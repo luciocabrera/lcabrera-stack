@@ -282,7 +282,7 @@ Raw judge replies and full reply text go to the transcript file, never into
 and each dimension's `feedback` are judge-written text. So `detail` is not
 safe to serve as a whole. The boundary for anything public is the
 allow-list in
-[ADR-132](../../decisions/ADR-132-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md),
+[ADR-133](../../decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md),
 applied in the package's query functions; no route returns `detail`
 unfiltered.
 
@@ -784,7 +784,7 @@ the ingester logs host and database name only.
 ## 8. Dashboard
 
 Placement and exposure are decided in
-[ADR-132](../../decisions/ADR-132-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md),
+[ADR-133](../../decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md),
 adopted from the P-03 draft.
 
 ### 8.1 Routes
@@ -797,9 +797,9 @@ existing routes do.
 | ------------------------------------ | ----------------------------------------------------------------------------------- | ----- |
 | `/evals`                             | latest run per suite, `totals`, last 30 pass rates per suite, regressions on main   | #1277 |
 | `/evals/runs/:runId`                 | run header (allow-listed settings and env) and a trial page via `fetchPage`         | #1277 |
-| `/evals/runs/:runId.json`            | the run's projection allow-listed by ADR-132, never the stored envelope             | #1279 |
+| `/evals/runs/:runId.json`            | the run's projection allow-listed by ADR-133, never the stored envelope             | #1279 |
 | `/evals/compare?a=&b=` or `?branch=` | `evals.run_compare(a, b)` plus `attribute()`                                        | #1278 |
-| `/evals/subjects/:kind/:name`        | `v_subject_trend` for one subject, annotation fields ADR-132 allows, in range       | #1278 |
+| `/evals/subjects/:kind/:name`        | `v_subject_trend` for one subject, annotation fields ADR-133 allows, in range       | #1278 |
 | `/evals/heatmap`                     | subjects × last N runs from `v_subject_trend`, flaky set from `flaky_tasks(window)` | #1278 |
 | `/evals/cost`                        | tokens and both costs per run, suite and skill; p50/p95 duration                    | #1278 |
 | `/evals/confusion`                   | expected skill × invoked skill over `eval_trial_detail` for one run or a range      | #1280 |
@@ -816,14 +816,14 @@ existing routes do.
   route does.
 - Charts: sparkline, trend with bands, heatmap and matrix are drawn as SVG
   with StyleX. Four small shapes do not justify a charting dependency;
-  ADR-132's Alternatives considered records the rejected library.
+  ADR-133's Alternatives considered records the rejected library.
 - The reader pool is the package's own, built from
   `EVALS_READER_DATABASE_URL` and validated by a Zod schema in the package.
 
 ### 8.3 Public and private
 
 Every `/evals` route is public, with nothing private behind it (question 3).
-[ADR-132](../../decisions/ADR-132-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)
+[ADR-133](../../decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)
 is the single source for what a route may return and for the marker test
 that enforces it; this plan does not restate either.
 
@@ -919,7 +919,7 @@ All three drafts from [`adr-drafts/`](./adr-drafts/) are adopted, each numbered 
    that removes, renames or re-means a field bumps it; adding an optional
    field does not. The ingester accepts the current version and the one
    before it through an upcaster, and rejects anything else by name.
-3. [ADR-132](../../decisions/ADR-132-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)
+3. [ADR-133](../../decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)
    (#1264), adopted. `/evals` in the showcase, every route public and aggregate-only,
    behind a server-side `EVALS_DASHBOARD` variable, charts in SVG with
    StyleX, reading through a role that can only SELECT.
