@@ -1,7 +1,8 @@
 /**
  * The pure half of the run envelope every eval runner writes: what the CI
  * environment says about the run, a session's metrics as one trial, the
- * totals over the trials, and the envelope itself. The shape is the schema in
+ * totals over the trials with the pass rate's Wilson interval, the line that
+ * prints it, and the envelope itself. The shape is the schema in
  * `@repo/eval-history` (ADR-131); the effects live in `run-record.mjs`.
  * Usage: imported by `run-record.mjs` and each suite's envelope module.
  */
@@ -9,6 +10,8 @@ import {
   ENVELOPE_SCHEMA_VERSION,
   OUTCOMES,
 } from '@repo/eval-history/envelope/envelope.constants';
+import { countOutcomes } from '@repo/eval-history/stats/countOutcomes.util';
+import { wilson } from '@repo/eval-history/stats/wilson.util';
 
 import { withoutSeparator } from './agent-sessions.mjs';
 
@@ -114,15 +117,39 @@ const outcomeCounts = (trials) =>
     ]),
   );
 
-const passRateOf = ({ fail, pass }) => {
-  const n = pass + fail;
-  return {
-    k: pass,
-    lower: null,
+const NO_RATE = { lower: null, rate: null, upper: null };
+
+export const passRateOf = ({ regressionConfig, trials }) => {
+  const { k, n } = countOutcomes(trials.map(({ outcome }) => outcome));
+  const estimate = wilson({
+    k,
+    minN: regressionConfig.minTrialsForRate,
     n,
-    rate: n === 0 ? null : pass / n,
-    upper: null,
-  };
+    z: regressionConfig.z,
+  });
+  return estimate.kind === 'rate'
+    ? {
+        k,
+        lower: estimate.lower,
+        n,
+        rate: estimate.rate,
+        upper: estimate.upper,
+      }
+    : { ...NO_RATE, k, n };
+};
+
+const percent = (share) => `${(share * 100).toFixed(1)}%`;
+
+const excludedNote = (excluded) =>
+  excluded === 0 ? '' : `; ${excluded} error, timeout or skipped not counted`;
+
+export const passRateLine = ({ regressionConfig, totals }) => {
+  const { k, lower, n, rate, upper } = totals.pass_rate;
+  const counts = `n=${n}, ${k} passed`;
+  const excluded = excludedNote(totals.trials - n);
+  return rate === null
+    ? `Pass rate: insufficient data (${counts}; a rate needs ${regressionConfig.minTrialsForRate} counted trials${excluded})`
+    : `Pass rate: ${percent(rate)} (${counts}; Wilson interval ${percent(lower)}–${percent(upper)} at z=${regressionConfig.z}${excluded})`;
 };
 
 const summedTokens = (trials) =>
@@ -145,22 +172,25 @@ const reportedCostTotal = ({ costFree, trials }) => {
     : costs.reduce((total, cost) => total + cost, 0);
 };
 
-export const runTotals = ({ costFree, durationMs, trials }) => {
-  const byOutcome = outcomeCounts(trials);
-  return {
-    by_outcome: byOutcome,
-    cost_usd_reported: reportedCostTotal({ costFree, trials }),
-    duration_ms: durationMs,
-    pass_rate: passRateOf(byOutcome),
-    tokens: summedTokens(trials),
-    trials: trials.length,
-  };
-};
+export const runTotals = ({
+  costFree,
+  durationMs,
+  regressionConfig,
+  trials,
+}) => ({
+  by_outcome: outcomeCounts(trials),
+  cost_usd_reported: reportedCostTotal({ costFree, trials }),
+  duration_ms: durationMs,
+  pass_rate: passRateOf({ regressionConfig, trials }),
+  tokens: summedTokens(trials),
+  trials: trials.length,
+});
 
 export const assembleEnvelope = ({
   finishedAt,
   identity,
   plan,
+  regressionConfig,
   status,
   trials,
 }) => ({
@@ -179,6 +209,7 @@ export const assembleEnvelope = ({
     totals: runTotals({
       costFree: plan.modelId === undefined,
       durationMs: Math.max(0, finishedAt - Date.parse(identity.started_at)),
+      regressionConfig,
       trials,
     }),
   },
