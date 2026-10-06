@@ -18,7 +18,9 @@ const nullableColumns = () =>
     | 'tracking_number'
   >;
 
-const buildOrder = (): EnterpriseOrder => ({
+const buildOrder = (
+  overrides: Partial<EnterpriseOrder> = {},
+): EnterpriseOrder => ({
   ...nullableColumns(),
   balance_due: '149.40',
   billing_address_line1: '221B Baker Street',
@@ -72,6 +74,7 @@ const buildOrder = (): EnterpriseOrder => ({
   volume_m3: '0.5000',
   warehouse_location: 'Warehouse A',
   weight_kg: '1.20',
+  ...overrides,
 });
 
 it('coerces numeric string columns to numbers', () => {
