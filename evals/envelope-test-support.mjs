@@ -6,6 +6,8 @@
  */
 import { sessionMetrics } from './agent-sessions.mjs';
 
+export const TEST_REGRESSION_CONFIG = { minTrialsForRate: 6, z: 1.96 };
+
 export const STARTED_AT = Date.UTC(2026, 9, 6, 9, 0, 0);
 
 export const testIdentity = {
