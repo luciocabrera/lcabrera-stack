@@ -42,6 +42,7 @@ export const WORKSPACE_RUNTIMES = {
   node: [
     'packages/create-lcabrera-stack/**',
     'packages/devkit/**',
+    'packages/eval-history/**',
     'packages/node-runtime/**',
     'packages/repo-standards/**',
     'packages/server/**',

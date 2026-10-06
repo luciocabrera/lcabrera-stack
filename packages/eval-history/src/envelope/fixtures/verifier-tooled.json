@@ -1,0 +1,131 @@
+{
+  "run": {
+    "actor": "luciocabrera",
+    "baseline_id": null,
+    "branch": "main",
+    "catalog_hash": null,
+    "env": {
+      "arch": "x64",
+      "ci_runner": null,
+      "node": "v26.10.0",
+      "os": "linux"
+    },
+    "finished_at": "2026-10-06T09:05:00.000Z",
+    "git_dirty": false,
+    "git_sha": "16f7a4255428f35bd4dbc8fd1e5db92e9f3e5427",
+    "harness_version": "6a6dbac53a63",
+    "model_id": "claude-opus-5-5",
+    "pr_number": null,
+    "project": "lcabrera-stack",
+    "run_id": "c9587af2-2a33-43e0-9b0f-aac3323ef28f",
+    "sdk_version": "0.3.289",
+    "settings": {
+      "argv": ["--runs", "1"],
+      "concurrency": 1,
+      "hidden": [],
+      "max_turns": 40,
+      "runs": 1,
+      "selection": [],
+      "timeout_ms": 600000,
+      "tools": ["Bash", "Read"]
+    },
+    "started_at": "2026-10-06T09:00:00.000Z",
+    "status": "complete",
+    "suite": "verifier-tooled",
+    "trigger": "local",
+    "totals": {
+      "by_outcome": {
+        "pass": 0,
+        "fail": 0,
+        "error": 0,
+        "timeout": 1,
+        "skipped": 0
+      },
+      "cost_usd_reported": 0.5,
+      "duration_ms": 600000,
+      "pass_rate": {
+        "k": 0,
+        "lower": null,
+        "n": 0,
+        "rate": null,
+        "upper": null
+      },
+      "tokens": {
+        "cache_read": 50,
+        "cache_write": 10,
+        "input": 500,
+        "output": 100
+      },
+      "trials": 1
+    }
+  },
+  "schema_version": 1,
+  "subjects": [
+    {
+      "content_hash": "88c9eae68eb300b2971a2bec9e5a26ff4179fd661d6b7d861e4c6557b9aaee14",
+      "kind": "agent",
+      "name": "refactor-verifier",
+      "path": ".claude/agents/refactor-verifier.md"
+    }
+  ],
+  "tasks": [
+    {
+      "agent_prompt_hash": "7978f506baa16285f4f3f6cee4f425c0bd5e06883e37ede4a8d8e62c03d660ef",
+      "expected_hash": "eef70f4158cde69e1d7f9da732a78575689ca0d42fd5fe21de01c0b441cd21ce",
+      "fixture_hash": "a9485d17c39b521f9de31b558df98f81dd72a9c7498f57f27b74356ea150fbd9",
+      "judge_prompt_hash": null,
+      "kind": "fixture",
+      "set": "regression",
+      "source": null,
+      "subject": {
+        "kind": "agent",
+        "name": "refactor-verifier"
+      },
+      "tags": [],
+      "task_hash": "4183069518e700ba80f6a30245a962198063ff7008f401333474957bcb52c456",
+      "task_key": "verifier-tooled/gate-proof"
+    }
+  ],
+  "trials": [
+    {
+      "cost_usd_reported": 0.12,
+      "detail": {
+        "expected_not_met": [],
+        "fixture": "gate-proof",
+        "gate_proof_seen": false,
+        "not_met": [],
+        "schema": "verifier-tooled/1",
+        "verdict": null
+      },
+      "duration_api_ms": 9000,
+      "duration_ms": 12000,
+      "error_class": "timeout",
+      "finished_at": null,
+      "first_token_at": "2026-10-06T09:00:01.500Z",
+      "model_usage": {
+        "claude-opus-5-5": {
+          "costUSD": 0.12,
+          "inputTokens": 100,
+          "outputTokens": 20
+        }
+      },
+      "outcome": "timeout",
+      "queued_at": "2026-10-06T09:00:00.000Z",
+      "started_at": "2026-10-06T09:00:00.100Z",
+      "task_key": "verifier-tooled/gate-proof",
+      "tokens": {
+        "cache_read": 10,
+        "cache_write": 2,
+        "input": 100,
+        "output": 20
+      },
+      "transcript": {
+        "bytes": 2048,
+        "sha256": "810b30b3732435a7343cc61f8cb3d5dbc52323ebbb743fc7cd4499a456b0e0bf",
+        "uri": ".tmp/eval-results/x/verifier-tooled-gate-proof.json"
+      },
+      "trial_index": 0,
+      "turns": 40
+    }
+  ]
+}

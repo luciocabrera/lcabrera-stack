@@ -98,6 +98,10 @@
           "name": "@lcabrera/devkit"
         },
         {
+          "dir": "packages/eval-history",
+          "name": "@repo/eval-history"
+        },
+        {
           "dir": "packages/repo-standards",
           "name": "@lcabrera/repo-standards"
         },
@@ -189,6 +193,11 @@
         {
           "dir": "packages/vite-configs",
           "name": "@lcabrera/vite-config",
+          "run": true
+        },
+        {
+          "dir": "packages/eval-history",
+          "name": "@repo/eval-history",
           "run": true
         }
       ]

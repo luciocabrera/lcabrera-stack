@@ -220,6 +220,7 @@
         "packages/api/**",
         "packages/create-lcabrera-stack/**",
         "packages/devkit/**",
+        "packages/eval-history/**",
         "packages/eslint-local-rules/**",
         "packages/node-runtime/**",
         "packages/repo-standards/**",
