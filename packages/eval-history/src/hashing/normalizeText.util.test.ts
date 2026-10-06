@@ -23,4 +23,16 @@ describe('normalizeText', () => {
   it('keeps trailing spaces and indentation', () => {
     expect(normalizeText('  a  \n\tb')).toBe('  a  \n\tb\n');
   });
+
+  it('strips only trailing line feeds, leaving spaces and tabs before them', () => {
+    expect(normalizeText('a \t\n\r\n\n')).toBe('a \t\n');
+    expect(normalizeText('\n'.repeat(3))).toBe('\n');
+  });
+
+  it('keeps a long run of line feeds that is not at the end', () => {
+    const middle = '\n'.repeat(50_000);
+
+    expect(normalizeText(`a${middle}b`)).toBe(`a${middle}b\n`);
+    expect(normalizeText(`a${middle}b${middle}`)).toBe(`a${middle}b\n`);
+  });
 });
