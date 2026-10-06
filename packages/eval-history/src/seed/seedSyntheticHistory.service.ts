@@ -28,6 +28,27 @@ const readCounts = async (client: MigrationClient) => {
   return counts ?? { runs: 0, trials: 0 };
 };
 
+type RunInOrderArgs = {
+  readonly client: MigrationClient;
+  readonly statements: readonly string[];
+  readonly values: unknown[];
+};
+
+const runInOrder = async ({
+  client,
+  statements,
+  values,
+}: RunInOrderArgs): Promise<void> => {
+  const [text, ...rest] = statements;
+
+  if (text === undefined) {
+    return;
+  }
+
+  await client.query({ text, values });
+  await runInOrder({ client, statements: rest, values });
+};
+
 const insertHistory = async ({
   client,
   endsOn,
@@ -41,9 +62,11 @@ const insertHistory = async ({
     SYNTHETIC_PRIVATE_TEXT,
   ];
 
-  for (const text of SYNTHETIC_HISTORY_STATEMENTS) {
-    await client.query({ text, values });
-  }
+  await runInOrder({
+    client,
+    statements: SYNTHETIC_HISTORY_STATEMENTS,
+    values,
+  });
 };
 
 export const seedSyntheticHistory = async (args: SeedSyntheticHistoryArgs) => {
