@@ -10,6 +10,7 @@ area:
   - packages/eval-history/src/annotations/**
   - packages/eval-history/src/envelope/**
   - packages/eval-history/src/testing/**
+  - packages/eval-history/src/privacy/**
   - packages/eval-history/src/queries/**
   - docs/decisions/ADR-133-*.md
   - packages/eval-history/scripts/annotate.mjs

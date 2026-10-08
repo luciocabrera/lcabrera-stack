@@ -1,0 +1,309 @@
+[
+  {
+    "definition": " SELECT grade.trial_id,\n    trial.run_id,\n    task.task_key,\n    grade.dimension,\n    (detail.detail ->> 'judge_model'::text) AS judge_model,\n    (task_version.judge_prompt_hash)::text AS judge_prompt_hash,\n    judged.score AS judge_score,\n    (grade.score)::integer AS human_score,\n    grade.graded_at\n   FROM (((((evals.eval_human_grade grade\n     JOIN evals.eval_trial trial ON ((trial.id = grade.trial_id)))\n     JOIN evals.eval_task_version task_version ON ((task_version.id = trial.task_version_id)))\n     JOIN evals.eval_task task ON ((task.id = task_version.task_id)))\n     JOIN evals.eval_trial_detail detail ON (((detail.trial_id = grade.trial_id) AND (detail.detail_schema = 'quality/1'::text))))\n     JOIN LATERAL ( SELECT ((dimension.value ->> 'score'::text))::double precision AS score\n           FROM jsonb_array_elements((detail.detail -> 'dimensions'::text)) dimension(value)\n          WHERE ((dimension.value ->> 'name'::text) = grade.dimension)\n         LIMIT 1) judged ON (true));",
+    "dependencies": [
+      {
+        "relation": "eval_human_grade",
+        "kind": "r"
+      },
+      {
+        "relation": "eval_task",
+        "kind": "r"
+      },
+      {
+        "relation": "eval_task_version",
+        "kind": "r"
+      },
+      {
+        "relation": "eval_trial",
+        "kind": "r"
+      },
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "v-judge-agreement",
+    "registered": true
+  },
+  {
+    "definition": " SELECT trial_id,\n    (detail ->> 'judge_model'::text) AS judge_model\n   FROM evals.eval_trial_detail d;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "registered-judge-model",
+    "registered": true
+  },
+  {
+    "definition": " SELECT ( SELECT (eval_trial_detail.detail ->> 'judge_model'::text)\n           FROM evals.eval_trial_detail\n          WHERE (eval_trial_detail.trial_id = g.trial_id)) AS m\n   FROM evals.eval_human_grade g;",
+    "dependencies": [
+      {
+        "relation": "eval_human_grade",
+        "kind": "r"
+      },
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "registered-unqualified-single-table",
+    "registered": true
+  },
+  {
+    "definition": " SELECT (e.value ->> 'name'::text) AS n,\n    ((e.value ->> 'score'::text))::integer AS s\n   FROM evals.eval_trial_detail d,\n    LATERAL jsonb_array_elements((d.detail -> 'dimensions'::text)) e(value);",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "registered-dimension-fields",
+    "registered": true
+  },
+  {
+    "definition": " SELECT (detail ->> 'summary'::text) AS s\n   FROM evals.eval_trial_detail \"Raw\";",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "quoted-alias",
+    "registered": false
+  },
+  {
+    "definition": " SELECT g.trial_id,\n    x.s\n   FROM (evals.eval_human_grade g\n     JOIN LATERAL ( SELECT (\"Raw\".detail ->> 'summary'::text) AS s\n           FROM evals.eval_trial_detail \"Raw\"\n          WHERE (\"Raw\".trial_id = g.trial_id)) x ON (true));",
+    "dependencies": [
+      {
+        "relation": "eval_human_grade",
+        "kind": "r"
+      },
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "quoted-alias-lateral",
+    "registered": false
+  },
+  {
+    "definition": " SELECT ((to_jsonb(detail.*) -> 'detail'::text) -> 'dimensions'::text) AS x\n   FROM evals.eval_trial_detail detail;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "to-jsonb-detail-row",
+    "registered": false
+  },
+  {
+    "definition": " SELECT (to_jsonb(grade.*) ->> 'grader'::text) AS x\n   FROM evals.eval_human_grade grade;",
+    "dependencies": [
+      {
+        "relation": "eval_human_grade",
+        "kind": "r"
+      }
+    ],
+    "name": "to-jsonb-grade-row",
+    "registered": false
+  },
+  {
+    "definition": " SELECT (to_jsonb(trial.*) ->> 'transcript_uri'::text) AS x\n   FROM evals.eval_trial trial;",
+    "dependencies": [
+      {
+        "relation": "eval_trial",
+        "kind": "r"
+      }
+    ],
+    "name": "to-jsonb-trial-row",
+    "registered": false
+  },
+  {
+    "definition": " SELECT row_to_json(d.*) AS x\n   FROM evals.eval_trial_detail d;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "row-to-json-bare-alias",
+    "registered": false
+  },
+  {
+    "definition": " SELECT (detail ->> 'summary'::text) AS s\n   FROM evals.eval_trial_detail d;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "field-arrow-text",
+    "registered": false
+  },
+  {
+    "definition": " SELECT (detail #>> '{summary}'::text[]) AS s\n   FROM evals.eval_trial_detail d;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "path-text-operator",
+    "registered": false
+  },
+  {
+    "definition": " SELECT jsonb_extract_path_text(detail, VARIADIC ARRAY['summary'::text]) AS s\n   FROM evals.eval_trial_detail d;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "extract-path-text",
+    "registered": false
+  },
+  {
+    "definition": " SELECT detail['summary'::text] AS s\n   FROM evals.eval_trial_detail d;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "subscript",
+    "registered": false
+  },
+  {
+    "definition": " SELECT (detail)::text AS s\n   FROM evals.eval_trial_detail d;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "cast-to-text",
+    "registered": false
+  },
+  {
+    "definition": " SELECT jsonb_path_query_first(detail, '$.\"summary\"'::jsonpath) AS s\n   FROM evals.eval_trial_detail d;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "jsonpath",
+    "registered": false
+  },
+  {
+    "definition": " SELECT ( SELECT (d.detail ->> 'summary'::text)\n           FROM evals.eval_trial_detail d\n          WHERE (d.trial_id = g.trial_id)) AS s\n   FROM evals.eval_human_grade g;",
+    "dependencies": [
+      {
+        "relation": "eval_human_grade",
+        "kind": "r"
+      },
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "scalar-subselect",
+    "registered": false
+  },
+  {
+    "definition": " SELECT ( SELECT (eval_trial_detail.detail ->> 'summary'::text)\n           FROM evals.eval_trial_detail\n          WHERE (eval_trial_detail.trial_id = g.trial_id)) AS s\n   FROM evals.eval_human_grade g;",
+    "dependencies": [
+      {
+        "relation": "eval_human_grade",
+        "kind": "r"
+      },
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "scalar-subselect-unqualified",
+    "registered": false
+  },
+  {
+    "definition": " WITH x AS (\n         SELECT d.detail\n           FROM evals.eval_trial_detail d\n        )\n SELECT (detail ->> 'summary'::text) AS s\n   FROM x;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "cte",
+    "registered": false
+  },
+  {
+    "definition": " SELECT (detail ->> 'summary'::text) AS s\n   FROM ( SELECT d.detail\n           FROM evals.eval_trial_detail d) s;",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "derived-table",
+    "registered": false
+  },
+  {
+    "definition": " SELECT (e.value ->> 'feedback'::text) AS f\n   FROM evals.eval_trial_detail d,\n    LATERAL jsonb_array_elements((d.detail -> 'dimensions'::text)) e(value);",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "element-feedback",
+    "registered": false
+  },
+  {
+    "definition": " SELECT e.value AS f\n   FROM evals.eval_trial_detail d,\n    LATERAL jsonb_array_elements((d.detail -> 'dimensions'::text)) e(value);",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "bare-element-value",
+    "registered": false
+  },
+  {
+    "definition": " SELECT to_jsonb(e.value) AS f\n   FROM evals.eval_trial_detail d,\n    LATERAL jsonb_array_elements((d.detail -> 'dimensions'::text)) e(value);",
+    "dependencies": [
+      {
+        "relation": "eval_trial_detail",
+        "kind": "r"
+      }
+    ],
+    "name": "to-jsonb-element",
+    "registered": false
+  },
+  {
+    "definition": " SELECT grader\n   FROM evals.eval_human_grade g;",
+    "dependencies": [
+      {
+        "relation": "eval_human_grade",
+        "kind": "r"
+      }
+    ],
+    "name": "grader-column",
+    "registered": false
+  },
+  {
+    "definition": " SELECT (detail ->> 'summary'::text) AS s\n   FROM evals.v_probe_helper h;",
+    "dependencies": [
+      {
+        "relation": "v_probe_helper",
+        "kind": "v"
+      }
+    ],
+    "name": "helper-view",
+    "registered": false
+  }
+]

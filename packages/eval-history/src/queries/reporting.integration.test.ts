@@ -20,12 +20,13 @@ import { EVALS_READER_ROLE } from '../migrate/migrate.constants.ts';
 import { migrateEvals } from '../migrate/migrateEvals.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
 import { readModelPrices } from '../prices/readModelPrices.service.ts';
+import { viewDependencyViolations } from '../privacy/viewDependencyViolations.util.ts';
+import { viewReadViolations } from '../privacy/viewReadViolations.util.ts';
 import { SYNTHETIC_PRIVATE_TEXT } from '../seed/seed.constants.ts';
 import { seedSyntheticHistory } from '../seed/seedSyntheticHistory.service.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { columnsNamed } from './columnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
-import { jsonbFieldReads } from './jsonbFieldReads.util.ts';
 import {
   EXCLUDED_COLUMNS,
   PUBLIC_FIELD_PATHS,
@@ -38,12 +39,31 @@ import { readTaskPassRates } from './readTaskPassRates.service.ts';
 import { runCompareQuery } from './runCompareQuery.util.ts';
 import { subjectTrendQuery } from './subjectTrendQuery.util.ts';
 import { taskPassRatesQuery } from './taskPassRatesQuery.util.ts';
-import { unregisteredViewReads } from './unregisteredViewReads.util.ts';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
 const BUDGET_MS = 500;
 const SEEDED_TRIALS_AT_LEAST = 15_000;
+
+const VIEW_DEPENDENCIES_SQL = `select view.relname as view, referenced.relname as relation, referenced.relkind::text as kind
+from pg_rewrite rewrite
+join pg_class view on view.oid = rewrite.ev_class
+join pg_namespace namespace on namespace.oid = view.relnamespace
+join pg_depend dependency on dependency.objid = rewrite.oid
+  and dependency.classid = 'pg_rewrite'::regclass
+  and dependency.refclassid = 'pg_class'::regclass
+join pg_class referenced on referenced.oid = dependency.refobjid
+where namespace.nspname = 'evals' and view.relname = any($1) and referenced.oid <> view.oid
+union
+select view.relname, called.proname, 'f'
+from pg_rewrite rewrite
+join pg_class view on view.oid = rewrite.ev_class
+join pg_namespace namespace on namespace.oid = view.relnamespace
+join pg_depend dependency on dependency.objid = rewrite.oid
+  and dependency.classid = 'pg_rewrite'::regclass
+  and dependency.refclassid = 'pg_proc'::regclass
+join pg_proc called on called.oid = dependency.refobjid
+where namespace.nspname = 'evals' and view.relname = any($1)`;
 
 const UUID_GROUPS = /^(.{8})(.{4})(.{4})(.{4})(.{12})$/;
 
@@ -252,19 +272,25 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
 
   const readDefinitions = async () => {
     const client = await connect(databaseName);
-    const { rows: usage } = await client.query<{
-      readonly column: string;
-      readonly view: string;
-    }>({
-      text: "select view_name as view, table_name || '.' || column_name as column from information_schema.view_column_usage where view_schema = 'evals' and view_name = any($1)",
-      values: [[...REPORTING_RELATIONS]],
+    const relations = [[...REPORTING_RELATIONS]];
+    const { rows: usage } = await client.query<{ readonly column: string }>({
+      text: "select table_name || '.' || column_name as column from information_schema.view_column_usage where view_schema = 'evals' and view_name = any($1)",
+      values: relations,
     });
     const { rows: views } = await client.query<{
       readonly definition: string;
       readonly view: string;
     }>({
       text: "select viewname as view, definition from pg_views where schemaname = 'evals' and viewname = any($1)",
-      values: [[...REPORTING_RELATIONS]],
+      values: relations,
+    });
+    const { rows: dependencies } = await client.query<{
+      readonly kind: string;
+      readonly relation: string;
+      readonly view: string;
+    }>({
+      text: VIEW_DEPENDENCIES_SQL,
+      values: relations,
     });
     const { rows: jsonb } = await client.query<{ readonly qualified: string }>(
       "select table_name || '.' || column_name as qualified from information_schema.columns where table_schema = 'evals' and data_type = 'jsonb'",
@@ -273,40 +299,60 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
       readonly definition: string;
     }>({
       text: "select pg_get_functiondef(p.oid) as definition from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'evals' and p.proname = any($1)",
-      values: [[...REPORTING_RELATIONS]],
+      values: relations,
     });
+    const jsonbColumns = jsonb.map(({ qualified }) => qualified);
+    const violationsGuarding = (guarded: readonly string[]) =>
+      views.flatMap(({ definition, view }) => {
+        const own = dependencies.filter(
+          (dependency) => dependency.view === view,
+        );
+
+        return [
+          ...viewReadViolations({
+            definition,
+            dependsOn: own.map(({ relation }) => relation),
+            fieldPaths: PUBLIC_FIELD_PATHS,
+            guarded,
+            jsonbColumns,
+          }).violations,
+          ...viewDependencyViolations({
+            allowed: REPORTING_RELATIONS,
+            dependencies: own,
+          }),
+        ].map((violation) => `${view}: ${violation}`);
+      });
 
     return {
+      agreementDefinition:
+        views.find(({ view }) => view === 'v_judge_agreement')?.definition ??
+        '',
       bodies: functions.map(({ definition }) => definition),
-      definitions: new Map(
-        views.map(({ definition, view }) => [view, definition]),
-      ),
-      jsonbColumns: jsonb.map(({ qualified }) => qualified),
-      usage,
+      jsonbColumns,
       viewColumns: usage.map(({ column }) => column),
+      violationsGuarding,
     };
   };
 
   it('defines the views over no excluded column but registered jsonb fields', async () => {
-    const { definitions, jsonbColumns, usage, viewColumns } =
-      await readDefinitions();
+    const {
+      agreementDefinition,
+      jsonbColumns,
+      viewColumns,
+      violationsGuarding,
+    } = await readDefinitions();
 
     expect(viewColumns).toContain('eval_trial.outcome');
     expect(
-      jsonbFieldReads({
-        column: 'eval_trial_detail.detail',
-        definition: definitions.get('v_judge_agreement') ?? '',
-      }).toSorted(compareCodeUnits),
-    ).toEqual([...PUBLIC_FIELD_PATHS].toSorted(compareCodeUnits));
-    expect(
-      unregisteredViewReads({
-        definitions,
+      viewReadViolations({
+        definition: agreementDefinition,
+        dependsOn: [],
         fieldPaths: PUBLIC_FIELD_PATHS,
         guarded: EXCLUDED_COLUMNS,
         jsonbColumns,
-        usage,
-      }),
-    ).toEqual([]);
+      }).reads.toSorted(compareCodeUnits),
+    ).toEqual([...PUBLIC_FIELD_PATHS].toSorted(compareCodeUnits));
+    expect(violationsGuarding(EXCLUDED_COLUMNS)).toEqual([]);
   });
 
   it('defines the functions over no excluded column', async () => {
@@ -319,7 +365,7 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
   });
 
   it('reads a jsonb column in a view only through registered fields, and names none in a query or a function', async () => {
-    const { bodies, definitions, jsonbColumns, usage } =
+    const { bodies, jsonbColumns, violationsGuarding } =
       await readDefinitions();
     const generated = Object.values(QUERIES).map(({ text }) => text);
 
@@ -329,14 +375,6 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
         columnsNamed({ columns: jsonbColumns, sql }),
       ),
     ).toEqual([]);
-    expect(
-      unregisteredViewReads({
-        definitions,
-        fieldPaths: PUBLIC_FIELD_PATHS,
-        guarded: jsonbColumns,
-        jsonbColumns,
-        usage,
-      }),
-    ).toEqual([]);
+    expect(violationsGuarding(jsonbColumns)).toEqual([]);
   });
 });
