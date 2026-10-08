@@ -6,7 +6,7 @@ type ElementFieldReadsArgs = {
   readonly path: string;
 };
 
-const FIELD_STEP = /^\s*\)*\s*->>\s*'([^']+)'/u;
+const FIELD_STEP = /^[\s)]*->>\s*'([^']+)'/u;
 
 export const elementFieldReads = ({
   definition,

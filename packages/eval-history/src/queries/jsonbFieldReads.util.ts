@@ -9,9 +9,11 @@ type JsonbFieldReadsArgs = {
 
 const STEP = /^\s*(->>?)\s*'([^']+)'(?:::text)?/u;
 
-const ARRAY_ELEMENTS_OPEN = /jsonb_array_elements\([\s(]*$/u;
+const ARRAY_ELEMENTS_CALL = 'jsonb_array_elements(';
 
-const ARRAY_ELEMENTS_ALIAS = /^\s*\)[\s)]*\s(\w+)\((\w+)\)/u;
+const CLOSING = /^[\s)]+/u;
+
+const ELEMENT_ALIAS = /^(\w+)\((\w+)\)/u;
 
 export const jsonbFieldReads = ({
   column,
@@ -32,13 +34,21 @@ export const jsonbFieldReads = ({
 
       const [taken, operator, key] = step;
       const path = `${column}.${key}`;
-      const elements = ARRAY_ELEMENTS_ALIAS.exec(after.slice(taken.length));
+      const rest = after.slice(taken.length);
+      const closing = CLOSING.exec(rest)?.[0] ?? '';
+      const elements = closing.includes(')')
+        ? ELEMENT_ALIAS.exec(rest.slice(closing.length))
+        : undefined;
+      const before = definition.slice(0, start);
+      const call = before.lastIndexOf(ARRAY_ELEMENTS_CALL);
+      const isOpensArrayElements =
+        call !== -1 &&
+        before
+          .slice(call + ARRAY_ELEMENTS_CALL.length)
+          .replaceAll('(', '')
+          .trim() === '';
 
-      if (
-        operator === '->' &&
-        elements !== null &&
-        ARRAY_ELEMENTS_OPEN.test(definition.slice(0, start))
-      ) {
+      if (operator === '->' && elements && isOpensArrayElements) {
         return elementFieldReads({
           definition,
           element: `${elements[1]}.${elements[2]}`,
