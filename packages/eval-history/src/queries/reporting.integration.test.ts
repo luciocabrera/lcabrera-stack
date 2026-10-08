@@ -11,7 +11,6 @@
  */
 
 import { createHash, randomUUID } from 'node:crypto';
-import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 import { z } from 'zod';
 
@@ -31,6 +30,7 @@ import { readRunComparison } from './readRunComparison.service.ts';
 import { readSubjectTrend } from './readSubjectTrend.service.ts';
 import { readTaskPassRates } from './readTaskPassRates.service.ts';
 import { runCompareQuery } from './runCompareQuery.util.ts';
+import { scratchServer } from './scratchServer.service.ts';
 import { subjectTrendQuery } from './subjectTrendQuery.util.ts';
 import { taskPassRatesQuery } from './taskPassRatesQuery.util.ts';
 
@@ -90,23 +90,8 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
   const databaseName = `evals_reporting_${suffix}`;
   const smallDatabaseName = `evals_reporting_small_${suffix}`;
   const reader = { ...EVALS_READER_ROLE, name: `evals_reader_test_${suffix}` };
-  const clients: pg.Client[] = [];
   const seeded = { runs: 0, trials: 0 };
-
-  const connect = async (database?: string) => {
-    const url = new URL(DATABASE_URL ?? '');
-
-    if (database) {
-      url.pathname = `/${database}`;
-    }
-
-    const client = new pg.Client({ connectionString: url.href });
-
-    await client.connect();
-    clients.push(client);
-
-    return client;
-  };
+  const { connect, dispose } = scratchServer({ url: DATABASE_URL ?? '' });
 
   const readerClient = async () => {
     const client = await connect(databaseName);
@@ -138,16 +123,10 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
   }, 60_000);
 
   afterAll(async () => {
-    await Promise.all(clients.map((client) => client.end()));
-    const admin = new pg.Client({ connectionString: DATABASE_URL });
-
-    await admin.connect();
-    await admin.query(`drop database if exists "${databaseName}" with (force)`);
-    await admin.query(
-      `drop database if exists "${smallDatabaseName}" with (force)`,
-    );
-    await admin.query(`drop role if exists "${reader.name}"`);
-    await admin.end();
+    await dispose({
+      databases: [databaseName, smallDatabaseName],
+      roles: [reader.name],
+    });
   });
 
   it('holds a year of nightly runs and at least 15k trials', () => {

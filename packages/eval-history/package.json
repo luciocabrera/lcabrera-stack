@@ -38,7 +38,20 @@
     "./queries/readRunComparison.service": "./src/queries/readRunComparison.service.ts",
     "./queries/readSubjectTrend.service": "./src/queries/readSubjectTrend.service.ts",
     "./queries/readTaskPassRates.service": "./src/queries/readTaskPassRates.service.ts",
-    "./seed/seedSyntheticHistory.service": "./src/seed/seedSyntheticHistory.service.ts"
+    "./seed/seedSyntheticHistory.service": "./src/seed/seedSyntheticHistory.service.ts",
+    "./migrate/migrate.constants": "./src/migrate/migrate.constants.ts",
+    "./migrate/migrateEvals.service": "./src/migrate/migrateEvals.service.ts",
+    "./migrate/readMigrations.service": "./src/migrate/readMigrations.service.ts",
+    "./prices/readModelPrices.service": "./src/prices/readModelPrices.service.ts",
+    "./queries/evalsReaderPool.service": "./src/queries/evalsReaderPool.service.ts",
+    "./queries/freeStringPaths.util": "./src/queries/freeStringPaths.util.ts",
+    "./queries/isTextTyped.util": "./src/queries/isTextTyped.util.ts",
+    "./queries/markedSamples.util": "./src/queries/markedSamples.util.ts",
+    "./queries/readPublicColumns.service": "./src/queries/readPublicColumns.service.ts",
+    "./queries/readRunSummaries.service": "./src/queries/readRunSummaries.service.ts",
+    "./queries/readRunTrials.service": "./src/queries/readRunTrials.service.ts",
+    "./queries/databaseUrl.util": "./src/queries/databaseUrl.util.ts",
+    "./queries/scratchServer.service": "./src/queries/scratchServer.service.ts"
   },
   "scripts": {
     "format": "vp fmt .",

@@ -20,6 +20,9 @@ Every table route serves its own rows from Postgres — see
 | `/car-sales-infinite`               | `routes/car-sales-infinite/`              | The same table and columns through infinite scroll; reuses `/car-sales`'s `COLUMNS`, `config/` and service                                                                                                                                                                |
 | `/wide-alltypes-150`                | `routes/wide-alltypes-150/`               | Stress-test page for the `wide_alltypes_150` dataset using the shared `TableLayout` implementation                                                                                                                                                                        |
 | `/skill-scores`                     | `routes/skill-scores/`                    | A database-free grid whose loader sends a `cell` call of each built-in kind and a `cellPalette` defining the `caution` tone; `SkillScores.cellRenderers.test.tsx` also registers a Zod-backed renderer; `sortSkillScoreRows` orders its static rows by the requested sort |
+| `/evals`                            | `routes/evals/overview/`                  | Behind `EVALS_DASHBOARD=1`: the latest run of each eval suite with its pass rate, Wilson interval, cost and duration, a sparkline of its last runs whose every point links to that run, and a banner when main's latest rate falls below the previous main run's interval |
+| `/evals/runs/:runId`                | `routes/evals/run-detail/`                | Behind the same flag: one run's figures, a trial chart whose every point links to `?trial=<id>`, that trial's figures, and the run's trials through `TableRouteView`                                                                                                      |
+| `/evals/runs/:runId/trials`         | `routes/evals/run-trials/`                | Resource route serving the run page's load-more — raw JSON `{ data, total }`, the same projection as the first page                                                                                                                                                       |
 | `/_api/filter-options`              | `routes/api/filter-options/`              | Resource route for `transport: 'loader'` filter-option descriptors (ADR-009); its loader reads Postgres server-side                                                                                                                                                       |
 | `/_api/car-sales/paginated`         | `routes/api/car-sales-paginated/`         | Resource route serving `/car-sales-infinite`'s load-more from `selectCarSalesPage` — raw JSON `{ data, hasMore, total }`                                                                                                                                                  |
 | `/_api/wide-alltypes-150/paginated` | `routes/api/wide-alltypes-150-paginated/` | Resource route serving `/wide-alltypes-150`'s load-more from `selectWideAlltypes150Page` — raw JSON `{ data, hasMore, total }`                                                                                                                                            |
@@ -37,6 +40,36 @@ route by default and the external API only under the `VITE_API_URL` override.
 | `fetchWideAlltypes150Page` | `services/wideAlltypes150.api.ts`       | A page of `wide_alltypes_150`, plus the `WideAlltypes150` / `WideAlltypes150Response` shapes                                                                  |
 | `isExternalApiEnabled`     | `services/isExternalApiEnabled.util.ts` | **Whether** the external path is taken — the app's only read of `VITE_API_URL`, treating an empty value as unset. **Where** it goes is `getApiBaseUrl` (#705) |
 | `fakeDelay`                | `services/fakeDelay.util.ts`            | Artificial `VITE_API_DELAY_MS` delay so the loading skeleton is visible against a local data source; no-ops when unset                                        |
+
+### Eval dashboard (`routes/evals/`)
+
+Every loader reads through `@repo/eval-history`'s query functions on its reader
+pool, never with SQL of its own, so the allow-list those functions project
+through is the one guarantee of what a public route returns.
+
+| Artifact                | Location                                   | Description                                                                                                                           |
+| ----------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `requireEvalsDashboard` | `.server/requireEvalsDashboard.service.ts` | The one read of `EVALS_DASHBOARD`; throws a 404 `Response` unless it is `1`. Every `/evals` loader calls it first                     |
+| `Sparkline`             | `Sparkline/`                               | A small SVG point chart drawn with StyleX; every point is a router link, optionally joined by a line and toned by outcome             |
+| `sparklineGeometry`     | `Sparkline/sparklineGeometry.util.ts`      | Pure: each point's position in the chart box, scaled to the top value, plus the polyline joining them                                 |
+| `toSuiteSummaries`      | `overview/toSuiteSummaries.util.ts`        | The newest run of each suite and its scored runs as chart points, oldest first, each linked to its run                                |
+| `suiteRegressions`      | `overview/suiteRegressions.util.ts`        | The suites whose latest main run has a rate below the lower bound of the main run before it                                           |
+| `parseTrialPageParams`  | `run-trials/parseTrialPageParams.util.ts`  | The trial resource route's `limit`/`skip`/`sort` params, clamped to `EVALS_TRIALS_PAGE_LIMIT`                                         |
+| `runFigures`            | `utils/runFigures.util.ts`                 | A run summary plus its pass rate, Wilson interval at `EVALS_INTERVAL` and wall-clock duration, with dates as ISO strings              |
+| `trialChartPoints`      | `utils/trialChartPoints.util.ts`           | One chart point per trial: its duration, toned by outcome, linked to `?trial=<id>` on its run                                         |
+| `toTrialPage`           | `utils/toTrialPage.util.ts`                | A page of trials as table rows, the invoked skills joined into one cell                                                               |
+| `toTrialSorting`        | `utils/toTrialSorting.util.ts`             | The table's sorting renamed to the `{ column, direction }` the trial query takes                                                      |
+| `isRunId`               | `utils/isRunId.util.ts`                    | Whether a route param is a run id, so a malformed one answers 404 before any query                                                    |
+| `isTrialPage`           | `utils/isTrialPage.util.ts`                | Shape guard for the trial resource route's JSON                                                                                       |
+| `evalsHref`             | `utils/evalsHref.util.ts`                  | The link to a run, or to one trial of it                                                                                              |
+| `evalsRouteEntries`     | `utils/evalsRouteEntries.util.ts`          | The route config's `/evals` entries with their full paths — what the flag and public-payload tests iterate, so a new route is covered |
+| `routeLoaderArgs`       | `utils/routeLoaderArgs.util.ts`            | Loader args for a route path with its params filled in; refuses a param it has no value for                                           |
+| `passRateLabel`         | `utils/passRateLabel.util.ts`              | A pass rate as a percentage with its k/n                                                                                              |
+| `intervalLabel`         | `utils/intervalLabel.util.ts`              | An interval as two percentages, or why there is none                                                                                  |
+| `costLabel`             | `utils/costLabel.util.ts`                  | A cost in dollars, or `not reported`                                                                                                  |
+| `durationLabel`         | `utils/durationLabel.util.ts`              | A duration in hours, minutes or seconds                                                                                               |
+| `trialSummaryLabel`     | `utils/trialSummaryLabel.util.ts`          | One trial's figures as a sentence, naming each missing one                                                                            |
+| `runFacts`              | `utils/runFacts.util.ts`                   | The run page's term-and-value list, saying which figures the run did not record                                                       |
 
 ### Server-side route helpers (`routes/enterprise-orders/.server/`)
 
