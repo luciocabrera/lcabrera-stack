@@ -1,0 +1,146 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`evalsReport over fixture runs > compares runs of two models under --allow-model-change, listing the model as the change 1`] = `
+"### skills: feat/1234-tighten-react-19 vs main (claude-opus-5-5 → claude-sonnet-5-5)
+
+No task changed outcome.
+
+Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 91.7% (n=12, 64.6%–98.5%).
+
+Cost: $1.20 → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
+
+Changed: model. That is one cause."
+`;
+
+exports[`evalsReport over fixture runs > names the one hash that changed, with n and the interval on each side 1`] = `
+"### skills: feat/1234-tighten-react-19 vs main (claude-opus-5-5)
+
+| Task | main | feat/1234-tighten-react-19 |
+| --- | --- | --- |
+| skills/react-19/trigger-1 | 3/3 | 1/3 |
+| skills/react-19/trigger-3 | 2/3 | 3/3 |
+
+Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 83.3% (n=12, 55.2%–95.3%).
+
+Cost: $1.20 → $1.45 reported. Duration p50: 13.0 s → 14.0 s.
+
+Changed: \`react-19\` content hash. That is one cause."
+`;
+
+exports[`evalsReport over fixture runs > prints the same comparison as JSON under --json 1`] = `
+{
+  "comparisons": [
+    {
+      "a": {
+        "branch": "main",
+        "costUsdReported": 1.2,
+        "durationP50Ms": 13000,
+        "excluded": 0,
+        "gitSha": "beb037095bfb649a79782612a37e430c5a0d7018",
+        "modelId": "claude-opus-5-5",
+        "rate": {
+          "k": 11,
+          "kind": "rate",
+          "lower": 0.6461140782014047,
+          "n": 12,
+          "rate": 0.9166666666666666,
+          "upper": 0.9851352905492264,
+        },
+        "runId": "00000000-0000-4000-8000-000000000001",
+        "status": "complete",
+      },
+      "b": {
+        "branch": "feat/1234-tighten-react-19",
+        "costUsdReported": 1.45,
+        "durationP50Ms": 14000,
+        "excluded": 0,
+        "gitSha": "beb037095bfb649a79782612a37e430c5a0d7018",
+        "modelId": "claude-opus-5-5",
+        "rate": {
+          "k": 10,
+          "kind": "rate",
+          "lower": 0.5519636426153274,
+          "n": 12,
+          "rate": 0.8333333333333334,
+          "upper": 0.9530358523851776,
+        },
+        "runId": "00000000-0000-4000-8000-000000000002",
+        "status": "complete",
+      },
+      "changed": {
+        "changed": "content:skill/react-19",
+        "kind": "single",
+      },
+      "flips": [
+        {
+          "a": {
+            "excluded": 0,
+            "k": 3,
+            "n": 3,
+          },
+          "b": {
+            "excluded": 0,
+            "k": 1,
+            "n": 3,
+          },
+          "taskKey": "skills/react-19/trigger-1",
+        },
+        {
+          "a": {
+            "excluded": 0,
+            "k": 2,
+            "n": 3,
+          },
+          "b": {
+            "excluded": 0,
+            "k": 3,
+            "n": 3,
+          },
+          "taskKey": "skills/react-19/trigger-3",
+        },
+      ],
+      "kind": "comparison",
+      "suite": "skills",
+      "thresholds": {
+        "minTrialsForRate": 6,
+        "z": 1.96,
+      },
+    },
+  ],
+}
+`;
+
+exports[`evalsReport over fixture runs > refuses runs of two models and says why 1`] = `
+"### skills: feat/1234-tighten-react-19 vs main: not compared
+
+Run A used \`claude-opus-5-5\` and run B used \`claude-sonnet-5-5\`. A pass rate measures the model as much as the inputs, so a difference between two models would be blamed on whichever hash changed. Pass \`--allow-model-change\` to compare them anyway; the model is then listed among the changes."
+`;
+
+exports[`evalsReport over fixture runs > says insufficient data, with n, when too few trials were counted 1`] = `
+"### skills: feat/1234-tighten-react-19 vs main (claude-opus-5-5)
+
+| Task | main | feat/1234-tighten-react-19 |
+| --- | --- | --- |
+| skills/react-19/trigger-1 | 1/2 (+1 not counted) | 2/2 (+1 not counted) |
+
+Pass rate, Wilson interval at z=1.96: insufficient data (n=2, 1 passed, 1 not counted) → insufficient data (n=2, 2 passed, 1 not counted). A rate needs 6 counted trials; error, timeout and skipped trials are not counted.
+
+Cost: $1.20 → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
+
+Changed: \`react-19\` content hash. That is one cause."
+`;
+
+exports[`evalsReport over fixture runs > says multiple causes when two hashes changed 1`] = `
+"### skills: feat/1234-tighten-react-19 vs main (claude-opus-5-5)
+
+| Task | main | feat/1234-tighten-react-19 |
+| --- | --- | --- |
+| skills/react-19/trigger-1 | 3/3 | 1/3 |
+| skills/react-19/trigger-3 | 2/3 | 3/3 |
+
+Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 83.3% (n=12, 55.2%–95.3%).
+
+Cost: $1.20 → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
+
+Changed: skill catalog hash, \`react-19\` content hash. That is multiple causes, so no single change explains the difference."
+`;

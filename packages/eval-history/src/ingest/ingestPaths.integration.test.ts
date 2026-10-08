@@ -10,7 +10,6 @@
 
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import pg from 'pg';
 import {
   afterAll,
   beforeAll,
@@ -26,6 +25,7 @@ import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { applyMigrations } from '../migrate/applyMigrations.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
+import { scratchDatabase } from '../migrate/scratchDatabase.service.ts';
 import { ingestPaths } from './ingestPaths.service.ts';
 import { memoryFileSystem } from './memoryFileSystem.util.ts';
 
@@ -104,13 +104,10 @@ it.runIf(IS_CI)('has a database to ingest into under CI', () => {
 });
 
 describe.skipIf(!DATABASE_URL)('ingestPaths against Postgres', () => {
-  const scratchUrl = new URL(DATABASE_URL ?? 'postgres://localhost');
-
-  scratchUrl.pathname = `/${SCRATCH}`;
-
-  const connectionString = scratchUrl.href;
-  const admin = new pg.Client({ connectionString: DATABASE_URL });
-  const client = new pg.Client({ connectionString });
+  const { admin, client, connectionString } = scratchDatabase({
+    adminUrl: DATABASE_URL,
+    name: SCRATCH,
+  });
   type IngestArgs = {
     readonly envelopes: readonly RunEnvelope[];
     readonly url?: string;

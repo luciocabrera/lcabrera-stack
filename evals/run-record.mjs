@@ -41,7 +41,7 @@ const EVALS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(EVALS_DIR);
 export const RESULTS_DIR = '.tmp/eval-results';
 const SHARED_MODULE = join(EVALS_DIR, 'agent-sessions.mjs');
-const REGRESSION_CONFIG = join(EVALS_DIR, 'regression.config.json');
+export const REGRESSION_CONFIG = join(EVALS_DIR, 'regression.config.json');
 const SIGNALS = ['SIGINT', 'SIGTERM'];
 
 const git = (args) => runGit({ args, cwd: REPO_ROOT });

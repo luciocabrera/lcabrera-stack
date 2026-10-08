@@ -45,6 +45,36 @@ the runner warns and still exits as its results say; `vp run evals:ingest`
 sends whatever is under `.tmp/eval-results/` later, and skips a run already
 stored. An aborted run is left for that command too.
 
+## Comparing two runs
+
+`vp run evals:report -- --compare main` answers whether a change made a suite
+better or worse. It takes, from the database `EVALS_DATABASE_URL` names, the
+newest complete run of each suite on `main` and on the current branch, and
+prints one markdown section per suite that has both:
+
+1. the tasks that flipped, with passed over counted trials on each side. A
+   task flips when it went from passing every trial to not, from passing none
+   to some, or the other way, or when only one run has it;
+2. each run's pass rate with n and its Wilson interval, or `insufficient data`
+   below `minTrialsForRate` counted trials;
+3. the reported cost and the median trial duration of each run;
+4. which input hashes changed: the harness version, the skill catalog, each
+   subject's content, each task's task, fixture and expected hashes, and the
+   judge and agent prompts. One changed hash is named as the one cause; more
+   than one is reported as multiple causes, because no single change then
+   explains the difference.
+
+`--suite` narrows it to one suite and `--branch` names the run under test's
+branch. `--a <run> --b <run>` compares two runs given as run ids or as
+envelope files, so two CI artifacts compare with no database. `--json` prints
+the same comparison as JSON.
+
+Runs of two models are not compared: the report says which models they used
+and exits 1, because a pass rate measures the model as much as the inputs.
+`--allow-model-change` compares them anyway and lists the model among the
+changes. Nothing here flags a regression yet; the report prints the figures
+the rule in [`regression.config.json`](#regression-thresholds) will read.
+
 ## What a full run costs
 
 The skill-trigger and verifier suites run each task or fixture three times by
