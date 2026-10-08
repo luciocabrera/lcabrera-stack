@@ -22,5 +22,3 @@ export const REPORTING_RELATIONS = [
   'v_subject_trend',
   'v_task_pass_rate',
 ] as const;
-
-export const SQL_TYPE_NAMES = ['text'] as const;

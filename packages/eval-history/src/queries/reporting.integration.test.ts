@@ -22,7 +22,7 @@ import { readMigrations } from '../migrate/readMigrations.service.ts';
 import { readModelPrices } from '../prices/readModelPrices.service.ts';
 import { SYNTHETIC_PRIVATE_TEXT } from '../seed/seed.constants.ts';
 import { seedSyntheticHistory } from '../seed/seedSyntheticHistory.service.ts';
-import { excludedColumnsNamed } from './excludedColumnsNamed.util.ts';
+import { columnsNamed } from './columnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
 import { EXCLUDED_COLUMNS, REPORTING_RELATIONS } from './queries.constants.ts';
 import { readFlakyTasks } from './readFlakyTasks.service.ts';
@@ -240,32 +240,64 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
     );
   });
 
-  it('defines the views over no excluded column', async () => {
+  const readDefinitions = async () => {
     const client = await connect(databaseName);
-    const { rows } = await client.query<{ readonly used: string }>({
-      text: "select table_name || '.' || column_name as used from information_schema.view_column_usage where view_schema = 'evals' and view_name = any($1)",
+    const { rows: viewColumns } = await client.query<{ readonly used: string }>(
+      {
+        text: "select table_name || '.' || column_name as used from information_schema.view_column_usage where view_schema = 'evals' and view_name = any($1)",
+        values: [[...REPORTING_RELATIONS]],
+      },
+    );
+    const { rows: functions } = await client.query<{
+      readonly definition: string;
+    }>({
+      text: "select pg_get_functiondef(p.oid) as definition from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'evals' and p.proname = any($1)",
       values: [[...REPORTING_RELATIONS]],
     });
-    const used = rows.map(({ used: column }) => column);
 
-    expect(used).toContain('eval_trial.outcome');
+    return {
+      bodies: functions.map(({ definition }) => definition),
+      viewColumns: viewColumns.map(({ used }) => used),
+    };
+  };
+
+  it('defines the views over no excluded column', async () => {
+    const { viewColumns } = await readDefinitions();
+
+    expect(viewColumns).toContain('eval_trial.outcome');
     expect(
-      used.filter((column) =>
+      viewColumns.filter((column) =>
         (EXCLUDED_COLUMNS as readonly string[]).includes(column),
       ),
     ).toEqual([]);
   });
 
   it('defines the functions over no excluded column', async () => {
-    const client = await connect(databaseName);
-    const { rows } = await client.query<{ readonly definition: string }>({
-      text: "select pg_get_functiondef(p.oid) as definition from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'evals' and p.proname = any($1)",
-      values: [[...REPORTING_RELATIONS]],
-    });
+    const { bodies } = await readDefinitions();
 
-    expect(rows).not.toEqual([]);
+    expect(bodies).not.toEqual([]);
     expect(
-      rows.flatMap(({ definition }) => excludedColumnsNamed(definition)),
+      bodies.flatMap((sql) => columnsNamed({ columns: EXCLUDED_COLUMNS, sql })),
     ).toEqual([]);
+  });
+
+  it('names no jsonb column in a generated query, a view or a function', async () => {
+    const client = await connect(databaseName);
+    const { rows } = await client.query<{ readonly qualified: string }>(
+      "select table_name || '.' || column_name as qualified from information_schema.columns where table_schema = 'evals' and data_type = 'jsonb'",
+    );
+    const columns = rows.map(({ qualified }) => qualified);
+    const { bodies, viewColumns } = await readDefinitions();
+    const generated = Object.values(QUERIES).map(({ text }) => text);
+
+    expect(columns).toContain('eval_trial_detail.detail');
+    expect(
+      [...generated, ...bodies].flatMap((sql) =>
+        columnsNamed({ columns, sql }),
+      ),
+    ).toEqual([]);
+    expect(viewColumns.filter((column) => columns.includes(column))).toEqual(
+      [],
+    );
   });
 });

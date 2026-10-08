@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { excludedColumnsNamed } from './excludedColumnsNamed.util.ts';
+import { columnsNamed } from './columnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
-import { REPORTING_RELATIONS } from './queries.constants.ts';
+import { EXCLUDED_COLUMNS, REPORTING_RELATIONS } from './queries.constants.ts';
 import { runCompareQuery } from './runCompareQuery.util.ts';
 import { subjectTrendQuery } from './subjectTrendQuery.util.ts';
 import { taskPassRatesQuery } from './taskPassRatesQuery.util.ts';
@@ -14,31 +14,9 @@ const GENERATED = [
   runCompareQuery({ a: 'run-a', b: 'run-b' }),
 ].map(({ text }) => text);
 
-const PRIVATE_TEXT_PREFIXES = [
-  'transcript',
-  'detail',
-  'reply',
-  'summary',
-  'feedback',
-  'settings',
-  'argv',
-  'env',
-];
-
-const words = (sql: string) =>
-  sql.toLowerCase().match(/[a-z_][a-z\d_]*/g) ?? [];
-
 describe('the generated reporting SQL', () => {
   it.each(GENERATED)('names no excluded column: %s', (sql) => {
-    expect(excludedColumnsNamed(sql)).toEqual([]);
-  });
-
-  it.each(GENERATED)('names no transcript or judge-reply field: %s', (sql) => {
-    expect(
-      words(sql).filter((word) =>
-        PRIVATE_TEXT_PREFIXES.some((prefix) => word.startsWith(prefix)),
-      ),
-    ).toEqual([]);
+    expect(columnsNamed({ columns: EXCLUDED_COLUMNS, sql })).toEqual([]);
   });
 
   it.each(GENERATED)(
