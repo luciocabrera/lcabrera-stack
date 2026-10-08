@@ -3,7 +3,7 @@ governs:
   - repository
 ---
 
-# ADR-134 — Lint evals/ from a root eslint config rather than making it a workspace
+# ADR-135 — Lint evals/ from a root eslint config rather than making it a workspace
 
 **Status:** Accepted
 

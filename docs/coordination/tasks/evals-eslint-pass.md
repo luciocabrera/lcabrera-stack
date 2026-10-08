@@ -16,7 +16,7 @@ area:
   - .github/skills/lint-toolchain/SKILL.md
   - .github/skills/quality-gate-workflow/SKILL.md
   - .changeset/*
-  - docs/decisions/ADR-134-*
+  - docs/decisions/ADR-135-lint-evals-*
 started: 2026-10-08
 updated: 2026-10-08
 plan: (none)
