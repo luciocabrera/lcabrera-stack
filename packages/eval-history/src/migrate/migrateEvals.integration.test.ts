@@ -13,7 +13,14 @@
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import pg from 'pg';
-import { afterAll, beforeEach, describe, expect, it } from 'vite-plus/test';
+import {
+  afterAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+} from 'vite-plus/test';
 
 import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
 import { readFileSet } from '../hashing/readFileSet.service.ts';
@@ -24,6 +31,7 @@ import {
   MIGRATIONS_DIRECTORY,
 } from './migrate.constants.ts';
 import { migrateEvals } from './migrateEvals.service.ts';
+import { migrateReport } from './migrateReport.util.ts';
 import { parseMigrationFiles } from './parseMigrationFiles.util.ts';
 import { readMigrations } from './readMigrations.service.ts';
 
@@ -355,6 +363,10 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
 
     expect(result.granted.map(({ name }) => name)).toEqual([role.name]);
     expect(result.missing).toEqual([]);
+    expect(result.ungranted).toEqual([]);
+    expect(migrateReport(result)).toContain(
+      `evals:migrate: granted ${role.name}`,
+    );
     expect(
       await column(
         `select c.relname as value from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'evals' and c.relkind = 'r' and has_table_privilege('${role.name}', c.oid, 'INSERT') order by 1`,
@@ -387,5 +399,61 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
 
     expect(result.granted).toEqual([]);
     expect(result.missing).toEqual([role]);
+  });
+
+  it('reports a grant that changed nothing when it runs as a role that owns no evals object', async () => {
+    const migrations = await readMigrations();
+    const prices = await readModelPrices();
+    const admin = await connect();
+
+    await migrateEvals({ client: admin, migrations, prices, roles: [] });
+
+    const nonOwner = scratchRole();
+    const granted = scratchRole();
+
+    await admin.query(`create role "${nonOwner.name}" nologin`);
+    await admin.query(`create role "${granted.name}" nologin`);
+    await admin.query(
+      `grant usage, create on schema evals to "${nonOwner.name}"`,
+    );
+    const [database] = await column('select current_database() as value');
+    const grantOnDatabase = (verb: 'grant' | 'revoke') =>
+      admin.query(
+        `${verb} create on database "${String(database)}" ${verb === 'grant' ? 'to' : 'from'} "${nonOwner.name}"`,
+      );
+
+    await grantOnDatabase('grant');
+    onTestFinished(async () => {
+      await grantOnDatabase('revoke');
+    });
+    await admin.query(
+      `grant select, insert, update, delete on all tables in schema evals to "${nonOwner.name}"`,
+    );
+
+    const client = await connect();
+
+    await client.query(`set role "${nonOwner.name}"`);
+    const result = await migrateEvals({
+      client,
+      migrations,
+      prices,
+      roles: [granted],
+    });
+    const report = migrateReport(result);
+
+    expect(result.granted).toEqual([]);
+    expect(result.ungranted.map(({ role }) => role)).toEqual([granted]);
+    expect(result.ungranted[0]?.lacking).toEqual(
+      expect.arrayContaining([
+        { object: 'schema evals', privilege: 'usage' },
+        { object: 'schema evals', privilege: 'create' },
+        { object: 'table evals.eval_run', privilege: 'insert' },
+      ]),
+    );
+    expect(report).not.toContain(`granted ${granted.name}`);
+    expect(report).toContain(
+      `evals:migrate: role ${granted.name} still lacks these privileges after the grant`,
+    );
+    expect(report).toContain('  insert on table evals.eval_run');
   });
 });

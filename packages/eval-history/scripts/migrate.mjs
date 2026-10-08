@@ -2,13 +2,13 @@
  * Applies `migrations/` to the eval-history database named by
  * EVALS_DATABASE_URL, under the advisory lock and checksum check ADR-130
  * decides, upserts `model-prices.json` into evals.model_price, and grants each
- * existing role its privileges. A missing role is printed as the statements
- * that create it.
+ * existing role its privileges, then checks the role holds them. A missing
+ * role is printed as the statements that create it.
  *
  * Usage: vp run evals:migrate
  * Exit codes: 0 applied or already current, missing roles included; 1 on an
- * invalid env, a changed applied file, an invalid price file, or a failed
- * statement.
+ * invalid env, a changed applied file, an invalid price file, a failed
+ * statement, or a role that still lacks a privilege after the grant.
  */
 import process from 'node:process';
 import pg from 'pg';
@@ -43,7 +43,13 @@ const env = evalsDatabaseEnvSchema.safeParse(process.env);
 
 if (env.success) {
   try {
-    console.log(migrateReport(await migrate(env.data.EVALS_DATABASE_URL)));
+    const result = await migrate(env.data.EVALS_DATABASE_URL);
+
+    console.log(migrateReport(result));
+
+    if (result.ungranted.length > 0) {
+      process.exitCode = 1;
+    }
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
     process.exitCode = 1;

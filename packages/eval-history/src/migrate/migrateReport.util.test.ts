@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { EVALS_WRITER_ROLE } from './migrate.constants.ts';
+import { EVALS_READER_ROLE, EVALS_WRITER_ROLE } from './migrate.constants.ts';
 import { migrateReport } from './migrateReport.util.ts';
 
 const migration = {
@@ -18,6 +18,7 @@ describe('migrateReport', () => {
         granted: [EVALS_WRITER_ROLE],
         missing: [],
         pricesUpserted: 3,
+        ungranted: [],
       }),
     ).toBe(
       [
@@ -35,6 +36,7 @@ describe('migrateReport', () => {
         granted: [],
         missing: [EVALS_WRITER_ROLE],
         pricesUpserted: 3,
+        ungranted: [],
       }),
     ).toBe(
       [
@@ -46,5 +48,27 @@ describe('migrateReport', () => {
         '  grant select, insert, update, delete on all tables in schema evals to "evals_writer";',
       ].join('\n'),
     );
+  });
+
+  it('does not report a role as granted when it still lacks a privilege', () => {
+    const report = migrateReport({
+      applied: [],
+      granted: [EVALS_WRITER_ROLE],
+      missing: [],
+      pricesUpserted: 3,
+      ungranted: [
+        {
+          lacking: [{ object: 'schema evals', privilege: 'usage' }],
+          role: EVALS_READER_ROLE,
+        },
+      ],
+    });
+
+    expect(report).toContain('evals:migrate: granted evals_writer');
+    expect(report).not.toContain('granted evals_reader');
+    expect(report).toContain(
+      'evals:migrate: role evals_reader still lacks these privileges after the grant',
+    );
+    expect(report).toContain('  usage on schema evals');
   });
 });

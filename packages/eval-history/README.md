@@ -63,6 +63,13 @@ the run prints the `create role` and `grant` statements and still exits 0:
 creating a role needs a privilege some hosts withhold, so that step is the
 operator's.
 
+After granting, the run checks each role with `has_schema_privilege` and
+`has_table_privilege`, and prints `granted` only for a role that holds every
+listed privilege. Postgres does not fail a `grant` from a role that does not
+own the object; it warns and grants nothing. So a role still missing a
+privilege is listed with each privilege and object it lacks, and the run
+exits 1. Run it as the role that owns the `evals` objects.
+
 `vp run evals:ingest` reads the same variable. Every eval runner calls it on
 its own envelope with `--quiet-unreachable`, so an unset variable or a database
 that is down only warns, and the file waits on disk for the next
