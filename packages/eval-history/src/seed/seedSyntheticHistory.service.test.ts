@@ -71,6 +71,27 @@ describe('seedSyntheticHistory', () => {
     );
   });
 
+  it('binds a smaller shape in place of the default', async () => {
+    const { client, sent } = fakeClient({ runsBefore: 0 });
+    const shape = { nights: 10, subjects: 2, trialsPerTask: 1 };
+
+    await seedSyntheticHistory({ client, endsOn: '2026-10-01', shape });
+
+    expect(
+      sent
+        .filter(({ text }) => SYNTHETIC_HISTORY_STATEMENTS.includes(text))
+        .map(({ values }) => values),
+    ).toEqual(
+      SYNTHETIC_HISTORY_STATEMENTS.map(() => [
+        '2026-10-01',
+        10,
+        2,
+        1,
+        SYNTHETIC_PRIVATE_TEXT,
+      ]),
+    );
+  });
+
   it('refuses a database that already holds runs and writes nothing', async () => {
     const { client, sent } = fakeClient({ runsBefore: 2 });
 

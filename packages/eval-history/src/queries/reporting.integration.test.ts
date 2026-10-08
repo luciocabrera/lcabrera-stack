@@ -16,6 +16,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 import { z } from 'zod';
 
 import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
+import { applyMigrations } from '../migrate/applyMigrations.service.ts';
 import { EVALS_READER_ROLE } from '../migrate/migrate.constants.ts';
 import { migrateEvals } from '../migrate/migrateEvals.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
@@ -87,6 +88,7 @@ it.runIf(IS_CI)('has a database to report from under CI', () => {
 describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
   const suffix = randomUUID().replaceAll('-', '');
   const databaseName = `evals_reporting_${suffix}`;
+  const smallDatabaseName = `evals_reporting_small_${suffix}`;
   const reader = { ...EVALS_READER_ROLE, name: `evals_reader_test_${suffix}` };
   const clients: pg.Client[] = [];
   const seeded = { runs: 0, trials: 0 };
@@ -141,6 +143,9 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
 
     await admin.connect();
     await admin.query(`drop database if exists "${databaseName}" with (force)`);
+    await admin.query(
+      `drop database if exists "${smallDatabaseName}" with (force)`,
+    );
     await admin.query(`drop role if exists "${reader.name}"`);
     await admin.end();
   });
@@ -148,6 +153,26 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
   it('holds a year of nightly runs and at least 15k trials', () => {
     expect(seeded.runs).toBe(365);
     expect(seeded.trials).toBeGreaterThanOrEqual(SEEDED_TRIALS_AT_LEAST);
+  });
+
+  it('seeds a smaller shape with the counts that follow from it', async () => {
+    const admin = await connect();
+
+    await admin.query(`create database "${smallDatabaseName}"`);
+    const client = await connect(smallDatabaseName);
+
+    await applyMigrations({ client, migrations: await readMigrations() });
+    const counts = await seedSyntheticHistory({
+      client,
+      endsOn: '2026-10-01',
+      shape: { nights: 10, subjects: 2, trialsPerTask: 1 },
+    });
+    const { rows } = await client.query<{ readonly subjects: number }>(
+      'select count(*)::integer as subjects from evals.eval_subject',
+    );
+
+    expect(counts).toEqual({ runs: 10, trials: 10 * 2 * 2 * 1 });
+    expect(rows[0]?.subjects).toBe(2);
   });
 
   it.each(Object.entries(QUERIES).map(([name, query]) => ({ name, query })))(

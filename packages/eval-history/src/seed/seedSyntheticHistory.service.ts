@@ -1,6 +1,7 @@
 import { z } from 'zod';
 
 import type { MigrationClient } from '../migrate/migrate.types.ts';
+import type { SyntheticShape } from './seed.types.ts';
 
 import {
   SYNTHETIC_HISTORY_STATEMENTS,
@@ -11,7 +12,7 @@ import {
 type SeedSyntheticHistoryArgs = {
   readonly client: MigrationClient;
   readonly endsOn: string;
-  readonly shape?: typeof SYNTHETIC_SHAPE;
+  readonly shape?: SyntheticShape;
 };
 
 const countsSchema = z.array(

@@ -1,3 +1,5 @@
+import type { SyntheticShape } from './seed.types.ts';
+
 const SYNTHETIC_PROJECT = 'synthetic';
 
 export const SYNTHETIC_PRIVATE_TEXT = 'synthetic-private-text';
@@ -6,7 +8,7 @@ export const SYNTHETIC_SHAPE = {
   nights: 365,
   subjects: 7,
   trialsPerTask: 3,
-} as const;
+} as const satisfies SyntheticShape;
 
 const PARAMETERS = `
 with p as (
