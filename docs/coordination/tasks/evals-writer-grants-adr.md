@@ -8,6 +8,7 @@ area:
   - docs/decisions/ADR-13[0-9]*
   - packages/eval-history/README.md
   - packages/eval-history/scripts/migrate*.mjs
+  - packages/eval-history/scripts/seed-synthetic-history*.mjs
   - packages/eval-history/src/migrate/**
   - COMMANDS.md
 started: 2026-10-06

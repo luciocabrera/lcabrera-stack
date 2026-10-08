@@ -62,8 +62,9 @@ holds the schema the file must pass.
 Last, it grants `evals_writer` and `evals_reader` the privileges
 `EVALS_WRITER_ROLE` and `EVALS_READER_ROLE` list, in
 `src/migrate/migrate.constants.ts`, to each role that exists, after revoking
-whatever else that role holds on the same objects, so the lists are exactly
-what each role ends up with. The writer gets `usage` on schema `evals`, with no
+whatever else the owner granted that role on the same objects, so for grants
+made by the owner or a superuser the lists are exactly what each role ends up
+with. A grant made by a non-owner holding grant option is left alone. The writer gets `usage` on schema `evals`, with no
 `create`, and DML on its tables. The reader gets `usage` on schema `evals` and
 `select` on its tables and views, and nothing else: it is the role the
 dashboard connects as. When a role does not exist,
@@ -88,8 +89,10 @@ its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
 budget. Without the variable all three skip and say why, except under `CI`,
 where they fail.
 
-`vp run --filter @repo/eval-history seed:synthetic` migrates the database
-`EVALS_DATABASE_URL` names and writes the synthetic year into it. It refuses a
+`vp run --filter @repo/eval-history seed:synthetic` migrates and grants
+through `EVALS_MIGRATE_DATABASE_URL`, as `evals:migrate` does, then writes the
+synthetic year as the writer through `EVALS_DATABASE_URL`. It needs both and
+exits 1 naming whichever is missing. It refuses a
 database that already holds a run, so point it at an empty one, never at the
 history you keep.
 

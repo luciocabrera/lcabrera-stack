@@ -48,7 +48,7 @@ same constraint as its reason for not creating roles.
 
 No current code path needs the writer to own anything. The writer inserts,
 updates, selects and deletes rows. It never alters or drops a table or the
-schema, and only the migrator changes the schema.
+schema. The schema changes only when migrations run.
 
 ## Decision
 
@@ -57,6 +57,13 @@ connects through `EVALS_MIGRATE_DATABASE_URL`, validated by its own Zod schema,
 and does not read `EVALS_DATABASE_URL`. With the variable unset or not a
 `postgres://` URL, it exits 1 naming it, before connecting. The role it
 connects as creates the schema and every object in it, and so owns them.
+
+`seed:synthetic`, which also applies the migrations, does so the same way:
+it migrates and grants through `EVALS_MIGRATE_DATABASE_URL`, then inserts its
+synthetic history as the writer through `EVALS_DATABASE_URL`. It needs both
+variables and exits 1 naming whichever is missing. Inserting needs only the
+writer's grants, so no step of the seed runs as the writer with more than
+that.
 
 **`evals_writer` is granted privileges on schema `evals` and owns no object
 in it.** It connects through `EVALS_DATABASE_URL`, which ingest reads.
@@ -72,8 +79,11 @@ tables of its own and would own them, and ingest only reads and writes rows.
 
 On every run, after the migrations, the migrator revokes all privileges each
 granted role holds on the objects its list names, then grants the list, in
-one transaction. A privilege dropped from a list is taken back on the next
-run, and a table a new migration adds is covered the run it is created.
+one transaction. A revoke run by the owner removes only grants recorded with
+the owner as grantor, which covers grants made by the owner or by a
+superuser. For those, a privilege dropped from a list is taken back on the
+next run. A grant made by another role holding grant option is not touched.
+A table a new migration adds is covered the run it is created.
 `migrateEvals.integration.test.ts` migrates as a scratch migrating role and
 asserts that the writer owns nothing in the schema, can insert, fails `alter`
 and `drop` with "must be owner" and `create table` with "permission denied",
@@ -93,7 +103,9 @@ and loses a `create` granted before the run.
 - `evals_writer` cannot `alter` or `drop` the tables or the schema, and
   cannot create objects in it. Work that needs that goes through a migration.
 - A privilege granted by hand to a granted role on schema `evals` or its
-  tables does not survive the next `evals:migrate`.
+  tables, by the owner or a superuser, does not survive the next
+  `evals:migrate`. One granted by a non-owner holding grant option does, and
+  nothing here grants that option.
 - A table created outside `evals:migrate` is not covered by the table grant
   until the next run. `all tables in schema` covers only tables that exist when
   the grant runs, and no default privileges are set.
