@@ -21,7 +21,7 @@ create table if not exists evals.schema_migration (
 
 export const EVALS_WRITER_ROLE = {
   grants: [
-    { on: 'schema evals', privileges: 'usage, create' },
+    { on: 'schema evals', privileges: 'usage' },
     {
       on: 'all tables in schema evals',
       privileges: 'select, insert, update, delete',
