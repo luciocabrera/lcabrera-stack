@@ -7,8 +7,9 @@
  * envelope that fails the schema is not written, and the error names each field.
  * Each envelope written prints the run's pass rate, with n and its Wilson
  * interval at the thresholds in `regression.config.json`, beside its path.
- * A complete or partial envelope is then sent to the eval-history database; an
- * aborted one is left for `vp run evals:ingest`, since the process is ending.
+ * A complete or partial envelope is then sent to the eval-history database,
+ * after the signal handlers are removed, so a signal during the send cannot
+ * rewrite it; an aborted one is left for `vp run evals:ingest`.
  * Usage: imported by every runner under `evals/`.
  */
 import { createHash, randomUUID } from 'node:crypto';
@@ -214,12 +215,14 @@ export const recordRun = async ({
     const result = await Promise.resolve()
       .then(() => execute(context))
       .catch(async (error) => {
+        stopListening();
         const saved = saveOrReport(() => save('partial'));
         if (saved !== null) {
           await ingest({ file: saved.file });
         }
         throw error;
       });
+    stopListening();
     const saved = save('complete');
     await ingest({ file: saved.file });
     return { ...saved, result };

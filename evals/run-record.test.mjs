@@ -197,6 +197,34 @@ describe('recordRun', () => {
     ]);
   });
 
+  it('does not rewrite the saved envelope when a signal arrives during ingest', async () => {
+    for (const fails of [false, true]) {
+      const signals = new EventEmitter();
+      const raise = vi.fn();
+      const statuses = [];
+      ingest = vi.fn(async () => {
+        signals.emit('SIGINT');
+        signals.emit('SIGTERM');
+        statuses.push(written().run.status);
+      });
+      const run = record({
+        execute: ({ addTrial }) => {
+          addTrial(trial);
+          if (fails) {
+            throw new Error('usage limit reached');
+          }
+        },
+        raise,
+        signals,
+      });
+      await (fails ? expect(run).rejects.toThrow('usage limit reached') : run);
+      const status = fails ? 'partial' : 'complete';
+      expect(statuses).toStrictEqual([status]);
+      expect(written().run.status).toBe(status);
+      expect(raise).not.toHaveBeenCalled();
+    }
+  });
+
   it('leaves an aborted envelope on disk for evals:ingest', async () => {
     const signals = new EventEmitter();
     const started = Promise.withResolvers();
