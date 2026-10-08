@@ -62,13 +62,11 @@ table a new migration adds is covered the run it is created.
 
 - The migrator needs no role membership on any host. It grants on objects its
   own connection created, which the creating role is always allowed to do.
-- `evals:migrate` must connect as the role that created the `evals` objects, a
-  member of that role, or a superuser. Any other role fails during the
-  bootstrap, before the grant step. The exception is `evals_writer` when it
-  already holds its grants and has `create` on the database: that run exits 0
-  and reports the role as granted, although Postgres granted nothing.
-  [#1357](https://github.com/luciocabrera/lcabrera-stack/issues/1357) tracks
-  that report.
+- `evals:migrate` must connect as the role that created the `evals` objects,
+  or a role that inherits its privileges. Running it as any other role is
+  unsupported. A run that holds `evals_writer`'s privileges can report a grant
+  that changed nothing, which
+  [#1357](https://github.com/luciocabrera/lcabrera-stack/issues/1357) tracks.
 - `evals_writer` cannot `alter` or `drop` the tables or the schema unless it is
   also the role the migrator connects as. Work that needs that goes through a
   migration.
