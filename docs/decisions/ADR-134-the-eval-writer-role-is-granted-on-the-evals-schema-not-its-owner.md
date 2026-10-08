@@ -62,6 +62,9 @@ table a new migration adds is covered the run it is created.
 
 - The migrator needs no role membership on any host. It grants on objects its
   own connection created, which the creating role is always allowed to do.
+  That holds only while every `evals:migrate` run connects as the same role.
+  Pointing `EVALS_DATABASE_URL` at a different role later makes the grant step
+  fail, because that role does not own the tables.
 - `evals_writer` cannot `alter` or `drop` the tables or the schema unless it is
   also the role the migrator connects as. Work that needs that goes through a
   migration.
