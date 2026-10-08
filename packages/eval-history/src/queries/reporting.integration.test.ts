@@ -15,6 +15,7 @@ import pg from 'pg';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 import { z } from 'zod';
 
+import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
 import { EVALS_READER_ROLE } from '../migrate/migrate.constants.ts';
 import { migrateEvals } from '../migrate/migrateEvals.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
@@ -23,7 +24,7 @@ import { SYNTHETIC_PRIVATE_TEXT } from '../seed/seed.constants.ts';
 import { seedSyntheticHistory } from '../seed/seedSyntheticHistory.service.ts';
 import { excludedColumnsNamed } from './excludedColumnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
-import { EXCLUDED_COLUMNS } from './queries.constants.ts';
+import { EXCLUDED_COLUMNS, REPORTING_RELATIONS } from './queries.constants.ts';
 import { readFlakyTasks } from './readFlakyTasks.service.ts';
 import { readRunComparison } from './readRunComparison.service.ts';
 import { readSubjectTrend } from './readSubjectTrend.service.ts';
@@ -227,11 +228,24 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
     expect(JSON.stringify(results)).not.toContain(SYNTHETIC_PRIVATE_TEXT);
   });
 
+  it('finds every reporting relation as a view or a function', async () => {
+    const client = await connect(databaseName);
+    const { rows } = await client.query<{ readonly name: string }>({
+      text: "select c.relname as name from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'evals' and c.relkind = 'v' and c.relname = any($1) union select p.proname from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'evals' and p.proname = any($1)",
+      values: [[...REPORTING_RELATIONS]],
+    });
+
+    expect(rows.map(({ name }) => name).toSorted(compareCodeUnits)).toEqual(
+      [...REPORTING_RELATIONS].toSorted(compareCodeUnits),
+    );
+  });
+
   it('defines the views over no excluded column', async () => {
     const client = await connect(databaseName);
-    const { rows } = await client.query<{ readonly used: string }>(
-      "select table_name || '.' || column_name as used from information_schema.view_column_usage where view_schema = 'evals' and view_name in ('v_task_pass_rate', 'v_subject_trend')",
-    );
+    const { rows } = await client.query<{ readonly used: string }>({
+      text: "select table_name || '.' || column_name as used from information_schema.view_column_usage where view_schema = 'evals' and view_name = any($1)",
+      values: [[...REPORTING_RELATIONS]],
+    });
     const used = rows.map(({ used: column }) => column);
 
     expect(used).toContain('eval_trial.outcome');
@@ -244,11 +258,12 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
 
   it('defines the functions over no excluded column', async () => {
     const client = await connect(databaseName);
-    const { rows } = await client.query<{ readonly definition: string }>(
-      "select pg_get_functiondef(p.oid) as definition from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'evals' and p.proname in ('flaky_tasks', 'run_compare')",
-    );
+    const { rows } = await client.query<{ readonly definition: string }>({
+      text: "select pg_get_functiondef(p.oid) as definition from pg_proc p join pg_namespace n on n.oid = p.pronamespace where n.nspname = 'evals' and p.proname = any($1)",
+      values: [[...REPORTING_RELATIONS]],
+    });
 
-    expect(rows).toHaveLength(2);
+    expect(rows).not.toEqual([]);
     expect(
       rows.flatMap(({ definition }) => excludedColumnsNamed(definition)),
     ).toEqual([]);
