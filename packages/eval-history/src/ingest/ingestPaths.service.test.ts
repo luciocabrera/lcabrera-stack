@@ -1,8 +1,18 @@
+import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
+import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { ingestPaths } from './ingestPaths.service.ts';
+import { memoryFileSystem } from './memoryFileSystem.util.ts';
 
 const URL_ = 'postgres://writer:secret@localhost:5434/eval_history';
+const ENVELOPE_FILE =
+  '/results/skills/4e5aa14f-79b7-452d-be7c-66bdff258a25.json';
+
+const fixtures = await readJsonFiles({
+  directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),
+});
+const SKILLS_ENVELOPE = JSON.stringify(fixtures.get('skills.json'));
 
 describe('ingestPaths', () => {
   it('warns and exits 0 without a database when told to stay quiet', async () => {
@@ -45,7 +55,7 @@ describe('ingestPaths', () => {
     });
   });
 
-  it('names a missing path and never logs the URL', async () => {
+  it('names a missing path', async () => {
     const summary = await ingestPaths({
       connect: vi.fn(),
       connectionString: URL_,
@@ -60,6 +70,30 @@ describe('ingestPaths', () => {
       ],
       stdout: [],
     });
-    expect(JSON.stringify(summary)).not.toContain('secret');
+  });
+
+  it('logs the database by host, port and name, never by URL or password', async () => {
+    const summary = await ingestPaths({
+      connect: async () => {
+        throw Object.assign(new Error('connect ECONNREFUSED'), {
+          code: 'ECONNREFUSED',
+        });
+      },
+      connectionString: URL_,
+      fileSystem: memoryFileSystem({ [ENVELOPE_FILE]: SKILLS_ENVELOPE }),
+      paths: ['/results'],
+      quietUnreachable: true,
+    });
+    const lines = summary.stdout.map(
+      (line) => JSON.parse(line) as { readonly database: string },
+    );
+    const output = JSON.stringify(summary);
+
+    expect(lines.map(({ database }) => database)).toEqual([
+      'localhost:5434/eval_history',
+    ]);
+    expect(summary.stderr.join('\n')).toContain('localhost:5434/eval_history');
+    expect(output).not.toContain('secret');
+    expect(output).not.toContain(URL_);
   });
 });
