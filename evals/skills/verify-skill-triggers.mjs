@@ -52,6 +52,7 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
+import { scrubSecrets } from '../transcript-scrub.mjs';
 
 import {
   coverageProblems,
@@ -175,7 +176,7 @@ const attemptTask = async ({
     scopeError({ expectedTools: scope.tools, messages });
   const name = `${skill}-${task.id}-${trial}.json`;
   const text = JSON.stringify(messages, null, 2);
-  writeFileSync(join(REPORT_DIR, name), text);
+  writeFileSync(join(REPORT_DIR, name), scrubSecrets(text));
   const invoked = invokedSkills(messages);
   const fixtureRead = fixtureWasRead({
     fixtureFiles,

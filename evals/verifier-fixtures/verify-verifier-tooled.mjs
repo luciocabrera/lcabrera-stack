@@ -36,6 +36,7 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
+import { scrubSecrets } from '../transcript-scrub.mjs';
 
 import {
   agentTools,
@@ -140,7 +141,10 @@ const runText = ({ error, report, treeProblem: problem }) =>
 
 const save = ({ fixture, runs }) => {
   for (const [index, run] of runs.entries()) {
-    writeFileSync(join(REPORT_DIR, `${fixture}-${index + 1}.md`), runText(run));
+    writeFileSync(
+      join(REPORT_DIR, `${fixture}-${index + 1}.md`),
+      scrubSecrets(runText(run)),
+    );
   }
 };
 

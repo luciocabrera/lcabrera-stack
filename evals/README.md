@@ -27,6 +27,16 @@ session, with its tokens, cost and durations. Each suite's own output under
 `.tmp/` is still written, and skill quality builds `report.html` from the
 envelope.
 
+A transcript is scrubbed as it is written, by
+[`transcript-scrub.mjs`](./transcript-scrub.mjs), and so is each runner's own
+copy under `.tmp/`, which CI uploads as an artifact. It redacts the value of
+every environment variable whose name marks it secret (a name ending in
+`TOKEN`, `SECRET`, `PASSWORD`, `API_KEY`, `DATABASE_URL` and the like), the
+password in any URL, and known token shapes such as GitHub, npm and API keys,
+JWTs and private key blocks. Each is replaced with `[REDACTED:<kind>]`. The
+size and sha256 the envelope records are taken from the scrubbed file, and a
+transcript with nothing to redact is written unchanged.
+
 The envelope is written on every way out: `complete` on a normal finish,
 `partial` when the run throws, and `aborted` on Ctrl-C or SIGTERM. A runner
 whose envelope fails the schema writes none, names each failing field and exits 1.

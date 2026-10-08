@@ -45,6 +45,7 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
+import { scrubSecrets } from '../transcript-scrub.mjs';
 
 import { qualityTask, qualityTrial } from './quality-envelope.mjs';
 
@@ -89,7 +90,7 @@ const replyOf = (messages) => finalResult(messages)?.result ?? '';
 
 const outcome = ({ error, messages, skill, timestamps }) => {
   const reply = replyOf(messages);
-  writeFileSync(join(REPORT_DIR, `${skill}.json`), reply);
+  writeFileSync(join(REPORT_DIR, `${skill}.json`), scrubSecrets(reply));
   const problem = error ?? sessionProblem(messages);
   const metrics = sessionMetrics(messages, timestamps, error);
   return problem === undefined

@@ -38,6 +38,7 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
+import { scrubSecrets } from '../transcript-scrub.mjs';
 
 import {
   agentBody,
@@ -95,7 +96,7 @@ const saveReports = ({ fixture, sessions }) => {
   for (const [index, session] of sessions.entries()) {
     writeFileSync(
       join(REPORT_DIR, `${fixture}-${index + 1}.md`),
-      reportText(session),
+      scrubSecrets(reportText(session)),
     );
   }
 };
