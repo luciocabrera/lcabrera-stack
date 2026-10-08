@@ -67,6 +67,7 @@ const trial = sessionTrial({
 });
 
 let resultsDir;
+let ingest;
 
 const written = () =>
   JSON.parse(
@@ -80,6 +81,7 @@ const record = (overrides) =>
   recordRun({
     clock: () => STARTED_AT + 2000,
     identity: testIdentity,
+    ingest,
     plan,
     resultsDir,
     signals: new EventEmitter(),
@@ -88,6 +90,7 @@ const record = (overrides) =>
 
 beforeEach(() => {
   resultsDir = mkdtempSync(join(tmpdir(), 'eval-results-'));
+  ingest = vi.fn(async () => undefined);
   vi.spyOn(console, 'log').mockImplementation(() => undefined);
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
 });
@@ -150,6 +153,93 @@ describe('recordRun', () => {
         run: { status: 'aborted', totals: { trials: 1 } },
       });
     }
+  });
+
+  it('sends a complete or partial envelope once it is written', async () => {
+    const file = join(
+      resultsDir,
+      'rules-consistency',
+      `${testIdentity.run_id}.json`,
+    );
+    await record({ execute: () => undefined });
+    expect(ingest).toHaveBeenLastCalledWith({ file });
+    await expect(
+      record({
+        execute: () => {
+          throw new Error('usage limit reached');
+        },
+      }),
+    ).rejects.toThrow('usage limit reached');
+    expect(ingest).toHaveBeenCalledTimes(2);
+    expect(ingest).toHaveBeenLastCalledWith({ file });
+  });
+
+  it('sends the envelope only once its pass rate is written', async () => {
+    const sent = [];
+    ingest = vi.fn(async ({ file }) => {
+      sent.push(JSON.parse(readFileSync(file, 'utf8')).run.totals.pass_rate);
+    });
+    await record({
+      execute: ({ addTrial }) => {
+        for (const trialIndex of [0, 1, 2, 3, 4, 5]) {
+          addTrial({ ...trial, trial_index: trialIndex });
+        }
+      },
+    });
+    expect(sent).toStrictEqual([
+      {
+        k: 6,
+        lower: expect.closeTo(0.6097, 4),
+        n: 6,
+        rate: 1,
+        upper: expect.closeTo(1, 4),
+      },
+    ]);
+  });
+
+  it('does not rewrite the saved envelope when a signal arrives during ingest', async () => {
+    for (const fails of [false, true]) {
+      const signals = new EventEmitter();
+      const raise = vi.fn();
+      const statuses = [];
+      ingest = vi.fn(async () => {
+        signals.emit('SIGINT');
+        signals.emit('SIGTERM');
+        statuses.push(written().run.status);
+      });
+      const run = record({
+        execute: ({ addTrial }) => {
+          addTrial(trial);
+          if (fails) {
+            throw new Error('usage limit reached');
+          }
+        },
+        raise,
+        signals,
+      });
+      await (fails ? expect(run).rejects.toThrow('usage limit reached') : run);
+      const status = fails ? 'partial' : 'complete';
+      expect(statuses).toStrictEqual([status]);
+      expect(written().run.status).toBe(status);
+      expect(raise).not.toHaveBeenCalled();
+    }
+  });
+
+  it('leaves an aborted envelope on disk for evals:ingest', async () => {
+    const signals = new EventEmitter();
+    const started = Promise.withResolvers();
+    void record({
+      execute: () => {
+        started.resolve();
+        return Promise.withResolvers().promise;
+      },
+      raise: vi.fn(),
+      signals,
+    });
+    await started.promise;
+    signals.emit('SIGINT');
+    expect(written().run.status).toBe('aborted');
+    expect(ingest).not.toHaveBeenCalled();
   });
 
   it('prints the pass rate the envelope carries, at the thresholds in regression.config.json', async () => {
