@@ -2,7 +2,7 @@
 id: release-the-pending-changesets
 title: chore(release): version the packages from the pending changesets
 owner: agent:claude
-status: active
+status: review
 branch: chore/1355-release-the-pending-changesets
 area:
   - packages/*/package.json
@@ -14,7 +14,7 @@ area:
 started: 2026-10-08
 updated: 2026-10-08
 plan: (none)
-pr: (none)
+pr: "#1356"
 issue: #1355
 ---
 
