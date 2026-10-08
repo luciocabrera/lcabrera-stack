@@ -279,6 +279,21 @@ heatmap and the matrix are small, fixed shapes.
   raised, and `createTableRouteLoader` in `@lcabrera/ui` already accepts any
   `fetchPage`.
 
+## Amendments
+
+> **Widened by [#1281](https://github.com/luciocabrera/lcabrera-stack/issues/1281)**
+> (2026-10-08). `eval_trial_detail.detail` gains one allowed field: the quality
+> suite's `judge_model`. It is a model identifier in the same closed form as
+> `eval_run.model_id`, which the table above already allows, and the judge
+> agreement rate is reported per judge model, so a route that shows it needs the
+> field. `PUBLIC_FIELD_PATHS` lists it beside the dimension names and scores.
+> `summary`, per-dimension `feedback` and every other `detail` field stay
+> excluded. `evals.v_judge_agreement` reads only those three paths and
+> `eval_human_grade.dimension`, which the table above allows. `grader` stays
+> excluded by name. The view is in `REPORTING_RELATIONS`, and the reporting test
+> parses each reporting view's definition and fails on any other path, and on any
+> read of `detail` as a whole.
+
 ## References
 
 - [`eval-history-plan.md`](../agents/planning/eval-history-plan.md) §8 and §12

@@ -25,7 +25,12 @@ import { seedSyntheticHistory } from '../seed/seedSyntheticHistory.service.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { columnsNamed } from './columnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
-import { EXCLUDED_COLUMNS, REPORTING_RELATIONS } from './queries.constants.ts';
+import { jsonbFieldReads } from './jsonbFieldReads.util.ts';
+import {
+  EXCLUDED_COLUMNS,
+  PUBLIC_FIELD_PATHS,
+  REPORTING_RELATIONS,
+} from './queries.constants.ts';
 import { readFlakyTasks } from './readFlakyTasks.service.ts';
 import { readRunComparison } from './readRunComparison.service.ts';
 import { readSubjectTrend } from './readSubjectTrend.service.ts';
@@ -33,6 +38,7 @@ import { readTaskPassRates } from './readTaskPassRates.service.ts';
 import { runCompareQuery } from './runCompareQuery.util.ts';
 import { subjectTrendQuery } from './subjectTrendQuery.util.ts';
 import { taskPassRatesQuery } from './taskPassRatesQuery.util.ts';
+import { unregisteredViewReads } from './unregisteredViewReads.util.ts';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
@@ -246,11 +252,22 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
 
   const readDefinitions = async () => {
     const client = await connect(databaseName);
-    const { rows: viewColumns } = await client.query<{ readonly used: string }>(
-      {
-        text: "select table_name || '.' || column_name as used from information_schema.view_column_usage where view_schema = 'evals' and view_name = any($1)",
-        values: [[...REPORTING_RELATIONS]],
-      },
+    const { rows: usage } = await client.query<{
+      readonly column: string;
+      readonly view: string;
+    }>({
+      text: "select view_name as view, table_name || '.' || column_name as column from information_schema.view_column_usage where view_schema = 'evals' and view_name = any($1)",
+      values: [[...REPORTING_RELATIONS]],
+    });
+    const { rows: views } = await client.query<{
+      readonly definition: string;
+      readonly view: string;
+    }>({
+      text: "select viewname as view, definition from pg_views where schemaname = 'evals' and viewname = any($1)",
+      values: [[...REPORTING_RELATIONS]],
+    });
+    const { rows: jsonb } = await client.query<{ readonly qualified: string }>(
+      "select table_name || '.' || column_name as qualified from information_schema.columns where table_schema = 'evals' and data_type = 'jsonb'",
     );
     const { rows: functions } = await client.query<{
       readonly definition: string;
@@ -261,18 +278,34 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
 
     return {
       bodies: functions.map(({ definition }) => definition),
-      viewColumns: viewColumns.map(({ used }) => used),
+      definitions: new Map(
+        views.map(({ definition, view }) => [view, definition]),
+      ),
+      jsonbColumns: jsonb.map(({ qualified }) => qualified),
+      usage,
+      viewColumns: usage.map(({ column }) => column),
     };
   };
 
-  it('defines the views over no excluded column', async () => {
-    const { viewColumns } = await readDefinitions();
+  it('defines the views over no excluded column but registered jsonb fields', async () => {
+    const { definitions, jsonbColumns, usage, viewColumns } =
+      await readDefinitions();
 
     expect(viewColumns).toContain('eval_trial.outcome');
     expect(
-      viewColumns.filter((column) =>
-        (EXCLUDED_COLUMNS as readonly string[]).includes(column),
-      ),
+      jsonbFieldReads({
+        column: 'eval_trial_detail.detail',
+        definition: definitions.get('v_judge_agreement') ?? '',
+      }).toSorted(compareCodeUnits),
+    ).toEqual([...PUBLIC_FIELD_PATHS].toSorted(compareCodeUnits));
+    expect(
+      unregisteredViewReads({
+        definitions,
+        fieldPaths: PUBLIC_FIELD_PATHS,
+        guarded: EXCLUDED_COLUMNS,
+        jsonbColumns,
+        usage,
+      }),
     ).toEqual([]);
   });
 
@@ -285,23 +318,25 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
     ).toEqual([]);
   });
 
-  it('names no jsonb column in a generated query, a view or a function', async () => {
-    const client = await connect(databaseName);
-    const { rows } = await client.query<{ readonly qualified: string }>(
-      "select table_name || '.' || column_name as qualified from information_schema.columns where table_schema = 'evals' and data_type = 'jsonb'",
-    );
-    const columns = rows.map(({ qualified }) => qualified);
-    const { bodies, viewColumns } = await readDefinitions();
+  it('reads a jsonb column in a view only through registered fields, and names none in a query or a function', async () => {
+    const { bodies, definitions, jsonbColumns, usage } =
+      await readDefinitions();
     const generated = Object.values(QUERIES).map(({ text }) => text);
 
-    expect(columns).toContain('eval_trial_detail.detail');
+    expect(jsonbColumns).toContain('eval_trial_detail.detail');
     expect(
       [...generated, ...bodies].flatMap((sql) =>
-        columnsNamed({ columns, sql }),
+        columnsNamed({ columns: jsonbColumns, sql }),
       ),
     ).toEqual([]);
-    expect(viewColumns.filter((column) => columns.includes(column))).toEqual(
-      [],
-    );
+    expect(
+      unregisteredViewReads({
+        definitions,
+        fieldPaths: PUBLIC_FIELD_PATHS,
+        guarded: jsonbColumns,
+        jsonbColumns,
+        usage,
+      }),
+    ).toEqual([]);
   });
 });

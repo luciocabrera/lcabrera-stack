@@ -19,6 +19,13 @@ export const EXCLUDED_COLUMNS = [
 export const REPORTING_RELATIONS = [
   'flaky_tasks',
   'run_compare',
+  'v_judge_agreement',
   'v_subject_trend',
   'v_task_pass_rate',
+] as const;
+
+export const PUBLIC_FIELD_PATHS = [
+  'eval_trial_detail.detail.dimensions[].name',
+  'eval_trial_detail.detail.dimensions[].score',
+  'eval_trial_detail.detail.judge_model',
 ] as const;

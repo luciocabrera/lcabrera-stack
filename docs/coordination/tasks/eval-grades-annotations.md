@@ -10,7 +10,8 @@ area:
   - packages/eval-history/src/annotations/**
   - packages/eval-history/src/envelope/**
   - packages/eval-history/src/testing/**
-  - packages/eval-history/src/queries/reporting.integration.test.ts
+  - packages/eval-history/src/queries/**
+  - docs/decisions/ADR-133-*.md
   - packages/eval-history/scripts/annotate.mjs
   - packages/eval-history/scripts/grade.mjs
   - packages/eval-history/scripts/lib/**

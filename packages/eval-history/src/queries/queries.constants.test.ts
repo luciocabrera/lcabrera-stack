@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { judgeAgreementQuery } from '../grades/judgeAgreementQuery.util.ts';
 import { columnsNamed } from './columnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
 import { EXCLUDED_COLUMNS, REPORTING_RELATIONS } from './queries.constants.ts';
@@ -12,6 +13,7 @@ const GENERATED = [
   subjectTrendQuery({ kind: 'skill', limit: 30, name: 'react-19' }),
   flakyTasksQuery({ disagreeFraction: 0.2, window: 10 }),
   runCompareQuery({ a: 'run-a', b: 'run-b' }),
+  judgeAgreementQuery(),
 ].map(({ text }) => text);
 
 describe('the generated reporting SQL', () => {

@@ -35,9 +35,13 @@ decides how the envelope is versioned.
   `readFlakyTasks` (`evals.flaky_tasks(run_window)`, the plan's `v_flaky_tasks`, a
   function so the window comes from `evals/regression.config.json`) and
   `readRunComparison` (`evals.run_compare(a, b)`). Each builds its SQL in a
-  pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
-  the views beneath, names a column in `EXCLUDED_COLUMNS`
+  pure `*Query.util.ts`, so a test can read what is sent, and none of them
+  names a column in `EXCLUDED_COLUMNS`
   ([ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)).
+  A view in `REPORTING_RELATIONS`, `evals.v_judge_agreement` among them, may
+  read an excluded `jsonb` column only through the paths `PUBLIC_FIELD_PATHS`
+  lists; `jsonbFieldReads` parses those reads out of the view's definition, and
+  the reporting test fails on any other path or on the whole column.
 - `src/seed/` — a year of synthetic nightly history, about 15k trials, for
   timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of
