@@ -62,14 +62,22 @@ connects as creates the schema and every object in it, and so owns them.
 in it.** It connects through `EVALS_DATABASE_URL`, which ingest reads.
 `EVALS_WRITER_ROLE` is the one list of what it holds:
 
-- `usage, create` on schema `evals`
+- `usage` on schema `evals`
 - `select, insert, update, delete` on all tables in schema `evals`
 
-The migrator re-applies the grants on every run, after the migrations, so a
-table a new migration adds is covered the run it is created.
+The writer has no `create` on the schema. With it, the writer could create
+tables of its own and would own them, and ingest only reads and writes rows.
+[#1346](https://github.com/luciocabrera/lcabrera-stack/pull/1346) granted
+`usage, create`; this record drops `create`.
+
+On every run, after the migrations, the migrator revokes all privileges each
+granted role holds on the objects its list names, then grants the list, in
+one transaction. A privilege dropped from a list is taken back on the next
+run, and a table a new migration adds is covered the run it is created.
 `migrateEvals.integration.test.ts` migrates as a scratch migrating role and
-asserts that the writer owns nothing in the schema, can insert, and fails
-`alter` and `drop` with "must be owner".
+asserts that the writer owns nothing in the schema, can insert, fails `alter`
+and `drop` with "must be owner" and `create table` with "permission denied",
+and loses a `create` granted before the run.
 
 ## Consequences
 
@@ -82,8 +90,10 @@ asserts that the writer owns nothing in the schema, can insert, and fails
   Running it as any other role is unsupported. A run that holds
   `evals_writer`'s privileges can report a grant that changed nothing, which
   [#1357](https://github.com/luciocabrera/lcabrera-stack/issues/1357) tracks.
-- `evals_writer` cannot `alter` or `drop` the tables or the schema. Work that
-  needs that goes through a migration.
+- `evals_writer` cannot `alter` or `drop` the tables or the schema, and
+  cannot create objects in it. Work that needs that goes through a migration.
+- A privilege granted by hand to a granted role on schema `evals` or its
+  tables does not survive the next `evals:migrate`.
 - A table created outside `evals:migrate` is not covered by the table grant
   until the next run. `all tables in schema` covers only tables that exist when
   the grant runs, and no default privileges are set.

@@ -61,15 +61,18 @@ holds the schema the file must pass.
 
 Last, it grants `evals_writer` and `evals_reader` the privileges
 `EVALS_WRITER_ROLE` and `EVALS_READER_ROLE` list, in
-`src/migrate/migrate.constants.ts`, to each role that exists. The reader gets
-`usage` on schema `evals` and `select` on its tables and views, and nothing
-else: it is the role the dashboard connects as. When a role does not exist,
+`src/migrate/migrate.constants.ts`, to each role that exists, after revoking
+whatever else that role holds on the same objects, so the lists are exactly
+what each role ends up with. The writer gets `usage` on schema `evals`, with no
+`create`, and DML on its tables. The reader gets `usage` on schema `evals` and
+`select` on its tables and views, and nothing else: it is the role the
+dashboard connects as. When a role does not exist,
 the run prints the `create role` and `grant` statements and still exits 0:
 creating a role needs a privilege some hosts withhold, so that step is the
 operator's. The printed `create role` sets no password; set the credential
 the role's connection string will carry, `EVALS_DATABASE_URL` for the writer.
-Neither role owns anything in schema `evals`, so neither can alter or drop what
-the migrating role created.
+Neither role owns anything in schema `evals` or can create in it, so neither
+can alter or drop what the migrating role created.
 
 `vp run evals:ingest` reads `EVALS_DATABASE_URL` and connects as
 `evals_writer`. Every eval runner calls it on

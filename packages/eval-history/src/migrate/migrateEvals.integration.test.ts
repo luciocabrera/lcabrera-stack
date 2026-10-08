@@ -197,6 +197,26 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     }
   };
 
+  const separateMigrator = async () => {
+    const migrator = await scratchMigrator();
+    const writer = scratchRole();
+    const admin = await connect();
+
+    await admin.query(`create role "${writer.name}" nologin`);
+    const client = await connect();
+
+    await client.query(`set role "${migrator}"`);
+    const migrate = async () =>
+      migrateEvals({
+        client,
+        migrations: await readMigrations(),
+        prices: await readModelPrices(),
+        roles: [writer],
+      });
+
+    return { client, migrate, migrator, writer };
+  };
+
   afterAll(async () => {
     const client = await connect();
 
@@ -422,20 +442,8 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
   });
 
   it('leaves the writer owning nothing when a separate role migrates', async () => {
-    const migrator = await scratchMigrator();
-    const writer = scratchRole();
-    const admin = await connect();
-
-    await admin.query(`create role "${writer.name}" nologin`);
-    const client = await connect();
-
-    await client.query(`set role "${migrator}"`);
-    const result = await migrateEvals({
-      client,
-      migrations: await readMigrations(),
-      prices: await readModelPrices(),
-      roles: [writer],
-    });
+    const { migrate, migrator, writer } = await separateMigrator();
+    const result = await migrate();
 
     expect(result.granted.map(({ name }) => name)).toEqual([writer.name]);
 
@@ -474,6 +482,24 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     await expect(
       asRole({ role: writer.name, sql: 'drop schema evals cascade' }),
     ).rejects.toThrow(/must be owner of schema evals/);
+    await expect(
+      asRole({ role: writer.name, sql: 'create table evals.x (i int)' }),
+    ).rejects.toThrow(/permission denied for schema evals/);
+  });
+
+  it('takes back a schema privilege the writer no longer lists on the next run', async () => {
+    const { client, migrate, writer } = await separateMigrator();
+
+    await migrate();
+    await client.query(`grant create on schema evals to "${writer.name}"`);
+    const schemaPrivileges = async () =>
+      column(
+        `select p as value from unnest(array['USAGE', 'CREATE']) p where has_schema_privilege('${writer.name}', 'evals', p) order by 1`,
+      );
+
+    expect(await schemaPrivileges()).toEqual(['CREATE', 'USAGE']);
+    await migrate();
+    expect(await schemaPrivileges()).toEqual(['USAGE']);
   });
 
   it('reports a missing role instead of failing', async () => {
