@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -24,7 +23,7 @@ const PROOF = [
   'Passed:    vp run --filter @lcabrera/utils test → exit 0',
 ].join('\n');
 
-const report = ({ verdict, rows, proof = PROOF }) =>
+const report = ({ proof = PROOF, rows, verdict }) =>
   [
     `VERDICT: ${verdict}`,
     '',
@@ -127,10 +126,10 @@ describe('expectedVerdict', () => {
   });
 });
 
-describe('judgeTooledFixture', () => {
-  const judge = (expectedNotMet, runs) =>
-    judgeTooledFixture({ expectedNotMet, fixture: 'f', runs });
+const judge = (expectedNotMet, runs) =>
+  judgeTooledFixture({ expectedNotMet, fixture: 'f', runs });
 
+describe('judgeTooledFixture', () => {
   it('passes clean work only on a plain PASS with a gate proof', () => {
     expect(
       judge([], [{ report: report({ rows: allMet, verdict: 'PASS' }) }])

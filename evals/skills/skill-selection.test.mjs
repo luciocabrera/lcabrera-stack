@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   coverageProblems,
-  PROMPT_SUFFIX,
   isPathScoped,
+  PROMPT_SUFFIX,
   selectedSkills,
   selectionProblems,
   withoutSeparator,
@@ -65,6 +65,8 @@ describe('withoutSeparator', () => {
   });
 });
 
+const declaredAs = (...names) => new Map(names.map((name) => [name, name]));
+
 describe('coverageProblems', () => {
   const prompt = `Do it. ${PROMPT_SUFFIX}`;
   const task = (name, id, shouldTrigger, extra = {}) => ({
@@ -86,7 +88,6 @@ describe('coverageProblems', () => {
     task(name, 'near-miss', false, extra),
     ...padding(name, extra),
   ];
-  const declaredAs = (...names) => new Map(names.map((name) => [name, name]));
 
   it('passes a skill with both tasks, and a scoped skill whose tasks name a fixture', () => {
     expect(

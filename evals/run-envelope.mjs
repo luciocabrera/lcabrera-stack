@@ -40,7 +40,7 @@ export const branchOf = ({ env, head }) =>
   env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME || head;
 
 export const actorOf = ({ email, env, user }) =>
-  env.GITHUB_ACTOR || email?.split('@')[0] || user;
+  env.GITHUB_ACTOR || email?.split('@', 1)[0] || user;
 
 export const environmentOf = ({ arch, env, node, os }) => ({
   arch,
@@ -267,4 +267,7 @@ export const envelopeProblems = (issues) =>
 const RELATIVE_IMPORT = /(?:from|import)\s+'(\.{1,2}\/[^']+)'/gu;
 
 export const relativeImports = (source) =>
-  [...source.matchAll(RELATIVE_IMPORT)].map(([, specifier]) => specifier);
+  source
+    .matchAll(RELATIVE_IMPORT)
+    .map(([, specifier]) => specifier)
+    .toArray();

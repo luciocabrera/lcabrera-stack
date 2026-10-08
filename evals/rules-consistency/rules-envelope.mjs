@@ -115,8 +115,8 @@ export const rulesRecords = ({
     ),
   );
   return {
-    subjects: subjects.map(subjectOf),
-    tasks: checks.map(taskOf),
+    subjects: subjects.map((subject) => subjectOf(subject)),
+    tasks: checks.map((check) => taskOf(check)),
     trials: checks.map((check) => trialOf({ ...check, finishedAt, startedAt })),
   };
 };

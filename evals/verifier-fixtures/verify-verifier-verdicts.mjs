@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { query } from '@anthropic-ai/claude-agent-sdk';
 /**
  * Runs the refactor-verifier prompt, read verbatim from its agent definition,
  * over each fixture diff with no tools, and checks which criteria each report
@@ -19,8 +20,6 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { query } from '@anthropic-ai/claude-agent-sdk';
-
 import {
   chunk,
   costLine,
@@ -38,18 +37,6 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
-
-import {
-  agentBody,
-  describeJudgement,
-  judgeFixture,
-  readReport,
-  renderDispatch,
-  reportText,
-  runCount,
-  runCounts,
-  suiteEnd,
-} from './verifier-fixtures.mjs';
 import {
   agentPromptHash,
   CONTRACT_PATH,
@@ -57,6 +44,17 @@ import {
   verifierSubject,
   verifierTrial,
 } from './verifier-envelope.mjs';
+import {
+  agentBody,
+  describeJudgement,
+  isRunMatching,
+  judgeFixture,
+  readReport,
+  renderDispatch,
+  reportText,
+  runCount,
+  suiteEnd,
+} from './verifier-fixtures.mjs';
 
 const MODEL = 'claude-opus-5-5';
 const SUITE = 'verifier-fixtures';
@@ -114,7 +112,7 @@ const recordSession = ({
       error: session.error,
       expectedNotMet,
       fixture,
-      matched: runCounts({ expectedNotMet, run }),
+      matched: isRunMatching({ expectedNotMet, run }),
       metrics: session.metrics,
       queuedAt,
       run,
@@ -164,7 +162,7 @@ const runSuite = async ({ fixtures, record, runs, shared }) => {
   const { exitCode, footer } = suiteEnd({ judgements, reportDir: REPORT_DIR });
   console.log(
     [
-      ...judgements.map(describeJudgement),
+      ...judgements.map((judgement) => describeJudgement(judgement)),
       footer,
       costLine(results.map(({ metrics }) => metrics)),
     ].join('\n'),

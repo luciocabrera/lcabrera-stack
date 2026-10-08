@@ -1,3 +1,6 @@
+import { parseEnvelope } from '@repo/eval-history/envelope/parseEnvelope.util';
+import { harnessVersion } from '@repo/eval-history/hashing/harnessVersion.util';
+import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
 /**
  * Writes the run envelope every eval runner leaves behind, to
  * `.tmp/eval-results/<suite>/<run_id>.json`, with its transcripts beside it in
@@ -18,12 +21,7 @@ import { userInfo } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { parseEnvelope } from '@repo/eval-history/envelope/parseEnvelope.util';
-import { harnessVersion } from '@repo/eval-history/hashing/harnessVersion.util';
-import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
-
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
-
 import {
   actorOf,
   assembleEnvelope,
@@ -75,12 +73,12 @@ export const sdkVersion = () => {
     .version;
 };
 
-const insideEvals = (file) => !relative(EVALS_DIR, file).startsWith('..');
+const isInsideEvals = (file) => !relative(EVALS_DIR, file).startsWith('..');
 
 const importsOf = (file) =>
   relativeImports(readFileSync(file, 'utf8'))
     .map((specifier) => resolve(dirname(file), specifier))
-    .filter(insideEvals);
+    .filter((path) => isInsideEvals(path));
 
 const importClosure = (pending, seen = new Set()) => {
   const [file, ...rest] = pending;
@@ -201,7 +199,9 @@ export const recordRun = async ({
     signals.on(signal, listener);
   }
   const context = {
-    addTrial: (trial) => trials.push(trial),
+    addTrial: (trial) => {
+      trials.push(trial);
+    },
     transcript: ({ name, text }) =>
       saveTranscript({
         name,
@@ -211,17 +211,20 @@ export const recordRun = async ({
         text,
       }),
   };
+  const executeOrSavePartial = async () => {
+    try {
+      return await execute(context);
+    } catch (error) {
+      stopListening();
+      const saved = saveOrReport(() => save('partial'));
+      if (saved !== null) {
+        await ingest({ file: saved.file });
+      }
+      throw error;
+    }
+  };
   try {
-    const result = await Promise.resolve()
-      .then(() => execute(context))
-      .catch(async (error) => {
-        stopListening();
-        const saved = saveOrReport(() => save('partial'));
-        if (saved !== null) {
-          await ingest({ file: saved.file });
-        }
-        throw error;
-      });
+    const result = await executeOrSavePartial();
     stopListening();
     const saved = save('complete');
     await ingest({ file: saved.file });

@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+import { query } from '@anthropic-ai/claude-agent-sdk';
 /**
  * Runs the refactor-verifier with its own tools against each fixture applied
  * in a scratch worktree, one fixture at a time, and checks the report: clean
@@ -17,8 +18,6 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
-import { query } from '@anthropic-ai/claude-agent-sdk';
-
 import {
   chunk,
   errorText,
@@ -36,7 +35,6 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
-
 import {
   agentTools,
   describeTooledJudgement,
@@ -46,6 +44,7 @@ import {
   tooledRunCount,
   tooledRunCounts,
 } from './tooled-fixtures.mjs';
+import { cleanUp, git, prepare, treeProblem } from './tooled-worktree.mjs';
 import {
   agentPromptHash,
   CONTRACT_PATH,
@@ -54,7 +53,6 @@ import {
   verifierSubject,
 } from './verifier-envelope.mjs';
 import { agentBody, suiteEnd } from './verifier-fixtures.mjs';
-import { cleanUp, git, prepare, treeProblem } from './tooled-worktree.mjs';
 
 const MODEL = 'claude-opus-5-5';
 const SUITE = 'verifier-tooled';
@@ -227,7 +225,7 @@ const judgeAndPrint = async ({
 };
 
 const selected = ({ expected, names }) => {
-  const unknown = names.filter((name) => !(name in expected));
+  const unknown = names.filter((name) => !Object.hasOwn(expected, name));
   if (unknown.length > 0) {
     throw new Error(`no fixture named ${unknown.join(', ')} in expected.json`);
   }

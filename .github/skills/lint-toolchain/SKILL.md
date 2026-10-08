@@ -98,6 +98,13 @@ use `@lcabrera/vite-config/eslint-base-custom-rules` (same stack minus React/Sty
 and without `clean-import-paths`, which strips the import extensions
 node-resolution code requires).
 
+`evals/` is the one code directory that is not a workspace, so the root carries
+its pass: the root `eslint.config.mjs` ignores every path but `evals/`, and the
+root `lint:eslint:check` lints `evals` by name, so a config that ignored it too
+fails with "all of the files matching the glob pattern are ignored" instead of
+reporting a clean run. The runners take the tooling-script block through the
+factory's `toolingScriptPatterns`, as files under `scripts/` do.
+
 Inherited eslint violations are baselined per workspace in
 `eslint-suppressions.json` (ESLint bulk suppressions) — **new violations fail the
 gate**: CI runs `vp run -r lint:eslint:check` as its own step in

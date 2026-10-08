@@ -167,9 +167,18 @@ export const createNodeScriptFileConfig = ({ globals }) => ({
  * are tests whose subject is `null` itself. `undefined` remains the repository's
  * absent value everywhere the rule still applies.
  *
+ * `patterns` adds further positions with the same fact: a repository whose
+ * own commands live in a directory not named `scripts/` names it here, and
+ * the block applies there as it does under `scripts/`.
+ *
+ * @param {readonly string[]} [patterns]
  */
-export const createToolingScriptFileConfig = () => ({
-  files: ['**/scripts/**/*.{js,mjs,cjs}', '**/*.config.{js,mjs,cjs}'],
+export const createToolingScriptFileConfig = (patterns = []) => ({
+  files: [
+    '**/scripts/**/*.{js,mjs,cjs}',
+    '**/*.config.{js,mjs,cjs}',
+    ...patterns,
+  ],
   rules: {
     'perfectionist/sort-objects': [
       'error',

@@ -5,7 +5,7 @@ import {
   describeVerdict,
   fixtureWasRead,
   invokedSkills,
-  judgeTask,
+  isCorrect,
   readPaths,
   readTask,
   scopeError,
@@ -98,22 +98,22 @@ describe('invokedSkills', () => {
   });
 });
 
-describe('judgeTask', () => {
+describe('isCorrect', () => {
   it('passes a trigger task only when the skill was invoked', () => {
     expect(
-      judgeTask({ invoked: ['epic'], shouldTrigger: true, skill: 'epic' }),
+      isCorrect({ invoked: ['epic'], shouldTrigger: true, skill: 'epic' }),
     ).toBe(true);
     expect(
-      judgeTask({ invoked: ['unslop'], shouldTrigger: true, skill: 'epic' }),
+      isCorrect({ invoked: ['unslop'], shouldTrigger: true, skill: 'epic' }),
     ).toBe(false);
   });
 
   it('passes a near-miss only when the skill was not invoked, whatever else was', () => {
     expect(
-      judgeTask({ invoked: ['unslop'], shouldTrigger: false, skill: 'epic' }),
+      isCorrect({ invoked: ['unslop'], shouldTrigger: false, skill: 'epic' }),
     ).toBe(true);
     expect(
-      judgeTask({ invoked: ['epic'], shouldTrigger: false, skill: 'epic' }),
+      isCorrect({ invoked: ['epic'], shouldTrigger: false, skill: 'epic' }),
     ).toBe(false);
   });
 });
@@ -157,16 +157,17 @@ describe('trialCount', () => {
   });
 });
 
+const trial = ({ id = 'trigger', passed, trial: number }) => ({
+  error: undefined,
+  fixtureRead: true,
+  invoked: passed ? ['epic'] : [],
+  passed,
+  skill: 'epic',
+  task: { id, shouldTrigger: true },
+  trial: number,
+});
+
 describe('taskVerdicts', () => {
-  const trial = ({ id = 'trigger', passed, trial: number }) => ({
-    error: undefined,
-    fixtureRead: true,
-    invoked: passed ? ['epic'] : [],
-    passed,
-    skill: 'epic',
-    task: { id, shouldTrigger: true },
-    trial: number,
-  });
   const verdicts = taskVerdicts([
     trial({ passed: true, trial: 1 }),
     trial({ passed: false, trial: 2 }),
@@ -263,14 +264,14 @@ describe('describeResult on a pass', () => {
   });
 });
 
-describe('fixture reads', () => {
-  const read = (file_path) => ({
-    message: {
-      content: [{ input: { file_path }, name: 'Read', type: 'tool_use' }],
-    },
-    type: 'assistant',
-  });
+const read = (file_path) => ({
+  message: {
+    content: [{ input: { file_path }, name: 'Read', type: 'tool_use' }],
+  },
+  type: 'assistant',
+});
 
+describe('fixture reads', () => {
   it('collects the paths the session read', () => {
     expect(readPaths([read('/tmp/w/src/A.tsx')])).toStrictEqual([
       '/tmp/w/src/A.tsx',
@@ -349,9 +350,9 @@ describe('sessionError', () => {
   });
 });
 
-describe('scopeError', () => {
-  const init = (tools) => [{ subtype: 'init', tools, type: 'system' }];
+const init = (tools) => [{ subtype: 'init', tools, type: 'system' }];
 
+describe('scopeError', () => {
   it('accepts a session that holds exactly the requested tools', () => {
     expect(
       scopeError({

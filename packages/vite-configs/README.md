@@ -104,6 +104,19 @@ export default await createCustomRulesLintConfig({
 Omitting `serverOnlySyntaxRestrictions` omits the server/client block entirely —
 which is what a package with no client bundle wants.
 
+Both factories apply a narrower block to the scripts a repository runs on
+itself, where paths and text come from the repository or the command line
+rather than from a request. They recognise those by a directory named scripts
+in the path, or by a config file name such as `vite.config.mjs`. Pass
+`toolingScriptPatterns` to name other files that hold such commands:
+
+```js
+export default createBaseCustomRulesLintConfig({
+  toolingScriptPatterns: ['tools/**/*.mjs'],
+  tsconfigRootDir: import.meta.dirname,
+});
+```
+
 `./eslint-restrictions` also carries the tables both factories apply
 unconditionally, so you can re-compose them: `BARREL_SYNTAX_RESTRICTIONS`,
 `REACT_TYPE_IMPORT_PATHS`, `STATE_LIBRARY_IMPORT_PATTERNS` and

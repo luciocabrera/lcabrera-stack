@@ -60,8 +60,8 @@ describe('indexFindings', () => {
   it('reports a rule missing from the index and an index row with no file', () => {
     expect(
       indexFindings({
-        indexFile: 'AGENTS.md',
         indexed: ['.claude/rules/a.md', '.claude/rules/gone.md'],
+        indexFile: 'AGENTS.md',
         onDisk: ['.claude/rules/a.md', '.claude/rules/new.md'],
       }),
     ).toEqual([

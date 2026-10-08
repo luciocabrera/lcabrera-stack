@@ -10,7 +10,7 @@ import {
   testPlan,
 } from '../envelope-test-support.mjs';
 import { assembleEnvelope } from '../run-envelope.mjs';
-
+import { readTooledRun, tooledRunCounts } from './tooled-fixtures.mjs';
 import {
   agentPromptHash,
   fixtureTask,
@@ -19,7 +19,6 @@ import {
   verifierSubject,
   verifierTrial,
 } from './verifier-envelope.mjs';
-import { readTooledRun, tooledRunCounts } from './tooled-fixtures.mjs';
 
 const task = (suite) =>
   fixtureTask({

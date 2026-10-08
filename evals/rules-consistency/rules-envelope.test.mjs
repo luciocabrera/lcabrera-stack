@@ -8,7 +8,6 @@ import {
   testPlan,
 } from '../envelope-test-support.mjs';
 import { assembleEnvelope } from '../run-envelope.mjs';
-
 import { rulesRecords } from './rules-envelope.mjs';
 
 const TYPESCRIPT = '.claude/rules/typescript.md';
