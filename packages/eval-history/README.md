@@ -23,6 +23,17 @@ decides how the envelope is versioned.
   on `run_id`, so a run already stored is left alone.
 - `src/prices/` — the schema of `model-prices.json` and its upsert into
   `evals.model_price`.
+- `src/queries/` — the read functions the dashboard calls, one per reporting
+  view or function of `migrations/0002-reporting.sql`: `readTaskPassRates`
+  (`evals.v_task_pass_rate`), `readSubjectTrend` (`evals.v_subject_trend`),
+  `readFlakyTasks` (`evals.flaky_tasks(run_window)`, the plan's `v_flaky_tasks`, a
+  function so the window comes from `evals/regression.config.json`) and
+  `readRunComparison` (`evals.run_compare(a, b)`). Each builds its SQL in a
+  pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
+  the views beneath, names a column in `EXCLUDED_COLUMNS`
+  ([ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)).
+- `src/seed/` — a year of synthetic nightly history, about 15k trials, for
+  timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of
   [the plan's §6](../../docs/agents/planning/eval-history-plan.md#6-statistics-module):
   the Wilson interval, pass@k and pass^k, the baseline summary, the binary and
@@ -43,8 +54,11 @@ with that `validFrom`, so the old rows still cost the runs before it; changing
 the numbers of an existing entry corrects that row in place. `src/prices/`
 holds the schema the file must pass.
 
-Last, it grants `evals_writer` the privileges `EVALS_WRITER_ROLE` lists, in
-`src/migrate/migrate.constants.ts`, when the role exists. When it does not,
+Last, it grants `evals_writer` and `evals_reader` the privileges
+`EVALS_WRITER_ROLE` and `EVALS_READER_ROLE` list, in
+`src/migrate/migrate.constants.ts`, to each role that exists. The reader gets
+`usage` on schema `evals` and `select` on its tables and views, and nothing
+else: it is the role the dashboard connects as. When a role does not exist,
 the run prints the `create role` and `grant` statements and still exits 0:
 creating a role needs a privilege some hosts withhold, so that step is the
 operator's.
@@ -56,8 +70,16 @@ that is down only warns, and the file waits on disk for the next
 
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-The ingest test creates and drops a database of its own beside that one.
-Without the variable both skip and say why, except under `CI`, where they fail.
+The ingest test and the reporting test each create and drop a database of
+their own on the same server. The reporting test seeds the synthetic year into
+its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
+budget. Without the variable all three skip and say why, except under `CI`,
+where they fail.
+
+`vp run --filter @repo/eval-history seed:synthetic` migrates the database
+`EVALS_DATABASE_URL` names and writes the synthetic year into it. It refuses a
+database that already holds a run, so point it at an empty one, never at the
+history you keep.
 
 The source is TypeScript with erasable syntax only, so a plain `.mjs` runner
 imports it through `exports` with no build and no loader.
