@@ -4,6 +4,9 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./baseline/probeDatabase.service": "./src/baseline/probeDatabase.service.ts",
+    "./baseline/readBaseline.service": "./src/baseline/readBaseline.service.ts",
+    "./baseline/recordBaseline.service": "./src/baseline/recordBaseline.service.ts",
     "./envelope/envelope.constants": "./src/envelope/envelope.constants.ts",
     "./envelope/envelope.schema": "./src/envelope/envelope.schema.ts",
     "./envelope/envelope.types": "./src/envelope/envelope.types.ts",

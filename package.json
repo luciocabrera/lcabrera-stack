@@ -43,6 +43,7 @@
     "devkit:sync": "devkit sync",
     "docs:for-package": "repo-docs-for-package",
     "docs:verify": "repo-verify-docs-paths",
+    "evals:baseline": "node evals/run-baseline.mjs",
     "evals:ingest": "node evals/ingest-envelopes.mjs",
     "evals:migrate": "vp run --filter @repo/eval-history migrate",
     "evals:rules:verify": "node evals/rules-consistency/verify-rules-consistency.mjs",
