@@ -32,6 +32,10 @@ decides how the envelope is versioned.
   pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
   the views beneath, names a column in `EXCLUDED_COLUMNS`
   ([ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)).
+- `src/report/` — the comparison behind `vp run evals:report`: it reads two
+  runs from envelope files or from the database, refuses runs of two models
+  unless told otherwise, and renders the flipped tasks, both pass rates, cost,
+  duration and the changed hashes as markdown or JSON.
 - `src/seed/` — a year of synthetic nightly history, about 15k trials, for
   timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of

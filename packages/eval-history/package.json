@@ -33,6 +33,7 @@
     "./stats/summarize.util": "./src/stats/summarize.util.ts",
     "./stats/triggerPrecisionRecall.util": "./src/stats/triggerPrecisionRecall.util.ts",
     "./stats/wilson.util": "./src/stats/wilson.util.ts",
+    "./report/evalsReport.service": "./src/report/evalsReport.service.ts",
     "./queries/queries.constants": "./src/queries/queries.constants.ts",
     "./queries/queries.types": "./src/queries/queries.types.ts",
     "./queries/readFlakyTasks.service": "./src/queries/readFlakyTasks.service.ts",
