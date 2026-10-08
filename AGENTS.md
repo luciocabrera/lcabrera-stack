@@ -257,9 +257,10 @@ are the ones you would guess **wrong**:
 
 **The exception is a command `vp` does not wrap** — then reaching for pnpm (or
 `npx`) directly is correct, not a workaround, because there is nothing to route
-through `vp`. Two such cases exist today: `pnpm clean --lockfile` (there is no
-`vp clean`) and catalog updating via `taze`; both live in
-`scripts/deps-refresh.sh` (`vp run deps:refresh`). The test is mechanical — if
+through `vp`. The cases today: `pnpm clean --lockfile` (there is no
+`vp clean`) and catalog updating via `taze`, both in `scripts/deps-refresh.sh`
+(`vp run deps:refresh`), and `pnpm peers check` in the root `deps:peers` task
+(`vp pm` forwards no `peers` subcommand). The test is mechanical — if
 `vp` exposes the command, use `vp`; if it genuinely does not, pnpm-direct is
 fine. This is deliberately narrow: it does **not** license `pnpm install` /
 `pnpm add` / `pnpm dlx` where `vp install` / `vp add` / `vp dlx` exist. The
