@@ -22,6 +22,7 @@ import { readMigrations } from '../migrate/readMigrations.service.ts';
 import { readModelPrices } from '../prices/readModelPrices.service.ts';
 import { SYNTHETIC_PRIVATE_TEXT } from '../seed/seed.constants.ts';
 import { seedSyntheticHistory } from '../seed/seedSyntheticHistory.service.ts';
+import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { columnsNamed } from './columnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
 import { EXCLUDED_COLUMNS, REPORTING_RELATIONS } from './queries.constants.ts';
@@ -30,7 +31,6 @@ import { readRunComparison } from './readRunComparison.service.ts';
 import { readSubjectTrend } from './readSubjectTrend.service.ts';
 import { readTaskPassRates } from './readTaskPassRates.service.ts';
 import { runCompareQuery } from './runCompareQuery.util.ts';
-import { scratchConnections } from './scratchConnections.service.ts';
 import { subjectTrendQuery } from './subjectTrendQuery.util.ts';
 import { taskPassRatesQuery } from './taskPassRatesQuery.util.ts';
 

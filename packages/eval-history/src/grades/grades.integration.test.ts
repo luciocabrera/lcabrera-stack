@@ -19,7 +19,7 @@ import { ANNOTATION_KINDS } from '../annotations/annotations.constants.ts';
 import { recordAnnotation } from '../annotations/recordAnnotation.service.ts';
 import { applyMigrations } from '../migrate/applyMigrations.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
-import { scratchConnections } from '../queries/scratchConnections.service.ts';
+import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { judgeAgreement } from './judgeAgreement.util.ts';
 import { readJudgeAgreement } from './readJudgeAgreement.service.ts';
 import { recordHumanGrades } from './recordHumanGrades.service.ts';
@@ -59,6 +59,8 @@ insert into evals.eval_task_version (task_id, task_hash)
 select id, '${'2'.repeat(64)}' from evals.eval_task where task_key = 'skill-quality/unslop';
 insert into evals.eval_task_version (task_id, task_hash)
 select id, '${'3'.repeat(64)}' from evals.eval_task where task_key = 'skills/unslop/trigger-1';
+insert into evals.eval_task_version (task_id, task_hash, judge_prompt_hash)
+select id, '${'4'.repeat(64)}', '${JUDGE_PROMPT_HASH}' from evals.eval_task where task_key = 'skill-quality/unslop';
 insert into evals.eval_trial (run_id, task_version_id, subject_version_id, trial_index, outcome, queued_at)
 select '${RUN_ID}', task_version.id, (select id from evals.eval_subject_version), row_number() over (order by task_version.task_hash) - 1, 'pass', now()
 from evals.eval_task_version task_version;
@@ -113,7 +115,7 @@ describe.skipIf(!DATABASE_URL)(
   () => {
     const databaseName = `evals_grades_${randomUUID().replaceAll('-', '')}`;
     const { close, connect } = scratchConnections(DATABASE_URL ?? '');
-    const trials = { pinned: '', skills: '', unpinned: '' };
+    const trials = { blank: '', pinned: '', skills: '', unpinned: '' };
 
     beforeAll(async () => {
       const admin = await connect();
@@ -124,6 +126,7 @@ describe.skipIf(!DATABASE_URL)(
       await applyMigrations({ client, migrations: await readMigrations() });
       await client.query(FIXTURE_SQL);
       Object.assign(trials, {
+        blank: await trialIdOf({ client, taskHashDigit: '4' }),
         pinned: await trialIdOf({ client, taskHashDigit: '1' }),
         skills: await trialIdOf({ client, taskHashDigit: '3' }),
         unpinned: await trialIdOf({ client, taskHashDigit: '2' }),
@@ -144,9 +147,12 @@ describe.skipIf(!DATABASE_URL)(
         insertDetail({
           client,
           detail: qualityDetail(''),
-          trialId: trials.unpinned,
+          trialId: trials.blank,
         }),
-      ).rejects.toMatchObject({ code: '23514' });
+      ).rejects.toMatchObject({
+        code: '23514',
+        constraint: 'eval_trial_detail_quality_names_judge_model',
+      });
     });
 
     it('refuses a quality trial whose task version has no judge prompt hash', async () => {

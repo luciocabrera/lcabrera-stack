@@ -9,7 +9,7 @@ area:
   - packages/eval-history/src/grades/**
   - packages/eval-history/src/annotations/**
   - packages/eval-history/src/envelope/**
-  - packages/eval-history/src/queries/scratchConnections.service.ts
+  - packages/eval-history/src/testing/**
   - packages/eval-history/src/queries/reporting.integration.test.ts
   - packages/eval-history/scripts/annotate.mjs
   - packages/eval-history/scripts/grade.mjs

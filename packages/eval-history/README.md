@@ -48,6 +48,9 @@ decides how the envelope is versioned.
   toward n. The thresholds are not in the code: `loadRegressionConfig` reads
   them from [`evals/regression.config.json`](../../evals/regression.config.json)
   and rejects a file that fails `regressionConfigSchema`.
+- `src/testing/` — the scratch-database harness the integration tests share:
+  it connects to databases beside the one `EVALS_TEST_DATABASE_URL` names and
+  drops them, and the roles a test created, afterwards. No command imports it.
 
 `vp run evals:migrate` applies `migrations/` to the database
 `EVALS_MIGRATE_DATABASE_URL` names, connected as the migrating role, which
