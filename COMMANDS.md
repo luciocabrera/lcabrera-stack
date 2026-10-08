@@ -253,6 +253,7 @@ falls back to the estimate that reports simple code as a CRAP breach.
 | Command               | Runs                                                                                              |
 | --------------------- | ------------------------------------------------------------------------------------------------- |
 | `vp run deps:audit`   | the advisory gate — `vp pm audit --json` piped into `repo-verify-deps-audit`                      |
+| `vp run deps:peers`   | `pnpm peers check` — fails when any workspace has an unmet or out-of-range peer dependency        |
 | `vp run deps:refresh` | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → open a build(deps) PR |
 
 `deps:audit` fails on a known vulnerability at `moderate` or above that has no
@@ -265,6 +266,17 @@ fails rather than reporting clean. Raise the floor for one run with
 It runs in CI's Quality Gate and daily in `deps-audit.yml`, but deliberately not
 in the `pre-push` hook, which must work offline. What to do when it fires is
 [`docs/agents/dependency-advisories.md`](docs/agents/dependency-advisories.md).
+
+`deps:peers` exits non-zero when an installed package's peer range is not met
+by what the lockfile resolved. The exit code is the signal, not the listing:
+when several workspaces share one unmet peer, `pnpm peers check` can name fewer
+of them than have the problem, so read the listing as a sample. No
+other check sees an unmet peer — the type pass, the tests and the lint pass all
+run against whatever version was installed — so a hand-moved major can leave a
+plugin outside the range it was built for while every other gate stays green.
+`vp` does not wrap `pnpm peers`, so the task calls pnpm directly. It reads the
+installed tree and needs no registry, and runs in CI's Quality Gate and in
+`check:safe`.
 
 `deps:refresh` (`scripts/deps-refresh.sh`) bumps the pnpm catalog and every
 `package.json` to their latest in-range versions (TypeScript is held for a known
