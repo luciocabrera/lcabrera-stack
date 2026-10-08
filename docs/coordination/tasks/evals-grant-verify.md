@@ -2,7 +2,7 @@
 id: evals-grant-verify
 title: Report a grant as done only when the role holds the privilege
 owner: agent:claude
-status: active
+status: review
 branch: fix/1357-evals-grant-verify
 area:
   - packages/eval-history/src/migrate/**
@@ -11,7 +11,7 @@ area:
 started: 2026-10-08
 updated: 2026-10-08
 plan: (none)
-pr: (none)
+pr: #1364
 issue: #1357
 ---
 

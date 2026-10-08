@@ -5,6 +5,11 @@ export type EvalsRole = {
   readonly name: string;
 };
 
+export type LackingPrivilege = {
+  readonly object: string;
+  readonly privilege: string;
+};
+
 export type Migration = {
   readonly name: string;
   readonly sha256: string;
@@ -31,4 +36,9 @@ export type MigrationQuery = {
 export type RoleGrant = {
   readonly on: string;
   readonly privileges: string;
+};
+
+export type UngrantedRole = {
+  readonly lacking: readonly LackingPrivilege[];
+  readonly role: EvalsRole;
 };
