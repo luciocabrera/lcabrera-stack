@@ -11,11 +11,15 @@ governs:
 
 **Issue:** [#1347](https://github.com/luciocabrera/lcabrera-stack/issues/1347)
 
-**Amends:** [ADR-130](ADR-130-keep-eval-history-in-a-private-workspace-with-its-own-schema-and-migrator.md).
-Its "Two roles" paragraph says `evals_writer` owns the schema. The accurate
-statement is that `evals_writer` is granted privileges on it and does not own
-it. The rest of ADR-130 stands, including the reader role, the missing-role
-behaviour and the migrator, and its body keeps its original reasoning.
+**Amends:** [ADR-130](ADR-130-keep-eval-history-in-a-private-workspace-with-its-own-schema-and-migrator.md),
+in two places. Its "Two roles" paragraph says `evals_writer` owns the schema;
+here a separate migrating role owns it, and `evals_writer` is granted
+privileges on it. Its "One connection variable per role" paragraph names
+`EVALS_DATABASE_URL` for every writer command; here `evals:migrate` connects
+through its own `EVALS_MIGRATE_DATABASE_URL`, and `EVALS_DATABASE_URL` stays
+the writer's. The rest of ADR-130 stands, including the reader role, the
+missing-role behaviour and the migrator, and its body keeps its original
+reasoning.
 
 **Relates to:** [#1344](https://github.com/luciocabrera/lcabrera-stack/issues/1344)
 (the grants), [`docs/README.md`](../README.md) (the append-only rule that makes
@@ -30,51 +34,62 @@ says `vp run evals:migrate` "grants to the roles when they exist".
 implemented the second sentence. `EVALS_WRITER_ROLE` in
 `packages/eval-history/src/migrate/migrate.constants.ts` lists the privileges,
 and the migrator grants them on every run, after applying migrations.
-Ownership is never transferred.
 
-Transferring it means running `alter schema evals owner to evals_writer`, plus
-the same for every table. Postgres allows that only when the migrating role is
-a superuser or a member of `evals_writer`. A managed host may not grant that
-membership. ADR-130 gives the same constraint as its reason for not creating
-roles.
+ADR-130 also gives `EVALS_DATABASE_URL` to the writer, and `evals:migrate`
+read that same variable. So in the setup ADR-130 describes, the migrator
+connected as `evals_writer`, created every object as that role, and the writer
+owned them all. The grants were then grants of a role to itself.
 
-No current code path needs ownership. The writer inserts, updates, selects and
-deletes rows. It never alters or drops a table or the schema, and only the
-migrator changes the schema.
+Transferring ownership after the fact means running
+`alter schema evals owner to evals_writer`, plus the same for every table.
+Postgres allows that only when the migrating role is a superuser or a member of
+`evals_writer`. A managed host may not grant that membership. ADR-130 gives the
+same constraint as its reason for not creating roles.
+
+No current code path needs the writer to own anything. The writer inserts,
+updates, selects and deletes rows. It never alters or drops a table or the
+schema, and only the migrator changes the schema.
 
 ## Decision
 
-**`evals_writer` is granted privileges on schema `evals` and does not own it.**
+**A separate migrating role owns the `evals` objects.** `vp run evals:migrate`
+connects through `EVALS_MIGRATE_DATABASE_URL`, validated by its own Zod schema,
+and does not read `EVALS_DATABASE_URL`. With the variable unset or not a
+`postgres://` URL, it exits 1 naming it, before connecting. The role it
+connects as creates the schema and every object in it, and so owns them.
+
+**`evals_writer` is granted privileges on schema `evals` and owns no object
+in it.** It connects through `EVALS_DATABASE_URL`, which ingest reads.
 `EVALS_WRITER_ROLE` is the one list of what it holds:
 
 - `usage, create` on schema `evals`
 - `select, insert, update, delete` on all tables in schema `evals`
 
-The schema and its tables are owned by whichever role `vp run evals:migrate`
-connects as through `EVALS_DATABASE_URL`, because that role creates them. When
-that connection is itself `evals_writer`, the role owns what it created. That
-ownership comes from the connection, not from anything the migrator does.
-
 The migrator re-applies the grants on every run, after the migrations, so a
 table a new migration adds is covered the run it is created.
+`migrateEvals.integration.test.ts` migrates as a scratch migrating role and
+asserts that the writer owns nothing in the schema, can insert, and fails
+`alter` and `drop` with "must be owner".
 
 ## Consequences
 
+- An operator provisions two roles, not one: the migrating role, with `create`
+  on the database, and `evals_writer`. Each has its own connection string.
 - The migrator needs no role membership on any host. It grants on objects its
   own connection created, which the creating role is always allowed to do.
-- `evals:migrate` must connect as the role that created the `evals` objects,
-  or a role that inherits its privileges. Running it as any other role is
-  unsupported. A run that holds `evals_writer`'s privileges can report a grant
-  that changed nothing, which
+- `evals:migrate` connects as the role that created the `evals` objects.
+  Running it as any other role is unsupported. A run that holds
+  `evals_writer`'s privileges can report a grant that changed nothing, which
   [#1357](https://github.com/luciocabrera/lcabrera-stack/issues/1357) tracks.
-- `evals_writer` cannot `alter` or `drop` the tables or the schema unless it is
-  also the role the migrator connects as. Work that needs that goes through a
-  migration.
+- `evals_writer` cannot `alter` or `drop` the tables or the schema. Work that
+  needs that goes through a migration.
 - A table created outside `evals:migrate` is not covered by the table grant
   until the next run. `all tables in schema` covers only tables that exist when
   the grant runs, and no default privileges are set.
-- The `create role` and `grant` statements the migrator prints for a missing
-  role are the full setup. An operator has no `alter ... owner` step to run.
+- For a missing `evals_writer`, the migrator prints `create role ... login`
+  and the grants. That statement sets no password: the operator sets the
+  credential that `EVALS_DATABASE_URL` will carry. There is no
+  `alter ... owner` step.
 
 ## Alternatives considered
 
@@ -82,6 +97,9 @@ table a new migration adds is covered the run it is created.
   Rejected: it needs the migrating role to be a member of `evals_writer`, which
   a managed host may not allow, and it buys `alter` and `drop`, which no code
   path uses.
+- **Keep one variable and let the writer migrate, so it owns the objects.**
+  Rejected: the role ingest runs as could then alter and drop the history, and
+  the grants `EVALS_WRITER_ROLE` lists would describe nothing.
 - **Keep ADR-130's wording and treat the grants as an interim step.**
   Rejected: the record and the code would keep describing different privileges,
   and nothing would decide which one is wrong.
@@ -95,7 +113,9 @@ table a new migration adds is covered the run it is created.
 - [ADR-130](ADR-130-keep-eval-history-in-a-private-workspace-with-its-own-schema-and-migrator.md)
 - [#1344](https://github.com/luciocabrera/lcabrera-stack/issues/1344),
   [#1346](https://github.com/luciocabrera/lcabrera-stack/pull/1346),
-  [#1347](https://github.com/luciocabrera/lcabrera-stack/issues/1347)
-- `packages/eval-history/src/migrate/migrate.constants.ts`
+  [#1347](https://github.com/luciocabrera/lcabrera-stack/issues/1347),
+  [#1357](https://github.com/luciocabrera/lcabrera-stack/issues/1357)
+- `packages/eval-history/src/migrate/migrate.constants.ts`,
+  `packages/eval-history/src/migrate/evalsMigrateDatabaseEnv.schema.ts`
 - [PostgreSQL: `ALTER SCHEMA`](https://www.postgresql.org/docs/current/sql-alterschema.html)
   (who may change an owner)

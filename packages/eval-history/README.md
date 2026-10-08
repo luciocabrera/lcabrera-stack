@@ -28,8 +28,13 @@ decides how the envelope is versioned.
   and rejects a file that fails `regressionConfigSchema`.
 
 `vp run evals:migrate` applies `migrations/` to the database
-`EVALS_DATABASE_URL` names. Locally that is a database named `eval_history` on
-the compose Postgres, created once with `create database eval_history`.
+`EVALS_MIGRATE_DATABASE_URL` names, connected as the migrating role, which
+needs `create` on that database and owns every object it creates. It does not
+read `EVALS_DATABASE_URL`, which is `evals_writer`'s and is what ingest uses;
+with only that one set, the run exits 1 naming the missing variable
+([ADR-134](../../docs/decisions/ADR-134-the-eval-writer-role-is-granted-on-the-evals-schema-not-its-owner.md)).
+Locally that is a database named `eval_history` on the compose Postgres,
+created once with `create database eval_history`.
 
 Every run then upserts [`model-prices.json`](./model-prices.json) into
 `evals.model_price`, keyed on `modelId` and `validFrom`. Take the prices from
@@ -42,7 +47,9 @@ Last, it grants `evals_writer` the privileges `EVALS_WRITER_ROLE` lists, in
 `src/migrate/migrate.constants.ts`, when the role exists. When it does not,
 the run prints the `create role` and `grant` statements and still exits 0:
 creating a role needs a privilege some hosts withhold, so that step is the
-operator's.
+operator's. The printed `create role` sets no password; set the credential
+`EVALS_DATABASE_URL` will carry. `evals_writer` owns nothing in schema `evals`,
+so it cannot alter or drop what the migrating role created.
 
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.

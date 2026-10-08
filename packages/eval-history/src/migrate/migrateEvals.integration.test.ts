@@ -7,7 +7,8 @@
  * `evals` in the database EVALS_TEST_DATABASE_URL names and drops it before
  * every test, so point it at a scratch database. Roles are cluster-wide, so the
  * grant tests create a role under a random name and drop it afterwards rather
- * than touch `evals_writer`. Unset, it skips locally and fails under CI.
+ * than touch `evals_writer`, and the ownership test migrates as a scratch
+ * migrating role the same way. Unset, it skips locally and fails under CI.
  */
 
 import { randomUUID } from 'node:crypto';
@@ -158,6 +159,44 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     return rows;
   };
 
+  const migratorRoles: string[] = [];
+
+  const scratchMigrator = async () => {
+    const name = `evals_migrator_test_${randomUUID().replaceAll('-', '')}`;
+    const admin = await connect();
+    const { rows } = await admin.query<{ readonly name: string }>(
+      'select current_database() as name',
+    );
+
+    migratorRoles.push(name);
+    await admin.query(`create role "${name}" nologin`);
+    await admin.query(
+      `grant create on database "${rows[0]?.name ?? ''}" to "${name}"`,
+    );
+
+    return name;
+  };
+
+  const asRole = async ({
+    role,
+    sql,
+  }: {
+    readonly role: string;
+    readonly sql: string;
+  }) => {
+    const client = await connect();
+
+    await client.query('begin');
+
+    try {
+      await client.query(`set local role "${role}"`);
+
+      return await client.query(sql);
+    } finally {
+      await client.query('rollback');
+    }
+  };
+
   afterAll(async () => {
     const client = await connect();
 
@@ -165,6 +204,12 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     await Promise.all(
       scratchRoles.map((name) => client.query(`drop role if exists "${name}"`)),
     );
+
+    for (const name of migratorRoles) {
+      await client.query(`drop owned by "${name}"`);
+      await client.query(`drop role "${name}"`);
+    }
+
     await Promise.all(clients.map((connection) => connection.end()));
   });
 
@@ -374,6 +419,61 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
 
     await admin.query('rollback');
     expect(rows).toHaveLength(1);
+  });
+
+  it('leaves the writer owning nothing when a separate role migrates', async () => {
+    const migrator = await scratchMigrator();
+    const writer = scratchRole();
+    const admin = await connect();
+
+    await admin.query(`create role "${writer.name}" nologin`);
+    const client = await connect();
+
+    await client.query(`set role "${migrator}"`);
+    const result = await migrateEvals({
+      client,
+      migrations: await readMigrations(),
+      prices: await readModelPrices(),
+      roles: [writer],
+    });
+
+    expect(result.granted.map(({ name }) => name)).toEqual([writer.name]);
+
+    const ownersSql = `
+      select nspowner::regrole::text as value from pg_namespace where nspname = 'evals'
+      union all
+      select c.relowner::regrole::text from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'evals'
+      union all
+      select t.typowner::regrole::text from pg_type t join pg_namespace n on n.oid = t.typnamespace where n.nspname = 'evals'`;
+
+    expect(new Set(await column(ownersSql))).toEqual(new Set([migrator]));
+    expect(
+      await column(
+        `select c.relname as value from pg_class c join pg_namespace n on n.oid = c.relnamespace where n.nspname = 'evals' and c.relkind = 'r' and has_table_privilege('${writer.name}', c.oid, 'INSERT') order by 1`,
+      ),
+    ).toEqual(expect.arrayContaining(INGEST_TABLES));
+
+    const { rows } = await asRole({
+      role: writer.name,
+      sql: "insert into evals.eval_subject (kind, name, path) values ('skill', 'probe', 'probe/SKILL.md') returning id",
+    });
+
+    expect(rows).toHaveLength(1);
+    await expect(
+      asRole({
+        role: writer.name,
+        sql: 'alter table evals.eval_trial add column probe integer',
+      }),
+    ).rejects.toThrow(/must be owner of table eval_trial/);
+    await expect(
+      asRole({ role: writer.name, sql: 'drop table evals.eval_trial' }),
+    ).rejects.toThrow(/must be owner of table eval_trial/);
+    await expect(
+      asRole({ role: writer.name, sql: 'alter schema evals rename to probe' }),
+    ).rejects.toThrow(/must be owner of schema evals/);
+    await expect(
+      asRole({ role: writer.name, sql: 'drop schema evals cascade' }),
+    ).rejects.toThrow(/must be owner of schema evals/);
   });
 
   it('reports a missing role instead of failing', async () => {
