@@ -16,6 +16,11 @@ decides how the envelope is versioned.
 - `src/migrate/` and `migrations/` — the migrator ADR-130 decides and the
   ordered SQL files it applies. A fix to an applied file is a new file: the
   migrator refuses to run while an applied one has changed.
+- `src/ingest/` — the ingester behind `vp run evals:ingest`: it finds
+  envelopes under the paths it is given, brings one written a version earlier
+  up to date through its upcaster in `ENVELOPE_UPCASTERS` and rejects any
+  other version by name (ADR-131), and stores each run in one transaction keyed
+  on `run_id`, so a run already stored is left alone.
 - `src/prices/` — the schema of `model-prices.json` and its upsert into
   `evals.model_price`.
 - `src/queries/` — the read functions the dashboard calls, one per reporting
@@ -58,12 +63,18 @@ the run prints the `create role` and `grant` statements and still exits 0:
 creating a role needs a privilege some hosts withhold, so that step is the
 operator's.
 
+`vp run evals:ingest` reads the same variable. Every eval runner calls it on
+its own envelope with `--quiet-unreachable`, so an unset variable or a database
+that is down only warns, and the file waits on disk for the next
+`vp run evals:ingest`.
+
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-The reporting test creates and drops a database of its own on the same server,
-seeds the synthetic year into it and times every query with `EXPLAIN ANALYZE`
-against a 500 ms budget. Without the variable both skip and say why, except
-under `CI`, where they fail.
+The ingest test and the reporting test each create and drop a database of
+their own on the same server. The reporting test seeds the synthetic year into
+its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
+budget. Without the variable all three skip and say why, except under `CI`,
+where they fail.
 
 `vp run --filter @repo/eval-history seed:synthetic` migrates the database
 `EVALS_DATABASE_URL` names and writes the synthetic year into it. It refuses a
