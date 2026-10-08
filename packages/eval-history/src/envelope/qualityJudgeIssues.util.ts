@@ -25,7 +25,7 @@ export const qualityJudgeIssues = ({
           },
         ]
       : []),
-    ...(task && task.judge_prompt_hash === null
+    ...(task?.judge_prompt_hash === null
       ? [
           {
             code: 'custom' as const,

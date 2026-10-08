@@ -1,5 +1,7 @@
 import pg from 'pg';
 
+import { inSequence } from '../ingest/inSequence.service.ts';
+
 type CloseArgs = {
   readonly databases?: readonly string[];
   readonly roles?: readonly string[];
@@ -29,14 +31,18 @@ export const scratchConnections = (databaseUrl: string) => {
 
     await admin.connect();
 
-    try {
-      for (const database of databases) {
-        await admin.query(`drop database if exists "${database}" with (force)`);
-      }
+    const statements = [
+      ...databases.map(
+        (database) => `drop database if exists "${database}" with (force)`,
+      ),
+      ...roles.map((role) => `drop role if exists "${role}"`),
+    ];
 
-      for (const role of roles) {
-        await admin.query(`drop role if exists "${role}"`);
-      }
+    try {
+      await inSequence({
+        items: statements,
+        step: (statement) => admin.query(statement),
+      });
     } finally {
       await admin.end();
     }

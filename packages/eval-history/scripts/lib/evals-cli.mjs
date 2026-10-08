@@ -1,10 +1,14 @@
 /**
  * What the eval-history commands that write by hand share: the argument list
  * without the separator `vp run` passes through, the author a note or grade is
- * recorded under, and a client on the database EVALS_DATABASE_URL names.
+ * recorded under, and a client on the database EVALS_DATABASE_URL names. Git
+ * runs from a fixed system directory with PATH pinned to those directories,
+ * as `@lcabrera/repo-standards`'s git-exec does, so a writable PATH entry
+ * cannot shadow it.
  * Usage: imported by `annotate.mjs` and `grade.mjs`.
  */
 import { execFileSync } from 'node:child_process';
+import { existsSync } from 'node:fs';
 import { userInfo } from 'node:os';
 import process from 'node:process';
 import pg from 'pg';
@@ -17,10 +21,20 @@ export const cliArguments = () => {
   return args[0] === '--' ? args.slice(1) : args;
 };
 
+const TRUSTED_DIRECTORIES = ['/usr/local/bin', '/usr/bin', '/bin'];
+
 const gitEmail = () => {
+  const git = TRUSTED_DIRECTORIES.map((directory) => `${directory}/git`).find(
+    (path) => existsSync(path),
+  );
+  if (git === undefined) {
+    return;
+  }
   try {
-    return execFileSync('git', ['config', 'user.email'], {
+    return execFileSync(git, ['config', 'user.email'], {
       encoding: 'utf8',
+      env: { ...process.env, PATH: TRUSTED_DIRECTORIES.join(':') },
+      stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
   } catch {
     return;

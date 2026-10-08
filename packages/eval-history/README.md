@@ -108,7 +108,8 @@ history you keep.
 ## Grading the judge
 
 `migrations/0003-grades-and-annotations.sql` adds `evals.eval_human_grade`,
-one score from 1 to 5 per trial, rubric dimension and grader, and
+one score from 1 to 5 per trial, rubric dimension and grader, deleted with
+its trial like every other trial child, and
 `evals.v_judge_agreement`, which puts each hand grade next to the judge's
 score for the same trial and dimension, with the judge model and judge prompt
 hash it was given under. The same migration makes the database refuse a

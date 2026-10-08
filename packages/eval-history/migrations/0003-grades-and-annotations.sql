@@ -1,5 +1,5 @@
 create table evals.eval_human_grade (
-  trial_id bigint not null references evals.eval_trial (id),
+  trial_id bigint not null references evals.eval_trial (id) on delete cascade,
   dimension text not null,
   score smallint not null check (score between 1 and 5),
   grader text not null,

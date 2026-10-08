@@ -257,5 +257,26 @@ describe.skipIf(!DATABASE_URL)(
       expect(recorded).toMatchObject({ kind: 'model-change' });
       expect(recorded.at.toISOString()).toBe('2026-10-08T09:00:00.000Z');
     });
+
+    it("removes a trial's hand grades when the trial is deleted", async () => {
+      const client = await connect(databaseName);
+      const gradesOf = async () => {
+        const { rows } = await client.query<{ readonly count: number }>({
+          text: 'select count(*)::integer as count from evals.eval_human_grade where trial_id = $1',
+          values: [trials.pinned],
+        });
+
+        return rows[0]?.count;
+      };
+
+      expect(await gradesOf()).toBeGreaterThan(0);
+
+      await client.query({
+        text: 'delete from evals.eval_trial where id = $1',
+        values: [trials.pinned],
+      });
+
+      expect(await gradesOf()).toBe(0);
+    });
   },
 );
