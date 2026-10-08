@@ -1,6 +1,7 @@
 import type { EnvelopeShape } from './envelope.types.ts';
 
 import { DETAIL_SCHEMA_BY_SUITE } from './envelope.constants.ts';
+import { qualityJudgeIssues } from './qualityJudgeIssues.util.ts';
 
 export const envelopeConsistencyIssues = ({
   run,
@@ -8,7 +9,7 @@ export const envelopeConsistencyIssues = ({
   trials,
 }: EnvelopeShape) => {
   const expectedDetail = DETAIL_SCHEMA_BY_SUITE[run.suite];
-  const taskKeys = new Set(tasks.map(({ task_key }) => task_key));
+  const tasksByKey = new Map(tasks.map((task) => [task.task_key, task]));
 
   return trials.flatMap(({ detail, error_class, outcome, task_key }, index) => [
     ...(detail.schema === expectedDetail
@@ -20,7 +21,7 @@ export const envelopeConsistencyIssues = ({
             path: ['trials', index, 'detail', 'schema'],
           },
         ]),
-    ...(taskKeys.has(task_key)
+    ...(tasksByKey.has(task_key)
       ? []
       : [
           {
@@ -38,5 +39,6 @@ export const envelopeConsistencyIssues = ({
           },
         ]
       : []),
+    ...qualityJudgeIssues({ detail, index, task: tasksByKey.get(task_key) }),
   ]);
 };
