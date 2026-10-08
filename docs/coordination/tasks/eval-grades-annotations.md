@@ -14,6 +14,7 @@ area:
   - packages/eval-history/scripts/annotate.mjs
   - packages/eval-history/scripts/grade.mjs
   - packages/eval-history/scripts/lib/**
+  - packages/eval-history/scripts/seed-synthetic-history.mjs
   - packages/eval-history/package.json
   - packages/eval-history/README.md
   - package.json

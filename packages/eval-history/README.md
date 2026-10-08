@@ -50,8 +50,13 @@ decides how the envelope is versioned.
   and rejects a file that fails `regressionConfigSchema`.
 
 `vp run evals:migrate` applies `migrations/` to the database
-`EVALS_DATABASE_URL` names. Locally that is a database named `eval_history` on
-the compose Postgres, created once with `create database eval_history`.
+`EVALS_MIGRATE_DATABASE_URL` names, connected as the migrating role, which
+needs `create` on that database and owns every object it creates. It does not
+read `EVALS_DATABASE_URL`, which is `evals_writer`'s and is what ingest uses;
+with only that one set, the run exits 1 naming the missing variable
+([ADR-134](../../docs/decisions/ADR-134-the-eval-writer-role-is-granted-on-the-evals-schema-not-its-owner.md)).
+Locally that is a database named `eval_history` on the compose Postgres,
+created once with `create database eval_history`.
 
 Every run then upserts [`model-prices.json`](./model-prices.json) into
 `evals.model_price`, keyed on `modelId` and `validFrom`. Take the prices from
@@ -62,28 +67,38 @@ holds the schema the file must pass.
 
 Last, it grants `evals_writer` and `evals_reader` the privileges
 `EVALS_WRITER_ROLE` and `EVALS_READER_ROLE` list, in
-`src/migrate/migrate.constants.ts`, to each role that exists. The reader gets
-`usage` on schema `evals` and `select` on its tables and views, and nothing
-else: it is the role the dashboard connects as. When a role does not exist,
+`src/migrate/migrate.constants.ts`, to each role that exists, after revoking
+whatever else the owner granted that role on the same objects, so for grants
+made by the owner or a superuser the lists are exactly what each role ends up
+with. A grant made by a non-owner holding grant option is left alone. The writer gets `usage` on schema `evals`, with no
+`create`, and DML on its tables. The reader gets `usage` on schema `evals` and
+`select` on its tables and views, and nothing else: it is the role the
+dashboard connects as. When a role does not exist,
 the run prints the `create role` and `grant` statements and still exits 0:
 creating a role needs a privilege some hosts withhold, so that step is the
-operator's.
+operator's. The printed `create role` sets no password; set the credential
+the role's connection string will carry, `EVALS_DATABASE_URL` for the writer.
+Neither role owns anything in schema `evals` or can create in it, so neither
+can alter or drop what the migrating role created.
 
-`vp run evals:ingest` reads the same variable. Every eval runner calls it on
+`vp run evals:ingest` reads `EVALS_DATABASE_URL` and connects as
+`evals_writer`. Every eval runner calls it on
 its own envelope with `--quiet-unreachable`, so an unset variable or a database
 that is down only warns, and the file waits on disk for the next
 `vp run evals:ingest`.
 
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-The ingest test and the reporting test each create and drop a database of
+The ingest, reporting and grade tests each create and drop a database of
 their own on the same server. The reporting test seeds the synthetic year into
 its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
-budget. Without the variable all three skip and say why, except under `CI`,
-where they fail.
+budget. Without the variable every one of them skips and says why, except
+under `CI`, where they fail.
 
-`vp run --filter @repo/eval-history seed:synthetic` migrates the database
-`EVALS_DATABASE_URL` names and writes the synthetic year into it. It refuses a
+`vp run --filter @repo/eval-history seed:synthetic` migrates and grants
+through `EVALS_MIGRATE_DATABASE_URL`, as `evals:migrate` does, then writes the
+synthetic year as the writer through `EVALS_DATABASE_URL`. It needs both and
+exits 1 naming whichever is missing. It refuses a
 database that already holds a run, so point it at an empty one, never at the
 history you keep.
 
@@ -103,6 +118,11 @@ earlier score. It accepts only a trial with a quality judgement and only the
 dimensions the judge scored there, and when no `--score` is given it lists
 them without showing the judge's scores. The grader is `--grader`, else the
 GitHub actor, else the local part of git's `user.email`.
+
+`evals:grade` and `evals:annotate` read `EVALS_DATABASE_URL` and connect as
+`evals_writer`; the `select`, `insert` and `update` that role holds on the
+tables are all they need. The judge-pin trigger runs as the writing role and
+reads only `evals.eval_trial` and `evals.eval_task_version`.
 
 Agreement is the share of graded scores equal to the judge's, reported per
 judge model and judge prompt hash, because a change to either is a different
