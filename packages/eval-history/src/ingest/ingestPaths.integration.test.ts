@@ -26,12 +26,15 @@ import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { applyMigrations } from '../migrate/applyMigrations.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
+import { envelopeFileSystem } from './envelopeFileSystem.util.ts';
 import { ingestPaths } from './ingestPaths.service.ts';
-import { memoryFileSystem } from './memoryFileSystem.util.ts';
+import { integrationDatabase } from './integrationDatabase.util.ts';
 
-const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
-const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
-const SCRATCH = `evals_ingest_${String(process.pid)}_${String(Date.now())}`;
+const {
+  scratch: SCRATCH,
+  scratchUrl: connectionString,
+  url: DATABASE_URL,
+} = integrationDatabase({ label: 'ingest' });
 const UNREACHABLE_URL = 'postgres://nobody@127.0.0.1:1/evals';
 const TASKS = 12;
 const TRIALS_PER_TASK = 3;
@@ -82,33 +85,7 @@ const skillsRun = (runId = randomUUID()): RunEnvelope => {
   };
 };
 
-const filesOf = (envelopes: readonly RunEnvelope[]) =>
-  Object.fromEntries(
-    envelopes.map((envelope) => [
-      `/results/skills/${envelope.run.run_id}.json`,
-      JSON.stringify(envelope),
-    ]),
-  );
-
-if (!DATABASE_URL && !IS_CI) {
-  process.stderr.write(
-    'Skipping the Postgres ingest tests: EVALS_TEST_DATABASE_URL is unset.\n',
-  );
-}
-
-it.runIf(IS_CI)('has a database to ingest into under CI', () => {
-  expect(
-    DATABASE_URL,
-    'EVALS_TEST_DATABASE_URL must be set under CI',
-  ).toBeTruthy();
-});
-
 describe.skipIf(!DATABASE_URL)('ingestPaths against Postgres', () => {
-  const scratchUrl = new URL(DATABASE_URL ?? 'postgres://localhost');
-
-  scratchUrl.pathname = `/${SCRATCH}`;
-
-  const connectionString = scratchUrl.href;
   const admin = new pg.Client({ connectionString: DATABASE_URL });
   const client = new pg.Client({ connectionString });
   type IngestArgs = {
@@ -119,7 +96,7 @@ describe.skipIf(!DATABASE_URL)('ingestPaths against Postgres', () => {
   const ingest = async ({ envelopes, url = connectionString }: IngestArgs) => {
     const summary = await ingestPaths({
       connectionString: url,
-      fileSystem: memoryFileSystem(filesOf(envelopes)),
+      fileSystem: envelopeFileSystem(envelopes),
       paths: ['/results'],
       quietUnreachable: true,
     });

@@ -27,6 +27,7 @@ import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
 import {
   actorOf,
   assembleEnvelope,
+  baselineIdOf,
   branchOf,
   envelopeProblems,
   environmentOf,
@@ -52,6 +53,7 @@ export const runIdentity = ({ env = process.env, now = Date.now() } = {}) => ({
     env,
     user: userInfo().username,
   }),
+  baseline_id: baselineIdOf(env),
   branch: branchOf({ env, head: git(['rev-parse', '--abbrev-ref', 'HEAD']) }),
   env: environmentOf({
     arch: process.arch,

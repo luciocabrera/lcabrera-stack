@@ -11,6 +11,7 @@ import {
 import {
   actorOf,
   assembleEnvelope,
+  baselineIdOf,
   branchOf,
   envelopeProblems,
   passRateLine,
@@ -39,6 +40,24 @@ describe('triggerOf', () => {
       triggerOf({ GITHUB_ACTIONS: 'true', GITHUB_EVENT_NAME: 'merge_group' }),
     ).toBe('ci-push');
     expect(triggerOf({ GITHUB_ACTIONS: 'true' })).toBe('ci-manual');
+  });
+
+  it('is baseline whenever a baseline id is set, in CI or not', () => {
+    const baseline = {
+      EVALS_BASELINE_ID: 'b8f1c0de-0000-4000-8000-000000000001',
+    };
+
+    expect(triggerOf(baseline)).toBe('baseline');
+    expect(
+      triggerOf({
+        ...baseline,
+        GITHUB_ACTIONS: 'true',
+        GITHUB_EVENT_NAME: 'push',
+      }),
+    ).toBe('baseline');
+    expect(baselineIdOf(baseline)).toBe(baseline.EVALS_BASELINE_ID);
+    expect(baselineIdOf({ EVALS_BASELINE_ID: '' })).toBeNull();
+    expect(baselineIdOf({})).toBeNull();
   });
 });
 
@@ -287,12 +306,40 @@ describe('assembleEnvelope', () => {
     expect(parseEnvelope(envelope).ok).toBe(true);
     expect(envelope).toMatchObject({
       run: {
+        baseline_id: null,
         finished_at: '2026-10-06T09:00:05.000Z',
         sdk_version: '0.3.289',
         status: 'partial',
         totals: { duration_ms: 5000, trials: 0 },
       },
       schema_version: 1,
+    });
+  });
+});
+
+describe('assembleEnvelope under a baseline', () => {
+  it('keeps the baseline id and trigger the identity carries', () => {
+    const baselineId = 'b8f1c0de-0000-4000-8000-000000000001';
+    const envelope = assembleEnvelope({
+      finishedAt: STARTED_AT + 5000,
+      identity: {
+        ...testIdentity,
+        baseline_id: baselineId,
+        trigger: 'baseline',
+      },
+      plan: testPlan({
+        settings: runSettings({ argv: [], concurrency: 4, runs: 3 }),
+        suite: 'rules-consistency',
+      }),
+      regressionConfig: TEST_REGRESSION_CONFIG,
+      status: 'complete',
+      trials: [],
+    });
+
+    expect(parseEnvelope(envelope).ok).toBe(true);
+    expect(envelope.run).toMatchObject({
+      baseline_id: baselineId,
+      trigger: 'baseline',
     });
   });
 });

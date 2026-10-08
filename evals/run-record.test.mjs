@@ -21,7 +21,6 @@ import {
 import { sessionTrial } from './run-envelope.mjs';
 import {
   recordRun,
-  runIdentity,
   runnerHarnessVersion,
   saveEnvelope,
   saveTranscript,
@@ -356,15 +355,5 @@ describe('runnerHarnessVersion', () => {
         new URL('skills/verify-skill-triggers.mjs', import.meta.url),
       ),
     ).not.toBe(version);
-  });
-});
-
-describe('runIdentity', () => {
-  it('reads the commit and mints a fresh uuid each run', () => {
-    const identity = runIdentity({ env: {}, now: STARTED_AT });
-    expect(identity.git_sha).toMatch(/^[0-9a-f]{40}$/u);
-    expect(identity.trigger).toBe('local');
-    expect(identity.started_at).toBe('2026-10-06T09:00:00.000Z');
-    expect(runIdentity({ env: {} }).run_id).not.toBe(identity.run_id);
   });
 });

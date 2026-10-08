@@ -6,6 +6,13 @@ decides why it exists and why it never ships, and
 [ADR-131](../../docs/decisions/ADR-131-version-the-eval-run-envelope-and-accept-the-previous-version.md)
 decides how the envelope is versioned.
 
+- `src/baseline/` — the A/A baseline behind `vp run evals:baseline`:
+  `aggregateBaseline` turns one baseline's run envelopes into the mean and
+  sample standard deviation per suite, model and subject. It leaves out a run
+  that is partial, dirty or calls no model, and records nothing for a baseline
+  spanning two commits or models. `writeBaseline` stores the rows in
+  `evals.eval_baseline` in one transaction, and `readBaseline` reads back the
+  latest row per subject for a suite and model.
 - `src/envelope/` — the run envelope as a Zod schema, the validator, the
   emitted `envelope.schema.json`, and one example envelope per suite under
   `fixtures/`.
@@ -70,10 +77,10 @@ that is down only warns, and the file waits on disk for the next
 
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-The ingest test and the reporting test each create and drop a database of
+The ingest, baseline and reporting tests each create and drop a database of
 their own on the same server. The reporting test seeds the synthetic year into
 its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
-budget. Without the variable all three skip and say why, except under `CI`,
+budget. Without the variable all four skip and say why, except under `CI`,
 where they fail.
 
 `vp run --filter @repo/eval-history seed:synthetic` migrates the database
