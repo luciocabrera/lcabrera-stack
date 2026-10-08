@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { inSequence } from './inSequence.util.ts';
+import { inSequence } from './inSequence.service.ts';
 
 const sleep = async (delay: number) =>
   new Promise((resolve) => {

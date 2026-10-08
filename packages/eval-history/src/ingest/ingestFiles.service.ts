@@ -7,7 +7,7 @@ import type {
 import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
 import { errorReason } from './errorReason.util.ts';
 import { ingestEnvelope } from './ingestEnvelope.service.ts';
-import { inSequence } from './inSequence.util.ts';
+import { inSequence } from './inSequence.service.ts';
 import { readEnvelopeFile } from './readEnvelopeFile.service.ts';
 
 type Indexed = {

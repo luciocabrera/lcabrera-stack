@@ -6,8 +6,12 @@ type InSequenceArgs<Item, Result> = {
 export const inSequence = async <Item, Result>({
   items,
   step,
-}: InSequenceArgs<Item, Result>) =>
-  items.reduce<Promise<readonly Result[]>>(
-    async (previous, item) => [...(await previous), await step(item)],
-    Promise.resolve([]),
-  );
+}: InSequenceArgs<Item, Result>) => {
+  const results: Result[] = [];
+
+  for (const item of items) {
+    results.push(await step(item));
+  }
+
+  return results;
+};

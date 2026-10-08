@@ -11,7 +11,7 @@ import {
   UPSERT_SUBJECT_SQL,
   UPSERT_TASK_SQL,
 } from './ingest.constants.ts';
-import { inSequence } from './inSequence.util.ts';
+import { inSequence } from './inSequence.service.ts';
 
 type IngestEnvelopeArgs = {
   readonly client: IngestClient;
