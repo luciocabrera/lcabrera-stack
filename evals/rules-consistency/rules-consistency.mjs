@@ -7,7 +7,6 @@
  * Usage: imported by `verify-rules-consistency.mjs`.
  */
 import { matchesGlob } from 'node:path';
-
 import { parse } from 'yaml';
 
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---/;
@@ -37,10 +36,10 @@ const sectionLines = (markdown, heading) => {
 export const indexedRules = (agentsMarkdown, heading) =>
   sectionLines(agentsMarkdown, heading)
     .filter((line) => line.startsWith('|'))
-    .map((line) => RULE_REFERENCE.exec(line.split('|')[1] ?? '')?.[1])
+    .map((line) => RULE_REFERENCE.exec(line.split('|', 2)[1] ?? '')?.[1])
     .filter((label) => label !== undefined);
 
-export const indexFindings = ({ indexed, onDisk, indexFile }) => {
+export const indexFindings = ({ indexed, indexFile, onDisk }) => {
   const indexedSet = new Set(indexed);
   const onDiskSet = new Set(onDisk);
   const unindexed = onDisk
@@ -55,24 +54,24 @@ export const indexFindings = ({ indexed, onDisk, indexFile }) => {
 const matchesAny = (file, globs) =>
   globs.some((glob) => matchesGlob(file, glob));
 
-export const coverage = ({ rules, files }) =>
+export const coverage = ({ files, rules }) =>
   new Map(
-    rules.map(({ label, globs }) => [
+    rules.map(({ globs, label }) => [
       label,
       files.filter((file) => matchesAny(file, globs)),
     ]),
   );
 
-export const coverageFindings = ({ rules, covered }) =>
+export const coverageFindings = ({ covered, rules }) =>
   rules
     .filter(({ label }) => (covered.get(label) ?? []).length === 0)
-    .map(({ label, globs }) =>
+    .map(({ globs, label }) =>
       globs.length === 0
         ? `${label} declares no paths, so it never loads`
         : `${label} matches no tracked file, so it never loads`,
     );
 
-export const overlaps = ({ rules, covered }) =>
+export const overlaps = ({ covered, rules }) =>
   rules
     .flatMap((first, index) =>
       rules.slice(index + 1).map((second) => {

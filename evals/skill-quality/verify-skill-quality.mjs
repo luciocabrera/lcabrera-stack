@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import { query } from '@anthropic-ai/claude-agent-sdk';
+import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
+import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
 /**
  * Scores every skill's SKILL.md with the judge prompt and rubric `waza quality`
  * uses, on a Claude session with no tools, prints a markdown table, and writes
@@ -14,20 +17,16 @@
  * not parse, or a name is no skill, 130/143 = interrupted.
  */
 import {
+  existsSync,
   mkdirSync,
   mkdtempSync,
-  readFileSync,
   readdirSync,
-  existsSync,
+  readFileSync,
   writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-
-import { query } from '@anthropic-ai/claude-agent-sdk';
-import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
-import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
 
 import {
   chunk,
@@ -45,16 +44,7 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
-
 import { qualityTask, qualityTrial } from './quality-envelope.mjs';
-
-import {
-  baselineTable,
-  judgePrompt,
-  parseJudgement,
-  selectedSkills,
-} from './skill-quality.mjs';
-
 import {
   envelopeResults,
   parseRun,
@@ -62,6 +52,12 @@ import {
   reportDataFromEnvelope,
   runRecord,
 } from './quality-report.mjs';
+import {
+  baselineTable,
+  judgePrompt,
+  parseJudgement,
+  selectedSkills,
+} from './skill-quality.mjs';
 
 const SKILLS_DIR = '.github/skills';
 const REPORT_DIR = '.tmp/skill-quality';
@@ -76,7 +72,7 @@ const catalog = () =>
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .filter((name) => existsSync(join(SKILLS_DIR, name, 'SKILL.md')))
-    .toSorted();
+    .toSorted((a, b) => a.localeCompare(b));
 
 const judged = ({ reply, skill }) => {
   const { judgement, problems } = parseJudgement(reply);
@@ -136,7 +132,7 @@ const readHistory = () =>
   existsSync(RUNS_DIR)
     ? readdirSync(RUNS_DIR)
         .filter((name) => name.endsWith('.json'))
-        .toSorted()
+        .toSorted((a, b) => a.localeCompare(b))
         .map((name) => parseRun(readFileSync(join(RUNS_DIR, name), 'utf8')))
         .filter((run) => run !== undefined)
     : [];
@@ -180,7 +176,7 @@ const qualityPlan = async ({ model, skills }) => {
     }),
     subjects: skillSubjects({ hashes, selected: skills }),
     suite: 'skill-quality',
-    tasks: skills.map(qualityTask),
+    tasks: skills.map((skill) => qualityTask(skill)),
   };
 };
 

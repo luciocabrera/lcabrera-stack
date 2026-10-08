@@ -69,6 +69,9 @@ export const findConfigDirectory = ({
   }
 };
 
+export const workspaceLabel = ({ directory, repoRoot }) =>
+  relative(repoRoot, directory) || '.';
+
 export const planLintGroups = ({ exists = existsSync, paths, repoRoot }) => {
   const groups = new Map();
   for (const filePath of paths) {

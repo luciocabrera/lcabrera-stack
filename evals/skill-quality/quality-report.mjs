@@ -81,7 +81,7 @@ export const envelopeResults = ({ tasks, trials }) => {
   return trials
     .map((trial) => ({ ...trial, ...order.get(trial.task_key) }))
     .toSorted((left, right) => left.index - right.index)
-    .map(resultOf);
+    .map((trial) => resultOf(trial));
 };
 
 export const reportDataFromEnvelope = ({ envelope, history }) =>

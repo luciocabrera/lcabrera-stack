@@ -49,17 +49,17 @@ const ticking = (start) => {
   };
 };
 
-describe('drain', () => {
-  const session = async function* (fail) {
-    yield { type: 'system' };
-    if (fail) {
-      throw new Error('Reached maximum number of turns (1)');
-    }
-    yield { type: 'assistant' };
-    yield { type: 'assistant' };
-    yield { type: 'result' };
-  };
+const session = async function* (fail) {
+  yield { type: 'system' };
+  if (fail) {
+    throw new Error('Reached maximum number of turns (1)');
+  }
+  yield { type: 'assistant' };
+  yield { type: 'assistant' };
+  yield { type: 'result' };
+};
 
+describe('drain', () => {
   it('collects every message, and stamps the first answer once', async () => {
     expect(await drain(session(false), ticking(100))).toStrictEqual({
       firstTokenAt: 101,
@@ -103,14 +103,15 @@ describe('timedDrain', () => {
   });
 });
 
+const usage = (input, output, cacheRead, cacheWrite, costUSD) => ({
+  cacheCreationInputTokens: cacheWrite,
+  cacheReadInputTokens: cacheRead,
+  costUSD,
+  inputTokens: input,
+  outputTokens: output,
+});
+
 describe('sessionMetrics', () => {
-  const usage = (input, output, cacheRead, cacheWrite, costUSD) => ({
-    cacheCreationInputTokens: cacheWrite,
-    cacheReadInputTokens: cacheRead,
-    costUSD,
-    inputTokens: input,
-    outputTokens: output,
-  });
   const modelUsage = {
     'claude-haiku': usage(5, 6, 7, 8, 0.01),
     'claude-opus': usage(100, 200, 300, 400, 0.5),
@@ -163,10 +164,11 @@ describe('sessionMetrics', () => {
     ).toBe('2026-01-01T00:00:02.000Z');
   });
 
+  const classOf = (overrides) =>
+    sessionMetrics([result({ is_error: true, ...overrides })], timestamps)
+      .error_class;
+
   it('classes each error result, and never as fail', () => {
-    const classOf = (overrides) =>
-      sessionMetrics([result({ is_error: true, ...overrides })], timestamps)
-        .error_class;
     expect(classOf({ subtype: 'error_max_turns' })).toBe('max_turns');
     expect(classOf({ subtype: 'error_max_budget_usd' })).toBe('budget');
     expect(classOf({ subtype: 'error_during_execution' })).toBe('execution');
@@ -232,8 +234,9 @@ describe('sessionMetrics', () => {
   });
 });
 
+const init = (tools) => ({ subtype: 'init', tools, type: 'system' });
+
 describe('sessionProblem', () => {
-  const init = (tools) => ({ subtype: 'init', tools, type: 'system' });
   const success = { subtype: 'success', type: 'result' };
 
   it('accepts a session with no tools that ended in success', () => {

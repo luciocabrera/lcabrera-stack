@@ -21,7 +21,6 @@ import {
   runIdentity,
   runnerHarnessVersion,
 } from '../run-record.mjs';
-
 import {
   coverage,
   coverageFindings,
@@ -91,7 +90,7 @@ const report = ({
   const findings = [...index, ...covered];
   if (shared.length > 0) {
     console.log('Rules that load together (informational):');
-    console.log(shared.map(describeOverlap).join('\n'));
+    console.log(shared.map((overlap) => describeOverlap(overlap)).join('\n'));
   }
   if (findings.length > 0) {
     console.error('Rules consistency failed:');

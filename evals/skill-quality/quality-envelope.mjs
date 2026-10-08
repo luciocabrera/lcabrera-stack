@@ -1,3 +1,4 @@
+import { canonicalHash } from '@repo/eval-history/hashing/canonicalHash.util';
 /**
  * The skill-quality run as envelope records: each judged skill a subject and a
  * task, and each judge session a trial holding the scores. The raw reply is
@@ -6,10 +7,7 @@
  */
 import { createHash } from 'node:crypto';
 
-import { canonicalHash } from '@repo/eval-history/hashing/canonicalHash.util';
-
 import { sessionTrial, taskRecord } from '../run-envelope.mjs';
-
 import { judgePrompt, RUBRIC } from './skill-quality.mjs';
 
 const qualityTaskKey = (skill) => `skill-quality/${skill}`;

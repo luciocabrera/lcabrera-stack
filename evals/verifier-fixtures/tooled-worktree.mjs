@@ -9,7 +9,6 @@ import { readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { runGit } from '../../packages/repo-standards/scripts/git-exec.mjs';
-
 import { nextAdrNumber, withAdrNumber } from './tooled-fixtures.mjs';
 
 const REPO_ROOT = resolve('.');

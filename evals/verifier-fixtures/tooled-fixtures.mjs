@@ -9,13 +9,12 @@
 import { parse as parseYaml } from 'yaml';
 
 import { wholeNumber } from '../agent-sessions.mjs';
-
 import {
   agentFrontmatter,
   definiteNotMet,
   describeRun,
   fixtureLine,
-  sameNumbers,
+  haveSameNumbers,
   verdictOf,
 } from './verifier-fixtures.mjs';
 
@@ -41,7 +40,7 @@ export const nextAdrNumber = (fileNames) =>
   ) + 1;
 
 export const withAdrNumber = ({ diff, number }) =>
-  diff.replaceAll(FIXTURE_ADR, `ADR-${String(number).padStart(3, '0')}`);
+  diff.replaceAll(FIXTURE_ADR, () => `ADR-${String(number).padStart(3, '0')}`);
 
 export const tooledDispatch = ({ base, branch, diff, issue, worktree }) =>
   [
@@ -74,7 +73,7 @@ export const hasGateProof = (report) =>
 export const expectedVerdict = (expectedNotMet) =>
   expectedNotMet.length === 0 ? 'PASS' : 'FAIL';
 
-const verdictMatches = ({ expected, verdict = '' }) =>
+const isVerdictMatching = ({ expected, verdict = '' }) =>
   expected === 'PASS' ? verdict === 'PASS' : /^FAIL\b/.test(verdict);
 
 export const readTooledRun = ({ error, report = '', treeProblem }) => ({
@@ -87,14 +86,14 @@ export const readTooledRun = ({ error, report = '', treeProblem }) => ({
 export const tooledRunCounts = ({ expectedNotMet, run }) =>
   run.error === undefined &&
   run.proof &&
-  verdictMatches({
+  isVerdictMatching({
     expected: expectedVerdict(expectedNotMet),
     verdict: run.verdict,
   }) &&
-  sameNumbers(run.notMet, expectedNotMet);
+  haveSameNumbers(run.notMet, expectedNotMet);
 
 export const judgeTooledFixture = ({ expectedNotMet, fixture, runs }) => {
-  const read = runs.map(readTooledRun);
+  const read = runs.map((run) => readTooledRun(run));
   return {
     expectedNotMet,
     fixture,
@@ -102,7 +101,7 @@ export const judgeTooledFixture = ({ expectedNotMet, fixture, runs }) => {
       read.length > 0 &&
       read.every((run) => tooledRunCounts({ expectedNotMet, run })),
     runs: read,
-    stable: read.every(({ notMet }) => sameNumbers(notMet, read[0].notMet)),
+    stable: read.every(({ notMet }) => haveSameNumbers(notMet, read[0].notMet)),
   };
 };
 
@@ -122,7 +121,7 @@ export const describeTooledJudgement = ({
 }) =>
   fixtureLine({
     fixture,
-    lines: runs.map(describeTooledRun),
+    lines: runs.map((run) => describeTooledRun(run)),
     matched,
     stable,
     wanted: `expected ${expectedVerdict(expectedNotMet)} with not-met [${expectedNotMet.join(',')}] and a fail-to-pass gate proof`,
