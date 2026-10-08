@@ -25,11 +25,16 @@ const PLANTED_ENV = {
   CLAUDE_CODE_OAUTH_TOKEN: 'opaque-oauth-value-0123456789',
   EVALS_DATABASE_URL:
     'postgres://evals_writer:hunter2-pw@db.example:5432/evals',
+  EVALS_MIGRATE_DATABASE_URL:
+    'postgres://evals_owner:owner-pw@db.example:5432/evals',
 };
 const PLANTED_TOKEN = ['ghp', 'a1B2'.repeat(9)].join('_');
 const PLANTED_TEXT = JSON.stringify(
   [
     { content: `$ env\nEVALS_DATABASE_URL=${PLANTED_ENV.EVALS_DATABASE_URL}` },
+    {
+      content: `EVALS_MIGRATE_DATABASE_URL=${PLANTED_ENV.EVALS_MIGRATE_DATABASE_URL}`,
+    },
     { content: `oauth ${PLANTED_ENV.CLAUDE_CODE_OAUTH_TOKEN}` },
     { content: 'remote https://ci:other-pw@git.example/repo.git' },
     { content: `token ${PLANTED_TOKEN}` },
@@ -75,6 +80,8 @@ describe('a transcript with secrets in it', () => {
     for (const secret of [
       PLANTED_ENV.EVALS_DATABASE_URL,
       'hunter2-pw',
+      PLANTED_ENV.EVALS_MIGRATE_DATABASE_URL,
+      'owner-pw',
       PLANTED_ENV.CLAUDE_CODE_OAUTH_TOKEN,
       'other-pw',
       PLANTED_TOKEN,

@@ -26,14 +26,17 @@ describe('scrubSecrets', () => {
     const env = {
       CLAUDE_CODE_OAUTH_TOKEN: 'opaque-value-with-no-known-shape',
       EVALS_DATABASE_URL: 'postgres://u:p@h/db',
+      EVALS_MIGRATE_DATABASE_URL: 'postgres://owner:p@h/db',
       HOME: '/home/runner/work',
     };
     expect(
       scrubSecrets(
-        'token=opaque-value-with-no-known-shape url=postgres://u:p@h/db home=/home/runner/work',
+        'token=opaque-value-with-no-known-shape url=postgres://u:p@h/db migrate=postgres://owner:p@h/db home=/home/runner/work',
         { env },
       ),
-    ).toBe('token=[REDACTED:env] url=[REDACTED:env] home=/home/runner/work');
+    ).toBe(
+      'token=[REDACTED:env] url=[REDACTED:env] migrate=[REDACTED:env] home=/home/runner/work',
+    );
   });
 
   it('redacts a secret value as it appears inside a JSON string', () => {
