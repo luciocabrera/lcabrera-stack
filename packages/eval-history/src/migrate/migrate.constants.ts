@@ -30,6 +30,17 @@ export const EVALS_WRITER_ROLE = {
   name: 'evals_writer',
 } as const satisfies EvalsRole;
 
-export const EVALS_ROLES: readonly EvalsRole[] = [EVALS_WRITER_ROLE];
+export const EVALS_READER_ROLE = {
+  grants: [
+    { on: 'schema evals', privileges: 'usage' },
+    { on: 'all tables in schema evals', privileges: 'select' },
+  ],
+  name: 'evals_reader',
+} as const satisfies EvalsRole;
+
+export const EVALS_ROLES: readonly EvalsRole[] = [
+  EVALS_WRITER_ROLE,
+  EVALS_READER_ROLE,
+];
 
 export const MIGRATE_REPORT_PREFIX = 'evals:migrate:';

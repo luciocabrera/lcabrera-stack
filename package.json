@@ -43,6 +43,7 @@
     "devkit:sync": "devkit sync",
     "docs:for-package": "repo-docs-for-package",
     "docs:verify": "repo-verify-docs-paths",
+    "evals:ingest": "node evals/ingest-envelopes.mjs",
     "evals:migrate": "vp run --filter @repo/eval-history migrate",
     "evals:rules:verify": "node evals/rules-consistency/verify-rules-consistency.mjs",
     "evals:skills": "node evals/skills/verify-skill-triggers.mjs",

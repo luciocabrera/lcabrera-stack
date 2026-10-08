@@ -7,6 +7,9 @@
  * envelope that fails the schema is not written, and the error names each field.
  * Each envelope written prints the run's pass rate, with n and its Wilson
  * interval at the thresholds in `regression.config.json`, beside its path.
+ * A complete or partial envelope is then sent to the eval-history database,
+ * after the signal handlers are removed, so a signal during the send cannot
+ * rewrite it; an aborted one is left for `vp run evals:ingest`.
  * Usage: imported by every runner under `evals/`.
  */
 import { createHash, randomUUID } from 'node:crypto';
@@ -32,10 +35,11 @@ import {
   relativeImports,
   triggerOf,
 } from './run-envelope.mjs';
+import { ingestAfterRun } from './run-ingest.mjs';
 
 const EVALS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(EVALS_DIR);
-const RESULTS_DIR = '.tmp/eval-results';
+export const RESULTS_DIR = '.tmp/eval-results';
 const SHARED_MODULE = join(EVALS_DIR, 'agent-sessions.mjs');
 const REGRESSION_CONFIG = join(EVALS_DIR, 'regression.config.json');
 const SIGNALS = ['SIGINT', 'SIGTERM'];
@@ -145,9 +149,10 @@ const reportSaved = ({ regressionConfig, saved }) => {
 
 const saveOrReport = (save) => {
   try {
-    save();
+    return save();
   } catch (error) {
     console.error(error instanceof Error ? error.message : String(error));
+    return null;
   }
 };
 
@@ -155,6 +160,7 @@ export const recordRun = async ({
   clock = Date.now,
   execute,
   identity,
+  ingest = ingestAfterRun,
   plan,
   raise = (signal) => process.kill(process.pid, signal),
   regressionConfig = loadRegressionConfig({ file: REGRESSION_CONFIG }),
@@ -208,11 +214,18 @@ export const recordRun = async ({
   try {
     const result = await Promise.resolve()
       .then(() => execute(context))
-      .catch((error) => {
-        saveOrReport(() => save('partial'));
+      .catch(async (error) => {
+        stopListening();
+        const saved = saveOrReport(() => save('partial'));
+        if (saved !== null) {
+          await ingest({ file: saved.file });
+        }
         throw error;
       });
-    return { ...save('complete'), result };
+    stopListening();
+    const saved = save('complete');
+    await ingest({ file: saved.file });
+    return { ...saved, result };
   } finally {
     stopListening();
   }

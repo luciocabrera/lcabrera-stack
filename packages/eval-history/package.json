@@ -19,6 +19,7 @@
     "./hashing/readFileSet.service": "./src/hashing/readFileSet.service.ts",
     "./hashing/skillCatalogEntry.util": "./src/hashing/skillCatalogEntry.util.ts",
     "./hashing/skillHashes.util": "./src/hashing/skillHashes.util.ts",
+    "./ingest/ingestPaths.service": "./src/ingest/ingestPaths.service.ts",
     "./stats/attribute.util": "./src/stats/attribute.util.ts",
     "./stats/binaryRegression.util": "./src/stats/binaryRegression.util.ts",
     "./stats/countOutcomes.util": "./src/stats/countOutcomes.util.ts",
@@ -31,7 +32,14 @@
     "./stats/stats.types": "./src/stats/stats.types.ts",
     "./stats/summarize.util": "./src/stats/summarize.util.ts",
     "./stats/triggerPrecisionRecall.util": "./src/stats/triggerPrecisionRecall.util.ts",
-    "./stats/wilson.util": "./src/stats/wilson.util.ts"
+    "./stats/wilson.util": "./src/stats/wilson.util.ts",
+    "./queries/queries.constants": "./src/queries/queries.constants.ts",
+    "./queries/queries.types": "./src/queries/queries.types.ts",
+    "./queries/readFlakyTasks.service": "./src/queries/readFlakyTasks.service.ts",
+    "./queries/readRunComparison.service": "./src/queries/readRunComparison.service.ts",
+    "./queries/readSubjectTrend.service": "./src/queries/readSubjectTrend.service.ts",
+    "./queries/readTaskPassRates.service": "./src/queries/readTaskPassRates.service.ts",
+    "./seed/seedSyntheticHistory.service": "./src/seed/seedSyntheticHistory.service.ts"
   },
   "scripts": {
     "format": "vp fmt .",
@@ -42,6 +50,7 @@
     "lint:eslint:check": "eslint . --config eslint.config.mjs --max-warnings 0",
     "migrate": "node ./scripts/migrate.mjs",
     "schema:write": "node ./scripts/write-envelope-schema.mjs",
+    "seed:synthetic": "node ./scripts/seed-synthetic-history.mjs",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "dependencies": {
