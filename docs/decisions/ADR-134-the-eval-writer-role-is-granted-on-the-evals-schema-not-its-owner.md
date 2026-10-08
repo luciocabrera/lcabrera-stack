@@ -73,8 +73,9 @@ asserts that the writer owns nothing in the schema, can insert, and fails
 
 ## Consequences
 
-- An operator provisions two roles, not one: the migrating role, with `create`
-  on the database, and `evals_writer`. Each has its own connection string.
+- An operator provisions the migrating role, with `create` on the database,
+  in addition to `evals_writer` and `evals_reader`. Each has its own
+  connection string, and neither granted role owns an object in `evals`.
 - The migrator needs no role membership on any host. It grants on objects its
   own connection created, which the creating role is always allowed to do.
 - `evals:migrate` connects as the role that created the `evals` objects.
@@ -86,9 +87,10 @@ asserts that the writer owns nothing in the schema, can insert, and fails
 - A table created outside `evals:migrate` is not covered by the table grant
   until the next run. `all tables in schema` covers only tables that exist when
   the grant runs, and no default privileges are set.
-- For a missing `evals_writer`, the migrator prints `create role ... login`
+- For a missing granted role, the migrator prints `create role ... login`
   and the grants. That statement sets no password: the operator sets the
-  credential that `EVALS_DATABASE_URL` will carry. There is no
+  credential the role's connection string will carry, `EVALS_DATABASE_URL`
+  for the writer. There is no
   `alter ... owner` step.
 
 ## Alternatives considered
