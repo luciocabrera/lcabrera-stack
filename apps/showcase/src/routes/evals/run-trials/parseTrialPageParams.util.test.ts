@@ -33,7 +33,22 @@ describe('parseTrialPageParams', () => {
     expect(parse('limit=0').limit).toBe(1);
   });
 
-  it('ignores a sort that is not a list', () => {
-    expect(parse('sort={"durationMs":"desc"}').sorting).toEqual([]);
+  it.each([
+    '[null]',
+    '{}',
+    '"x"',
+    '[{"id":1}]',
+    '[{"columnKey":1}]',
+    'not json',
+  ])('reads sort=%s as no sort', (sort) => {
+    expect(parse(`sort=${encodeURIComponent(sort)}`).sorting).toEqual([]);
+  });
+
+  it('keeps a valid sort', () => {
+    expect(
+      parse(
+        `sort=${encodeURIComponent('[{"columnKey":"turns","direction":"asc"}]')}`,
+      ).sorting,
+    ).toEqual([{ column: 'turns', direction: 'asc' }]);
   });
 });

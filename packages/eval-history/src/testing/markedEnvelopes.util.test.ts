@@ -39,9 +39,13 @@ describe('markedEnvelopes', () => {
   });
 
   it('keeps the public fields free of the marker', () => {
-    const detail = JSON.stringify(quality?.trials[0]?.detail);
-
     expect(quality?.run.branch).not.toBe(MARKER);
-    expect(detail).toContain('"judge_model":"public-sample"');
+    expect(quality?.run.suite).toBe('skill-quality');
+  });
+
+  it('marks the judge model, which the allow-list names only as a column', () => {
+    const detail = quality?.trials[0]?.detail;
+
+    expect(detail?.schema === 'quality/1' && detail.judge_model).toBe(MARKER);
   });
 });

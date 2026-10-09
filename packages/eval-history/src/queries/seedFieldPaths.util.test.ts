@@ -17,6 +17,7 @@ describe('seedFieldPaths', () => {
       'findings',
       'fixture',
       'init_tools',
+      'judge_model',
       'problem',
       'summary',
     ]);

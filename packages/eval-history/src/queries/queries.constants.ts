@@ -81,7 +81,6 @@ export const PUBLIC_FIELD_PATHS = [
   'eval_trial_detail.detail.expected_not_met',
   'eval_trial_detail.detail.expected_skill',
   'eval_trial_detail.detail.invoked',
-  'eval_trial_detail.detail.judge_model',
   'eval_trial_detail.detail.not_met',
   'eval_trial_detail.detail.overall',
   'eval_trial_detail.detail.verdict',

@@ -355,7 +355,12 @@ limit 1`);
     );
     expect(seedFieldPaths('eval_run.settings')).toContain('argv');
     expect(seedFieldPaths('eval_trial_detail.detail')).toEqual(
-      expect.arrayContaining(['dimensions[].feedback', 'findings', 'summary']),
+      expect.arrayContaining([
+        'dimensions[].feedback',
+        'findings',
+        'judge_model',
+        'summary',
+      ]),
     );
     expect(count).toBeGreaterThan(ENVELOPES.length);
   });
