@@ -124,6 +124,14 @@ database refuses a skill-quality trial detail without a `judge_model`, and one
 whose task version has no `judge_prompt_hash`, so every judged trial says which
 judge produced it.
 
+On a database that already holds quality trials, 0003 fills `judge_model`
+and `eval_judge_score` from each trial's `detail` before it adds the
+constraints. It first checks every quality trial, and when one names no
+`judge_model`, has no judge prompt hash on its task version, scores a
+dimension outside the whole numbers 1 to 5 or scores one twice, it stops with
+the trial's id and the reason, leaving the database at 0002. Fix that row,
+then run `vp run evals:migrate` again.
+
 `vp run evals:grade -- --trial <id> --score <dimension>=<1-5> [--score ...]`
 records a grade; a grader who grades the same dimension again replaces their
 earlier score. It accepts only a trial with judge scores and only the
