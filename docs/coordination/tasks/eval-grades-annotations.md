@@ -19,6 +19,7 @@ area:
   - packages/eval-history/scripts/seed-synthetic-history.mjs
   - packages/eval-history/package.json
   - packages/eval-history/README.md
+  - evals/skill-quality/quality-envelope.test.mjs
   - package.json
   - COMMANDS.md
 started: 2026-10-08
