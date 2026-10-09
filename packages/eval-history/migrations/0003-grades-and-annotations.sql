@@ -1,17 +1,29 @@
-create table evals.eval_human_grade (
+alter table evals.eval_trial_detail
+  add column judge_model text,
+  add constraint eval_trial_detail_quality_names_judge_model
+    check (detail_schema <> 'quality/1' or coalesce(judge_model, '') <> ''),
+  add constraint eval_trial_detail_judge_model_matches_detail
+    check (judge_model is not distinct from detail ->> 'judge_model');
+
+create table evals.eval_judge_score (
   trial_id bigint not null references evals.eval_trial (id) on delete cascade,
+  dimension text not null,
+  score smallint not null check (score between 1 and 5),
+  primary key (trial_id, dimension)
+);
+
+create table evals.eval_human_grade (
+  trial_id bigint not null,
   dimension text not null,
   score smallint not null check (score between 1 and 5),
   grader text not null,
   graded_at timestamptz not null default now(),
-  primary key (trial_id, dimension, grader)
+  primary key (trial_id, dimension, grader),
+  foreign key (trial_id, dimension)
+    references evals.eval_judge_score (trial_id, dimension) on delete cascade
 );
 
 create index eval_annotation_at on evals.eval_annotation (at);
-
-alter table evals.eval_trial_detail
-  add constraint eval_trial_detail_quality_names_judge_model
-  check (detail_schema <> 'quality/1' or coalesce(detail ->> 'judge_model', '') <> '');
 
 create function evals.require_judge_prompt_hash()
 returns trigger
@@ -42,19 +54,15 @@ select
   trial.run_id,
   task.task_key,
   grade.dimension,
-  detail.detail ->> 'judge_model' as judge_model,
+  trial_detail.judge_model,
   task_version.judge_prompt_hash::text as judge_prompt_hash,
-  judged.score as judge_score,
+  judged.score::integer as judge_score,
   grade.score::integer as human_score,
   grade.graded_at
 from evals.eval_human_grade grade
+join evals.eval_judge_score judged
+  on judged.trial_id = grade.trial_id and judged.dimension = grade.dimension
 join evals.eval_trial trial on trial.id = grade.trial_id
+join evals.eval_trial_detail trial_detail on trial_detail.trial_id = grade.trial_id
 join evals.eval_task_version task_version on task_version.id = trial.task_version_id
-join evals.eval_task task on task.id = task_version.task_id
-join evals.eval_trial_detail detail on detail.trial_id = grade.trial_id and detail.detail_schema = 'quality/1'
-join lateral (
-  select (dimension.value ->> 'score')::double precision as score
-  from jsonb_array_elements(detail.detail -> 'dimensions') dimension
-  where dimension.value ->> 'name' = grade.dimension
-  limit 1
-) judged on true;
+join evals.eval_task task on task.id = task_version.task_id;

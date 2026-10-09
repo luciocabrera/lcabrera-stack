@@ -10,8 +10,9 @@ decides how the envelope is versioned.
   its schema and the insert `evals:annotate` runs.
 - `src/envelope/` — the run envelope as a Zod schema, the validator, the
   emitted `envelope.schema.json`, and one example envelope per suite under
-  `fixtures/`. A skill-quality trial whose detail names no `judge_model`, or
-  whose task carries no `judge_prompt_hash`, fails the run schema.
+  `fixtures/`. A skill-quality trial whose detail names no `judge_model`,
+  whose task carries no `judge_prompt_hash`, or whose dimension scores are not
+  whole numbers from 1 to 5 on distinct dimensions, fails the run schema.
 - `src/grades/` — hand grades of the quality judge: recording one against the
   dimensions the judge scored on that trial, reading
   `evals.v_judge_agreement`, and the agreement rate `evals:grade` prints.
@@ -26,14 +27,9 @@ decides how the envelope is versioned.
   envelopes under the paths it is given, brings one written a version earlier
   up to date through its upcaster in `ENVELOPE_UPCASTERS` and rejects any
   other version by name (ADR-131), and stores each run in one transaction keyed
-  on `run_id`, so a run already stored is left alone.
-- `src/privacy/` — the ADR-133 check on a reporting view's deparsed
-  definition: `viewReadViolations` tokenises it, follows every alias of a table
-  holding an excluded column, and reports any read it cannot attach to a
-  `PUBLIC_FIELD_PATHS` entry, any whole-row use and any alias it cannot read;
-  `viewDependencyViolations` reports a dependency that is neither a base table
-  nor a reporting relation. `fixtures/view-probes.pg18.json` holds the probe
-  views it is tested on, as Postgres 18 deparses them.
+  on `run_id`, so a run already stored is left alone. A skill-quality trial's
+  judge model and dimension scores go into their own columns in the statement
+  that inserts the trial.
 - `src/prices/` — the schema of `model-prices.json` and its upsert into
   `evals.model_price`.
 - `src/queries/` — the read functions the dashboard calls, one per reporting
@@ -42,12 +38,9 @@ decides how the envelope is versioned.
   `readFlakyTasks` (`evals.flaky_tasks(run_window)`, the plan's `v_flaky_tasks`, a
   function so the window comes from `evals/regression.config.json`) and
   `readRunComparison` (`evals.run_compare(a, b)`). Each builds its SQL in a
-  pure `*Query.util.ts`, so a test can read what is sent, and none of them
-  names a column in `EXCLUDED_COLUMNS`
+  pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
+  the views beneath, names a column in `EXCLUDED_COLUMNS`
   ([ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)).
-  A view in `REPORTING_RELATIONS`, `evals.v_judge_agreement` among them, may
-  read an excluded `jsonb` column only through the paths `PUBLIC_FIELD_PATHS`
-  lists; the reporting test checks every such view with `src/privacy/`.
 - `src/seed/` — a year of synthetic nightly history, about 15k trials, for
   timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of
@@ -117,18 +110,23 @@ history you keep.
 
 ## Grading the judge
 
-`migrations/0003-grades-and-annotations.sql` adds `evals.eval_human_grade`,
-one score from 1 to 5 per trial, rubric dimension and grader, deleted with
-its trial like every other trial child, and
-`evals.v_judge_agreement`, which puts each hand grade next to the judge's
-score for the same trial and dimension, with the judge model and judge prompt
-hash it was given under. The same migration makes the database refuse a
-skill-quality trial detail without a `judge_model`, and one whose task version
-has no `judge_prompt_hash`, so every judged trial says which judge produced it.
+`migrations/0003-grades-and-annotations.sql` adds `evals.eval_judge_score`,
+the judge's 1-5 score per trial and rubric dimension, and a `judge_model`
+column on `evals.eval_trial_detail`. Ingest fills both from a skill-quality
+trial's `detail` in the statement that inserts the trial, and a check keeps
+`judge_model` equal to the model the `detail` names. It also adds
+`evals.eval_human_grade`, one score from 1 to 5 per judged dimension and
+grader, whose key references the judge score it grades and is deleted with it,
+so a grade can only exist beside a judge score. `evals.v_judge_agreement` puts
+each hand grade next to that judge score, with the judge model and the judge
+prompt hash of the trial's task version, and reads no field of `detail`. The
+database refuses a skill-quality trial detail without a `judge_model`, and one
+whose task version has no `judge_prompt_hash`, so every judged trial says which
+judge produced it.
 
 `vp run evals:grade -- --trial <id> --score <dimension>=<1-5> [--score ...]`
 records a grade; a grader who grades the same dimension again replaces their
-earlier score. It accepts only a trial with a quality judgement and only the
+earlier score. It accepts only a trial with judge scores and only the
 dimensions the judge scored there, and when no `--score` is given it lists
 them without showing the judge's scores. The grader is `--grader`, else the
 GitHub actor, else the local part of git's `user.email`.

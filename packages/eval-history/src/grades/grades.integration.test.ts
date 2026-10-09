@@ -1,22 +1,29 @@
 // @vitest-environment node
 
 /**
- * Hand grades, annotations and the judge pin against a real Postgres: the
- * agreement view joins a hand grade to the judge's score inside jsonb, and the
- * constraint and trigger that keep a quality trial's judge model and prompt
- * hash are claims a fake client reports green on whether or not they hold. It
- * creates a database of its own next to the one EVALS_TEST_DATABASE_URL names
- * and drops it afterwards. Unset, it skips locally and fails under CI.
+ * Hand grades, judge scores, annotations and the judge pin against a real
+ * Postgres. The quality trial arrives through the ingester, so the score rows
+ * and the judge model column the agreement view reads are the ones ingest
+ * writes. The constraints and the trigger are claims a fake client reports
+ * green on whether or not they hold. It creates a database of its own next to
+ * the one EVALS_TEST_DATABASE_URL names and drops it afterwards. Unset, it
+ * skips locally and fails under CI.
  */
 
 import type pg from 'pg';
 
 import { randomUUID } from 'node:crypto';
+import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
+
+import type { RunEnvelope } from '../envelope/envelope.types.ts';
 
 import { annotationSchema } from '../annotations/annotation.schema.ts';
 import { ANNOTATION_KINDS } from '../annotations/annotations.constants.ts';
 import { recordAnnotation } from '../annotations/recordAnnotation.service.ts';
+import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
+import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
+import { ingestEnvelope } from '../ingest/ingestEnvelope.service.ts';
 import { applyMigrations } from '../migrate/applyMigrations.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
@@ -27,74 +34,65 @@ import { recordHumanGrades } from './recordHumanGrades.service.ts';
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
 
-const RUN_ID = '1f07f209-956c-48a0-8945-a2e39ee047a8';
 const JUDGE_MODEL = 'claude-opus-5-5';
-const JUDGE_PROMPT_HASH = 'c'.repeat(64);
 
-const qualityDetail = (judgeModel: string) => ({
-  dimensions: [
-    { feedback: 'Plain.', name: 'clarity', score: 4 },
-    { feedback: 'Thin on errors.', name: 'completeness', score: 2 },
-  ],
-  judge_model: judgeModel,
-  overall: 3,
-  reply_sha256: 'd'.repeat(64),
-  schema: 'quality/1',
-  summary: 'Fine.',
+const fixtures = await readJsonFiles({
+  directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),
 });
 
-const FIXTURE_SQL = `
-insert into evals.eval_run (run_id, suite, trigger, actor, branch, git_sha, git_dirty, started_at, finished_at, status, model_id, harness_version, schema_version, settings, env, totals, envelope_sha256)
-values ('${RUN_ID}', 'skill-quality', 'local', 'tester', 'main', '${'0'.repeat(40)}', false, now(), now(), 'complete', '${JUDGE_MODEL}', 'a8368fc2f15d', 1, '{}', '{}', '{}', '${'e'.repeat(64)}');
-insert into evals.eval_subject (kind, name, path) values ('skill', 'unslop', '.github/skills/unslop');
-insert into evals.eval_subject_version (subject_id, content_hash, first_seen_sha, first_seen_at)
-select id, '${'f'.repeat(64)}', '${'0'.repeat(40)}', now() from evals.eval_subject;
-insert into evals.eval_task (suite, subject_id, task_key, kind, task_set)
-select 'skill-quality', id, 'skill-quality/unslop', 'quality', 'capability' from evals.eval_subject;
-insert into evals.eval_task (suite, subject_id, task_key, kind, task_set)
-select 'skills', id, 'skills/unslop/trigger-1', 'trigger', 'regression' from evals.eval_subject;
-insert into evals.eval_task_version (task_id, task_hash, judge_prompt_hash)
-select id, '${'1'.repeat(64)}', '${JUDGE_PROMPT_HASH}' from evals.eval_task where task_key = 'skill-quality/unslop';
-insert into evals.eval_task_version (task_id, task_hash)
-select id, '${'2'.repeat(64)}' from evals.eval_task where task_key = 'skill-quality/unslop';
-insert into evals.eval_task_version (task_id, task_hash)
-select id, '${'3'.repeat(64)}' from evals.eval_task where task_key = 'skills/unslop/trigger-1';
-insert into evals.eval_task_version (task_id, task_hash, judge_prompt_hash)
-select id, '${'4'.repeat(64)}', '${JUDGE_PROMPT_HASH}' from evals.eval_task where task_key = 'skill-quality/unslop';
-insert into evals.eval_trial (run_id, task_version_id, subject_version_id, trial_index, outcome, queued_at)
-select '${RUN_ID}', task_version.id, (select id from evals.eval_subject_version), row_number() over (order by task_version.task_hash) - 1, 'pass', now()
-from evals.eval_task_version task_version;
-`;
+const qualityEnvelope = (): RunEnvelope => {
+  const envelope = runEnvelopeSchema.parse(fixtures.get('skill-quality.json'));
+
+  return runEnvelopeSchema.parse({
+    ...envelope,
+    trials: envelope.trials.map((trial) => ({
+      ...trial,
+      detail: {
+        ...trial.detail,
+        dimensions: [
+          { feedback: 'Plain.', name: 'clarity', score: 4 },
+          { feedback: 'Thin on errors.', name: 'completeness', score: 2 },
+        ],
+        judge_model: JUDGE_MODEL,
+      },
+    })),
+  });
+};
+
+type QueryRowArgs = {
+  readonly client: pg.Client;
+  readonly text: string;
+  readonly values?: unknown[];
+};
+
+const firstValue = async ({ client, text, values = [] }: QueryRowArgs) => {
+  const { rows } = await client.query<{ readonly value: string }>({
+    text,
+    values,
+  });
+
+  return rows[0]?.value ?? '';
+};
 
 type InsertDetailArgs = {
   readonly client: pg.Client;
-  readonly detail: Readonly<Record<string, unknown>>;
+  readonly judgeModel: string;
   readonly trialId: string;
 };
 
-type TrialIdOfArgs = {
-  readonly client: pg.Client;
-  readonly taskHashDigit: string;
-};
-
-const trialIdOf = async ({ client, taskHashDigit }: TrialIdOfArgs) => {
-  const { rows } = await client.query<{ readonly id: string }>({
-    text: 'select trial.id::text as id from evals.eval_trial trial join evals.eval_task_version task_version on task_version.id = trial.task_version_id where task_version.task_hash = $1',
-    values: [taskHashDigit.repeat(64)],
-  });
-  const [row] = rows;
-
-  if (!row) {
-    throw new Error(`no trial for task hash ${taskHashDigit}`);
-  }
-
-  return row.id;
-};
-
-const insertDetail = ({ client, detail, trialId }: InsertDetailArgs) =>
+const insertQualityDetail = ({
+  client,
+  judgeModel,
+  trialId,
+}: InsertDetailArgs) =>
   client.query({
-    text: 'insert into evals.eval_trial_detail (trial_id, detail_schema, detail) values ($1, $2, $3)',
-    values: [trialId, detail.schema, detail],
+    text: 'insert into evals.eval_trial_detail (trial_id, detail_schema, detail, judge_model) values ($1, $2, $3, $4)',
+    values: [
+      trialId,
+      'quality/1',
+      { judge_model: judgeModel, schema: 'quality/1' },
+      judgeModel,
+    ],
   });
 
 if (!DATABASE_URL && !IS_CI) {
@@ -115,7 +113,7 @@ describe.skipIf(!DATABASE_URL)(
   () => {
     const databaseName = `evals_grades_${randomUUID().replaceAll('-', '')}`;
     const { close, connect } = scratchConnections(DATABASE_URL ?? '');
-    const trials = { blank: '', pinned: '', skills: '', unpinned: '' };
+    const trials = { blank: '', quality: '', skills: '', unpinned: '' };
 
     beforeAll(async () => {
       const admin = await connect();
@@ -124,34 +122,93 @@ describe.skipIf(!DATABASE_URL)(
       const client = await connect(databaseName);
 
       await applyMigrations({ client, migrations: await readMigrations() });
-      await client.query(FIXTURE_SQL);
-      Object.assign(trials, {
-        blank: await trialIdOf({ client, taskHashDigit: '4' }),
-        pinned: await trialIdOf({ client, taskHashDigit: '1' }),
-        skills: await trialIdOf({ client, taskHashDigit: '3' }),
-        unpinned: await trialIdOf({ client, taskHashDigit: '2' }),
-      });
-      await insertDetail({
+      await ingestEnvelope({
         client,
-        detail: qualityDetail(JUDGE_MODEL),
-        trialId: trials.pinned,
+        envelope: qualityEnvelope(),
+        sha256: 'a'.repeat(64),
+      });
+      await ingestEnvelope({
+        client,
+        envelope: runEnvelopeSchema.parse(fixtures.get('skills.json')),
+        sha256: 'b'.repeat(64),
+      });
+
+      const trialOfSuite = (suite: string) =>
+        firstValue({
+          client,
+          text: 'select min(trial.id)::text as value from evals.eval_trial trial join evals.eval_run run on run.run_id = trial.run_id where run.suite = $1',
+          values: [suite],
+        });
+      const quality = await trialOfSuite('skill-quality');
+      const copyTrial = (taskVersion: string) =>
+        firstValue({
+          client,
+          text: `insert into evals.eval_trial (run_id, task_version_id, subject_version_id, trial_index, outcome, queued_at)
+select run_id, ${taskVersion}, subject_version_id, 100 + (select count(*) from evals.eval_trial), 'pass', now()
+from evals.eval_trial where id = $1
+returning id::text as value`,
+          values: [quality],
+        });
+      const unpinnedVersion = await firstValue({
+        client,
+        text: "insert into evals.eval_task_version (task_id, task_hash) select task_version.task_id, repeat('2', 64) from evals.eval_trial trial join evals.eval_task_version task_version on task_version.id = trial.task_version_id where trial.id = $1 returning id::text as value",
+        values: [quality],
+      });
+
+      Object.assign(trials, {
+        blank: await copyTrial('task_version_id'),
+        quality,
+        skills: await trialOfSuite('skills'),
+        unpinned: await copyTrial(unpinnedVersion),
       });
     }, 60_000);
 
     afterAll(() => close({ databases: [databaseName] }));
 
+    it("writes a quality trial's judge model and dimension scores at ingest", async () => {
+      const client = await connect(databaseName);
+      const { rows } = await client.query<{
+        readonly dimension: string;
+        readonly judge_model: string;
+        readonly score: number;
+      }>({
+        text: 'select score.dimension, score.score, trial_detail.judge_model from evals.eval_judge_score score join evals.eval_trial_detail trial_detail on trial_detail.trial_id = score.trial_id where score.trial_id = $1 order by score.dimension',
+        values: [trials.quality],
+      });
+
+      expect(rows).toEqual([
+        { dimension: 'clarity', judge_model: JUDGE_MODEL, score: 4 },
+        { dimension: 'completeness', judge_model: JUDGE_MODEL, score: 2 },
+      ]);
+    });
+
     it('refuses a quality trial detail with no judge model', async () => {
       const client = await connect(databaseName);
 
       await expect(
-        insertDetail({
-          client,
-          detail: qualityDetail(''),
-          trialId: trials.blank,
-        }),
+        insertQualityDetail({ client, judgeModel: '', trialId: trials.blank }),
       ).rejects.toMatchObject({
         code: '23514',
         constraint: 'eval_trial_detail_quality_names_judge_model',
+      });
+    });
+
+    it('refuses a judge model column that disagrees with the detail', async () => {
+      const client = await connect(databaseName);
+
+      await expect(
+        client.query({
+          text: 'insert into evals.eval_trial_detail (trial_id, detail_schema, detail, judge_model) values ($1, $2, $3, $4)',
+          values: [
+            trials.blank,
+            'quality/1',
+            { judge_model: 'another-model', schema: 'quality/1' },
+            JUDGE_MODEL,
+          ],
+        }),
+      ).rejects.toMatchObject({
+        code: '23514',
+        constraint: 'eval_trial_detail_judge_model_matches_detail',
       });
     });
 
@@ -159,9 +216,9 @@ describe.skipIf(!DATABASE_URL)(
       const client = await connect(databaseName);
 
       await expect(
-        insertDetail({
+        insertQualityDetail({
           client,
-          detail: qualityDetail(JUDGE_MODEL),
+          judgeModel: JUDGE_MODEL,
           trialId: trials.unpinned,
         }),
       ).rejects.toMatchObject({
@@ -181,7 +238,7 @@ describe.skipIf(!DATABASE_URL)(
             { dimension: 'clarity', score: 4 },
             { dimension: 'completeness', score: 4 },
           ],
-          trialId: trials.pinned,
+          trialId: trials.quality,
         }),
       ).toEqual({ dimensions: ['clarity', 'completeness'], kind: 'recorded' });
 
@@ -198,7 +255,8 @@ describe.skipIf(!DATABASE_URL)(
       );
       expect(
         rows.every(
-          ({ judgePromptHash }) => judgePromptHash === JUDGE_PROMPT_HASH,
+          ({ judgePromptHash }) =>
+            judgePromptHash === qualityEnvelope().tasks[0]?.judge_prompt_hash,
         ),
       ).toBe(true);
       expect(judgeAgreement({ minN: 1, rows, z: 1.96 })).toMatchObject([
@@ -213,14 +271,14 @@ describe.skipIf(!DATABASE_URL)(
         client,
         grader: 'lucio',
         scores: [{ dimension: 'completeness', score: 2 }],
-        trialId: trials.pinned,
+        trialId: trials.quality,
       });
       const rows = await readJudgeAgreement({ client });
 
       expect(rows.map(({ humanScore }) => humanScore)).toEqual([4, 2]);
     });
 
-    it('writes no grade for a trial that has no quality judgement', async () => {
+    it('writes no grade for a trial that has no judge scores', async () => {
       const client = await connect(databaseName);
 
       expect(
@@ -234,6 +292,17 @@ describe.skipIf(!DATABASE_URL)(
         kind: 'rejected',
         problems: [`trial ${trials.skills} has no quality judgement to grade`],
       });
+    });
+
+    it('refuses, in the database, a grade of a dimension the judge did not score', async () => {
+      const client = await connect(databaseName);
+
+      await expect(
+        client.query({
+          text: 'insert into evals.eval_human_grade (trial_id, dimension, score, grader) values ($1, $2, $3, $4)',
+          values: [trials.quality, 'tone', 3, 'lucio'],
+        }),
+      ).rejects.toMatchObject({ code: '23503' });
     });
 
     it('records an annotation of every kind the enum holds', async () => {
@@ -258,25 +327,24 @@ describe.skipIf(!DATABASE_URL)(
       expect(recorded.at.toISOString()).toBe('2026-10-08T09:00:00.000Z');
     });
 
-    it("removes a trial's hand grades when the trial is deleted", async () => {
+    it("removes a trial's judge scores and hand grades when the trial is deleted", async () => {
       const client = await connect(databaseName);
-      const gradesOf = async () => {
-        const { rows } = await client.query<{ readonly count: number }>({
-          text: 'select count(*)::integer as count from evals.eval_human_grade where trial_id = $1',
-          values: [trials.pinned],
+      const countOf = (table: string) =>
+        firstValue({
+          client,
+          text: `select count(*)::text as value from evals.${table} where trial_id = $1`,
+          values: [trials.quality],
         });
 
-        return rows[0]?.count;
-      };
-
-      expect(await gradesOf()).toBeGreaterThan(0);
+      expect(await countOf('eval_human_grade')).toBe('2');
 
       await client.query({
         text: 'delete from evals.eval_trial where id = $1',
-        values: [trials.pinned],
+        values: [trials.quality],
       });
 
-      expect(await gradesOf()).toBe(0);
+      expect(await countOf('eval_human_grade')).toBe('0');
+      expect(await countOf('eval_judge_score')).toBe('0');
     });
   },
 );

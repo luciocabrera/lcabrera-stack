@@ -2,6 +2,7 @@ import type { EnvelopeShape } from './envelope.types.ts';
 
 import { DETAIL_SCHEMA_BY_SUITE } from './envelope.constants.ts';
 import { qualityJudgeIssues } from './qualityJudgeIssues.util.ts';
+import { qualityScoreIssues } from './qualityScoreIssues.util.ts';
 
 export const envelopeConsistencyIssues = ({
   run,
@@ -40,5 +41,6 @@ export const envelopeConsistencyIssues = ({
         ]
       : []),
     ...qualityJudgeIssues({ detail, index, task: tasksByKey.get(task_key) }),
+    ...qualityScoreIssues({ detail, index }),
   ]);
 };

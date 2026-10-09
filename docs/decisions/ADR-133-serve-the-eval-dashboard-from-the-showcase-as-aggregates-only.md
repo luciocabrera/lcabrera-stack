@@ -283,25 +283,13 @@ heatmap and the matrix are small, fixed shapes.
 
 > **Widened by
 > [#1281](https://github.com/luciocabrera/lcabrera-stack/issues/1281)**
-> (2026-10-08). `eval_trial_detail.detail` gains one allowed field: the quality
-> suite's `judge_model`. It is a model identifier in the same closed form as
-> `eval_run.model_id`, which the table above already allows, and the judge
-> agreement rate is reported per judge model, so a route that shows it needs the
-> field. `PUBLIC_FIELD_PATHS` lists it beside the dimension names and scores.
-> `summary`, per-dimension `feedback` and every other `detail` field stay
-> excluded. `evals.v_judge_agreement` reads only those three paths and
-> `eval_human_grade.dimension`, which the table above allows. `grader` stays
-> excluded by name. The view is in `REPORTING_RELATIONS`, and the reporting test
-> checks each reporting view's definition as Postgres deparses it. It fails when
-> a view reads a field of an excluded `jsonb` column outside
-> `PUBLIC_FIELD_PATHS`, reads any other excluded column at all, reads an
-> excluded `jsonb` column in a form it cannot attach to a path (a subscript,
-> `#>>`, a cast, a function argument), takes a whole row of a table that holds
-> an excluded column, uses an alias it cannot read, or depends on a relation
-> that is neither a base table nor in `REPORTING_RELATIONS`. The check reads
-> deparsed SQL, not the query tree, and is written to report a read of a guarded
-> table or column it cannot account for rather than pass it. The test cases are
-> the deparsed probe views under `src/privacy/fixtures/`.
+> (2026-10-09). Two text-typed columns join the allowed set:
+> `eval_trial_detail.judge_model`, a model identifier in the same closed form as
+> `eval_run.model_id`, and the new table `eval_judge_score`'s `dimension`, a
+> rubric dimension name like `eval_human_grade.dimension`.
+> `eval_judge_score.score` is a number and needs no entry. Ingest copies both
+> out of the quality suite's `detail`, so `evals.v_judge_agreement` reads plain
+> columns and nothing inside `detail`, which stays excluded whole.
 
 ## References
 
