@@ -2,9 +2,10 @@
  * What the eval-history commands that write by hand share: the argument list
  * without the separator `vp run` passes through, the author a note or grade is
  * recorded under, and a client on the database EVALS_DATABASE_URL names. Git
- * runs from a fixed system directory with PATH pinned to those directories,
- * as `@lcabrera/repo-standards`'s git-exec does, so a writable PATH entry
- * cannot shadow it.
+ * runs from a fixed system directory with PATH pinned to those directories, so
+ * a writable PATH entry cannot shadow it, and with every inherited GIT_*
+ * variable dropped, so GIT_DIR cannot point it at another repository's
+ * user.email.
  * Usage: imported by `annotate.mjs` and `grade.mjs`.
  */
 import { execFileSync } from 'node:child_process';
@@ -23,6 +24,13 @@ export const cliArguments = () => {
 
 const TRUSTED_DIRECTORIES = ['/usr/local/bin', '/usr/bin', '/bin'];
 
+export const gitEnv = (env) => ({
+  ...Object.fromEntries(
+    Object.entries(env).filter(([name]) => !name.startsWith('GIT_')),
+  ),
+  PATH: TRUSTED_DIRECTORIES.join(':'),
+});
+
 const gitEmail = () => {
   const git = TRUSTED_DIRECTORIES.map((directory) => `${directory}/git`).find(
     (path) => existsSync(path),
@@ -33,7 +41,7 @@ const gitEmail = () => {
   try {
     return execFileSync(git, ['config', 'user.email'], {
       encoding: 'utf8',
-      env: { ...process.env, PATH: TRUSTED_DIRECTORIES.join(':') },
+      env: gitEnv(process.env),
       stdio: ['ignore', 'pipe', 'ignore'],
     }).trim();
   } catch {
