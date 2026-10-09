@@ -30,8 +30,8 @@ envelope.
 Every file a runner writes is scrubbed as it is written, through
 `writeScrubbed` in [`transcript-scrub.mjs`](./transcript-scrub.mjs): the
 envelope, the transcripts, and each runner's own output under `.tmp/`, such as
-`trials.json`, which CI uploads as an artifact. A test fails if a runner writes
-a file any other way. The scrubber redacts the value of every environment
+`trials.json`, which CI uploads as an artifact. A test fails if a runner, or an `evals/` module it
+imports, writes a file any other way outside its own scratch directory. The scrubber redacts the value of every environment
 variable whose name marks it secret (a name ending in `TOKEN`, `SECRET`,
 `PASSWORD`, `API_KEY`, `ACCESS_KEY`, `DATABASE_URL` and the like, with a value
 of at least 8 characters), the password in any URL, with or without a user, and

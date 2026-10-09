@@ -7,6 +7,7 @@ branch: feat/1353-scrub-eval-transcripts
 area:
   - evals/run-record*.mjs
   - evals/transcript-scrub*.mjs
+  - evals/runner-writes*.mjs
   - evals/skills/verify-skill-triggers.mjs
   - evals/README.md
   - evals/envelope-test-support.mjs
@@ -14,7 +15,7 @@ area:
   - evals/verifier-fixtures/verify-verifier-*.mjs
   - docs/agents/planning/eval-history-plan.md
 started: 2026-10-08
-updated: 2026-10-08
+updated: 2026-10-09
 plan: (none)
 pr: '#1361'
 issue: #1353

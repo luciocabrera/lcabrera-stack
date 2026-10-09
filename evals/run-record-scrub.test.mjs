@@ -125,3 +125,29 @@ describe('a transcript with no secret in it', () => {
     });
   });
 });
+
+describe('an envelope with a secret in it', () => {
+  it('is written scrubbed with the env recordRun was given, and returned as written', async () => {
+    const secret = PLANTED_ENV.CLAUDE_CODE_OAUTH_TOKEN;
+    const outcome = await recordRun({
+      clock: () => STARTED_AT + 2000,
+      env: PLANTED_ENV,
+      execute: ({ addTrial }) => addTrial(rulesTrial),
+      identity: testIdentity,
+      ingest: async () => undefined,
+      plan: {
+        ...rulesPlan,
+        settings: { ...rulesPlan.settings, argv: ['--token', secret] },
+      },
+      resultsDir,
+      signals: new EventEmitter(),
+    });
+    const onDisk = readFileSync(outcome.file, 'utf8');
+    expect(onDisk).not.toContain(secret);
+    expect(JSON.parse(onDisk).run.settings.argv).toStrictEqual([
+      '--token',
+      '[REDACTED:env]',
+    ]);
+    expect(outcome.envelope).toStrictEqual(JSON.parse(onDisk));
+  });
+});

@@ -1,7 +1,6 @@
-import { mkdtempSync, readdirSync, readFileSync, rmSync } from 'node:fs';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { basename, dirname, join } from 'node:path';
-import { fileURLToPath } from 'node:url';
+import { join } from 'node:path';
 
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -10,10 +9,6 @@ import {
   secretEnvValues,
   writeScrubbed,
 } from './transcript-scrub.mjs';
-
-const EVALS_DIR = dirname(fileURLToPath(import.meta.url));
-const RAW_WRITE =
-  /\b(?:writeFileSync|appendFileSync|createWriteStream|writeFile|appendFile)\b|node:fs\/promises/;
 
 const GITHUB_TOKEN = ['ghp', 'a1B2'.repeat(9)].join('_');
 const JWT = ['eyJ', 'eyJ', '']
@@ -104,6 +99,15 @@ describe('scrubSecrets', () => {
     );
   });
 
+  it.each([
+    'https://user@host.example/path',
+    'ssh://git@github.com:22/org/repo.git',
+    'git+ssh://git@github.com/org/repo.git',
+    '{"remote":"https://x-access@git.example/repo.git"}',
+  ])('leaves %s, a URL with a user and no password, unchanged', (text) => {
+    expect(scrubSecrets(text, { env: {} })).toBe(text);
+  });
+
   it('returns text with no secret in it unchanged', () => {
     const text = JSON.stringify(
       [
@@ -159,30 +163,5 @@ describe('writeScrubbed', () => {
     } finally {
       rmSync(directory, { force: true, recursive: true });
     }
-  });
-});
-
-describe('runner output', () => {
-  const writers = readdirSync(EVALS_DIR, { recursive: true })
-    .filter((path) => !path.startsWith('node_modules'))
-    .filter(
-      (path) =>
-        /^verify-.*\.mjs$/.test(basename(path)) || path === 'run-record.mjs',
-    );
-
-  it('finds every runner', () => {
-    expect(writers).toStrictEqual(
-      expect.arrayContaining([
-        'run-record.mjs',
-        join('skill-quality', 'verify-skill-quality.mjs'),
-        join('skills', 'verify-skill-triggers.mjs'),
-        join('verifier-fixtures', 'verify-verifier-tooled.mjs'),
-        join('verifier-fixtures', 'verify-verifier-verdicts.mjs'),
-      ]),
-    );
-  });
-
-  it.each(writers)('%s writes files only through writeScrubbed', (path) => {
-    expect(readFileSync(join(EVALS_DIR, path), 'utf8')).not.toMatch(RAW_WRITE);
   });
 });
