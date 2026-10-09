@@ -64,13 +64,13 @@ describe('toSuiteSummaries', () => {
       {
         href: '/evals/runs/a',
         key: 'a',
-        label: '2026-10-01 on main: 60% (1/2)',
+        label: 'Run a, 2026-10-01 on main: 60% (1/2)',
         value: 0.6,
       },
       {
         href: '/evals/runs/c',
         key: 'c',
-        label: '2026-10-03 on main: 90% (1/2)',
+        label: 'Run c, 2026-10-03 on main: 90% (1/2)',
         value: 0.9,
       },
     ]);

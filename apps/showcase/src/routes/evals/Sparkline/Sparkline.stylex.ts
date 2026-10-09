@@ -14,6 +14,9 @@ export const styles = stylex.create({
     strokeWidth: 1,
     cursor: 'pointer',
   },
+  figure: {
+    margin: 0,
+  },
   error: {
     fill: colors.error,
   },

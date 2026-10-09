@@ -43,33 +43,36 @@ route by default and the external API only under the `VITE_API_URL` override.
 
 ### Eval dashboard (`routes/evals/`)
 
-Every loader reads through `@repo/eval-history`'s query functions on its reader
-pool, never with SQL of its own, so the allow-list those functions project
-through is the one guarantee of what a public route returns.
+Every loader reads through `.server/evalsHistory.service.ts`, which runs
+`@repo/eval-history`'s query functions on its reader pool, never SQL of its
+own, so the allow-list those functions project through is the one guarantee of
+what a public route returns.
 
-| Artifact                | Location                                   | Description                                                                                                                           |
-| ----------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `requireEvalsDashboard` | `.server/requireEvalsDashboard.service.ts` | The one read of `EVALS_DASHBOARD`; throws a 404 `Response` unless it is `1`. Every `/evals` loader calls it first                     |
-| `Sparkline`             | `Sparkline/`                               | A small SVG point chart drawn with StyleX; every point is a router link, optionally joined by a line and toned by outcome             |
-| `sparklineGeometry`     | `Sparkline/sparklineGeometry.util.ts`      | Pure: each point's position in the chart box, scaled to the top value, plus the polyline joining them                                 |
-| `toSuiteSummaries`      | `overview/toSuiteSummaries.util.ts`        | The newest run of each suite and its scored runs as chart points, oldest first, each linked to its run                                |
-| `suiteRegressions`      | `overview/suiteRegressions.util.ts`        | The suites whose latest main run has a rate below the lower bound of the main run before it                                           |
-| `parseTrialPageParams`  | `run-trials/parseTrialPageParams.util.ts`  | The trial resource route's `limit`/`skip`/`sort` params, clamped to `EVALS_TRIALS_PAGE_LIMIT`                                         |
-| `runFigures`            | `utils/runFigures.util.ts`                 | A run summary plus its pass rate, Wilson interval at `EVALS_INTERVAL` and wall-clock duration, with dates as ISO strings              |
-| `trialChartPoints`      | `utils/trialChartPoints.util.ts`           | One chart point per trial: its duration, toned by outcome, linked to `?trial=<id>` on its run                                         |
-| `toTrialPage`           | `utils/toTrialPage.util.ts`                | A page of trials as table rows, the invoked skills joined into one cell                                                               |
-| `toTrialSorting`        | `utils/toTrialSorting.util.ts`             | The table's sorting renamed to the `{ column, direction }` the trial query takes                                                      |
-| `isRunId`               | `utils/isRunId.util.ts`                    | Whether a route param is a run id, so a malformed one answers 404 before any query                                                    |
-| `isTrialPage`           | `utils/isTrialPage.util.ts`                | Shape guard for the trial resource route's JSON                                                                                       |
-| `evalsHref`             | `utils/evalsHref.util.ts`                  | The link to a run, or to one trial of it                                                                                              |
-| `evalsRouteEntries`     | `utils/evalsRouteEntries.util.ts`          | The route config's `/evals` entries with their full paths — what the flag and public-payload tests iterate, so a new route is covered |
-| `routeLoaderArgs`       | `utils/routeLoaderArgs.util.ts`            | Loader args for a route path with its params filled in; refuses a param it has no value for                                           |
-| `passRateLabel`         | `utils/passRateLabel.util.ts`              | A pass rate as a percentage with its k/n                                                                                              |
-| `intervalLabel`         | `utils/intervalLabel.util.ts`              | An interval as two percentages, or why there is none                                                                                  |
-| `costLabel`             | `utils/costLabel.util.ts`                  | A cost in dollars, or `not reported`                                                                                                  |
-| `durationLabel`         | `utils/durationLabel.util.ts`              | A duration in hours, minutes or seconds                                                                                               |
-| `trialSummaryLabel`     | `utils/trialSummaryLabel.util.ts`          | One trial's figures as a sentence, naming each missing one                                                                            |
-| `runFacts`              | `utils/runFacts.util.ts`                   | The run page's term-and-value list, saying which figures the run did not record                                                       |
+| Artifact                                | Location                                   | Description                                                                                                                                                  |
+| --------------------------------------- | ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `requireEvalsDashboard`                 | `.server/requireEvalsDashboard.service.ts` | The one read of `EVALS_DASHBOARD`; throws a 404 `Response` unless it is `1`. Every `/evals` loader calls it first                                            |
+| `selectRunSummaries`, `selectRunTrials` | `.server/evalsHistory.service.ts`          | The loaders' only database access: the run and trial readers bound to the reader pool                                                                        |
+| `Sparkline`                             | `Sparkline/`                               | A small SVG point chart drawn with StyleX, exposed as a labelled group; every point is a named router link, optionally joined by a line and toned by outcome |
+| `sparklineGeometry`                     | `Sparkline/sparklineGeometry.util.ts`      | Pure: each point's position in the chart box, scaled to the top value, plus the polyline joining them                                                        |
+| `toSuiteSummaries`                      | `overview/toSuiteSummaries.util.ts`        | The newest run of each suite and its scored runs as chart points, oldest first, each linked to its run                                                       |
+| `suiteRegressions`                      | `overview/suiteRegressions.util.ts`        | The suites whose latest main run has a rate below the lower bound of the main run before it                                                                  |
+| `parseTrialPageParams`                  | `run-trials/parseTrialPageParams.util.ts`  | The trial resource route's `limit`/`skip`/`sort` params, clamped to `EVALS_TRIALS_PAGE_LIMIT`                                                                |
+| `runFigures`                            | `utils/runFigures.util.ts`                 | A run summary plus its pass rate, Wilson interval at `EVALS_INTERVAL` and wall-clock duration, with dates as ISO strings                                     |
+| `trialChartPoints`                      | `utils/trialChartPoints.util.ts`           | One chart point per trial: its duration, toned by outcome, linked to `?trial=<id>` on its run                                                                |
+| `toTrialPage`                           | `utils/toTrialPage.util.ts`                | A page of trials as table rows, the invoked skills joined into one cell                                                                                      |
+| `toTrialSorting`                        | `utils/toTrialSorting.util.ts`             | The table's sorting renamed to the `{ column, direction }` the trial query takes                                                                             |
+| `isRunId`                               | `utils/isRunId.util.ts`                    | Whether a route param is a run id, so a malformed one answers 404 before any query                                                                           |
+| `parseTrialId`                          | `utils/parseTrialId.util.ts`               | The `?trial=` param as a trial id, or nothing when it is not a positive bigint                                                                               |
+| `isTrialPage`                           | `utils/isTrialPage.util.ts`                | Shape guard for the trial resource route's JSON                                                                                                              |
+| `evalsHref`                             | `utils/evalsHref.util.ts`                  | The link to a run, or to one trial of it                                                                                                                     |
+| `evalsRouteEntries`                     | `utils/evalsRouteEntries.util.ts`          | The route config's `/evals` entries with their full paths — what the flag and public-payload tests iterate, so a new route is covered                        |
+| `routeLoaderArgs`                       | `utils/routeLoaderArgs.util.ts`            | Loader args for a route path with its params filled in; refuses a param it has no value for                                                                  |
+| `passRateLabel`                         | `utils/passRateLabel.util.ts`              | A pass rate as a percentage with its k/n                                                                                                                     |
+| `intervalLabel`                         | `utils/intervalLabel.util.ts`              | An interval as two percentages, or why there is none                                                                                                         |
+| `costLabel`                             | `utils/costLabel.util.ts`                  | A cost in dollars, or `not reported`                                                                                                                         |
+| `durationLabel`                         | `utils/durationLabel.util.ts`              | A duration in hours, minutes or seconds                                                                                                                      |
+| `trialSummaryLabel`                     | `utils/trialSummaryLabel.util.ts`          | One trial's figures as a sentence, naming each missing one                                                                                                   |
+| `runFacts`                              | `utils/runFacts.util.ts`                   | The run page's term-and-value list, saying which figures the run did not record                                                                              |
 
 ### Server-side route helpers (`routes/enterprise-orders/.server/`)
 

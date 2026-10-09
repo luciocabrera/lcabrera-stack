@@ -23,7 +23,7 @@ export const toSuiteSummaries = (runs: readonly RunFigures[]) => {
         .map((run) => ({
           href: evalsHref({ runId: run.runId }),
           key: run.runId,
-          label: `${run.startedAt.slice(0, 10)} on ${run.branch}: ${passRateLabel(run)}`,
+          label: `Run ${run.runId.slice(0, 8)}, ${run.startedAt.slice(0, 10)} on ${run.branch}: ${passRateLabel(run)}`,
           value: run.rate ?? 0,
         })),
       suite,

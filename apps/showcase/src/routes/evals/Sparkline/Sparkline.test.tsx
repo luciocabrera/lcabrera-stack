@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -17,6 +17,9 @@ const POINTS = [
     value: 0.25,
   },
 ];
+
+const PRESENTATIONAL_PARENT =
+  '[role="img"], [role="presentation"], [role="none"]';
 
 const renderSparkline = (isConnected?: boolean) =>
   render(
@@ -45,11 +48,23 @@ describe('Sparkline', () => {
     expect(container.querySelectorAll('circle')).toHaveLength(POINTS.length);
   });
 
-  it('names each point and the chart for assistive technology', () => {
+  it('exposes every point as a named link inside a named chart', () => {
     renderSparkline();
 
-    expect(screen.getByRole('img', { name: 'Pass rate' })).toBeTruthy();
-    expect(screen.getByLabelText('trial 9: fail')).toBeTruthy();
+    const chart = screen.getByRole('figure', { name: 'Pass rate' });
+    const links = within(chart).getAllByRole('link');
+
+    expect(links.map((link) => link.getAttribute('aria-label'))).toEqual(
+      POINTS.map(({ label }) => label),
+    );
+    expect(
+      links.filter((link) => link.closest(PRESENTATIONAL_PARENT) !== null),
+    ).toEqual([]);
+    expect(
+      within(chart)
+        .getByRole('link', { name: 'trial 9: fail' })
+        .getAttribute('href'),
+    ).toBe('/evals/runs/c?trial=9');
   });
 
   it('draws the line only when the points are a series', () => {

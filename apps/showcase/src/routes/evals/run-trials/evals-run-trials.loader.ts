@@ -1,8 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { evalsReaderPool } from '@repo/eval-history/queries/evalsReaderPool.service';
-import { readRunTrials } from '@repo/eval-history/queries/readRunTrials.service';
-
+import { selectRunTrials } from '../.server/evalsHistory.service';
 import { requireEvalsDashboard } from '../.server/requireEvalsDashboard.service';
 import { isRunId } from '../utils/isRunId.util';
 import { toTrialPage } from '../utils/toTrialPage.util';
@@ -17,8 +15,7 @@ export const loader = async ({ params, request }: LoaderFunctionArgs) => {
     throw new Response('Not Found', { status: 404 });
   }
 
-  const page = await readRunTrials({
-    client: evalsReaderPool(),
+  const page = await selectRunTrials({
     runId,
     ...parseTrialPageParams(new URL(request.url).searchParams),
   });

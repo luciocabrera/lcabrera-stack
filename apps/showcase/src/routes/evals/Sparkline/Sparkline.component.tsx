@@ -22,27 +22,28 @@ export const Sparkline = ({
   });
 
   return (
-    <svg
-      aria-label={label}
-      role='img'
-      viewBox={`0 0 ${String(SPARKLINE_SIZE.width)} ${String(SPARKLINE_SIZE.height)}`}
-      width={SPARKLINE_SIZE.width}
-      {...stylex.props(styles.chart)}
-    >
-      {isConnected && dots.length > 1 && (
-        <polyline points={line} {...stylex.props(styles.line)} />
-      )}
-      {dots.map((dot) => (
-        <Link aria-label={dot.label} key={dot.key} to={dot.href}>
-          <title>{dot.label}</title>
-          <circle
-            cx={dot.cx}
-            cy={dot.cy}
-            r={SPARKLINE_SIZE.dotRadius}
-            {...stylex.props(styles.dot, dot.tone && styles[dot.tone])}
-          />
-        </Link>
-      ))}
-    </svg>
+    <figure aria-label={label} {...stylex.props(styles.figure)}>
+      <svg
+        viewBox={`0 0 ${String(SPARKLINE_SIZE.width)} ${String(SPARKLINE_SIZE.height)}`}
+        width={SPARKLINE_SIZE.width}
+        {...stylex.props(styles.chart)}
+      >
+        <title>{label}</title>
+        {isConnected && dots.length > 1 && (
+          <polyline points={line} {...stylex.props(styles.line)} />
+        )}
+        {dots.map((dot) => (
+          <Link aria-label={dot.label} key={dot.key} to={dot.href}>
+            <title>{dot.label}</title>
+            <circle
+              cx={dot.cx}
+              cy={dot.cy}
+              r={SPARKLINE_SIZE.dotRadius}
+              {...stylex.props(styles.dot, dot.tone && styles[dot.tone])}
+            />
+          </Link>
+        ))}
+      </svg>
+    </figure>
   );
 };
