@@ -30,6 +30,7 @@
     "@lcabrera/ui": "workspace:*",
     "@lcabrera/utils": "workspace:*",
     "@react-router/serve": "catalog:react",
+    "@repo/eval-history": "workspace:*",
     "@stylexjs/stylex": "catalog:react",
     "react": "catalog:react",
     "react-dom": "catalog:react",

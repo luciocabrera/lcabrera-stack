@@ -25,6 +25,9 @@ export default [
   route('car-sales', 'routes/car-sales/root.ts'),
   route('car-sales-infinite', 'routes/car-sales-infinite/root.ts'),
   route('skill-scores', 'routes/skill-scores/root.ts'),
+  route('evals', 'routes/evals/overview/root.ts'),
+  route('evals/runs/:runId', 'routes/evals/run-detail/root.ts'),
+  route('evals/runs/:runId/trials', 'routes/evals/run-trials/root.ts'),
   route('enterprise-orders', 'routes/enterprise-orders/root.ts', [
     route('new', 'routes/enterprise-orders/new-order/root.tsx'),
     route('edit/:orderId', 'routes/enterprise-orders/edit-order/root.tsx'),

@@ -174,8 +174,9 @@ Nothing else sets it, so under `test`, `test:all`, `test:ci` and `test:changed`
 those suites skip and no connection is opened. Start Postgres with
 `vp run db:up` before running them.
 
-**`@repo/eval-history`'s migrator, ingest, reporting and grade tests are the DB-bound
-suites CI runs.** Each gates in-file on `EVALS_TEST_DATABASE_URL`: unset, it
+**`@repo/eval-history`'s migrator, ingest, reporting and grade tests, and
+`apps/showcase`'s `/evals` public-payload test, are the DB-bound suites CI
+runs.** Each gates in-file on `EVALS_TEST_DATABASE_URL`: unset, it
 prints why and skips — except under `CI`, where it fails. The Unit Tests job
 sets the variable against a Postgres service container; the Fallow Audit job has
 none, so the workspace's `test:coverage` excludes `*.integration.test.ts`. The
@@ -190,7 +191,10 @@ alone is not enough: the writer test inserts under `set local role` on the role
 it created, and from Postgres 16 a non-superuser creator cannot `set role` to it
 by default. They use a randomly named role, never `evals_writer`. The ingest and
 reporting tests beside it each create and drop a database of their own on that
-server, so the user also needs `CREATEDB`; a superuser has both.
+server, so the user also needs `CREATEDB`; a superuser has both. The showcase's
+`/evals` test does the same, and also creates a migrating, a writer and a
+reader login role with passwords: it migrates as the first, ingests as the
+second and runs every loader as the third.
 
 `vp run --filter showcase test:e2e` is the browser suite for the same database.
 It is opt-in in the same way: it is not part of `test:ci` or `check:safe`.

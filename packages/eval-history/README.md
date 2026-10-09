@@ -41,6 +41,12 @@ decides how the envelope is versioned.
   pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
   the views beneath, names a column in `EXCLUDED_COLUMNS`
   ([ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)).
+  `readRunSummaries` and `readRunTrials` read base tables instead, and reach
+  each one only through `projectedRelation`, which refuses a column outside
+  `PUBLIC_COLUMNS` (derived per read from `information_schema` by
+  `readPublicColumns`) and a `jsonb` field outside `PUBLIC_FIELD_PATHS`.
+  `evalsReaderPool` is the pool they run on, built from
+  `EVALS_READER_DATABASE_URL`.
 - `src/seed/` — a year of synthetic nightly history, about 15k trials, for
   timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of
@@ -53,7 +59,10 @@ decides how the envelope is versioned.
   and rejects a file that fails `regressionConfigSchema`.
 - `src/testing/` — the scratch-database harness the integration tests share:
   it connects to databases beside the one `EVALS_TEST_DATABASE_URL` names and
-  drops them, and the roles a test created, afterwards. No command imports it.
+  drops them, and the roles a test created, afterwards. `markedEnvelopes`
+  builds one schema-valid envelope per suite with a marker in every field the
+  allow-list leaves out, for the showcase's `/evals` public-payload test. No
+  command imports either.
 
 `vp run evals:migrate` applies `migrations/` to the database
 `EVALS_MIGRATE_DATABASE_URL` names, connected as the migrating role, which
