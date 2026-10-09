@@ -1,5 +1,18 @@
 # @lcabrera/devkit
 
+## 0.8.0
+
+### Minor Changes
+
+- 6a48007: `devkit init` and `devkit create` now place `docs/agents/dependency-advisories.json`, the register the dependency audit reads, at the `monorepo` rung, where `deps:audit` is wired. It carries one allowance, dated to 2026-11-03, for GHSA-vfj7-8cjw-p6xm in `braces`. No patched `braces` exists, and it reaches that rung only through `@stylexjs/eslint-plugin`, a peer of `@lcabrera/vite-config`. Without the register, a tree made today fails its own `deps:audit` on that advisory.
+
+  The file is yours to edit like any other placed file. `devkit sync` refreshes it until you edit it, and keeps your edits once you have.
+
+### Patch Changes
+
+- 0ae748a: `@lcabrera/server` now declares `pg` at `^8.23.1`, and `@lcabrera/eslint-plugin` declares `@typescript-eslint/utils` at `^8.71.0`. `@lcabrera/devkit` pins pnpm 12.9.1 in the `packageManager` of the repository it writes, and the `full` rung's app declares `pg` at `^8.23.1`.
+- 9ac517f: The `workspace` blueprint's `pnpm-workspace.yaml` now overrides `tinypool@2` to `^2.1.2`. The `vite-plus` release the blueprint pins installs an `oxfmt` that pins `tinypool` exactly at 2.1.0, which carries two critical advisories (GHSA-5gmw-xhrv-c9v3, GHSA-85c8-ppgw-ccpr). Without the override a freshly created tree fails its own `deps:audit` task on first install.
+
 ## 0.7.0
 
 ### Minor Changes

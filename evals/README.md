@@ -27,6 +27,21 @@ session, with its tokens, cost and durations. Each suite's own output under
 `.tmp/` is still written, and skill quality builds `report.html` from the
 envelope.
 
+Every file a runner writes is scrubbed as it is written, through
+`writeScrubbed` in [`transcript-scrub.mjs`](./transcript-scrub.mjs): the
+envelope, the transcripts, and each runner's own output under `.tmp/`, such as
+`trials.json`, which CI uploads as an artifact. A test fails if a runner, or an `evals/` module it
+imports, writes a file any other way outside its own scratch directory. The scrubber redacts the value of every environment
+variable whose name marks it secret (a name ending in `TOKEN`, `SECRET`,
+`PASSWORD`, `API_KEY`, `ACCESS_KEY`, `DATABASE_URL` and the like, with a value
+of at least 8 characters), the password in any URL, with or without a user, and
+known token shapes such as GitHub, npm and API keys, JWTs and private key
+blocks. Each is replaced with `[REDACTED:<kind>]`. The size and sha256 the
+envelope records are taken from the scrubbed file, and a file with nothing to
+redact is written unchanged. A value is matched as written or JSON-escaped, so
+the same secret URL-encoded, base64-encoded or wrapped across lines is not
+caught unless its shape is.
+
 The envelope is written on every way out: `complete` on a normal finish,
 `partial` when the run throws, and `aborted` on Ctrl-C or SIGTERM. A runner
 whose envelope fails the schema writes none, names each failing field and exits 1.

@@ -13,12 +13,11 @@ import {
 } from 'vite-plus/test';
 
 import {
-  finishedSession,
+  rulesPlan as plan,
+  rulesTrial as trial,
   STARTED_AT,
   testIdentity,
-  testPlan,
 } from './envelope-test-support.mjs';
-import { sessionTrial } from './run-envelope.mjs';
 import {
   recordRun,
   runIdentity,
@@ -26,45 +25,6 @@ import {
   saveEnvelope,
   saveTranscript,
 } from './run-record.mjs';
-
-const TASK_KEY = 'rules-consistency/typescript/indexed';
-
-const plan = testPlan({
-  modelId: undefined,
-  subjects: [
-    {
-      content_hash: 'a'.repeat(64),
-      kind: 'rule',
-      name: 'typescript',
-      path: '.claude/rules/typescript.md',
-    },
-  ],
-  suite: 'rules-consistency',
-  tasks: [
-    {
-      agent_prompt_hash: null,
-      expected_hash: null,
-      fixture_hash: null,
-      judge_prompt_hash: null,
-      kind: 'rule-check',
-      set: 'regression',
-      source: null,
-      subject: { kind: 'rule', name: 'typescript' },
-      tags: [],
-      task_hash: 'b'.repeat(64),
-      task_key: TASK_KEY,
-    },
-  ],
-});
-
-const trial = sessionTrial({
-  detail: { check: 'indexed', findings: [], schema: 'rules/1' },
-  metrics: finishedSession(),
-  passed: true,
-  queuedAt: STARTED_AT,
-  taskKey: TASK_KEY,
-  trialIndex: 0,
-});
 
 let resultsDir;
 let ingest;

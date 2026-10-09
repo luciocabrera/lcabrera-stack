@@ -179,7 +179,7 @@ export const GATE_RUNTIME_PACKAGE = '@lcabrera/repo-standards';
 
 export const TOOLCHAIN_RANGES = {
   [DEVKIT_PACKAGE]: `>=${ownManifest.version} <${inc(ownManifest.version, 'major')}`,
-  [GATE_RUNTIME_PACKAGE]: '>=0.7.0 <1.0.0',
+  [GATE_RUNTIME_PACKAGE]: '>=0.8.0 <1.0.0',
 };
 
 /**
