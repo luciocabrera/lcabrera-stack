@@ -1086,7 +1086,13 @@ diff step instead, and a job skipped that way still reports. Its **Verifier fixt
 that touches `.claude/agents/refactor-verifier.md`,
 `docs/agents/refactor-verified-contract.md` or `evals/verifier-fixtures/`, on
 `CLAUDE_CODE_OAUTH_TOKEN`. It is not a required check, so a spent usage limit
-cannot stall a merge.
+cannot stall a merge. Both model jobs then upload `.tmp/eval-results/` (the run
+envelopes, with the scrubbed transcripts beside them) as an artifact kept for
+90 days, and run `evals:ingest` on it with the `EVALS_DATABASE_URL` secret.
+That step is `continue-on-error` and does not fail the job. With the secret
+unset it skips with a notice. When the database is unreachable or rejects an
+envelope it leaves a warning, and `vp run evals:ingest` on the downloaded
+artifact sends the envelopes later.
 
 Other workflows: `lighthouse.yml`, `validate-skills.yml`, and
 [`pr-standards.yml`](.github/workflows/pr-standards.yml) — on every pull request
