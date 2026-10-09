@@ -109,6 +109,34 @@ jobs:
           if-no-files-found: ignore
           retention-days: 7
 
+      - name: Upload envelopes
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: skill-trigger-envelopes
+          path: .tmp/eval-results/
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Ingest envelopes (advisory)
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          EVALS_DATABASE_URL: ${{ secrets.EVALS_DATABASE_URL }}
+        run: |
+          if [ -z "$EVALS_DATABASE_URL" ]; then
+            echo "::notice title=Eval history::EVALS_DATABASE_URL is not set, so ingest is skipped; the envelopes are in the skill-trigger-envelopes artifact."
+            exit 0
+          fi
+          if [ ! -d .tmp/eval-results ]; then
+            echo "::notice title=Eval history::No envelope was written under .tmp/eval-results, so there is nothing to ingest."
+            exit 0
+          fi
+          if ! vp run evals:ingest -- .tmp/eval-results; then
+            echo "::warning title=Eval history::evals:ingest did not store every envelope; they are in the skill-trigger-envelopes artifact, and vp run evals:ingest sends a downloaded copy."
+          fi
+
   verifier-fixtures:
     name: Verifier fixtures (Claude, advisory)
     concurrency:
@@ -174,3 +202,31 @@ jobs:
           path: .tmp/verifier-evals/
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Upload envelopes
+        if: always() && steps.scope.outputs.run == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: verifier-fixture-envelopes
+          path: .tmp/eval-results/
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Ingest envelopes (advisory)
+        if: always() && steps.scope.outputs.run == 'true'
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          EVALS_DATABASE_URL: ${{ secrets.EVALS_DATABASE_URL }}
+        run: |
+          if [ -z "$EVALS_DATABASE_URL" ]; then
+            echo "::notice title=Eval history::EVALS_DATABASE_URL is not set, so ingest is skipped; the envelopes are in the verifier-fixture-envelopes artifact."
+            exit 0
+          fi
+          if [ ! -d .tmp/eval-results ]; then
+            echo "::notice title=Eval history::No envelope was written under .tmp/eval-results, so there is nothing to ingest."
+            exit 0
+          fi
+          if ! vp run evals:ingest -- .tmp/eval-results; then
+            echo "::warning title=Eval history::evals:ingest did not store every envelope; they are in the verifier-fixture-envelopes artifact, and vp run evals:ingest sends a downloaded copy."
+          fi
