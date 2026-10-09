@@ -12,6 +12,7 @@ import {
   UPSERT_TASK_SQL,
 } from './ingest.constants.ts';
 import { inSequence } from './inSequence.service.ts';
+import { judgeColumns } from './judgeColumns.util.ts';
 
 type IngestEnvelopeArgs = {
   readonly client: IngestClient;
@@ -82,32 +83,39 @@ const trialValues = ({
   subjectVersionId,
   taskVersionId,
   trial,
-}: TrialValuesArgs) => [
-  run.run_id,
-  taskVersionId,
-  subjectVersionId,
-  trial.trial_index,
-  trial.outcome,
-  trial.error_class,
-  trial.queued_at,
-  trial.started_at,
-  trial.first_token_at,
-  trial.finished_at,
-  trial.duration_ms,
-  trial.duration_api_ms,
-  trial.turns,
-  trial.tokens.input,
-  trial.tokens.output,
-  trial.tokens.cache_read,
-  trial.tokens.cache_write,
-  trial.cost_usd_reported,
-  trial.transcript?.uri,
-  trial.transcript?.sha256,
-  trial.transcript?.bytes,
-  trial.transcript ? transcriptExpiry(run) : undefined,
-  trial.detail.schema,
-  trial.detail,
-];
+}: TrialValuesArgs) => {
+  const { dimensions, judgeModel, scores } = judgeColumns(trial.detail);
+
+  return [
+    run.run_id,
+    taskVersionId,
+    subjectVersionId,
+    trial.trial_index,
+    trial.outcome,
+    trial.error_class,
+    trial.queued_at,
+    trial.started_at,
+    trial.first_token_at,
+    trial.finished_at,
+    trial.duration_ms,
+    trial.duration_api_ms,
+    trial.turns,
+    trial.tokens.input,
+    trial.tokens.output,
+    trial.tokens.cache_read,
+    trial.tokens.cache_write,
+    trial.cost_usd_reported,
+    trial.transcript?.uri,
+    trial.transcript?.sha256,
+    trial.transcript?.bytes,
+    trial.transcript ? transcriptExpiry(run) : undefined,
+    trial.detail.schema,
+    trial.detail,
+    judgeModel,
+    dimensions,
+    scores,
+  ];
+};
 
 type WriteSubjectArgs = {
   readonly client: IngestClient;

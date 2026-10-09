@@ -19,6 +19,7 @@ export const EXCLUDED_COLUMNS = [
 export const REPORTING_RELATIONS = [
   'flaky_tasks',
   'run_compare',
+  'v_judge_agreement',
   'v_subject_trend',
   'v_task_pass_rate',
 ] as const;
