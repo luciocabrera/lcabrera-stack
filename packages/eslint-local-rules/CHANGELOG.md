@@ -1,5 +1,11 @@
 # @lcabrera/eslint-plugin
 
+## 0.3.3
+
+### Patch Changes
+
+- 0ae748a: `@lcabrera/server` now declares `pg` at `^8.23.1`, and `@lcabrera/eslint-plugin` declares `@typescript-eslint/utils` at `^8.71.0`. `@lcabrera/devkit` pins pnpm 12.9.1 in the `packageManager` of the repository it writes, and the `full` rung's app declares `pg` at `^8.23.1`.
+
 ## 0.3.2
 
 ### Patch Changes
