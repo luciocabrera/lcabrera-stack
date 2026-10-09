@@ -24,6 +24,7 @@ export const EXCLUDED_COLUMNS = [
 export const REPORTING_RELATIONS = [
   'flaky_tasks',
   'run_compare',
+  'v_judge_agreement',
   'v_subject_trend',
   'v_task_pass_rate',
 ] as const;
@@ -34,6 +35,7 @@ export const ALLOWED_TEXT_COLUMNS = [
   'eval_baseline.model_id',
   'eval_baseline.suite',
   'eval_human_grade.dimension',
+  'eval_judge_score.dimension',
   'eval_run.branch',
   'eval_run.catalog_hash',
   'eval_run.git_sha',
@@ -57,6 +59,7 @@ export const ALLOWED_TEXT_COLUMNS = [
   'eval_tool_call.tool',
   'eval_trial.error_class',
   'eval_trial_detail.detail_schema',
+  'eval_trial_detail.judge_model',
   'model_price.model_id',
   'suite.name',
 ] as const;
@@ -78,6 +81,7 @@ export const PUBLIC_FIELD_PATHS = [
   'eval_trial_detail.detail.expected_not_met',
   'eval_trial_detail.detail.expected_skill',
   'eval_trial_detail.detail.invoked',
+  'eval_trial_detail.detail.judge_model',
   'eval_trial_detail.detail.not_met',
   'eval_trial_detail.detail.overall',
   'eval_trial_detail.detail.verdict',

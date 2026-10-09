@@ -279,6 +279,18 @@ heatmap and the matrix are small, fixed shapes.
   raised, and `createTableRouteLoader` in `@lcabrera/ui` already accepts any
   `fetchPage`.
 
+## Amendments
+
+> **Widened by
+> [#1281](https://github.com/luciocabrera/lcabrera-stack/issues/1281)**
+> (2026-10-09). Two text-typed columns join the allowed set:
+> `eval_trial_detail.judge_model`, a model identifier in the same closed form as
+> `eval_run.model_id`, and the new table `eval_judge_score`'s `dimension`, a
+> rubric dimension name like `eval_human_grade.dimension`.
+> `eval_judge_score.score` is a number and needs no entry. Ingest copies both
+> out of the quality suite's `detail`, so `evals.v_judge_agreement` reads plain
+> columns and nothing inside `detail`, which stays excluded whole.
+
 ## References
 
 - [`eval-history-plan.md`](../agents/planning/eval-history-plan.md) §8 and §12

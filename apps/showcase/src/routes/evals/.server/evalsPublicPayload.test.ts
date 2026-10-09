@@ -1,19 +1,24 @@
 // @vitest-environment node
 
 /**
- * What a public /evals route may return, checked against a real Postgres. The
- * test migrates a scratch database next to the one EVALS_TEST_DATABASE_URL
- * names, seeds a short synthetic history, then writes a unique marker into
- * every column and every envelope field the allow-list does not make public.
- * Each /evals loader in the route config then answers as the read-only role,
- * and no answer may carry the marker. Unset, it skips locally and fails under
- * CI.
+ * What a public /evals route may return, checked against a real Postgres with
+ * the three roles ADR-134 separates: the schema is migrated by a migrating
+ * role that owns it, history is written by a role holding only the writer's
+ * grants (a short synthetic year, then one ingested envelope per suite), and
+ * every loader reads through a login holding only the reader's grants. Every
+ * column and envelope field the allow-list leaves out carries a unique marker,
+ * and no answer may contain it. Unset, it skips locally and fails under CI.
  */
 
 import type pg from 'pg';
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { EVALS_READER_ROLE } from '@repo/eval-history/migrate/migrate.constants';
+import { ingestPaths } from '@repo/eval-history/ingest/ingestPaths.service';
+import { memoryFileSystem } from '@repo/eval-history/ingest/memoryFileSystem.util';
+import {
+  EVALS_READER_ROLE,
+  EVALS_WRITER_ROLE,
+} from '@repo/eval-history/migrate/migrate.constants';
 import { migrateEvals } from '@repo/eval-history/migrate/migrateEvals.service';
 import { readMigrations } from '@repo/eval-history/migrate/readMigrations.service';
 import { readModelPrices } from '@repo/eval-history/prices/readModelPrices.service';
@@ -27,14 +32,15 @@ import {
   EXCLUDED_COLUMNS,
   EXCLUDED_TABLES,
   JSONB_COLUMN_SCHEMAS,
-  PUBLIC_FIELD_PATHS,
 } from '@repo/eval-history/queries/queries.constants';
 import {
   readPublicColumns,
   readSchemaColumns,
 } from '@repo/eval-history/queries/readPublicColumns.service';
-import { scratchServer } from '@repo/eval-history/queries/scratchServer.service';
+import { seedFieldPaths } from '@repo/eval-history/queries/seedFieldPaths.util';
 import { seedSyntheticHistory } from '@repo/eval-history/seed/seedSyntheticHistory.service';
+import { markedEnvelopes } from '@repo/eval-history/testing/markedEnvelopes.util';
+import { scratchConnections } from '@repo/eval-history/testing/scratchConnections.service';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 import { z } from 'zod';
@@ -60,28 +66,41 @@ const MARKER = `zzprivate${randomBytes(8).toString('hex')}`;
 
 const SHAPE = { nights: 4, subjects: 2, trialsPerTask: 3 };
 
+const ENVELOPES = markedEnvelopes({
+  marker: MARKER,
+  startedAt: '2026-10-05T02:00:00.000Z',
+});
+
+const ENVELOPE_FILES = Object.fromEntries(
+  ENVELOPES.map((envelope) => [
+    `/results/${envelope.run.run_id}.json`,
+    JSON.stringify(envelope),
+  ]),
+);
+
 const seededRowsSchema = z.array(
   z.object({ runId: z.string(), taskKey: z.string(), trialId: z.string() }),
 );
 
 const countSchema = z.array(z.object({ count: z.number().int() }));
 
-const fieldSeedPaths = (column: JsonbColumn) =>
-  (ALLOWED_WHOLE_JSONB as readonly string[]).includes(column)
-    ? []
-    : freeStringPaths({ schema: JSONB_COLUMN_SCHEMAS[column] }).filter(
-        (path) =>
-          !(PUBLIC_FIELD_PATHS as readonly string[]).includes(
-            `${column}.${path}`,
-          ),
-      );
-
 const samplesFor = (column: JsonbColumn) =>
   markedSamples({
     marker: MARKER,
     schema: JSONB_COLUMN_SCHEMAS[column],
-    seedPaths: fieldSeedPaths(column),
+    seedPaths: seedFieldPaths(column),
   });
+
+const seedRunJsonb = async (client: pg.Client) => {
+  const [settings] = samplesFor('eval_run.settings');
+  const [env] = samplesFor('eval_run.env');
+  const [totals] = samplesFor('eval_run.totals');
+
+  await client.query({
+    text: 'update evals.eval_run set settings = $1, env = $2, totals = $3',
+    values: [settings, env, totals],
+  });
+};
 
 const settle = async (value: unknown): Promise<unknown> => {
   if (value instanceof Response) {
@@ -128,14 +147,33 @@ it.runIf(IS_CI)('has a database to check the /evals payload against', () => {
 });
 
 describe.skipIf(!DATABASE_URL)('the public /evals payload', () => {
-  const suffix = randomUUID().replaceAll('-', '');
+  const suffix = randomUUID().replaceAll('-', '').slice(0, 16);
   const databaseName = `evals_dashboard_${suffix}`;
   const password = randomBytes(16).toString('hex');
+  const migrator = `evals_migrate_dash_${suffix}`;
+  const writer = { ...EVALS_WRITER_ROLE, name: `evals_writer_dash_${suffix}` };
   const reader = { ...EVALS_READER_ROLE, name: `evals_reader_dash_${suffix}` };
-  const { connect, dispose } = scratchServer({ url: DATABASE_URL ?? '' });
+  const roles = [migrator, writer.name, reader.name];
+  const { close, connect } = scratchConnections(DATABASE_URL ?? '');
   const loaded = new Map<string, RouteModule>();
   const seeded = { runId: '', taskKey: '', trialId: '' };
   const seededColumns: string[] = [];
+
+  const urlAs = (user: string) =>
+    databaseUrl({
+      database: databaseName,
+      password,
+      url: DATABASE_URL ?? '',
+      user,
+    });
+
+  const connectAs = async (user: string) => {
+    const client = await connect(databaseName);
+
+    await client.query(`set role "${user}"`);
+
+    return client;
+  };
 
   const seedTextColumns = async (client: pg.Client) => {
     const publicColumns = await readPublicColumns({ client });
@@ -162,48 +200,11 @@ describe.skipIf(!DATABASE_URL)('the public /evals payload', () => {
     }
   };
 
-  const seedJsonb = async (client: pg.Client) => {
-    const [settings] = samplesFor('eval_run.settings');
-    const [env] = samplesFor('eval_run.env');
-    const [totals] = samplesFor('eval_run.totals');
-
-    await client.query({
-      text: 'update evals.eval_run set settings = $1, env = $2, totals = $3',
-      values: [settings, env, totals],
-    });
-
-    const details = samplesFor('eval_trial_detail.detail');
-    const { rows } = await client.query({
-      text: `select id::text as "trialId" from evals.eval_trial
-where run_id = $1 order by id limit $2`,
-      values: [seeded.runId, details.length],
-    });
-    const trialIds = rows.map(
-      (row: { readonly trialId: string }) => row.trialId,
-    );
-
-    expect(trialIds).toHaveLength(details.length);
-
-    for (const [index, detail] of details.entries()) {
-      await client.query({
-        text: `insert into evals.eval_trial_detail (trial_id, detail_schema, detail)
-values ($1, $2, $3)`,
-        values: [
-          trialIds[index],
-          z.object({ schema: z.string() }).parse(detail).schema,
-          detail,
-        ],
-      });
-    }
-
-    seeded.trialId = trialIds[0] ?? '';
-  };
-
   const seedOtherTables = async (client: pg.Client) => {
     await client.query({
       text: `insert into evals.eval_tool_call (trial_id, seq, tool, input_summary, at)
-select id, 0, 'Read', 'placeholder', now() from evals.eval_trial where run_id = $1`,
-      values: [seeded.runId],
+select id, 0, 'Read', 'placeholder', now() from evals.eval_trial`,
+      values: [],
     });
     await client.query({
       text: `insert into evals.eval_annotation (at, kind, text, author)
@@ -215,6 +216,11 @@ values (now(), 'note', 'placeholder', 'placeholder')`,
   (baseline_id, suite, model_id, metric, git_sha, n_runs, mean, stddev)
 values ($1, 'skills', 'synthetic-model-b', 'pass_rate', $2, 3, 0.5, 0.1)`,
       values: [randomUUID(), '0'.repeat(40)],
+    });
+    await client.query({
+      text: `insert into evals.eval_human_grade (trial_id, dimension, score, grader)
+select trial_id, dimension, 3, 'placeholder' from evals.eval_judge_score`,
+      values: [],
     });
   };
 
@@ -252,35 +258,60 @@ values ($1, 'skills', 'synthetic-model-b', 'pass_rate', $2, 3, 0.5, 0.1)`,
     const admin = await connect();
 
     await admin.query(`create database "${databaseName}"`);
+
+    for (const role of roles) {
+      await admin.query(`create role "${role}" login password '${password}'`);
+    }
+
     await admin.query(
-      `create role "${reader.name}" login password '${password}'`,
+      `grant create, connect on database "${databaseName}" to "${migrator}"`,
     );
 
-    const client = await connect(databaseName);
+    const migrating = await connectAs(migrator);
     const migrated = await migrateEvals({
-      client,
+      client: migrating,
       migrations: await readMigrations(),
       prices: await readModelPrices(),
-      roles: [reader],
+      roles: [writer, reader],
     });
 
-    expect(migrated.granted.map(({ name }) => name)).toEqual([reader.name]);
-    await seedSyntheticHistory({ client, endsOn: '2026-10-01', shape: SHAPE });
+    expect(migrated.granted.map(({ name }) => name)).toEqual([
+      writer.name,
+      reader.name,
+    ]);
 
-    const { rows } = await client.query(`select
+    const writing = await connectAs(writer.name);
+
+    await seedSyntheticHistory({
+      client: writing,
+      endsOn: '2026-10-01',
+      shape: SHAPE,
+    });
+
+    const ingested = await ingestPaths({
+      connectionString: urlAs(writer.name),
+      fileSystem: memoryFileSystem(ENVELOPE_FILES),
+      paths: ['/results'],
+      quietUnreachable: false,
+    });
+
+    expect(ingested.exitCode, ingested.stderr.join('\n')).toBe(0);
+
+    const { rows } = await writing.query(`select
   run.run_id::text as "runId", task.task_key as "taskKey", trial.id::text as "trialId"
 from evals.eval_run run
 join evals.eval_trial trial on trial.run_id = run.run_id
 join evals.eval_task_version version on version.id = trial.task_version_id
 join evals.eval_task task on task.id = version.task_id
+where run.suite = 'skill-quality'
 order by run.started_at desc, trial.id
 limit 1`);
     const [first] = seededRowsSchema.parse(rows);
 
     Object.assign(seeded, first);
-    await seedOtherTables(client);
-    await seedJsonb(client);
-    await seedTextColumns(client);
+    await seedOtherTables(writing);
+    await seedRunJsonb(writing);
+    await seedTextColumns(migrating);
 
     for (const { file } of ENTRIES) {
       const load = MODULES[file.replace(/^routes\/evals\//u, '../')];
@@ -291,46 +322,60 @@ limit 1`);
     }
 
     vi.stubEnv('EVALS_DASHBOARD', '1');
-    vi.stubEnv(
-      'EVALS_READER_DATABASE_URL',
-      databaseUrl({
-        database: databaseName,
-        password,
-        url: DATABASE_URL ?? '',
-        user: reader.name,
-      }),
-    );
+    vi.stubEnv('EVALS_READER_DATABASE_URL', urlAs(reader.name));
   }, 120_000);
 
   afterAll(async () => {
     vi.unstubAllEnvs();
     await closeEvalsReaderPool();
-    await dispose({ databases: [databaseName], roles: [reader.name] });
+    await close({ databases: [databaseName], roles });
   });
 
   it('seeds the marker where the allow-list says it must not be read', async () => {
     const client = await connect(databaseName);
     const { rows } = await client.query({
-      text: `select count(*)::integer as count from evals.eval_run
-where settings::text like '%' || $1 || '%'`,
+      text: `select (
+  (select count(*) from evals.eval_run where settings::text like '%' || $1 || '%')
+  + (select count(*) from evals.eval_trial_detail where detail::text like '%' || $1 || '%')
+)::integer as count`,
       values: [MARKER],
     });
     const [{ count } = { count: 0 }] = countSchema.parse(rows);
 
     expect(seededColumns).toEqual(
       expect.arrayContaining([
+        'eval_annotation.author',
+        'eval_annotation.text',
+        'eval_human_grade.grader',
         'eval_run.actor',
         'eval_subject_version.content',
-        'eval_trial.transcript_uri',
-        'eval_annotation.text',
         'eval_tool_call.input_summary',
+        'eval_trial.transcript_uri',
       ]),
     );
-    expect(fieldSeedPaths('eval_run.settings')).toContain('argv');
-    expect(fieldSeedPaths('eval_trial_detail.detail')).toEqual(
+    expect(seedFieldPaths('eval_run.settings')).toContain('argv');
+    expect(seedFieldPaths('eval_trial_detail.detail')).toEqual(
       expect.arrayContaining(['dimensions[].feedback', 'findings', 'summary']),
     );
-    expect(count).toBeGreaterThan(0);
+    expect(count).toBeGreaterThan(ENVELOPES.length);
+  });
+
+  it('derives the same excluded text columns the allow-list names', async () => {
+    const client = await connect(databaseName);
+    const publicColumns = await readPublicColumns({ client });
+    const schemaColumns = await readSchemaColumns({ client });
+    const textColumns = schemaColumns
+      .filter((column) => isTextTyped(column))
+      .map(({ column, table }) => `${table}.${column}`);
+    const excludedText = textColumns.filter((column) =>
+      (EXCLUDED_COLUMNS as readonly string[]).includes(column),
+    );
+
+    expect(excludedText).not.toEqual([]);
+    expect(excludedText.filter((column) => publicColumns.has(column))).toEqual(
+      [],
+    );
+    expect(seededColumns).toEqual(expect.arrayContaining(excludedText));
   });
 
   it('loads a module for every /evals route', () => {
@@ -339,7 +384,7 @@ where settings::text like '%' || $1 || '%'`,
   });
 
   it.each(ENTRIES.map(({ path }) => ({ path })))(
-    '$path answers with seeded public data and without the marker',
+    '$path answers as the reader with seeded public data and without the marker',
     async ({ path }) => {
       const { payload, status } = await answer(path);
 
@@ -353,6 +398,14 @@ where settings::text like '%' || $1 || '%'`,
     },
     30_000,
   );
+
+  it('connects the loaders as a role that cannot write', async () => {
+    const client = await connectAs(reader.name);
+
+    await expect(
+      client.query(`delete from evals.eval_annotation`),
+    ).rejects.toThrow(/permission denied/u);
+  });
 
   it('makes every column public that carries no free text and is not excluded', async () => {
     const client = await connect(databaseName);

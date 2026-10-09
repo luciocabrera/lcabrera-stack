@@ -42,7 +42,7 @@ describe('migrateReport', () => {
         'evals:migrate: upserted 3 model prices',
         'evals:migrate: role evals_writer does not exist; create it, then run evals:migrate again:',
         '  create role "evals_writer" login;',
-        '  grant usage, create on schema evals to "evals_writer";',
+        '  grant usage on schema evals to "evals_writer";',
         '  grant select, insert, update, delete on all tables in schema evals to "evals_writer";',
       ].join('\n'),
     );

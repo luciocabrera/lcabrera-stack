@@ -22,6 +22,7 @@ import { readMigrations } from '../migrate/readMigrations.service.ts';
 import { readModelPrices } from '../prices/readModelPrices.service.ts';
 import { SYNTHETIC_PRIVATE_TEXT } from '../seed/seed.constants.ts';
 import { seedSyntheticHistory } from '../seed/seedSyntheticHistory.service.ts';
+import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { columnsNamed } from './columnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
 import { EXCLUDED_COLUMNS, REPORTING_RELATIONS } from './queries.constants.ts';
@@ -30,7 +31,6 @@ import { readRunComparison } from './readRunComparison.service.ts';
 import { readSubjectTrend } from './readSubjectTrend.service.ts';
 import { readTaskPassRates } from './readTaskPassRates.service.ts';
 import { runCompareQuery } from './runCompareQuery.util.ts';
-import { scratchServer } from './scratchServer.service.ts';
 import { subjectTrendQuery } from './subjectTrendQuery.util.ts';
 import { taskPassRatesQuery } from './taskPassRatesQuery.util.ts';
 
@@ -90,8 +90,8 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
   const databaseName = `evals_reporting_${suffix}`;
   const smallDatabaseName = `evals_reporting_small_${suffix}`;
   const reader = { ...EVALS_READER_ROLE, name: `evals_reader_test_${suffix}` };
+  const { close, connect } = scratchConnections(DATABASE_URL ?? '');
   const seeded = { runs: 0, trials: 0 };
-  const { connect, dispose } = scratchServer({ url: DATABASE_URL ?? '' });
 
   const readerClient = async () => {
     const client = await connect(databaseName);
@@ -122,12 +122,12 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
     );
   }, 60_000);
 
-  afterAll(async () => {
-    await dispose({
+  afterAll(() =>
+    close({
       databases: [databaseName, smallDatabaseName],
       roles: [reader.name],
-    });
-  });
+    }),
+  );
 
   it('holds a year of nightly runs and at least 15k trials', () => {
     expect(seeded.runs).toBe(365);

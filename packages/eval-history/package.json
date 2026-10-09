@@ -19,6 +19,8 @@
     "./hashing/readFileSet.service": "./src/hashing/readFileSet.service.ts",
     "./hashing/skillCatalogEntry.util": "./src/hashing/skillCatalogEntry.util.ts",
     "./hashing/skillHashes.util": "./src/hashing/skillHashes.util.ts",
+    "./ingest/ingestPaths.service": "./src/ingest/ingestPaths.service.ts",
+    "./ingest/memoryFileSystem.util": "./src/ingest/memoryFileSystem.util.ts",
     "./stats/attribute.util": "./src/stats/attribute.util.ts",
     "./stats/binaryRegression.util": "./src/stats/binaryRegression.util.ts",
     "./stats/countOutcomes.util": "./src/stats/countOutcomes.util.ts",
@@ -51,11 +53,18 @@
     "./queries/readRunSummaries.service": "./src/queries/readRunSummaries.service.ts",
     "./queries/readRunTrials.service": "./src/queries/readRunTrials.service.ts",
     "./queries/databaseUrl.util": "./src/queries/databaseUrl.util.ts",
-    "./queries/scratchServer.service": "./src/queries/scratchServer.service.ts"
+    "./queries/seedFieldPaths.util": "./src/queries/seedFieldPaths.util.ts",
+    "./testing/markedEnvelopes.util": "./src/testing/markedEnvelopes.util.ts",
+    "./testing/scratchConnections.service": "./src/testing/scratchConnections.service.ts",
+    "./grades/judgeAgreement.util": "./src/grades/judgeAgreement.util.ts",
+    "./grades/judgeAgreementLines.util": "./src/grades/judgeAgreementLines.util.ts",
+    "./grades/readJudgeAgreement.service": "./src/grades/readJudgeAgreement.service.ts"
   },
   "scripts": {
+    "annotate": "node ./scripts/annotate.mjs",
     "format": "vp fmt .",
     "format:check": "vp fmt --check .",
+    "grade": "node ./scripts/grade.mjs",
     "lint": "vp lint . --fix && vp run lint:eslint",
     "lint:check": "vp lint . && vp run lint:eslint:check",
     "lint:eslint": "eslint . --config eslint.config.mjs --fix --max-warnings 0",
