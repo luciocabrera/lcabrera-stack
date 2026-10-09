@@ -19,7 +19,6 @@ import {
   readFileSync,
   readdirSync,
   existsSync,
-  writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
@@ -45,7 +44,7 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
-import { scrubSecrets } from '../transcript-scrub.mjs';
+import { writeScrubbed } from '../transcript-scrub.mjs';
 
 import { qualityTask, qualityTrial } from './quality-envelope.mjs';
 
@@ -90,7 +89,7 @@ const replyOf = (messages) => finalResult(messages)?.result ?? '';
 
 const outcome = ({ error, messages, skill, timestamps }) => {
   const reply = replyOf(messages);
-  writeFileSync(join(REPORT_DIR, `${skill}.json`), scrubSecrets(reply));
+  writeScrubbed({ file: join(REPORT_DIR, `${skill}.json`), text: reply });
   const problem = error ?? sessionProblem(messages);
   const metrics = sessionMetrics(messages, timestamps, error);
   return problem === undefined
@@ -146,23 +145,23 @@ const writeReport = (envelope) => {
   const history = readHistory();
   const generatedAt = envelope.run.finished_at;
   mkdirSync(RUNS_DIR, { recursive: true });
-  writeFileSync(
-    join(RUNS_DIR, `${generatedAt.replaceAll(':', '-')}.json`),
-    JSON.stringify(
+  writeScrubbed({
+    file: join(RUNS_DIR, `${generatedAt.replaceAll(':', '-')}.json`),
+    text: JSON.stringify(
       runRecord({
         generatedAt,
         model: envelope.run.model_id,
         results: envelopeResults(envelope),
       }),
     ),
-  );
-  writeFileSync(
-    REPORT_FILE,
-    renderReport({
+  });
+  writeScrubbed({
+    file: REPORT_FILE,
+    text: renderReport({
       data: reportDataFromEnvelope({ envelope, history }),
       template: readFileSync(TEMPLATE, 'utf8'),
     }),
-  );
+  });
 };
 
 const qualityPlan = async ({ model, skills }) => {

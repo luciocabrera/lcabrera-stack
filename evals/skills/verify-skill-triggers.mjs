@@ -26,7 +26,6 @@ import {
   renameSync,
   statSync,
   symlinkSync,
-  writeFileSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -52,7 +51,7 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
-import { scrubSecrets } from '../transcript-scrub.mjs';
+import { writeScrubbed } from '../transcript-scrub.mjs';
 
 import {
   coverageProblems,
@@ -176,7 +175,7 @@ const attemptTask = async ({
     scopeError({ expectedTools: scope.tools, messages });
   const name = `${skill}-${task.id}-${trial}.json`;
   const text = JSON.stringify(messages, null, 2);
-  writeFileSync(join(REPORT_DIR, name), scrubSecrets(text));
+  writeScrubbed({ file: join(REPORT_DIR, name), text });
   const invoked = invokedSkills(messages);
   const fixtureRead = fixtureWasRead({
     fixtureFiles,
@@ -309,7 +308,7 @@ const jobsFor = ({ record, runs, selected, values }) =>
 
 const report = (results) => {
   const trials = results.map(trialRecord);
-  writeFileSync(TRIALS_FILE, JSON.stringify(trials, null, 2));
+  writeScrubbed({ file: TRIALS_FILE, text: JSON.stringify(trials, null, 2) });
   const verdicts = taskVerdicts(results);
   console.log(verdicts.map(describeVerdict).join('\n'));
   console.log(`\n${formatMatrix(confusionMatrix(trials))}\n`);

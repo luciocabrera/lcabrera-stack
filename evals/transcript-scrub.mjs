@@ -1,17 +1,20 @@
 /**
- * Redacts secret-shaped text from a transcript before it is written, because
+ * Redacts secret-shaped text from every file an eval runner writes, because
  * the files under `.tmp/` are uploaded as artifacts of a public repository and
  * a session's tool output can echo an environment. Three kinds are matched:
  * the value of any environment variable whose name marks it secret, the
  * password in a URL, and known token shapes. Text with none of them is
- * returned unchanged.
- * Usage: imported by `run-record.mjs` and by every runner that keeps its own copy.
+ * written unchanged. `writeScrubbed` is the one writer for a runner's output.
+ * Usage: imported by `run-record.mjs` and by every runner under `evals/`.
  */
+import { writeFileSync } from 'node:fs';
+
 const SECRET_ENV_NAME =
-  /(?:TOKEN|SECRET|PASSWORD|PASSWD|PASSPHRASE|API_?KEY|PRIVATE_KEY|CREDENTIALS?|DATABASE_URL|_DSN)$/i;
+  /(?:TOKEN|SECRET|PASSWORD|PASSWD|PASSPHRASE|API_?KEY|ACCESS_KEY|PRIVATE_KEY|CREDENTIALS?|DATABASE_URL|_DSN)$/i;
 const MIN_SECRET_LENGTH = 8;
 
-const URL_PASSWORD = /\b([a-z][a-z\d+.-]*:\/\/[^\s:@/"'\\]+):[^\s@/"'\\]+@/gi;
+const URL_PASSWORD =
+  /\b([a-z][a-z\d+.-]*:\/\/[^\s:@/?#"'\\]*):[^\s/?#"'\\]+@/gi;
 
 const TOKEN_SHAPES = [
   [
@@ -61,3 +64,9 @@ const redactTokens = (text) =>
 
 export const scrubSecrets = (text, { env = process.env } = {}) =>
   redactTokens(redactUrlPasswords(redactValues(text, secretEnvValues(env))));
+
+export const writeScrubbed = ({ env = process.env, file, text }) => {
+  const bytes = Buffer.from(scrubSecrets(text, { env }), 'utf8');
+  writeFileSync(file, bytes);
+  return bytes;
+};
