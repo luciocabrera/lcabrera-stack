@@ -35,12 +35,19 @@ const ONLY_IN_B = `{
 const onlyInB: Record<string, unknown> = JSON.parse(ONLY_IN_B);
 
 describe('readRunComparison', () => {
-  it('returns a task present in one run only, with the other side null', async () => {
+  it('returns a task present in one run only, with the other side absent', async () => {
     const { client, sent } = recordingClient([onlyInB]);
+    const [read] = await readRunComparison({ a: RUN_A, b: RUN_B, client });
 
-    expect(await readRunComparison({ a: RUN_A, b: RUN_B, client })).toEqual([
-      onlyInB,
-    ]);
+    expect(read).toEqual(
+      Object.fromEntries(
+        Object.entries(onlyInB).map(([key, value]) => [
+          key,
+          value ?? undefined,
+        ]),
+      ),
+    );
+    expect(read?.kA).toBeUndefined();
     expect(sent).toEqual([runCompareQuery({ a: RUN_A, b: RUN_B })]);
   });
 

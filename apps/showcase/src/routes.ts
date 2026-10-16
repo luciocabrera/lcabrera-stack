@@ -28,6 +28,10 @@ export default [
   route('evals', 'routes/evals/overview/root.ts'),
   route('evals/runs/:runId', 'routes/evals/run-detail/root.ts'),
   route('evals/runs/:runId/trials', 'routes/evals/run-trials/root.ts'),
+  route('evals/compare', 'routes/evals/compare/root.ts'),
+  route('evals/subjects/:kind/:name', 'routes/evals/subject-trend/root.ts'),
+  route('evals/heatmap', 'routes/evals/heatmap/root.ts'),
+  route('evals/cost', 'routes/evals/cost/root.ts'),
   route('enterprise-orders', 'routes/enterprise-orders/root.ts', [
     route('new', 'routes/enterprise-orders/new-order/root.tsx'),
     route('edit/:orderId', 'routes/enterprise-orders/edit-order/root.tsx'),

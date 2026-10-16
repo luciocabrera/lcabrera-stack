@@ -3,7 +3,11 @@ import { projectedRelation } from './projectedRelation.util.ts';
 type RunSummariesQueryArgs = {
   readonly publicColumns: ReadonlySet<string>;
   readonly scope:
-    | { readonly kind: 'recent'; readonly perSuite: number }
+    | {
+        readonly branch?: string;
+        readonly kind: 'recent';
+        readonly perSuite: number;
+      }
     | { readonly kind: 'run'; readonly runId: string };
 };
 
@@ -21,6 +25,7 @@ const RUN_COLUMNS = [
   'model_id',
   'harness_version',
   'sdk_version',
+  'catalog_hash',
   'settings.runs',
   'settings.concurrency',
   'settings.timeout_ms',
@@ -47,12 +52,13 @@ export const runSummariesQuery = ({
     publicColumns,
     table: 'eval_trial',
   });
+  const branch = scope.kind === 'recent' ? scope.branch : undefined;
   const scoped =
     scope.kind === 'run'
       ? `select run.*, 1 as recency from ${run} run where run.run_id = $1`
       : `select ranked.* from (
     select run.*, row_number() over (partition by run.suite order by run.started_at desc, run.run_id) as recency
-    from ${run} run
+    from ${run} run${branch === undefined ? '' : '\n    where run.branch = $2'}
   ) ranked
   where ranked.recency <= $1`;
 
@@ -85,6 +91,7 @@ select
   run.model_id as "modelId",
   run.harness_version as "harnessVersion",
   run.sdk_version as "sdkVersion",
+  run.catalog_hash as "catalogHash",
   run.settings_runs as "runs",
   run.settings_concurrency as "concurrency",
   run.settings_timeout_ms as "timeoutMs",
@@ -100,6 +107,9 @@ select
 from run
 left join trials on trials.run_id = run.run_id
 order by run.suite, run.started_at desc, run.run_id`,
-    values: [scope.kind === 'run' ? scope.runId : scope.perSuite],
+    values:
+      scope.kind === 'run'
+        ? [scope.runId]
+        : [scope.perSuite, ...(branch === undefined ? [] : [branch])],
   };
 };

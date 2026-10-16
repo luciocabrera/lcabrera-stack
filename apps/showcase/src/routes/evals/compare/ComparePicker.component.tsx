@@ -1,0 +1,34 @@
+import * as stylex from '@stylexjs/stylex';
+import { Form } from 'react-router';
+
+import type { ComparePickerProps } from './EvalsCompare.types';
+
+import { styles } from './EvalsCompare.stylex';
+import { runChoiceLabel } from './runChoiceLabel.util';
+
+export const ComparePicker = ({ choices }: ComparePickerProps) => (
+  <>
+    <Form method='get' {...stylex.props(styles.form)}>
+      {(['a', 'b'] as const).map((side, index) => (
+        <label key={side} {...stylex.props(styles.field)}>
+          Run {side.toUpperCase()}
+          <select defaultValue={choices[index]?.runId} name={side} required>
+            {choices.map((run) => (
+              <option key={run.runId} value={run.runId}>
+                {runChoiceLabel(run)}
+              </option>
+            ))}
+          </select>
+        </label>
+      ))}
+      <button type='submit'>Compare runs</button>
+    </Form>
+    <Form method='get' {...stylex.props(styles.form)}>
+      <label {...stylex.props(styles.field)}>
+        Branch
+        <input name='branch' placeholder='feat/…' required />
+      </label>
+      <button type='submit'>Compare with main</button>
+    </Form>
+  </>
+);

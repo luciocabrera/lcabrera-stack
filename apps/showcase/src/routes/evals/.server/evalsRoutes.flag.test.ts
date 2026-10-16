@@ -22,32 +22,23 @@ import {
   vi,
 } from 'vite-plus/test';
 
-import routes from '@/routes';
-
-import { evalsRouteEntries } from '../utils/evalsRouteEntries.util';
 import { routeLoaderArgs } from '../utils/routeLoaderArgs.util';
+import {
+  EVALS_ROUTE_ENTRIES as ENTRIES,
+  loadEvalsRouteModules,
+} from './evalsRouteModules.fixtures';
 
-type RouteModule = {
-  readonly loader: (args: LoaderFunctionArgs) => Promise<unknown>;
+const modules = {
+  loaded: new Map() as Awaited<ReturnType<typeof loadEvalsRouteModules>>,
 };
 
-const ENTRIES = evalsRouteEntries({ routes });
-
-const MODULES = import.meta.glob<RouteModule>('../**/{root,layout}.ts');
-
-const loaded = new Map<string, RouteModule>();
-
 beforeAll(async () => {
-  for (const { file } of ENTRIES) {
-    const load = MODULES[file.replace(/^routes\/evals\//u, '../')];
-
-    if (load) {
-      loaded.set(file, await load());
-    }
-  }
+  modules.loaded = await loadEvalsRouteModules();
 }, 60_000);
 
-const PARAMS = { runId: '00000000-0000-4000-8000-000000000000' };
+const RUN_ID = '00000000-0000-4000-8000-000000000000';
+
+const PARAMS = { kind: 'skill', name: 'react-19', runId: RUN_ID };
 
 beforeEach(() => {
   vi.stubEnv('EVALS_DASHBOARD', '');
@@ -68,7 +59,7 @@ describe('the /evals routes with the flag unset', () => {
   });
 
   it.each(ENTRIES)('$path answers 404', async ({ file, path }) => {
-    const routeModule = loaded.get(file);
+    const routeModule = modules.loaded.get(file);
 
     expect(
       routeModule,
@@ -82,7 +73,7 @@ describe('the /evals routes with the flag unset', () => {
           routeLoaderArgs({
             params: PARAMS,
             path,
-            search: '?trial=1',
+            search: `?trial=1&a=${RUN_ID}&b=${RUN_ID}`,
           }) as LoaderFunctionArgs,
         );
 
