@@ -18,12 +18,12 @@ import { EVALS_WRITER_ROLE } from '../migrate/migrate.constants.ts';
 import { migrateEvals } from '../migrate/migrateEvals.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
 import { readModelPrices } from '../prices/readModelPrices.service.ts';
-import { integrationDatabase } from '../testing/integrationDatabase.util.ts';
+import { integrationDatabase } from '../testing/integrationDatabase.service.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
-import { baselineFixtures } from './baselineFixtures.util.ts';
+import { baselineFixtures } from './baselineFixtures.service.ts';
 import { readBaseline } from './readBaseline.service.ts';
 import { recordBaseline } from './recordBaseline.service.ts';
-import { stubBaselineRun } from './stubBaselineRun.util.ts';
+import { stubBaselineRun } from './stubBaselineRun.service.ts';
 
 const {
   scratch: DATABASE_NAME,

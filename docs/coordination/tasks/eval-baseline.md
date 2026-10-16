@@ -11,7 +11,7 @@ area:
   - evals/run-record*
   - packages/eval-history/src/baseline/**
   - packages/eval-history/src/ingest/envelopeFileSystem.util*.ts
-  - packages/eval-history/src/ingest/integrationDatabase.util.ts
+  - packages/eval-history/src/testing/integrationDatabase.service.ts
   - packages/eval-history/src/ingest/ingestPaths.integration.test.ts
   - packages/eval-history/package.json
   - packages/eval-history/README.md
@@ -19,7 +19,7 @@ area:
   - COMMANDS.md
   - evals/README.md
 started: 2026-10-08
-updated: 2026-10-08
+updated: 2026-10-16
 plan: (none)
 pr: '#1362'
 issue: #1272

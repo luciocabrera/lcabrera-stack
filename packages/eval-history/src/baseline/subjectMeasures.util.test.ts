@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { baselineFixtures } from './baselineFixtures.util.ts';
-import { stubBaselineRun } from './stubBaselineRun.util.ts';
+import { baselineFixtures } from './baselineFixtures.service.ts';
+import { stubBaselineRun } from './stubBaselineRun.service.ts';
 import { subjectMeasures } from './subjectMeasures.util.ts';
 
 const { quality, skills } = await baselineFixtures();

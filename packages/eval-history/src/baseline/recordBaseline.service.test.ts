@@ -7,9 +7,9 @@ import {
   INSERT_BASELINE_SQL,
   SELECT_SUBJECT_ID_SQL,
 } from './baseline.constants.ts';
-import { baselineFixtures } from './baselineFixtures.util.ts';
+import { baselineFixtures } from './baselineFixtures.service.ts';
 import { recordBaseline } from './recordBaseline.service.ts';
-import { stubBaselineRun } from './stubBaselineRun.util.ts';
+import { stubBaselineRun } from './stubBaselineRun.service.ts';
 
 const { skills } = await baselineFixtures();
 

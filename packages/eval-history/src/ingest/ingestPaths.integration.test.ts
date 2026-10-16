@@ -26,7 +26,7 @@ import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { applyMigrations } from '../migrate/applyMigrations.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
-import { integrationDatabase } from '../testing/integrationDatabase.util.ts';
+import { integrationDatabase } from '../testing/integrationDatabase.service.ts';
 import { envelopeFileSystem } from './envelopeFileSystem.util.ts';
 import { ingestPaths } from './ingestPaths.service.ts';
 

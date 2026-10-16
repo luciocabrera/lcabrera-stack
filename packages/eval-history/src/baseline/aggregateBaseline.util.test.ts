@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vite-plus/test';
 import type { Outcome } from '../stats/stats.types.ts';
 
 import { aggregateBaseline } from './aggregateBaseline.util.ts';
-import { baselineFixtures } from './baselineFixtures.util.ts';
-import { stubBaselineRun } from './stubBaselineRun.util.ts';
+import { baselineFixtures } from './baselineFixtures.service.ts';
+import { stubBaselineRun } from './stubBaselineRun.service.ts';
 
 const { quality, rules, skills } = await baselineFixtures();
 
