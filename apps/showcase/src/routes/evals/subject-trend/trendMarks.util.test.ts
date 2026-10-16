@@ -3,14 +3,14 @@ import { describe, expect, it } from 'vite-plus/test';
 import { trendMarks } from './trendMarks.util';
 
 type PointArgs = {
-  readonly contentHash?: string;
+  readonly contentHashes?: readonly string[];
   readonly key: string;
   readonly modelId?: string;
   readonly startedAt: string;
 };
 
 const point = ({ key, startedAt, ...overrides }: PointArgs) => ({
-  contentHash: 'a'.repeat(64),
+  contentHashes: ['a'.repeat(64)],
   href: `/evals/runs/${key}`,
   key,
   label: key,
@@ -29,12 +29,12 @@ describe('trendMarks', () => {
       points: [
         point({ key: 'r1', startedAt: '2026-01-01' }),
         point({
-          contentHash: 'b'.repeat(64),
+          contentHashes: ['b'.repeat(64)],
           key: 'r2',
           startedAt: '2026-01-02',
         }),
         point({
-          contentHash: 'b'.repeat(64),
+          contentHashes: ['b'.repeat(64)],
           key: 'r3',
           modelId: 'model-b',
           startedAt: '2026-01-03',
@@ -47,6 +47,24 @@ describe('trendMarks', () => {
         [1, 'content', 'Content hash changed to bbbbbbbbbbbb'],
         [2, 'model', 'Model changed from model-a to model-b'],
       ],
+    );
+  });
+
+  it('names every content hash of a run that held more than one', () => {
+    const [mark] = trendMarks({
+      annotations: [],
+      points: [
+        point({ key: 'r1', startedAt: '2026-01-01' }),
+        point({
+          contentHashes: ['a'.repeat(64), 'b'.repeat(64)],
+          key: 'r2',
+          startedAt: '2026-01-02',
+        }),
+      ],
+    });
+
+    expect(mark?.label).toBe(
+      'Content hash changed to aaaaaaaaaaaa and bbbbbbbbbbbb',
     );
   });
 

@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import { EvalsSubjectTrend } from './EvalsSubjectTrend.component';
 
 const POINT = {
-  contentHash: 'b'.repeat(64),
+  contentHashes: ['b'.repeat(64)],
   href: '/evals/runs/r2?trial=8',
   key: 'r2',
   label: 'skills run r2: 50% (1/2); open trial 8',

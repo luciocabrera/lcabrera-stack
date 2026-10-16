@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import { trendPoints } from './trendPoints.util';
 
 const run = (overrides: Partial<SubjectRun>): SubjectRun => ({
-  contentHash: 'c'.repeat(64),
+  contentHashes: ['c'.repeat(64)],
   k: 9,
   modelId: 'model-a',
   n: 10,

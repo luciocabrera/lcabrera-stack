@@ -11,7 +11,7 @@ export const ComparePicker = ({ choices }: ComparePickerProps) => (
     <Form method='get' {...stylex.props(styles.form)}>
       {(['a', 'b'] as const).map((side, index) => (
         <label key={side} {...stylex.props(styles.field)}>
-          Run {side.toUpperCase()}
+          <span>Run {side.toUpperCase()}</span>
           <select defaultValue={choices[index]?.runId} name={side} required>
             {choices.map((run) => (
               <option key={run.runId} value={run.runId}>
@@ -25,7 +25,7 @@ export const ComparePicker = ({ choices }: ComparePickerProps) => (
     </Form>
     <Form method='get' {...stylex.props(styles.form)}>
       <label {...stylex.props(styles.field)}>
-        Branch
+        <span>Branch</span>
         <input name='branch' placeholder='feat/…' required />
       </label>
       <button type='submit'>Compare with main</button>

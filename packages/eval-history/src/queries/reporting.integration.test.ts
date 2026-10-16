@@ -370,6 +370,45 @@ where trial.id = any($1::bigint[])`,
     ).not.toEqual([]);
   });
 
+  it('keeps one row per subject and run when the run holds two versions of the subject', async () => {
+    const client = await connect(databaseName);
+    const scope = {
+      kind: 'subject',
+      limit: 1,
+      subjectKind: 'skill',
+      subjectName: 'synthetic-skill-03',
+    } as const;
+
+    await client.query('begin');
+
+    try {
+      const [latest] = await readSubjectRuns({ client, scope });
+      const { rowCount } = await client.query({
+        text: `update evals.eval_trial trial
+set subject_version_id = (
+  select other.id from evals.eval_subject_version other
+  where other.subject_id = current.subject_id and other.id <> current.id
+  order by other.id limit 1
+)
+from evals.eval_subject_version current
+where current.id = trial.subject_version_id
+  and trial.id = $1::bigint`,
+        values: [latest?.trialId],
+      });
+      const [mixed, ...rest] = await readSubjectRuns({ client, scope });
+
+      expect(rowCount).toBe(1);
+      expect(latest?.contentHashes).toHaveLength(1);
+      expect(rest).toEqual([]);
+      expect(mixed?.runId).toBe(latest?.runId);
+      expect(mixed?.trials).toBe(latest?.trials);
+      expect(mixed?.contentHashes).toHaveLength(2);
+      expect(mixed?.contentHashes).toContain(latest?.contentHashes[0]);
+    } finally {
+      await client.query('rollback');
+    }
+  });
+
   it('denies the reader role an INSERT with a permission error', async () => {
     const client = await readerClient();
 

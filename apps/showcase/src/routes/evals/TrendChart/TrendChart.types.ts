@@ -9,8 +9,8 @@ export type TrendChartPoint = {
   readonly href: string;
   readonly key: string;
   readonly label: string;
-  readonly lower?: number | undefined;
-  readonly upper?: number | undefined;
+  readonly lower?: number;
+  readonly upper?: number;
   readonly value: number;
 };
 

@@ -54,7 +54,7 @@ select
   run.suite,
   run.started_at as "startedAt",
   run.model_id as "modelId",
-  subject_version.content_hash::text as "contentHash",
+  array_agg(distinct subject_version.content_hash::text order by subject_version.content_hash::text) as "contentHashes",
   (count(*) filter (where trial.outcome in ('pass', 'fail')))::integer as n,
   (count(*) filter (where trial.outcome = 'pass'))::integer as k,
   count(*)::integer as trials,
@@ -70,7 +70,7 @@ join ${relation({ columns: ['id', 'subject_id', 'content_hash'], table: 'eval_su
 join ${relation({ columns: ['id', 'kind', 'name'], table: 'eval_subject' })} subject on subject.id = subject_version.subject_id
 join ${relation({ columns: ['id', 'task_id'], table: 'eval_task_version' })} task_version on task_version.id = trial.task_version_id
 join ${relation({ columns: ['id', 'task_key'], table: 'eval_task' })} task on task.id = task_version.task_id${subjectFilter}
-group by subject.id, subject.kind, subject.name, run.run_id, run.suite, run.started_at, run.model_id, subject_version.id, subject_version.content_hash${limit}`,
+group by subject.id, subject.kind, subject.name, run.run_id, run.suite, run.started_at, run.model_id${limit}`,
     values:
       scope.kind === 'recent'
         ? [scope.perSuite]

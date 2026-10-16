@@ -12,7 +12,7 @@ export const trendPoints = (runs: readonly SubjectRun[]) =>
       const figures = rateFigures(run);
 
       return {
-        contentHash: run.contentHash,
+        contentHashes: run.contentHashes,
         href: evalsHref({ runId: run.runId, trialId: run.trialId }),
         key: run.runId,
         label: `${run.suite} run ${run.runId.slice(0, 8)}, ${run.startedAt.toISOString().slice(0, 10)}: ${passRateLabel(figures)}; open trial ${run.trialId}`,

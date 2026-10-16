@@ -6,7 +6,7 @@ import { nullAsAbsent } from './nullAsAbsent.util.ts';
 const count = z.number().int().nonnegative();
 
 export const subjectRunRowSchema = z.object({
-  contentHash: z.string(),
+  contentHashes: z.array(z.string()).min(1),
   k: count,
   modelId: nullAsAbsent(z.string()),
   n: count,

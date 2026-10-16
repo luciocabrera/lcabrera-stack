@@ -55,6 +55,14 @@ describe('subjectRunsQuery', () => {
     expect(query.text).not.toContain('subject.name = $2');
   });
 
+  it('keeps one row per subject and run, whatever versions the run holds', () => {
+    const { text } = subjectRunsQuery({ publicColumns, scope: SUBJECT_SCOPE });
+
+    expect(text).toMatch(/group by subject\.id, [^\n]*run\.model_id\n/u);
+    expect(text).not.toMatch(/group by [^\n]*subject_version/u);
+    expect(text).toContain('array_agg(distinct subject_version.content_hash');
+  });
+
   it('links each cell to a failing trial before any other', () => {
     const { text } = subjectRunsQuery({ publicColumns, scope: SUBJECT_SCOPE });
 

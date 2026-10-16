@@ -23,7 +23,7 @@ vi.mock('../.server/evalsHistory.service', () => ({
 }));
 
 const run = (overrides: Partial<SubjectRun>): SubjectRun => ({
-  contentHash: 'a'.repeat(64),
+  contentHashes: ['a'.repeat(64)],
   k: 3,
   modelId: 'model-a',
   n: 3,
@@ -39,7 +39,7 @@ const run = (overrides: Partial<SubjectRun>): SubjectRun => ({
 });
 
 const NEWEST = run({
-  contentHash: 'b'.repeat(64),
+  contentHashes: ['b'.repeat(64)],
   runId: '00000000-0000-4000-8000-000000000002',
   startedAt: new Date('2026-10-02T02:00:00Z'),
 });

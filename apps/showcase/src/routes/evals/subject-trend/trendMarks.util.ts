@@ -7,7 +7,10 @@ type TrendMarksArgs = {
     readonly at: string;
     readonly kind: string;
   }[];
-  readonly points: ReturnType<typeof trendPoints>;
+  readonly points: readonly (Omit<
+    ReturnType<typeof trendPoints>[number],
+    'contentHashes'
+  > & { readonly contentHashes: readonly string[] })[];
 };
 
 export const trendMarks = ({ annotations, points }: TrendMarksArgs) => {
@@ -19,14 +22,14 @@ export const trendMarks = ({ annotations, points }: TrendMarksArgs) => {
     }
 
     return [
-      ...(previous.contentHash === point.contentHash
+      ...(previous.contentHashes.join(',') === point.contentHashes.join(',')
         ? []
         : [
             {
               index,
               key: `content-${point.key}`,
               kind: 'content' as const,
-              label: `Content hash changed to ${point.contentHash.slice(0, 12)}`,
+              label: `Content hash changed to ${point.contentHashes.map((hash) => hash.slice(0, 12)).join(' and ')}`,
             },
           ]),
       ...(previous.modelId === point.modelId

@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import { heatmapCell } from './heatmapCell.util';
 
 const CELL: SubjectRun = {
-  contentHash: 'c'.repeat(64),
+  contentHashes: ['c'.repeat(64)],
   k: 1,
   modelId: 'model-a',
   n: 3,

@@ -53,12 +53,14 @@ export const runSummariesQuery = ({
     table: 'eval_trial',
   });
   const branch = scope.kind === 'recent' ? scope.branch : undefined;
+  const branchFilter =
+    branch === undefined ? '' : '\n    where run.branch = $2';
   const scoped =
     scope.kind === 'run'
       ? `select run.*, 1 as recency from ${run} run where run.run_id = $1`
       : `select ranked.* from (
     select run.*, row_number() over (partition by run.suite order by run.started_at desc, run.run_id) as recency
-    from ${run} run${branch === undefined ? '' : '\n    where run.branch = $2'}
+    from ${run} run${branchFilter}
   ) ranked
   where ranked.recency <= $1`;
 

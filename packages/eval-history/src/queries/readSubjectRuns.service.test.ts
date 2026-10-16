@@ -20,7 +20,7 @@ const COLUMNS = schemaColumnsOf({
 });
 
 const row = {
-  contentHash: 'c'.repeat(64),
+  contentHashes: ['c'.repeat(64)],
   k: 2,
   modelId: 'model-a',
   n: 3,

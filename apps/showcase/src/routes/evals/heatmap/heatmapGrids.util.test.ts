@@ -8,7 +8,7 @@ const RUN_1 = '00000000-0000-4000-8000-000000000001';
 const RUN_2 = '00000000-0000-4000-8000-000000000002';
 
 const cell = (overrides: Partial<SubjectRun>): SubjectRun => ({
-  contentHash: 'c'.repeat(64),
+  contentHashes: ['c'.repeat(64)],
   k: 3,
   modelId: 'model-a',
   n: 3,
