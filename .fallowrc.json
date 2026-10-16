@@ -19,7 +19,9 @@
     "apps/showcase/lighthouse.config.js",
     "apps/showcase/config/*.ts",
     "packages/ui/config/*.ts",
-    "docs/*.html"
+    "docs/index.html",
+    "docs/packages.html",
+    "docs/workflow.html"
   ],
   "ignorePatterns": [
     "**/build/**",
