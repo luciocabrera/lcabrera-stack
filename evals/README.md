@@ -84,6 +84,12 @@ branch. `--a <run> --b <run>` compares two runs given as run ids or as
 envelope files, so two CI artifacts compare with no database. `--json` prints
 the same comparison as JSON.
 
+A run holds the tasks it has trials for, and only the subjects those tasks
+name, whether it is read from a file or from the database. A task that a
+partial or aborted run planned but never reached is absent from it, so the
+report shows that task as present in only one run rather than as one that
+failed every trial.
+
 Runs of two models are not compared: the report says which models they used
 and exits 1, because a pass rate measures the model as much as the inputs.
 `--allow-model-change` compares them anyway and lists the model among the

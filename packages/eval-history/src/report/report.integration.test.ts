@@ -63,14 +63,26 @@ const feature = fixtureEnvelope({
   runId: '00000000-0000-4000-8000-0000000000b1',
 });
 
+const aborted = fixtureEnvelope({
+  base,
+  branch: 'feat/1235-aborted-run',
+  outcomes: {
+    'skills/react-19/trigger-1': ['pass', 'pass', 'pass'],
+    'skills/react-19/trigger-2': ['pass', 'fail'],
+    'skills/react-19/trigger-3': [],
+  },
+  runId: '00000000-0000-4000-8000-0000000000c1',
+});
+
 const RESULT_FILES = Object.fromEntries(
-  [main, feature].map((envelope) => [
+  [main, feature, aborted].map((envelope) => [
     `/results/skills/${envelope.run.run_id}.json`,
     JSON.stringify(envelope),
   ]),
 );
 
 const ENVELOPES = new Map([
+  ['aborted.json', aborted],
   ['feature.json', feature],
   ['main.json', main],
 ]);
@@ -104,6 +116,17 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
     database: SCRATCH,
     url: DATABASE_URL ?? 'postgres://localhost',
   });
+
+  const againstMain = (b: string) =>
+    evalsReport({
+      a: 'main.json',
+      allowModelChange: false,
+      b,
+      connectionString,
+      json: false,
+      readEnvelope,
+      thresholds: THRESHOLDS,
+    });
 
   beforeAll(async () => {
     const admin = await connect();
@@ -166,5 +189,13 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
     expect(JSON.parse(byId.stdout[0] ?? '')).toMatchObject({
       comparisons: [{ a: { runId: main.run.run_id }, kind: 'comparison' }],
     });
+  });
+
+  it('reads a run whose plan outran its trials the way its envelope reads', async () => {
+    const fromHistory = await againstMain(aborted.run.run_id);
+    const fromFile = await againstMain('aborted.json');
+
+    expect(fromHistory.exitCode).toBe(0);
+    expect(fromHistory.stdout).toEqual(fromFile.stdout);
   });
 });

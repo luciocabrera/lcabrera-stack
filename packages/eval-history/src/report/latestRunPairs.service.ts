@@ -1,7 +1,8 @@
 import type { QueryClient } from '../queries/queries.types.ts';
-import type { ReportRun, Suite } from './report.types.ts';
+import type { Suite } from './report.types.ts';
 
 import { SUITES } from '../envelope/envelope.constants.ts';
+import { inSequence } from '../ingest/inSequence.service.ts';
 import { readLatestRunId } from './readLatestRunId.service.ts';
 import { readReportRun } from './readReportRun.service.ts';
 import { ReportInputError } from './reportInput.error.ts';
@@ -17,11 +18,6 @@ type LatestRunPairsArgs = {
   readonly branch: string;
   readonly client: QueryClient;
   readonly suite?: Suite;
-};
-
-type RunPair = {
-  readonly a: ReportRun;
-  readonly b: ReportRun;
 };
 
 const latestRun = async (args: LatestRunArgs) => {
@@ -44,17 +40,17 @@ export const latestRunPairs = async ({
     );
   }
 
-  const pairs: RunPair[] = [];
   const suites = suite === undefined ? SUITES : [suite];
+  const candidates = await inSequence({
+    items: suites,
+    step: async (name) => {
+      const a = await latestRun({ branch: base, client, suite: name });
+      const b = await latestRun({ branch, client, suite: name });
 
-  for (const name of suites) {
-    const a = await latestRun({ branch: base, client, suite: name });
-    const b = await latestRun({ branch, client, suite: name });
-
-    if (a !== undefined && b !== undefined) {
-      pairs.push({ a, b });
-    }
-  }
+      return a === undefined || b === undefined ? undefined : { a, b };
+    },
+  });
+  const pairs = candidates.filter((pair) => pair !== undefined);
 
   if (pairs.length === 0) {
     throw new ReportInputError(
