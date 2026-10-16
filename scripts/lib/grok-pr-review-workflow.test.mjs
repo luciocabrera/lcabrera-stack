@@ -50,9 +50,13 @@ describe('the subscription review does not use an API key', () => {
     expect(step).toContain('GROK_AUTH_JSON is empty');
   });
 
-  it('does not persist the job token in the checkout', () => {
-    const step = stepBlock(yaml(), 'Check out the pull request head');
+  it('checks out the merge ref and does not persist the job token', () => {
+    const step = stepBlock(
+      yaml(),
+      'Check out the merge ref for this pull request',
+    );
     expect(step).toContain('persist-credentials: false');
+    expect(step).not.toContain('github.event.pull_request.head.sha');
   });
 
   it('keeps the session file out of the model tools', () => {
