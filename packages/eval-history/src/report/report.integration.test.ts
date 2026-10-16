@@ -22,7 +22,8 @@ import { ingestPaths } from '../ingest/ingestPaths.service.ts';
 import { memoryFileSystem } from '../ingest/memoryFileSystem.util.ts';
 import { applyMigrations } from '../migrate/applyMigrations.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
-import { scratchDatabase } from '../migrate/scratchDatabase.service.ts';
+import { databaseUrl } from '../queries/databaseUrl.util.ts';
+import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { evalsReport } from './evalsReport.service.ts';
 import { fixtureEnvelope } from './fixtureEnvelope.util.ts';
 
@@ -98,16 +99,20 @@ it.runIf(IS_CI)('has a database to report from under CI', () => {
 });
 
 describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
-  const { admin, client, connectionString } = scratchDatabase({
-    adminUrl: DATABASE_URL,
-    name: SCRATCH,
+  const { close, connect } = scratchConnections(DATABASE_URL ?? '');
+  const connectionString = databaseUrl({
+    database: SCRATCH,
+    url: DATABASE_URL ?? 'postgres://localhost',
   });
 
   beforeAll(async () => {
-    await admin.connect();
+    const admin = await connect();
+
     await admin.query(`create database ${SCRATCH}`);
-    await client.connect();
-    await applyMigrations({ client, migrations: await readMigrations() });
+    await applyMigrations({
+      client: await connect(SCRATCH),
+      migrations: await readMigrations(),
+    });
 
     const ingested = await ingestPaths({
       connectionString,
@@ -119,11 +124,7 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
     expect(ingested.exitCode).toBe(0);
   });
 
-  afterAll(async () => {
-    await client.end();
-    await admin.query(`drop database if exists ${SCRATCH} with (force)`);
-    await admin.end();
-  });
+  afterAll(() => close({ databases: [SCRATCH] }));
 
   it('prints for --compare main what it prints for the same two envelopes', async () => {
     const fromHistory = await evalsReport({

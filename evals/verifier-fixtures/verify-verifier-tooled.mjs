@@ -12,7 +12,7 @@
  * Needs a Claude login and the local database the full quality gate uses.
  * Exit codes: 0 = every fixture matched, 1 = otherwise, 130/143 = interrupted.
  */
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -36,6 +36,7 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
+import { writeScrubbed } from '../transcript-scrub.mjs';
 
 import {
   agentTools,
@@ -140,7 +141,10 @@ const runText = ({ error, report, treeProblem: problem }) =>
 
 const save = ({ fixture, runs }) => {
   for (const [index, run] of runs.entries()) {
-    writeFileSync(join(REPORT_DIR, `${fixture}-${index + 1}.md`), runText(run));
+    writeScrubbed({
+      file: join(REPORT_DIR, `${fixture}-${index + 1}.md`),
+      text: runText(run),
+    });
   }
 };
 

@@ -80,6 +80,12 @@ with trial as (
     $17, $18, $19, $20, $21, $22
   )
   returning id
+),
+detail as (
+  insert into evals.eval_trial_detail (trial_id, detail_schema, detail, judge_model)
+  select id, $23, $24, $25 from trial
 )
-insert into evals.eval_trial_detail (trial_id, detail_schema, detail)
-select id, $23, $24 from trial`;
+insert into evals.eval_judge_score (trial_id, dimension, score)
+select trial.id, judged.dimension, judged.score
+from trial
+cross join unnest($26::text[], $27::smallint[]) as judged (dimension, score)`;
