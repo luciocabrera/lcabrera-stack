@@ -1,7 +1,7 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
 exports[`evalsReport over fixture runs > compares runs of two models under --allow-model-change, listing the model as the change 1`] = `
-"### skills: feat/1234-tighten-react-19 vs main (claude-opus-5-5 → claude-sonnet-5-5)
+"### skills: main → feat/1234-tighten-react-19 (claude-opus-5-5 → claude-sonnet-5-5)
 
 No task changed outcome.
 
@@ -13,7 +13,7 @@ Changed: model. That is one cause."
 `;
 
 exports[`evalsReport over fixture runs > names the one hash that changed, with n and the interval on each side 1`] = `
-"### skills: feat/1234-tighten-react-19 vs main (claude-opus-5-5)
+"### skills: main → feat/1234-tighten-react-19 (claude-opus-5-5)
 
 | Task | main | feat/1234-tighten-react-19 |
 | --- | --- | --- |
@@ -111,13 +111,13 @@ exports[`evalsReport over fixture runs > prints the same comparison as JSON unde
 `;
 
 exports[`evalsReport over fixture runs > refuses runs of two models and says why 1`] = `
-"### skills: feat/1234-tighten-react-19 vs main: not compared
+"### skills: main → feat/1234-tighten-react-19: not compared
 
 Run A used \`claude-opus-5-5\` and run B used \`claude-sonnet-5-5\`. A pass rate measures the model as much as the inputs, so a difference between two models would be blamed on whichever hash changed. Pass \`--allow-model-change\` to compare them anyway; the model is then listed among the changes."
 `;
 
 exports[`evalsReport over fixture runs > says insufficient data, with n, when too few trials were counted 1`] = `
-"### skills: feat/1234-tighten-react-19 vs main (claude-opus-5-5)
+"### skills: main → feat/1234-tighten-react-19 (claude-opus-5-5)
 
 | Task | main | feat/1234-tighten-react-19 |
 | --- | --- | --- |
@@ -131,7 +131,7 @@ Changed: \`react-19\` content hash. That is one cause."
 `;
 
 exports[`evalsReport over fixture runs > says multiple causes when two hashes changed 1`] = `
-"### skills: feat/1234-tighten-react-19 vs main (claude-opus-5-5)
+"### skills: main → feat/1234-tighten-react-19 (claude-opus-5-5)
 
 | Task | main | feat/1234-tighten-react-19 |
 | --- | --- | --- |

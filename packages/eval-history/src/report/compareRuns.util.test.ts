@@ -90,4 +90,17 @@ describe('compareRuns', () => {
       compareRuns({ a: main, b: main, thresholds: regressionConfig }),
     ).toHaveProperty('thresholds', { minTrialsForRate: 6, z: 1.96 });
   });
+
+  it('names no cause for a task only one run reached', () => {
+    const comparison = compareRuns({
+      a: main,
+      b: { ...main, tasks: [] },
+      thresholds,
+    });
+
+    expect(comparison).toMatchObject({
+      changed: { kind: 'none' },
+      flips: [{ taskKey: 'skills/react-19/trigger-1' }],
+    });
+  });
 });

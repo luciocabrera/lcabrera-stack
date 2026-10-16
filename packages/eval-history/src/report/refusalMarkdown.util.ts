@@ -6,5 +6,5 @@ import { sideLabels } from './sideLabels.util.ts';
 export const refusalMarkdown = (refusal: Refusal) => {
   const labels = sideLabels(refusal);
 
-  return `### ${refusal.suite}: ${labels.b} vs ${labels.a}: not compared\n\n${refusalText(refusal)}`;
+  return `### ${refusal.suite}: ${labels.a} → ${labels.b}: not compared\n\n${refusalText(refusal)}`;
 };

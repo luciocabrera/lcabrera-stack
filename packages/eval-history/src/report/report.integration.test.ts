@@ -197,5 +197,8 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
 
     expect(fromHistory.exitCode).toBe(0);
     expect(fromHistory.stdout).toEqual(fromFile.stdout);
+    expect(fromHistory.stdout[0]).toContain(
+      'Changed: no input hash, so nothing recorded explains a difference.',
+    );
   });
 });

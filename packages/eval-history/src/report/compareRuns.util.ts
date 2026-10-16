@@ -5,6 +5,7 @@ import { refusalReason } from './refusalReason.util.ts';
 import { runHashes } from './runHashes.util.ts';
 import { runReference } from './runReference.util.ts';
 import { runSide } from './runSide.util.ts';
+import { sharedTaskRun } from './sharedTaskRun.util.ts';
 import { taskFlips } from './taskFlips.util.ts';
 
 type CompareRunsArgs = {
@@ -35,7 +36,10 @@ export const compareRuns = ({
   return {
     a: runSide({ run: a, thresholds }),
     b: runSide({ run: b, thresholds }),
-    changed: attribute({ after: runHashes(b), before: runHashes(a) }),
+    changed: attribute({
+      after: runHashes(sharedTaskRun({ other: a, run: b })),
+      before: runHashes(sharedTaskRun({ other: b, run: a })),
+    }),
     flips: taskFlips({ a, b }),
     kind: 'comparison',
     suite: b.suite,

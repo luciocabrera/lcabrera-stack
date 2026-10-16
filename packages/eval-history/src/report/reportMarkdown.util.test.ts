@@ -22,8 +22,8 @@ describe('reportMarkdown', () => {
     expect(
       markdown.split('\n').filter((line) => line.startsWith('### ')),
     ).toEqual([
-      '### skills: feat/x vs main (model-a)',
-      '### skills: feat/y vs main: not compared',
+      '### skills: main → feat/x (model-a)',
+      '### skills: main → feat/y: not compared',
     ]);
   });
 });

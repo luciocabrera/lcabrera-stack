@@ -13,7 +13,7 @@ export const comparisonMarkdown = (comparison: Comparison) => {
   const labels = sideLabels(comparison);
 
   return [
-    `### ${comparison.suite}: ${labels.b} vs ${labels.a} (${modelText(comparison)})`,
+    `### ${comparison.suite}: ${labels.a} → ${labels.b} (${modelText(comparison)})`,
     flipTable({ flips: comparison.flips, labels }),
     rateLine(comparison),
     `Cost: ${costText(comparison.a)} → ${costText(comparison.b)}. Duration p50: ${durationText(comparison.a)} → ${durationText(comparison.b)}.`,

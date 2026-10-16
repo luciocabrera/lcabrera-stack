@@ -74,10 +74,11 @@ prints one markdown section per suite that has both:
    below `minTrialsForRate` counted trials;
 3. the reported cost and the median trial duration of each run;
 4. which input hashes changed: the harness version, the skill catalog, each
-   subject's content, each task's task, fixture and expected hashes, and the
-   judge and agent prompts. One changed hash is named as the one cause; more
-   than one is reported as multiple causes, because no single change then
-   explains the difference.
+   subject's content, the task, fixture and expected hashes of each task both
+   runs hold, and the judge and agent prompts. A task only one run reached
+   shows in the flip list and is not named as a cause. One changed hash is
+   named as the one cause; more than one is reported as multiple causes,
+   because no single change then explains the difference.
 
 `--suite` narrows it to one suite and `--branch` names the run under test's
 branch. `--a <run> --b <run>` compares two runs given as run ids or as

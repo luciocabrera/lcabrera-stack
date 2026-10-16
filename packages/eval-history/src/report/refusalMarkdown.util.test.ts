@@ -20,7 +20,7 @@ describe('refusalMarkdown', () => {
       suite: 'skills',
     }).split('\n\n', 2);
 
-    expect(heading).toBe('### skills: feat/x vs main: not compared');
+    expect(heading).toBe('### skills: main → feat/x: not compared');
     expect(reason).toContain('`model-b`');
   });
 });

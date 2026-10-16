@@ -27,7 +27,7 @@ describe('comparisonMarkdown', () => {
     ).split('\n\n');
 
     expect(sections).toEqual([
-      '### skills: feat/x vs main (model-a)',
+      '### skills: main → feat/x (model-a)',
       'No task changed outcome.',
       expect.stringContaining('Pass rate, Wilson interval at z=1.96'),
       'Cost: $1.00 reported → $1.00 reported. Duration p50: 2.0 s → 2.0 s.',
