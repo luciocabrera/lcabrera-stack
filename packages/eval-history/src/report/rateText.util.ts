@@ -1,6 +1,6 @@
 import type { RunSide } from './report.types.ts';
 
-const percent = (share: number) => `${(share * 100).toFixed(1)}%`;
+import { formatPercent } from '../grades/formatPercent.util.ts';
 
 export const rateText = ({
   excluded,
@@ -9,6 +9,6 @@ export const rateText = ({
   const uncounted = excluded === 0 ? '' : `, ${String(excluded)} not counted`;
 
   return rate.kind === 'rate'
-    ? `${percent(rate.rate)} (n=${String(rate.n)}, ${percent(rate.lower)}–${percent(rate.upper)}${uncounted})`
+    ? `${formatPercent(rate.rate)} (n=${String(rate.n)}, ${formatPercent(rate.lower)}–${formatPercent(rate.upper)}${uncounted})`
     : `insufficient data (n=${String(rate.n)}, ${String(rate.k)} passed${uncounted})`;
 };

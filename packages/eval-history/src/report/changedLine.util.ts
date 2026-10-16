@@ -1,13 +1,8 @@
-import type { RunComparison } from './report.types.ts';
+import type { Comparison } from './report.types.ts';
 
 import { hashLabel } from './hashLabel.util.ts';
 
-type Attribution = Extract<
-  RunComparison,
-  { readonly kind: 'comparison' }
->['changed'];
-
-export const changedLine = (changed: Attribution) => {
+export const changedLine = (changed: Comparison['changed']) => {
   if (changed.kind === 'none') {
     return 'Changed: no input hash, so nothing recorded explains a difference.';
   }

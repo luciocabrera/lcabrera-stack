@@ -26,3 +26,5 @@ export const HASH_LABELS: Readonly<Record<string, string>> = {
 };
 
 export const ABSENT_CELL = '—';
+
+export const SHORT_SHA_LENGTH = 7;

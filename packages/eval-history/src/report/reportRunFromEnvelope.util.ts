@@ -1,12 +1,6 @@
 import type { RunEnvelope } from '../envelope/envelope.types.ts';
 
-const subjectKey = ({
-  kind,
-  name,
-}: {
-  readonly kind: string;
-  readonly name: string;
-}) => `${kind}:${name}`;
+import { subjectKey } from './subjectKey.util.ts';
 
 export const reportRunFromEnvelope = ({
   run,

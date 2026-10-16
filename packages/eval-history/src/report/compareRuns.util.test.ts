@@ -1,31 +1,11 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type { ReportRun } from './report.types.ts';
-
 import { compareRuns } from './compareRuns.util.ts';
+import { reportRunFixture } from './reportRunFixture.util.ts';
 
 const thresholds = { minTrialsForRate: 6, z: 1.96 };
 
-const main: ReportRun = {
-  branch: 'main',
-  catalogHash: 'cat1',
-  costUsdReported: 1,
-  durationsMs: [1000, 3000],
-  gitSha: 'a'.repeat(40),
-  harnessVersion: 'h1',
-  modelId: 'model-a',
-  runId: 'run-a',
-  status: 'complete',
-  subjects: [{ contentHash: 'c1', kind: 'skill', name: 'react-19' }],
-  suite: 'skills',
-  tasks: [
-    {
-      outcomes: ['pass', 'pass', 'fail', 'error'],
-      taskHash: 't1',
-      taskKey: 'skills/react-19/trigger-1',
-    },
-  ],
-};
+const main = reportRunFixture();
 
 describe('compareRuns', () => {
   it('refuses two models and names both', () => {

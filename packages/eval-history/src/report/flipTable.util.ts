@@ -1,21 +1,10 @@
-import type { TaskCount, TaskFlip } from './report.types.ts';
+import type { TaskFlip } from './report.types.ts';
 
-import { ABSENT_CELL } from './report.constants.ts';
+import { flipCell } from './flipCell.util.ts';
 
 type FlipTableArgs = {
   readonly flips: readonly TaskFlip[];
   readonly labels: { readonly a: string; readonly b: string };
-};
-
-const cell = (count: TaskCount | undefined) => {
-  if (count === undefined) {
-    return ABSENT_CELL;
-  }
-
-  const uncounted =
-    count.excluded === 0 ? '' : ` (+${String(count.excluded)} not counted)`;
-
-  return `${String(count.k)}/${String(count.n)}${uncounted}`;
 };
 
 export const flipTable = ({ flips, labels }: FlipTableArgs) =>
@@ -25,6 +14,7 @@ export const flipTable = ({ flips, labels }: FlipTableArgs) =>
         `| Task | ${labels.a} | ${labels.b} |`,
         '| --- | --- | --- |',
         ...flips.map(
-          ({ a, b, taskKey }) => `| ${taskKey} | ${cell(a)} | ${cell(b)} |`,
+          ({ a, b, taskKey }) =>
+            `| ${taskKey} | ${flipCell(a)} | ${flipCell(b)} |`,
         ),
       ].join('\n');

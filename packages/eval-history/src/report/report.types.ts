@@ -4,9 +4,23 @@ import type { QueryClient } from '../queries/queries.types.ts';
 import type { Outcome, Rate } from '../stats/stats.types.ts';
 import type { compareRuns } from './compareRuns.util.ts';
 
+export type Comparison = Extract<
+  RunComparison,
+  { readonly kind: 'comparison' }
+>;
+
+export type HashEntry = readonly [string, string | undefined];
+
+export type LabelledRun = {
+  readonly branch: string;
+  readonly gitSha: string;
+};
+
 export type ReadEnvelope = (
   file: string,
 ) => ReturnType<typeof readEnvelopeFile>;
+
+export type Refusal = Extract<RunComparison, { readonly kind: 'refused' }>;
 
 export type ReportConnection = {
   readonly client: QueryClient;
@@ -56,6 +70,11 @@ export type RunSide = {
   readonly rate: Rate;
   readonly runId: string;
   readonly status: ReportRun['status'];
+};
+
+export type SidePair<Side> = {
+  readonly a: Side;
+  readonly b: Side;
 };
 
 export type Suite = (typeof SUITES)[number];
