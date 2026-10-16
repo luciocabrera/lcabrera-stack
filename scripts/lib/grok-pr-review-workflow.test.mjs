@@ -47,6 +47,26 @@ describe('the subscription review does not use an API key', () => {
     expect(step).toContain('GROK_AUTH_JSON is empty');
   });
 
+  it('does not persist the job token in the checkout', () => {
+    const step = stepBlock(yaml(), 'Check out the pull request head');
+    expect(step).toContain('persist-credentials: false');
+  });
+
+  it('keeps the session file out of the model tools', () => {
+    const step = stepBlock(yaml(), RUN_STEP);
+    expect(step).toContain('unset GROK_AUTH_JSON');
+    for (const rule of [
+      'Read(**/.grok)',
+      'Read(**/.grok/**)',
+      'Read(~/.grok)',
+      'Read(~/.grok/**)',
+      'Edit(**/.grok/**)',
+      'Edit(~/.grok/**)',
+    ]) {
+      expect(step, rule).toContain(`--deny '${rule}'`);
+    }
+  });
+
   it('does not hand the model step a GitHub token', () => {
     const step = stepBlock(yaml(), RUN_STEP);
     expect(stepEnvValue(step, 'GITHUB_TOKEN')).toBe("''");

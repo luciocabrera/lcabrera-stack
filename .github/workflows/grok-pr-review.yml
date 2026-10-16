@@ -36,7 +36,8 @@ name: Grok PR Review
 #
 # The model step sets GITHUB_TOKEN and GH_TOKEN empty. search_replace can
 # edit a file in the workspace; it cannot call GitHub. The submit step is
-# the one that receives the token.
+# the one that receives the token. Checkout sets persist-credentials to
+# false, so that token is not written into .git/config either.
 #
 # Forks are skipped rather than failed. pull_request from a fork does not
 # receive secrets, and pull_request_target would run a fork's workflow
@@ -75,6 +76,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+          persist-credentials: false
 
       # Pin the linux-x86_64 binary by version and digest. The URL is the
       # file the upstream installer fetches for this platform; the checksum
@@ -116,8 +118,10 @@ jobs:
 
       # An empty secret on a same-repo pull request ends RED here. Writing
       # the file and starting the CLI would spend a turn to learn the same
-      # fact from the binary. The session file is mode 600 and removed
-      # before the submit step.
+      # fact from the binary. The session file is mode 600. The env var is
+      # unset before the CLI starts, and Read/Edit deny rules for the grok
+      # home still apply under --always-approve. The file is removed before
+      # the submit step.
       - name: Run the Grok subscription review
         env:
           GH_TOKEN: ''
@@ -137,6 +141,7 @@ jobs:
           install -d -m 700 "${HOME}/.grok"
           umask 077
           printf '%s\n' "${GROK_AUTH_JSON}" > "${HOME}/.grok/auth.json"
+          unset GROK_AUTH_JSON
 
           {
             echo "Pull request #${PR_NUMBER} of ${REPOSITORY}."
@@ -148,6 +153,12 @@ jobs:
           grok --prompt-file grok-subscription-prompt.md \
             --model grok-4.7 \
             --always-approve \
+            --deny 'Read(**/.grok)' \
+            --deny 'Read(**/.grok/**)' \
+            --deny 'Read(~/.grok)' \
+            --deny 'Read(~/.grok/**)' \
+            --deny 'Edit(**/.grok/**)' \
+            --deny 'Edit(~/.grok/**)' \
             --no-subagents \
             --disable-web-search \
             --tools 'read_file,grep,list_dir,search_replace' \
