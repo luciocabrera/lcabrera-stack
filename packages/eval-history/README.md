@@ -115,8 +115,12 @@ scratch database, because it drops schema `evals` there before every test.
 The ingest, reporting and grade tests each create and drop a database of
 their own on the same server. The reporting test seeds the synthetic year into
 its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
-budget. Without the variable every one of them skips and says why, except
-under `CI`, where they fail.
+budget. The `evals:migrate` script test runs `scripts/migrate.mjs` against a
+database of its own, as the owner and then as a role that owns nothing, and
+checks its exit code. Because the script grants `evals_writer` and
+`evals_reader` by name, it creates either role only when the server lacks it,
+and drops only the ones it created. Without the variable every one of them
+skips and says why, except under `CI`, where they fail.
 
 `vp run --filter @repo/eval-history seed:synthetic` migrates and grants
 through `EVALS_MIGRATE_DATABASE_URL`, as `evals:migrate` does, then writes the

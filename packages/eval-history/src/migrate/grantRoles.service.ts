@@ -6,6 +6,7 @@ import type {
   UngrantedRole,
 } from './migrate.types.ts';
 
+import { inSequence } from '../ingest/inSequence.service.ts';
 import { grantStatements } from './grantStatements.util.ts';
 import { lackingPrivileges } from './lackingPrivileges.service.ts';
 import { revokeStatements } from './revokeStatements.util.ts';
@@ -50,12 +51,13 @@ const applyGrants = async ({ client, roles }: GrantRolesArgs) => {
 };
 
 const checkGrants = async ({ client, roles }: GrantRolesArgs) => {
-  const checked: readonly UngrantedRole[] = await Promise.all(
-    roles.map(async (role) => ({
+  const checked: readonly UngrantedRole[] = await inSequence({
+    items: roles,
+    step: async (role) => ({
       lacking: await lackingPrivileges({ client, role }),
       role,
-    })),
-  );
+    }),
+  });
 
   return {
     granted: checked
