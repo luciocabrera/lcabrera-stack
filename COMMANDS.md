@@ -1144,6 +1144,14 @@ then-submit shape as Claude. Both jobs spend model tokens, which is why they ski
 drafts, bound themselves with `timeout-minutes`, and cancel superseded runs.
 [ADR-116](docs/decisions/ADR-116-a-grok-catalog-reviewer-posts-on-pull-requests-and-is-not-an-accepted-reviewer.md).
 
+[`grok-pr-review.yml`](.github/workflows/grok-pr-review.yml) is a separate
+reviewer on a separate credential. It runs Grok Build from the
+`GROK_AUTH_JSON` secret, the contents of `~/.grok/auth.json`, and it does
+not read `XAI_API_KEY`. Inline comments go out as a pull-request review and
+one summary comment is updated in place, both as `github-actions[bot]`,
+which is not an accepted reviewer. Drafts and pull requests opened from a
+fork are skipped. The secret setup is in that file's header.
+
 [`agent-review-verdict.yml`](.github/workflows/agent-review-verdict.yml) runs
 `scripts/verify-agent-review.mjs` on every pull request and on every comment made
 on one, publishing an `Agent review verdict` commit status. It **validates** the

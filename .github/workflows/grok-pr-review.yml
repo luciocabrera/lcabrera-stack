@@ -1,0 +1,82 @@
+name: Grok PR Review
+
+# A subscription review, beside grok-review.yml. That workflow is the
+# catalog pass and authenticates with XAI_API_KEY under its own GitHub App
+# (ADR-116). This one authenticates with the Grok Build session only.
+#
+# Create the secret once, on a machine where `grok models` says you are
+# logged in with grok.com. The value is the whole file, braces included:
+#
+#   cat ~/.grok/auth.json
+#
+# Paste that into the repository:
+# Settings → Secrets and variables → Actions → New repository secret
+# Name: GROK_AUTH_JSON
+#
+# Or, from that same machine, without printing the file:
+#
+#   gh secret set GROK_AUTH_JSON < ~/.grok/auth.json
+#
+# Do not commit the file and do not echo it in a log. It is a live login.
+# When a run says the session expired, run `grok login` again and replace
+# the secret. Do not add XAI_API_KEY here: the CLI falls back to an API key
+# only when no session is active, and this job must not take that path.
+#
+# The review is posted with GITHUB_TOKEN, so the author is
+# github-actions[bot]. That login is not an accepted reviewer
+# (scripts/lib/copilot-review.mjs), so this job cannot green
+# "Copilot review complete".
+#
+# Forks are skipped rather than failed. pull_request from a fork does not
+# receive secrets, and pull_request_target would run a fork's workflow
+# change with this secret. Do not switch the trigger.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  # The review itself, including inline comments.
+  pull-requests: write
+  # The single summary comment is an issue comment on the pull request,
+  # updated in place. The pulls permission does not cover that endpoint.
+  issues: write
+
+# A superseded run reviews a head that is already gone and spends the
+# subscription's quota to do it. The group is not grok-review's, so a push
+# does not cancel the catalog pass.
+concurrency:
+  group: grok-pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # A draft is reviewed again when it is marked ready. A fork is another
+    # repository: head.repo.full_name differs, the job does not start, and
+    # GROK_AUTH_JSON is never passed in.
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
+    name: Review the pull request with the Grok subscription
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Check out the pull request head
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # Pinned to the v1.0.2 commit. The v1 tag in that repository is
+      # force-moved, so a floating tag is not a pin. The action writes
+      # grok_auth_json to ~/.grok/auth.json, runs the CLI with read-only
+      # tools, posts inline comments plus one summary comment, and deletes
+      # the auth file at the end. It has no API-key input.
+      - name: Review with the Grok Build subscription
+        uses: 0xr3ngar/grok-build-review-action@eded30018cdee4e83dfca14d18f292b860c30cdd # v1.0.2
+        with:
+          grok_auth_json: ${{ secrets.GROK_AUTH_JSON }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          model: grok-4.7
+          roast_level: professional
+          fail_on: never
+          status_comments: true
+          max_turns: '40'
