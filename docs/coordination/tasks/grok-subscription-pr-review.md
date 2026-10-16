@@ -7,13 +7,12 @@ branch: ci/1375-grok-subscription-pr-review
 area:
   - .github/workflows/grok-pr-review.yml
   - scripts/lib/grok-pr-review-workflow.test.mjs
-  - COMMANDS.md
   - docs/tooling/copilot-review-gate.md
   - packages/devkit/CLASSIFICATION.md
 started: 2026-10-16
 updated: 2026-10-16
 plan: (none)
-issue: '#1375'
+issue: #1375
 ---
 
 ## What
