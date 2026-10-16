@@ -989,9 +989,7 @@
             svg,
           );
           el('rect', { width: W, height: H, rx: 3 }, g);
-          var short = p.name
-            .replace('@lcabrera/', '')
-            .replace('@repo/', '@repo/');
+          var short = p.name.replace('@lcabrera/', '');
           el('text', { class: 'nm', x: 12, y: 20 }, g).textContent =
             short.length > 19 ? short.slice(0, 18) + '…' : short;
           el('text', { class: 'rt', x: 12, y: 36 }, g).textContent = p.rt;
