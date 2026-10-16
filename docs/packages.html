@@ -1,0 +1,2046 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="The two products lcabrera-stack ships, every package in them, and the boundaries between them."
+    />
+    <title>Stack Package Map</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@500;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap"
+    />
+    <style>
+      /* Layout: a signal-box panel. One narrow reading column, with full-width interactive "panels" (route diagram, isolation lever frame, round loop, eval bench) set into it. */
+      :root {
+        --bg: #eef1f0;
+        --panel: #f8faf9;
+        --ink: #17201d;
+        --muted: #56635e;
+        --rule: #c9d2ce;
+        --accent: #0d6b55;
+        --accent-soft: #d6ebe4;
+        --amber: #9a5b00;
+        --amber-soft: #f6e6c8;
+        --red: #b3261e;
+        --red-soft: #f7dcd9;
+        --font-display:
+          'IBM Plex Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+        --font-body:
+          'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        --font-mono:
+          'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
+          monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #111715;
+          --panel: #18201d;
+          --ink: #e2e9e6;
+          --muted: #98a6a0;
+          --rule: #2d3834;
+          --accent: #4fc4a2;
+          --accent-soft: #173a30;
+          --amber: #e3a646;
+          --amber-soft: #3a2c12;
+          --red: #f08077;
+          --red-soft: #3d1c19;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme='dark'] {
+        --bg: #111715;
+        --panel: #18201d;
+        --ink: #e2e9e6;
+        --muted: #98a6a0;
+        --rule: #2d3834;
+        --accent: #4fc4a2;
+        --accent-soft: #173a30;
+        --amber: #e3a646;
+        --amber-soft: #3a2c12;
+        --red: #f08077;
+        --red-soft: #3d1c19;
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font: 400 16px/1.6 var(--font-body);
+        padding-inline: 16px;
+        padding-block: 0 64px;
+      }
+      .wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+      }
+      .col {
+        max-width: 68ch;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: var(--font-display);
+        text-wrap: balance;
+        line-height: 1.15;
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(2.1rem, 5.5vw, 3.4rem);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      h2 {
+        font-size: clamp(1.5rem, 3.2vw, 2rem);
+        font-weight: 700;
+      }
+      h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0;
+      }
+      a {
+        color: var(--accent);
+        text-underline-offset: 3px;
+      }
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      code,
+      .mono {
+        font-family: var(--font-mono);
+        font-size: 0.86em;
+      }
+      code {
+        background: var(--accent-soft);
+        padding: 0.05em 0.35em;
+        border-radius: 3px;
+        overflow-wrap: anywhere;
+      }
+      .label {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      section {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        padding-block: 56px 0;
+        border-top: 1px solid var(--rule);
+        margin-top: 56px;
+      }
+
+      /* Masthead */
+      header.mast {
+        padding-block: 56px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .lede {
+        font-size: 1.15rem;
+        color: var(--ink);
+        max-width: 62ch;
+      }
+      .byline {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      .thesis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0;
+        border: 1px solid var(--rule);
+        background: var(--panel);
+        margin-top: 18px;
+      }
+      .thesis div {
+        padding: 16px 18px;
+        border-right: 1px solid var(--rule);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+      }
+      .thesis div:last-child {
+        border-right: 0;
+      }
+      .thesis strong {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+      }
+      .thesis span {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      @media (max-width: 700px) {
+        .thesis div {
+          border-right: 0;
+          border-bottom: 1px solid var(--rule);
+        }
+        .thesis div:last-child {
+          border-bottom: 0;
+        }
+      }
+
+      /* Panel shell */
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-width: 0;
+      }
+      .panel-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
+
+      /* Route diagram */
+      .route {
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .track {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        min-width: 820px;
+        position: relative;
+      }
+      .stop {
+        flex: 1;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 0 2px;
+        background: none;
+        border: 0;
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+      }
+      .stop::before {
+        content: '';
+        position: absolute;
+        top: 13px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--rule);
+        z-index: 0;
+      }
+      .stop:first-child::before {
+        left: 50%;
+      }
+      .stop:last-child::before {
+        right: 50%;
+      }
+      .lamp {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid var(--rule);
+        background: var(--bg);
+        position: relative;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        font: 600 0.72rem var(--font-mono);
+        color: var(--muted);
+        transition:
+          background 0.2s,
+          border-color 0.2s,
+          color 0.2s;
+      }
+      .stop .who {
+        font: 600 0.62rem var(--font-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .stop .nm {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 0.92rem;
+        text-align: center;
+        line-height: 1.2;
+      }
+      .stop.done .lamp {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .stop.done::before {
+        background: var(--accent);
+      }
+      .stop[aria-selected='true'] .lamp {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--panel);
+      }
+      .stop[aria-selected='true'] .nm {
+        font-weight: 700;
+      }
+      .stop:hover .lamp {
+        border-color: var(--accent);
+      }
+      .detail {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        gap: 24px;
+        border-top: 1px solid var(--rule);
+        padding-top: 18px;
+      }
+      .detail .lock {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border-left: 3px solid var(--accent);
+        padding-left: 14px;
+      }
+      .detail ul {
+        margin: 0;
+        padding-left: 1.1em;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      button.btn {
+        font: 600 0.85rem var(--font-body);
+        padding: 8px 14px;
+        border: 1px solid var(--ink);
+        background: var(--panel);
+        color: var(--ink);
+        cursor: pointer;
+        border-radius: 2px;
+      }
+      button.btn.primary {
+        background: var(--ink);
+        color: var(--panel);
+      }
+      button.btn:hover {
+        border-color: var(--accent);
+      }
+      button.btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      @media (max-width: 760px) {
+        .detail {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      /* Lever frame (isolation) */
+      .levers {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .lever {
+        font: 600 0.85rem var(--font-body);
+        padding: 8px 14px;
+        border: 1px solid var(--rule);
+        background: var(--bg);
+        color: var(--ink);
+        cursor: pointer;
+        border-radius: 2px;
+      }
+      .lever[aria-pressed='true'] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--panel);
+      }
+      .matrix {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.92rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 9px 10px;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      th {
+        font: 600 0.7rem var(--font-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .cell {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex: none;
+      }
+      .yes .dot {
+        background: var(--accent);
+      }
+      .no .dot {
+        background: transparent;
+        border: 2px solid var(--red);
+      }
+      .no {
+        color: var(--red);
+      }
+      .matrix td.dim,
+      .matrix th.dim {
+        opacity: 0.32;
+      }
+      .note {
+        font-size: 0.92rem;
+        color: var(--muted);
+      }
+
+      /* Round loop */
+      .rounds {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .round {
+        border: 1px solid var(--rule);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        background: var(--bg);
+        min-height: 132px;
+      }
+      .round .st {
+        font: 600 0.75rem var(--font-mono);
+        letter-spacing: 0.05em;
+      }
+      .round.pass {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+      .round.fail {
+        border-color: var(--red);
+        background: var(--red-soft);
+      }
+      .round.live {
+        border-style: dashed;
+        border-color: var(--ink);
+      }
+      .outcome {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-weight: 700;
+        min-height: 1.5em;
+      }
+      @media (max-width: 620px) {
+        .rounds {
+          grid-template-columns: 1fr;
+        }
+        .round {
+          min-height: 0;
+        }
+      }
+
+      /* Planted violation */
+      .plant-steps {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        counter-reset: s;
+      }
+      .plant-steps li {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: start;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--rule);
+        opacity: 0.4;
+        transition: opacity 0.2s;
+      }
+      .plant-steps li.on {
+        opacity: 1;
+      }
+      .plant-steps li::before {
+        counter-increment: s;
+        content: counter(s);
+        font: 600 0.8rem var(--font-mono);
+        width: 26px;
+        height: 26px;
+        border: 2px solid var(--rule);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+      }
+      .plant-steps li.on::before {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .term {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        background: var(--bg);
+        border: 1px solid var(--rule);
+        padding: 6px 8px;
+        overflow-x: auto;
+        white-space: pre;
+        margin-top: 6px;
+      }
+      .exit {
+        font: 600 0.75rem var(--font-mono);
+        padding: 3px 8px;
+        border-radius: 2px;
+        white-space: nowrap;
+      }
+      .exit.bad {
+        background: var(--red-soft);
+        color: var(--red);
+      }
+      .exit.good {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .exit.neutral {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
+
+      /* Hooks */
+      .split {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        border: 1px solid var(--rule);
+        background: var(--panel);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-width: 0;
+      }
+      .tag {
+        align-self: flex-start;
+        font: 600 0.68rem var(--font-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 7px;
+        border-radius: 2px;
+      }
+      .tag.enf {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .tag.adv {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
+
+      /* Eval bench */
+      .fixtures {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 8px;
+      }
+      .fx {
+        text-align: left;
+        border: 1px solid var(--rule);
+        background: var(--bg);
+        padding: 10px 12px;
+        cursor: pointer;
+        color: var(--ink);
+        font: inherit;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        border-radius: 2px;
+      }
+      .fx[aria-pressed='true'] {
+        border-color: var(--ink);
+        background: var(--panel);
+        box-shadow: inset 0 -3px 0 var(--accent);
+      }
+      .fx .mono {
+        font-size: 0.82rem;
+        font-weight: 600;
+      }
+      .fx span:last-child {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .crit {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .crit div {
+        display: grid;
+        grid-template-columns: 26px minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 0.92rem;
+      }
+      .crit .n {
+        font: 600 0.8rem var(--font-mono);
+        color: var(--muted);
+      }
+      .calc {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+        gap: 24px;
+        align-items: start;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .field label {
+        font-size: 0.88rem;
+        font-weight: 600;
+      }
+      .field .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      input[type='range'] {
+        flex: 1;
+        accent-color: var(--accent);
+        min-width: 0;
+      }
+      .field output {
+        font: 600 0.95rem var(--font-mono);
+        min-width: 2.5ch;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .verdict {
+        border: 1px solid var(--rule);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: var(--bg);
+      }
+      .verdict .big {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      .verdict.flag {
+        border-color: var(--red);
+      }
+      .verdict.flag .big {
+        color: var(--red);
+      }
+      .verdict.ok .big {
+        color: var(--accent);
+      }
+      .verdict.insuf .big {
+        color: var(--amber);
+      }
+      .ci {
+        position: relative;
+        height: 34px;
+      }
+      .ci .axis {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 16px;
+        height: 2px;
+        background: var(--rule);
+      }
+      .ci .band {
+        position: absolute;
+        top: 10px;
+        height: 14px;
+        background: var(--accent-soft);
+        border: 1px solid var(--accent);
+      }
+      .ci .pt {
+        position: absolute;
+        top: 9px;
+        width: 4px;
+        height: 16px;
+        background: var(--accent);
+        transform: translateX(-2px);
+      }
+      .ci .tk {
+        position: absolute;
+        top: 24px;
+        font: 400 0.68rem var(--font-mono);
+        color: var(--muted);
+        transform: translateX(-50%);
+      }
+      .ci-wrap {
+        padding: 0 12px 14px;
+      }
+      @media (max-width: 760px) {
+        .calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .nums {
+        font-variant-numeric: tabular-nums;
+      }
+
+      footer {
+        margin-top: 64px;
+        padding-top: 20px;
+        border-top: 1px solid var(--rule);
+        color: var(--muted);
+        font-size: 0.88rem;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
+
+      nav.site {
+        position: sticky;
+        top: env(safe-area-inset-top, 0px);
+        z-index: 5;
+        background: var(--bg);
+        border-bottom: 1px solid var(--rule);
+        margin-inline: -16px;
+        padding-inline: 16px;
+      }
+      nav.site .in {
+        max-width: 1040px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 6px 20px;
+        flex-wrap: wrap;
+        padding-block: 12px;
+      }
+      nav.site .brand {
+        font: 700 1rem var(--font-display);
+        color: var(--ink);
+        text-decoration: none;
+        margin-right: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      nav.site .brand::before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      nav.site a.lk {
+        font-size: 0.92rem;
+        color: var(--muted);
+        text-decoration: none;
+        padding-block: 2px;
+        border-bottom: 2px solid transparent;
+      }
+      nav.site a.lk:hover {
+        color: var(--ink);
+      }
+      nav.site a.lk[aria-current='page'] {
+        color: var(--ink);
+        border-bottom-color: var(--accent);
+        font-weight: 600;
+      }
+      .pager {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 56px;
+      }
+      .pager a {
+        font: 600 0.92rem var(--font-body);
+      }
+
+      .lines {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 14px;
+      }
+      .line {
+        border: 1px solid var(--rule);
+        background: var(--panel);
+        padding: 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-width: 0;
+      }
+      .line h3 {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 2px;
+        flex: none;
+      }
+      .sw-app {
+        background: var(--accent);
+      }
+      .sw-tool {
+        background: var(--amber);
+      }
+      .sw-int {
+        background: transparent;
+        border: 2px dashed var(--muted);
+      }
+      .map-wrap {
+        overflow-x: auto;
+      }
+      svg.map {
+        width: 100%;
+        min-width: 760px;
+        height: auto;
+        display: block;
+        font-family: var(--font-body);
+      }
+      .map .lane {
+        fill: var(--bg);
+        stroke: var(--rule);
+      }
+      .map .lane-label {
+        font: 600 11px var(--font-mono);
+        letter-spacing: 0.08em;
+        fill: var(--muted);
+      }
+      .map .edge {
+        stroke: var(--rule);
+        stroke-width: 1.5;
+        fill: none;
+        transition:
+          stroke 0.15s,
+          opacity 0.15s;
+      }
+      .map .edge.dev {
+        stroke-dasharray: 4 4;
+      }
+      .map .edge.hot {
+        stroke: var(--ink);
+        stroke-width: 2;
+      }
+      .map .edge.faint {
+        opacity: 0.25;
+      }
+      .map .node {
+        cursor: pointer;
+      }
+      .map .node rect {
+        fill: var(--panel);
+        stroke: var(--rule);
+        stroke-width: 1.5;
+        transition:
+          stroke 0.15s,
+          fill 0.15s;
+      }
+      .map .node.app rect {
+        stroke: var(--accent);
+      }
+      .map .node.tool rect {
+        stroke: var(--amber);
+      }
+      .map .node.int rect {
+        stroke: var(--muted);
+        stroke-dasharray: 4 3;
+      }
+      .map .node .nm {
+        font: 600 13px var(--font-mono);
+        fill: var(--ink);
+      }
+      .map .node .rt {
+        font: 400 11px var(--font-body);
+        fill: var(--muted);
+      }
+      .map .node.sel rect {
+        fill: var(--accent-soft);
+        stroke-width: 2.5;
+      }
+      .map .node.tool.sel rect {
+        fill: var(--amber-soft);
+      }
+      .map .node.faint {
+        opacity: 0.35;
+      }
+      .map .node:focus {
+        outline: none;
+      }
+      .map .node:focus-visible rect {
+        stroke: var(--ink);
+        stroke-width: 3;
+      }
+      .legend {
+        display: flex;
+        gap: 18px;
+        flex-wrap: wrap;
+        font-size: 0.85rem;
+        color: var(--muted);
+      }
+      .legend span {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .pkg {
+        display: grid;
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        gap: 24px;
+        border-top: 1px solid var(--rule);
+        padding-top: 18px;
+      }
+      .kv {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 6px 14px;
+        font-size: 0.92rem;
+      }
+      .kv dt {
+        color: var(--muted);
+      }
+      .kv dd {
+        margin: 0;
+        min-width: 0;
+        overflow-wrap: anywhere;
+      }
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+      }
+      .chip {
+        font: 600 0.75rem var(--font-mono);
+        padding: 3px 8px;
+        border: 1px solid var(--rule);
+        border-radius: 2px;
+        background: var(--bg);
+        color: var(--ink);
+        cursor: pointer;
+      }
+      .chip:hover {
+        border-color: var(--accent);
+      }
+      .chip.static {
+        cursor: default;
+      }
+      .reqs {
+        margin: 0;
+        padding-left: 1.1em;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        font-size: 0.9rem;
+      }
+      @media (max-width: 760px) {
+        .pkg {
+          grid-template-columns: 1fr;
+        }
+      }
+      .boundary {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 0;
+        border: 1px solid var(--rule);
+      }
+      .zone {
+        padding: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        border-right: 1px solid var(--rule);
+        min-width: 0;
+      }
+      .zone:last-child {
+        border-right: 0;
+      }
+      .zone .chips .chip {
+        cursor: default;
+      }
+      @media (max-width: 680px) {
+        .boundary {
+          grid-template-columns: 1fr;
+        }
+        .zone {
+          border-right: 0;
+          border-bottom: 1px solid var(--rule);
+        }
+        .zone:last-child {
+          border-bottom: 0;
+        }
+      }
+      .attempts {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .attempt {
+        text-align: left;
+        font: inherit;
+        color: var(--ink);
+        background: var(--bg);
+        border: 1px solid var(--rule);
+        padding: 10px 12px;
+        cursor: pointer;
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        align-items: center;
+        border-radius: 2px;
+      }
+      .attempt[aria-pressed='true'] {
+        border-color: var(--red);
+        background: var(--red-soft);
+      }
+      .attempt code {
+        background: transparent;
+        padding: 0;
+      }
+      .result {
+        border-left: 3px solid var(--red);
+        padding-left: 14px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-height: 120px;
+      }
+      .ba {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+        gap: 24px;
+      }
+      @media (max-width: 760px) {
+        .ba {
+          grid-template-columns: 1fr;
+        }
+      }
+      .personas {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .plist {
+        display: flex;
+        flex-direction: column;
+      }
+      .plist div {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        padding: 9px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 0.94rem;
+        align-items: baseline;
+      }
+      .plist .chips {
+        justify-content: flex-end;
+      }
+      .surfaces {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 12px;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="site" aria-label="Site">
+      <div class="in">
+        <a class="brand" href="index.html">lcabrera-stack</a
+        ><a class="lk" href="workflow.html">Agentic workflow</a
+        ><a class="lk" href="packages.html" aria-current="page"
+          >Product and packages</a
+        ><a
+          class="lk"
+          href="https://github.com/luciocabrera/lcabrera-stack"
+          target="_blank"
+          rel="noopener"
+          >GitHub</a
+        >
+      </div>
+    </nav>
+    <div class="wrap">
+      <header class="mast">
+        <span class="label">lcabrera-stack · the product</span>
+        <h1>Two products, one repository</h1>
+        <p class="lede">
+          The repository ships two things, split by who installs them. An
+          application installs the <strong>application stack</strong>: a data
+          grid, the wire contract between browser and server, and a safe query
+          layer. Another repository installs the <strong>toolchain</strong>:
+          configs, gates, lint rules, and the agent setup that runs this
+          repository, packaged so it can run someone else's.
+        </p>
+        <p class="byline">
+          The public packages are published to npm under
+          <code>@lcabrera/*</code>. Internal ones stay under
+          <code>@repo/*</code>, so an import line tells you which side of the
+          product boundary you are on.
+        </p>
+      </header>
+
+      <section id="lines">
+        <div class="col stack">
+          <span class="label">1 · The product lines</span>
+          <h2>Split by consumer, not by build shape</h2>
+          <p>
+            A package belongs to a line because of who installs it. The UI
+            library publishes TypeScript source and the toolchain publishes
+            plain <code>.mjs</code>, yet each sits where its consumer does. A
+            capability that serves neither consumer is a signal to stop, not to
+            add a package.
+          </p>
+        </div>
+        <div class="lines">
+          <div class="line">
+            <h3><span class="swatch sw-app"></span>Application stack</h3>
+            <p><span class="label">Installed by an application</span></p>
+            <p>
+              Rendering, querying and serving data: the grid a user works in,
+              the contract between the two ends, and the query layer behind it.
+            </p>
+          </div>
+          <div class="line">
+            <h3><span class="swatch sw-tool"></span>Repository toolchain</h3>
+            <p><span class="label">Installed by a repository</span></p>
+            <p>
+              The standards a repository runs on: TypeScript and Vite+ configs,
+              lint rules, gates, git hooks, and the agent instructions that come
+              with them.
+            </p>
+          </div>
+          <div class="line">
+            <h3><span class="swatch sw-int"></span>Internal harness</h3>
+            <p><span class="label">Never published</span></p>
+            <p>
+              The showcase app that puts the packages under load, the eval
+              history store, and this repository's own config roster. When app
+              convenience and package cleanliness conflict, the package wins.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section id="map">
+        <div class="col stack">
+          <span class="label">2 · The package map</span>
+          <h2>Every workspace, and what depends on what</h2>
+          <p>
+            Select a package to see what it is for, which runtime it may run in,
+            what it depends on, and the product requirements that judge it.
+            Arrows point from a package to what it depends on.
+          </p>
+        </div>
+        <div class="panel">
+          <div class="legend">
+            <span><span class="swatch sw-app"></span>application stack</span>
+            <span><span class="swatch sw-tool"></span>toolchain</span>
+            <span><span class="swatch sw-int"></span>internal</span>
+            <span
+              ><svg width="28" height="8" aria-hidden="true">
+                <line
+                  x1="0"
+                  y1="4"
+                  x2="28"
+                  y2="4"
+                  stroke="currentColor"
+                  stroke-dasharray="4 4"
+                  stroke-width="1.5"
+                /></svg
+              >dev dependency</span
+            >
+          </div>
+          <div class="map-wrap">
+            <svg
+              class="map"
+              id="map"
+              viewBox="0 0 920 470"
+              role="group"
+              aria-label="Package dependency map"
+            ></svg>
+          </div>
+          <div class="pkg" id="pkg" aria-live="polite"></div>
+        </div>
+      </section>
+
+      <section id="boundary">
+        <div class="col stack">
+          <span class="label">3 · The runtime boundary</span>
+          <h2>A client-safe package may only depend on client-safe packages</h2>
+          <p>
+            The browser half and the server half used to be one package. The
+            cost showed up as the Postgres driver riding into every consumer of
+            the UI library, because it needed two fetch helpers. They are now
+            split by runtime, and each tsconfig denies the other side's types.
+            Try an import the rules forbid.
+          </p>
+        </div>
+        <div class="panel">
+          <div class="boundary">
+            <div class="zone">
+              <span class="label">Runs anywhere</span>
+              <div class="chips">
+                <span class="chip static">@lcabrera/utils</span>
+              </div>
+              <p class="note">
+                Pure functions. No side effects, no dependencies.
+              </p>
+            </div>
+            <div class="zone">
+              <span class="label">Browser-safe</span>
+              <div class="chips">
+                <span class="chip static">@lcabrera/api</span
+                ><span class="chip static">@lcabrera/ui</span>
+              </div>
+              <p class="note">
+                No <code>node</code> types. Fetch, validation and the grid.
+              </p>
+            </div>
+            <div class="zone">
+              <span class="label">Node only</span>
+              <div class="chips">
+                <span class="chip static">@lcabrera/server</span
+                ><span class="chip static">@lcabrera/node</span>
+              </div>
+              <p class="note">
+                No DOM lib. Postgres, secrets, process lifecycle.
+              </p>
+            </div>
+          </div>
+          <div class="ba">
+            <div
+              class="attempts"
+              id="attempts"
+              role="group"
+              aria-label="Forbidden imports"
+            ></div>
+            <div class="result" id="result" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+
+      <section id="personas">
+        <div class="col stack">
+          <span class="label">4 · Who it is for</span>
+          <h2>Requirements written in each user's words</h2>
+          <p>
+            A persona earns a place by having a different definition of "it
+            works". Each requirement in the register is written for exactly one
+            of them, names the packages it judges, and declares whether it is
+            met. A change that earns a requirement flips its state in the same
+            commit. Pick a persona.
+          </p>
+        </div>
+        <div class="panel">
+          <div
+            class="personas"
+            id="personaBtns"
+            role="group"
+            aria-label="Choose a persona"
+          ></div>
+          <p id="personaDef"></p>
+          <div class="plist" id="plist"></div>
+          <p class="note">
+            Current state of each requirement:
+            <a
+              href="https://github.com/luciocabrera/lcabrera-stack/tree/main/docs/product/requirements"
+              target="_blank"
+              rel="noopener"
+              >docs/product/requirements</a
+            >.
+          </p>
+        </div>
+      </section>
+
+      <section id="showcase">
+        <div class="col stack">
+          <span class="label">5 · The harness</span>
+          <h2>The showcase app puts the packages under load</h2>
+          <p>
+            A React Router SSR app, and the only workspace that depends on
+            several packages at once, which makes it the place cross-package
+            integration is proven. It never holds a guarantee a package relies
+            on: a package must work from outside this repository, where none of
+            the monorepo's wiring exists.
+          </p>
+        </div>
+        <div class="surfaces">
+          <div class="card">
+            <h3>Large tables</h3>
+            <p>
+              Virtualized and infinite-scroll grids over seeded Postgres data,
+              including a wide table with many column types, to keep render cost
+              honest.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Grouping and summaries</h3>
+            <p>
+              Group rows into a report, fold levels, drill into a group, and put
+              a dimension across the top of a summary. Grouping runs as SQL on
+              the server.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Editing</h3>
+            <p>
+              Create, view, edit and delete orders through route loaders and
+              actions, with validated input and no data fetching in effects.
+            </p>
+          </div>
+          <div class="card">
+            <h3>Eval dashboard</h3>
+            <p>
+              Pass rates and run history from the agent eval suites, served as
+              aggregates only, so no transcript leaves the database.
+            </p>
+          </div>
+        </div>
+      </section>
+      <div class="pager">
+        <a href="workflow.html">← Agentic workflow</a><span></span>
+      </div>
+      <footer>
+        <span
+          >Source:
+          <a
+            href="https://github.com/luciocabrera/lcabrera-stack"
+            target="_blank"
+            rel="noopener"
+            >github.com/luciocabrera/lcabrera-stack</a
+          >. The documents in the repository are canonical; these pages
+          summarise them.</span
+        ><span>Lucio Cabrera</span>
+      </footer>
+    </div>
+    <script>
+      (function () {
+        var GH = 'https://github.com/luciocabrera/lcabrera-stack/';
+        var P = {
+          utils: {
+            name: '@lcabrera/utils',
+            dir: 'packages/utils',
+            line: 'app',
+            rt: 'runs anywhere',
+            x: 110,
+            y: 395,
+            deps: [],
+            desc: 'Pure, framework-agnostic TypeScript utilities: arrays, comparison, formatters, guards, numbers, strings. No side effects and no dependencies, so it is safe in the browser and on the server.',
+            npm: true,
+          },
+          api: {
+            name: '@lcabrera/api',
+            dir: 'packages/api',
+            line: 'app',
+            rt: 'browser-safe',
+            x: 200,
+            y: 285,
+            deps: ['utils'],
+            desc: 'Browser-safe HTTP building blocks: base-URL resolution, validated fetch, paginated table pages and distinct-value queries. The client half of the wire contract.',
+            npm: true,
+          },
+          ui: {
+            name: '@lcabrera/ui',
+            dir: 'packages/ui',
+            line: 'app',
+            rt: 'browser-safe',
+            x: 90,
+            y: 175,
+            deps: ['api', 'utils'],
+            desc: 'React component library built around a virtualized, filterable, groupable data table, plus forms, modals, navigation and settings. Styled with StyleX and published as TypeScript source.',
+            npm: true,
+          },
+          server: {
+            name: '@lcabrera/server',
+            dir: 'packages/server',
+            line: 'app',
+            rt: 'node only',
+            x: 310,
+            y: 175,
+            deps: ['api', 'utils'],
+            desc: 'Node-only Postgres primitives: an injection-safe SQL builder, the server half of the column-filter contract, sorting, paged table queries, and secret, token and ticket helpers.',
+            npm: true,
+          },
+          node: {
+            name: '@lcabrera/node',
+            dir: 'packages/node-runtime',
+            line: 'app',
+            rt: 'node only',
+            x: 330,
+            y: 395,
+            deps: [],
+            desc: 'Process-lifecycle primitives for long-running Node services: graceful shutdown on the signals a container runtime actually sends. Kept apart so a shutdown handler never drags in a database driver.',
+            npm: true,
+          },
+          showcase: {
+            name: 'showcase',
+            dir: 'apps/showcase',
+            line: 'int',
+            rt: 'React Router SSR',
+            x: 200,
+            y: 65,
+            deps: ['ui', 'server', 'api', 'utils', 'evalh'],
+            desc: 'The harness app. It depends on several packages at once, so it is where cross-package integration is verified. Not published.',
+            npm: false,
+          },
+          evalh: {
+            name: '@repo/eval-history',
+            dir: 'packages/eval-history',
+            line: 'int',
+            rt: 'node only',
+            x: 400,
+            y: 65,
+            deps: [],
+            desc: 'Stores agent eval runs in Postgres with its own schema and migrator, and computes pass rates and regression checks. Private.',
+            npm: false,
+          },
+          create: {
+            name: 'create-lcabrera-stack',
+            dir: 'packages/create-lcabrera-stack',
+            line: 'tool',
+            rt: 'CLI',
+            x: 640,
+            y: 65,
+            deps: ['devkit'],
+            desc: 'The initializer behind pnpm create lcabrera-stack. A thin shim over devkit create, unscoped because the package manager decides that name.',
+            npm: true,
+          },
+          devkit: {
+            name: '@lcabrera/devkit',
+            dir: 'packages/devkit',
+            line: 'tool',
+            rt: 'CLI, .mjs',
+            x: 640,
+            y: 175,
+            deps: ['standards'],
+            desc: "Copies this repository's agent setup into another repository: skills, path rules, subagent definitions, workflows, hooks and templates. Then reports what has diverged, so an upgrade keeps local edits.",
+            npm: true,
+          },
+          standards: {
+            name: '@lcabrera/repo-standards',
+            dir: 'packages/repo-standards',
+            line: 'tool',
+            rt: 'CLI, .mjs',
+            x: 640,
+            y: 285,
+            deps: [],
+            desc: 'The gates as commands: commit, branch, PR and issue format, the coordination register, ADRs, and publishing checks. Code is resolved from node_modules so it can be upgraded; prose is copied by devkit so it can be edited.',
+            npm: true,
+          },
+          vitecfg: {
+            name: '@lcabrera/vite-config',
+            dir: 'packages/vite-configs',
+            line: 'tool',
+            rt: 'build config',
+            x: 830,
+            y: 175,
+            deps: ['eslint'],
+            desc: 'Vite+ format, lint, pack and run config factories, and shareable ESLint flat configs for TypeScript and React workspaces.',
+            npm: true,
+          },
+          eslint: {
+            name: '@lcabrera/eslint-plugin',
+            dir: 'packages/eslint-local-rules',
+            line: 'tool',
+            rt: 'lint rules',
+            x: 830,
+            y: 285,
+            deps: [],
+            desc: 'Custom ESLint rules: file-name conventions, clean import paths, readonly props, and one component per module.',
+            npm: true,
+          },
+          tsconfig: {
+            name: '@lcabrera/tsconfig',
+            dir: 'packages/tsconfig',
+            line: 'tool',
+            rt: 'build config',
+            x: 830,
+            y: 395,
+            deps: [],
+            desc: 'Strict TypeScript config factories and a generator that writes a tsconfig per workspace, in app and node variants. Generated configs are never edited by hand.',
+            npm: true,
+          },
+          tsconfigs: {
+            name: '@repo/ts-configs',
+            dir: 'packages/ts-configs',
+            line: 'int',
+            rt: 'internal',
+            x: 640,
+            y: 395,
+            deps: [],
+            dev: ['tsconfig'],
+            desc: "This repository's own workspace roster for the tsconfig generator. The published factories moved to @lcabrera/tsconfig; this half stayed private.",
+            npm: false,
+          },
+        };
+        var REQ = [
+          [
+            'A column says how its cells look, even when the server sends it',
+            'application-developer',
+            ['ui'],
+          ],
+          [
+            'A gate I installed fires on my violation, and stays quiet otherwise',
+            'repository-maintainer',
+            ['devkit', 'standards'],
+          ],
+          [
+            'A grouped grid reads as the report I arranged',
+            'data-user',
+            ['ui'],
+          ],
+          [
+            'One package, in my own repository, on my own stack',
+            'application-developer',
+            ['api', 'node', 'server', 'ui', 'utils'],
+          ],
+          [
+            'A skill that arrived with the setup does its job in my repository',
+            'repository-maintainer',
+            ['devkit'],
+          ],
+          [
+            'Two shipped instructions never say opposite things',
+            'repository-maintainer',
+            ['devkit', 'standards'],
+          ],
+          [
+            'An agent works my repository knowing nothing about the one this came from',
+            'repository-maintainer',
+            ['devkit', 'standards'],
+          ],
+          [
+            'I take an upgrade and keep the changes I made',
+            'repository-maintainer',
+            ['devkit'],
+          ],
+          [
+            'A table is browsable and editable without SQL',
+            'data-user',
+            ['ui', 'api', 'server'],
+          ],
+          [
+            'An HTTP API is buildable from the server packages alone',
+            'application-developer',
+            ['server', 'utils'],
+          ],
+          [
+            'A grid connects to a table by naming it',
+            'application-developer',
+            ['ui', 'api', 'server'],
+          ],
+          [
+            'A read spans more than one table, and can be filtered on its aggregates',
+            'application-developer',
+            ['server'],
+          ],
+          [
+            'One entry point expresses a read',
+            'application-developer',
+            ['server'],
+          ],
+          ['Grouped tables open the way I set them', 'data-user', ['ui']],
+          [
+            'One command leaves me a repository I can work in',
+            'project-starter',
+            [
+              'create',
+              'devkit',
+              'standards',
+              'tsconfig',
+              'vitecfg',
+              'ui',
+              'api',
+              'server',
+            ],
+          ],
+          [
+            'A shipped document reads with only its package on disk',
+            'repository-maintainer',
+            [
+              'api',
+              'devkit',
+              'eslint',
+              'node',
+              'standards',
+              'server',
+              'tsconfig',
+              'ui',
+              'utils',
+              'vitecfg',
+            ],
+          ],
+          [
+            'I can put a dimension across the top of a summary',
+            'data-user',
+            ['server', 'ui'],
+          ],
+          [
+            'A table renders from rows and columns alone',
+            'application-developer',
+            ['ui'],
+          ],
+          [
+            'A query built from request data cannot be injected into',
+            'application-developer',
+            ['server'],
+          ],
+          [
+            'The table is operable from the keyboard, and honest to a screen reader',
+            'data-user',
+            ['ui'],
+          ],
+          ['The settings panel fits the way I work', 'data-user', ['ui']],
+          [
+            'The shipped setup works as installed',
+            'repository-maintainer',
+            ['devkit', 'standards'],
+          ],
+          [
+            'Nothing server-only rides in with the component package',
+            'application-developer',
+            ['ui'],
+          ],
+          [
+            'The grid works with no router mounted',
+            'application-developer',
+            ['ui'],
+          ],
+        ];
+        var W = 150,
+          H = 46,
+          NS = 'http://www.w3.org/2000/svg';
+        var svg = document.getElementById('map'),
+          sel = 'ui';
+        function el(t, a, parent) {
+          var e = document.createElementNS(NS, t);
+          for (var k in a) e.setAttribute(k, a[k]);
+          if (parent) parent.appendChild(e);
+          return e;
+        }
+        el(
+          'rect',
+          { class: 'lane', x: 10, y: 20, width: 470, height: 440, rx: 2 },
+          svg,
+        );
+        el(
+          'rect',
+          { class: 'lane', x: 540, y: 20, width: 370, height: 440, rx: 2 },
+          svg,
+        );
+        el('text', { class: 'lane-label', x: 22, y: 38 }, svg).textContent =
+          'APPLICATION STACK + HARNESS';
+        el('text', { class: 'lane-label', x: 552, y: 38 }, svg).textContent =
+          'REPOSITORY TOOLCHAIN';
+        var edges = [],
+          nodes = {};
+        var defs = el('defs', {}, svg);
+        var mk = el(
+          'marker',
+          {
+            id: 'arr',
+            viewBox: '0 0 10 10',
+            refX: 9,
+            refY: 5,
+            markerWidth: 7,
+            markerHeight: 7,
+            orient: 'auto-start-reverse',
+          },
+          defs,
+        );
+        el('path', { d: 'M0,0 L10,5 L0,10 z', fill: 'currentColor' }, mk);
+        var eg = el('g', { style: 'color: var(--muted)' }, svg);
+        function addEdge(a, b, dev) {
+          var A = P[a],
+            B = P[b];
+          var x1 = A.x,
+            y1 = A.y + H / 2,
+            x2 = B.x,
+            y2 = B.y - H / 2;
+          if (B.y < A.y) {
+            y1 = A.y - H / 2;
+            y2 = B.y + H / 2;
+          }
+          if (B.y === A.y) {
+            y1 = A.y;
+            y2 = B.y;
+            x1 = A.x + (B.x > A.x ? W / 2 : -W / 2);
+            x2 = B.x + (B.x > A.x ? -W / 2 : W / 2);
+          }
+          var my = (y1 + y2) / 2;
+          var d =
+            B.y === A.y
+              ? 'M' + x1 + ',' + y1 + ' L' + x2 + ',' + y2
+              : 'M' +
+                x1 +
+                ',' +
+                y1 +
+                ' C' +
+                x1 +
+                ',' +
+                my +
+                ' ' +
+                x2 +
+                ',' +
+                my +
+                ' ' +
+                x2 +
+                ',' +
+                y2;
+          var p = el(
+            'path',
+            {
+              class: 'edge' + (dev ? ' dev' : ''),
+              d: d,
+              'marker-end': 'url(#arr)',
+            },
+            eg,
+          );
+          edges.push({ a: a, b: b, el: p });
+        }
+        Object.keys(P).forEach(function (k) {
+          (P[k].deps || []).forEach(function (d) {
+            addEdge(k, d, false);
+          });
+          (P[k].dev || []).forEach(function (d) {
+            addEdge(k, d, true);
+          });
+        });
+        Object.keys(P).forEach(function (k) {
+          var p = P[k];
+          var g = el(
+            'g',
+            {
+              class: 'node ' + p.line,
+              tabindex: 0,
+              role: 'button',
+              'aria-label': p.name,
+              transform:
+                'translate(' + (p.x - W / 2) + ',' + (p.y - H / 2) + ')',
+            },
+            svg,
+          );
+          el('rect', { width: W, height: H, rx: 3 }, g);
+          var short = p.name
+            .replace('@lcabrera/', '')
+            .replace('@repo/', '@repo/');
+          el('text', { class: 'nm', x: 12, y: 20 }, g).textContent =
+            short.length > 19 ? short.slice(0, 18) + '…' : short;
+          el('text', { class: 'rt', x: 12, y: 36 }, g).textContent = p.rt;
+          g.addEventListener('click', function () {
+            pick(k);
+          });
+          g.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              pick(k);
+            }
+          });
+          nodes[k] = g;
+        });
+        var lineName = {
+          app: 'Application stack',
+          tool: 'Repository toolchain',
+          int: 'Internal, not published',
+        };
+        function chip(k) {
+          return (
+            '<button type="button" class="chip" data-k="' +
+            k +
+            '">' +
+            P[k].name +
+            '</button>'
+          );
+        }
+        function pick(k) {
+          sel = k;
+          var p = P[k];
+          var dependents = Object.keys(P).filter(function (o) {
+            return (P[o].deps || []).concat(P[o].dev || []).indexOf(k) !== -1;
+          });
+          var related = {};
+          related[k] = 1;
+          (p.deps || []).concat(p.dev || []).forEach(function (d) {
+            related[d] = 1;
+          });
+          dependents.forEach(function (d) {
+            related[d] = 1;
+          });
+          Object.keys(nodes).forEach(function (n) {
+            nodes[n].classList.toggle('sel', n === k);
+            nodes[n].classList.toggle('faint', !related[n]);
+          });
+          edges.forEach(function (e) {
+            var hot = e.a === k || e.b === k;
+            e.el.classList.toggle('hot', hot);
+            e.el.classList.toggle('faint', !hot);
+          });
+          var reqs = REQ.filter(function (r) {
+            return r[2].indexOf(k) !== -1;
+          });
+          var links =
+            '<a href="' +
+            GH +
+            'tree/main/' +
+            p.dir +
+            '" target="_blank" rel="noopener">source</a>' +
+            (p.npm
+              ? ' · <a href="https://www.npmjs.com/package/' +
+                p.name +
+                '" target="_blank" rel="noopener">npm</a>'
+              : '');
+          document.getElementById('pkg').innerHTML =
+            '<div class="stack"><span class="label">' +
+            lineName[p.line] +
+            '</span><h3 class="mono">' +
+            p.name +
+            '</h3><p>' +
+            p.desc +
+            '</p><dl class="kv"><dt>Runtime</dt><dd>' +
+            p.rt +
+            '</dd><dt>Folder</dt><dd><code>' +
+            p.dir +
+            '</code></dd><dt>Depends on</dt><dd>' +
+            ((p.deps || []).length || (p.dev || []).length
+              ? '<div class="chips">' +
+                (p.deps || []).map(chip).join('') +
+                (p.dev || []).map(chip).join('') +
+                '</div>'
+              : 'nothing in the workspace') +
+            '</dd><dt>Used by</dt><dd>' +
+            (dependents.length
+              ? '<div class="chips">' + dependents.map(chip).join('') + '</div>'
+              : 'no other workspace') +
+            '</dd><dt>Links</dt><dd>' +
+            links +
+            '</dd></dl></div>' +
+            '<div class="stack"><span class="label">Requirements that judge it</span>' +
+            (reqs.length
+              ? '<ul class="reqs">' +
+                reqs
+                  .map(function (r) {
+                    return '<li>' + r[0] + '</li>';
+                  })
+                  .join('') +
+                '</ul>'
+              : '<p class="note">None name it directly. It is judged through the packages that use it.</p>') +
+            '</div>';
+          Array.prototype.forEach.call(
+            document.querySelectorAll('#pkg .chip'),
+            function (c) {
+              c.addEventListener('click', function () {
+                pick(c.getAttribute('data-k'));
+              });
+            },
+          );
+        }
+        pick(sel);
+
+        var attempts = [
+          {
+            from: '@lcabrera/ui',
+            code: "import { sql } from '@lcabrera/server'",
+            gate: 'check:public-api in packages/ui',
+            why: 'The UI package is client-safe, so it may only depend on client-safe packages. Importing the server package would put the Postgres driver into every application that renders a grid, which is exactly the cost that split the packages.',
+            adr: 'docs/decisions/ADR-038-public-package-topology-by-runtime.md',
+            adrName: 'ADR-038',
+          },
+          {
+            from: '@lcabrera/api',
+            code: "import { readFile } from 'node:fs'",
+            gate: 'the generated tsconfig: no node types',
+            why: 'The browser half gets no Node type definitions at all, so the import fails type-checking before anything runs. The server half is denied the DOM library in the same way, so the boundary holds in both directions.',
+            adr: 'docs/decisions/ADR-038-public-package-topology-by-runtime.md',
+            adrName: 'ADR-038',
+          },
+          {
+            from: '@lcabrera/utils',
+            code: "process.on('SIGTERM', shutdown)",
+            gate: "the package's purity contract",
+            why: 'Utils promises pure, side-effect-free helpers. Anything that touches the process belongs in @lcabrera/node, and that is not folded into the server package either, so a service that only wants a shutdown handler never installs a database driver.',
+            adr: 'docs/decisions/ADR-069-publish-the-shared-toolchain.md',
+            adrName: 'ADR-069',
+          },
+          {
+            from: '@lcabrera/ui',
+            code: "import { columnFilter } from '@repo/shared-filters'",
+            gate: 'the duplicate-over-undeclared-edges rule',
+            why: 'A package must stand on its own outside this repository. A shared internal package would resolve here and break for every consumer, so the column-filter shapes are written twice, once in ui and once in server.',
+            adr: 'docs/decisions/ADR-039-duplicate-over-undeclared-edges.md',
+            adrName: 'ADR-039',
+          },
+        ];
+        var cur = 0,
+          at = document.getElementById('attempts');
+        attempts.forEach(function (a, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'attempt';
+          b.id = 'attempt-' + i;
+          b.innerHTML =
+            '<span><span class="label">' +
+            a.from +
+            '</span><br><code>' +
+            a.code +
+            '</code></span><span class="exit bad">blocked</span>';
+          b.addEventListener('click', function () {
+            cur = i;
+            drawAttempt();
+          });
+          at.appendChild(b);
+        });
+        function drawAttempt() {
+          Array.prototype.forEach.call(at.children, function (b, i) {
+            b.setAttribute('aria-pressed', i === cur ? 'true' : 'false');
+          });
+          var a = attempts[cur];
+          document.getElementById('result').innerHTML =
+            '<span class="label">Stopped by</span><strong>' +
+            a.gate +
+            '</strong><p>' +
+            a.why +
+            '</p><a class="mono" href="' +
+            GH +
+            'blob/main/' +
+            a.adr +
+            '" target="_blank" rel="noopener">' +
+            a.adrName +
+            '</a>';
+        }
+        drawAttempt();
+
+        var personas = [
+          [
+            'application-developer',
+            'Application developer',
+            'Installs the application stack and reaches it through an import. It works when the import resolves, the component renders with the props its documentation names, and the server half speaks the same contract as the client.',
+          ],
+          [
+            'data-user',
+            'Data user',
+            'Installs nothing and never sees a package name. They judge the app the developer shipped like a database tool they did not have to learn: browse, filter, group, drill in and edit without writing SQL.',
+          ],
+          [
+            'repository-maintainer',
+            'Repository maintainer',
+            'Installs the toolchain, along with everyone working in the repository, including the agents. It works when a gate fires on what it claims to guard and stays quiet otherwise, and when two instructions never contradict.',
+          ],
+          [
+            'project-starter',
+            'Project starter',
+            'Has no repository yet. One command should leave them one that installs, builds, tests, lints, gates itself, and has an agent able to work in it.',
+          ],
+        ];
+        var pcur = 0,
+          pb = document.getElementById('personaBtns');
+        personas.forEach(function (p, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'lever';
+          b.textContent = p[1];
+          b.id = 'persona-' + i;
+          b.addEventListener('click', function () {
+            pcur = i;
+            drawPersona();
+          });
+          pb.appendChild(b);
+        });
+        function drawPersona() {
+          Array.prototype.forEach.call(pb.children, function (b, i) {
+            b.setAttribute('aria-pressed', i === pcur ? 'true' : 'false');
+          });
+          var p = personas[pcur];
+          document.getElementById('personaDef').textContent = p[2];
+          document.getElementById('plist').innerHTML = REQ.filter(function (r) {
+            return r[1] === p[0];
+          })
+            .map(function (r) {
+              return (
+                '<div><span>' +
+                r[0] +
+                '</span><span class="chips">' +
+                r[2]
+                  .slice(0, 4)
+                  .map(function (k) {
+                    return (
+                      '<span class="chip static">' +
+                      P[k].name.replace('@lcabrera/', '') +
+                      '</span>'
+                    );
+                  })
+                  .join('') +
+                (r[2].length > 4
+                  ? '<span class="chip static">+' +
+                    (r[2].length - 4) +
+                    '</span>'
+                  : '') +
+                '</span></div>'
+              );
+            })
+            .join('');
+        }
+        drawPersona();
+      })();
+    </script>
+  </body>
+</html>

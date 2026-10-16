@@ -8,6 +8,7 @@ import type {
 
 import { grantStatements } from './grantStatements.util.ts';
 import { lackingPrivileges } from './lackingPrivileges.service.ts';
+import { revokeStatements } from './revokeStatements.util.ts';
 
 type GrantRolesArgs = {
   readonly client: MigrationClient;
@@ -26,7 +27,10 @@ const existingRoleNames = async ({ client, roles }: GrantRolesArgs) => {
 };
 
 const applyGrants = async ({ client, roles }: GrantRolesArgs) => {
-  const statements = roles.flatMap((role) => grantStatements(role));
+  const statements = roles.flatMap((role) => [
+    ...revokeStatements(role),
+    ...grantStatements(role),
+  ]);
 
   if (statements.length === 0) {
     return;

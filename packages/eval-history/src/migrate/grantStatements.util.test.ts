@@ -4,9 +4,9 @@ import { grantStatements } from './grantStatements.util.ts';
 import { EVALS_WRITER_ROLE } from './migrate.constants.ts';
 
 describe('grantStatements', () => {
-  it('grants the writer usage and create on the schema and DML on its tables', () => {
+  it('grants the writer usage on the schema and DML on its tables', () => {
     expect(grantStatements(EVALS_WRITER_ROLE)).toEqual([
-      'grant usage, create on schema evals to "evals_writer"',
+      'grant usage on schema evals to "evals_writer"',
       'grant select, insert, update, delete on all tables in schema evals to "evals_writer"',
     ]);
   });
