@@ -20,7 +20,7 @@ export const migrateEvals = async ({
 }: MigrateEvalsArgs) => {
   const applied = await applyMigrations({ client, migrations });
   const pricesUpserted = await upsertModelPrices({ client, prices });
-  const { granted, missing } = await grantRoles({ client, roles });
+  const { granted, missing, ungranted } = await grantRoles({ client, roles });
 
-  return { applied, granted, missing, pricesUpserted };
+  return { applied, granted, missing, pricesUpserted, ungranted };
 };
