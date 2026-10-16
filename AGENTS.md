@@ -257,9 +257,10 @@ are the ones you would guess **wrong**:
 
 **The exception is a command `vp` does not wrap** — then reaching for pnpm (or
 `npx`) directly is correct, not a workaround, because there is nothing to route
-through `vp`. Two such cases exist today: `pnpm clean --lockfile` (there is no
-`vp clean`) and catalog updating via `taze`; both live in
-`scripts/deps-refresh.sh` (`vp run deps:refresh`). The test is mechanical — if
+through `vp`. The cases today: `pnpm clean --lockfile` (there is no
+`vp clean`) and catalog updating via `taze`, both in `scripts/deps-refresh.sh`
+(`vp run deps:refresh`), and `pnpm peers check` in the root `deps:peers` task
+(`vp pm` forwards no `peers` subcommand). The test is mechanical — if
 `vp` exposes the command, use `vp`; if it genuinely does not, pnpm-direct is
 fine. This is deliberately narrow: it does **not** license `pnpm install` /
 `pnpm add` / `pnpm dlx` where `vp install` / `vp add` / `vp dlx` exist. The
@@ -295,9 +296,9 @@ deliberate violation (Rule 14). Handling a _finding_ is Non-Negotiable Rule 11 �
 verify, then fix; never suppress. The public packages (§1) take no
 suppressions at all, enforced by `vp run suppressions:verify`.
 
-**`test:all` vs `test:ci`.** Neither needs a database locally — the DB-bound smoke suites in `apps/showcase` gate on `SMOKE_DB`, and only `vp run --filter showcase test:smoke` sets it; `@repo/eval-history`'s migrator test runs when `EVALS_TEST_DATABASE_URL` names a scratch database, skips without it, and fails without it under CI, where the `unit-tests` job sets it against a Postgres service — so the two differ only in ordering: `test:ci` runs `showcase` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing — it is what CI runs on a push to `main`; on a pull request CI runs `test:changed -- --ci` instead, and `check-safe.yml` picks between them by event.
+**`test:all` vs `test:ci`.** Neither needs a database locally — the DB-bound smoke suites in `apps/showcase` gate on `SMOKE_DB`, and only `vp run --filter showcase test:smoke` sets it; `@repo/eval-history`'s migrator, ingest and reporting tests and the showcase's `/evals` public-payload test run when `EVALS_TEST_DATABASE_URL` names a scratch database, skip without it, and fail without it under CI, where the `unit-tests` job sets it against a Postgres service — so the two differ only in ordering: `test:ci` runs `showcase` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing — it is what CI runs on a push to `main`; on a pull request CI runs `test:changed -- --ci` instead, and `check-safe.yml` picks between them by event.
 
-**A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today — `apps/showcase`'s DB-bound suites gate themselves in-file on `SMOKE_DB`, and `packages/eval-history`'s gate in-file on `EVALS_TEST_DATABASE_URL`, rather than needing a task-level split, which is the other way to discharge this. `packages/eval-history` also excludes `*.integration.test.ts` from its `test:coverage`, because the Fallow Audit job that runs that task has no Postgres — and **the substitution is not built** — `packages/repo-standards/scripts/affected-tests.mjs` says so in its own header, and the only per-workspace substitution it carries is the one `gates.affectedTests.coverageTaskPackage` names. Build it when a DB-bound workspace arrives, mirroring `test:ci` in the root manifest; do not assume it is waiting.
+**A workspace with real-Postgres tests must split them**: keep the full suite as `test`, and expose a `test:unit` (plus `test:coverage`) that `--exclude`s the DB-bound files. Without the split the whole workspace has to be dropped from `test:ci`, which silently takes its pure tests with it. Nothing here needs this today — `apps/showcase`'s smoke suites gate themselves in-file on `SMOKE_DB`, and `packages/eval-history`'s suites and the showcase's `/evals` public-payload test gate in-file on `EVALS_TEST_DATABASE_URL`, rather than needing a task-level split, which is the other way to discharge this. `packages/eval-history` also excludes `*.integration.test.ts` from its `test:coverage`, because the Fallow Audit job that runs that task has no Postgres — and **the substitution is not built** — `packages/repo-standards/scripts/affected-tests.mjs` says so in its own header, and the only per-workspace substitution it carries is the one `gates.affectedTests.coverageTaskPackage` names. Build it when a DB-bound workspace arrives, mirroring `test:ci` in the root manifest; do not assume it is waiting.
 
 ### Fallow Static Analysis (run from repo root)
 

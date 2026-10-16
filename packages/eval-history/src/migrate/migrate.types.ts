@@ -1,5 +1,10 @@
 export type AppliedMigration = Omit<Migration, 'sql'>;
 
+export type EvalsRole = {
+  readonly grants: readonly RoleGrant[];
+  readonly name: string;
+};
+
 export type Migration = {
   readonly name: string;
   readonly sha256: string;
@@ -21,4 +26,9 @@ export type MigrationDriftIssue = {
 export type MigrationQuery = {
   readonly text: string;
   readonly values?: unknown[];
+};
+
+export type RoleGrant = {
+  readonly on: string;
+  readonly privileges: string;
 };

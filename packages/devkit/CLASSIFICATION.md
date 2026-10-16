@@ -485,6 +485,7 @@ tool nobody installed is a step nobody defined.
 | `lint:biome`       | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation; which analysers a consumer runs is theirs.                                  |
 | `lint:biome:check` | `repo`     | seed   | **parameterise** | **hard**   | The same analyser without `--write` — the form a gate runs.                                          |
 | `test:scripts`     | `repo`     | seed   | **parameterise** | **hard**   | Runs the suites that live in no workspace.                                                           |
+| `deps:peers`       | `repo`     | seed   | **parameterise** | **hard**   | One package-manager invocation; it exits non-zero on an unmet peer.                                  |
 | `fallow:full`      | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation, configured by a seeded config file.                                         |
 | `fallow:audit`     | `repo`     | seed   | **parameterise** | **hard**   | Its `audit` subcommand.                                                                              |
 | `fallow:dead-code` | `repo`     | seed   | **parameterise** | **hard**   | Its `dead-code` subcommand.                                                                          |

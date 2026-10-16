@@ -18,7 +18,10 @@
     "packages/devkit/assets/workspace/packages/typescript-config/generate.ts",
     "apps/showcase/lighthouse.config.js",
     "apps/showcase/config/*.ts",
-    "packages/ui/config/*.ts"
+    "packages/ui/config/*.ts",
+    "docs/index.html",
+    "docs/packages.html",
+    "docs/workflow.html"
   ],
   "ignorePatterns": [
     "**/build/**",

@@ -27,6 +27,21 @@ session, with its tokens, cost and durations. Each suite's own output under
 `.tmp/` is still written, and skill quality builds `report.html` from the
 envelope.
 
+Every file a runner writes is scrubbed as it is written, through
+`writeScrubbed` in [`transcript-scrub.mjs`](./transcript-scrub.mjs): the
+envelope, the transcripts, and each runner's own output under `.tmp/`, such as
+`trials.json`, which CI uploads as an artifact. A test fails if a runner, or an `evals/` module it
+imports, writes a file any other way outside its own scratch directory. The scrubber redacts the value of every environment
+variable whose name marks it secret (a name ending in `TOKEN`, `SECRET`,
+`PASSWORD`, `API_KEY`, `ACCESS_KEY`, `DATABASE_URL` and the like, with a value
+of at least 8 characters), the password in any URL, with or without a user, and
+known token shapes such as GitHub, npm and API keys, JWTs and private key
+blocks. Each is replaced with `[REDACTED:<kind>]`. The size and sha256 the
+envelope records are taken from the scrubbed file, and a file with nothing to
+redact is written unchanged. A value is matched as written or JSON-escaped, so
+the same secret URL-encoded, base64-encoded or wrapped across lines is not
+caught unless its shape is.
+
 The envelope is written on every way out: `complete` on a normal finish,
 `partial` when the run throws, and `aborted` on Ctrl-C or SIGTERM. A runner
 whose envelope fails the schema writes none, names each failing field and exits 1.
@@ -38,6 +53,12 @@ trials are left out of n, and the line says how many there were. With fewer
 counted trials than `minTrialsForRate`, the line reads `insufficient data`. The
 envelope's `totals.pass_rate` holds the same figures, with `rate`, `lower` and
 `upper` set to null when the data is insufficient.
+
+A complete or partial envelope is then sent to the eval-history database that
+`EVALS_DATABASE_URL` names. When the variable is unset or the database is down,
+the runner warns and still exits as its results say; `vp run evals:ingest`
+sends whatever is under `.tmp/eval-results/` later, and skips a run already
+stored. An aborted run is left for that command too.
 
 ## What a full run costs
 

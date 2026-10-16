@@ -8,6 +8,14 @@ import type {
 
 export type EnvelopeShape = DeepReadonly<z.output<typeof envelopeShapeSchema>>;
 
+export type EnvelopeUpcaster = (
+  envelope: Readonly<Record<string, unknown>>,
+) => unknown;
+
+export type EnvelopeUpcasters = Readonly<
+  Partial<Record<number, EnvelopeUpcaster>>
+>;
+
 export type RunEnvelope = DeepReadonly<z.output<typeof runEnvelopeSchema>>;
 
 export type TrialDetail = DeepReadonly<z.output<typeof trialDetailSchema>>;
