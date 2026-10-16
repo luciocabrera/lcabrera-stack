@@ -3,6 +3,9 @@
  * repository pins, and must post from a step the model does not run.
  * A later edit that adds an API key, a marketplace action, or hands the
  * model the write token would leave the rest of the suite green.
+ * `0xr3ngar` is the owner of grok-build-review-action, the marketplace
+ * action ADR-116 alternative 4 rejects. The executable workflow must not
+ * name it.
  *
  * Governed by .claude/rules/scripts.md.
  */
