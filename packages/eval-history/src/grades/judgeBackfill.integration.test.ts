@@ -12,7 +12,6 @@
 
 import type pg from 'pg';
 
-import { randomUUID } from 'node:crypto';
 import { afterAll, describe, expect, it } from 'vite-plus/test';
 
 import { applyMigrations } from '../migrate/applyMigrations.service.ts';
@@ -115,20 +114,14 @@ it.runIf(IS_CI)('has a database to upgrade under CI', () => {
 describe.skipIf(!DATABASE_URL)(
   '0003 on a database that holds quality trials',
   () => {
-    const { close, connect } = scratchConnections(DATABASE_URL ?? '');
-    const databases: string[] = [];
+    const { close, connect, createDatabase } = scratchConnections(
+      DATABASE_URL ?? '',
+    );
 
-    const scratchDatabase = async () => {
-      const name = `evals_backfill_${randomUUID().replaceAll('-', '')}`;
-      const admin = await connect();
+    const scratchDatabase = async () =>
+      connect(await createDatabase('evals_backfill'));
 
-      await admin.query(`create database "${name}"`);
-      databases.push(name);
-
-      return connect(name);
-    };
-
-    afterAll(() => close({ databases }));
+    afterAll(() => close());
 
     it('backfills the judge model and dimension scores from each detail', async () => {
       const client = await scratchDatabase();
