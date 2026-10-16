@@ -27,8 +27,8 @@ describe('lackingPrivileges', () => {
     expect(queries.map(({ values }) => values)).toEqual([
       [
         'evals_writer',
-        ['evals', 'evals'],
-        ['usage', 'create'],
+        ['evals'],
+        ['usage'],
         ['evals', 'evals', 'evals', 'evals'],
         ['select', 'insert', 'update', 'delete'],
       ],

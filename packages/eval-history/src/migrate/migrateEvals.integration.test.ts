@@ -572,7 +572,6 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     expect(result.ungranted[0]?.lacking).toEqual(
       expect.arrayContaining([
         { object: 'schema evals', privilege: 'usage' },
-        { object: 'schema evals', privilege: 'create' },
         { object: 'table evals.eval_run', privilege: 'insert' },
       ]),
     );

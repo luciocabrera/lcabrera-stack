@@ -50,11 +50,12 @@ const applyGrants = async ({ client, roles }: GrantRolesArgs) => {
 };
 
 const checkGrants = async ({ client, roles }: GrantRolesArgs) => {
-  const checked: UngrantedRole[] = [];
-
-  for (const role of roles) {
-    checked.push({ lacking: await lackingPrivileges({ client, role }), role });
-  }
+  const checked: readonly UngrantedRole[] = await Promise.all(
+    roles.map(async (role) => ({
+      lacking: await lackingPrivileges({ client, role }),
+      role,
+    })),
+  );
 
   return {
     granted: checked

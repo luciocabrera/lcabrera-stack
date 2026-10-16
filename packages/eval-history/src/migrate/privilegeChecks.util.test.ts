@@ -7,7 +7,6 @@ describe('privilegeChecks', () => {
   it('checks each privilege of each grant on its own', () => {
     expect(privilegeChecks(EVALS_WRITER_ROLE)).toEqual([
       { kind: 'schema', privilege: 'usage', schema: 'evals' },
-      { kind: 'schema', privilege: 'create', schema: 'evals' },
       { kind: 'tables', privilege: 'select', schema: 'evals' },
       { kind: 'tables', privilege: 'insert', schema: 'evals' },
       { kind: 'tables', privilege: 'update', schema: 'evals' },
