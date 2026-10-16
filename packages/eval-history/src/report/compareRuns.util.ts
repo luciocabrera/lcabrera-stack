@@ -65,6 +65,9 @@ export const compareRuns = ({
     flips: taskFlips({ a, b }),
     kind: 'comparison',
     suite: b.suite,
-    thresholds,
+    thresholds: {
+      minTrialsForRate: thresholds.minTrialsForRate,
+      z: thresholds.z,
+    },
   } as const;
 };

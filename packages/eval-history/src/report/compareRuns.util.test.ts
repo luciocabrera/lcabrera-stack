@@ -102,4 +102,12 @@ describe('compareRuns', () => {
       },
     });
   });
+
+  it('carries only the thresholds the comparison reads', () => {
+    const regressionConfig = { ...thresholds, binary: { ofTrials: 3 } };
+
+    expect(
+      compareRuns({ a: main, b: main, thresholds: regressionConfig }),
+    ).toHaveProperty('thresholds', { minTrialsForRate: 6, z: 1.96 });
+  });
 });

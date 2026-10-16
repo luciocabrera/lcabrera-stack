@@ -17,7 +17,7 @@ const modelText = ({ a, b }: Pick<Comparison, 'a' | 'b'>) => {
 const costText = ({ costUsdReported }: RunSide) =>
   costUsdReported === undefined
     ? 'not reported'
-    : `$${costUsdReported.toFixed(2)}`;
+    : `$${costUsdReported.toFixed(2)} reported`;
 
 const durationText = ({ durationP50Ms }: RunSide) =>
   durationP50Ms === undefined
@@ -57,7 +57,7 @@ export const comparisonMarkdown = (comparison: Comparison) => {
     `### ${comparison.suite}: ${labels.b} vs ${labels.a} (${modelText(comparison)})`,
     flipTable({ flips: comparison.flips, labels }),
     rateLine(comparison),
-    `Cost: ${costText(comparison.a)} → ${costText(comparison.b)} reported. Duration p50: ${durationText(comparison.a)} → ${durationText(comparison.b)}.`,
+    `Cost: ${costText(comparison.a)} → ${costText(comparison.b)}. Duration p50: ${durationText(comparison.a)} → ${durationText(comparison.b)}.`,
     changedLine(comparison.changed),
     ...statusLines({ comparison, labels }),
   ].join('\n\n');

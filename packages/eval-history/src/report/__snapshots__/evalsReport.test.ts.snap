@@ -7,7 +7,7 @@ No task changed outcome.
 
 Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 91.7% (n=12, 64.6%–98.5%).
 
-Cost: $1.20 → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
+Cost: $1.20 reported → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
 
 Changed: model. That is one cause."
 `;
@@ -22,7 +22,7 @@ exports[`evalsReport over fixture runs > names the one hash that changed, with n
 
 Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 83.3% (n=12, 55.2%–95.3%).
 
-Cost: $1.20 → $1.45 reported. Duration p50: 13.0 s → 14.0 s.
+Cost: $1.20 reported → $1.45 reported. Duration p50: 13.0 s → 14.0 s.
 
 Changed: \`react-19\` content hash. That is one cause."
 `;
@@ -125,7 +125,7 @@ exports[`evalsReport over fixture runs > says insufficient data, with n, when to
 
 Pass rate, Wilson interval at z=1.96: insufficient data (n=2, 1 passed, 1 not counted) → insufficient data (n=2, 2 passed, 1 not counted). A rate needs 6 counted trials; error, timeout and skipped trials are not counted.
 
-Cost: $1.20 → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
+Cost: $1.20 reported → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
 
 Changed: \`react-19\` content hash. That is one cause."
 `;
@@ -140,7 +140,7 @@ exports[`evalsReport over fixture runs > says multiple causes when two hashes ch
 
 Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 83.3% (n=12, 55.2%–95.3%).
 
-Cost: $1.20 → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
+Cost: $1.20 reported → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
 
 Changed: skill catalog hash, \`react-19\` content hash. That is multiple causes, so no single change explains the difference."
 `;

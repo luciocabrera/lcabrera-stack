@@ -30,6 +30,16 @@ const FEATURE_OUTCOMES = {
 
 const FEATURE = 'feat/1234-tighten-react-19';
 
+const UNREPORTED_COST: Readonly<Record<string, unknown>> = JSON.parse(
+  '{"cost_usd_reported":null}',
+);
+
+const mainRun = fixtureEnvelope({
+  base,
+  outcomes: MAIN_OUTCOMES,
+  runId: '00000000-0000-4000-8000-000000000001',
+});
+
 const RUNS = {
   'few-main.json': fixtureEnvelope({
     base,
@@ -43,10 +53,15 @@ const RUNS = {
     outcomes: { 'skills/react-19/trigger-1': ['pass', 'timeout', 'pass'] },
     runId: '00000000-0000-4000-8000-000000000006',
   }),
-  'main.json': fixtureEnvelope({
-    base,
-    outcomes: MAIN_OUTCOMES,
-    runId: '00000000-0000-4000-8000-000000000001',
+  'main.json': mainRun,
+  'no-cost.json': runEnvelopeSchema.parse({
+    ...mainRun,
+    run: {
+      ...mainRun.run,
+      branch: FEATURE,
+      run_id: '00000000-0000-4000-8000-000000000007',
+      totals: { ...mainRun.run.totals, ...UNREPORTED_COST },
+    },
   }),
   'one-cause.json': fixtureEnvelope({
     base,
@@ -114,6 +129,12 @@ describe('evalsReport over fixture runs', () => {
     expect(markdown).toContain('`react-19` content hash. That is one cause.');
     expect(markdown).toMatch(/91\.7% \(n=12, \d+\.\d%–\d+\.\d%\)/u);
     expect(markdown).toMatchSnapshot();
+  });
+
+  it('says a cost was not reported without calling it reported', async () => {
+    const { stdout } = await report({ a: 'main.json', b: 'no-cost.json' });
+
+    expect(stdout[0]).toContain('Cost: $1.20 reported → not reported.');
   });
 
   it('says multiple causes when two hashes changed', async () => {
