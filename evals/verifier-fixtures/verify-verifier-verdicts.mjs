@@ -14,7 +14,7 @@
  * Exit codes: 0 = every fixture matched and was stable, 1 = otherwise,
  * 130/143 = interrupted.
  */
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
@@ -38,6 +38,7 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
+import { writeScrubbed } from '../transcript-scrub.mjs';
 
 import {
   agentBody,
@@ -93,10 +94,10 @@ const CONCURRENCY = 4;
 
 const saveReports = ({ fixture, sessions }) => {
   for (const [index, session] of sessions.entries()) {
-    writeFileSync(
-      join(REPORT_DIR, `${fixture}-${index + 1}.md`),
-      reportText(session),
-    );
+    writeScrubbed({
+      file: join(REPORT_DIR, `${fixture}-${index + 1}.md`),
+      text: reportText(session),
+    });
   }
 };
 

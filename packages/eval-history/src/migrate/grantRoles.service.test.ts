@@ -49,12 +49,12 @@ describe('grantRoles', () => {
     });
     expect(statements.slice(1)).toEqual([
       'begin',
-      'grant usage on schema evals to "present";',
+      'revoke all on schema evals from "present";\ngrant usage on schema evals to "present";',
       'commit',
     ]);
   });
 
-  it('sends every grant of every existing role as one statement batch', async () => {
+  it('sends every revoke and grant of every existing role as one statement batch', async () => {
     const { client, statements } = fakeClient({
       existing: ['first', 'second'],
     });
@@ -63,7 +63,7 @@ describe('grantRoles', () => {
 
     expect(statements.slice(1)).toEqual([
       'begin',
-      'grant usage on schema evals to "first";\ngrant usage on schema evals to "second";',
+      'revoke all on schema evals from "first";\ngrant usage on schema evals to "first";\nrevoke all on schema evals from "second";\ngrant usage on schema evals to "second";',
       'commit',
     ]);
   });
@@ -78,7 +78,7 @@ describe('grantRoles', () => {
 
   it('rolls back the grants when the batch fails', async () => {
     const failOn =
-      'grant usage on schema evals to "first";\ngrant usage on schema evals to "second";';
+      'revoke all on schema evals from "first";\ngrant usage on schema evals to "first";\nrevoke all on schema evals from "second";\ngrant usage on schema evals to "second";';
     const { client, statements } = fakeClient({
       existing: ['first', 'second'],
       failOn,
@@ -86,7 +86,7 @@ describe('grantRoles', () => {
 
     await expect(
       grantRoles({ client, roles: [role('first'), role('second')] }),
-    ).rejects.toThrow('failed: grant');
+    ).rejects.toThrow('failed: revoke');
     expect(statements.at(-1)).toBe('rollback');
   });
 });

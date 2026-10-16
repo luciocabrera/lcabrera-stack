@@ -1,5 +1,43 @@
 # @lcabrera/vite-config
 
+## 0.7.0
+
+### Minor Changes
+
+- 19e7fc5: `unicorn/prefer-default-parameters` is now on in both shared configs (`createCustomRulesLintConfig` and `createBaseCustomRulesLintConfig`) as an error. Code that passed before can fail lint under it.
+
+  The rule reports a parameter or a destructured binding that is read as `x ?? literal` or `x || literal`, and asks for the default to sit where the value is declared. A default applies to `undefined` only. Where `null` can reach the binding, a mechanical rewrite changes what `null` does, so write that `null` path out explicitly (for example `typeof x === 'string' ? x : ''`) rather than accepting the suggested default.
+
+- 0ae748a: The peer ranges move to the versions this package is now exercised against: `eslint` `^10.12.0`, `typescript-eslint` `^8.71.0`, `eslint-plugin-react-dom` and `eslint-plugin-react-x` `^5.24.2`, `eslint-plugin-security` `^4.2.0` and `globals` `^17.13.0`.
+
+  **This is the breaking part:** each floor rises inside its major, so a consumer on a release below any of them, such as `eslint` 10.11, now gets an unmet peer and must move up to the floor.
+
+  `createBaseCustomRulesLintConfig` and `createCustomRulesLintConfig` now declare their return types, `Linter.Config[]` and `Promise<Linter.Config[]>` from `eslint`. They were published as `any[]` and `Promise<any[]>` only because inference gave up. With the `eslint-plugin-react-x` 5.24 types it no longer does, and the inferred type named `@typescript-eslint/utils`, which this package does not declare. Code that relied on the old `any` to index an entry as an arbitrary shape now gets a type error at that spot.
+
+- 2a41f15: The `eslint-plugin-unicorn` peer range moves to `^77.0.0`, and both shared configs (`createCustomRulesLintConfig` and `createBaseCustomRulesLintConfig`) now apply unicorn 77's recommended set with the settings below.
+
+  **This is the breaking part:** the range no longer admits unicorn 73 to 76, so a consumer on any of them gets an unmet peer and must move up. Code that passed before can now fail lint under the rules listed as on.
+
+  **On, new in the recommended set:** `no-async-iterator-callback`, `no-conflicting-constraints`, `no-incomplete-accessor-override`, `no-ineffective-csp-directives`, `no-invalid-boolean-attribute-value`, `no-invalid-dom-token`, `no-invalid-integrity`, `no-invalid-intl-options`, `no-invalid-property-descriptor`, `no-invalid-response-options`, `no-invalid-style-set-property`, `no-invalid-temporal-arithmetic`, `no-invalid-url-protocol-comparison`, `no-leading-empty-lines`, `no-prevent-default-in-passive-listener`, `no-unnecessary-parameters`, `no-unsafe-json-serialization`, `no-unused-builtin-method-return` (it replaces `no-unused-array-method-return`), `no-unused-iterator-helper`, `no-url-in-search-params`, `no-useless-set-construction`, `no-using-resource-escape`, `prefer-combined-guards`, `prefer-escaped-irregular-whitespace`, `prefer-iterator-zip`, `prefer-literal-ascii`, `prefer-promise-static-methods`, `prefer-short-escape-sequences`, `prefer-temporal-conversion` and `require-text-decoder-streaming`, all with the `unicorn/` prefix.
+
+  **On, and reporting more than in 73:** `unicorn/prefer-early-return`, `unicorn/prefer-continue`, `unicorn/prefer-group-by` and `unicorn/prefer-minimal-ternary`.
+
+  **`unicorn/prefer-ternary` takes `only-single-line`.** In unicorn 77 the rule also merges an `if` that returns with the `return` after it. Under this option it still does that when the condition and both values each fit on one line, and leaves a multi-line guard clause alone.
+
+  **`unicorn/no-unnecessary-parameters` is off in tests.** A block matching `**/*.{test,spec}.*` and `**/e2e/**` (script and TypeScript extensions only) switches it off. In a test, a helper that the current cases all call the same way is still a general helper, and inlining the value makes it specific to those cases. Source files keep the rule.
+
+  **Off:**
+
+  - `unicorn/no-asterisk-prefix-in-documentation-comments` rejects the `*` line prefix of a JSDoc block. It is a style preference that changes no behaviour and catches no bug.
+  - `unicorn/no-top-level-side-effects` reports `export default defineConfig(...)`, `export default createRule(...)` and a default-exported config array, which are pure factory calls. Its only fix binds the same call to a variable first.
+  - `unicorn/no-unnecessary-array-flat-map` asks a `flatMap` callback to return a bare value instead of a one-element array. A callback that returns an array from every branch shows at a glance that it yields zero, one or many, and the bare value saves only one allocation.
+
+### Patch Changes
+
+- 1dfa518: The package's own build now declares `@babel/core` as a dev dependency, on the major `vite-plugin-babel` peers on, and its suite runs the older `@babel/preset-typescript` major that matches it. The README is updated to match. It now says the suite runs the older major, and that a project on that major passes `allowDeclareFields: true` alongside `allExtensions` and `isTSX` to keep a class field declared without an initializer. Peer ranges and the `./plugins` output are unchanged.
+- Updated dependencies [0ae748a]
+  - @lcabrera/eslint-plugin@0.3.3
+
 ## 0.6.1
 
 ### Patch Changes

@@ -1,32 +1,32 @@
 // @vitest-environment node
 
 /**
- * The baseline against a real Postgres: whether a second model's baseline sits
- * beside the first, and whether the latest one per suite, model and subject is
- * what reads back, are claims about evals.eval_baseline's constraints that a
- * fake client reports green on either way. It creates a database of its own
- * beside the one EVALS_TEST_DATABASE_URL names, migrates it, and drops it
+ * The baseline against a real Postgres, written and read as the writer role
+ * the migrator grants: whether that role can store and read a baseline,
+ * whether a second model's baseline sits beside the first, and whether the
+ * latest one per suite, model and subject is what reads back, are claims a
+ * fake client reports green on either way. It creates a database and a writer
+ * role of its own beside the one EVALS_TEST_DATABASE_URL names, and drops both
  * afterwards. Unset, it skips locally and fails under CI.
  */
 
-import pg from 'pg';
+import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
-import type { RunEnvelope } from '../envelope/envelope.types.ts';
-
 import { envelopeFileSystem } from '../ingest/envelopeFileSystem.util.ts';
-import { ingestPaths } from '../ingest/ingestPaths.service.ts';
-import { integrationDatabase } from '../ingest/integrationDatabase.util.ts';
-import { applyMigrations } from '../migrate/applyMigrations.service.ts';
+import { EVALS_WRITER_ROLE } from '../migrate/migrate.constants.ts';
+import { migrateEvals } from '../migrate/migrateEvals.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
-import { aggregateBaseline } from './aggregateBaseline.util.ts';
+import { readModelPrices } from '../prices/readModelPrices.service.ts';
+import { integrationDatabase } from '../testing/integrationDatabase.util.ts';
+import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { baselineFixtures } from './baselineFixtures.util.ts';
 import { readBaseline } from './readBaseline.service.ts';
+import { recordBaseline } from './recordBaseline.service.ts';
 import { stubBaselineRun } from './stubBaselineRun.util.ts';
-import { writeBaseline } from './writeBaseline.service.ts';
 
 const {
-  scratch: SCRATCH,
+  scratch: DATABASE_NAME,
   scratchUrl: SCRATCH_URL,
   url: DATABASE_URL,
 } = integrationDatabase({ label: 'baseline' });
@@ -58,52 +58,75 @@ const runsOf = ({ baselineId, modelId, passes }: RunsOfArgs) =>
   );
 
 describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
-  const admin = new pg.Client({ connectionString: DATABASE_URL });
-  const client = new pg.Client({ connectionString: SCRATCH_URL });
+  const writer = {
+    ...EVALS_WRITER_ROLE,
+    name: `evals_writer_test_${randomUUID().replaceAll('-', '')}`,
+  };
+  const { close, connect } = scratchConnections(DATABASE_URL ?? '');
 
-  const record = async (envelopes: readonly RunEnvelope[]) => {
-    const ingested = await ingestPaths({
+  const writerClient = async () => {
+    const client = await connect(DATABASE_NAME);
+
+    await client.query(`set role "${writer.name}"`);
+
+    return client;
+  };
+
+  const record = async (args: RunsOfArgs) => {
+    const summary = await recordBaseline({
+      baselineId: args.baselineId,
+      connect: async () => ({
+        client: await writerClient(),
+        end: () => Promise.resolve(),
+      }),
       connectionString: SCRATCH_URL,
-      fileSystem: envelopeFileSystem(envelopes),
+      fileSystem: envelopeFileSystem(runsOf(args)),
       paths: ['/results'],
-      quietUnreachable: false,
     });
 
-    expect(ingested.exitCode).toBe(0);
+    expect(summary.stderr).toEqual([]);
 
-    return writeBaseline({ client, rows: aggregateBaseline(envelopes).rows });
+    return summary.exitCode;
   };
 
   beforeAll(async () => {
-    await admin.connect();
-    await admin.query(`create database ${SCRATCH}`);
-    await client.connect();
-    await applyMigrations({ client, migrations: await readMigrations() });
+    const admin = await connect();
+
+    await admin.query(`create database "${DATABASE_NAME}"`);
+    await admin.query(`create role "${writer.name}" nologin`);
+
+    const result = await migrateEvals({
+      client: await connect(DATABASE_NAME),
+      migrations: await readMigrations(),
+      prices: await readModelPrices(),
+      roles: [writer],
+    });
+
+    expect(result.granted.map(({ name }) => name)).toEqual([writer.name]);
   });
 
-  afterAll(async () => {
-    await client.end();
-    await admin.query(`drop database if exists ${SCRATCH} with (force)`);
-    await admin.end();
-  });
+  afterAll(() => close({ databases: [DATABASE_NAME], roles: [writer.name] }));
 
-  it('keeps each model on rows of its own and reads back the latest per subject', async () => {
+  it('keeps each model on rows of its own and reads back the latest per subject, as the writer', async () => {
     expect(
-      await record(
-        runsOf({ baselineId: MODEL_A_FIRST, modelId: 'model-a', passes: 1 }),
-      ),
-    ).toBe(2);
+      await record({
+        baselineId: MODEL_A_FIRST,
+        modelId: 'model-a',
+        passes: 1,
+      }),
+    ).toBe(0);
     expect(
-      await record(
-        runsOf({ baselineId: MODEL_B, modelId: 'model-b', passes: 2 }),
-      ),
-    ).toBe(2);
+      await record({ baselineId: MODEL_B, modelId: 'model-b', passes: 2 }),
+    ).toBe(0);
     expect(
-      await record(
-        runsOf({ baselineId: MODEL_A_SECOND, modelId: 'model-a', passes: 4 }),
-      ),
-    ).toBe(2);
+      await record({
+        baselineId: MODEL_A_SECOND,
+        modelId: 'model-a',
+        passes: 4,
+      }),
+    ).toBe(0);
 
+    const client = await writerClient();
     const stored = await client.query<{
       readonly model_id: string;
       readonly rows: number;

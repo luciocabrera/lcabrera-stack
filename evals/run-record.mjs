@@ -7,13 +7,17 @@
  * envelope that fails the schema is not written, and the error names each field.
  * Each envelope written prints the run's pass rate, with n and its Wilson
  * interval at the thresholds in `regression.config.json`, beside its path.
+ * The envelope and every transcript are scrubbed of secrets as they are
+ * written, and a transcript is hashed after it, so the size and hash the
+ * envelope records describe the file on disk; the envelope returned is the
+ * scrubbed one that was written.
  * A complete or partial envelope is then sent to the eval-history database,
  * after the signal handlers are removed, so a signal during the send cannot
  * rewrite it; an aborted one is left for `vp run evals:ingest`.
  * Usage: imported by every runner under `evals/`.
  */
 import { createHash, randomUUID } from 'node:crypto';
-import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { userInfo } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -37,6 +41,7 @@ import {
   triggerOf,
 } from './run-envelope.mjs';
 import { ingestAfterRun } from './run-ingest.mjs';
+import { writeScrubbed } from './transcript-scrub.mjs';
 
 const EVALS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(EVALS_DIR);
@@ -106,6 +111,7 @@ const runDirectory = ({ resultsDir, runId, suite }) =>
   join(resultsDir, suite, runId);
 
 export const saveTranscript = ({
+  env = process.env,
   name,
   resultsDir = RESULTS_DIR,
   runId,
@@ -114,9 +120,8 @@ export const saveTranscript = ({
 }) => {
   const directory = runDirectory({ resultsDir, runId, suite });
   const file = join(directory, name);
-  const bytes = Buffer.from(text, 'utf8');
   mkdirSync(directory, { recursive: true });
-  writeFileSync(file, bytes);
+  const bytes = writeScrubbed({ env, file, text });
   return {
     bytes: bytes.length,
     sha256: createHash('sha256').update(bytes).digest('hex'),
@@ -124,7 +129,11 @@ export const saveTranscript = ({
   };
 };
 
-export const saveEnvelope = ({ envelope, resultsDir = RESULTS_DIR }) => {
+export const saveEnvelope = ({
+  env = process.env,
+  envelope,
+  resultsDir = RESULTS_DIR,
+}) => {
   const parsed = parseEnvelope(envelope);
   if (!parsed.ok) {
     throw new Error(
@@ -137,8 +146,12 @@ export const saveEnvelope = ({ envelope, resultsDir = RESULTS_DIR }) => {
   const directory = join(resultsDir, envelope.run.suite);
   const file = join(directory, `${envelope.run.run_id}.json`);
   mkdirSync(directory, { recursive: true });
-  writeFileSync(file, `${JSON.stringify(parsed.envelope, null, 2)}\n`);
-  return { envelope: parsed.envelope, file };
+  const bytes = writeScrubbed({
+    env,
+    file,
+    text: `${JSON.stringify(parsed.envelope, null, 2)}\n`,
+  });
+  return { envelope: JSON.parse(bytes.toString('utf8')), file };
 };
 
 const reportSaved = ({ regressionConfig, saved }) => {
@@ -160,6 +173,7 @@ const saveOrReport = (save) => {
 
 export const recordRun = async ({
   clock = Date.now,
+  env = process.env,
   execute,
   identity,
   ingest = ingestAfterRun,
@@ -183,6 +197,7 @@ export const recordRun = async ({
           status,
           trials,
         }),
+        env,
         resultsDir,
       }),
     });
@@ -206,6 +221,7 @@ export const recordRun = async ({
     addTrial: (trial) => trials.push(trial),
     transcript: ({ name, text }) =>
       saveTranscript({
+        env,
         name,
         resultsDir,
         runId: identity.run_id,
