@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from 'node:fs';
+
+import { BASELINE_SUITES } from '@repo/eval-history/baseline/baseline.constants';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import {
@@ -47,6 +50,7 @@ describe('parseBaselineArgs', () => {
   it.each([
     [[], '--suite is required'],
     [['--suite', 'rules-consistency'], '--suite must be one of'],
+    [['--suite', 'nope', '--model', 'x'], '--suite must be one of'],
     [
       ['--suite', 'skills', '--runs', '1'],
       '--runs must be a whole number of at least 2; got "1"',
@@ -92,13 +96,26 @@ describe('interruptCode', () => {
 });
 
 describe('runner wiring', () => {
-  it('names a runner that exists for every suite', async () => {
-    const { existsSync } = await import('node:fs');
-
-    for (const runner of Object.values(BASELINE_RUNNERS)) {
-      expect(existsSync(new URL(runner, import.meta.url))).toBe(true);
+  it('names a runner that exists for every suite', () => {
+    for (const { path } of Object.values(BASELINE_RUNNERS)) {
+      expect(existsSync(new URL(path, import.meta.url))).toBe(true);
     }
   });
+
+  it('runs exactly the suites the package can aggregate', () => {
+    expect(Object.keys(BASELINE_RUNNERS).toSorted()).toEqual(
+      BASELINE_SUITES.toSorted(),
+    );
+  });
+
+  it.each(Object.entries(BASELINE_RUNNERS))(
+    'offers --model to %s exactly when its runner declares it',
+    (_suite, { path, takesModel }) => {
+      const source = readFileSync(new URL(path, import.meta.url), 'utf8');
+
+      expect(/\bmodel: \{/u.test(source)).toBe(takesModel);
+    },
+  );
 
   it('forwards only the model, and tags the child with the baseline id', () => {
     expect(runnerArgs({ model: undefined })).toEqual([]);

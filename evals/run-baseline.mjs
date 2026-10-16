@@ -37,7 +37,7 @@ const EVALS_DIR = dirname(fileURLToPath(import.meta.url));
 const runOnce = ({ baselineId, model, suite }) =>
   spawnSync(
     process.execPath,
-    [join(EVALS_DIR, BASELINE_RUNNERS[suite]), ...runnerArgs({ model })],
+    [join(EVALS_DIR, BASELINE_RUNNERS[suite].path), ...runnerArgs({ model })],
     { env: runEnvironment({ baselineId, env: process.env }), stdio: 'inherit' },
   );
 

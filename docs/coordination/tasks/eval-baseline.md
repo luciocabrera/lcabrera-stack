@@ -9,6 +9,7 @@ area:
   - evals/baseline-*
   - evals/run-envelope*
   - evals/run-record*
+  - evals/runner-writes.test.mjs
   - packages/eval-history/src/baseline/**
   - packages/eval-history/src/ingest/envelopeFileSystem.util*.ts
   - packages/eval-history/src/testing/integrationDatabase.service.ts

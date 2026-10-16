@@ -69,8 +69,9 @@ It runs the suite `--runs` times, `baseline.defaultRuns` from
 passes one `baseline_id` to every run, so each envelope is tagged
 `trigger: baseline`. It then stores the mean and sample standard deviation per
 suite and per subject in `evals.eval_baseline`. For skill-quality that is the
-judge's overall score; for the other suites it is the pass rate, counted as the
-`Pass rate:` line counts it. `--model <id>` reaches the skills and skill-quality
+judge's overall score; for the other suites it is the pass rate, with the same
+outcomes left out of n as the `Pass rate:` line. Unlike that line, a run below
+`minTrialsForRate` still contributes its rate. `--model <id>` reaches the skills and skill-quality
 runners; the verifier runners fix their own model.
 
 Each row carries its suite, model and subject, and each baseline gets its own

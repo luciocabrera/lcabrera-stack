@@ -10,13 +10,20 @@ import { parseArgs } from 'node:util';
 import { BASELINE_ID_VARIABLE } from './run-envelope.mjs';
 
 export const BASELINE_RUNNERS = {
-  'skill-quality': 'skill-quality/verify-skill-quality.mjs',
-  skills: 'skills/verify-skill-triggers.mjs',
-  'verifier-fixtures': 'verifier-fixtures/verify-verifier-verdicts.mjs',
-  'verifier-tooled': 'verifier-fixtures/verify-verifier-tooled.mjs',
+  'skill-quality': {
+    path: 'skill-quality/verify-skill-quality.mjs',
+    takesModel: true,
+  },
+  skills: { path: 'skills/verify-skill-triggers.mjs', takesModel: true },
+  'verifier-fixtures': {
+    path: 'verifier-fixtures/verify-verifier-verdicts.mjs',
+    takesModel: false,
+  },
+  'verifier-tooled': {
+    path: 'verifier-fixtures/verify-verifier-tooled.mjs',
+    takesModel: false,
+  },
 };
-
-const MODEL_SUITES = new Set(['skill-quality', 'skills']);
 
 const PREFIX = 'evals:baseline:';
 
@@ -26,17 +33,21 @@ const INTERRUPT_STATUSES = new Set(Object.values(INTERRUPT_CODES));
 
 const refused = (message) => ({ message: `${PREFIX} ${message}`, ok: false });
 
+const isBaselineRunner = (suite) => Object.hasOwn(BASELINE_RUNNERS, suite);
+
 const suiteProblem = (suite) => {
   if (suite === undefined) {
     return '--suite is required';
   }
-  return Object.hasOwn(BASELINE_RUNNERS, suite)
+  return isBaselineRunner(suite)
     ? null
     : `--suite must be one of ${Object.keys(BASELINE_RUNNERS).join(', ')}; got "${suite}"`;
 };
 
 const modelProblem = ({ model, suite }) =>
-  model === undefined || MODEL_SUITES.has(suite)
+  model === undefined ||
+  !isBaselineRunner(suite) ||
+  BASELINE_RUNNERS[suite].takesModel
     ? null
     : `the ${suite} runner fixes its own model, so --model does not apply`;
 

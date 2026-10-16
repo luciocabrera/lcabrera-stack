@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./baseline/baseline.constants": "./src/baseline/baseline.constants.ts",
     "./baseline/probeDatabase.service": "./src/baseline/probeDatabase.service.ts",
     "./baseline/readBaseline.service": "./src/baseline/readBaseline.service.ts",
     "./baseline/recordBaseline.service": "./src/baseline/recordBaseline.service.ts",
