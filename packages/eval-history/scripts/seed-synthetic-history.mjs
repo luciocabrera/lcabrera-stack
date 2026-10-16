@@ -11,7 +11,6 @@
  * runs, or a failed statement.
  */
 import process from 'node:process';
-import pg from 'pg';
 
 import { evalsDatabaseEnvSchema } from '../src/migrate/evalsDatabaseEnv.schema.ts';
 import { evalsMigrateDatabaseEnvSchema } from '../src/migrate/evalsMigrateDatabaseEnv.schema.ts';
@@ -20,28 +19,17 @@ import { migrateEvals } from '../src/migrate/migrateEvals.service.ts';
 import { readMigrations } from '../src/migrate/readMigrations.service.ts';
 import { readModelPrices } from '../src/prices/readModelPrices.service.ts';
 import { seedSyntheticHistory } from '../src/seed/seedSyntheticHistory.service.ts';
-
-const withClient = async (connectionString, work) => {
-  const client = new pg.Client({ connectionString });
-
-  await client.connect();
-
-  try {
-    return await work(client);
-  } finally {
-    await client.end();
-  }
-};
+import { withEvalsClient } from './lib/evals-cli.mjs';
 
 const seed = async ({ migrateUrl, writerUrl }) => {
   const migrations = await readMigrations();
   const prices = await readModelPrices();
 
-  await withClient(migrateUrl, (client) =>
+  await withEvalsClient(migrateUrl, (client) =>
     migrateEvals({ client, migrations, prices, roles: EVALS_ROLES }),
   );
 
-  return withClient(writerUrl, (client) =>
+  return withEvalsClient(writerUrl, (client) =>
     seedSyntheticHistory({
       client,
       endsOn: new Date().toISOString().slice(0, 10),

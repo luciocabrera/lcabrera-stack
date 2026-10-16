@@ -422,6 +422,9 @@ importers:
       '@react-router/serve':
         specifier: catalog:react
         version: 8.4.0(react-router@8.4.0(react-dom@19.3.0(react@19.3.0))(react@19.3.0))(supports-color@7.2.0)(typescript@6.0.3)
+      '@repo/eval-history':
+        specifier: workspace:*
+        version: link:../../packages/eval-history
       '@stylexjs/stylex':
         specifier: catalog:react
         version: 0.19.1
