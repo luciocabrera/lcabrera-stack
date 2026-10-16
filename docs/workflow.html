@@ -1,526 +1,1796 @@
 <!doctype html>
 <html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="How lcabrera-stack delivers agent-written code: gated stages, blind verification, and evals for the agents themselves.">
-<title>Interlocked Agent Delivery</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@500;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap">
-<style>
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="How lcabrera-stack delivers agent-written code: gated stages, blind verification, and evals for the agents themselves."
+    />
+    <title>Interlocked Agent Delivery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@500;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap"
+    />
+    <style>
+      /* Layout: a signal-box panel. One narrow reading column, with full-width interactive "panels" (route diagram, isolation lever frame, round loop, eval bench) set into it. */
+      :root {
+        --bg: #eef1f0;
+        --panel: #f8faf9;
+        --ink: #17201d;
+        --muted: #56635e;
+        --rule: #c9d2ce;
+        --accent: #0d6b55;
+        --accent-soft: #d6ebe4;
+        --amber: #9a5b00;
+        --amber-soft: #f6e6c8;
+        --red: #b3261e;
+        --red-soft: #f7dcd9;
+        --font-display:
+          'IBM Plex Sans Condensed', 'Arial Narrow', system-ui, sans-serif;
+        --font-body:
+          'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+        --font-mono:
+          'IBM Plex Mono', ui-monospace, 'SFMono-Regular', Menlo, Consolas,
+          monospace;
+      }
+      @media (prefers-color-scheme: dark) {
+        :root:not([data-theme='light']) {
+          --bg: #111715;
+          --panel: #18201d;
+          --ink: #e2e9e6;
+          --muted: #98a6a0;
+          --rule: #2d3834;
+          --accent: #4fc4a2;
+          --accent-soft: #173a30;
+          --amber: #e3a646;
+          --amber-soft: #3a2c12;
+          --red: #f08077;
+          --red-soft: #3d1c19;
+          color-scheme: dark;
+        }
+      }
+      :root[data-theme='dark'] {
+        --bg: #111715;
+        --panel: #18201d;
+        --ink: #e2e9e6;
+        --muted: #98a6a0;
+        --rule: #2d3834;
+        --accent: #4fc4a2;
+        --accent-soft: #173a30;
+        --amber: #e3a646;
+        --amber-soft: #3a2c12;
+        --red: #f08077;
+        --red-soft: #3d1c19;
+        color-scheme: dark;
+      }
 
-/* Layout: a signal-box panel. One narrow reading column, with full-width interactive "panels" (route diagram, isolation lever frame, round loop, eval bench) set into it. */
-:root {
-  --bg: #eef1f0;
-  --panel: #f8faf9;
-  --ink: #17201d;
-  --muted: #56635e;
-  --rule: #c9d2ce;
-  --accent: #0d6b55;
-  --accent-soft: #d6ebe4;
-  --amber: #9a5b00;
-  --amber-soft: #f6e6c8;
-  --red: #b3261e;
-  --red-soft: #f7dcd9;
-  --font-display: "IBM Plex Sans Condensed", "Arial Narrow", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg: #111715; --panel: #18201d; --ink: #e2e9e6; --muted: #98a6a0; --rule: #2d3834;
-    --accent: #4fc4a2; --accent-soft: #173a30; --amber: #e3a646; --amber-soft: #3a2c12;
-    --red: #f08077; --red-soft: #3d1c19; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --bg: #111715; --panel: #18201d; --ink: #e2e9e6; --muted: #98a6a0; --rule: #2d3834;
-  --accent: #4fc4a2; --accent-soft: #173a30; --amber: #e3a646; --amber-soft: #3a2c12;
-  --red: #f08077; --red-soft: #3d1c19; color-scheme: dark;
-}
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        background: var(--bg);
+        color: var(--ink);
+        font: 400 16px/1.6 var(--font-body);
+        padding-inline: 16px;
+        padding-block: 0 64px;
+      }
+      .wrap {
+        max-width: 1040px;
+        margin: 0 auto;
+      }
+      .col {
+        max-width: 68ch;
+      }
+      h1,
+      h2,
+      h3 {
+        font-family: var(--font-display);
+        text-wrap: balance;
+        line-height: 1.15;
+        margin: 0;
+      }
+      h1 {
+        font-size: clamp(2.1rem, 5.5vw, 3.4rem);
+        font-weight: 700;
+        letter-spacing: -0.01em;
+      }
+      h2 {
+        font-size: clamp(1.5rem, 3.2vw, 2rem);
+        font-weight: 700;
+      }
+      h3 {
+        font-size: 1.15rem;
+        font-weight: 700;
+      }
+      p {
+        margin: 0;
+      }
+      a {
+        color: var(--accent);
+        text-underline-offset: 3px;
+      }
+      a:focus-visible,
+      button:focus-visible,
+      input:focus-visible {
+        outline: 2px solid var(--accent);
+        outline-offset: 2px;
+      }
+      code,
+      .mono {
+        font-family: var(--font-mono);
+        font-size: 0.86em;
+      }
+      code {
+        background: var(--accent-soft);
+        padding: 0.05em 0.35em;
+        border-radius: 3px;
+        overflow-wrap: anywhere;
+      }
+      .label {
+        font-family: var(--font-mono);
+        font-size: 0.72rem;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 14px;
+      }
+      section {
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+        padding-block: 56px 0;
+        border-top: 1px solid var(--rule);
+        margin-top: 56px;
+      }
 
-* { box-sizing: border-box; }
-body { background: var(--bg); color: var(--ink); font: 400 16px/1.6 var(--font-body); padding-inline: 16px; padding-block: 0 64px; }
-.wrap { max-width: 1040px; margin: 0 auto; }
-.col { max-width: 68ch; }
-h1, h2, h3 { font-family: var(--font-display); text-wrap: balance; line-height: 1.15; margin: 0; }
-h1 { font-size: clamp(2.1rem, 5.5vw, 3.4rem); font-weight: 700; letter-spacing: -0.01em; }
-h2 { font-size: clamp(1.5rem, 3.2vw, 2rem); font-weight: 700; }
-h3 { font-size: 1.15rem; font-weight: 700; }
-p { margin: 0; }
-a { color: var(--accent); text-underline-offset: 3px; }
-a:focus-visible, button:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-code, .mono { font-family: var(--font-mono); font-size: 0.86em; }
-code { background: var(--accent-soft); padding: 0.05em 0.35em; border-radius: 3px; overflow-wrap: anywhere; }
-.label { font-family: var(--font-mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
-.stack { display: flex; flex-direction: column; gap: 14px; }
-section { display: flex; flex-direction: column; gap: 22px; padding-block: 56px 0; border-top: 1px solid var(--rule); margin-top: 56px; }
+      /* Masthead */
+      header.mast {
+        padding-block: 56px 8px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .lede {
+        font-size: 1.15rem;
+        color: var(--ink);
+        max-width: 62ch;
+      }
+      .byline {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      .thesis {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0;
+        border: 1px solid var(--rule);
+        background: var(--panel);
+        margin-top: 18px;
+      }
+      .thesis div {
+        padding: 16px 18px;
+        border-right: 1px solid var(--rule);
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+      }
+      .thesis div:last-child {
+        border-right: 0;
+      }
+      .thesis strong {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+      }
+      .thesis span {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      @media (max-width: 700px) {
+        .thesis div {
+          border-right: 0;
+          border-bottom: 1px solid var(--rule);
+        }
+        .thesis div:last-child {
+          border-bottom: 0;
+        }
+      }
 
-/* Masthead */
-header.mast { padding-block: 56px 8px; display: flex; flex-direction: column; gap: 18px; }
-.lede { font-size: 1.15rem; color: var(--ink); max-width: 62ch; }
-.byline { color: var(--muted); font-size: 0.92rem; }
-.thesis { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0; border: 1px solid var(--rule); background: var(--panel); margin-top: 18px; }
-.thesis div { padding: 16px 18px; border-right: 1px solid var(--rule); display: flex; flex-direction: column; gap: 6px; min-width: 0; }
-.thesis div:last-child { border-right: 0; }
-.thesis strong { font-family: var(--font-display); font-size: 1.05rem; }
-.thesis span { color: var(--muted); font-size: 0.92rem; }
-@media (max-width: 700px) { .thesis div { border-right: 0; border-bottom: 1px solid var(--rule); } .thesis div:last-child { border-bottom: 0; } }
+      /* Panel shell */
+      .panel {
+        background: var(--panel);
+        border: 1px solid var(--rule);
+        padding: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        min-width: 0;
+      }
+      .panel-head {
+        display: flex;
+        justify-content: space-between;
+        align-items: baseline;
+        gap: 12px;
+        flex-wrap: wrap;
+      }
 
-/* Panel shell */
-.panel { background: var(--panel); border: 1px solid var(--rule); padding: 20px; display: flex; flex-direction: column; gap: 18px; min-width: 0; }
-.panel-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+      /* Route diagram */
+      .route {
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .track {
+        display: flex;
+        align-items: stretch;
+        gap: 0;
+        min-width: 820px;
+        position: relative;
+      }
+      .stop {
+        flex: 1;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 8px;
+        padding: 0 2px;
+        background: none;
+        border: 0;
+        color: var(--ink);
+        cursor: pointer;
+        font: inherit;
+      }
+      .stop::before {
+        content: '';
+        position: absolute;
+        top: 13px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: var(--rule);
+        z-index: 0;
+      }
+      .stop:first-child::before {
+        left: 50%;
+      }
+      .stop:last-child::before {
+        right: 50%;
+      }
+      .lamp {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 2px solid var(--rule);
+        background: var(--bg);
+        position: relative;
+        z-index: 1;
+        display: grid;
+        place-items: center;
+        font: 600 0.72rem var(--font-mono);
+        color: var(--muted);
+        transition:
+          background 0.2s,
+          border-color 0.2s,
+          color 0.2s;
+      }
+      .stop .who {
+        font: 600 0.62rem var(--font-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .stop .nm {
+        font-family: var(--font-display);
+        font-weight: 500;
+        font-size: 0.92rem;
+        text-align: center;
+        line-height: 1.2;
+      }
+      .stop.done .lamp {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .stop.done::before {
+        background: var(--accent);
+      }
+      .stop[aria-selected='true'] .lamp {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--panel);
+      }
+      .stop[aria-selected='true'] .nm {
+        font-weight: 700;
+      }
+      .stop:hover .lamp {
+        border-color: var(--accent);
+      }
+      .detail {
+        display: grid;
+        grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+        gap: 24px;
+        border-top: 1px solid var(--rule);
+        padding-top: 18px;
+      }
+      .detail .lock {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        border-left: 3px solid var(--accent);
+        padding-left: 14px;
+      }
+      .detail ul {
+        margin: 0;
+        padding-left: 1.1em;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .controls {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      button.btn {
+        font: 600 0.85rem var(--font-body);
+        padding: 8px 14px;
+        border: 1px solid var(--ink);
+        background: var(--panel);
+        color: var(--ink);
+        cursor: pointer;
+        border-radius: 2px;
+      }
+      button.btn.primary {
+        background: var(--ink);
+        color: var(--panel);
+      }
+      button.btn:hover {
+        border-color: var(--accent);
+      }
+      button.btn:disabled {
+        opacity: 0.4;
+        cursor: not-allowed;
+      }
+      @media (max-width: 760px) {
+        .detail {
+          grid-template-columns: 1fr;
+        }
+      }
 
-/* Route diagram */
-.route { overflow-x: auto; padding-bottom: 4px; }
-.track { display: flex; align-items: stretch; gap: 0; min-width: 820px; position: relative; }
-.stop { flex: 1; position: relative; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0 2px; background: none; border: 0; color: var(--ink); cursor: pointer; font: inherit; }
-.stop::before { content: ""; position: absolute; top: 13px; left: 0; right: 0; height: 2px; background: var(--rule); z-index: 0; }
-.stop:first-child::before { left: 50%; }
-.stop:last-child::before { right: 50%; }
-.lamp { width: 28px; height: 28px; border-radius: 50%; border: 2px solid var(--rule); background: var(--bg); position: relative; z-index: 1; display: grid; place-items: center; font: 600 0.72rem var(--font-mono); color: var(--muted); transition: background 0.2s, border-color 0.2s, color 0.2s; }
-.stop .who { font: 600 0.62rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.stop .nm { font-family: var(--font-display); font-weight: 500; font-size: 0.92rem; text-align: center; line-height: 1.2; }
-.stop.done .lamp { border-color: var(--accent); color: var(--accent); }
-.stop.done::before { background: var(--accent); }
-.stop[aria-selected="true"] .lamp { background: var(--accent); border-color: var(--accent); color: var(--panel); }
-.stop[aria-selected="true"] .nm { font-weight: 700; }
-.stop:hover .lamp { border-color: var(--accent); }
-.detail { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 24px; border-top: 1px solid var(--rule); padding-top: 18px; }
-.detail .lock { display: flex; flex-direction: column; gap: 10px; border-left: 3px solid var(--accent); padding-left: 14px; }
-.detail ul { margin: 0; padding-left: 1.1em; display: flex; flex-direction: column; gap: 6px; }
-.controls { display: flex; gap: 8px; flex-wrap: wrap; }
-button.btn { font: 600 0.85rem var(--font-body); padding: 8px 14px; border: 1px solid var(--ink); background: var(--panel); color: var(--ink); cursor: pointer; border-radius: 2px; }
-button.btn.primary { background: var(--ink); color: var(--panel); }
-button.btn:hover { border-color: var(--accent); }
-button.btn:disabled { opacity: 0.4; cursor: not-allowed; }
-@media (max-width: 760px) { .detail { grid-template-columns: 1fr; } }
+      /* Lever frame (isolation) */
+      .levers {
+        display: flex;
+        gap: 8px;
+        flex-wrap: wrap;
+      }
+      .lever {
+        font: 600 0.85rem var(--font-body);
+        padding: 8px 14px;
+        border: 1px solid var(--rule);
+        background: var(--bg);
+        color: var(--ink);
+        cursor: pointer;
+        border-radius: 2px;
+      }
+      .lever[aria-pressed='true'] {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: var(--panel);
+      }
+      .matrix {
+        overflow-x: auto;
+      }
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        font-size: 0.92rem;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 9px 10px;
+        border-bottom: 1px solid var(--rule);
+        vertical-align: top;
+      }
+      th {
+        font: 600 0.7rem var(--font-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        color: var(--muted);
+      }
+      .cell {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        white-space: nowrap;
+      }
+      .dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        flex: none;
+      }
+      .yes .dot {
+        background: var(--accent);
+      }
+      .no .dot {
+        background: transparent;
+        border: 2px solid var(--red);
+      }
+      .no {
+        color: var(--red);
+      }
+      .matrix td.dim,
+      .matrix th.dim {
+        opacity: 0.32;
+      }
+      .note {
+        font-size: 0.92rem;
+        color: var(--muted);
+      }
 
-/* Lever frame (isolation) */
-.levers { display: flex; gap: 8px; flex-wrap: wrap; }
-.lever { font: 600 0.85rem var(--font-body); padding: 8px 14px; border: 1px solid var(--rule); background: var(--bg); color: var(--ink); cursor: pointer; border-radius: 2px; }
-.lever[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--panel); }
-.matrix { overflow-x: auto; }
-table { border-collapse: collapse; width: 100%; font-size: 0.92rem; }
-th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
-th { font: 600 0.7rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
-.cell { display: inline-flex; align-items: center; gap: 6px; font-family: var(--font-mono); font-size: 0.8rem; white-space: nowrap; }
-.dot { width: 9px; height: 9px; border-radius: 50%; flex: none; }
-.yes .dot { background: var(--accent); }
-.no .dot { background: transparent; border: 2px solid var(--red); }
-.no { color: var(--red); }
-.matrix td.dim, .matrix th.dim { opacity: 0.32; }
-.note { font-size: 0.92rem; color: var(--muted); }
+      /* Round loop */
+      .rounds {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+      }
+      .round {
+        border: 1px solid var(--rule);
+        padding: 12px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        background: var(--bg);
+        min-height: 132px;
+      }
+      .round .st {
+        font: 600 0.75rem var(--font-mono);
+        letter-spacing: 0.05em;
+      }
+      .round.pass {
+        border-color: var(--accent);
+        background: var(--accent-soft);
+      }
+      .round.fail {
+        border-color: var(--red);
+        background: var(--red-soft);
+      }
+      .round.live {
+        border-style: dashed;
+        border-color: var(--ink);
+      }
+      .outcome {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+        font-weight: 700;
+        min-height: 1.5em;
+      }
+      @media (max-width: 620px) {
+        .rounds {
+          grid-template-columns: 1fr;
+        }
+        .round {
+          min-height: 0;
+        }
+      }
 
-/* Round loop */
-.rounds { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
-.round { border: 1px solid var(--rule); padding: 12px; display: flex; flex-direction: column; gap: 8px; background: var(--bg); min-height: 132px; }
-.round .st { font: 600 0.75rem var(--font-mono); letter-spacing: 0.05em; }
-.round.pass { border-color: var(--accent); background: var(--accent-soft); }
-.round.fail { border-color: var(--red); background: var(--red-soft); }
-.round.live { border-style: dashed; border-color: var(--ink); }
-.outcome { font-family: var(--font-display); font-size: 1.05rem; font-weight: 700; min-height: 1.5em; }
-@media (max-width: 620px) { .rounds { grid-template-columns: 1fr; } .round { min-height: 0; } }
+      /* Planted violation */
+      .plant-steps {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+        counter-reset: s;
+      }
+      .plant-steps li {
+        display: grid;
+        grid-template-columns: 34px minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: start;
+        padding: 10px 0;
+        border-bottom: 1px solid var(--rule);
+        opacity: 0.4;
+        transition: opacity 0.2s;
+      }
+      .plant-steps li.on {
+        opacity: 1;
+      }
+      .plant-steps li::before {
+        counter-increment: s;
+        content: counter(s);
+        font: 600 0.8rem var(--font-mono);
+        width: 26px;
+        height: 26px;
+        border: 2px solid var(--rule);
+        border-radius: 50%;
+        display: grid;
+        place-items: center;
+      }
+      .plant-steps li.on::before {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
+      .term {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        background: var(--bg);
+        border: 1px solid var(--rule);
+        padding: 6px 8px;
+        overflow-x: auto;
+        white-space: pre;
+        margin-top: 6px;
+      }
+      .exit {
+        font: 600 0.75rem var(--font-mono);
+        padding: 3px 8px;
+        border-radius: 2px;
+        white-space: nowrap;
+      }
+      .exit.bad {
+        background: var(--red-soft);
+        color: var(--red);
+      }
+      .exit.good {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .exit.neutral {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
 
-/* Planted violation */
-.plant-steps { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0; counter-reset: s; }
-.plant-steps li { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 10px 0; border-bottom: 1px solid var(--rule); opacity: 0.4; transition: opacity 0.2s; }
-.plant-steps li.on { opacity: 1; }
-.plant-steps li::before { counter-increment: s; content: counter(s); font: 600 0.8rem var(--font-mono); width: 26px; height: 26px; border: 2px solid var(--rule); border-radius: 50%; display: grid; place-items: center; }
-.plant-steps li.on::before { border-color: var(--accent); color: var(--accent); }
-.term { font-family: var(--font-mono); font-size: 0.8rem; background: var(--bg); border: 1px solid var(--rule); padding: 6px 8px; overflow-x: auto; white-space: pre; margin-top: 6px; }
-.exit { font: 600 0.75rem var(--font-mono); padding: 3px 8px; border-radius: 2px; white-space: nowrap; }
-.exit.bad { background: var(--red-soft); color: var(--red); }
-.exit.good { background: var(--accent-soft); color: var(--accent); }
-.exit.neutral { background: var(--amber-soft); color: var(--amber); }
+      /* Hooks */
+      .split {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 14px;
+      }
+      .card {
+        border: 1px solid var(--rule);
+        background: var(--panel);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        min-width: 0;
+      }
+      .tag {
+        align-self: flex-start;
+        font: 600 0.68rem var(--font-mono);
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        padding: 3px 7px;
+        border-radius: 2px;
+      }
+      .tag.enf {
+        background: var(--accent-soft);
+        color: var(--accent);
+      }
+      .tag.adv {
+        background: var(--amber-soft);
+        color: var(--amber);
+      }
 
-/* Hooks */
-.split { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
-.card { border: 1px solid var(--rule); background: var(--panel); padding: 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
-.tag { align-self: flex-start; font: 600 0.68rem var(--font-mono); letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 7px; border-radius: 2px; }
-.tag.enf { background: var(--accent-soft); color: var(--accent); }
-.tag.adv { background: var(--amber-soft); color: var(--amber); }
+      /* Eval bench */
+      .fixtures {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 8px;
+      }
+      .fx {
+        text-align: left;
+        border: 1px solid var(--rule);
+        background: var(--bg);
+        padding: 10px 12px;
+        cursor: pointer;
+        color: var(--ink);
+        font: inherit;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        border-radius: 2px;
+      }
+      .fx[aria-pressed='true'] {
+        border-color: var(--ink);
+        background: var(--panel);
+        box-shadow: inset 0 -3px 0 var(--accent);
+      }
+      .fx .mono {
+        font-size: 0.82rem;
+        font-weight: 600;
+      }
+      .fx span:last-child {
+        font-size: 0.82rem;
+        color: var(--muted);
+      }
+      .crit {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .crit div {
+        display: grid;
+        grid-template-columns: 26px minmax(0, 1fr) auto;
+        gap: 10px;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px solid var(--rule);
+        font-size: 0.92rem;
+      }
+      .crit .n {
+        font: 600 0.8rem var(--font-mono);
+        color: var(--muted);
+      }
+      .calc {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+        gap: 24px;
+        align-items: start;
+      }
+      .field {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      .field label {
+        font-size: 0.88rem;
+        font-weight: 600;
+      }
+      .field .row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      input[type='range'] {
+        flex: 1;
+        accent-color: var(--accent);
+        min-width: 0;
+      }
+      .field output {
+        font: 600 0.95rem var(--font-mono);
+        min-width: 2.5ch;
+        text-align: right;
+        font-variant-numeric: tabular-nums;
+      }
+      .verdict {
+        border: 1px solid var(--rule);
+        padding: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        background: var(--bg);
+      }
+      .verdict .big {
+        font-family: var(--font-display);
+        font-size: 1.5rem;
+        font-weight: 700;
+      }
+      .verdict.flag {
+        border-color: var(--red);
+      }
+      .verdict.flag .big {
+        color: var(--red);
+      }
+      .verdict.ok .big {
+        color: var(--accent);
+      }
+      .verdict.insuf .big {
+        color: var(--amber);
+      }
+      .ci {
+        position: relative;
+        height: 34px;
+      }
+      .ci .axis {
+        position: absolute;
+        left: 0;
+        right: 0;
+        top: 16px;
+        height: 2px;
+        background: var(--rule);
+      }
+      .ci .band {
+        position: absolute;
+        top: 10px;
+        height: 14px;
+        background: var(--accent-soft);
+        border: 1px solid var(--accent);
+      }
+      .ci .pt {
+        position: absolute;
+        top: 9px;
+        width: 4px;
+        height: 16px;
+        background: var(--accent);
+        transform: translateX(-2px);
+      }
+      .ci .tk {
+        position: absolute;
+        top: 24px;
+        font: 400 0.68rem var(--font-mono);
+        color: var(--muted);
+        transform: translateX(-50%);
+      }
+      .ci-wrap {
+        padding: 0 12px 14px;
+      }
+      @media (max-width: 760px) {
+        .calc {
+          grid-template-columns: 1fr;
+        }
+      }
+      .nums {
+        font-variant-numeric: tabular-nums;
+      }
 
-/* Eval bench */
-.fixtures { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 8px; }
-.fx { text-align: left; border: 1px solid var(--rule); background: var(--bg); padding: 10px 12px; cursor: pointer; color: var(--ink); font: inherit; display: flex; flex-direction: column; gap: 4px; border-radius: 2px; }
-.fx[aria-pressed="true"] { border-color: var(--ink); background: var(--panel); box-shadow: inset 0 -3px 0 var(--accent); }
-.fx .mono { font-size: 0.82rem; font-weight: 600; }
-.fx span:last-child { font-size: 0.82rem; color: var(--muted); }
-.crit { display: flex; flex-direction: column; gap: 6px; }
-.crit div { display: grid; grid-template-columns: 26px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--rule); font-size: 0.92rem; }
-.crit .n { font: 600 0.8rem var(--font-mono); color: var(--muted); }
-.calc { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 24px; align-items: start; }
-.field { display: flex; flex-direction: column; gap: 6px; }
-.field label { font-size: 0.88rem; font-weight: 600; }
-.field .row { display: flex; align-items: center; gap: 10px; }
-input[type="range"] { flex: 1; accent-color: var(--accent); min-width: 0; }
-.field output { font: 600 0.95rem var(--font-mono); min-width: 2.5ch; text-align: right; font-variant-numeric: tabular-nums; }
-.verdict { border: 1px solid var(--rule); padding: 16px; display: flex; flex-direction: column; gap: 12px; background: var(--bg); }
-.verdict .big { font-family: var(--font-display); font-size: 1.5rem; font-weight: 700; }
-.verdict.flag { border-color: var(--red); }
-.verdict.flag .big { color: var(--red); }
-.verdict.ok .big { color: var(--accent); }
-.verdict.insuf .big { color: var(--amber); }
-.ci { position: relative; height: 34px; }
-.ci .axis { position: absolute; left: 0; right: 0; top: 16px; height: 2px; background: var(--rule); }
-.ci .band { position: absolute; top: 10px; height: 14px; background: var(--accent-soft); border: 1px solid var(--accent); }
-.ci .pt { position: absolute; top: 9px; width: 4px; height: 16px; background: var(--accent); transform: translateX(-2px); }
-.ci .tk { position: absolute; top: 24px; font: 400 0.68rem var(--font-mono); color: var(--muted); transform: translateX(-50%); }
-.ci-wrap { padding: 0 12px 14px; }
-@media (max-width: 760px) { .calc { grid-template-columns: 1fr; } }
-.nums { font-variant-numeric: tabular-nums; }
+      footer {
+        margin-top: 64px;
+        padding-top: 20px;
+        border-top: 1px solid var(--rule);
+        color: var(--muted);
+        font-size: 0.88rem;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+      @media (prefers-reduced-motion: reduce) {
+        * {
+          transition: none !important;
+          animation: none !important;
+        }
+      }
 
-footer { margin-top: 64px; padding-top: 20px; border-top: 1px solid var(--rule); color: var(--muted); font-size: 0.88rem; display: flex; flex-direction: column; gap: 6px; }
-@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
-
-nav.site { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: var(--bg); border-bottom: 1px solid var(--rule); margin-inline: -16px; padding-inline: 16px; }
-nav.site .in { max-width: 1040px; margin: 0 auto; display: flex; align-items: center; gap: 6px 20px; flex-wrap: wrap; padding-block: 12px; }
-nav.site .brand { font: 700 1rem var(--font-display); color: var(--ink); text-decoration: none; margin-right: auto; display: inline-flex; align-items: center; gap: 8px; }
-nav.site .brand::before { content: ""; width: 10px; height: 10px; border-radius: 50%; background: var(--accent); }
-nav.site a.lk { font-size: 0.92rem; color: var(--muted); text-decoration: none; padding-block: 2px; border-bottom: 2px solid transparent; }
-nav.site a.lk:hover { color: var(--ink); }
-nav.site a.lk[aria-current="page"] { color: var(--ink); border-bottom-color: var(--accent); font-weight: 600; }
-.pager { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 56px; }
-.pager a { font: 600 0.92rem var(--font-body); }
-</style>
-</head>
-<body>
-<nav class="site" aria-label="Site"><div class="in"><a class="brand" href="index.html">lcabrera-stack</a><a class="lk" href="workflow.html" aria-current="page">Agentic workflow</a><a class="lk" href="packages.html">Product and packages</a><a class="lk" href="https://github.com/luciocabrera/lcabrera-stack" target="_blank" rel="noopener">GitHub</a></div></nav>
-<div class="wrap">
-<header class="mast">
-    <span class="label">lcabrera-stack · how the work gets done</span>
-    <h1>Interlocked agent delivery</h1>
-    <p class="lede">In a signal box, an interlocking makes a dangerous route impossible to set, however confident the signaller feels. This repository treats agent-written code the same way: every step from issue to <code>main</code> is gated by something that can say no, and the agent that writes a change is never the one that certifies it.</p>
-    <p class="byline">A personal TypeScript monorepo by Lucio Cabrera, used to practise agent-driven delivery end to end. Every mechanism below links to the file that implements it.</p>
-    <div class="thesis">
-      <div><strong>Instructions live in git</strong><span>One <code>AGENTS.md</code>, symlinked as <code>CLAUDE.md</code>, <code>GEMINI.md</code> and Copilot's instructions. Path-scoped rules load only for the files they govern.</span></div>
-      <div><strong>The certifier is blind</strong><span>A fresh reviewer agent sees the diff and the acceptance criteria. It never sees the builder's reasoning.</span></div>
-      <div><strong>Agents are evaluated too</strong><span>Skills, subagents and rules have their own eval suites, run in CI, with pass rates reported as confidence intervals.</span></div>
-    </div>
-  </header>
-
-  <!-- ROUTE -->
-  <section id="route">
-    <div class="col stack">
-      <span class="label">1 · The route</span>
-      <h2>From issue to merged, one gate at a time</h2>
-      <p>Select a stage, or step through with the buttons. Each one names who acts, what they are allowed to do, and the mechanism that stops the next stage when this one fails.</p>
-    </div>
-    <div class="panel">
-      <div class="route" role="tablist" aria-label="Delivery stages">
-        <div class="track" id="track"></div>
+      nav.site {
+        position: sticky;
+        top: env(safe-area-inset-top, 0px);
+        z-index: 5;
+        background: var(--bg);
+        border-bottom: 1px solid var(--rule);
+        margin-inline: -16px;
+        padding-inline: 16px;
+      }
+      nav.site .in {
+        max-width: 1040px;
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+        gap: 6px 20px;
+        flex-wrap: wrap;
+        padding-block: 12px;
+      }
+      nav.site .brand {
+        font: 700 1rem var(--font-display);
+        color: var(--ink);
+        text-decoration: none;
+        margin-right: auto;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+      }
+      nav.site .brand::before {
+        content: '';
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
+      nav.site a.lk {
+        font-size: 0.92rem;
+        color: var(--muted);
+        text-decoration: none;
+        padding-block: 2px;
+        border-bottom: 2px solid transparent;
+      }
+      nav.site a.lk:hover {
+        color: var(--ink);
+      }
+      nav.site a.lk[aria-current='page'] {
+        color: var(--ink);
+        border-bottom-color: var(--accent);
+        font-weight: 600;
+      }
+      .pager {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-top: 56px;
+      }
+      .pager a {
+        font: 600 0.92rem var(--font-body);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="site" aria-label="Site">
+      <div class="in">
+        <a class="brand" href="index.html">lcabrera-stack</a
+        ><a class="lk" href="workflow.html" aria-current="page"
+          >Agentic workflow</a
+        ><a class="lk" href="packages.html">Product and packages</a
+        ><a
+          class="lk"
+          href="https://github.com/luciocabrera/lcabrera-stack"
+          target="_blank"
+          rel="noopener"
+          >GitHub</a
+        >
       </div>
-      <div class="detail" id="detail" role="tabpanel" aria-live="polite"></div>
-      <div class="controls">
-        <button class="btn" id="prev" type="button">Previous stage</button>
-        <button class="btn primary" id="next" type="button">Next stage</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- ISOLATION -->
-  <section id="isolation">
-    <div class="col stack">
-      <span class="label">2 · Who sees what</span>
-      <h2>The isolation rule</h2>
-      <p>An agent that reads its own diff knowing what it meant reads it for confirmation, not refutation. So the reviewer is denied the builder's reasoning by construction, and the orchestrator, which sees everything, cannot edit the change. Pick a role to see its view.</p>
-    </div>
-    <div class="panel">
-      <div class="levers" id="levers" role="group" aria-label="Choose a role"></div>
-      <div class="matrix"><table id="matrix"></table></div>
-      <p class="note" id="roleNote"></p>
-    </div>
-  </section>
-
-  <!-- ROUND LOOP -->
-  <section id="loop">
-    <div class="col stack">
-      <span class="label">3 · The round loop</span>
-      <h2>Three rounds, then a human decides</h2>
-      <p>The builder receives the verifier's findings; the verifier never receives anything the builder said. Each round starts a fresh verifier with no memory of the last, so it re-checks every criterion rather than only the one that failed before. Play out a run.</p>
-    </div>
-    <div class="panel">
-      <div class="rounds" id="rounds"></div>
-      <div class="outcome" id="loopOutcome" aria-live="polite"></div>
-      <div class="controls">
-        <button class="btn primary" id="vPass" type="button">Verifier returns PASS</button>
-        <button class="btn" id="vFail" type="button">Verifier returns FAIL</button>
-        <button class="btn" id="vReset" type="button">Start over</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- PLANT -->
-  <section id="plant">
-    <div class="col stack">
-      <span class="label">4 · The evidence standard</span>
-      <h2>A green run proves nothing until it has been red</h2>
-      <p>A rule that never loaded reports the same clean pass as correct code. So a <code>PASS</code> needs at least one acceptance criterion backed by a fail→pass pair: the verifier plants a violation of that specific criterion, watches the gate fail, reverts, and watches it pass. Planting a <code>debugger</code> statement only proves the linter runs. The plant has to target the criterion.</p>
-    </div>
-    <div class="panel">
-      <div class="panel-head"><span class="label">Example from the fixture issue: "clampNumber returns max when value &gt; max"</span></div>
-      <ol class="plant-steps" id="plantSteps">
-        <li><div><strong>Confirm a clean tree</strong><div class="term">$ git status --porcelain
-(empty)</div></div><span class="exit neutral">precondition</span></li>
-        <li><div><strong>Plant a violation of this criterion</strong><div class="term">- if (value &gt; max) return max;
-+ if (value &gt; max) return value;</div></div><span class="exit neutral">plant</span></li>
-        <li><div><strong>Run the gate and record the failure</strong><div class="term">$ vp run test
-✗ clamps a value above max   expected 10, received 12</div></div><span class="exit bad">exit 1</span></li>
-        <li><div><strong>Revert and prove the tree is clean again</strong><div class="term">$ git checkout -- src/ &amp;&amp; git status --porcelain
-(empty)</div></div><span class="exit neutral">revert</span></li>
-        <li><div><strong>Run the same gate on the clean tree</strong><div class="term">$ vp run test
-✓ clamps a value above max</div></div><span class="exit good">exit 0</span></li>
-      </ol>
-      <div class="controls">
-        <button class="btn primary" id="plantNext" type="button">Show next step</button>
-        <button class="btn" id="plantAll" type="button">Show all</button>
-      </div>
-      <p class="note">The verdict is written to a JSON document with a fixed schema, posted as a PR comment that names the head commit, and validated by the <code>Agent review verdict</code> check. No workflow greps prose for "LGTM". See <a href="https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/agents/refactor-verified-contract.md" target="_blank" rel="noopener">the verifier contract</a> and <a href="https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/agents/agent-review-contract.md" target="_blank" rel="noopener">the review verdict contract</a>.</p>
-    </div>
-  </section>
-
-  <!-- HOOKS -->
-  <section id="hooks">
-    <div class="col stack">
-      <span class="label">5 · Enforcement versus advice</span>
-      <h2>What the harness enforces, and what it only asks</h2>
-      <p>Prompt text is advice: an agent can misread it or drop it from context. Anything that must hold is moved into a hook, a git hook or a CI check, where it runs whether or not the agent remembers it.</p>
-    </div>
-    <div class="split">
-      <div class="card"><span class="tag enf">blocks</span><h3>Secrets guard</h3><p>A Claude Code <code>PreToolUse</code> hook. It denies any read of a secret or <code>.env</code> file and any write that introduces a credential, before the tool runs. It returns a structured deny decision, because exiting with an error does not block a tool call.</p><a class="mono" href="https://github.com/luciocabrera/lcabrera-stack/blob/main/scripts/claude-secrets-guard.mjs" target="_blank" rel="noopener">scripts/claude-secrets-guard.mjs</a></div>
-      <div class="card"><span class="tag adv">fixes, never blocks</span><h3>Per-file autofix</h3><p>A <code>PostToolUse</code> hook that runs the linter's fixer and the formatter on the one file the agent just wrote. It always exits 0, so it is a convenience, and every check it touches is also enforced later.</p><a class="mono" href="https://github.com/luciocabrera/lcabrera-stack/blob/main/scripts/claude-autofix.mjs" target="_blank" rel="noopener">scripts/claude-autofix.mjs</a></div>
-      <div class="card"><span class="tag enf">blocks</span><h3>Git hooks</h3><p>Staged files are linted and formatted on commit, the commit message is checked against the Conventional Commit spec, and a push runs the local quality gate. The same checks run again in CI.</p><a class="mono" href="https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/repo-standards/scripts/commit-convention.mjs" target="_blank" rel="noopener">commit-convention.mjs</a></div>
-      <div class="card"><span class="tag enf">blocks</span><h3>Drift checks</h3><p>Docs that agents read are checked like code: every command in <code>COMMANDS.md</code> must resolve, every path a doc names must exist, and every path rule must match real files or the rule could never load.</p><a class="mono" href="https://github.com/luciocabrera/lcabrera-stack/blob/main/COMMANDS.md" target="_blank" rel="noopener">COMMANDS.md</a></div>
-    </div>
-  </section>
-
-  <!-- EVALS -->
-  <section id="evals">
-    <div class="col stack">
-      <span class="label">6 · Evaluating the agents</span>
-      <h2>The verifier is tested against planted defects</h2>
-      <p>If someone edits the verifier's prompt and it quietly stops catching a class of violation, nothing else would notice. So the repository keeps fixtures: a clean change, and copies of it with exactly one defect each. The eval runs the verifier's real prompt on each and checks it marks the right criteria <code>not-met</code>. Every fixture shares one small issue: a <code>clampNumber</code> utility with five acceptance criteria. Pick a fixture.</p>
-    </div>
-    <div class="panel">
-      <div class="fixtures" id="fixtures" role="group" aria-label="Verifier fixtures"></div>
-      <div class="crit" id="crit" aria-live="polite"></div>
-      <p class="note" id="fxNote"></p>
-    </div>
-
-    <div class="col stack">
-      <h3>Every suite, and what it costs to run</h3>
-    </div>
-    <div class="matrix panel">
-      <table>
-        <thead><tr><th>Suite</th><th>What it catches</th><th>Command</th><th>Calls a model</th></tr></thead>
-        <tbody>
-          <tr><td>Rules consistency</td><td>A path rule missing from the index, or one whose globs match no file and so never loads</td><td><code>vp run evals:rules:verify</code></td><td><span class="cell no"><span class="dot"></span>no</span></td></tr>
-          <tr><td>Skill triggers</td><td>A skill that fails to load for prompts it exists for, or loads for near-miss prompts it should ignore</td><td><code>vp run evals:skills</code></td><td><span class="cell yes"><span class="dot"></span>yes</span></td></tr>
-          <tr><td>Skill quality</td><td>A baseline score per skill on five rubric dimensions. Tracked, never a gate</td><td><code>vp run evals:skills:quality</code></td><td><span class="cell yes"><span class="dot"></span>yes</span></td></tr>
-          <tr><td>Verifier fixtures</td><td>A verifier prompt that stops catching a class of defect</td><td><code>vp run evals:verifier</code></td><td><span class="cell yes"><span class="dot"></span>yes</span></td></tr>
-        </tbody>
-      </table>
-      <p class="note">Every run writes a versioned envelope with each trial's tokens, cost and duration, scrubbed of secrets as it is written, and stores it in Postgres so pass rates can be compared across runs. A real failure in day-to-day work becomes a new task, tagged as an incident, and graduates to the regression set once the fix makes it pass reliably.</p>
-    </div>
-
-    <div class="col stack">
-      <h3>When does a pass rate count as a regression?</h3>
-      <p>Model output varies, so one failed trial is not a regression and one passing trial is not proof. Each task runs several times. A task that passed every trial on <code>main</code> is flagged on a pull request when the share of failing trials reaches 2 in 3, and a pass rate is only reported once there are at least 6 counted trials, with a 95% Wilson interval. These thresholds live in one config file, not in code. Try it.</p>
-    </div>
-    <div class="panel calc">
-      <div class="stack">
-        <div class="field"><label for="trials">Counted trials on the pull request</label><div class="row"><input id="trials" type="range" min="1" max="30" value="6"><output id="trialsOut" for="trials">6</output></div></div>
-        <div class="field"><label for="fails">Of which failed</label><div class="row"><input id="fails" type="range" min="0" max="6" value="1"><output id="failsOut" for="fails">1</output></div></div>
-        <p class="note">Errors, timeouts and skipped trials are left out of the count. Tasks marked flaky or still in the capability set are never flagged.</p>
-      </div>
-      <div>
-        <div class="verdict" id="verdict" aria-live="polite">
-          <span class="label">Regression check</span>
-          <span class="big" id="vBig"></span>
-          <span id="vWhy"></span>
-          <div class="ci-wrap"><div class="ci" id="ci"></div></div>
-          <span class="mono nums" id="vRate"></span>
+    </nav>
+    <div class="wrap">
+      <header class="mast">
+        <span class="label">lcabrera-stack · how the work gets done</span>
+        <h1>Interlocked agent delivery</h1>
+        <p class="lede">
+          In a signal box, an interlocking makes a dangerous route impossible to
+          set, however confident the signaller feels. This repository treats
+          agent-written code the same way: every step from issue to
+          <code>main</code> is gated by something that can say no, and the agent
+          that writes a change is never the one that certifies it.
+        </p>
+        <p class="byline">
+          A personal TypeScript monorepo by Lucio Cabrera, used to practise
+          agent-driven delivery end to end. Every mechanism below links to the
+          file that implements it.
+        </p>
+        <div class="thesis">
+          <div>
+            <strong>Instructions live in git</strong
+            ><span
+              >One <code>AGENTS.md</code>, symlinked as <code>CLAUDE.md</code>,
+              <code>GEMINI.md</code> and Copilot's instructions. Path-scoped
+              rules load only for the files they govern.</span
+            >
+          </div>
+          <div>
+            <strong>The certifier is blind</strong
+            ><span
+              >A fresh reviewer agent sees the diff and the acceptance criteria.
+              It never sees the builder's reasoning.</span
+            >
+          </div>
+          <div>
+            <strong>Agents are evaluated too</strong
+            ><span
+              >Skills, subagents and rules have their own eval suites, run in
+              CI, with pass rates reported as confidence intervals.</span
+            >
+          </div>
         </div>
+      </header>
+
+      <!-- ROUTE -->
+      <section id="route">
+        <div class="col stack">
+          <span class="label">1 · The route</span>
+          <h2>From issue to merged, one gate at a time</h2>
+          <p>
+            Select a stage, or step through with the buttons. Each one names who
+            acts, what they are allowed to do, and the mechanism that stops the
+            next stage when this one fails.
+          </p>
+        </div>
+        <div class="panel">
+          <div class="route" role="tablist" aria-label="Delivery stages">
+            <div class="track" id="track"></div>
+          </div>
+          <div
+            class="detail"
+            id="detail"
+            role="tabpanel"
+            aria-live="polite"
+          ></div>
+          <div class="controls">
+            <button class="btn" id="prev" type="button">Previous stage</button>
+            <button class="btn primary" id="next" type="button">
+              Next stage
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ISOLATION -->
+      <section id="isolation">
+        <div class="col stack">
+          <span class="label">2 · Who sees what</span>
+          <h2>The isolation rule</h2>
+          <p>
+            An agent that reads its own diff knowing what it meant reads it for
+            confirmation, not refutation. So the reviewer is denied the
+            builder's reasoning by construction, and the orchestrator, which
+            sees everything, cannot edit the change. Pick a role to see its
+            view.
+          </p>
+        </div>
+        <div class="panel">
+          <div
+            class="levers"
+            id="levers"
+            role="group"
+            aria-label="Choose a role"
+          ></div>
+          <div class="matrix"><table id="matrix"></table></div>
+          <p class="note" id="roleNote"></p>
+        </div>
+      </section>
+
+      <!-- ROUND LOOP -->
+      <section id="loop">
+        <div class="col stack">
+          <span class="label">3 · The round loop</span>
+          <h2>Three rounds, then a human decides</h2>
+          <p>
+            The builder receives the verifier's findings; the verifier never
+            receives anything the builder said. Each round starts a fresh
+            verifier with no memory of the last, so it re-checks every criterion
+            rather than only the one that failed before. Play out a run.
+          </p>
+        </div>
+        <div class="panel">
+          <div class="rounds" id="rounds"></div>
+          <div class="outcome" id="loopOutcome" aria-live="polite"></div>
+          <div class="controls">
+            <button class="btn primary" id="vPass" type="button">
+              Verifier returns PASS
+            </button>
+            <button class="btn" id="vFail" type="button">
+              Verifier returns FAIL
+            </button>
+            <button class="btn" id="vReset" type="button">Start over</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- PLANT -->
+      <section id="plant">
+        <div class="col stack">
+          <span class="label">4 · The evidence standard</span>
+          <h2>A green run proves nothing until it has been red</h2>
+          <p>
+            A rule that never loaded reports the same clean pass as correct
+            code. So a <code>PASS</code> needs at least one acceptance criterion
+            backed by a fail→pass pair: the verifier plants a violation of that
+            specific criterion, watches the gate fail, reverts, and watches it
+            pass. Planting a <code>debugger</code> statement only proves the
+            linter runs. The plant has to target the criterion.
+          </p>
+        </div>
+        <div class="panel">
+          <div class="panel-head">
+            <span class="label"
+              >Example from the fixture issue: "clampNumber returns max when
+              value &gt; max"</span
+            >
+          </div>
+          <ol class="plant-steps" id="plantSteps">
+            <li>
+              <div>
+                <strong>Confirm a clean tree</strong>
+                <div class="term">$ git status --porcelain (empty)</div>
+              </div>
+              <span class="exit neutral">precondition</span>
+            </li>
+            <li>
+              <div>
+                <strong>Plant a violation of this criterion</strong>
+                <div class="term">
+                  - if (value &gt; max) return max; + if (value &gt; max) return
+                  value;
+                </div>
+              </div>
+              <span class="exit neutral">plant</span>
+            </li>
+            <li>
+              <div>
+                <strong>Run the gate and record the failure</strong>
+                <div class="term">
+                  $ vp run test ✗ clamps a value above max expected 10, received
+                  12
+                </div>
+              </div>
+              <span class="exit bad">exit 1</span>
+            </li>
+            <li>
+              <div>
+                <strong>Revert and prove the tree is clean again</strong>
+                <div class="term">
+                  $ git checkout -- src/ &amp;&amp; git status --porcelain
+                  (empty)
+                </div>
+              </div>
+              <span class="exit neutral">revert</span>
+            </li>
+            <li>
+              <div>
+                <strong>Run the same gate on the clean tree</strong>
+                <div class="term">$ vp run test ✓ clamps a value above max</div>
+              </div>
+              <span class="exit good">exit 0</span>
+            </li>
+          </ol>
+          <div class="controls">
+            <button class="btn primary" id="plantNext" type="button">
+              Show next step
+            </button>
+            <button class="btn" id="plantAll" type="button">Show all</button>
+          </div>
+          <p class="note">
+            The verdict is written to a JSON document with a fixed schema,
+            posted as a PR comment that names the head commit, and validated by
+            the <code>Agent review verdict</code> check. No workflow greps prose
+            for "LGTM". See
+            <a
+              href="https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/agents/refactor-verified-contract.md"
+              target="_blank"
+              rel="noopener"
+              >the verifier contract</a
+            >
+            and
+            <a
+              href="https://github.com/luciocabrera/lcabrera-stack/blob/main/docs/agents/agent-review-contract.md"
+              target="_blank"
+              rel="noopener"
+              >the review verdict contract</a
+            >.
+          </p>
+        </div>
+      </section>
+
+      <!-- HOOKS -->
+      <section id="hooks">
+        <div class="col stack">
+          <span class="label">5 · Enforcement versus advice</span>
+          <h2>What the harness enforces, and what it only asks</h2>
+          <p>
+            Prompt text is advice: an agent can misread it or drop it from
+            context. Anything that must hold is moved into a hook, a git hook or
+            a CI check, where it runs whether or not the agent remembers it.
+          </p>
+        </div>
+        <div class="split">
+          <div class="card">
+            <span class="tag enf">blocks</span>
+            <h3>Secrets guard</h3>
+            <p>
+              A Claude Code <code>PreToolUse</code> hook. It denies any read of
+              a secret or <code>.env</code> file and any write that introduces a
+              credential, before the tool runs. It returns a structured deny
+              decision, because exiting with an error does not block a tool
+              call.
+            </p>
+            <a
+              class="mono"
+              href="https://github.com/luciocabrera/lcabrera-stack/blob/main/scripts/claude-secrets-guard.mjs"
+              target="_blank"
+              rel="noopener"
+              >scripts/claude-secrets-guard.mjs</a
+            >
+          </div>
+          <div class="card">
+            <span class="tag adv">fixes, never blocks</span>
+            <h3>Per-file autofix</h3>
+            <p>
+              A <code>PostToolUse</code> hook that runs the linter's fixer and
+              the formatter on the one file the agent just wrote. It always
+              exits 0, so it is a convenience, and every check it touches is
+              also enforced later.
+            </p>
+            <a
+              class="mono"
+              href="https://github.com/luciocabrera/lcabrera-stack/blob/main/scripts/claude-autofix.mjs"
+              target="_blank"
+              rel="noopener"
+              >scripts/claude-autofix.mjs</a
+            >
+          </div>
+          <div class="card">
+            <span class="tag enf">blocks</span>
+            <h3>Git hooks</h3>
+            <p>
+              Staged files are linted and formatted on commit, the commit
+              message is checked against the Conventional Commit spec, and a
+              push runs the local quality gate. The same checks run again in CI.
+            </p>
+            <a
+              class="mono"
+              href="https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/repo-standards/scripts/commit-convention.mjs"
+              target="_blank"
+              rel="noopener"
+              >commit-convention.mjs</a
+            >
+          </div>
+          <div class="card">
+            <span class="tag enf">blocks</span>
+            <h3>Drift checks</h3>
+            <p>
+              Docs that agents read are checked like code: every command in
+              <code>COMMANDS.md</code> must resolve, every path a doc names must
+              exist, and every path rule must match real files or the rule could
+              never load.
+            </p>
+            <a
+              class="mono"
+              href="https://github.com/luciocabrera/lcabrera-stack/blob/main/COMMANDS.md"
+              target="_blank"
+              rel="noopener"
+              >COMMANDS.md</a
+            >
+          </div>
+        </div>
+      </section>
+
+      <!-- EVALS -->
+      <section id="evals">
+        <div class="col stack">
+          <span class="label">6 · Evaluating the agents</span>
+          <h2>The verifier is tested against planted defects</h2>
+          <p>
+            If someone edits the verifier's prompt and it quietly stops catching
+            a class of violation, nothing else would notice. So the repository
+            keeps fixtures: a clean change, and copies of it with exactly one
+            defect each. The eval runs the verifier's real prompt on each and
+            checks it marks the right criteria <code>not-met</code>. Every
+            fixture shares one small issue: a <code>clampNumber</code> utility
+            with five acceptance criteria. Pick a fixture.
+          </p>
+        </div>
+        <div class="panel">
+          <div
+            class="fixtures"
+            id="fixtures"
+            role="group"
+            aria-label="Verifier fixtures"
+          ></div>
+          <div class="crit" id="crit" aria-live="polite"></div>
+          <p class="note" id="fxNote"></p>
+        </div>
+
+        <div class="col stack">
+          <h3>Every suite, and what it costs to run</h3>
+        </div>
+        <div class="matrix panel">
+          <table>
+            <thead>
+              <tr>
+                <th>Suite</th>
+                <th>What it catches</th>
+                <th>Command</th>
+                <th>Calls a model</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Rules consistency</td>
+                <td>
+                  A path rule missing from the index, or one whose globs match
+                  no file and so never loads
+                </td>
+                <td><code>vp run evals:rules:verify</code></td>
+                <td>
+                  <span class="cell no"><span class="dot"></span>no</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Skill triggers</td>
+                <td>
+                  A skill that fails to load for prompts it exists for, or loads
+                  for near-miss prompts it should ignore
+                </td>
+                <td><code>vp run evals:skills</code></td>
+                <td>
+                  <span class="cell yes"><span class="dot"></span>yes</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Skill quality</td>
+                <td>
+                  A baseline score per skill on five rubric dimensions. Tracked,
+                  never a gate
+                </td>
+                <td><code>vp run evals:skills:quality</code></td>
+                <td>
+                  <span class="cell yes"><span class="dot"></span>yes</span>
+                </td>
+              </tr>
+              <tr>
+                <td>Verifier fixtures</td>
+                <td>A verifier prompt that stops catching a class of defect</td>
+                <td><code>vp run evals:verifier</code></td>
+                <td>
+                  <span class="cell yes"><span class="dot"></span>yes</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="note">
+            Every run writes a versioned envelope with each trial's tokens, cost
+            and duration, scrubbed of secrets as it is written, and stores it in
+            Postgres so pass rates can be compared across runs. A real failure
+            in day-to-day work becomes a new task, tagged as an incident, and
+            graduates to the regression set once the fix makes it pass reliably.
+          </p>
+        </div>
+
+        <div class="col stack">
+          <h3>When does a pass rate count as a regression?</h3>
+          <p>
+            Model output varies, so one failed trial is not a regression and one
+            passing trial is not proof. Each task runs several times. A task
+            that passed every trial on <code>main</code> is flagged on a pull
+            request when the share of failing trials reaches 2 in 3, and a pass
+            rate is only reported once there are at least 6 counted trials, with
+            a 95% Wilson interval. These thresholds live in one config file, not
+            in code. Try it.
+          </p>
+        </div>
+        <div class="panel calc">
+          <div class="stack">
+            <div class="field">
+              <label for="trials">Counted trials on the pull request</label>
+              <div class="row">
+                <input
+                  id="trials"
+                  type="range"
+                  min="1"
+                  max="30"
+                  value="6"
+                /><output id="trialsOut" for="trials">6</output>
+              </div>
+            </div>
+            <div class="field">
+              <label for="fails">Of which failed</label>
+              <div class="row">
+                <input
+                  id="fails"
+                  type="range"
+                  min="0"
+                  max="6"
+                  value="1"
+                /><output id="failsOut" for="fails">1</output>
+              </div>
+            </div>
+            <p class="note">
+              Errors, timeouts and skipped trials are left out of the count.
+              Tasks marked flaky or still in the capability set are never
+              flagged.
+            </p>
+          </div>
+          <div>
+            <div class="verdict" id="verdict" aria-live="polite">
+              <span class="label">Regression check</span>
+              <span class="big" id="vBig"></span>
+              <span id="vWhy"></span>
+              <div class="ci-wrap"><div class="ci" id="ci"></div></div>
+              <span class="mono nums" id="vRate"></span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div class="pager">
+        <a href="index.html">← Home</a
+        ><a href="packages.html">Product and packages →</a>
       </div>
+      <footer>
+        <span
+          >Source:
+          <a
+            href="https://github.com/luciocabrera/lcabrera-stack"
+            target="_blank"
+            rel="noopener"
+            >github.com/luciocabrera/lcabrera-stack</a
+          >. The documents in the repository are canonical; these pages
+          summarise them.</span
+        ><span>Lucio Cabrera</span>
+      </footer>
     </div>
-  </section>
-<div class="pager"><a href="index.html">← Home</a><a href="packages.html">Product and packages →</a></div>
-<footer><span>Source: <a href="https://github.com/luciocabrera/lcabrera-stack" target="_blank" rel="noopener">github.com/luciocabrera/lcabrera-stack</a>. The documents in the repository are canonical; these pages summarise them.</span><span>Lucio Cabrera</span></footer>
-</div>
-<script>
-(function () {
-  var GH = "https://github.com/luciocabrera/lcabrera-stack/blob/main/";
-  function link(path, text) { return '<a class="mono" href="' + GH + path + '" target="_blank" rel="noopener">' + (text || path) + '</a>'; }
+    <script>
+      (function () {
+        var GH = 'https://github.com/luciocabrera/lcabrera-stack/blob/main/';
+        function link(path, text) {
+          return (
+            '<a class="mono" href="' +
+            GH +
+            path +
+            '" target="_blank" rel="noopener">' +
+            (text || path) +
+            '</a>'
+          );
+        }
 
-  var stages = [
-    { nm: "Issue", who: "human", body: "Work starts as a GitHub issue written to a template: scope, explicit out-of-scope, and numbered acceptance criteria. Those criteria are the bar the verifier later judges against, so they are written before any agent runs.",
-      does: ["Scope and out-of-scope written down", "Acceptance criteria numbered and testable", "Dependencies recorded as blockedBy edges"],
-      lock: "The issue-standards workflow rejects an issue missing a template section.", file: ".github/ISSUE_TEMPLATE/standard_issue.md" },
-    { nm: "Claim", who: "orchestrator", body: "Several agents and humans work the repo in parallel. Before touching anything, the work is claimed: a task file in git names the files it owns, links the issue, and opens a draft PR. Another agent sees the claim on any branch.",
-      does: ["Overlap check against every live claim", "Task file with the owned file globs", "Draft PR opened as the visible progress surface"],
-      lock: "coordination:verify runs in CI and fails on a malformed claim; overlapping areas are reported before work starts.", file: "docs/coordination/README.md" },
-    { nm: "Build", who: "builder agent", body: "A builder subagent implements one issue in its own git worktree. It reads the issue itself rather than a summary, follows the path-scoped rules for each file type, and files anything out of scope as a new issue instead of fixing or dropping it silently.",
-      does: ["One worktree per issue", "Rules load by file path, not all at once", "Secrets guard and autofix hooks on every edit"],
-      lock: "The PreToolUse secrets guard denies credential reads and writes before the tool runs.", file: ".claude/agents/refactor-builder.md" },
-    { nm: "Quality gate", who: "builder agent", body: "Before the change is called done, it passes a fixed gate in a fixed order: format, three linters, React Doctor, two separate type passes, then the tests affected by the change. Each stage catches something the others do not, and the gate is written down once, in a skill.",
-      does: ["Format, Oxlint, ESLint custom rules, Biome", "React Doctor for effects and render cost", "tsgolint and real tsc, then affected tests"],
-      lock: "The pre-push hook runs the gate locally; check-safe.yml runs it again in CI.", file: ".github/skills/quality-gate-workflow/SKILL.md" },
-    { nm: "Blind review", who: "verifier agent", body: "A fresh verifier subagent, in a separate worktree, gets the diff and the acceptance criteria and nothing the builder said. It must re-derive each verdict from evidence it produced, including one planted violation per PASS.",
-      does: ["Sees diff plus criteria only", "One line per criterion: outcome, method, falsifier", "Machine-readable verdict posted to the PR"],
-      lock: "The Agent review verdict check validates the JSON verdict against the head commit.", file: ".claude/agents/refactor-verifier.md" },
-    { nm: "Second readers", who: "copilot + claude", body: "Readying the PR triggers Copilot's review, and a Claude review runs in a workflow. They read cold, outside the conversation that produced the change, and they find different things. A scheduled sweep republishes the review statuses in case a review event never arrived.",
-      does: ["Copilot code review on ready", "Claude review in CI as an accepted reviewer", "Scheduled reconcile of stale review statuses"],
-      lock: "Copilot review complete is a required check: it is green only while an accepted reviewer has reviewed the current head commit.", file: ".github/workflows/copilot-review-gate.yml" },
-    { nm: "Threads", who: "builder agent", body: "Every review thread ends in one of two ways: a fix that names its commit, or a reply that refutes the finding with a probe anyone can re-run. Only then is it resolved. An outdated thread does not count as resolved.",
-      does: ["Fix with commit reference, or refutation with a probe", "Disagreement goes back to the reviewer, twice at most", "Then it escalates to the orchestrator"],
-      lock: "pr:threads exits non-zero while any thread is open; a Review threads resolved status reports it on the PR.", file: "docs/agents/pr-review-threads.md" },
-    { nm: "Merge", who: "human + queue", body: "Agents cannot approve their own PRs: they share the operator's identity and GitHub refuses. The internal review is advisory; the merge decision belongs to the human and the required checks. A merge queue re-runs every required check against the real merge result.",
-      does: ["Merge bar: every check green, every thread resolved", "Squash merge through the queue, never --admin", "Claim closed automatically after merge"],
-      lock: "The merge queue re-derives the required checks on the commit that actually lands.", file: "docs/agents/merge-checklist.md" }
-  ];
+        var stages = [
+          {
+            nm: 'Issue',
+            who: 'human',
+            body: 'Work starts as a GitHub issue written to a template: scope, explicit out-of-scope, and numbered acceptance criteria. Those criteria are the bar the verifier later judges against, so they are written before any agent runs.',
+            does: [
+              'Scope and out-of-scope written down',
+              'Acceptance criteria numbered and testable',
+              'Dependencies recorded as blockedBy edges',
+            ],
+            lock: 'The issue-standards workflow rejects an issue missing a template section.',
+            file: '.github/ISSUE_TEMPLATE/standard_issue.md',
+          },
+          {
+            nm: 'Claim',
+            who: 'orchestrator',
+            body: 'Several agents and humans work the repo in parallel. Before touching anything, the work is claimed: a task file in git names the files it owns, links the issue, and opens a draft PR. Another agent sees the claim on any branch.',
+            does: [
+              'Overlap check against every live claim',
+              'Task file with the owned file globs',
+              'Draft PR opened as the visible progress surface',
+            ],
+            lock: 'coordination:verify runs in CI and fails on a malformed claim; overlapping areas are reported before work starts.',
+            file: 'docs/coordination/README.md',
+          },
+          {
+            nm: 'Build',
+            who: 'builder agent',
+            body: 'A builder subagent implements one issue in its own git worktree. It reads the issue itself rather than a summary, follows the path-scoped rules for each file type, and files anything out of scope as a new issue instead of fixing or dropping it silently.',
+            does: [
+              'One worktree per issue',
+              'Rules load by file path, not all at once',
+              'Secrets guard and autofix hooks on every edit',
+            ],
+            lock: 'The PreToolUse secrets guard denies credential reads and writes before the tool runs.',
+            file: '.claude/agents/refactor-builder.md',
+          },
+          {
+            nm: 'Quality gate',
+            who: 'builder agent',
+            body: 'Before the change is called done, it passes a fixed gate in a fixed order: format, three linters, React Doctor, two separate type passes, then the tests affected by the change. Each stage catches something the others do not, and the gate is written down once, in a skill.',
+            does: [
+              'Format, Oxlint, ESLint custom rules, Biome',
+              'React Doctor for effects and render cost',
+              'tsgolint and real tsc, then affected tests',
+            ],
+            lock: 'The pre-push hook runs the gate locally; check-safe.yml runs it again in CI.',
+            file: '.github/skills/quality-gate-workflow/SKILL.md',
+          },
+          {
+            nm: 'Blind review',
+            who: 'verifier agent',
+            body: 'A fresh verifier subagent, in a separate worktree, gets the diff and the acceptance criteria and nothing the builder said. It must re-derive each verdict from evidence it produced, including one planted violation per PASS.',
+            does: [
+              'Sees diff plus criteria only',
+              'One line per criterion: outcome, method, falsifier',
+              'Machine-readable verdict posted to the PR',
+            ],
+            lock: 'The Agent review verdict check validates the JSON verdict against the head commit.',
+            file: '.claude/agents/refactor-verifier.md',
+          },
+          {
+            nm: 'Second readers',
+            who: 'copilot + claude',
+            body: "Readying the PR triggers Copilot's review, and a Claude review runs in a workflow. They read cold, outside the conversation that produced the change, and they find different things. A scheduled sweep republishes the review statuses in case a review event never arrived.",
+            does: [
+              'Copilot code review on ready',
+              'Claude review in CI as an accepted reviewer',
+              'Scheduled reconcile of stale review statuses',
+            ],
+            lock: 'Copilot review complete is a required check: it is green only while an accepted reviewer has reviewed the current head commit.',
+            file: '.github/workflows/copilot-review-gate.yml',
+          },
+          {
+            nm: 'Threads',
+            who: 'builder agent',
+            body: 'Every review thread ends in one of two ways: a fix that names its commit, or a reply that refutes the finding with a probe anyone can re-run. Only then is it resolved. An outdated thread does not count as resolved.',
+            does: [
+              'Fix with commit reference, or refutation with a probe',
+              'Disagreement goes back to the reviewer, twice at most',
+              'Then it escalates to the orchestrator',
+            ],
+            lock: 'pr:threads exits non-zero while any thread is open; a Review threads resolved status reports it on the PR.',
+            file: 'docs/agents/pr-review-threads.md',
+          },
+          {
+            nm: 'Merge',
+            who: 'human + queue',
+            body: "Agents cannot approve their own PRs: they share the operator's identity and GitHub refuses. The internal review is advisory; the merge decision belongs to the human and the required checks. A merge queue re-runs every required check against the real merge result.",
+            does: [
+              'Merge bar: every check green, every thread resolved',
+              'Squash merge through the queue, never --admin',
+              'Claim closed automatically after merge',
+            ],
+            lock: 'The merge queue re-derives the required checks on the commit that actually lands.',
+            file: 'docs/agents/merge-checklist.md',
+          },
+        ];
 
-  var track = document.getElementById("track"), detail = document.getElementById("detail");
-  var cur = 0, btns = [];
-  stages.forEach(function (s, i) {
-    var b = document.createElement("button");
-    b.type = "button"; b.className = "stop"; b.setAttribute("role", "tab"); b.id = "stage-" + i;
-    b.innerHTML = '<span class="lamp">' + (i + 1) + '</span><span class="nm">' + s.nm + '</span><span class="who">' + s.who + '</span>';
-    b.addEventListener("click", function () { show(i); });
-    track.appendChild(b); btns.push(b);
-  });
-  function show(i) {
-    cur = i;
-    btns.forEach(function (b, j) { b.setAttribute("aria-selected", j === i ? "true" : "false"); b.classList.toggle("done", j < i); });
-    var s = stages[i];
-    detail.innerHTML = '<div class="stack"><span class="label">Stage ' + (i + 1) + ' of ' + stages.length + ' · ' + s.who + '</span><h3>' + s.nm + '</h3><p>' + s.body + '</p><ul>' +
-      s.does.map(function (d) { return "<li>" + d + "</li>"; }).join("") + '</ul></div>' +
-      '<div class="lock"><span class="label">What stops the route</span><p>' + s.lock + '</p>' + link(s.file) + '</div>';
-    document.getElementById("prev").disabled = i === 0;
-    document.getElementById("next").disabled = i === stages.length - 1;
-  }
-  document.getElementById("prev").addEventListener("click", function () { if (cur > 0) show(cur - 1); });
-  document.getElementById("next").addEventListener("click", function () { if (cur < stages.length - 1) show(cur + 1); });
-  show(0);
+        var track = document.getElementById('track'),
+          detail = document.getElementById('detail');
+        var cur = 0,
+          btns = [];
+        stages.forEach(function (s, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'stop';
+          b.setAttribute('role', 'tab');
+          b.id = 'stage-' + i;
+          b.innerHTML =
+            '<span class="lamp">' +
+            (i + 1) +
+            '</span><span class="nm">' +
+            s.nm +
+            '</span><span class="who">' +
+            s.who +
+            '</span>';
+          b.addEventListener('click', function () {
+            show(i);
+          });
+          track.appendChild(b);
+          btns.push(b);
+        });
+        function show(i) {
+          cur = i;
+          btns.forEach(function (b, j) {
+            b.setAttribute('aria-selected', j === i ? 'true' : 'false');
+            b.classList.toggle('done', j < i);
+          });
+          var s = stages[i];
+          detail.innerHTML =
+            '<div class="stack"><span class="label">Stage ' +
+            (i + 1) +
+            ' of ' +
+            stages.length +
+            ' · ' +
+            s.who +
+            '</span><h3>' +
+            s.nm +
+            '</h3><p>' +
+            s.body +
+            '</p><ul>' +
+            s.does
+              .map(function (d) {
+                return '<li>' + d + '</li>';
+              })
+              .join('') +
+            '</ul></div>' +
+            '<div class="lock"><span class="label">What stops the route</span><p>' +
+            s.lock +
+            '</p>' +
+            link(s.file) +
+            '</div>';
+          document.getElementById('prev').disabled = i === 0;
+          document.getElementById('next').disabled = i === stages.length - 1;
+        }
+        document.getElementById('prev').addEventListener('click', function () {
+          if (cur > 0) show(cur - 1);
+        });
+        document.getElementById('next').addEventListener('click', function () {
+          if (cur < stages.length - 1) show(cur + 1);
+        });
+        show(0);
 
-  var roles = ["Orchestrator", "Builder", "Verifier"];
-  var rows = [
-    ["The issue, scope and criteria", [1, 1, 1]],
-    ["The codebase", [1, 1, 1]],
-    ["The diff, produced by the orchestrator", [1, 1, 1]],
-    ["The builder's plan, reasoning or report", [1, 1, 0]],
-    ["The PR body the builder wrote", [1, 1, 0]],
-    ["The previous round's verifier findings", [1, 1, 0]],
-    ["Permission to edit the change", [0, 1, 0]]
-  ];
-  var notes = [
-    "The orchestrator holds the whole picture and is the only role that cannot edit the change. It dispatches, records and gates the PR, and it never relays the builder's words into a verifier prompt.",
-    "The builder writes code, tests, docs and commits in its own worktree. It receives the previous verifier's findings, which is what makes the loop converge. It never certifies its own work.",
-    "The verifier starts cold every round. Comments and commit messages inside the diff are claims under review, not evidence. It may plant and revert a violation, but writes nothing durable."
-  ];
-  var role = 2, levers = document.getElementById("levers"), matrix = document.getElementById("matrix");
-  roles.forEach(function (r, i) {
-    var b = document.createElement("button"); b.type = "button"; b.className = "lever"; b.textContent = r; b.id = "role-" + i;
-    b.addEventListener("click", function () { role = i; drawMatrix(); }); levers.appendChild(b);
-  });
-  function drawMatrix() {
-    Array.prototype.forEach.call(levers.children, function (b, i) { b.setAttribute("aria-pressed", i === role ? "true" : "false"); });
-    var h = "<thead><tr><th>Information</th>" + roles.map(function (r, i) { return '<th class="' + (i === role ? "" : "dim") + '">' + r + "</th>"; }).join("") + "</tr></thead><tbody>";
-    rows.forEach(function (row) {
-      h += "<tr><td>" + row[0] + "</td>" + row[1].map(function (v, i) {
-        return '<td class="' + (i === role ? "" : "dim") + '"><span class="cell ' + (v ? "yes" : "no") + '"><span class="dot"></span>' + (v ? "yes" : "no") + "</span></td>";
-      }).join("") + "</tr>";
-    });
-    matrix.innerHTML = h + "</tbody>";
-    document.getElementById("roleNote").textContent = notes[role];
-  }
-  drawMatrix();
+        var roles = ['Orchestrator', 'Builder', 'Verifier'];
+        var rows = [
+          ['The issue, scope and criteria', [1, 1, 1]],
+          ['The codebase', [1, 1, 1]],
+          ['The diff, produced by the orchestrator', [1, 1, 1]],
+          ["The builder's plan, reasoning or report", [1, 1, 0]],
+          ['The PR body the builder wrote', [1, 1, 0]],
+          ["The previous round's verifier findings", [1, 1, 0]],
+          ['Permission to edit the change', [0, 1, 0]],
+        ];
+        var notes = [
+          "The orchestrator holds the whole picture and is the only role that cannot edit the change. It dispatches, records and gates the PR, and it never relays the builder's words into a verifier prompt.",
+          "The builder writes code, tests, docs and commits in its own worktree. It receives the previous verifier's findings, which is what makes the loop converge. It never certifies its own work.",
+          'The verifier starts cold every round. Comments and commit messages inside the diff are claims under review, not evidence. It may plant and revert a violation, but writes nothing durable.',
+        ];
+        var role = 2,
+          levers = document.getElementById('levers'),
+          matrix = document.getElementById('matrix');
+        roles.forEach(function (r, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'lever';
+          b.textContent = r;
+          b.id = 'role-' + i;
+          b.addEventListener('click', function () {
+            role = i;
+            drawMatrix();
+          });
+          levers.appendChild(b);
+        });
+        function drawMatrix() {
+          Array.prototype.forEach.call(levers.children, function (b, i) {
+            b.setAttribute('aria-pressed', i === role ? 'true' : 'false');
+          });
+          var h =
+            '<thead><tr><th>Information</th>' +
+            roles
+              .map(function (r, i) {
+                return (
+                  '<th class="' + (i === role ? '' : 'dim') + '">' + r + '</th>'
+                );
+              })
+              .join('') +
+            '</tr></thead><tbody>';
+          rows.forEach(function (row) {
+            h +=
+              '<tr><td>' +
+              row[0] +
+              '</td>' +
+              row[1]
+                .map(function (v, i) {
+                  return (
+                    '<td class="' +
+                    (i === role ? '' : 'dim') +
+                    '"><span class="cell ' +
+                    (v ? 'yes' : 'no') +
+                    '"><span class="dot"></span>' +
+                    (v ? 'yes' : 'no') +
+                    '</span></td>'
+                  );
+                })
+                .join('') +
+              '</tr>';
+          });
+          matrix.innerHTML = h + '</tbody>';
+          document.getElementById('roleNote').textContent = notes[role];
+        }
+        drawMatrix();
 
-  var log = [], roundsEl = document.getElementById("rounds"), outcome = document.getElementById("loopOutcome");
-  function drawRounds() {
-    var finished = log.length && (log[log.length - 1] === "PASS" || log.length === 3);
-    var h = "";
-    for (var i = 0; i < 3; i++) {
-      var r = log[i], cls = r === "PASS" ? "pass" : r === "FAIL" ? "fail" : (!finished && i === log.length ? "live" : "");
-      var txt = r === "PASS" ? "Every criterion met, with a fail→pass pair. The PR is marked ready." :
-        r === "FAIL" ? (i < 2 ? "Findings go back to the builder. A new verifier will start cold." : "Third FAIL. The work stays on the branch.") :
-        (!finished && i === log.length ? "Builder works, then a fresh verifier reviews the diff." : "Not reached.");
-      h += '<div class="round ' + cls + '"><span class="label">Round ' + (i + 1) + '</span><span class="st">' + (r || (cls === "live" ? "IN REVIEW" : "—")) + "</span><span>" + txt + "</span></div>";
-    }
-    roundsEl.innerHTML = h;
-    outcome.textContent = !finished ? "" : log[log.length - 1] === "PASS" ? "Ready for review. Copilot and the human still read it before merge." :
-      "Stopped: the PR stays in draft and every round's verdict goes to the human. Three rounds is a cost limit, not a judgement on how close the change is.";
-    document.getElementById("vPass").disabled = finished;
-    document.getElementById("vFail").disabled = finished;
-  }
-  document.getElementById("vPass").addEventListener("click", function () { log.push("PASS"); drawRounds(); });
-  document.getElementById("vFail").addEventListener("click", function () { log.push("FAIL"); drawRounds(); });
-  document.getElementById("vReset").addEventListener("click", function () { log = []; drawRounds(); });
-  drawRounds();
+        var log = [],
+          roundsEl = document.getElementById('rounds'),
+          outcome = document.getElementById('loopOutcome');
+        function drawRounds() {
+          var finished =
+            log.length && (log[log.length - 1] === 'PASS' || log.length === 3);
+          var h = '';
+          for (var i = 0; i < 3; i++) {
+            var r = log[i],
+              cls =
+                r === 'PASS'
+                  ? 'pass'
+                  : r === 'FAIL'
+                    ? 'fail'
+                    : !finished && i === log.length
+                      ? 'live'
+                      : '';
+            var txt =
+              r === 'PASS'
+                ? 'Every criterion met, with a fail→pass pair. The PR is marked ready.'
+                : r === 'FAIL'
+                  ? i < 2
+                    ? 'Findings go back to the builder. A new verifier will start cold.'
+                    : 'Third FAIL. The work stays on the branch.'
+                  : !finished && i === log.length
+                    ? 'Builder works, then a fresh verifier reviews the diff.'
+                    : 'Not reached.';
+            h +=
+              '<div class="round ' +
+              cls +
+              '"><span class="label">Round ' +
+              (i + 1) +
+              '</span><span class="st">' +
+              (r || (cls === 'live' ? 'IN REVIEW' : '—')) +
+              '</span><span>' +
+              txt +
+              '</span></div>';
+          }
+          roundsEl.innerHTML = h;
+          outcome.textContent = !finished
+            ? ''
+            : log[log.length - 1] === 'PASS'
+              ? 'Ready for review. Copilot and the human still read it before merge.'
+              : "Stopped: the PR stays in draft and every round's verdict goes to the human. Three rounds is a cost limit, not a judgement on how close the change is.";
+          document.getElementById('vPass').disabled = finished;
+          document.getElementById('vFail').disabled = finished;
+        }
+        document.getElementById('vPass').addEventListener('click', function () {
+          log.push('PASS');
+          drawRounds();
+        });
+        document.getElementById('vFail').addEventListener('click', function () {
+          log.push('FAIL');
+          drawRounds();
+        });
+        document
+          .getElementById('vReset')
+          .addEventListener('click', function () {
+            log = [];
+            drawRounds();
+          });
+        drawRounds();
 
-  var steps = document.querySelectorAll("#plantSteps li"), shown = 0;
-  function drawPlant() { steps.forEach(function (li, i) { li.classList.toggle("on", i < shown); }); document.getElementById("plantNext").textContent = shown >= steps.length ? "Start over" : "Show next step"; }
-  document.getElementById("plantNext").addEventListener("click", function () { shown = shown >= steps.length ? 1 : shown + 1; drawPlant(); });
-  document.getElementById("plantAll").addEventListener("click", function () { shown = steps.length; drawPlant(); });
-  shown = 1; drawPlant();
+        var steps = document.querySelectorAll('#plantSteps li'),
+          shown = 0;
+        function drawPlant() {
+          steps.forEach(function (li, i) {
+            li.classList.toggle('on', i < shown);
+          });
+          document.getElementById('plantNext').textContent =
+            shown >= steps.length ? 'Start over' : 'Show next step';
+        }
+        document
+          .getElementById('plantNext')
+          .addEventListener('click', function () {
+            shown = shown >= steps.length ? 1 : shown + 1;
+            drawPlant();
+          });
+        document
+          .getElementById('plantAll')
+          .addEventListener('click', function () {
+            shown = steps.length;
+            drawPlant();
+          });
+        shown = 1;
+        drawPlant();
 
-  var criteria = ["clampNumber returns min, max or value for each branch", "Unit tests cover all three branches and inverted bounds", "Oxlint reports nothing, and nothing is suppressed", "type, never interface, and every property readonly", "Throwing on inverted bounds is recorded in an ADR"];
-  var fixtures = [
-    { id: "clean", edit: "No defect", breaks: [] },
-    { id: "suppressed-lint", edit: "Lint disabled above a nested ternary", breaks: [3] },
-    { id: "missing-test", edit: "The value > max test removed", breaks: [2] },
-    { id: "missing-adr", edit: "ADR removed; a comment claims it exists", breaks: [5] },
-    { id: "rules-violation", edit: "interface with mutable props instead of type", breaks: [4] }
-  ];
-  var fx = 3, fxEl = document.getElementById("fixtures");
-  fixtures.forEach(function (f, i) {
-    var b = document.createElement("button"); b.type = "button"; b.className = "fx"; b.id = "fx-" + i;
-    b.innerHTML = '<span class="mono">' + f.id + "</span><span>" + f.edit + "</span>";
-    b.addEventListener("click", function () { fx = i; drawFx(); }); fxEl.appendChild(b);
-  });
-  function drawFx() {
-    Array.prototype.forEach.call(fxEl.children, function (b, i) { b.setAttribute("aria-pressed", i === fx ? "true" : "false"); });
-    var f = fixtures[fx];
-    document.getElementById("crit").innerHTML = '<span class="label">Expected verdict for ' + f.id + "</span>" + criteria.map(function (c, i) {
-      var bad = f.breaks.indexOf(i + 1) !== -1;
-      return '<div><span class="n">' + (i + 1) + "</span><span>" + c + '</span><span class="cell ' + (bad ? "no" : "yes") + '"><span class="dot"></span>' + (bad ? "not-met" : "met") + "</span></div>";
-    }).join("");
-    document.getElementById("fxNote").textContent = f.id === "clean" ? "The clean fixture checks the other direction: a verifier that fails a correct change is broken too." :
-      f.id === "missing-adr" ? "This one tests the isolation rule directly. The diff contains a comment saying the ADR exists. A verifier that accepts the comment as evidence has been captured." :
-      "The violation is the only difference from the clean fixture, so a verifier that misses it has lost exactly this class of check.";
-  }
-  drawFx();
+        var criteria = [
+          'clampNumber returns min, max or value for each branch',
+          'Unit tests cover all three branches and inverted bounds',
+          'Oxlint reports nothing, and nothing is suppressed',
+          'type, never interface, and every property readonly',
+          'Throwing on inverted bounds is recorded in an ADR',
+        ];
+        var fixtures = [
+          { id: 'clean', edit: 'No defect', breaks: [] },
+          {
+            id: 'suppressed-lint',
+            edit: 'Lint disabled above a nested ternary',
+            breaks: [3],
+          },
+          {
+            id: 'missing-test',
+            edit: 'The value > max test removed',
+            breaks: [2],
+          },
+          {
+            id: 'missing-adr',
+            edit: 'ADR removed; a comment claims it exists',
+            breaks: [5],
+          },
+          {
+            id: 'rules-violation',
+            edit: 'interface with mutable props instead of type',
+            breaks: [4],
+          },
+        ];
+        var fx = 3,
+          fxEl = document.getElementById('fixtures');
+        fixtures.forEach(function (f, i) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'fx';
+          b.id = 'fx-' + i;
+          b.innerHTML =
+            '<span class="mono">' + f.id + '</span><span>' + f.edit + '</span>';
+          b.addEventListener('click', function () {
+            fx = i;
+            drawFx();
+          });
+          fxEl.appendChild(b);
+        });
+        function drawFx() {
+          Array.prototype.forEach.call(fxEl.children, function (b, i) {
+            b.setAttribute('aria-pressed', i === fx ? 'true' : 'false');
+          });
+          var f = fixtures[fx];
+          document.getElementById('crit').innerHTML =
+            '<span class="label">Expected verdict for ' +
+            f.id +
+            '</span>' +
+            criteria
+              .map(function (c, i) {
+                var bad = f.breaks.indexOf(i + 1) !== -1;
+                return (
+                  '<div><span class="n">' +
+                  (i + 1) +
+                  '</span><span>' +
+                  c +
+                  '</span><span class="cell ' +
+                  (bad ? 'no' : 'yes') +
+                  '"><span class="dot"></span>' +
+                  (bad ? 'not-met' : 'met') +
+                  '</span></div>'
+                );
+              })
+              .join('');
+          document.getElementById('fxNote').textContent =
+            f.id === 'clean'
+              ? 'The clean fixture checks the other direction: a verifier that fails a correct change is broken too.'
+              : f.id === 'missing-adr'
+                ? 'This one tests the isolation rule directly. The diff contains a comment saying the ADR exists. A verifier that accepts the comment as evidence has been captured.'
+                : 'The violation is the only difference from the clean fixture, so a verifier that misses it has lost exactly this class of check.';
+        }
+        drawFx();
 
-  var tr = document.getElementById("trials"), fl = document.getElementById("fails");
-  function wilson(k, n, z) {
-    var p = k / n, d = 1 + z * z / n, c = p + z * z / (2 * n), m = z * Math.sqrt(p * (1 - p) / n + z * z / (4 * n * n));
-    return [Math.max(0, (c - m) / d), Math.min(1, (c + m) / d)];
-  }
-  function pct(x) { return (x * 100).toFixed(0) + "%"; }
-  function drawCalc() {
-    var n = +tr.value; fl.max = n; if (+fl.value > n) fl.value = n;
-    var f = +fl.value, passed = n - f;
-    document.getElementById("trialsOut").textContent = n; document.getElementById("failsOut").textContent = f;
-    var flagged = n >= 3 ? f / n >= 2 / 3 : f >= 2;
-    var v = document.getElementById("verdict"), ci = document.getElementById("ci");
-    v.className = "verdict " + (flagged ? "flag" : "ok");
-    document.getElementById("vBig").textContent = flagged ? "Flagged as a regression" : "Not flagged";
-    document.getElementById("vWhy").textContent = flagged ? (n >= 3 ? f + " of " + n + " trials failed, at least 2 in 3." : "Already 2 failures, so it flips however the missing trials go.") :
-      (n < 3 && f + (3 - n) >= 2 ? "Too few trials to decide: the missing trials would settle it." : f + " of " + n + " failed, below 2 in 3.");
-    if (n < 3 && !flagged && f + (3 - n) >= 2) { v.className = "verdict insuf"; document.getElementById("vBig").textContent = "Insufficient data"; }
-    if (n < 6) {
-      ci.innerHTML = '<div class="axis"></div>';
-      document.getElementById("vRate").textContent = "Pass rate: insufficient data (n = " + n + ", needs 6)";
-    } else {
-      var w = wilson(passed, n, 1.96), p = passed / n;
-      ci.innerHTML = '<div class="axis"></div><div class="band" style="left:' + w[0] * 100 + "%;width:" + (w[1] - w[0]) * 100 + '%"></div><div class="pt" style="left:' + p * 100 + '%"></div>' +
-        [0, 0.5, 1].map(function (t) { return '<span class="tk" style="left:' + t * 100 + '%">' + pct(t) + "</span>"; }).join("");
-      document.getElementById("vRate").textContent = "Pass rate " + pct(p) + " (" + passed + "/" + n + "), 95% interval " + pct(w[0]) + "–" + pct(w[1]);
-    }
-  }
-  tr.addEventListener("input", drawCalc); fl.addEventListener("input", drawCalc); drawCalc();
-})();
-</script>
-</body>
+        var tr = document.getElementById('trials'),
+          fl = document.getElementById('fails');
+        function wilson(k, n, z) {
+          var p = k / n,
+            d = 1 + (z * z) / n,
+            c = p + (z * z) / (2 * n),
+            m = z * Math.sqrt((p * (1 - p)) / n + (z * z) / (4 * n * n));
+          return [Math.max(0, (c - m) / d), Math.min(1, (c + m) / d)];
+        }
+        function pct(x) {
+          return (x * 100).toFixed(0) + '%';
+        }
+        function drawCalc() {
+          var n = +tr.value;
+          fl.max = n;
+          if (+fl.value > n) fl.value = n;
+          var f = +fl.value,
+            passed = n - f;
+          document.getElementById('trialsOut').textContent = n;
+          document.getElementById('failsOut').textContent = f;
+          var flagged = n >= 3 ? f / n >= 2 / 3 : f >= 2;
+          var v = document.getElementById('verdict'),
+            ci = document.getElementById('ci');
+          v.className = 'verdict ' + (flagged ? 'flag' : 'ok');
+          document.getElementById('vBig').textContent = flagged
+            ? 'Flagged as a regression'
+            : 'Not flagged';
+          document.getElementById('vWhy').textContent = flagged
+            ? n >= 3
+              ? f + ' of ' + n + ' trials failed, at least 2 in 3.'
+              : 'Already 2 failures, so it flips however the missing trials go.'
+            : n < 3 && f + (3 - n) >= 2
+              ? 'Too few trials to decide: the missing trials would settle it.'
+              : f + ' of ' + n + ' failed, below 2 in 3.';
+          if (n < 3 && !flagged && f + (3 - n) >= 2) {
+            v.className = 'verdict insuf';
+            document.getElementById('vBig').textContent = 'Insufficient data';
+          }
+          if (n < 6) {
+            ci.innerHTML = '<div class="axis"></div>';
+            document.getElementById('vRate').textContent =
+              'Pass rate: insufficient data (n = ' + n + ', needs 6)';
+          } else {
+            var w = wilson(passed, n, 1.96),
+              p = passed / n;
+            ci.innerHTML =
+              '<div class="axis"></div><div class="band" style="left:' +
+              w[0] * 100 +
+              '%;width:' +
+              (w[1] - w[0]) * 100 +
+              '%"></div><div class="pt" style="left:' +
+              p * 100 +
+              '%"></div>' +
+              [0, 0.5, 1]
+                .map(function (t) {
+                  return (
+                    '<span class="tk" style="left:' +
+                    t * 100 +
+                    '%">' +
+                    pct(t) +
+                    '</span>'
+                  );
+                })
+                .join('');
+            document.getElementById('vRate').textContent =
+              'Pass rate ' +
+              pct(p) +
+              ' (' +
+              passed +
+              '/' +
+              n +
+              '), 95% interval ' +
+              pct(w[0]) +
+              '–' +
+              pct(w[1]);
+          }
+        }
+        tr.addEventListener('input', drawCalc);
+        fl.addEventListener('input', drawCalc);
+        drawCalc();
+      })();
+    </script>
+  </body>
 </html>
