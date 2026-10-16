@@ -10,9 +10,12 @@
  * afterwards. Unset, it skips locally and fails under CI.
  */
 
+import type pg from 'pg';
+
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
+import { SUBJECT_KINDS } from '../envelope/envelope.constants.ts';
 import { envelopeFileSystem } from '../ingest/envelopeFileSystem.util.ts';
 import { EVALS_WRITER_ROLE } from '../migrate/migrate.constants.ts';
 import { migrateEvals } from '../migrate/migrateEvals.service.ts';
@@ -21,6 +24,7 @@ import { readModelPrices } from '../prices/readModelPrices.service.ts';
 import { integrationDatabase } from '../testing/integrationDatabase.service.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { baselineFixtures } from './baselineFixtures.service.ts';
+import { probeDatabase } from './probeDatabase.service.ts';
 import { readBaseline } from './readBaseline.service.ts';
 import { recordBaseline } from './recordBaseline.service.ts';
 import { stubBaselineRun } from './stubBaselineRun.service.ts';
@@ -57,20 +61,34 @@ const runsOf = ({ baselineId, modelId, passes }: RunsOfArgs) =>
     }),
   );
 
+const probeWith = (client: () => Promise<pg.Client>) =>
+  probeDatabase({
+    connect: async () => ({
+      client: await client(),
+      end: () => Promise.resolve(),
+    }),
+    connectionString: SCRATCH_URL,
+  });
+
 describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
   const writer = {
     ...EVALS_WRITER_ROLE,
     name: `evals_writer_test_${randomUUID().replaceAll('-', '')}`,
   };
-  const { close, connect } = scratchConnections(DATABASE_URL ?? '');
+  const stranger = `evals_stranger_test_${randomUUID().replaceAll('-', '')}`;
+  const { close, connect, createDatabase } = scratchConnections(
+    DATABASE_URL ?? '',
+  );
 
-  const writerClient = async () => {
+  const clientAs = async (role: string) => {
     const client = await connect(DATABASE_NAME);
 
-    await client.query(`set role "${writer.name}"`);
+    await client.query(`set role "${role}"`);
 
     return client;
   };
+
+  const writerClient = () => clientAs(writer.name);
 
   const record = async (args: RunsOfArgs) => {
     const summary = await recordBaseline({
@@ -94,6 +112,7 @@ describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
 
     await admin.query(`create database "${DATABASE_NAME}"`);
     await admin.query(`create role "${writer.name}" nologin`);
+    await admin.query(`create role "${stranger}" nologin`);
 
     const result = await migrateEvals({
       client: await connect(DATABASE_NAME),
@@ -105,7 +124,32 @@ describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
     expect(result.granted.map(({ name }) => name)).toEqual([writer.name]);
   });
 
-  afterAll(() => close({ databases: [DATABASE_NAME], roles: [writer.name] }));
+  afterAll(() =>
+    close({ databases: [DATABASE_NAME], roles: [writer.name, stranger] }),
+  );
+
+  it('stores the subject kinds the envelope accepts, and no others', async () => {
+    const client = await connect(DATABASE_NAME);
+    const { rows } = await client.query<{ readonly kind: string }>(
+      'select unnest(enum_range(null::evals.subject_kind))::text as kind',
+    );
+
+    expect(rows.map(({ kind }) => kind)).toEqual([...SUBJECT_KINDS]);
+  });
+
+  it('passes the writer, and refuses a role without the grant or a database without the schema', async () => {
+    const unmigrated = await createDatabase('evals_probe');
+
+    expect(await probeWith(writerClient)).toEqual({ ok: true });
+    expect(await probeWith(() => clientAs(stranger))).toMatchObject({
+      message: expect.stringMatching(/this role can insert into/u),
+      ok: false,
+    });
+    expect(await probeWith(() => connect(unmigrated))).toMatchObject({
+      message: expect.stringMatching(/this role can insert into/u),
+      ok: false,
+    });
+  });
 
   it('keeps each model on rows of its own and reads back the latest per subject, as the writer', async () => {
     expect(

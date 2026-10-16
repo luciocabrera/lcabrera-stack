@@ -6,13 +6,14 @@ import type {
 } from '../ingest/ingest.types.ts';
 
 import { connectIngest } from '../ingest/connectIngest.service.ts';
+import { evalsDatabaseUrl } from '../ingest/evalsDatabaseUrl.util.ts';
 import { findEnvelopeFiles } from '../ingest/findEnvelopeFiles.service.ts';
 import { ingestPaths } from '../ingest/ingestPaths.service.ts';
 import { readEnvelopeFile } from '../ingest/readEnvelopeFile.service.ts';
 import { aggregateBaseline } from './aggregateBaseline.util.ts';
+import { BASELINE_DATABASE_URL } from './baseline.constants.ts';
 import { baselineHeading } from './baselineHeading.util.ts';
 import { baselineLine } from './baselineLine.util.ts';
-import { databaseUrl } from './databaseUrl.util.ts';
 import { writeBaseline } from './writeBaseline.service.ts';
 
 type FailureArgs = {
@@ -77,7 +78,10 @@ export const recordBaseline = async ({
   fileSystem = NODE_FILE_SYSTEM,
   paths,
 }: RecordBaselineArgs) => {
-  const database = databaseUrl(connectionString);
+  const database = evalsDatabaseUrl({
+    ...BASELINE_DATABASE_URL,
+    connectionString,
+  });
 
   if (!database.ok) {
     return failure({ stderr: [database.message] });

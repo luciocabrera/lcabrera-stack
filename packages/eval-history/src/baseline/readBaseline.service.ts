@@ -3,11 +3,11 @@ import { z } from 'zod';
 import type { QueryClient } from '../queries/queries.types.ts';
 import type { BaselineSuite } from './baseline.types.ts';
 
+import { SUBJECT_KINDS } from '../envelope/envelope.constants.ts';
 import {
   BASELINE_METRICS,
   BASELINE_SUITES,
   SELECT_LATEST_BASELINE_SQL,
-  SUBJECT_KINDS,
 } from './baseline.constants.ts';
 
 type ReadBaselineArgs = {

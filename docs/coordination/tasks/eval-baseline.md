@@ -12,6 +12,10 @@ area:
   - evals/runner-writes.test.mjs
   - packages/eval-history/src/baseline/**
   - packages/eval-history/src/ingest/envelopeFileSystem.util*.ts
+  - packages/eval-history/src/ingest/evalsDatabaseUrl.util*.ts
+  - packages/eval-history/src/ingest/ingestPaths.service.ts
+  - packages/eval-history/src/envelope/envelope.constants.ts
+  - packages/eval-history/src/envelope/envelope.schema.ts
   - packages/eval-history/src/testing/integrationDatabase.service.ts
   - packages/eval-history/src/ingest/ingestPaths.integration.test.ts
   - packages/eval-history/package.json

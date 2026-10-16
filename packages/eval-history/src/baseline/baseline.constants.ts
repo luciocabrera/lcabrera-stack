@@ -17,7 +17,18 @@ export const BASELINE_METRIC_BY_SUITE = {
   (typeof BASELINE_METRICS)[number]
 >;
 
-export const SUBJECT_KINDS = ['skill', 'rule', 'agent', 'prompt'] as const;
+export const BASELINE_DATABASE_URL = {
+  command: 'evals:baseline',
+  whenUnset: 'there is nowhere to write the baseline',
+} as const;
+
+export const PROBE_WRITABLE_SQL = `
+select count(*) = 2 and bool_and(
+  has_schema_privilege(n.oid, 'usage') and has_table_privilege(c.oid, 'insert')
+) as writable
+from pg_class c
+join pg_namespace n on n.oid = c.relnamespace
+where n.nspname = 'evals' and c.relname in ('eval_run', 'eval_baseline')`;
 
 export const SELECT_SUBJECT_ID_SQL = `
 select id from evals.eval_subject where kind = $1 and name = $2`;
