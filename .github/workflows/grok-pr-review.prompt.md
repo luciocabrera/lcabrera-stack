@@ -30,7 +30,13 @@ the whole contents with a JSON array, one entry per finding you would
 hold the merge for, most important first:
 
 ```json
-[{ "path": "src/thing.ts", "line": 42, "body": "why this line should change. Fix: …" }]
+[
+  {
+    "path": "src/thing.ts",
+    "line": 42,
+    "body": "why this line should change. Fix: …"
+  }
+]
 ```
 
 Write `[]` when, and only when, there is nothing you would hold the merge

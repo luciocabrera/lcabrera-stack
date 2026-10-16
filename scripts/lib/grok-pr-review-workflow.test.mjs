@@ -8,11 +8,7 @@
  */
 import { describe, expect, it } from 'vite-plus/test';
 
-import {
-  readRepoFile,
-  stepBlock,
-  stepEnvValue,
-} from './workflow-inspect.mjs';
+import { readRepoFile, stepBlock, stepEnvValue } from './workflow-inspect.mjs';
 
 const WORKFLOW = '.github/workflows/grok-pr-review.yml';
 const RUN_STEP = 'Run the Grok subscription review';
@@ -55,9 +51,7 @@ describe('the subscription review does not use an API key', () => {
     const step = stepBlock(yaml(), RUN_STEP);
     expect(stepEnvValue(step, 'GITHUB_TOKEN')).toBe("''");
     expect(stepEnvValue(step, 'GH_TOKEN')).toBe("''");
-    expect(step).toContain(
-      "--tools 'read_file,grep,list_dir,search_replace'",
-    );
+    expect(step).toContain("--tools 'read_file,grep,list_dir,search_replace'");
     expect(step).not.toContain('run_terminal_command');
   });
 
@@ -76,13 +70,16 @@ describe('the CLI is pinned', () => {
     expect(source).toContain(
       "GROK_SHA256: '10e6af64b24724fc1074c373e906b9ad121110044dddcbd97ad43c3a25f96d5f'",
     );
-    const step = stepBlock(source, INSTALL_STEP);
-    expect(step).toBeDefined();
-    expect(step).toContain('sha256sum -c');
-    expect(step).toContain('linux-x86_64');
-    expect(step).toContain("--proto '=https'");
-    expect(step).toContain('--tlsv1.2');
-    expect(step).not.toContain('install.sh');
+    const install = stepBlock(source, INSTALL_STEP) ?? '';
+    for (const needle of [
+      'sha256sum -c',
+      'linux-x86_64',
+      "--proto '=https'",
+      '--tlsv1.2',
+    ]) {
+      expect(install, needle).toContain(needle);
+    }
+    expect(install).not.toContain('install.sh');
   });
 });
 
