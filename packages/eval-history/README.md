@@ -58,8 +58,9 @@ decides how the envelope is versioned.
   them from [`evals/regression.config.json`](../../evals/regression.config.json)
   and rejects a file that fails `regressionConfigSchema`.
 - `src/testing/` — the scratch-database harness the integration tests share:
-  it connects to databases beside the one `EVALS_TEST_DATABASE_URL` names and
-  drops them, and the roles a test created, afterwards. `markedEnvelopes`
+  it creates and connects to databases beside the one
+  `EVALS_TEST_DATABASE_URL` names and drops them, and the roles a test
+  created, afterwards. `markedEnvelopes`
   builds one schema-valid envelope per suite with a marker in every field the
   allow-list leaves out, for the showcase's `/evals` public-payload test. No
   command imports either.

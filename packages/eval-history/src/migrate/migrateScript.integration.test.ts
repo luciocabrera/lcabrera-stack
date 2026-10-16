@@ -64,8 +64,9 @@ it.runIf(IS_CI)('has a database to migrate under CI', () => {
 });
 
 describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
-  const { close, connect } = scratchConnections(DATABASE_URL ?? '');
-  const databases: string[] = [];
+  const { close, connect, createDatabase } = scratchConnections(
+    DATABASE_URL ?? '',
+  );
   const roles: string[] = [];
 
   const createdRoles = async () => {
@@ -86,16 +87,6 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     });
   };
 
-  const scratchDatabase = async () => {
-    const name = `evals_migrate_script_${randomUUID().replaceAll('-', '')}`;
-    const admin = await connect();
-
-    await admin.query(`create database "${name}"`);
-    databases.push(name);
-
-    return name;
-  };
-
   const nonOwnerUrl = async (database: string) => {
     const user = `evals_nonowner_test_${randomUUID().replaceAll('-', '')}`;
     const password = randomUUID();
@@ -112,11 +103,11 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     return connectionUrl({ database, password, user });
   };
 
-  afterAll(() => close({ databases, roles }));
+  afterAll(() => close({ roles }));
 
   it('exits 0 and prints granted for each role when the owner migrates', async () => {
     await createdRoles();
-    const database = await scratchDatabase();
+    const database = await createDatabase('evals_migrate_script');
     const { status, stdout } = runScript(connectionUrl({ database }));
 
     expect(status).toBe(0);
@@ -126,7 +117,7 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
 
   it('exits 1 naming the lacking privilege when a non-owner cannot grant it', async () => {
     await createdRoles();
-    const database = await scratchDatabase();
+    const database = await createDatabase('evals_migrate_script');
 
     expect(runScript(connectionUrl({ database })).status).toBe(0);
 

@@ -1,3 +1,4 @@
+import { randomUUID } from 'node:crypto';
 import pg from 'pg';
 
 import { inSequence } from '../ingest/inSequence.service.ts';
@@ -25,6 +26,18 @@ export const scratchConnections = (databaseUrl: string) => {
     return client;
   };
 
+  const created: string[] = [];
+
+  const createDatabase = async (prefix: string) => {
+    const name = `${prefix}_${randomUUID().replaceAll('-', '')}`;
+    const admin = await connect();
+
+    await admin.query(`create database "${name}"`);
+    created.push(name);
+
+    return name;
+  };
+
   const close = async ({ databases = [], roles = [] }: CloseArgs = {}) => {
     await Promise.all(clients.map((client) => client.end()));
     const admin = new pg.Client({ connectionString: databaseUrl });
@@ -32,7 +45,7 @@ export const scratchConnections = (databaseUrl: string) => {
     await admin.connect();
 
     const statements = [
-      ...databases.map(
+      ...[...created, ...databases].map(
         (database) => `drop database if exists "${database}" with (force)`,
       ),
       ...roles.map((role) => `drop role if exists "${role}"`),
@@ -48,5 +61,5 @@ export const scratchConnections = (databaseUrl: string) => {
     }
   };
 
-  return { close, connect };
+  return { close, connect, createDatabase };
 };
