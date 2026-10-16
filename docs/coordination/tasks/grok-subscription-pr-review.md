@@ -6,6 +6,7 @@ status: review
 branch: ci/1375-grok-subscription-pr-review
 area:
   - .github/workflows/grok-pr-review.yml
+  - .github/workflows/grok-pr-review.prompt.md
   - scripts/lib/grok-pr-review-workflow.test.mjs
   - docs/tooling/copilot-review-gate.md
   - packages/devkit/CLASSIFICATION.md
@@ -22,6 +23,6 @@ Add a pull-request workflow that reviews with the grok.com session in
 
 ## Status / next
 
-- Current step: open the pull request and set the Actions secret.
+- Current step: the review threads asked for the pinned CLI, and that is what the branch now runs.
 - Blockers: none.
-- Next: merge once the required checks are green.
+- Next: reply on the threads, then merge once the required checks are green.

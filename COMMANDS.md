@@ -1145,12 +1145,13 @@ drafts, bound themselves with `timeout-minutes`, and cancel superseded runs.
 [ADR-116](docs/decisions/ADR-116-a-grok-catalog-reviewer-posts-on-pull-requests-and-is-not-an-accepted-reviewer.md).
 
 [`grok-pr-review.yml`](.github/workflows/grok-pr-review.yml) is a separate
-reviewer on a separate credential. It runs Grok Build from the
+reviewer on a separate credential. It runs the Grok CLI from the
 `GROK_AUTH_JSON` secret, the contents of `~/.grok/auth.json`, and it does
-not read `XAI_API_KEY`. Inline comments go out as a pull-request review and
-one summary comment is updated in place, both as `github-actions[bot]`,
-which is not an accepted reviewer. Drafts and pull requests opened from a
-fork are skipped. The secret setup is in that file's header.
+not read `XAI_API_KEY`. The binary is pinned by version and digest. The
+model writes two files, and `scripts/submit-pr-review.mjs` posts them with
+`GITHUB_TOKEN`, so the author is `github-actions[bot]`, which is not an
+accepted reviewer. Drafts and pull requests opened from a fork are skipped.
+The secret setup is in that file's header.
 
 [`agent-review-verdict.yml`](.github/workflows/agent-review-verdict.yml) runs
 `scripts/verify-agent-review.mjs` on every pull request and on every comment made
