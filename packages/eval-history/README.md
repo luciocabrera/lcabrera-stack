@@ -53,7 +53,9 @@ decides how the envelope is versioned.
   `projectedRelation`, which refuses a column outside `PUBLIC_COLUMNS`
   (derived per read from `information_schema` by `readPublicColumns`) and a
   `jsonb` field outside `PUBLIC_FIELD_PATHS`. `readSubjectRuns` gives a
-  subject's pass counts per run with a trial to link to, a failing one first;
+  subject's pass counts per run, one row per run whatever subject versions it
+  held, over the newest runs of each suite that records the subject, with a
+  trial to link to, a failing one first;
   `readRunCosts` gives tokens, the cost the SDK reported and the cost computed
   from the `evals.model_price` row in force when the run started, kept apart,
   and p50 and p95 trial duration, per run, suite and subject;

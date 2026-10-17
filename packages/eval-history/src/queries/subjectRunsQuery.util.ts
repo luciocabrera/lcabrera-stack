@@ -9,7 +9,7 @@ type SubjectRunsQueryArgs = {
       }
     | {
         readonly kind: 'subject';
-        readonly limit: number;
+        readonly perSuite: number;
         readonly subjectKind: string;
         readonly subjectName: string;
       };
@@ -38,15 +38,16 @@ export const subjectRunsQuery = ({
     scope.kind === 'subject'
       ? '\nwhere subject.kind::text = $1 and subject.name = $2'
       : '';
-  const limit =
+  const latestPerSuite =
     scope.kind === 'subject'
-      ? '\norder by run.started_at desc, run.run_id\nlimit $3'
-      : '\norder by subject.kind, subject.name, run.started_at desc, run.run_id';
+      ? '\nwhere grouped."suiteRecency" <= $3\norder by grouped.suite, grouped."startedAt" desc, grouped."runId"'
+      : '\norder by grouped."subjectKind", grouped."subjectName", grouped."startedAt" desc, grouped."runId"';
 
   return {
     text: `with run as (
   ${scopedRuns}
-)
+),
+grouped as (
 select
   subject.kind::text as "subjectKind",
   subject.name as "subjectName",
@@ -63,17 +64,20 @@ select
     min(trial.id) filter (where trial.outcome <> 'pass'),
     min(trial.id)
   )::text as "trialId",
-  array_agg(distinct task.task_key order by task.task_key) as "taskKeys"
+  array_agg(distinct task.task_key order by task.task_key) as "taskKeys",
+  row_number() over (partition by subject.id, run.suite order by run.started_at desc, run.run_id) as "suiteRecency"
 from run
 join ${relation({ columns: ['id', 'run_id', 'task_version_id', 'subject_version_id', 'outcome'], table: 'eval_trial' })} trial on trial.run_id = run.run_id
 join ${relation({ columns: ['id', 'subject_id', 'content_hash'], table: 'eval_subject_version' })} subject_version on subject_version.id = trial.subject_version_id
 join ${relation({ columns: ['id', 'kind', 'name'], table: 'eval_subject' })} subject on subject.id = subject_version.subject_id
 join ${relation({ columns: ['id', 'task_id'], table: 'eval_task_version' })} task_version on task_version.id = trial.task_version_id
 join ${relation({ columns: ['id', 'task_key'], table: 'eval_task' })} task on task.id = task_version.task_id${subjectFilter}
-group by subject.id, subject.kind, subject.name, run.run_id, run.suite, run.started_at, run.model_id${limit}`,
+group by subject.id, subject.kind, subject.name, run.run_id, run.suite, run.started_at, run.model_id
+)
+select grouped.* from grouped${latestPerSuite}`,
     values:
       scope.kind === 'recent'
         ? [scope.perSuite]
-        : [scope.subjectKind, scope.subjectName, scope.limit],
+        : [scope.subjectKind, scope.subjectName, scope.perSuite],
   };
 };

@@ -105,16 +105,26 @@ describe('the subject trend loader', () => {
       from: OLDEST.startedAt,
       to: NEWEST.startedAt,
     });
+    expect(selectSubjectRuns).toHaveBeenCalledWith({
+      scope: {
+        kind: 'subject',
+        perSuite: 120,
+        subjectKind: 'skill',
+        subjectName: 'react-19',
+      },
+    });
   });
 
   it('plots the runs oldest first with a mark for each change', async () => {
-    const data = await invoke({ kind: 'skill', name: 'react-19' });
+    const { series } = await invoke({ kind: 'skill', name: 'react-19' });
+    const [only] = series;
 
-    expect(data.points.map(({ key }) => key)).toEqual([
+    expect(series).toHaveLength(1);
+    expect(only?.points.map(({ key }) => key)).toEqual([
       OLDEST.runId,
       NEWEST.runId,
     ]);
-    expect(data.marks.map(({ kind }) => kind)).toEqual([
+    expect(only?.marks.map(({ kind }) => kind)).toEqual([
       'content',
       'annotation',
     ]);

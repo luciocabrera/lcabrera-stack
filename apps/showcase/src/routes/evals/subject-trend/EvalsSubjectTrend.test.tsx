@@ -21,23 +21,29 @@ afterEach(() => {
 });
 
 describe('EvalsSubjectTrend', () => {
-  it('charts the subject and lists each mark with a link to its run', async () => {
+  it('charts each suite apart and lists each mark with a link to its run', async () => {
     const Stub = createRoutesStub([
       {
         Component: EvalsSubjectTrend,
         loader: () => ({
           kind: 'skill',
-          marks: [
-            {
-              index: 0,
-              key: 'content-r2',
-              kind: 'content',
-              label: 'Content hash changed to bbbbbbbbbbbb',
-            },
-          ],
           name: 'react-19',
-          points: [POINT],
-          runs: 1,
+          series: [
+            {
+              marks: [
+                {
+                  index: 0,
+                  key: 'content-r2',
+                  kind: 'content',
+                  label: 'Content hash changed to bbbbbbbbbbbb',
+                },
+              ],
+              points: [POINT],
+              runs: 1,
+              suite: 'skills',
+            },
+            { marks: [], points: [], runs: 2, suite: 'skill-quality' },
+          ],
         }),
         path: '/evals/subjects/:kind/:name',
       },
@@ -47,7 +53,7 @@ describe('EvalsSubjectTrend', () => {
 
     expect(
       await screen.findByRole('figure', {
-        name: 'skill react-19 pass rate over time',
+        name: 'skill react-19 pass rate in skills over time',
       }),
     ).toBeDefined();
     expect(
@@ -55,6 +61,11 @@ describe('EvalsSubjectTrend', () => {
         .getAllByRole('link', { name: POINT.label })
         .map((link) => link.getAttribute('href')),
     ).toEqual([POINT.href, POINT.href]);
+    expect(
+      screen.getByRole('figure', {
+        name: 'skill react-19 pass rate in skill-quality over time',
+      }),
+    ).toBeDefined();
     expect(screen.getByRole('listitem').textContent).toContain(
       'Content hash changed to bbbbbbbbbbbb',
     );

@@ -7,8 +7,7 @@ import {
 import { requireEvalsDashboard } from '../.server/requireEvalsDashboard.service';
 import { EVALS_TREND_RUNS } from '../constants/evalsDashboard.constants';
 import { isSubjectKind } from '../utils/isSubjectKind.util';
-import { trendMarks } from './trendMarks.util';
-import { trendPoints } from './trendPoints.util';
+import { trendSeries } from './trendSeries.util';
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   requireEvalsDashboard();
@@ -22,35 +21,31 @@ export const loader = async ({ params }: LoaderFunctionArgs) => {
   const runs = await selectSubjectRuns({
     scope: {
       kind: 'subject',
-      limit: EVALS_TREND_RUNS,
+      perSuite: EVALS_TREND_RUNS,
       subjectKind: kind,
       subjectName: name,
     },
   });
-  const newest = runs.at(0);
-  const oldest = runs.at(-1);
+  const times = runs.map(({ startedAt }) => startedAt.getTime());
 
-  if (newest === undefined || oldest === undefined) {
+  if (times.length === 0) {
     throw new Response('Not Found', { status: 404 });
   }
 
   const annotations = await selectAnnotations({
-    from: oldest.startedAt,
-    to: newest.startedAt,
+    from: new Date(Math.min(...times)),
+    to: new Date(Math.max(...times)),
   });
-  const points = trendPoints(runs);
 
   return {
     kind,
-    marks: trendMarks({
+    name,
+    series: trendSeries({
       annotations: annotations.map((annotation) => ({
         ...annotation,
         at: annotation.at.toISOString(),
       })),
-      points,
+      runs,
     }),
-    name,
-    points,
-    runs: runs.length,
   };
 };

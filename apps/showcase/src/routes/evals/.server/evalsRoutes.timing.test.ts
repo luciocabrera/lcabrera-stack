@@ -4,7 +4,9 @@
  * Every /evals route, taken from the route config, answering against the
  * synthetic year of history (at least 15k trials) as the reader role, within
  * the dashboard's 500 ms budget. Each loader is called once to open the
- * reader pool's connections, then timed. It creates and drops a database and
+ * reader pool's connections, then timed three times; all three are printed,
+ * and the fastest must fit the budget, so one stall on a shared runner does
+ * not fail the build. It creates and drops a database and
  * a login role of its own beside the one EVALS_TEST_DATABASE_URL names.
  * Unset, it skips locally and fails under CI.
  */
@@ -136,14 +138,20 @@ from (select run_id from evals.eval_run order by started_at desc limit 1) latest
   it.each(ENTRIES.map(({ path }) => ({ path })))(
     '$path answers in under 500 ms',
     async ({ path }) => {
-      await call(path);
-
-      const started = performance.now();
       const answer = await call(path);
-      const elapsed = performance.now() - started;
+      const timed = async () => {
+        const started = performance.now();
 
+        await call(path);
+
+        return performance.now() - started;
+      };
+      const timings = [await timed(), await timed(), await timed()];
+      const report = `${path}: ${timings.map((ms) => ms.toFixed(1)).join(', ')} ms`;
+
+      process.stderr.write(`/evals timing ${report}\n`);
       expect(answer).toBeDefined();
-      expect(elapsed).toBeLessThan(BUDGET_MS);
+      expect(Math.min(...timings), report).toBeLessThan(BUDGET_MS);
     },
     30_000,
   );

@@ -28,20 +28,23 @@ const publicColumns = new Set([
 
 const SUBJECT_SCOPE = {
   kind: 'subject',
-  limit: 30,
+  perSuite: 30,
   subjectKind: 'skill',
   subjectName: 'react-19',
 } as const;
 
 describe('subjectRunsQuery', () => {
-  it('reads one subject over its newest runs', () => {
+  it('reads one subject over the newest runs of each suite that records it', () => {
     const query = subjectRunsQuery({ publicColumns, scope: SUBJECT_SCOPE });
 
     expect(query.values).toEqual(['skill', 'react-19', 30]);
     expect(query.text).toContain(
       'where subject.kind::text = $1 and subject.name = $2',
     );
-    expect(query.text).toContain('limit $3');
+    expect(query.text).toContain(
+      'partition by subject.id, run.suite order by run.started_at desc',
+    );
+    expect(query.text).toContain('where grouped."suiteRecency" <= $3');
   });
 
   it('reads every subject over the recent runs of each suite', () => {

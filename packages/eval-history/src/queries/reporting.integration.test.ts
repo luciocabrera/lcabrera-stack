@@ -93,7 +93,7 @@ const PROJECTED_QUERIES = {
       publicColumns,
       scope: {
         kind: 'subject',
-        limit: 400,
+        perSuite: 400,
         subjectKind: 'skill',
         subjectName: 'synthetic-skill-03',
       },
@@ -313,7 +313,7 @@ group by trial.run_id`,
       client,
       scope: {
         kind: 'subject',
-        limit: 30,
+        perSuite: 30,
         subjectKind: 'skill',
         subjectName: 'synthetic-skill-03',
       },
@@ -374,7 +374,7 @@ where trial.id = any($1::bigint[])`,
     const client = await connect(databaseName);
     const scope = {
       kind: 'subject',
-      limit: 1,
+      perSuite: 1,
       subjectKind: 'skill',
       subjectName: 'synthetic-skill-03',
     } as const;
@@ -404,6 +404,35 @@ where current.id = trial.subject_version_id
       expect(mixed?.trials).toBe(latest?.trials);
       expect(mixed?.contentHashes).toHaveLength(2);
       expect(mixed?.contentHashes).toContain(latest?.contentHashes[0]);
+    } finally {
+      await client.query('rollback');
+    }
+  });
+
+  it('reads the newest runs of each suite that records the subject apart', async () => {
+    const client = await connect(databaseName);
+    const scope = {
+      kind: 'subject',
+      perSuite: 2,
+      subjectKind: 'skill',
+      subjectName: 'synthetic-skill-03',
+    } as const;
+
+    await client.query('begin');
+
+    try {
+      const { rowCount } = await client.query({
+        text: "update evals.eval_run set suite = 'skill-quality' where run_id = $1",
+        values: [syntheticRunId(10)],
+      });
+      const runs = await readSubjectRuns({ client, scope });
+
+      expect(rowCount).toBe(1);
+      expect(runs.map(({ runId, suite }) => [suite, runId])).toEqual([
+        ['skill-quality', syntheticRunId(10)],
+        ['skills', syntheticRunId(365)],
+        ['skills', syntheticRunId(364)],
+      ]);
     } finally {
       await client.query('rollback');
     }

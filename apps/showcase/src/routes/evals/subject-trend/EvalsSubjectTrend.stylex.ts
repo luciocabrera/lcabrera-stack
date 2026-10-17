@@ -6,6 +6,11 @@ import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
+  heading: {
+    margin: 0,
+    fontSize: typography.fontSizeLg,
+    fontWeight: typography.fontWeightSemibold,
+  },
   list: {
     margin: 0,
     fontSize: typography.fontSizeSm,
@@ -15,6 +20,11 @@ export const styles = stylex.create({
     margin: 0,
     color: colors.textSecondary,
     fontSize: typography.fontSizeSm,
+  },
+  section: {
+    gap: spacing.sm,
+    display: 'flex',
+    flexDirection: 'column',
   },
   page: {
     padding: spacing.xl,
