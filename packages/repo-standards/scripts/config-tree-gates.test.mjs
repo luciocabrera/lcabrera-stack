@@ -99,6 +99,22 @@ describe('resolveTreeGates', () => {
     ).toEqual(['packages/one']);
   });
 
+  it('leaves the root eslint pass unprobed until a directory is named', () => {
+    expect(resolveTreeGates({}).eslintPass.rootPassDir).toBe('');
+    expect(
+      resolveTreeGates({ eslintPass: { rootPassDir: 'tools/' } }).eslintPass
+        .rootPassDir,
+    ).toBe('tools');
+  });
+
+  it('refuses a root pass directory that is blank, not a string or outside the repository', () => {
+    for (const rootPassDir of ['', '  ', 3, null, '../elsewhere', '/abs']) {
+      expect(() => resolveTreeGates({ eslintPass: { rootPassDir } })).toThrow(
+        /gates\.eslintPass\.rootPassDir/u,
+      );
+    }
+  });
+
   it('refuses a path that leaves the repository, naming the key', () => {
     expect(() =>
       resolveTreeGates({ reactDoctor: { reportFile: '../elsewhere.json' } }),

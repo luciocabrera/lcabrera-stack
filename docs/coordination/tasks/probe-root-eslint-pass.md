@@ -2,7 +2,7 @@
 id: probe-root-eslint-pass
 title: Probe the root eslint pass in lint:eslint:verify
 owner: agent:claude
-status: active
+status: review
 branch: build/1383-probe-root-eslint-pass
 area:
   - packages/repo-standards/scripts/verify-eslint-pass.mjs
@@ -19,7 +19,7 @@ area:
 started: 2026-10-17
 updated: 2026-10-17
 plan: (none)
-pr: (none)
+pr: '#1387'
 issue: #1383
 ---
 
