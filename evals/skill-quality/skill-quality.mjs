@@ -86,7 +86,8 @@ const fencedText = (reply) => {
 const replyJson = (reply) =>
   parseJson(reply.trim()) ?? parseJson(fencedText(reply));
 
-const isScore = (score) => Number.isInteger(score) && score >= 1 && score <= 5;
+const isScore = (score) =>
+  Number.isSafeInteger(score) && score >= 1 && score <= 5;
 
 const dimensionProblems = (byName) =>
   RUBRIC.flatMap(({ name }) => {
@@ -154,15 +155,19 @@ const HEADER = ['skill', ...RUBRIC.map(({ name }) => name), 'overall'];
 const row = (cells) => `| ${cells.join(' | ')} |`;
 
 const resultRow = ({ error, judgement, skill }) =>
-  judgement === undefined
-    ? row([skill, ...RUBRIC.map(() => '—'), `not judged: ${error}`])
-    : row([
-        skill,
-        ...judgement.dimensions.map(({ score }) => String(score)),
-        judgement.overall.toFixed(1),
-      ]);
+  row(
+    judgement === undefined
+      ? [skill, ...RUBRIC.map(() => '—'), `not judged: ${error}`]
+      : [
+          skill,
+          ...judgement.dimensions.map(({ score }) => String(score)),
+          judgement.overall.toFixed(1),
+        ],
+  );
 
 export const baselineTable = (results) =>
-  [row(HEADER), row(HEADER.map(() => '---')), ...results.map(resultRow)].join(
-    '\n',
-  );
+  [
+    row(HEADER),
+    row(HEADER.map(() => '---')),
+    ...results.map((result) => resultRow(result)),
+  ].join('\n');

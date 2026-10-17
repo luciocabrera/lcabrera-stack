@@ -21,7 +21,9 @@ export const readTask = (source) => {
   const task = parse(source);
   return {
     fixture: task.inputs?.context?.fixture,
-    graderSkills: (task.graders ?? []).flatMap(skillsNamedBy),
+    graderSkills: (task.graders ?? []).flatMap((grader) =>
+      skillsNamedBy(grader),
+    ),
     id: task.id,
     name: task.name,
     prompt: task.inputs.prompt,
@@ -216,15 +218,18 @@ export const coverageProblems = ({ catalog, declared, evals }) => {
     ...catalog.flatMap(({ name, scoped }) =>
       skillCoverageProblems({ name, scoped, tasks: evals.get(name) }),
     ),
-    ...[...evals.keys()]
+    ...evals
+      .keys()
       .filter((name) => !skills.has(name))
       .map((name) => `evals/skills/${name} has no skill under .github/skills/`),
-    ...[...evals.entries()].flatMap(([name, tasks]) => [
-      ...namingProblems({ declared: declared.get(name), name, tasks }),
-      ...idProblems({ name, tasks }),
-      ...tagProblems({ tasks }),
-      ...suffixProblems({ name, tasks }),
-    ]),
+    ...evals
+      .entries()
+      .flatMap(([name, tasks]) => [
+        ...namingProblems({ declared: declared.get(name), name, tasks }),
+        ...idProblems({ name, tasks }),
+        ...tagProblems({ tasks }),
+        ...suffixProblems({ name, tasks }),
+      ]),
   ];
 };
 
@@ -258,13 +263,13 @@ export const scopeError = ({ expectedTools, messages }) => {
     : `the session held ${toolList(actual)}, not ${toolList(expectedTools)}`;
 };
 
-export const judgeTask = ({ invoked, shouldTrigger, skill }) =>
+export const isCorrect = ({ invoked, shouldTrigger, skill }) =>
   invoked.includes(skill) === shouldTrigger;
 
 export const taskPassed = ({ error, fixtureRead, invoked, skill, task }) =>
   error === undefined &&
   fixtureRead &&
-  judgeTask({ invoked, shouldTrigger: task.shouldTrigger, skill });
+  isCorrect({ invoked, shouldTrigger: task.shouldTrigger, skill });
 
 const expectationOf = (task) =>
   task.shouldTrigger ? 'should load' : 'should not load';

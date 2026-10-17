@@ -66,16 +66,16 @@ and nowhere else. The table below is the _command reference_ this file exists to
 — which is why it is here and gated by `commands:verify`. If it and the skill ever
 disagree about the stages, the skill is right and this table is the bug.
 
-| #   | Command                       | Pass                                                         |
-| --- | ----------------------------- | ------------------------------------------------------------ |
-| 1   | `vp fmt .`                    | Oxfmt                                                        |
-| 2   | `vp lint .`                   | Oxlint                                                       |
-| 3   | `vp run -r lint:eslint:check` | eslint custom rules, every workspace — **not** in `vp check` |
-| 4   | `vp run lint:biome:check`     | Biome — **not** in `vp check` (run from root)                |
-| 5   | `vp run react-doctor:verify`  | React Doctor — root-only, errors block                       |
-| 6   | `vp check`                    | fmt + Oxlint + **tsgolint** type pass                        |
-| 7   | `vp run typecheck`            | real **tsc** — **not** the same as step 6                    |
-| 8   | `vp run test:changed`         | vitest — root-only; reaches `scripts/` too                   |
+| #   | Command                       | Pass                                                                      |
+| --- | ----------------------------- | ------------------------------------------------------------------------- |
+| 1   | `vp fmt .`                    | Oxfmt                                                                     |
+| 2   | `vp lint .`                   | Oxlint                                                                    |
+| 3   | `vp run -r lint:eslint:check` | eslint custom rules, every workspace and `evals/` — **not** in `vp check` |
+| 4   | `vp run lint:biome:check`     | Biome — **not** in `vp check` (run from root)                             |
+| 5   | `vp run react-doctor:verify`  | React Doctor — root-only, errors block                                    |
+| 6   | `vp check`                    | fmt + Oxlint + **tsgolint** type pass                                     |
+| 7   | `vp run typecheck`            | real **tsc** — **not** the same as step 6                                 |
+| 8   | `vp run test:changed`         | vitest — root-only; reaches `scripts/` too                                |
 
 Which stages get skipped in practice and why none is redundant is the skill's to
 explain, not this file's. From the root, `vp run check:safe` chains the whole thing
@@ -133,33 +133,34 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                               | Does                                                                                                                                                                               |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                                                                                                      |
-| `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                                                                                                          |
-| `vp run check:push`                   | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this, `test:changed`, then `fallow:preflight`                                                             |
-| `vp run typecheck:all`                | real tsc in all 14 workspaces, dependency order                                                                                                                                    |
-| `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                                                                                                  |
-| `vp run typegen:all`                  | route types for both React Router apps                                                                                                                                             |
-| `vp run fix`                          | `lint:all` then `format:all` — one command for everything a tool can fix itself; the formatter writes last                                                                         |
-| `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                                                                                                          |
-| `vp run lint:biome`                   | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                                                                                                      |
-| `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                                                                                                         |
-| `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)                                                                                           |
-| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too                                                                                           |
-| `vp run react-doctor:report`          | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)                                                                                         |
-| `vp run mutation:report`              | mutation-test `packages/utils` (ADR-119) — writes `reports/mutation/full-latest.json` (gitignored — produced on demand); never fails                                               |
-| `vp run format:all`                   | `vp fmt .` across the tree                                                                                                                                                         |
-| `vp run build:all`                    | build every workspace                                                                                                                                                              |
-| `vp run test:all`                     | every workspace suite plus the root `scripts/` and `evals/` suites — no database needed                                                                                            |
-| `vp run test:ci`                      | the same suites, `showcase` last so its coverage summary is fresh — run before pushing                                                                                             |
-| `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below                                                                                 |
-| `vp run test:evals`                   | the `evals/` suites — not a workspace and outside `scripts/`, so neither `-r` nor `test:scripts` reaches them; chained into `test:all` and `test:ci`, and run in `agent-evals.yml` |
-| `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                                                                                                 |
-| `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                                                                                                          |
-| `vp run --filter showcase test:e2e`   | the browser suite for the grid — Postgres, opt-in, and not part of `test:ci` or `check:safe`                                                                                       |
-| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                                                                                                          |
-| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                                                                                                           |
+| Command                               | Does                                                                                                                                                                                           |
+| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                                                                                                                  |
+| `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                                                                                                                      |
+| `vp run check:push`                   | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this, `test:changed`, then `fallow:preflight`                                                                         |
+| `vp run typecheck:all`                | real tsc in all 14 workspaces, dependency order                                                                                                                                                |
+| `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                                                                                                              |
+| `vp run typegen:all`                  | route types for both React Router apps                                                                                                                                                         |
+| `vp run fix`                          | `lint:all` then `format:all` — one command for everything a tool can fix itself; the formatter writes last                                                                                     |
+| `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                                                                                                                      |
+| `vp run lint:biome`                   | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                                                                                                                  |
+| `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                                                                                                                     |
+| `vp run lint:eslint:check`            | eslint over `evals/`, which is not a workspace: the root package carries the script, so `vp run -r lint:eslint:check` reaches it with the workspaces. `vp run lint:eslint` is the autofix form |
+| `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)                                                                                                       |
+| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails on error severity; writes the report too                                                                                                       |
+| `vp run react-doctor:report`          | the same scan, never failing — writes `reports/react-doctor/full-latest.json` (gitignored)                                                                                                     |
+| `vp run mutation:report`              | mutation-test `packages/utils` (ADR-119) — writes `reports/mutation/full-latest.json` (gitignored — produced on demand); never fails                                                           |
+| `vp run format:all`                   | `vp fmt .` across the tree                                                                                                                                                                     |
+| `vp run build:all`                    | build every workspace                                                                                                                                                                          |
+| `vp run test:all`                     | every workspace suite plus the root `scripts/` and `evals/` suites — no database needed                                                                                                        |
+| `vp run test:ci`                      | the same suites, `showcase` last so its coverage summary is fresh — run before pushing                                                                                                         |
+| `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below                                                                                             |
+| `vp run test:evals`                   | the `evals/` suites — not a workspace and outside `scripts/`, so neither `-r` nor `test:scripts` reaches them; chained into `test:all` and `test:ci`, and run in `agent-evals.yml`             |
+| `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                                                                                                             |
+| `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                                                                                                                      |
+| `vp run --filter showcase test:e2e`   | the browser suite for the grid — Postgres, opt-in, and not part of `test:ci` or `check:safe`                                                                                                   |
+| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                                                                                                                      |
+| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                                                                                                                       |
 
 `test:all` vs `test:ci`: neither needs a database locally, so the two
 differ only in ordering — `test:ci` runs `showcase` last so the PR's coverage

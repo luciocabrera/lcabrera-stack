@@ -115,6 +115,7 @@ const GLOBAL_IGNORES = [
  *   ignorePatterns?: readonly string[],
  *   publicImportBoundaryPatterns?: readonly RestrictedImportPattern[],
  *   serverOnlySyntaxRestrictions?: readonly RestrictedSyntaxEntry[],
+ *   toolingScriptPatterns?: readonly string[],
  *   tsconfigRootDir?: string,
  * }} [options]
  * @returns {Promise<import('eslint').Linter.Config[]>}
@@ -123,6 +124,7 @@ export const createCustomRulesLintConfig = async ({
   ignorePatterns = [],
   publicImportBoundaryPatterns = [],
   serverOnlySyntaxRestrictions = [],
+  toolingScriptPatterns = [],
   tsconfigRootDir = process.cwd(),
 } = {}) => {
   const workspaceRequire = createRequire(`${tsconfigRootDir}/package.json`);
@@ -206,7 +208,7 @@ export const createCustomRulesLintConfig = async ({
       },
     },
     createNodeScriptFileConfig({ globals }),
-    createToolingScriptFileConfig(),
+    createToolingScriptFileConfig(toolingScriptPatterns),
     createCommonJsFileConfig(),
     createTestFileConfig(),
     {

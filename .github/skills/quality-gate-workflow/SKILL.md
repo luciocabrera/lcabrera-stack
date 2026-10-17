@@ -37,7 +37,7 @@ This skill defines the mandatory validation sequence after code changes.
 
 1. `vp fmt .`
 2. `vp lint .` — Oxlint
-3. `vp run -r lint:eslint:check` — the eslint custom-rules pass, fanned out to every workspace (`--fix` variant: `vp run -r lint:eslint`). Without `-r` it covers only the workspace you are in, and from the repo root it fails, because no root task has that name
+3. `vp run -r lint:eslint:check` — the eslint custom-rules pass, fanned out to every workspace and to the root package, whose task lints `evals/` (`--fix` variant: `vp run -r lint:eslint`). Without `-r` it covers only the package you are in, so from the repo root it lints `evals/` and nothing else
 4. `vp run lint:biome:check` — the Biome pass (`--write` variant: `vp run lint:biome`) — **run from the repo root**
 5. `vp run react-doctor:verify` — the React Doctor gate — **run from the repo root**
 6. `vp check` — fmt + Oxlint + the **tsgolint** type pass

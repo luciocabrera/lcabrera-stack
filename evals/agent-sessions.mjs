@@ -24,11 +24,11 @@ export const runBatches = async ([batch, ...rest]) =>
         ...(await runBatches(rest)),
       ];
 
-const answers = (message) =>
+const isAnswer = (message) =>
   message.type === 'assistant' || message.type === 'stream_event';
 
 const firstAnswerAt = ({ clock, message, stamped }) =>
-  stamped ?? (answers(message) ? clock() : undefined);
+  stamped ?? (isAnswer(message) ? clock() : undefined);
 
 export const drain = async (session, clock = Date.now) => {
   const messages = [];
@@ -82,13 +82,15 @@ const toolsProblem = (init, expected) => {
 export const finalResult = (messages) =>
   messages.findLast((message) => message.type === 'result');
 
-const succeeded = (result) =>
+const hasSucceeded = (result) =>
   result?.subtype === 'success' && result.is_error !== true;
 
 const endingOf = (result) => result?.subtype ?? 'no result';
 
 const resultProblem = (result) =>
-  succeeded(result) ? undefined : `the session ended with ${endingOf(result)}`;
+  hasSucceeded(result)
+    ? undefined
+    : `the session ended with ${endingOf(result)}`;
 
 export const sessionProblem = (messages, expectedTools = []) =>
   toolsProblem(
@@ -158,11 +160,11 @@ const resultClass = (result) =>
 const thrownClass = (thrown) =>
   THROW_CLASSES.find(([, pattern]) => pattern.test(thrown))?.[0] ?? 'drain';
 
-const endedCleanly = (result, thrown) =>
-  succeeded(result) && thrown === undefined;
+const hasEndedCleanly = (result, thrown) =>
+  hasSucceeded(result) && thrown === undefined;
 
 const errorClass = (result, thrown = '') =>
-  result === undefined || succeeded(result)
+  result === undefined || hasSucceeded(result)
     ? thrownClass(thrown)
     : resultClass(result);
 
@@ -187,9 +189,11 @@ const isoAt = (epochMs) =>
   epochMs === undefined ? null : new Date(epochMs).toISOString();
 
 const firstTokenTime = (result, { firstToken, started }) =>
-  result?.ttft_ms === undefined || started === undefined
-    ? isoAt(firstToken)
-    : isoAt(started + result.ttft_ms);
+  isoAt(
+    started === undefined || result?.ttft_ms === undefined
+      ? firstToken
+      : started + result.ttft_ms,
+  );
 
 const stampedTimes = (result, timestamps) => ({
   finished_at: isoAt(timestamps.finished),
@@ -208,7 +212,7 @@ export const sessionMetrics = (messages, timestamps, thrown) => {
   return {
     ...reportedFields(result),
     ...stampedTimes(result, timestamps),
-    error_class: endedCleanly(result, thrown)
+    error_class: hasEndedCleanly(result, thrown)
       ? null
       : errorClass(result, thrown),
     ...usageFields(result?.modelUsage),
@@ -220,7 +224,7 @@ export const withoutSeparator = (args) =>
 
 export const wholeNumber = ({ minimum, reason = '', value }) => {
   const number = Number(value);
-  if (!Number.isInteger(number) || number < minimum) {
+  if (!Number.isSafeInteger(number) || number < minimum) {
     throw new Error(
       `--runs must be a whole number of at least ${minimum}${reason}; got "${value}"`,
     );
@@ -231,7 +235,9 @@ export const wholeNumber = ({ minimum, reason = '', value }) => {
 const reportedCost = (metrics) => metrics?.cost_usd_reported;
 
 export const costLine = (metrics) => {
-  const costs = metrics.map(reportedCost).filter(Number.isFinite);
+  const costs = metrics
+    .map((entry) => reportedCost(entry))
+    .filter((cost) => Number.isFinite(cost));
   const total = costs.reduce((sum, cost) => sum + cost, 0);
   const missing = metrics.length - costs.length;
   const reported = `Cost: $${total.toFixed(2)} reported over ${costs.length} session(s)`;

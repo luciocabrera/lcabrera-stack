@@ -87,18 +87,18 @@ describe('run identity readers', () => {
   });
 });
 
-describe('sessionTrial', () => {
-  const trial = (overrides) =>
-    sessionTrial({
-      detail: RULES_DETAIL,
-      metrics: finishedSession(),
-      passed: true,
-      queuedAt: STARTED_AT,
-      taskKey: 'skills/react-19/trigger',
-      trialIndex: 0,
-      ...overrides,
-    });
+const trial = (overrides) =>
+  sessionTrial({
+    detail: RULES_DETAIL,
+    metrics: finishedSession(),
+    passed: true,
+    queuedAt: STARTED_AT,
+    taskKey: 'skills/react-19/trigger',
+    trialIndex: 0,
+    ...overrides,
+  });
 
+describe('sessionTrial', () => {
   it('carries the session cost, tokens, turns, durations and times', () => {
     expect(trial({})).toMatchObject({
       cost_usd_reported: 0.12,
@@ -252,7 +252,10 @@ const totalsOf = (counts) =>
     costFree: true,
     durationMs: 0,
     regressionConfig: TEST_REGRESSION_CONFIG,
-    trials: outcomes(counts).map((trial) => ({ ...trial, tokens: tokensOf() })),
+    trials: outcomes(counts).map((outcome) => ({
+      ...outcome,
+      tokens: tokensOf(),
+    })),
   });
 
 describe('passRateLine', () => {

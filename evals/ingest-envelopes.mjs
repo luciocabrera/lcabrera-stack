@@ -8,10 +8,10 @@
  *   [--quiet-unreachable]  an unset or unreachable database warns and exits 0
  * Exit codes: 0 = every envelope stored or already present, 1 = otherwise.
  */
-import { existsSync } from 'node:fs';
-import { parseArgs } from 'node:util';
 
 import { ingestPaths } from '@repo/eval-history/ingest/ingestPaths.service';
+import { existsSync } from 'node:fs';
+import { parseArgs } from 'node:util';
 
 import { withoutSeparator } from './agent-sessions.mjs';
 import { RESULTS_DIR } from './run-record.mjs';

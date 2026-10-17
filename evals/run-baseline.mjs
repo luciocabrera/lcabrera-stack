@@ -11,17 +11,15 @@
  * Exit codes: 0 = baseline written, 1 = refused or not written,
  *   130/143 = interrupted.
  */
+import { probeDatabase } from '@repo/eval-history/baseline/probeDatabase.service';
+import { recordBaseline } from '@repo/eval-history/baseline/recordBaseline.service';
+import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
 import { spawnSync } from 'node:child_process';
 import { randomUUID } from 'node:crypto';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { probeDatabase } from '@repo/eval-history/baseline/probeDatabase.service';
-import { recordBaseline } from '@repo/eval-history/baseline/recordBaseline.service';
-import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
-
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
-
 import { withoutSeparator } from './agent-sessions.mjs';
 import {
   BASELINE_RUNNERS,

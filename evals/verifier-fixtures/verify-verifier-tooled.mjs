@@ -12,12 +12,11 @@
  * Needs a Claude login and the local database the full quality gate uses.
  * Exit codes: 0 = every fixture matched, 1 = otherwise, 130/143 = interrupted.
  */
+import { query } from '@anthropic-ai/claude-agent-sdk';
 import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-
-import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import {
   chunk,
@@ -37,7 +36,6 @@ import {
   sdkVersion,
 } from '../run-record.mjs';
 import { writeScrubbed } from '../transcript-scrub.mjs';
-
 import {
   agentTools,
   describeTooledJudgement,
@@ -47,6 +45,7 @@ import {
   tooledRunCount,
   tooledRunCounts,
 } from './tooled-fixtures.mjs';
+import { cleanUp, git, prepare, treeProblem } from './tooled-worktree.mjs';
 import {
   agentPromptHash,
   CONTRACT_PATH,
@@ -55,7 +54,6 @@ import {
   verifierSubject,
 } from './verifier-envelope.mjs';
 import { agentBody, suiteEnd } from './verifier-fixtures.mjs';
-import { cleanUp, git, prepare, treeProblem } from './tooled-worktree.mjs';
 
 const MODEL = 'claude-opus-5-5';
 const SUITE = 'verifier-tooled';
@@ -231,7 +229,7 @@ const judgeAndPrint = async ({
 };
 
 const selected = ({ expected, names }) => {
-  const unknown = names.filter((name) => !(name in expected));
+  const unknown = names.filter((name) => !Object.hasOwn(expected, name));
   if (unknown.length > 0) {
     throw new Error(`no fixture named ${unknown.join(', ')} in expected.json`);
   }

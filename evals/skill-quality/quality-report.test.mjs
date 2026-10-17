@@ -1,5 +1,4 @@
 import { readFileSync } from 'node:fs';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -108,13 +107,14 @@ describe('renderReport', () => {
     });
     const html = renderReport({ data, template });
     expect(html).not.toContain('</script><b>');
-    expect(html).toContain('\\u003c/script>\\u003cb>x\\u003c/b> $&');
+    expect(html).toContain(String.raw`\u003c/script>\u003cb>x\u003c/b> $&`);
   });
 
   it('has a sortable header for each rubric dimension, in rubric order', () => {
-    const keys = [...template.matchAll(/data-key="([a-z_]+)"/g)].map(
-      ([, key]) => key,
-    );
+    const keys = template
+      .matchAll(/data-key="([a-z_]+)"/g)
+      .map(([, key]) => key)
+      .toArray();
     expect(keys).toEqual([
       'skill',
       ...RUBRIC.map(({ name }) => name),
