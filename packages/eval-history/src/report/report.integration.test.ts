@@ -4,7 +4,8 @@
  * `evals:report --compare` against a real Postgres: the database path has to
  * print exactly what the envelope path prints for the same two runs, or a
  * comparison read from history would disagree with one read from CI
- * artifacts. It creates a database of its own beside the one
+ * artifacts. The judge agreement section is the one difference, because hand
+ * grades are stored only in the database. It creates a database of its own beside the one
  * EVALS_TEST_DATABASE_URL names and drops it afterwards. Unset, it skips
  * locally and fails under CI.
  */
@@ -17,6 +18,7 @@ import type { ReadEnvelope } from './report.types.ts';
 
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
+import { judgeAgreementLines } from '../grades/judgeAgreementLines.util.ts';
 import { sha256Hex } from '../hashing/sha256Hex.util.ts';
 import { ingestPaths } from '../ingest/ingestPaths.service.ts';
 import { memoryFileSystem } from '../ingest/memoryFileSystem.util.ts';
@@ -26,6 +28,10 @@ import { databaseUrl } from '../queries/databaseUrl.util.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { evalsReport } from './evalsReport.service.ts';
 import { fixtureEnvelope } from './fixtureEnvelope.util.ts';
+import {
+  AGREEMENT_HEADING,
+  AGREEMENT_NEEDS_DATABASE,
+} from './report.constants.ts';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
@@ -95,6 +101,24 @@ const readEnvelope: ReadEnvelope = (file) => {
       ? ({ file, ok: false, problems: ['absent'] } as const)
       : ({ envelope, file, ok: true, sha256: sha256Hex(file) } as const),
   );
+};
+
+const FILE_AGREEMENT = `\n\n${AGREEMENT_HEADING}\n\n${AGREEMENT_NEEDS_DATABASE}`;
+
+const HISTORY_AGREEMENT = [
+  '',
+  AGREEMENT_HEADING,
+  ...judgeAgreementLines({
+    judges: [],
+    minN: THRESHOLDS.minTrialsForRate,
+    z: THRESHOLDS.z,
+  }),
+].join('\n\n');
+
+const withHistoryAgreement = (fileMarkdown = '') => {
+  expect(fileMarkdown.endsWith(FILE_AGREEMENT)).toBe(true);
+
+  return `${fileMarkdown.slice(0, -FILE_AGREEMENT.length)}${HISTORY_AGREEMENT}`;
 };
 
 if (!DATABASE_URL && !IS_CI) {
@@ -170,8 +194,11 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
 
     expect(fromHistory.stderr).toEqual([]);
     expect(fromHistory.exitCode).toBe(0);
-    expect(fromHistory.stdout).toEqual(fromFiles.stdout);
+    expect(fromHistory.stdout).toEqual([
+      withHistoryAgreement(fromFiles.stdout[0]),
+    ]);
     expect(fromHistory.stdout[0]).toContain('multiple causes');
+    expect(fromHistory.stdout[0]).toContain('no hand grades yet');
   });
 
   it('reads a run by its id', async () => {
@@ -196,7 +223,9 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
     const fromFile = await againstMain('aborted.json');
 
     expect(fromHistory.exitCode).toBe(0);
-    expect(fromHistory.stdout).toEqual(fromFile.stdout);
+    expect(fromHistory.stdout).toEqual([
+      withHistoryAgreement(fromFile.stdout[0]),
+    ]);
     expect(fromHistory.stdout[0]).toContain(
       'Changed: no input hash, so nothing recorded explains a difference.',
     );

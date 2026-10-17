@@ -2,13 +2,21 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 
 import type { RunEnvelope } from '../envelope/envelope.types.ts';
+import type { QueryClient } from '../queries/queries.types.ts';
 import type { ReadEnvelope } from './report.types.ts';
 
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
+import { judgeAgreementQuery } from '../grades/judgeAgreementQuery.util.ts';
 import { sha256Hex } from '../hashing/sha256Hex.util.ts';
 import { evalsReport } from './evalsReport.service.ts';
 import { fixtureEnvelope } from './fixtureEnvelope.util.ts';
+import {
+  AGREEMENT_HEADING,
+  AGREEMENT_NEEDS_DATABASE,
+} from './report.constants.ts';
+import { reportRunFromEnvelope } from './reportRunFromEnvelope.util.ts';
+import { reportRunQueries } from './reportRunQueries.util.ts';
 
 const fixtures = await readJsonFiles({
   directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),
@@ -141,6 +149,45 @@ const readEnvelope: ReadEnvelope = (file) => {
   );
 };
 
+const SQL_NULL: unknown = JSON.parse('null');
+
+const asDatabaseRow = (value: object) =>
+  Object.fromEntries(
+    Object.entries(value).map(([key, field]) => [key, field ?? SQL_NULL]),
+  );
+
+const JUDGE_ROW = {
+  humanScore: 4,
+  judgeModel: 'claude-opus-5-5',
+  judgePromptHash: 'a'.repeat(64),
+  judgeScore: 4,
+};
+
+const AGREEMENT_ROWS = [
+  ...Array.from({ length: 5 }, () => JUDGE_ROW),
+  { ...JUDGE_ROW, humanScore: 2 },
+];
+
+const storedMain = reportRunFromEnvelope(mainRun);
+const storedQueries = reportRunQueries(storedMain.runId);
+
+const DATABASE_ROWS = new Map<string, readonly unknown[]>([
+  [judgeAgreementQuery().text, AGREEMENT_ROWS],
+  [storedQueries.run.text, [asDatabaseRow(storedMain)]],
+  [storedQueries.subjects.text, storedMain.subjects],
+  [
+    storedQueries.tasks.text,
+    storedMain.tasks.map((task) => asDatabaseRow(task)),
+  ],
+]);
+
+const databaseClient: QueryClient = {
+  query: ({ text }) => Promise.resolve({ rows: DATABASE_ROWS.get(text) ?? [] }),
+};
+
+const connect = () =>
+  Promise.resolve({ client: databaseClient, end: () => Promise.resolve() });
+
 type ReportArgs = {
   readonly a: keyof typeof RUNS;
   readonly allowModelChange?: boolean;
@@ -249,6 +296,62 @@ describe('evalsReport over fixture runs', () => {
     expect(markdown).toMatchSnapshot();
   });
 
+  it('says judge agreement needs the database when both runs are files', async () => {
+    const { stdout } = await report({ a: 'main.json', b: 'one-cause.json' });
+
+    expect(
+      stdout[0]?.endsWith(
+        `\n\n${AGREEMENT_HEADING}\n\n${AGREEMENT_NEEDS_DATABASE}`,
+      ),
+    ).toBe(true);
+  });
+
+  it('prints the agreement lines from the database and otherwise what the files print', async () => {
+    const fromDatabase = await evalsReport({
+      a: storedMain.runId,
+      allowModelChange: false,
+      b: 'one-cause.json',
+      connect,
+      connectionString: 'postgres://report@localhost/evals',
+      json: false,
+      readEnvelope,
+      thresholds: { minTrialsForRate: 6, z: 1.96 },
+    });
+    const fromFiles = await report({ a: 'main.json', b: 'one-cause.json' });
+    const [databaseMarkdown = ''] = fromDatabase.stdout;
+    const [fileMarkdown = ''] = fromFiles.stdout;
+    const comparisonsOf = (markdown: string) =>
+      markdown.slice(0, markdown.lastIndexOf(`\n\n${AGREEMENT_HEADING}\n\n`));
+
+    expect(fromDatabase.exitCode).toBe(0);
+    expect(comparisonsOf(databaseMarkdown)).toBe(comparisonsOf(fileMarkdown));
+    expect(comparisonsOf(databaseMarkdown)).toContain('### skills: main');
+    expect(databaseMarkdown).not.toContain(AGREEMENT_NEEDS_DATABASE);
+    expect(databaseMarkdown).toContain(
+      `\n\n${AGREEMENT_HEADING}\n\nJudge agreement (claude-opus-5-5, judge prompt aaaaaaaaaaaa): 83.3% (n=6 graded scores, 5 equal to the judge's; Wilson interval 43.6%–97.0% at z=1.96); mean gap 0.33 points`,
+    );
+  });
+
+  it('carries the agreement read from the database in --json', async () => {
+    const { stdout } = await evalsReport({
+      a: storedMain.runId,
+      allowModelChange: false,
+      b: 'one-cause.json',
+      connect,
+      connectionString: 'postgres://report@localhost/evals',
+      json: true,
+      readEnvelope,
+      thresholds: { minTrialsForRate: 6, z: 1.96 },
+    });
+
+    expect(JSON.parse(stdout[0] ?? '')).toMatchObject({
+      agreement: {
+        judges: [{ judgeModel: 'claude-opus-5-5', meanGap: 2 / 6 }],
+        kind: 'read',
+      },
+    });
+  });
+
   it('prints the same comparison as JSON under --json', async () => {
     const { exitCode, stdout } = await report({
       a: 'main.json',
@@ -259,6 +362,7 @@ describe('evalsReport over fixture runs', () => {
 
     expect(exitCode).toBe(0);
     expect(parsed).toMatchObject({
+      agreement: { kind: 'needs-database' },
       comparisons: [
         {
           changed: { changed: 'content:skill/react-19', kind: 'single' },
