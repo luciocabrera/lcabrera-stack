@@ -76,4 +76,17 @@ describe('baselineRun', () => {
       reason: `run ${envelope.run.run_id} is a rules-consistency run, which calls no model and has no baseline`,
     });
   });
+
+  it('excludes a run whose every trial ended in error and says why', () => {
+    const envelope = stubBaselineRun({
+      baselineId: BASELINE,
+      fixture: skills,
+      trialsBySkill: { 'react-19': [{ outcome: 'error' }] },
+    });
+
+    expect(baselineRun(envelope)).toEqual({
+      kind: 'excluded',
+      reason: `every trial of run ${envelope.run.run_id} ended in error, which points at the harness rather than the model, so it is left out`,
+    });
+  });
 });

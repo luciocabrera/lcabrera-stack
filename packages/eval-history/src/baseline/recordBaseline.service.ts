@@ -13,6 +13,7 @@ import { BASELINE_DATABASE_URL } from './baseline.constants.ts';
 import { baselineEnvelopes } from './baselineEnvelopes.service.ts';
 import { baselineHeading } from './baselineHeading.util.ts';
 import { baselineLine } from './baselineLine.util.ts';
+import { missingRunsProblem } from './missingRunsProblem.util.ts';
 import { writeBaseline } from './writeBaseline.service.ts';
 
 type FailureArgs = {
@@ -26,6 +27,7 @@ type RecordBaselineArgs = {
   readonly connectionString: string | undefined;
   readonly fileSystem?: IngestFileSystem;
   readonly paths: readonly string[];
+  readonly runs: number;
 };
 
 const NODE_FILE_SYSTEM: IngestFileSystem = { readdir, readFile, stat };
@@ -55,6 +57,7 @@ export const recordBaseline = async ({
   connectionString,
   fileSystem = NODE_FILE_SYSTEM,
   paths,
+  runs,
 }: RecordBaselineArgs) => {
   const database = evalsDatabaseUrl({
     ...BASELINE_DATABASE_URL,
@@ -66,8 +69,17 @@ export const recordBaseline = async ({
   }
 
   const loaded = await baselineEnvelopes({ baselineId, fileSystem, paths });
-  const unreadable = loaded.problems.map((problem) => `${PREFIX} ${problem}`);
   const { envelopes } = loaded;
+  const missing = missingRunsProblem({
+    baselineId,
+    found: envelopes.length + loaded.problems.length,
+    paths,
+    runs,
+  });
+  const unreadable = [
+    ...loaded.problems,
+    ...(missing === undefined ? [] : [missing]),
+  ].map((problem) => `${PREFIX} ${problem}`);
 
   if (envelopes.length === 0) {
     return failure({

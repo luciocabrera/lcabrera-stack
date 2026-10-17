@@ -2,6 +2,7 @@ import type { IngestFileSystem } from '../ingest/ingest.types.ts';
 
 import { baselineEnvelopes } from './baselineEnvelopes.service.ts';
 import { harnessProblem } from './harnessProblem.util.ts';
+import { missingRunsProblem } from './missingRunsProblem.util.ts';
 
 type CheckBaselineRunArgs = {
   readonly baselineId: string;
@@ -24,13 +25,12 @@ export const checkBaselineRun = async ({
   const harness = envelopes
     .map(({ envelope }) => harnessProblem(envelope))
     .filter((problem) => problem !== undefined);
-  const unaccounted = runs - envelopes.length - problems.length;
-  const missing =
-    unaccounted > 0
-      ? [
-          `${String(unaccounted)} of ${String(runs)} runs left no envelope for baseline ${baselineId} under ${paths.join(', ')}, so a runner failed before recording`,
-        ]
-      : [];
+  const missing = missingRunsProblem({
+    baselineId,
+    found: envelopes.length + problems.length,
+    paths,
+    runs,
+  });
 
-  return [...problems, ...harness, ...missing];
+  return [...problems, ...harness, ...(missing === undefined ? [] : [missing])];
 };

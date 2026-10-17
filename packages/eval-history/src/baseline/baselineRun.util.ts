@@ -1,5 +1,6 @@
 import type { RunEnvelope } from '../envelope/envelope.types.ts';
 
+import { harnessProblem } from './harnessProblem.util.ts';
 import { isBaselineSuite } from './isBaselineSuite.util.ts';
 
 const excluded = (reason: string) => ({ kind: 'excluded', reason }) as const;
@@ -26,6 +27,12 @@ export const baselineRun = (envelope: RunEnvelope) => {
     return excluded(
       `run ${run_id} recorded no model, so it cannot join a ${suite} baseline`,
     );
+  }
+
+  const harness = harnessProblem(envelope);
+
+  if (harness !== undefined) {
+    return excluded(`${harness}, so it is left out`);
   }
 
   return {

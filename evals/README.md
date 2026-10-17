@@ -139,8 +139,9 @@ when the run left none, ended partial, recorded no trials or saw every trial
 end in error: those point at the harness, and the remaining runs would fail the
 same way. The last run has none left to save, so a failure there is left out
 like any other unusable run and the baseline is written from the rest. A
-partial, aborted or dirty run is left out with its reason, and so is an
-envelope carrying the baseline's id that fails to parse. So is a subject
+partial, aborted or dirty run is left out with its reason, as is a run with no
+trials or only errored ones, an envelope carrying the baseline's id that fails
+to parse, and a run that left no envelope at all. So is a subject
 with a counted result in fewer than two runs. A baseline whose runs span two
 commits or two models records nothing.
 

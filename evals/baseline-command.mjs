@@ -195,6 +195,11 @@ export const runBaseline = async ({ argv, defaultRuns, effects }) => {
     total: parsed.runs,
   });
   return (
-    interrupted ?? (await effects.record({ baselineId, suite: parsed.suite }))
+    interrupted ??
+    (await effects.record({
+      baselineId,
+      runs: parsed.runs,
+      suite: parsed.suite,
+    }))
   );
 };

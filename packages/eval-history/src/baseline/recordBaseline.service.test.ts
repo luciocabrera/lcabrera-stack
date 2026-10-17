@@ -20,7 +20,7 @@ const OTHER = '22222222-2222-4222-8222-222222222222';
 
 type RunArgs = {
   readonly baselineId: string;
-  readonly outcome: 'fail' | 'pass';
+  readonly outcome: 'error' | 'fail' | 'pass';
 };
 
 const run = ({ baselineId, outcome }: RunArgs) =>
@@ -72,6 +72,9 @@ const recordRuns = ({ connect, envelopes }: RecordRunsArgs) =>
     connectionString: URL_,
     fileSystem: envelopeFileSystem(envelopes),
     paths: ['/results/skills'],
+    runs: envelopes.filter(
+      ({ run: { baseline_id } }) => baseline_id === BASELINE,
+    ).length,
   });
 
 const filesOf = (
@@ -181,6 +184,7 @@ describe('recordBaseline', () => {
       connectionString: URL_,
       fileSystem: memoryFileSystem(filesOf([...valid, broken])),
       paths: ['/results/skills'],
+      runs: 3,
     });
 
     expect(summary.exitCode).toBe(0);
@@ -190,12 +194,55 @@ describe('recordBaseline', () => {
     );
   });
 
+  it('names a commissioned run that left no envelope and records the rest', async () => {
+    const { connect } = database();
+    const summary = await recordBaseline({
+      baselineId: BASELINE,
+      connect,
+      connectionString: URL_,
+      fileSystem: envelopeFileSystem([
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+      ]),
+      paths: ['/results/skills'],
+      runs: 3,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toEqual([
+      `evals:baseline: 1 of 3 runs left no envelope for baseline ${BASELINE} under /results/skills, so a runner failed before recording`,
+    ]);
+  });
+
+  it('names a run whose every trial ended in error and records the rest', async () => {
+    const { connect } = database();
+    const failed = run({ baselineId: BASELINE, outcome: 'error' });
+    const summary = await recordBaseline({
+      baselineId: BASELINE,
+      connect,
+      connectionString: URL_,
+      fileSystem: envelopeFileSystem([
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        { ...failed, trials: failed.trials.slice(0, 1) },
+      ]),
+      paths: ['/results/skills'],
+      runs: 3,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toEqual([
+      `evals:baseline: every trial of run ${failed.run.run_id} ended in error, which points at the harness rather than the model, so it is left out`,
+    ]);
+  });
+
   it('refuses an unset database before reading anything', async () => {
     const summary = await recordBaseline({
       baselineId: BASELINE,
       connectionString: undefined,
       fileSystem: envelopeFileSystem([]),
       paths: ['/results/skills'],
+      runs: 2,
     });
 
     expect(summary.exitCode).toBe(1);

@@ -10,9 +10,10 @@ decides how the envelope is versioned.
   its schema and the insert `evals:annotate` runs.
 - `src/baseline/` — the A/A baseline behind `vp run evals:baseline`:
   `aggregateBaseline` turns one baseline's run envelopes into the mean and
-  sample standard deviation per suite, model and subject. It leaves out a run
-  that is partial, dirty or calls no model, and records nothing for a baseline
-  spanning two commits or models. `writeBaseline` stores the rows in
+  sample standard deviation per suite, model and subject. It leaves out, by
+  name, a run that is partial, dirty, records no model or saw every trial end
+  in error, and records nothing for a baseline spanning two commits or models.
+  `recordBaseline` also names each commissioned run that left no envelope. `writeBaseline` stores the rows in
   `evals.eval_baseline` in one transaction, and `readBaseline` reads back the
   latest row per subject for a suite and model. `checkBaselineRun` reads the
   runs a baseline has made so far and names any that left no envelope or

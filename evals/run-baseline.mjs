@@ -44,11 +44,12 @@ const runOnce = ({ baselineId, model, suite }) =>
 const checkRuns = ({ baselineId, runs, suite }) =>
   checkBaselineRun({ baselineId, paths: [join(RESULTS_DIR, suite)], runs });
 
-const record = async ({ baselineId, suite }) => {
+const record = async ({ baselineId, runs, suite }) => {
   const summary = await recordBaseline({
     baselineId,
     connectionString: process.env.EVALS_DATABASE_URL,
     paths: [join(RESULTS_DIR, suite)],
+    runs,
   });
   printSummary({ summary });
   return summary.exitCode;
