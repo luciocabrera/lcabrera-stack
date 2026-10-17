@@ -86,9 +86,12 @@ branch. `--a <run> --b <run>` compares two runs given as run ids or as
 envelope files, so two CI artifacts compare with no database. `--json` prints
 the same comparison as JSON.
 
-The report ends with a judge agreement section: the share of hand grades equal
-to the judge's score, per judge model and judge prompt hash, with n, its Wilson
-interval and the mean gap, exactly as `evals:grade` prints it. Hand grades are
+The report ends with a section headed "Judge agreement (all recorded hand
+grades, by judge model and prompt hash)": the share of every recorded hand
+grade equal to the judge's score, per judge model and judge prompt hash, with
+n, its Wilson interval and the mean gap, exactly as `evals:grade` prints it.
+Agreement measures a judge, not a run, so its n counts hand grades on any run,
+not only on the two being compared. Hand grades are
 stored only in the database, so when both runs come from envelope files the
 section says agreement needs the database instead. Everything above that
 section is the same whichever way the runs were read. `--json` carries the same

@@ -66,8 +66,10 @@ decides how the envelope is versioned.
   runs from envelope files or from the database, refuses runs of two models
   unless told otherwise, and renders the flipped tasks, both pass rates, cost,
   duration and the changed hashes as markdown or JSON. It ends with the judge
-  agreement `evals:grade` prints when it read from the database, and says the
-  section needs the database when both runs came from files.
+  agreement `evals:grade` prints when it read from the database, headed
+  "Judge agreement (all recorded hand grades, by judge model and prompt
+  hash)" because it covers every recorded hand grade rather than the two runs,
+  and says the section needs the database when both runs came from files.
 - `src/seed/` — a year of synthetic nightly history, about 15k trials, for
   timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of
@@ -195,7 +197,8 @@ in [`evals/regression.config.json`](../../evals/regression.config.json), and
 says "insufficient data" below that floor; the mean absolute gap between the
 two scores is printed beside it. `evals:grade` prints it after recording,
 `vp run evals:grade -- --agreement` prints it alone, and `evals:report` prints
-it after its comparisons whenever it connected to the database.
+it after its comparisons whenever it connected to the database, over every
+recorded hand grade rather than only the two runs it compares.
 
 `vp run evals:annotate -- --kind <kind> "<text>"` records a timeline note —
 `model-change`, `harness-change`, `incident` or `note` — at `--at`, or now.

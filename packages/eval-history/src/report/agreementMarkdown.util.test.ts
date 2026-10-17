@@ -30,6 +30,16 @@ const judges = judgeAgreement({
 });
 
 describe('agreementMarkdown', () => {
+  it('heads the section with what it covers, which is every recorded hand grade and not the two runs', () => {
+    expect(
+      agreementMarkdown({ agreement: { kind: 'needs-database' }, thresholds })
+        .split('\n', 1)
+        .at(0),
+    ).toBe(
+      '### Judge agreement (all recorded hand grades, by judge model and prompt hash)',
+    );
+  });
+
   it('prints the agreement lines under their heading, one paragraph per judge', () => {
     expect(
       agreementMarkdown({ agreement: { judges, kind: 'read' }, thresholds }),

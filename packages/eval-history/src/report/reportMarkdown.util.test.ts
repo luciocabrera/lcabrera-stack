@@ -38,7 +38,7 @@ describe('reportMarkdown', () => {
     ).toEqual([
       '### skills: main → feat/x (model-a)',
       '### skills: main → feat/y: not compared',
-      '### Judge agreement',
+      '### Judge agreement (all recorded hand grades, by judge model and prompt hash)',
     ]);
   });
 
