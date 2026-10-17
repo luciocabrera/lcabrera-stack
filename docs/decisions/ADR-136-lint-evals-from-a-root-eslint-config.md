@@ -65,10 +65,15 @@ The root carries the eslint pass for `evals/`:
   workspace, and this pass ignores them on purpose. No eslint pass reads them;
   Oxlint and Biome still do. Bringing them under
   eslint is a separate change.
-- `vp run lint:eslint:verify` does not probe the root pass. Its probe file is
-  written to a fresh directory at the root of a workspace, which this config
-  ignores. The fail-closed target above covers a pass that lints no files, but
-  not a pass that runs and reports nothing.
+- `vp run lint:eslint:verify` probes the root pass as well
+  ([#1383](https://github.com/luciocabrera/lcabrera-stack/issues/1383)).
+  `gates.eslintPass.rootPassDir` in `devkit.config.json` names `evals`, so the
+  gate plants a misordered import under `evals/` and runs
+  `vp run -r lint:eslint:check` from the root. It fails when the fan-out does
+  not report the plant, which is what happens when the root script leaves the
+  fan-out or the root config stops loading the rule. The fail-closed target
+  above covers a pass that lints no files; this covers a pass that runs and
+  reports nothing.
 
 ## Alternatives considered
 
