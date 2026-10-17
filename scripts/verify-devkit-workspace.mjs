@@ -2,9 +2,10 @@
  * Creates a `full`-rung tree from the packed `@lcabrera/devkit` tarball,
  * installs every `@lcabrera/*` package it resolves from a tarball packed from
  * this checkout and served by a scratch registry, checks its peers, runs the
- * tasks that tree wires for itself, seeds its database and runs its smoke
- * tests, fetches `/` from the app its root `start` task serves along with a
- * sorted and a filtered page held to SQL, runs every command its
+ * tasks that tree wires for itself with a declare-field probe committed to it
+ * and checked in its build under both blueprints' app configs, seeds its
+ * database and runs its smoke tests, fetches `/` from the app its root `start`
+ * task serves along with a sorted and a filtered page held to SQL, runs every command its
  * `devkit.config.json` hands its workflows and hooks, then runs the upgrade
  * that should find nothing left to add, and its commit-msg hook, which create
  * and the install must have turned on without being asked. The database is the
@@ -37,6 +38,11 @@ import {
   targetPathFor,
 } from '../packages/devkit/scripts/config.mjs';
 import { configuredCommandRuns } from './lib/devkit-config-commands.mjs';
+import {
+  placedConfigFieldFindings,
+  plantedProbeFindings,
+  workspaceConfigFieldFindings,
+} from './lib/devkit-tree-declare-field.mjs';
 import { packOne, run } from './lib/devkit-pack.mjs';
 import {
   registryState,
@@ -69,6 +75,7 @@ import {
   TREE_NAME,
   treeFindings,
 } from './lib/devkit-tree-run.mjs';
+import { upgradeFindings } from './lib/devkit-tree-upgrade.mjs';
 import { packedPackages } from './lib/devkit-workspace-closure.mjs';
 import {
   scopedRegistryConfig,
@@ -85,10 +92,7 @@ import {
   serveFindings,
   START_ARGS,
   taskFindings,
-  tasksAddedByUpgrade,
   TOOLCHAIN_BINS,
-  trackedPathsIn,
-  trackedWritesByUpgrade,
 } from './lib/devkit-workspace.mjs';
 
 const REPO_ROOT = process.cwd();
@@ -150,46 +154,6 @@ const toolchainBinFindings = ({ tree }) => {
     expected: TOOLCHAIN_BINS,
     present: existsSync(binDirectory) ? readdirSync(binDirectory) : [],
   });
-};
-
-const treeScripts = (tree) =>
-  readJson(join(tree, 'package.json')).scripts ?? {};
-
-const trackedPorcelain = (tree) =>
-  run('git', ['status', '--porcelain', '--untracked-files=no'], tree);
-
-const workingContentOf = ({ path, tree }) =>
-  existsSync(join(tree, path))
-    ? run('git', ['hash-object', '--', path], tree).trim()
-    : 'deleted';
-
-const trackedSnapshot = (tree) =>
-  Object.fromEntries(
-    trackedPathsIn(trackedPorcelain(tree)).map((path) => [
-      path,
-      workingContentOf({ path, tree }),
-    ]),
-  );
-
-const upgradeFindings = ({ devkit, tree }) => {
-  const scriptsBefore = treeScripts(tree);
-  const trackedBefore = trackedSnapshot(tree);
-  const upgraded = taskFindings({
-    label: 'devkit init --upgrade',
-    ...execute({ args: ['init', '--upgrade'], command: devkit, cwd: tree }),
-  });
-  return upgraded.length > 0
-    ? upgraded
-    : [
-        ...tasksAddedByUpgrade({
-          after: treeScripts(tree),
-          before: scriptsBefore,
-        }),
-        ...trackedWritesByUpgrade({
-          after: trackedSnapshot(tree),
-          before: trackedBefore,
-        }),
-      ];
 };
 
 const HOOK_IDENTITY = [
@@ -313,14 +277,17 @@ const treeChecks = (database) => [
   peerFindings,
   toolchainBinFindings,
   installedHooksFindings,
+  plantedProbeFindings,
   taskRunFindings,
   builtFindings,
+  placedConfigFieldFindings,
   database.prepared,
   servedFindings,
   configuredCommandFindings,
   trackedChangeFindings,
   upgradeFindings,
   commitHookRunFindings,
+  workspaceConfigFieldFindings,
 ];
 
 const checkedTree = async ({ devkit, staging, tree }) => {
@@ -383,7 +350,7 @@ const main = async () => {
               staging,
               tree: join(parent, TREE_NAME),
             }),
-      passed: `Created-workspace gate passed: \`devkit create --profile full\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry with no unmet peer, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} and every command in its \`devkit.config.json\` all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, the tree's seed and smoke tests passed against its database, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200 and a sorted and a filtered page whose rows match SQL, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
+      passed: `Created-workspace gate passed: \`devkit create --profile full\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry with no unmet peer, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} and every command in its \`devkit.config.json\` all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, a class field with no initializer survived that build and a second one under the \`workspace\` blueprint's app config, the tree's seed and smoke tests passed against its database, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200 and a sorted and a filtered page whose rows match SQL, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
       title: 'Created-workspace gate',
     });
   } finally {
