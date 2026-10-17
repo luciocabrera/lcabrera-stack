@@ -107,18 +107,43 @@ describe('gates.affectedTests.rootSuites', () => {
 
   const wordsOf = (command) => command.split(' ').filter((word) => word !== '');
 
+  const SELECTS_WORKSPACES = new Set([
+    '-r',
+    '--recursive',
+    '-t',
+    '--transitive',
+    '-F',
+    '--filter',
+  ]);
+
+  const TAKES_VALUE = new Set([
+    '-F',
+    '--filter',
+    '--log',
+    '--concurrency-limit',
+  ]);
+
+  const rootTaskOf = (words) => {
+    let index = 2;
+    let selectsWorkspaces = false;
+    while (index < words.length && words[index].startsWith('-')) {
+      const [flag] = words[index].split('=');
+      selectsWorkspaces ||= SELECTS_WORKSPACES.has(flag);
+      index += TAKES_VALUE.has(flag) && !words[index].includes('=') ? 2 : 1;
+    }
+    const task = words[index];
+    return selectsWorkspaces || task === undefined || task.includes('#')
+      ? undefined
+      : task;
+  };
+
   const chainedTasks = (command) =>
     command
       .split('&&')
       .map(wordsOf)
-      .filter(
-        (words) =>
-          words[0] === 'vp' &&
-          words[1] === 'run' &&
-          words[2] !== undefined &&
-          !words[2].startsWith('-'),
-      )
-      .map((words) => words[2]);
+      .filter((words) => words[0] === 'vp' && words[1] === 'run')
+      .map(rootTaskOf)
+      .filter((task) => task !== undefined);
 
   const suiteDirOf = (task) => {
     const words = wordsOf(MANIFEST_SCRIPTS[task] ?? '');
@@ -176,9 +201,17 @@ describe('gates.affectedTests.rootSuites', () => {
   it('reads a root task from a step with arguments, and no workspace fan-out as one', () => {
     expect(
       chainedTasks(
-        "vp run --filter '!showcase' test && vp run -r test && vp run test:hooks -- --bail && vp run test:scripts",
+        "vp run --filter '!showcase' test && vp run -r test && vp run -t @scope/app#test && vp run test:hooks -- --bail && vp run test:scripts",
       ),
     ).toEqual(['test:hooks', 'test:scripts']);
+  });
+
+  it('reads a root task from a step that targets the workspace root by flag', () => {
+    expect(
+      chainedTasks(
+        'vp run -w test:hooks && vp run --workspace-root --cache test:lint && vp run --log grouped test:docs',
+      ),
+    ).toEqual(['test:hooks', 'test:lint', 'test:docs']);
   });
 
   it('finds the directory each root suite runs from in its manifest command', () => {
