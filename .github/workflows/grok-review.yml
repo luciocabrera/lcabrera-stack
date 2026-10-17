@@ -154,4 +154,7 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           REPOSITORY: ${{ github.repository }}
         run: >
-          node scripts/submit-pr-review.mjs --body grok-review-body.md --findings grok-review-findings.json --placeholder '(replace this file with the review body)'
+          node scripts/submit-pr-review.mjs
+          --body grok-review-body.md
+          --findings grok-review-findings.json
+          --placeholder '(replace this file with the review body)'
