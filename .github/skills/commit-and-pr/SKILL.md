@@ -74,7 +74,7 @@ printf 'feat(ui): my subject\n' | vp run commit:verify -- -
   `REQUIRED_PR_SECTIONS`, and neither that list nor the template's is repeated
   here — reading either takes a second, and the copy that used to sit in this
   bullet named two of them and told you the rest were optional. The `🤖 Generated
-with Claude Code` footer is neither required nor rejected. Run
+  with Claude Code` footer is neither required nor rejected. Run
   [`unslop`](../unslop/SKILL.md) on the sentences inside the sections, and do not
   rewrite the headings — the gate matches them as headings, so numbering, emoji
   or bold in one fails it.

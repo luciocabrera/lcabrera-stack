@@ -93,7 +93,7 @@ a pull request — is prose a person reads, and this skill applies to it.
   The tell is a bold label and colon that restates the line
   (`**Performance:** Performance improved...`). A bold lead-in that ends in
   a period and adds new detail is fine (`**Schema in TypeScript.** Tables
-live in one file.`).
+  live in one file.`).
 - **No decorative emoji** in headings or bullets. `pr:verify` already fails
   emoji in required PR headings.
 - **No "Conclusion" / "In summary" / "Overall"** that restates. An ending

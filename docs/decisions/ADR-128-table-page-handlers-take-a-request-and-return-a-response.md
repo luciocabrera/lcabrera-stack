@@ -41,7 +41,7 @@ be able to declare a table once and wire each endpoint in a few lines.
   `{ request }` and accepts a returned `Response` can export them directly.
 - `createGroupDetailReads` returns `fetchPage` and `resolveLockedFilters`,
   typed structurally so a table loader that passes `{ effectiveSorting,
-filters, request }` accepts them without an adapter.
+  filters, request }` accepts them without an adapter.
 - Each factory types the functions it receives by what it calls. The page
   loader needs only `resolvePageRead` and a `selectPage` that accepts a
   group read, so a caller can pass narrower-typed or individually imported

@@ -150,7 +150,7 @@
   the raw distinct count.
 
   **Truncation is performed in a stated time zone.** `date_trunc(field,
-timestamptz)` resolves against the session `TimeZone`, so the same order falls in
+  timestamptz)` resolves against the session `TimeZone`, so the same order falls in
   December for one caller and January for another. `timestamptz` keys are pinned to
   UTC; `date` and `timestamp` are cast so the call cannot promote them through the
   session zone.

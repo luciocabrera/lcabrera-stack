@@ -43,7 +43,7 @@ which creates and drops its own three-column table):
 
 - a `point` column maps to `string` — the type the design calls "the best key".
   `GROUP BY` on it raises `could not identify an equality operator for type
-point`.
+  point`.
 - a `jsonb` column also maps to `string`. `min(jsonb)` does not exist. But
   `GROUP BY` on it **succeeds** — jsonb has equality. So the failure is per-type,
   not per-family, and no coarsening of the vocabulary can capture it.

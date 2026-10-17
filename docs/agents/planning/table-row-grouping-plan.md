@@ -107,7 +107,11 @@ constants (`*_SCHEMA`, `*_TABLE`, `*_PRIMARY_KEY`, `*_COLUMNS`,
 export type ColumnType = 'boolean' | 'date' | 'enum' | 'number' | 'text';
 // packages/ui/src/components/Table/Table.types.ts:201-206
 export type TableColumnDataType =
-  'boolean' | 'currency' | 'date' | 'number' | 'string';
+  | 'boolean'
+  | 'currency'
+  | 'date'
+  | 'number'
+  | 'string';
 ```
 
 **Nullability is not modeled anywhere.** Schema/table names live on table _meta_

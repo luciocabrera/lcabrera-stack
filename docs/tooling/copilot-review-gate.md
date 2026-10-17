@@ -802,7 +802,7 @@ rest of the preconditions.
      conclude there is no way out.
    - While it is unticked the merge button reads **`Squash and merge`** and is
      **disabled**. Ticking it relabels the button to **`Bypass rules and merge
-(squash)`** and enables it. That relabel is the confirmation the override actually
+     (squash)`** and enables it. That relabel is the confirmation the override actually
      applies to you, as distinct from merely being displayed.
    - No second confirmation, no typed-name prompt.
 

@@ -69,7 +69,7 @@ origin/main | wc -l`).
   list. It is the SonarCloud app's own check, not a workflow here, and SonarCloud
   runs in Automatic Analysis mode: it analyses `main` and pull requests only, so a
   `gh-readonly-queue/…` branch gets no analysis and no check. `Strict Sonar issue
-gate` already covers it and more — `--gate` fails on the same SonarCloud
+  gate` already covers it and more — `--gate` fails on the same SonarCloud
   quality gate, `--fail-on-issues` fails on any open issue, which the app's
   rating-based gate does not.
 - `Strict Sonar issue gate` decides "has SonarCloud analysed this code yet?" by
@@ -93,7 +93,7 @@ gate` already covers it and more — `--gate` fails on the same SonarCloud
 - The pull request a queue build answers for is resolved from the queue branch's
   ref by `scripts/resolve-subject-pr.mjs`, which fails rather than defaulting.
   `Commit + PR standards`, `Strict Sonar issue gate` and `Copilot review
-complete` all read what it exports, so neither event has its own copy of "what
+  complete` all read what it exports, so neither event has its own copy of "what
   is being checked".
 - `Copilot review complete` is a commit status on the pull request head, which
   the queue never reads. Its workflow publishes the same verdict about the same
