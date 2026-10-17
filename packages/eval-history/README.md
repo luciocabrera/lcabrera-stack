@@ -54,6 +54,10 @@ decides how the envelope is versioned.
   `readPublicColumns`) and a `jsonb` field outside `PUBLIC_FIELD_PATHS`.
   `evalsReaderPool` is the pool they run on, built from
   `EVALS_READER_DATABASE_URL`.
+- `src/report/` — the comparison behind `vp run evals:report`: it reads two
+  runs from envelope files or from the database, refuses runs of two models
+  unless told otherwise, and renders the flipped tasks, both pass rates, cost,
+  duration and the changed hashes as markdown or JSON.
 - `src/seed/` — a year of synthetic nightly history, about 15k trials, for
   timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of
