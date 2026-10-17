@@ -221,12 +221,14 @@ shared config packages `gates.affectedTests.globalPackages` names in
 [`devkit.config.json`](devkit.config.json) — force the
 full suite (a real dependency change always bumps the lockfile). The root
 suites no workspace selection would ever reach, `test:scripts` and
-`test:evals`, are selected by `gates.affectedTests.rootSuites`: each names the
-paths whose change can fail it, so `test:scripts` runs for anything under
-`scripts/`, any top-level file such as `.fallowrc.json`, and anything under
-`.changeset/`, `.claude/`, `.github/` or `.vite-hooks/`, and `test:evals` runs
-for anything under `evals/`. Every other out-of-workspace change, such as
-`docs/`, runs nothing. Affected workspaces run plain `test`; with
+`test:evals`, are selected by `gates.affectedTests.rootSuites`, which names the
+paths whose change can fail each one. `test:scripts` runs for every change,
+because its suites read files across the whole tree: workspace manifests, docs,
+workflows, skills and root config. `test:evals` runs for `evals/`, top-level
+files, `packages/eval-history`, the agent and rule files under `.claude/`, the
+skills, and the verifier contract under `docs/agents/`.
+`scripts/lib/gate-rosters.test.mjs` scans both suites for the paths they import
+or name and fails when one of those paths does not select its suite. Affected workspaces run plain `test`; with
 `--ci` (`repo-test-changed --ci`) `showcase` runs its coverage
 `test:ci` last, mirroring the root `test:ci` ordering. `--dry-run` prints the
 `vp run` commands without executing them. CI's Unit Tests job (and its coverage

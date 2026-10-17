@@ -13,6 +13,7 @@ area:
   - COMMANDS.md
   - .changeset/select-root-suites-by-their-inputs.md
   - scripts/lib/gate-rosters.test.mjs
+  - scripts/lib/root-suite-inputs*
   - .github/skills/quality-gate-workflow/SKILL.md
   - reports/api-surface/repo-standards.txt
 started: 2026-10-17
@@ -28,6 +29,6 @@ fix(tooling): select test:evals and test:scripts when their inputs change
 
 ## Status / next
 
-- Current step: implemented, gate run
+- Current step: round 2, roster derived from a scan of each suite
 - Blockers: none
 - Next: review

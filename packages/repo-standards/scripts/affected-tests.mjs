@@ -18,8 +18,10 @@
  * A root suite (`gates.affectedTests.rootSuites`) is a test task that lives in
  * no workspace, so no workspace selection reaches it: each one names the task
  * and the path patterns of every file whose change can fail it, and a changed
- * file matching any of them adds that task as its own group. Left unset, the
- * one root suite is `test:scripts` over the code under `scripts/`.
+ * file matching any of them adds that task as its own group. It is matched
+ * before the lint-only drop, because the linters passing says nothing about a
+ * suite that reads the file. Left unset, the one root suite is `test:scripts`
+ * over the code under `scripts/`.
  *
  * The per-workspace task substitution mirrors `test:ci` exactly so the two never
  * diverge: in CI mode the configured coverage workspace
@@ -151,7 +153,7 @@ export const resolveAffected = ({
   const lintOnly = compiledPatterns(lintOnlyPatterns);
   const global = new Set(globalPackages);
   const relevant = files.filter((file) => !matchesAny(file, lintOnly));
-  const suites = selectedSuites(relevant, rootSuites);
+  const suites = selectedSuites(files, rootSuites);
   if (relevant.length === 0) {
     return { changed: [], mode: 'none', packages: [], suites };
   }

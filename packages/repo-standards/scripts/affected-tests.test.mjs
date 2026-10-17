@@ -228,13 +228,13 @@ describe('resolveTestGroups — configured root suites', () => {
     ).toEqual([]);
   });
 
-  it('drops a lint-only file before matching it against a suite', () => {
-    expect(
-      suitesFor(
-        ['eslint.config.mjs'],
-        [{ patterns: ['^[^/]+$'], task: 'test:scripts' }],
-      ),
-    ).toEqual([]);
+  it('selects a suite for a lint-only file it reads, while no workspace runs', () => {
+    const result = groupsFor(
+      ['packages/utils/eslint.config.mjs'],
+      [{ patterns: ['^packages/'], task: 'test:scripts' }],
+    );
+    expect(result.mode).toBe('none');
+    expect(result.groups).toEqual([{ packages: [], task: 'test:scripts' }]);
   });
 });
 

@@ -324,9 +324,10 @@ likewise a valid answer rather than a refusal.
 selection reaches them. Each entry names a root `task` and the `patterns`
 (regular-expression sources, like `lintOnlyPatterns`) of every path whose change
 can fail it, and `repo-test-changed` runs the task as its own group when a
-changed file matches one. A suite that reads root config belongs here with that
-config's path, or a change to the config alone selects nothing and the suite
-first fails after the merge. Unset, the one root suite is `test:scripts` over
+changed file matches one, including a file `lintOnlyPatterns` drops, since the
+linters passing says nothing about a suite that reads it. A suite that reads
+root config belongs here with that config's path, or a change to the config
+alone selects nothing and the suite first fails after the merge. Unset, the one root suite is `test:scripts` over
 the `.mjs`, `.cjs` and `.js` files under `scripts/`; an empty list means none.
 
 Four things about it are easy to get wrong.

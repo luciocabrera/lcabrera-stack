@@ -8,6 +8,7 @@
  * config against the real tree, and they live here rather than beside the gates
  * because what they read is this repository's own data.
  */
+import { execFileSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -19,6 +20,7 @@ import {
   resolveAffected,
 } from '../../packages/repo-standards/scripts/affected-tests.mjs';
 import { readGates } from '../../packages/repo-standards/scripts/config.mjs';
+import { suiteInputs } from './root-suite-inputs.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -99,6 +101,26 @@ describe('gates.affectedTests.globalPackages', () => {
 describe('gates.affectedTests.rootSuites', () => {
   const { globalPackages, lintOnlyPatterns, rootSuites } = GATES.affectedTests;
 
+  const SUITE_DIRS = [
+    { dir: 'scripts', task: 'test:scripts' },
+    { dir: 'evals', task: 'test:evals' },
+  ];
+
+  const tracked = execFileSync('git', ['ls-files', '-z'], {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+  })
+    .split('\0')
+    .filter((file) => file !== '');
+
+  const inputsOf = (dir) =>
+    suiteInputs({
+      graph: GRAPH,
+      readSource: (file) => readFileSync(join(REPO_ROOT, file), 'utf8'),
+      suiteDir: dir,
+      tracked,
+    });
+
   const suitesFor = (file) =>
     resolveAffected({
       files: [file],
@@ -117,38 +139,54 @@ describe('gates.affectedTests.rootSuites', () => {
     ).toEqual([]);
   });
 
-  it('selects test:evals for a change under evals/', () => {
-    for (const file of [
-      'evals/run-record.mjs',
-      'evals/rules-consistency/rules-consistency.mjs',
-      'evals/regression.config.json',
-      'packages/repo-standards/scripts/git-exec.mjs',
-    ]) {
-      expect(suitesFor(file)).toContain('test:evals');
-    }
+  it.each(SUITE_DIRS)(
+    'selects $task for every path its sources import or read',
+    ({ dir, task }) => {
+      const unselected = inputsOf(dir).filter(
+        (path) => !suitesFor(path).includes(task),
+      );
+      expect(unselected).toEqual([]);
+    },
+  );
+
+  it('sees reads made through a relative URL, a path constant and a workspace import', () => {
+    expect(inputsOf('evals')).toEqual(
+      expect.arrayContaining([
+        '.claude/agents/refactor-verifier.md',
+        'packages/eval-history/package.json',
+      ]),
+    );
+    expect(inputsOf('scripts')).toContain('docs/coordination/README.md');
   });
 
-  it('selects test:scripts for a root file a scripts/ suite reads', () => {
+  it('selects test:scripts for any change, because its suites read every part of the tree', () => {
     for (const file of [
       '.fallowrc.json',
-      '.gitignore',
-      '.node-version',
-      'AGENTS.md',
-      'devkit.config.json',
-      'package.json',
-      '.changeset/config.json',
-      '.claude/pr-queue-policy.md',
-      '.github/workflows/check-safe.yml',
-      '.vite-hooks/pre-push',
-      'scripts/departed-names.json',
-      'scripts/lib/fallow-entries.mjs',
+      'docs/coordination/README.md',
+      'apps/showcase/package.json',
+      'packages/ui/package.json',
+      'packages/utils/eslint.config.mjs',
+      'evals/run-record.mjs',
     ]) {
       expect(suitesFor(file)).toContain('test:scripts');
     }
   });
 
-  it('selects no root suite for a change inside a workspace or under docs/', () => {
-    expect(suitesFor('packages/ui/src/index.ts')).toEqual([]);
-    expect(suitesFor('docs/README.md')).toEqual([]);
+  it.each([
+    'evals/run-record.mjs',
+    'package.json',
+    'packages/eval-history/src/baseline/baseline.constants.ts',
+    'packages/repo-standards/scripts/git-exec.mjs',
+    '.claude/agents/refactor-verifier.md',
+    '.claude/rules/typescript.md',
+    '.github/skills/unslop/SKILL.md',
+    'docs/agents/refactor-verified-contract.md',
+  ])('selects test:evals for %s', (file) => {
+    expect(suitesFor(file)).toContain('test:evals');
+  });
+
+  it('leaves test:evals out for a workspace or doc it does not read', () => {
+    expect(suitesFor('packages/ui/src/index.ts')).toEqual(['test:scripts']);
+    expect(suitesFor('docs/README.md')).toEqual(['test:scripts']);
   });
 });
