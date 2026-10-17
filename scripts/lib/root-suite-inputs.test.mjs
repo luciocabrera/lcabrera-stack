@@ -63,6 +63,21 @@ describe('suiteInputs', () => {
     ).toEqual(['tools/exec.mjs', 'tools/run.mjs']);
   });
 
+  it('scans a module reached outside the suite for the paths it reads', () => {
+    expect(
+      inputsOf(
+        {
+          'suite/a.mjs': "import { run } from '../tools/run.mjs';",
+          'tools/run.mjs': [
+            "const GUIDE = 'docs/guide/planning.md';",
+            "readFileSync(join(REPO_ROOT, '.config', 'tool.json'));",
+          ].join('\n'),
+        },
+        ['docs/guide/planning.md', '.config/tool.json'],
+      ),
+    ).toEqual(['.config/tool.json', 'docs/guide/planning.md', 'tools/run.mjs']);
+  });
+
   it('marks a directory it reads so a pattern for its contents is tested', () => {
     expect(
       inputsOf({ 'suite/a.mjs': "readdirSync('rules/agents');" }, [

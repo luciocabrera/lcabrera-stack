@@ -4,8 +4,9 @@
  * instead of trusting a hand-kept roster. It scans the suite's sources for
  * relative specifiers, repo-relative path literals, `join(REPO_ROOT, …)` calls
  * and imports of a workspace package, then follows relative imports into
- * modules outside the suite. A path computed at runtime is invisible to it, so
- * it over-reads literals and can still miss a computed read.
+ * modules outside the suite and scans those by the same rules. A path computed
+ * at runtime is invisible to it, so it over-reads literals and can still miss a
+ * computed read.
  *
  * Usage: `suiteInputs({ graph, readSource, suiteDir, tracked })`, from a test.
  */
@@ -104,11 +105,12 @@ export const suiteInputs = ({ graph, readSource, suiteDir, tracked }) => {
   const files = tracked.filter(
     (file) => isInside(file, suiteDir) && SOURCE.test(file),
   );
+  const reached = outsideModules({ files, readSource, suiteDir, trackedFiles });
   const candidates = [
-    ...files.flatMap((file) =>
+    ...[...files, ...reached].flatMap((file) =>
       referencedPaths({ file, graph, source: readSource(file) }),
     ),
-    ...outsideModules({ files, readSource, suiteDir, trackedFiles }),
+    ...reached,
   ]
     .map((path) => path.replace(/\/+$/u, ''))
     .filter((path) => !isInside(path, suiteDir));
