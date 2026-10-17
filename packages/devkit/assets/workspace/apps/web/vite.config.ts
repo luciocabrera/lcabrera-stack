@@ -1,6 +1,9 @@
 /**
  * The application's own Vite configuration. Lint and format are absent on
- * purpose: Vite+ reads those from the workspace root config only.
+ * purpose. From the workspace root, Vite+ reads those from the root config
+ * and does not apply a nested one. From a package directory it still uses
+ * the root unless that package defines its own `lint` or `fmt` block, which
+ * Vite+ does not recommend. The check command always uses the root.
  *
  * The component library ships TypeScript source rather than a build, so this
  * project's own toolchain compiles it. Three settings follow from that and none

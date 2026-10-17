@@ -41,6 +41,10 @@ and exclude the pattern if it ever starts shipping.
 vp run --filter @lcabrera/ui bench
 ```
 
+Vitest 5 prints the comparison table from `bench.compare()` inside one test. A
+separate `bench().run()` per variant reports that variant alone, so the variants
+being compared stay in the same test.
+
 Vitest's default `benchmark.include` matches `*.bench.ts` and its default test
 `include` matches only `*.{test,spec}.*`, so `vp run test` does **not** pick these
 up. Confirm that with the suite count after adding a file.

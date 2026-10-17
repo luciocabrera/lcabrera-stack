@@ -85,7 +85,7 @@ above — but a group key holding a short label now starts wider than it needs t
 ## Alternatives considered
 
 1. **Give the measure the slack the source had** — `max = min + (sourceMax −
-sourceMin)`. Rejected: it keeps a promise the declared numbers cannot make. A
+   sourceMin)`. Rejected: it keeps a promise the declared numbers cannot make. A
    column declared `100–110` would yield a 10px band, so the same collapse returns
    in a milder form, and the width of one column would depend on an unrelated
    number the author chose for a different view.

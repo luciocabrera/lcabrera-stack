@@ -176,8 +176,10 @@ const main = async () => {
 
   for (const path of stray)
     process.stdout.write(
-      `${path} declares \`lint\`, which Vite+ never loads from a workspace config.\n` +
-        '  Move it to the root config as a `lint.overrides` entry.\n',
+      `${path} declares \`lint\`. This repo keeps that block in the root config.\n` +
+        '  A package-directory lint run would use a workspace block, and\n' +
+        '  `vp check` would not. Move it to the root config as a\n' +
+        '  `lint.overrides` entry.\n',
     );
   for (const probe of silent)
     process.stdout.write(

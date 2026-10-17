@@ -217,7 +217,7 @@
   widening `never` to `void` and must not be removed. An `if`/`else` where both
   arms throw, a `switch` whose `default` throws, `for (;;)` and a throwing
   `finally` all make the bottom unreachable, while a guard clause — `if (bad)
-{ throw … }` — does not, and is reported.
+  { throw … }` — does not, and is reported.
 
   **One case is out of reach and stays wrong.** A call to a function declared
   `(): never` also makes the bottom unreachable, so `(): void => { process.exit(1); }`

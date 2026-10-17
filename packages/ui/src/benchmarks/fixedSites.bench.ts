@@ -1,4 +1,4 @@
-import { bench, describe } from 'vite-plus/test';
+import { describe, test } from 'vite-plus/test';
 
 import type {
   ColumnOrderState,
@@ -28,23 +28,26 @@ for (const size of SIZES) {
 
   // ---- resolveAcceptedUnpinConflictState, `unpin-beyond` left branch -------
   describe(`unpin-beyond left branch (n=${size}, pinned=${pinnedCount})`, () => {
-    bench('before #450: map().filter(left.includes) -> Set', () => {
-      const left = [...pinnedKeys];
-      const keysToUnpin = new Set(
-        columns
-          .slice(index)
-          .map((column) => column.key)
-          .filter((key) => left.includes(key)),
-      );
-      sink.total += left.filter((key) => !keysToUnpin.has(key)).length;
-    });
-
-    bench('after #450: map() -> Set', () => {
-      const left = [...pinnedKeys];
-      const keysFromIndex = new Set(
-        columns.slice(index).map((column) => column.key),
-      );
-      sink.total += left.filter((key) => !keysFromIndex.has(key)).length;
+    test('compare', async ({ bench }) => {
+      const before =
+        bench('before #450: map().filter(left.includes) -> Set', () => {
+          const left = [...pinnedKeys];
+          const keysToUnpin = new Set(
+            columns
+              .slice(index)
+              .map((column) => column.key)
+              .filter((key) => left.includes(key)),
+          );
+          sink.total += left.filter((key) => !keysToUnpin.has(key)).length;
+        });
+      const after = bench('after #450: map() -> Set', () => {
+        const left = [...pinnedKeys];
+        const keysFromIndex = new Set(
+          columns.slice(index).map((column) => column.key),
+        );
+        sink.total += left.filter((key) => !keysFromIndex.has(key)).length;
+      });
+      await bench.compare(before, after);
     });
   });
 
@@ -52,20 +55,23 @@ for (const size of SIZES) {
   describe(`move-column order rebuild (n=${size})`, () => {
     const columnKey = `col_${index}`;
 
-    bench('before #450: re-derive with filter().map()', () => {
-      const allOrderedKeys = columns.map((column) => column.key);
-      const newOrder: ColumnOrderState<Row> = columns
-        .filter((column) => column.key !== columnKey)
-        .map((column) => column.key);
-      sink.total += newOrder.length + allOrderedKeys.length;
-    });
-
-    bench('after #450: reuse allOrderedKeys, filter() only', () => {
-      const allOrderedKeys = columns.map((column) => column.key);
-      const newOrder: ColumnOrderState<Row> = allOrderedKeys.filter(
-        (key) => key !== columnKey,
-      );
-      sink.total += newOrder.length + allOrderedKeys.length;
+    test('compare', async ({ bench }) => {
+      const before = bench('before #450: re-derive with filter().map()', () => {
+        const allOrderedKeys = columns.map((column) => column.key);
+        const newOrder: ColumnOrderState<Row> = columns
+          .filter((column) => column.key !== columnKey)
+          .map((column) => column.key);
+        sink.total += newOrder.length + allOrderedKeys.length;
+      });
+      const after =
+        bench('after #450: reuse allOrderedKeys, filter() only', () => {
+          const allOrderedKeys = columns.map((column) => column.key);
+          const newOrder: ColumnOrderState<Row> = allOrderedKeys.filter(
+            (key) => key !== columnKey,
+          );
+          sink.total += newOrder.length + allOrderedKeys.length;
+        });
+      await bench.compare(before, after);
     });
   });
 
@@ -79,20 +85,22 @@ for (const size of SIZES) {
       right: [],
     };
 
-    bench('current: filter().map()', () => {
-      sink.total += columns
-        .filter((column) => column.key !== columnKey)
-        .map((column) => column.key).length;
-      sink.total += pinning.left.length;
-    });
+    test('compare', async ({ bench }) => {
+      const current = bench('current: filter().map()', () => {
+        sink.total += columns
+          .filter((column) => column.key !== columnKey)
+          .map((column) => column.key).length;
+        sink.total += pinning.left.length;
+      });
+      const fused = bench('fused: reduce()+push', () => {
+        sink.total += columns.reduce<string[]>((keys, column) => {
+          if (column.key !== columnKey) keys.push(column.key);
 
-    bench('fused: reduce()+push', () => {
-      sink.total += columns.reduce<string[]>((keys, column) => {
-        if (column.key !== columnKey) keys.push(column.key);
-
-        return keys;
-      }, []).length;
-      sink.total += pinning.left.length;
+          return keys;
+        }, []).length;
+        sink.total += pinning.left.length;
+      });
+      await bench.compare(current, fused);
     });
   });
 }
