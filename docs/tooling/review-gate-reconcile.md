@@ -435,7 +435,7 @@ two advisory contexts, and for reading what the sweep thinks.
    `agent-review-verdict.yml` both ran and published, from the branch's copy,
    because those filenames already existed on `main` — while
    `review-gate-reconcile.yml` returned `HTTP 404: workflow … not found on the
-default branch`. So a **new** workflow cannot be dispatched until it merges; a
+   default branch`. So a **new** workflow cannot be dispatched until it merges; a
    new `workflow_dispatch` trigger on an existing one can. Do not generalise this
    from the `issue_comment` rule in the agent-review gate's header — that one is
    about which ref the workflow _runs from_, and it is a different rule.
@@ -475,7 +475,7 @@ before relying on it again.
   `Copilot review complete` became a required context on 2026-08-21 (the first
   half of #698), so a status this sweep publishes for that gate now decides a
   merge. `Agent review verdict` is still advisory. `Review threads
-resolved` is a report either way: `required_review_thread_resolution` on the
+  resolved` is a report either way: `required_review_thread_resolution` on the
   `main` ruleset is what actually holds that merge, not this status.
 - **The hazard the promotion activated is closed.** The `pending` → `success`
   direction above — the mirror of #866, on a pull request that tightens a gate —

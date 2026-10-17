@@ -80,3 +80,7 @@ reports/usage/
 
 # Stryker sandbox (mutation runs) — scratch, never committed.
 .stryker-tmp/
+
+# Vitest writes `.vitest/` beside the project. Vitest 5, the release this
+# toolchain runs, is what creates it. Scratch, never committed.
+.vitest/

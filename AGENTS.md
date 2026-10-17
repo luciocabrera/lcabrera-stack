@@ -582,7 +582,7 @@ the decision that architecture files describe systems, not folders, is
   is now exactly one home, [`docs/decisions/`](docs/decisions/), and **a number
   identifies exactly one ADR** — `registers.adrGrandfatheredDuplicates` in
   `devkit.config.json` is empty, so every repeat is a collision `vp run
-adr:verify` rejects. Two homes existed while the showcase app kept its own;
+  adr:verify` rejects. Two homes existed while the showcase app kept its own;
   that is why an older ADR may cite a number, or a path, that now resolves
   somewhere else.
 

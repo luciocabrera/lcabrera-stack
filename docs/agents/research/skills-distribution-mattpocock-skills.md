@@ -165,7 +165,7 @@ mechanism** (confirmed current as of 2026-08-20 via `code.claude.com/docs/en/dis
 
 - `.claude-plugin/plugin.json`: the plugin manifest — `name`, `version` (kept in sync with `package.json`'s
   version by `/scripts/sync-plugin-version.mjs`, run in the `version` npm script right after `changeset
-version`), `description`, `author`, `homepage`, `repository`, `license`, `keywords`, and a `skills` array
+  version`), `description`, `author`, `homepage`, `repository`, `license`, `keywords`, and a `skills` array
   listing the 25 promoted skill paths **explicitly, one by one** (`./skills/engineering/tdd`,
   `./skills/productivity/grill-me`, etc.) — not a directory glob.
 - `.claude-plugin/marketplace.json`: makes the repo its own single-plugin marketplace (fallback path,
@@ -228,7 +228,7 @@ technique fails for Codex's plugin path specifically because "Codex copies the p
 - **Package versioning**: [Changesets](https://github.com/changesets/changesets) (`.changeset/*.md` +
   `@changesets/cli`, `@changesets/changelog-github`), the same tool family `lcabrera-stack` uses. Every
   substantive PR carries a changeset; `npm run version` runs `changeset version && node
-scripts/sync-plugin-version.mjs`, and `CHANGELOG.md` is generated (v1.2.3 at the researched commit — three
+  scripts/sync-plugin-version.mjs`, and `CHANGELOG.md` is generated (v1.2.3 at the researched commit — three
   patch entries, each linked to its PR and commit SHA, in the Changesets-standard format).
 - **`/scripts/sync-plugin-version.mjs`**: a small guard whose whole job is keeping `plugin.json`'s `version` in
   sync with `package.json`'s, because "Claude uses the plugin `version` to decide when installed users see an
@@ -388,7 +388,7 @@ phrasing is actively maintained, not just an initial design intent that then rot
   can already do "check my current setup against the current templates and report drift" through ordinary
   conversation, so a dedicated deterministic checker would be "duplicate work" and "a second skill drifting from
   the first as templates evolve." This is close to the opposite bet from devkit's SHA-256 manifest + `devkit
-doctor`: mattpocock/skills bets that natural-language reconciliation, invoked on demand, is cheaper to maintain
+  doctor`: mattpocock/skills bets that natural-language reconciliation, invoked on demand, is cheaper to maintain
   than a deterministic diff tool would be, for artifacts that are prose anyway. Whether that bet holds depends on
   how much the consumer trusts an LLM's self-report of drift versus a hash comparison — a real, arguable
   tradeoff, not obviously wrong.

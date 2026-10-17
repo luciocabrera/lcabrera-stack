@@ -230,7 +230,7 @@ Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
   queue and past every required check, and the account running this can. Never
   `-d`: gh refuses it in front of a queue, and the branch is deleted below.
 - **wait for the merge before doing anything that assumes one.** `gh pr view <n>
---json state` reading `MERGED` is the observation; the command returning is not.
+  --json state` reading `MERGED` is the observation; the command returning is not.
   In front of a queue that wait is minutes; without one it is immediate. The
   observation is what you act on either way.
 - if the queue ejects it, that is **not** visible in the PR's own checks, which

@@ -32,7 +32,7 @@ product** rather than local subagents. Core shape, from
   structured **handoff** message. They cannot talk to siblings.
 - **Verifiers** are the same shape as workers but produce a verdict
   (`live-ui-verified | unit-test-verified | type-check-only |
-verifier-blocked | verifier-failed`) against one target task's acceptance
+  verifier-blocked | verifier-failed`) against one target task's acceptance
   criteria — closely analogous to lcabrera-stack's
   `refactor-verified` builder/verifier split, down to "verifier sees only
   the target's acceptance criteria," though orchestrate's verifier does see
@@ -366,7 +366,7 @@ built directly on Cursor's product surface:
     `orchestrate/skills/orchestrate/scripts/tsconfig.json`, `orchestrate/skills/orchestrate/scripts/cli.ts`, `orchestrate/skills/orchestrate/scripts/cli/index.ts`
   - Directory listing (`find`) of the entire `orchestrate/` tree to confirm
     structure (`prompts/, references/, schemas/, scripts/core, scripts/cli,
-scripts/adapters, scripts/__tests__, scripts/tools`)
+    scripts/adapters, scripts/__tests__, scripts/tools`)
   - `create-plugin/skills/create-plugin-scaffold/SKILL.md`,
     `create-plugin/rules/plugin-quality-gates.mdc` (for Cursor's own
     prescribed install-location convention)

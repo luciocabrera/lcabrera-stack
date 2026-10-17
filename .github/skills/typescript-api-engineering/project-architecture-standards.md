@@ -31,7 +31,7 @@ implementation is `apps/showcase/src/routes/enterprise-orders/`.
 ## Core Principles
 
 1. **Dependency rule — inward only.** `loader/action → use-case → service(repo) →
-executors → pg`. `config/` (domain) has no downward dependency. The `.server/`
+   executors → pg`. `config/` (domain) has no downward dependency. The `.server/`
    boundary makes a client→server import a **build failure**, not a lint warning.
 2. **One responsibility per layer.** The action owns HTTP; the service owns
    persistence; `config/` owns pure rules. No God Service.

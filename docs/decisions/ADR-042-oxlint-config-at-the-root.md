@@ -9,7 +9,9 @@
 ## Context
 
 Every workspace carried a `lint` block in its own `vite.config.ts`, built from a
-`@repo/vite-configs/*-lint` factory. None of it was ever loaded.
+`@repo/vite-configs/*-lint` factory. On Vite+ 0.3, the release this repository
+was on when this ADR was accepted, none of it was loaded. What a
+package-directory run does on Vite+ 1.3 is the amendment at the end.
 
 This is not a Vite+ defect. `node_modules/vite-plus/docs/guide/monorepo.md` says
 so plainly:
@@ -69,8 +71,8 @@ because they become load-bearing the moment that category is enabled — and
 because a hand-maintained list that nothing checks is precisely how this went
 wrong the first time. The lists were initially written from whichever workspaces
 happened to carry a `lint` block, which is the shape of the setup that never
-loaded; six workspaces were silently missing, `packages/utils` and `packages/api`
-among them.
+loaded on that release; six workspaces were silently missing, `packages/utils`
+and `packages/api` among them.
 
 `packages/utils` is deliberately in neither runtime list. Its tsconfig gives it
 no DOM lib and no node types, it imports nothing from `node:`, and anything that
@@ -116,3 +118,24 @@ to fail is indistinguishable from one that cannot.
 same defect as a TypeScript error first, so a probe for it would pass whether or
 not the plugin loaded — the same non-discriminating evidence that produced the
 wrong conclusions on #318 in the first place (AGENTS.md Rule 14).
+
+## Amendment 2026-10-17 — Vite+ 1.3 loads a package lint block from that package
+
+The sentences above that say a workspace `lint` block was never loaded describe
+Vite+ 0.3. The guide quoted in Context is still in Vite+ 1.3 and still describes
+a run from the workspace root. The same guide now also says what a
+package-directory run does (`node_modules/vite-plus/docs/guide/monorepo.md`):
+
+- From the workspace root, `vp lint`, `vp fmt` and `vp check` apply the root
+  config and do not apply a nested one.
+- From a package directory, `vp lint` and `vp fmt` still use the root settings
+  unless that package's config defines its own `lint` or `fmt` block. Vite+
+  does not recommend that block.
+- `vp check` always uses the root `lint` and `fmt` blocks. A package config
+  cannot replace them.
+
+A workspace `lint` script is `vp lint .`, and `vp run` executes it with that
+package as the working directory. On 1.3 that run would load a `lint` block in
+the package config. The decision is unchanged. A workspace config still carries
+no `lint` key, and `vp run lint:plugins:verify` still fails when one appears.
+The root block and its `overrides` remain the only place a rule is set.

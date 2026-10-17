@@ -1,8 +1,11 @@
 /**
- * The Oxlint configuration a Vite+ monorepo loads once, from its ROOT
- * `vite.config.ts`. Vite+ reads `lint` from the root config only — a `lint`
- * block in a workspace config is never loaded
- * (`node_modules/vite-plus/docs/guide/monorepo.md`) — so per-workspace
+ * The Oxlint configuration a Vite+ monorepo loads from its root
+ * `vite.config.ts`. From the root, `vp lint`, `vp fmt` and `vp check` apply
+ * that config and do not apply a nested one. From a package directory, `vp
+ * lint` and `vp fmt` still use the root settings unless that package's own
+ * config defines a `lint` or `fmt` block, which Vite+ does not recommend;
+ * `vp check` always uses the root blocks and a package config cannot replace
+ * them (`node_modules/vite-plus/docs/guide/monorepo.md`). Per-workspace
  * differences are `overrides` here, with globs resolved from the repo root.
  *
  * Rules belonging to ESLint plugins (`react-x`, `react-dom`, `@stylexjs`,
