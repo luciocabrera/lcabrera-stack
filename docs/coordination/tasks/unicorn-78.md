@@ -9,6 +9,8 @@ area:
   - pnpm-lock.yaml
   - packages/vite-configs/**
   - .changeset/take-unicorn-78.md
+  - .changeset/theme-provider-initial-theme-default.md
+  - .changeset/unicorn-78-*.md
   - apps/showcase/src/auth/parseAuthToken.util.ts
   - packages/devkit/scripts/create.mjs
   - packages/eval-history/src/stats/comparability.util.ts
