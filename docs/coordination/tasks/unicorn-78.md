@@ -21,6 +21,10 @@ area:
   - packages/server/src/table-page/create-table-page-loader.util.ts
   - packages/ui/src/INVENTORY.md
   - packages/ui/src/utils/tests/createMockButton.util.tsx
+  - packages/ui/src/utils/tests/createMockSidePanelSection.util.tsx
+  - packages/ui/src/utils/tests/registerDrawerFooterMocks.tsx
+  - packages/ui/src/utils/tests/registerSectionFooterMocks.tsx
+  - packages/ui/src/components/Table/TableSettingsDrawer/GeneralSettingsSection/GeneralSettingsSection.test.tsx
   - packages/ui/src/contexts/ThemeContext/ThemeContext.provider.tsx
   - packages/ui/src/components/VirtualList/utils/getFilteredOptions.util.ts
   - packages/ui/src/components/Table/contexts/TableConfig/grouping/utils/pruneColumnAxis.util.ts

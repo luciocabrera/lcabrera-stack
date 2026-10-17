@@ -1,7 +1,5 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from 'react';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   afterEach,
@@ -12,29 +10,11 @@ import {
   vi,
 } from 'vite-plus/test';
 
+import '#ui/utils/tests/registerSectionFooterMocks';
+
 const { clearAllSettingsMock, resetTableSettingsMock } = vi.hoisted(() => ({
   clearAllSettingsMock: vi.fn(),
   resetTableSettingsMock: vi.fn(),
-}));
-
-vi.mock('#ui/components/Button', async () => {
-  const { MockButton } = await import('#ui/utils/tests/createMockButton.util');
-
-  return { Button: MockButton };
-});
-
-vi.mock('#ui/components/Icons', () => ({
-  EraserIcon: () => <span>Eraser icon</span>,
-  RefreshIcon: () => <span>Refresh icon</span>,
-}));
-
-vi.mock('#ui/components/SidePanel', () => ({
-  SidePanelSection: ({ children }: { readonly children: ReactNode }) => (
-    <section>{children}</section>
-  ),
-  SidePanelSectionHeader: ({ title }: { readonly title: string }) => (
-    <h3>{title}</h3>
-  ),
 }));
 
 vi.mock('../../TableDrawerContext/actions', () => ({

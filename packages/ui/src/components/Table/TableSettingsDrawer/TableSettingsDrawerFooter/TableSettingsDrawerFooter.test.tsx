@@ -1,7 +1,5 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from 'react';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   afterEach,
@@ -11,6 +9,8 @@ import {
   it,
   vi,
 } from 'vite-plus/test';
+
+import '#ui/utils/tests/registerDrawerFooterMocks';
 
 const {
   batchSetTableDrawerSettingsMock,
@@ -26,18 +26,6 @@ const {
   resetTableDrawerSettingsMock: vi.fn(),
   setTableIsTableSettingsOpenMock: vi.fn(),
   tableColumnFiltersMock: {} as Record<string, unknown>,
-}));
-
-vi.mock('#ui/components/Button', async () => {
-  const { MockButton } = await import('#ui/utils/tests/createMockButton.util');
-
-  return { Button: MockButton };
-});
-
-vi.mock('#ui/components/SidePanel', () => ({
-  SidePanelFooter: ({ children }: { readonly children: ReactNode }) => (
-    <div>{children}</div>
-  ),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/actions', () => ({
