@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 import type { IngestQuery } from '../ingest/ingest.types.ts';
 
 import { envelopeFileSystem } from '../ingest/envelopeFileSystem.util.ts';
+import { memoryFileSystem } from '../ingest/memoryFileSystem.util.ts';
 import {
   INSERT_BASELINE_SQL,
   SELECT_SUBJECT_ID_SQL,
@@ -19,7 +20,7 @@ const OTHER = '22222222-2222-4222-8222-222222222222';
 
 type RunArgs = {
   readonly baselineId: string;
-  readonly outcome: 'fail' | 'pass';
+  readonly outcome: 'error' | 'fail' | 'pass';
 };
 
 const run = ({ baselineId, outcome }: RunArgs) =>
@@ -71,7 +72,20 @@ const recordRuns = ({ connect, envelopes }: RecordRunsArgs) =>
     connectionString: URL_,
     fileSystem: envelopeFileSystem(envelopes),
     paths: ['/results/skills'],
+    runs: envelopes.filter(
+      ({ run: { baseline_id } }) => baseline_id === BASELINE,
+    ).length,
   });
+
+const filesOf = (
+  envelopes: readonly { readonly run: { readonly run_id: string } }[],
+) =>
+  Object.fromEntries(
+    envelopes.map((envelope) => [
+      `/results/skills/${envelope.run.run_id}.json`,
+      JSON.stringify(envelope),
+    ]),
+  );
 
 describe('recordBaseline', () => {
   it('ingests only its own runs, then writes the baseline rows', async () => {
@@ -154,12 +168,113 @@ describe('recordBaseline', () => {
     expect(sent.map(({ text }) => text)).not.toContain(INSERT_BASELINE_SQL);
   });
 
+  it('names an envelope of its baseline that fails to parse', async () => {
+    const { connect } = database();
+    const broken = {
+      ...run({ baselineId: BASELINE, outcome: 'pass' }),
+      schema_version: 99,
+    };
+    const valid = [
+      run({ baselineId: BASELINE, outcome: 'pass' }),
+      run({ baselineId: BASELINE, outcome: 'pass' }),
+    ];
+    const summary = await recordBaseline({
+      baselineId: BASELINE,
+      connect,
+      connectionString: URL_,
+      fileSystem: memoryFileSystem(filesOf([...valid, broken])),
+      paths: ['/results/skills'],
+      runs: 3,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toHaveLength(1);
+    expect(summary.stderr[0]).toContain(
+      `evals:baseline: /results/skills/${broken.run.run_id}.json carries baseline ${BASELINE} but is not a valid envelope, so it is left out: `,
+    );
+  });
+
+  it('names a commissioned run that left no envelope and records the rest', async () => {
+    const { connect } = database();
+    const summary = await recordBaseline({
+      baselineId: BASELINE,
+      connect,
+      connectionString: URL_,
+      fileSystem: envelopeFileSystem([
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+      ]),
+      paths: ['/results/skills'],
+      runs: 3,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toEqual([
+      `evals:baseline: 1 of 3 runs left no envelope for baseline ${BASELINE} under /results/skills, so a runner failed before recording`,
+    ]);
+  });
+
+  it('names a run whose every trial ended in error and records the rest', async () => {
+    const { connect } = database();
+    const failed = run({ baselineId: BASELINE, outcome: 'error' });
+    const summary = await recordBaseline({
+      baselineId: BASELINE,
+      connect,
+      connectionString: URL_,
+      fileSystem: envelopeFileSystem([
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        { ...failed, trials: failed.trials.slice(0, 1) },
+      ]),
+      paths: ['/results/skills'],
+      runs: 3,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toEqual([
+      `evals:baseline: every trial of run ${failed.run.run_id} ended in error, which points at the harness rather than the model, so it is left out`,
+    ]);
+  });
+
+  it('warns about a file it cannot read and records the rest', async () => {
+    const { connect } = database();
+    const stale = '/results/skills/33333333-3333-4333-8333-333333333333.json';
+    const files = memoryFileSystem({
+      ...filesOf([
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+      ]),
+      [stale]: '',
+    });
+    const summary = await recordBaseline({
+      baselineId: BASELINE,
+      connect,
+      connectionString: URL_,
+      fileSystem: {
+        ...files,
+        readFile: (file: string) =>
+          file === stale
+            ? Promise.reject(new Error('permission denied'))
+            : files.readFile(file),
+      },
+      paths: ['/results/skills'],
+      runs: 2,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toHaveLength(1);
+    expect(summary.stderr[0]).toContain(
+      `evals:baseline: ${stale} is left out, and no baseline can be read from it: could not read`,
+    );
+  });
+
   it('refuses an unset database before reading anything', async () => {
     const summary = await recordBaseline({
       baselineId: BASELINE,
       connectionString: undefined,
       fileSystem: envelopeFileSystem([]),
       paths: ['/results/skills'],
+      runs: 2,
     });
 
     expect(summary.exitCode).toBe(1);

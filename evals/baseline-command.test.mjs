@@ -1,7 +1,9 @@
 import { BASELINE_SUITES } from '@repo/eval-history/baseline/baseline.constants';
+import { MIN_BASELINE_RUNS } from '@repo/eval-history/stats/stats.constants';
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
+import { wholeNumberProblem } from './agent-sessions.mjs';
 import {
   BASELINE_RUNNERS,
   dirtyTreeProblem,
@@ -17,6 +19,7 @@ const BASELINE = '11111111-1111-4111-8111-111111111111';
 const byName = (left, right) => left.localeCompare(right);
 
 const effectsFor = (overrides = {}) => ({
+  checkRuns: vi.fn(() => Promise.resolve([])),
   error: vi.fn(),
   gitStatus: vi.fn(() => ''),
   log: vi.fn(),
@@ -66,6 +69,23 @@ describe('parseBaselineArgs', () => {
     expect(parsed.message).toContain(message);
     expect(parsed.message).toMatch(/^evals:baseline: /u);
   });
+});
+
+describe('parseBaselineArgs --runs', () => {
+  it.each(['1', '2.5', 'two', ''])(
+    'refuses %j with the sentence every runner prints',
+    (runs) => {
+      expect(
+        parseBaselineArgs({
+          argv: ['--suite', 'skills', '--runs', runs],
+          defaultRuns: 5,
+        }),
+      ).toEqual({
+        message: `evals:baseline: ${wholeNumberProblem({ minimum: MIN_BASELINE_RUNS, value: runs })}`,
+        ok: false,
+      });
+    },
+  );
 });
 
 describe('dirtyTreeProblem', () => {
@@ -184,6 +204,7 @@ describe('runBaseline', () => {
     expect(effects.mintId).toHaveBeenCalledOnce();
     expect(effects.record).toHaveBeenCalledWith({
       baselineId: BASELINE,
+      runs: 3,
       suite: 'skills',
     });
   });
@@ -202,6 +223,70 @@ describe('runBaseline', () => {
     ).toBe(130);
     expect(effects.runOnce).toHaveBeenCalledOnce();
     expect(effects.record).not.toHaveBeenCalled();
+  });
+
+  it('checks the runs so far after every run that has another after it', async () => {
+    const effects = effectsFor();
+
+    await runBaseline({
+      argv: ['--suite', 'skills'],
+      defaultRuns: 3,
+      effects,
+    });
+
+    expect(effects.checkRuns.mock.calls).toEqual([
+      [{ baselineId: BASELINE, model: undefined, runs: 1, suite: 'skills' }],
+      [{ baselineId: BASELINE, model: undefined, runs: 2, suite: 'skills' }],
+    ]);
+  });
+
+  it('leaves a failing last run to record, which keeps the good runs', async () => {
+    const effects = effectsFor({
+      checkRuns: vi.fn(({ runs }) =>
+        Promise.resolve(
+          runs === 5 ? ['every trial of run r ended in error'] : [],
+        ),
+      ),
+    });
+
+    expect(
+      await runBaseline({
+        argv: ['--suite', 'skills'],
+        defaultRuns: 5,
+        effects,
+      }),
+    ).toBe(0);
+    expect(effects.runOnce).toHaveBeenCalledTimes(5);
+    expect(effects.error).not.toHaveBeenCalled();
+    expect(effects.record).toHaveBeenCalledWith({
+      baselineId: BASELINE,
+      runs: 5,
+      suite: 'skills',
+    });
+  });
+
+  it('stops after the first run that shows a failing harness', async () => {
+    const effects = effectsFor({
+      checkRuns: vi.fn(() =>
+        Promise.resolve(['every trial of run r ended in error']),
+      ),
+    });
+
+    expect(
+      await runBaseline({
+        argv: ['--suite', 'skills'],
+        defaultRuns: 5,
+        effects,
+      }),
+    ).toBe(1);
+    expect(effects.runOnce).toHaveBeenCalledOnce();
+    expect(effects.record).not.toHaveBeenCalled();
+    expect(effects.error.mock.calls).toEqual([
+      ['evals:baseline: every trial of run r ended in error'],
+      [
+        'evals:baseline: stopped after run 1 of 5 rather than spend the rest on a failing harness; no baseline was written',
+      ],
+    ]);
   });
 
   it('refuses bad arguments before touching git', async () => {

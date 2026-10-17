@@ -222,14 +222,19 @@ export const sessionMetrics = (messages, timestamps, thrown) => {
 export const withoutSeparator = (args) =>
   args[0] === '--' ? args.slice(1) : args;
 
-export const wholeNumber = ({ minimum, reason = '', value }) => {
+export const wholeNumberProblem = ({ minimum, reason = '', value }) => {
   const number = Number(value);
-  if (!Number.isSafeInteger(number) || number < minimum) {
-    throw new Error(
-      `--runs must be a whole number of at least ${minimum}${reason}; got "${value}"`,
-    );
+  return Number.isSafeInteger(number) && number >= minimum
+    ? null
+    : `--runs must be a whole number of at least ${minimum}${reason}; got "${value}"`;
+};
+
+export const wholeNumber = ({ minimum, reason, value }) => {
+  const problem = wholeNumberProblem({ minimum, reason, value });
+  if (problem !== null) {
+    throw new Error(problem);
   }
-  return number;
+  return Number(value);
 };
 
 const reportedCost = (metrics) => metrics?.cost_usd_reported;

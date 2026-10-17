@@ -91,6 +91,7 @@ describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
   const writerClient = () => clientAs(writer.name);
 
   const record = async (args: RunsOfArgs) => {
+    const envelopes = runsOf(args);
     const summary = await recordBaseline({
       baselineId: args.baselineId,
       connect: async () => ({
@@ -98,8 +99,9 @@ describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
         end: () => Promise.resolve(),
       }),
       connectionString: SCRATCH_URL,
-      fileSystem: envelopeFileSystem(runsOf(args)),
+      fileSystem: envelopeFileSystem(envelopes),
       paths: ['/results'],
+      runs: envelopes.length,
     });
 
     expect(summary.stderr).toEqual([]);
