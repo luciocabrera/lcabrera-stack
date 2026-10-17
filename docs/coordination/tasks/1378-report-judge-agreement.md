@@ -2,7 +2,7 @@
 id: 1378-report-judge-agreement
 title: Report judge agreement in evals:report
 owner: agent:claude
-status: active
+status: review
 branch: feat/1378-1378-report-judge-agreement
 area:
   - packages/eval-history/src/report/**
@@ -13,7 +13,7 @@ area:
 started: 2026-10-17
 updated: 2026-10-17
 plan: (none)
-pr: (none)
+pr: '#1389'
 issue: #1378
 ---
 
