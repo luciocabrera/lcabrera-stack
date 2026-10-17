@@ -103,4 +103,27 @@ describe('compareRuns', () => {
       flips: [{ taskKey: 'skills/react-19/trigger-1' }],
     });
   });
+
+  it('names no cause for a subject only one run reached', () => {
+    const storePattern = {
+      contentHash: 'c-store',
+      kind: 'skill',
+      name: 'store-pattern',
+    } as const;
+    const storeTask = {
+      outcomes: ['pass' as const],
+      taskHash: 't-store',
+      taskKey: 'skills/store-pattern/trigger-1',
+    };
+    const complete = {
+      ...main,
+      subjects: [...main.subjects, storePattern],
+      tasks: [...main.tasks, storeTask],
+    };
+
+    expect(compareRuns({ a: complete, b: main, thresholds })).toMatchObject({
+      changed: { kind: 'none' },
+      flips: [{ taskKey: 'skills/store-pattern/trigger-1' }],
+    });
+  });
 });

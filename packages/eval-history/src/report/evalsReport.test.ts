@@ -40,6 +40,46 @@ const mainRun = fixtureEnvelope({
   runId: '00000000-0000-4000-8000-000000000001',
 });
 
+const STORE_PATTERN = { kind: 'skill', name: 'store-pattern' } as const;
+const STORE_TASK = 'skills/store-pattern/trigger-1';
+
+const withStorePattern = runEnvelopeSchema.parse({
+  ...mainRun,
+  subjects: [
+    ...mainRun.subjects,
+    {
+      ...mainRun.subjects[0],
+      ...STORE_PATTERN,
+      content_hash: sha256Hex('store-pattern'),
+      path: '.github/skills/store-pattern/SKILL.md',
+    },
+  ],
+  tasks: [
+    ...mainRun.tasks,
+    {
+      ...mainRun.tasks[0],
+      subject: STORE_PATTERN,
+      task_hash: sha256Hex(STORE_TASK),
+      task_key: STORE_TASK,
+    },
+  ],
+  trials: [
+    ...mainRun.trials,
+    { ...mainRun.trials[0], task_key: STORE_TASK, trial_index: 0 },
+  ],
+});
+
+const storePatternUnreached = runEnvelopeSchema.parse({
+  ...withStorePattern,
+  run: {
+    ...withStorePattern.run,
+    branch: FEATURE,
+    run_id: '00000000-0000-4000-8000-000000000008',
+    status: 'aborted',
+  },
+  trials: mainRun.trials,
+});
+
 const RUNS = {
   'few-main.json': fixtureEnvelope({
     base,
@@ -79,6 +119,7 @@ const RUNS = {
     outcomes: MAIN_OUTCOMES,
     runId: '00000000-0000-4000-8000-000000000004',
   }),
+  'store-pattern-unreached.json': storePatternUnreached,
   'two-causes.json': fixtureEnvelope({
     base,
     branch: FEATURE,
@@ -87,6 +128,7 @@ const RUNS = {
     outcomes: FEATURE_OUTCOMES,
     runId: '00000000-0000-4000-8000-000000000003',
   }),
+  'with-store-pattern.json': withStorePattern,
 };
 
 const readEnvelope: ReadEnvelope = (file) => {
@@ -129,6 +171,20 @@ describe('evalsReport over fixture runs', () => {
     expect(markdown).toContain('`react-19` content hash. That is one cause.');
     expect(markdown).toMatch(/91\.7% \(n=12, \d+\.\d%–\d+\.\d%\)/u);
     expect(markdown).toMatchSnapshot();
+  });
+
+  it('names no cause for a skill the aborted run never reached', async () => {
+    const { exitCode, stdout } = await report({
+      a: 'with-store-pattern.json',
+      b: 'store-pattern-unreached.json',
+    });
+    const [markdown = ''] = stdout;
+
+    expect(exitCode).toBe(0);
+    expect(markdown).toContain(`| ${STORE_TASK} | 1/1 | — |`);
+    expect(markdown).toContain(
+      'Changed: no input hash, so nothing recorded explains a difference.',
+    );
   });
 
   it('says a cost was not reported without calling it reported', async () => {

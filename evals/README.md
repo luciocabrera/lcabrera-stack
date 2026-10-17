@@ -73,10 +73,11 @@ prints one markdown section per suite that has both:
 2. each run's pass rate with n and its Wilson interval, or `insufficient data`
    below `minTrialsForRate` counted trials;
 3. the reported cost and the median trial duration of each run;
-4. which input hashes changed: the harness version, the skill catalog, each
-   subject's content, the task, fixture and expected hashes of each task both
-   runs hold, and the judge and agent prompts. A task only one run reached
-   shows in the flip list and is not named as a cause. One changed hash is
+4. which input hashes changed: the harness version, the skill catalog, the
+   content of each subject both runs hold, the task, fixture and expected
+   hashes of each task both runs hold, and the judge and agent prompts. A task
+   or subject only one run reached is not named as a cause; the task shows in
+   the flip list. One changed hash is
    named as the one cause; more than one is reported as multiple causes,
    because no single change then explains the difference.
 
