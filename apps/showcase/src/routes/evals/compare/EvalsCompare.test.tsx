@@ -83,11 +83,11 @@ describe('EvalsCompare', () => {
     ).toEqual(['/evals/runs/run-a', '/evals/runs/run-b']);
   });
 
-  it('offers two runs and a branch to compare when none is chosen', async () => {
+  it('prefills the older run as A and the newer as B, so an unchanged submit reads forward in time', async () => {
     renderWith({
       choices: [
-        run({ rate: 1, runId: 'run-a' }),
-        run({ rate: 0.5, runId: 'run-b' }),
+        run({ rate: 0.5, runId: 'run-newest' }),
+        run({ rate: 1, runId: 'run-before' }),
       ],
       comparison: undefined,
     });
@@ -97,7 +97,10 @@ describe('EvalsCompare', () => {
     expect([first?.getAttribute('name'), second?.getAttribute('name')]).toEqual(
       ['a', 'b'],
     );
-    expect((second as HTMLSelectElement | undefined)?.value).toBe('run-b');
+    expect([
+      (first as HTMLSelectElement | undefined)?.value,
+      (second as HTMLSelectElement | undefined)?.value,
+    ]).toEqual(['run-before', 'run-newest']);
     expect(screen.getByRole('textbox', { name: 'Branch' })).toBeDefined();
   });
 });

@@ -14,3 +14,5 @@ export const TOTAL_COLUMNS: readonly FiguresColumn[] = [
   { isNumeric: true, key: 'b', label: 'B' },
   { isNumeric: true, key: 'change', label: 'Change' },
 ];
+
+export const PREFILLED_CHOICE = { a: 1, b: 0 } as const;
