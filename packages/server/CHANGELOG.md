@@ -15,7 +15,7 @@
 - 955f68d: Adds `table-page/create-table-loader-reads.util`. `createTableLoaderReads({ limit, reader })` returns the `fetchPage` and `resolveGroupingCapabilities` of the page a table opens on, from a reader built by `createTablePageReader`. `fetchPage` takes the view's `effectiveSorting`, `filters`, `grouping` and `totalsPlacement`, and reads the first `limit` rows with their total: the sort rules that name a direction become the ORDER BY, the filters become the WHERE, and a grouping with keys switches to the grouped read. Spread the result into a table route loader instead of mapping the view state to a read by hand.
 - f9bc801: Adds `table-page/*`, the pieces that serve a database-backed table page.
   Declare the table once with `createTablePageReader({ target, primaryKey,
-fallbackSort, defaultLimit, maxLimit, groupMaxRows })` and it returns the read
+  fallbackSort, defaultLimit, maxLimit, groupMaxRows })` and it returns the read
   functions bound to that table:
 
   - `selectPage` clamps the page window and the ORDER BY length, reads rows plus
@@ -423,7 +423,7 @@ fallbackSort, defaultLimit, maxLimit, groupMaxRows })` and it returns the read
 
   The cap for `flat` and `rollup` is unchanged at four — only the wording moved.
   Cube then states its own lower cap in the same shape: `A cube grouping takes at
-most 3 group keys; got 4.`
+  most 3 group keys; got 4.`
 
   Anything matching on that message text needs updating. The `reason`
   discriminant is unchanged and is what callers should branch on.
@@ -468,7 +468,7 @@ most 3 group keys; got 4.`
   the raw distinct count.
 
   **Truncation is performed in a stated time zone.** `date_trunc(field,
-timestamptz)` resolves against the session `TimeZone`, so the same order falls in
+  timestamptz)` resolves against the session `TimeZone`, so the same order falls in
   December for one caller and January for another. `timestamptz` keys are pinned to
   UTC; `date` and `timestamp` are cast so the call cannot promote them through the
   session zone.

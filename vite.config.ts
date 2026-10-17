@@ -106,9 +106,18 @@ export const lintConfig = {
 };
 
 export default defineConfig({
+  test: {
+    // Vitest v4 compatibility: preserve mock call history.
+    // Remove after tests no longer rely on calls from setup or earlier tests.
+    // https://viteplus.dev/guide/vitest-v5#remove-unneeded-compatibility-settings
+    // https://vitest.dev/guide/migration/#clearmocks-is-enabled-by-default
+    clearMocks: false,
+  },
   fmt: fmtConfig,
-  // Vite+ reads `lint` from this file only; a workspace's own `lint` block is
-  // never loaded. Per-workspace differences are `overrides` inside this config.
+  // From the repo root, Vite+ applies this `lint` block and does not apply a
+  // workspace one. A package-directory `vp lint` still uses it unless that
+  // package defines its own `lint` block. `vp check` always uses this one.
+  // Per-workspace differences are `overrides` inside this config.
   lint: lintConfig,
   run: {
     tasks: {

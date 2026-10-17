@@ -32,9 +32,12 @@ React/StyleX halves of the peer list — see **Peer dependencies** below.
 
 ## Oxlint is configured once, at the root
 
-Vite+ reads `lint` from the **root** `vite.config.ts` only; a `lint` block in a
-workspace config is never loaded. So `createLintConfig` returns one object for
-the whole repo, and per-workspace differences are `overrides` inside it.
+Vite+ applies `lint` from the root `vite.config.ts`. From the root, `vp lint`,
+`vp fmt` and `vp check` do not apply a nested config. From a package directory,
+`vp lint` and `vp fmt` still use the root settings unless that package defines
+its own `lint` or `fmt` block; `vp check` always uses the root blocks. So
+`createLintConfig` returns one object for the whole repo, and per-workspace
+differences are `overrides` inside it.
 
 ```ts
 import { createFmtConfig } from '@lcabrera/vite-config/fmt';

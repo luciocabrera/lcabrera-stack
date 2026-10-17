@@ -38,9 +38,9 @@ long past the point where the browser waiting on the loader has given up.
 1. **Nothing estimates the result before running it.** The first signal that a
    grouping was too expensive is the payload arriving, or not arriving.
 2. **A timeout cannot be set per query without three traps.** `SET
-statement_timeout` without `LOCAL` persists on the pooled connection and
+   statement_timeout` without `LOCAL` persists on the pooled connection and
    silently re-tunes every later query that borrows it. `SET LOCAL
-statement_timeout = $1` is a **syntax error** — `SET` is a utility statement
+   statement_timeout = $1` is a **syntax error** — `SET` is a utility statement
    and cannot be prepared, so the value would have to be spliced into the SQL
    text. And an executor called without `tx` inside a transaction runs on the
    pool singleton instead, outside it, so the timeout applies to nothing — with

@@ -41,7 +41,7 @@ only one of them was injectable.
   sandbox those entries exist to draw.
 - `vp run pr:threads -- --resolve <thread-id>` — **not injectable.** The id is
   concatenated, not passed separately: `runGh(['api', 'graphql', …, '-f',
-'thread=' + threadId])` produces an element that begins with `thread=`
+  'thread=' + threadId])` produces an element that begins with `thread=`
   whatever the id is. `--resolve --paginate` sends `thread=--paginate`, which
   `gh` reads as the value of `-f` and binds as a GraphQL variable string. There
   is no vector in which it reaches flag position.

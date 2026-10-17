@@ -80,3 +80,4 @@ reports/usage/
 
 # Stryker sandbox (mutation runs) — scratch, never committed.
 .stryker-tmp/
+.vitest/

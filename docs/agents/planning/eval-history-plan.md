@@ -176,7 +176,12 @@ type RunEnvelope = {
       | 'verifier-tooled'
       | 'skill-quality';
     readonly trigger:
-      'local' | 'ci-pr' | 'ci-push' | 'ci-scheduled' | 'ci-manual' | 'baseline';
+      | 'local'
+      | 'ci-pr'
+      | 'ci-push'
+      | 'ci-scheduled'
+      | 'ci-manual'
+      | 'baseline';
     readonly actor: string; // GITHUB_ACTOR, else git user.email's local part
     readonly branch: string;
     readonly git_sha: string;
@@ -231,7 +236,11 @@ type RunEnvelope = {
     readonly task_key: string; // e.g. 'skills/react-19/trigger-2'
     readonly subject: { readonly kind: string; readonly name: string };
     readonly kind:
-      'trigger' | 'near-miss' | 'fixture' | 'quality' | 'rule-check';
+      | 'trigger'
+      | 'near-miss'
+      | 'fixture'
+      | 'quality'
+      | 'rule-check';
     readonly set: 'regression' | 'capability';
     readonly source: 'incident' | null; // PRD B11; validated by --check since #1298
     readonly tags: readonly string[];
@@ -572,7 +581,7 @@ The decision is a small migrator in the package:
 - Migrations are `packages/eval-history/migrations/NNNN-<slug>.sql`, applied
   in filename order.
 - `evals.schema_migration (version int primary key, name text, sha256
-char(64), applied_at timestamptz)` records each one.
+  char(64), applied_at timestamptz)` records each one.
 - Each file runs in its own transaction after `pg_advisory_xact_lock` on a
   fixed key, so two CI jobs cannot migrate at once.
 - An applied file whose checksum changed stops the run and names the file. A
@@ -945,7 +954,7 @@ Each has a recommendation. The issue that records the answer is in brackets.
 1. **Where does the history database live?** Recommend: locally, a separate
    database `eval_history` on the existing compose Postgres, schema `evals`.
    It shares the container and nothing else, so `vp run --filter showcase
-seed`, which drops tables, cannot reach it. (#1262)
+   seed`, which drops tables, cannot reach it. (#1262)
 2. **Hosted Postgres for CI and scheduled runs?** Recommend a free-tier
    serverless Postgres such as Neon, chosen by whoever owns the account,
    with `EVALS_DATABASE_URL` added as a secret. Until then CI ingest skips and

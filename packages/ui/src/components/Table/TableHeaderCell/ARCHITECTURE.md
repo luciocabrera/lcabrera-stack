@@ -144,7 +144,7 @@ inline pin/sort/settings buttons:
   per-column `ColumnSettingsDrawer` — identical wiring to the previous
   "Settings for {label}" button (`setTableColumnSelectedKey` +
   `setTableDrawersOpenState({ isColumnSettingsOpen: true,
-isTableSettingsOpen: false })`).
+  isTableSettingsOpen: false })`).
 
 **The layout lock.** While a grouping is applied, two kinds of column cannot
 take a layout action. `PinAndHideActions` asks `useTableColumnLayoutLock` once

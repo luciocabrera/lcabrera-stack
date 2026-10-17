@@ -34,15 +34,16 @@ export const createReactRouterRunConfig = ({
 }: CreateReactRouterRunConfigArgs = {}) => ({
   tasks: {
     build: {
-      cache: true,
+      cache: {
+        env: ['NODE_ENV'],
+        input: [
+          { auto: true },
+          '!build/**',
+          '!.react-router/**',
+          '!node_modules/.vite-temp/**',
+        ],
+      },
       command: 'NODE_ENV=production react-router build',
-      env: ['NODE_ENV'],
-      input: [
-        { auto: true },
-        '!build/**',
-        '!.react-router/**',
-        '!node_modules/.vite-temp/**',
-      ],
     },
     start: {
       command: `${createLoadLocalEnv(envFiles)} if [ ! -f ./build/server/index.js ]; then react-router build; fi && exec react-router-serve ./build/server/index.js`,

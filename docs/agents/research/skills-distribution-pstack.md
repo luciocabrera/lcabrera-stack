@@ -331,7 +331,7 @@ parallel, separately-maintained repository with its own translation layer.
   all — even its most code-like component, the CI validator
   (`/scripts/validate-plugins.mjs`), lives as a **plain script committed to the
   marketplace repo root itself**, run via `npm install --no-save ajv
-ajv-formats` in the consuming repo's own CI, not resolved from a published,
+  ajv-formats` in the consuming repo's own CI, not resolved from a published,
   versioned package. If pstack ever needed a real stateful gate (its
   `show-me-your-work` skill, for instance, writes a TSV decision log via a
   bundled `pstack/skills/show-me-your-work/scripts/log.sh` rather than any installed binary), it would face
@@ -372,7 +372,7 @@ ajv-formats` in the consuming repo's own CI, not resolved from a published,
   - `create-plugin/skills/create-plugin-scaffold/SKILL.md`
   - `create-plugin/skills/review-plugin-submission/SKILL.md`
 - WebSearch: `Cursor plugins "/add-plugin" marketplace.json install
-~/.cursor/plugins`
+  ~/.cursor/plugins`
 - WebSearch: `poteto pstack cursor plugin Lauren Tan`
 - WebFetch: `https://cursor.com/docs/plugins` (install/scope/auto-refresh
   behavior)

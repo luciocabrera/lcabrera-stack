@@ -37,5 +37,5 @@ createReactRouterPluginsConfig [const] ({ appRootUrl, babelConfigOverrides, babe
 
 ## ./run
 createLoadLocalEnv [const] (envFiles?: readonly string[]) => string
-createReactRouterRunConfig [const] ({ envFiles }?: CreateReactRouterRunConfigArgs) => { tasks: { build: { cache: boolean; command: string; env: string[]; input: (string | { auto: boolean; })[]; }; start: { command: string; }; test: { cache: boolean; command: string; }; "test:coverage": { cache: boolean; command: string; }; }; }
+createReactRouterRunConfig [const] ({ envFiles }?: CreateReactRouterRunConfigArgs) => { tasks: { build: { cache: { env: string[]; input: (string | { auto: boolean; })[]; }; command: string; }; start: { command: string; }; test: { cache: boolean; command: string; }; "test:coverage": { cache: boolean; command: string; }; }; }
 VITEST_COVERAGE_FLAGS [const] "--coverage --coverage.provider=v8 --coverage.reporter=json --coverage.reporter=json-summary --coverage.reportsDirectory=coverage"
