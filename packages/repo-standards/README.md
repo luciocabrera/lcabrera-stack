@@ -282,7 +282,7 @@ hardcode:
         { "dir": "packages/ui", "name": "@scope/ui", "run": true }
       ]
     },
-    "eslintPass": { "probeWorkspaces": ["packages/ui"] },
+    "eslintPass": { "probeWorkspaces": ["packages/ui"], "rootPassDir": "" },
     "affectedTests": {
       "coverageTaskPackage": "",
       "globalPackages": ["@scope/tsconfig", "@scope/vite-config"],
@@ -305,6 +305,14 @@ nothing, for the reason `publicPackageDirs` does: which workspaces a gate visits
 is the repository's own data. `repo-verify-inventory`, `repo-merge-coverage`,
 `repo-coverage-report`, `repo-verify-eslint-pass` and the change-scoped runners
 refuse an empty roster rather than passing over no workspaces.
+
+`eslintPass.rootPassDir` names a directory outside every workspace that the
+root package's own `lint:eslint:check` lints. When it is set,
+`repo-verify-eslint-pass` plants its probe under that directory and runs
+`vp run -r lint:eslint:check` from the root, and fails unless the fan-out reports
+the probe. That catches a root task that has left the fan-out as well as a root
+config that no longer loads the rule. An empty string, the default, and an
+absent key both mean the repository has no root pass to probe.
 
 `affectedTests` carries the two that are not rosters of workspaces to visit.
 `globalPackages` names the shared config packages whose change must force the

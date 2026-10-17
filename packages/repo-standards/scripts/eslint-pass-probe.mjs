@@ -17,6 +17,13 @@
  * so the exit code cannot tell those apart — but a throwing rule prints no
  * parseable JSON, which can. `silent` therefore means the pass ran and the rule
  * did not report the planted violation, i.e. it is not loaded.
+ *
+ * The root pass (`gates.eslintPass.rootPassDir`) is read from the fan-out's
+ * own output, which is the default text formatter interleaved with the task
+ * runner's lines, so it is matched by the probe's repository-relative path and
+ * the rule id printed under it. The task runner stops the remaining tasks
+ * when one fails, so a fan-out that failed without reporting the probe may
+ * never have reached the root task: that is `blocked`, not `unreported`.
  */
 
 export const PROBE_RULE = 'perfectionist/sort-imports';
@@ -44,4 +51,31 @@ export const classifyProbe = (stdout) => {
     .some((message) => message.ruleId === PROBE_RULE);
 
   return reported ? 'reported' : 'silent';
+};
+
+const slashed = (line) => line.replaceAll('\\', '/').trim();
+
+const reportsProbe = (output, probePath) => {
+  const lines = output.split(/\r?\n/u).map((line) => slashed(line));
+  const start = lines.findIndex(
+    (line) => line === probePath || line.endsWith(`/${probePath}`),
+  );
+
+  if (start === -1) {
+    return false;
+  }
+
+  const end = lines.findIndex((line, index) => index > start && line === '');
+
+  return lines
+    .slice(start + 1, end === -1 ? undefined : end)
+    .some((line) => line.endsWith(PROBE_RULE));
+};
+
+export const classifyFanOut = ({ output, probePath, status }) => {
+  if (reportsProbe(output, probePath)) {
+    return 'reported';
+  }
+
+  return status === 0 ? 'unreported' : 'blocked';
 };
