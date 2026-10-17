@@ -61,6 +61,10 @@ The root carries the eslint pass for `evals/`:
 - A block comment placed between two imports now splits the import list: the
   sort no longer reorders across it. Line comments still travel with the
   import below them, as before.
+- Root `scripts/` and `.github/skills/*/scripts/` are also outside every
+  workspace, and this pass ignores them on purpose. No eslint pass reads them;
+  Oxlint and Biome still do. Bringing them under
+  eslint is a separate change.
 - `vp run lint:eslint:verify` does not probe the root pass. Its probe file is
   written to a fresh directory at the root of a workspace, which this config
   ignores. The fail-closed target above covers a pass that lints no files, but

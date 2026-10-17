@@ -98,9 +98,11 @@ use `@lcabrera/vite-config/eslint-base-custom-rules` (same stack minus React/Sty
 and without `clean-import-paths`, which strips the import extensions
 node-resolution code requires).
 
-`evals/` is the one code directory that is not a workspace, so the root carries
-its pass: the root `eslint.config.mjs` ignores every path but `evals/`, and the
-root `lint:eslint:check` lints `evals` by name, so a config that ignored it too
+`evals/` is a code directory outside every workspace, so the root carries its
+pass. It is not the only one: root `scripts/` and `.github/skills/*/scripts/`
+are outside every workspace too, and no eslint pass reads them; Oxlint and
+Biome still do. For `evals/`, the root `eslint.config.mjs` ignores every path
+but `evals/`, and the root `lint:eslint:check` lints `evals` by name, so a config that ignored it too
 fails with "all of the files matching the glob pattern are ignored" instead of
 reporting a clean run. The runners take the tooling-script block through the
 factory's `toolingScriptPatterns`, as files under `scripts/` do.
