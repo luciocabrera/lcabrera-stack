@@ -15,6 +15,11 @@ area:
   - packages/eslint-local-rules/vite.config.ts
   - 'packages/*/vite.config.ts'
   - 'apps/*/vite.config.ts'
+  - packages/devkit/assets/**
+  - packages/repo-standards/scripts/verify-lint-plugins.mjs
+  - .github/skills/lint-toolchain/**
+  - .github/skills/health-swarm/**
+  - .changeset/pin-the-created-repo-toolchain-at-vite-plus-1-3.md
 started: 2026-10-17
 updated: 2026-10-17
 plan: (none)
@@ -28,6 +33,6 @@ Move the catalog pin, the Vite core alias, and the Vitest the toolchain bundles 
 
 ## Status / next
 
-- Current step: rebased onto `origin/main` after #1382 merged. The upgrade commit applied with no conflicts. `vp run check:safe` passed (92/92) on Node 26.7.0 before the earlier rebase onto the refresh branch.
+- Current step: the three review threads on #1386 are fixed in the working tree. The blueprint gitignore ignores `.vitest/`. The lint-config copies match where Vite+ 1.3 loads a nested block. `clearMocks: false` is gone.
 - Blockers: none.
-- Next: CI on https://github.com/luciocabrera/lcabrera-stack/pull/1386. Do not merge it from here.
+- Next: push, reply on the three threads, and squash-merge #1386 once the required checks pass on that head.

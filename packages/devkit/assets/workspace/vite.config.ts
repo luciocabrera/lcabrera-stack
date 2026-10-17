@@ -1,9 +1,12 @@
 /**
  * The one lint and format configuration this workspace loads.
  *
- * Vite+ reads `lint` and `fmt` from the root config only, so a workspace's own
- * config is never consulted for them and every per-workspace difference belongs
- * here as an override, with globs resolved from this directory.
+ * From this directory, Vite+ applies the `lint` and `fmt` blocks below and does
+ * not apply a nested config. From a package directory, lint and format still
+ * use this file unless that package defines its own `lint` or `fmt` block,
+ * which Vite+ does not recommend. The check command always uses this file.
+ * Per-workspace differences belong here as overrides, with globs resolved
+ * from this directory.
  */
 
 import { createFmtConfig } from '@lcabrera/vite-config/fmt';
@@ -18,11 +21,4 @@ export default defineConfig({
       node: ['packages/*/**'],
     },
   }),
-  test: {
-    // Vitest v4 compatibility: preserve mock call history.
-    // Remove after tests no longer rely on calls from setup or earlier tests.
-    // https://viteplus.dev/guide/vitest-v5#remove-unneeded-compatibility-settings
-    // https://vitest.dev/guide/migration/#clearmocks-is-enabled-by-default
-    clearMocks: false,
-  },
 });
