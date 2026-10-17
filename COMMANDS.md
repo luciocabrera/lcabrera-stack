@@ -95,8 +95,9 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 staged` fixes what it can on the staged files, but it cannot see a cross-file
 type error or a finding in a file this commit did not touch. **Tests are scoped,
 not the full suite**: `test:changed` selects on the diff and covers both halves —
-the affected workspaces and the root `scripts/` suites — so a docs-only push runs
-none, while a tooling-script edit still runs its tests here. Exactly what it
+the affected workspaces and the root suites, which are in no workspace — so a
+workspace edit runs that workspace and its dependents rather than every one, and
+a tooling-script edit still runs its tests here. Exactly what it
 selects, and what forces the full suite instead, is under
 [Gate & CI](#gate--ci) below; this section does not restate it.
 The **fallow audit** runs last, and locally: `fallow:preflight` is the same
@@ -219,11 +220,17 @@ skipped. Only the few files that change how every workspace resolves its tests �
 `pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root `vite.config.ts`, and the
 shared config packages `gates.affectedTests.globalPackages` names in
 [`devkit.config.json`](devkit.config.json) — force the
-full suite (a real dependency change always bumps the lockfile). A change to a
-code file under root `scripts/` (`.mjs`, `.cjs` or `.js`) adds the
-`test:scripts` group, which no workspace selection would ever reach; every other
-out-of-workspace change (root package.json scripts, lint/tsconfig configs, docs)
-affects no suite and runs nothing. Affected workspaces run plain `test`; with
+full suite (a real dependency change always bumps the lockfile). The root
+suites no workspace selection would ever reach are selected by
+`gates.affectedTests.rootSuites` in [`devkit.config.json`](devkit.config.json),
+which names the paths whose change can fail each one; `vp run test:changed --
+--dry-run` prints what a diff selects. **`test:scripts` is selected on every
+change, a docs-only one included**: a scan of its sources finds reads under
+nearly every top-level directory, so a narrower list would be one more roster to
+fall behind, and the suite costs seconds. `test:evals` is the selective one.
+`scripts/lib/gate-rosters.test.mjs` fails when a root test task `test:ci` runs
+is missing from that roster, when `test:scripts` stops matching every path, and
+when a path `test:evals` imports or names does not select it. Affected workspaces run plain `test`; with
 `--ci` (`repo-test-changed --ci`) `showcase` runs its coverage
 `test:ci` last, mirroring the root `test:ci` ordering. `--dry-run` prints the
 `vp run` commands without executing them. CI's Unit Tests job (and its coverage

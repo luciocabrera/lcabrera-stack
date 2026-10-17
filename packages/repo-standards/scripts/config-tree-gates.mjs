@@ -31,6 +31,12 @@ export const DEFAULT_TREE_GATES = {
     coverageTaskPackage: '',
     globalPackages: [],
     lintOnlyPatterns: [],
+    rootSuites: [
+      {
+        patterns: [String.raw`^scripts/.+\.(mjs|cjs|js)$`],
+        task: 'test:scripts',
+      },
+    ],
   },
   commandsDoc: { file: 'COMMANDS.md' },
   coverage: {
@@ -100,6 +106,26 @@ const treeList = (value, fallback, key) =>
       }))
     : fallback;
 
+const isSuiteEntry = (entry) =>
+  isPlainObject(entry) &&
+  typeof entry.task === 'string' &&
+  entry.task.trim() !== '' &&
+  Array.isArray(entry.patterns) &&
+  entry.patterns.length > 0;
+
+const suiteList = (value, fallback, key) =>
+  Array.isArray(value)
+    ? rejectMalformed({
+        entries: value,
+        isValid: isSuiteEntry,
+        key,
+        requirement: 'must name a `task` and a non-empty `patterns` list',
+      }).map((entry) => ({
+        patterns: patternList(entry.patterns, [], `${key}[].patterns`),
+        task: entry.task.trim(),
+      }))
+    : fallback;
+
 const pathList = (value, fallback, key) =>
   Array.isArray(value)
     ? rejectMalformed({
@@ -153,6 +179,11 @@ export const resolveTreeGates = (gates) => {
         affectedTests.lintOnlyPatterns,
         defaults.affectedTests.lintOnlyPatterns,
         'gates.affectedTests.lintOnlyPatterns',
+      ),
+      rootSuites: suiteList(
+        affectedTests.rootSuites,
+        defaults.affectedTests.rootSuites,
+        'gates.affectedTests.rootSuites',
       ),
     },
     commandsDoc: {
