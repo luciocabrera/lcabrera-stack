@@ -4,6 +4,7 @@ import {
   DETAIL_SCHEMA_BY_SUITE,
   ENVELOPE_SCHEMA_VERSION,
   OUTCOMES,
+  SUBJECT_KINDS,
   SUITES,
 } from './envelope.constants.ts';
 import { envelopeConsistencyIssues } from './envelopeConsistencyIssues.util.ts';
@@ -16,7 +17,7 @@ const strings = z.array(z.string());
 
 const suiteSchema = z.enum(SUITES);
 const outcomeSchema = z.enum(OUTCOMES);
-const subjectKindSchema = z.enum(['skill', 'rule', 'agent', 'prompt']);
+const subjectKindSchema = z.enum(SUBJECT_KINDS);
 
 const tokensSchema = z.object({
   cache_read: count,
