@@ -46,9 +46,11 @@ the root config with this repo's `WORKSPACE_RUNTIMES` roster — the factory
 pattern kept, moved to where Vite+ reads it
 ([ADR-042](../../../docs/decisions/ADR-042-oxlint-config-at-the-root.md), #318).
 The repo ran the other way round for a long time, with a `lint` block in every
-workspace built from a `*-lint` factory and **none of it loaded**; that layer is
-gone. `vp run lint:plugins:verify` now fails on a `lint` key in any workspace
-config, so it cannot come back.
+workspace built from a `*-lint` factory. On Vite+ 0.3 none of it loaded, and
+that layer is gone. Vite+ 1.3 would load such a block when `vp lint` runs from
+the package directory, which is why the gate still rejects the key.
+`vp run lint:plugins:verify` fails on a `lint` key in any workspace config, so
+it cannot come back.
 
 **Oxlint runs no ESLint-plugin rules.** The `jsPlugins` bridge is gone: the
 eslint pass already loads `react-x`, `react-dom`, `@stylexjs`, `local-rules`,

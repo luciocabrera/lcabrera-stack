@@ -20,6 +20,8 @@ area:
   - .github/skills/lint-toolchain/**
   - .github/skills/health-swarm/**
   - .changeset/pin-the-created-repo-toolchain-at-vite-plus-1-3.md
+  - docs/decisions/ADR-042-oxlint-config-at-the-root.md
+  - .gitignore
 started: 2026-10-17
 updated: 2026-10-17
 plan: (none)
@@ -33,6 +35,6 @@ Move the catalog pin, the Vite core alias, and the Vitest the toolchain bundles 
 
 ## Status / next
 
-- Current step: the three review threads on #1386 are fixed in the working tree. The blueprint gitignore ignores `.vitest/`. The lint-config copies match where Vite+ 1.3 loads a nested block. `clearMocks: false` is gone.
+- Current step: Claude reviewed `617d29d42` and opened two more threads. ADR-042 now says the never-loaded claim is the Vite+ 0.3 observation, and states what 1.3 does from a package directory. The host gitignore gives `.vitest/` its own note.
 - Blockers: none.
-- Next: push, reply on the three threads, and squash-merge #1386 once the required checks pass on that head.
+- Next: push, reply on the two new threads, and squash-merge #1386 once the required checks pass on that head.
