@@ -8,7 +8,7 @@
  * config against the real tree, and they live here rather than beside the gates
  * because what they read is this repository's own data.
  */
-import { existsSync, readdirSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -93,5 +93,62 @@ describe('gates.affectedTests.globalPackages', () => {
         lintOnlyPatterns,
       }).mode,
     ).toBe('scoped');
+  });
+});
+
+describe('gates.affectedTests.rootSuites', () => {
+  const { globalPackages, lintOnlyPatterns, rootSuites } = GATES.affectedTests;
+
+  const suitesFor = (file) =>
+    resolveAffected({
+      files: [file],
+      globalPackages,
+      graph: GRAPH,
+      lintOnlyPatterns,
+      rootSuites,
+    }).suites;
+
+  it('names only tasks the root manifest defines', () => {
+    const { scripts } = JSON.parse(
+      readFileSync(join(REPO_ROOT, 'package.json'), 'utf8'),
+    );
+    expect(
+      rootSuites.map((suite) => suite.task).filter((task) => !scripts[task]),
+    ).toEqual([]);
+  });
+
+  it('selects test:evals for a change under evals/', () => {
+    for (const file of [
+      'evals/run-record.mjs',
+      'evals/rules-consistency/rules-consistency.mjs',
+      'evals/regression.config.json',
+      'packages/repo-standards/scripts/git-exec.mjs',
+    ]) {
+      expect(suitesFor(file)).toContain('test:evals');
+    }
+  });
+
+  it('selects test:scripts for a root file a scripts/ suite reads', () => {
+    for (const file of [
+      '.fallowrc.json',
+      '.gitignore',
+      '.node-version',
+      'AGENTS.md',
+      'devkit.config.json',
+      'package.json',
+      '.changeset/config.json',
+      '.claude/pr-queue-policy.md',
+      '.github/workflows/check-safe.yml',
+      '.vite-hooks/pre-push',
+      'scripts/departed-names.json',
+      'scripts/lib/fallow-entries.mjs',
+    ]) {
+      expect(suitesFor(file)).toContain('test:scripts');
+    }
+  });
+
+  it('selects no root suite for a change inside a workspace or under docs/', () => {
+    expect(suitesFor('packages/ui/src/index.ts')).toEqual([]);
+    expect(suitesFor('docs/README.md')).toEqual([]);
   });
 });

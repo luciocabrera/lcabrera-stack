@@ -220,6 +220,23 @@
         "^packages/vite-configs/eslint\\.",
         "^packages/vite-configs/vite\\.(lint|fmt)\\.shared\\.config\\.ts$",
         "(^|/)eslint\\.config\\.mjs$"
+      ],
+      "rootSuites": [
+        {
+          "task": "test:scripts",
+          "patterns": [
+            "^scripts/",
+            "^[^/]+$",
+            "^\\.(changeset|claude|github|vite-hooks)/"
+          ]
+        },
+        {
+          "task": "test:evals",
+          "patterns": [
+            "^evals/",
+            "^packages/repo-standards/scripts/git-exec\\.mjs$"
+          ]
+        }
       ]
     }
   },

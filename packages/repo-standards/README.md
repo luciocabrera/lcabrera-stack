@@ -286,7 +286,10 @@ hardcode:
     "affectedTests": {
       "coverageTaskPackage": "",
       "globalPackages": ["@scope/tsconfig", "@scope/vite-config"],
-      "lintOnlyPatterns": ["(^|/)eslint\\.config\\.mjs$"]
+      "lintOnlyPatterns": ["(^|/)eslint\\.config\\.mjs$"],
+      "rootSuites": [
+        { "task": "test:scripts", "patterns": ["^scripts/", "^[^/]+$"] }
+      ]
     },
     "lintReport": { "reportsDir": "reports" },
     "reactDoctor": { "reportFile": "reports/react-doctor/full-latest.json" },
@@ -306,7 +309,7 @@ is the repository's own data. `repo-verify-inventory`, `repo-merge-coverage`,
 `repo-coverage-report`, `repo-verify-eslint-pass` and the change-scoped runners
 refuse an empty roster rather than passing over no workspaces.
 
-`affectedTests` carries the two that are not rosters of workspaces to visit.
+`affectedTests` carries the three that are not rosters of workspaces to visit.
 `globalPackages` names the shared config packages whose change must force the
 full run instead of a scoped one — that is the refusing one, because scoping a
 run that was due in full leaves the dependents untested and still reports a
@@ -316,6 +319,15 @@ because the linters gate it on every pull request anyway; an empty list only
 ever over-selects, so it is accepted. An empty `coverageTaskPackage` means no
 workspace runs a separate coverage task under `repo-test-changed --ci`, which is
 likewise a valid answer rather than a refusal.
+
+`rootSuites` lists the test tasks that live in no workspace, so no workspace
+selection reaches them. Each entry names a root `task` and the `patterns`
+(regular-expression sources, like `lintOnlyPatterns`) of every path whose change
+can fail it, and `repo-test-changed` runs the task as its own group when a
+changed file matches one. A suite that reads root config belongs here with that
+config's path, or a change to the config alone selects nothing and the suite
+first fails after the merge. Unset, the one root suite is `test:scripts` over
+the `.mjs`, `.cjs` and `.js` files under `scripts/`; an empty list means none.
 
 Four things about it are easy to get wrong.
 

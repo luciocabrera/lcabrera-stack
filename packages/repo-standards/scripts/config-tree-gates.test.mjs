@@ -24,6 +24,53 @@ describe('resolveTreeGates', () => {
     expect(gates.depsAudit).toEqual(DEFAULT_TREE_GATES.depsAudit);
   });
 
+  it('defaults the root suites to test:scripts over the code under scripts/', () => {
+    expect(resolveTreeGates({}).affectedTests.rootSuites).toEqual([
+      {
+        patterns: [String.raw`^scripts/.+\.(mjs|cjs|js)$`],
+        task: 'test:scripts',
+      },
+    ]);
+  });
+
+  it('reads root suites as given, and an empty list as none', () => {
+    const suites = [
+      { patterns: ['^evals/'], task: 'test:evals' },
+      {
+        patterns: ['^scripts/', String.raw`^\.fallowrc\.json$`],
+        task: 'test:scripts',
+      },
+    ];
+    expect(
+      resolveTreeGates({ affectedTests: { rootSuites: suites } }).affectedTests
+        .rootSuites,
+    ).toEqual(suites);
+    expect(
+      resolveTreeGates({ affectedTests: { rootSuites: [] } }).affectedTests
+        .rootSuites,
+    ).toEqual([]);
+  });
+
+  it('refuses a root suite with no task, no patterns or a broken pattern', () => {
+    for (const entry of [
+      { patterns: ['^evals/'] },
+      { patterns: [], task: 'test:evals' },
+      { task: 'test:evals' },
+      'test:evals',
+    ]) {
+      expect(() =>
+        resolveTreeGates({ affectedTests: { rootSuites: [entry] } }),
+      ).toThrow(/gates\.affectedTests\.rootSuites/u);
+    }
+    expect(() =>
+      resolveTreeGates({
+        affectedTests: {
+          rootSuites: [{ patterns: ['('], task: 'test:evals' }],
+        },
+      }),
+    ).toThrow(/do not compile/u);
+  });
+
   it('reads a workspace entry that names a directory and a package', () => {
     const gates = resolveTreeGates({
       coverage: {

@@ -96,8 +96,9 @@ gate that keeps the count honest.
 report generator and their `lib/` modules — is in none of them, so editing a
 tooling script and running the workspace's suite executes not one of its tests
 and reports green. `vp run test:changed` selects the affected workspaces and their dependents **and**
-adds the root `test:scripts` group when a script under root `scripts/` changed,
-so it cannot miss either half. **It reads untracked files too**, not only the
+adds each root suite `gates.affectedTests.rootSuites` names when a file it
+reads changed, `test:scripts` and `test:evals` among them, so it cannot miss
+either half. **It reads untracked files too**, not only the
 tracked diff — this stage runs before a commit, and a new component with a new
 colocated test is untracked at that moment; `scripts/changed-files.sh` adds
 `git ls-files --others --exclude-standard` for exactly that case, so nothing has

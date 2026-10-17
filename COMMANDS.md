@@ -219,11 +219,14 @@ skipped. Only the few files that change how every workspace resolves its tests â
 `pnpm-lock.yaml`, `pnpm-workspace.yaml`, the root `vite.config.ts`, and the
 shared config packages `gates.affectedTests.globalPackages` names in
 [`devkit.config.json`](devkit.config.json) â€” force the
-full suite (a real dependency change always bumps the lockfile). A change to a
-code file under root `scripts/` (`.mjs`, `.cjs` or `.js`) adds the
-`test:scripts` group, which no workspace selection would ever reach; every other
-out-of-workspace change (root package.json scripts, lint/tsconfig configs, docs)
-affects no suite and runs nothing. Affected workspaces run plain `test`; with
+full suite (a real dependency change always bumps the lockfile). The root
+suites no workspace selection would ever reach, `test:scripts` and
+`test:evals`, are selected by `gates.affectedTests.rootSuites`: each names the
+paths whose change can fail it, so `test:scripts` runs for anything under
+`scripts/`, any top-level file such as `.fallowrc.json`, and anything under
+`.changeset/`, `.claude/`, `.github/` or `.vite-hooks/`, and `test:evals` runs
+for anything under `evals/`. Every other out-of-workspace change, such as
+`docs/`, runs nothing. Affected workspaces run plain `test`; with
 `--ci` (`repo-test-changed --ci`) `showcase` runs its coverage
 `test:ci` last, mirroring the root `test:ci` ordering. `--dry-run` prints the
 `vp run` commands without executing them. CI's Unit Tests job (and its coverage

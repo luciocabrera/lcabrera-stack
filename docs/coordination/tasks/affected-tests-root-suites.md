@@ -2,7 +2,7 @@
 id: affected-tests-root-suites
 title: fix(tooling): select test:evals and test:scripts when their inputs change
 owner: agent:claude
-status: active
+status: review
 branch: fix/1380-affected-tests-root-suites
 area:
   - packages/repo-standards/scripts/affected-tests*
@@ -11,11 +11,14 @@ area:
   - packages/repo-standards/README.md
   - devkit.config.json
   - COMMANDS.md
-  - .changeset/*root-suites*
+  - .changeset/select-root-suites-by-their-inputs.md
+  - scripts/lib/gate-rosters.test.mjs
+  - .github/skills/quality-gate-workflow/SKILL.md
+  - reports/api-surface/repo-standards.txt
 started: 2026-10-17
 updated: 2026-10-17
 plan: (none)
-pr: (none)
+pr: #1388
 issue: #1380
 ---
 
@@ -25,6 +28,6 @@ fix(tooling): select test:evals and test:scripts when their inputs change
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, gate run
 - Blockers: none
-- Next:
+- Next: review
