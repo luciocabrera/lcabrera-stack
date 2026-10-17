@@ -12,7 +12,7 @@
  * Usage (from the repo root): vp run evals:verifier [-- --runs <n>]
  * Needs a Claude login, or CLAUDE_CODE_OAUTH_TOKEN in CI.
  * Exit codes: 0 = every fixture matched and was stable, 1 = otherwise,
- * 130/143 = interrupted.
+ * 75 = cut off by the session limit, 130/143 = interrupted.
  */
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
@@ -33,6 +33,7 @@ import {
 import { runSettings } from '../run-envelope.mjs';
 import {
   recordRun,
+  runExitCode,
   runIdentity,
   runnerHarnessVersion,
   sdkVersion,
@@ -154,6 +155,7 @@ const jobsFor = ({ fixtures, record, runs, shared }) =>
 const runSuite = async ({ fixtures, record, runs, shared }) => {
   const results = await runBatches(
     chunk(jobsFor({ fixtures, record, runs, shared }), CONCURRENCY),
+    record.isCutOff,
   );
   const judgements = fixtures.map(([fixture, expectedNotMet], position) => {
     const sessions = results.slice(position * runs, (position + 1) * runs);
@@ -232,5 +234,5 @@ try {
   await main();
 } catch (error) {
   console.error(error);
-  process.exitCode = 1;
+  process.exitCode = runExitCode(error);
 }

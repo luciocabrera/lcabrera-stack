@@ -5,6 +5,7 @@ import type { BaselineRow, BaselineSubject } from './baseline.types.ts';
 
 import { inSequence } from '../ingest/inSequence.service.ts';
 import {
+  DELETE_BASELINE_SQL,
   INSERT_BASELINE_SQL,
   SELECT_SUBJECT_ID_SQL,
 } from './baseline.constants.ts';
@@ -67,6 +68,11 @@ export const writeBaseline = async ({ client, rows }: WriteBaselineArgs) => {
   await client.query({ text: 'begin', values: [] });
 
   try {
+    await inSequence({
+      items: [...new Set(rows.map(({ baselineId }) => baselineId))],
+      step: (baselineId) =>
+        client.query({ text: DELETE_BASELINE_SQL, values: [baselineId] }),
+    });
     await inSequence({
       items: rows,
       step: (row) => insertRow({ client, row }),

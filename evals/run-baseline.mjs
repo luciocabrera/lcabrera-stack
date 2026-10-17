@@ -6,12 +6,17 @@
  * later comparison can tell a regression from ordinary run-to-run spread.
  * Usage (from the repo root):
  *   vp run evals:baseline -- --suite <suite> [--runs <n>] [--model <id>]
+ *     [--baseline-id <id>]
  *   --runs defaults to baseline.defaultRuns in regression.config.json
+ *   --baseline-id adds the runs to that baseline instead of starting one
  * Refuses a dirty tree, and needs EVALS_DATABASE_URL and a Claude login.
- * Stops after any run but the last whose envelope shows a failing harness.
- * Exit codes: 0 = baseline written, 1 = refused or not written,
- *   130/143 = interrupted.
+ * Stops after any run but the last whose envelope shows a failing harness,
+ * and after a run the session limit cut off.
+ * Exit codes: 0 = runs recorded, and the rows written once the baseline holds
+ *   enough runs, 1 = refused or not written, 75 = cut off by the session
+ *   limit, 130/143 = interrupted.
  */
+import { baselineSoFar } from '@repo/eval-history/baseline/baselineSoFar.service';
 import { checkBaselineRun } from '@repo/eval-history/baseline/checkBaselineRun.service';
 import { probeDatabase } from '@repo/eval-history/baseline/probeDatabase.service';
 import { recordBaseline } from '@repo/eval-history/baseline/recordBaseline.service';
@@ -41,8 +46,15 @@ const runOnce = ({ baselineId, model, suite }) =>
     { env: runEnvironment({ baselineId, env: process.env }), stdio: 'inherit' },
   );
 
-const checkRuns = ({ baselineId, runs, suite }) =>
-  checkBaselineRun({ baselineId, paths: [join(RESULTS_DIR, suite)], runs });
+const checkRuns = ({ baselineId, exclude, runs, suite }) =>
+  checkBaselineRun({
+    baselineId,
+    exclude,
+    paths: [join(RESULTS_DIR, suite)],
+    runs,
+  });
+
+const git = (args) => runGit({ args, cwd: dirname(EVALS_DIR) });
 
 const record = async ({ baselineId, runs, suite }) => {
   const summary = await recordBaseline({
@@ -63,10 +75,12 @@ const main = async () => {
     argv: withoutSeparator(process.argv.slice(2)),
     defaultRuns: config.baseline.defaultRuns,
     effects: {
+      baselineSoFar: ({ baselineId, suite }) =>
+        baselineSoFar({ baselineId, paths: [join(RESULTS_DIR, suite)] }),
       checkRuns,
       error: (line) => console.error(line),
-      gitStatus: () =>
-        runGit({ args: ['status', '--porcelain'], cwd: dirname(EVALS_DIR) }),
+      gitHead: () => git(['rev-parse', 'HEAD']),
+      gitStatus: () => git(['status', '--porcelain']),
       log: (line) => console.log(line),
       mintId: randomUUID,
       probeDatabase: () =>

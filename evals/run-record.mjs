@@ -2,8 +2,11 @@
  * Writes the run envelope every eval runner leaves behind, to
  * `.tmp/eval-results/<suite>/<run_id>.json`, with its transcripts beside it in
  * `<run_id>/`. It is written on every way out: `complete` on a normal finish,
- * `partial` when the run throws, `aborted` on SIGINT or SIGTERM, after which
- * the signal is raised again so the process ends the way it was asked to. An
+ * `partial` when the run throws or a trial hits the session limit, `aborted`
+ * on SIGINT or SIGTERM, after which the signal is raised again so the process
+ * ends the way it was asked to. A runner stops starting sessions once
+ * `isCutOff()` says a trial hit the limit; the run then throws a
+ * SessionLimitError, which `runExitCode` turns into exit 75. An
  * envelope that fails the schema is not written, and the error names each field.
  * Each envelope written prints the run's pass rate, with n and its Wilson
  * interval at the thresholds in `regression.config.json`, beside its path.
@@ -17,6 +20,7 @@
  * Usage: imported by every runner under `evals/`.
  */
 
+import { SESSION_LIMIT_ERROR_CLASS } from '@repo/eval-history/envelope/envelope.constants';
 import { parseEnvelope } from '@repo/eval-history/envelope/parseEnvelope.util';
 import { harnessVersion } from '@repo/eval-history/hashing/harnessVersion.util';
 import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
@@ -37,6 +41,7 @@ import {
   passRateLine,
   prNumberOf,
   relativeImports,
+  SESSION_LIMIT_EXIT,
   triggerOf,
 } from './run-envelope.mjs';
 import { ingestAfterRun } from './run-ingest.mjs';
@@ -161,6 +166,21 @@ const reportSaved = ({ regressionConfig, saved }) => {
   return saved;
 };
 
+export class SessionLimitError extends Error {
+  name = 'SessionLimitError';
+}
+
+export const runExitCode = (error) =>
+  error instanceof SessionLimitError ? SESSION_LIMIT_EXIT : 1;
+
+const isLimited = (trial) => trial.error_class === SESSION_LIMIT_ERROR_CLASS;
+
+const cutOffError = ({ cause, runId, trials }) =>
+  new SessionLimitError(
+    `the session limit cut run ${runId} off after ${trials.length} trial(s), so it was saved as partial; run it again once the limit resets`,
+    { cause },
+  );
+
 const saveOrReport = (save) => {
   try {
     return save();
@@ -216,10 +236,12 @@ export const recordRun = async ({
   for (const [signal, listener] of listeners) {
     signals.on(signal, listener);
   }
+  const isCutOff = () => trials.some((trial) => isLimited(trial));
   const context = {
     addTrial: (trial) => {
       trials.push(trial);
     },
+    isCutOff,
     transcript: ({ name, text }) =>
       saveTranscript({
         env,
@@ -230,20 +252,29 @@ export const recordRun = async ({
         text,
       }),
   };
+  const savePartial = async () => {
+    stopListening();
+    const saved = saveOrReport(() => save('partial'));
+    if (saved !== null) {
+      await ingest({ file: saved.file });
+    }
+  };
+  const cutOff = (cause) =>
+    cutOffError({ cause, runId: identity.run_id, trials });
   const executeOrSavePartial = async () => {
     try {
       return await execute(context);
     } catch (error) {
-      stopListening();
-      const saved = saveOrReport(() => save('partial'));
-      if (saved !== null) {
-        await ingest({ file: saved.file });
-      }
-      throw error;
+      await savePartial();
+      throw isCutOff() ? cutOff(error) : error;
     }
   };
   try {
     const result = await executeOrSavePartial();
+    if (isCutOff()) {
+      await savePartial();
+      throw cutOff();
+    }
     stopListening();
     const saved = save('complete');
     await ingest({ file: saved.file });

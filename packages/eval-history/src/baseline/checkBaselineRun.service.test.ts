@@ -39,6 +39,21 @@ describe('checkBaselineRun', () => {
     ).toEqual([]);
   });
 
+  it('checks only the runs this invocation added to a continued baseline', async () => {
+    const earlier = run('error');
+    const added = run('pass');
+
+    expect(
+      await checkBaselineRun({
+        baselineId: BASELINE,
+        exclude: [`/results/skills/${earlier.run.run_id}.json`],
+        fileSystem: envelopeFileSystem([earlier, added]),
+        paths: ['/results/skills'],
+        runs: 1,
+      }),
+    ).toEqual([]);
+  });
+
   it('names a run that left no envelope', async () => {
     expect(await check({ envelopes: [run('pass')], runs: 2 })).toEqual([
       `1 of 2 runs left no envelope for baseline ${BASELINE} under /results/skills, so a runner failed before recording`,

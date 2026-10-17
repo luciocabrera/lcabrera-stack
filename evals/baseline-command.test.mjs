@@ -1,9 +1,9 @@
 import { BASELINE_SUITES } from '@repo/eval-history/baseline/baseline.constants';
-import { MIN_BASELINE_RUNS } from '@repo/eval-history/stats/stats.constants';
 import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { wholeNumberProblem } from './agent-sessions.mjs';
+import { BASELINE, effectsFor } from './baseline-command-test-support.mjs';
 import {
   BASELINE_RUNNERS,
   dirtyTreeProblem,
@@ -14,21 +14,7 @@ import {
   runnerArgs,
 } from './baseline-command.mjs';
 
-const BASELINE = '11111111-1111-4111-8111-111111111111';
-
 const byName = (left, right) => left.localeCompare(right);
-
-const effectsFor = (overrides = {}) => ({
-  checkRuns: vi.fn(() => Promise.resolve([])),
-  error: vi.fn(),
-  gitStatus: vi.fn(() => ''),
-  log: vi.fn(),
-  mintId: vi.fn(() => BASELINE),
-  probeDatabase: vi.fn(() => Promise.resolve({ ok: true })),
-  record: vi.fn(() => Promise.resolve(0)),
-  runOnce: vi.fn(() => ({ signal: null, status: 1 })),
-  ...overrides,
-});
 
 describe('parseBaselineArgs', () => {
   it('takes the suite, the runs and an optional model', () => {
@@ -56,10 +42,14 @@ describe('parseBaselineArgs', () => {
     [['--suite', 'rules-consistency'], '--suite must be one of'],
     [['--suite', 'nope', '--model', 'x'], '--suite must be one of'],
     [
-      ['--suite', 'skills', '--runs', '1'],
-      '--runs must be a whole number of at least 2; got "1"',
+      ['--suite', 'skills', '--runs', '0'],
+      '--runs must be a whole number of at least 1; got "0"',
     ],
-    [['--suite', 'skills', '--runs', '2.5'], 'at least 2; got "2.5"'],
+    [['--suite', 'skills', '--runs', '2.5'], 'at least 1; got "2.5"'],
+    [
+      ['--suite', 'skills', '--baseline-id', 'last-night'],
+      '--baseline-id must be the uuid a baseline was started under; got "last-night"',
+    ],
     [['--suite', 'verifier-fixtures', '--model', 'x'], 'fixes its own model'],
     [['--suite', 'skills', 'extra'], 'evals:baseline:'],
   ])('refuses %j', (argv, message) => {
@@ -72,7 +62,7 @@ describe('parseBaselineArgs', () => {
 });
 
 describe('parseBaselineArgs --runs', () => {
-  it.each(['1', '2.5', 'two', ''])(
+  it.each(['0', '2.5', 'two', ''])(
     'refuses %j with the sentence every runner prints',
     (runs) => {
       expect(
@@ -81,7 +71,7 @@ describe('parseBaselineArgs --runs', () => {
           defaultRuns: 5,
         }),
       ).toEqual({
-        message: `evals:baseline: ${wholeNumberProblem({ minimum: MIN_BASELINE_RUNS, value: runs })}`,
+        message: `evals:baseline: ${wholeNumberProblem({ minimum: 1, value: runs })}`,
         ok: false,
       });
     },
@@ -235,8 +225,24 @@ describe('runBaseline', () => {
     });
 
     expect(effects.checkRuns.mock.calls).toEqual([
-      [{ baselineId: BASELINE, model: undefined, runs: 1, suite: 'skills' }],
-      [{ baselineId: BASELINE, model: undefined, runs: 2, suite: 'skills' }],
+      [
+        {
+          baselineId: BASELINE,
+          exclude: [],
+          model: undefined,
+          runs: 1,
+          suite: 'skills',
+        },
+      ],
+      [
+        {
+          baselineId: BASELINE,
+          exclude: [],
+          model: undefined,
+          runs: 2,
+          suite: 'skills',
+        },
+      ],
     ]);
   });
 

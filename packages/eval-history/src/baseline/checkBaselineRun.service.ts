@@ -6,6 +6,7 @@ import { missingRunsProblem } from './missingRunsProblem.util.ts';
 
 type CheckBaselineRunArgs = {
   readonly baselineId: string;
+  readonly exclude?: readonly string[];
   readonly fileSystem?: IngestFileSystem;
   readonly paths: readonly string[];
   readonly runs: number;
@@ -13,12 +14,14 @@ type CheckBaselineRunArgs = {
 
 export const checkBaselineRun = async ({
   baselineId,
+  exclude,
   fileSystem,
   paths,
   runs,
 }: CheckBaselineRunArgs) => {
   const { envelopes, invalid } = await baselineEnvelopes({
     baselineId,
+    exclude,
     fileSystem,
     paths,
   });

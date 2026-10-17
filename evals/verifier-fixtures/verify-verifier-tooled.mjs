@@ -10,7 +10,8 @@
  *
  * Usage (from the repo root): vp run evals:verifier:tooled [-- <fixture> ...] [--runs <n>] [--keep]
  * Needs a Claude login and the local database the full quality gate uses.
- * Exit codes: 0 = every fixture matched, 1 = otherwise, 130/143 = interrupted.
+ * Exit codes: 0 = every fixture matched, 1 = otherwise, 75 = cut off by the
+ * session limit, 130/143 = interrupted.
  */
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
@@ -31,6 +32,7 @@ import {
 import { runSettings } from '../run-envelope.mjs';
 import {
   recordRun,
+  runExitCode,
   runIdentity,
   runnerHarnessVersion,
   sdkVersion,
@@ -198,6 +200,7 @@ const runFixture = async ({
       }),
       1,
     ),
+    record.isCutOff,
   );
   save({ fixture, runs: results });
   return results;
@@ -277,6 +280,7 @@ const runSuite = async ({ expected, fixtures, keep, record, runs, shared }) => {
       ),
       1,
     ),
+    record.isCutOff,
   );
   const { exitCode, footer } = suiteEnd({ judgements, reportDir: REPORT_DIR });
   console.log(footer);
@@ -315,5 +319,5 @@ try {
   await main();
 } catch (error) {
   console.error(error);
-  process.exitCode = 1;
+  process.exitCode = runExitCode(error);
 }

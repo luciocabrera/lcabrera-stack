@@ -14,7 +14,8 @@
  *                     fixture in each
  * Each run also writes a run envelope under .tmp/eval-results/skills/.
  * Needs a Claude login, or CLAUDE_CODE_OAUTH_TOKEN in CI.
- * Exit codes: 0 = every task passed, 1 = otherwise, 130/143 = interrupted.
+ * Exit codes: 0 = every task passed, 1 = otherwise, 75 = cut off by the
+ * session limit, 130/143 = interrupted.
  */
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { fileSetHash } from '@repo/eval-history/hashing/fileSetHash.util';
@@ -46,6 +47,7 @@ import {
 import { runSettings, skillSubjects } from '../run-envelope.mjs';
 import {
   recordRun,
+  runExitCode,
   runIdentity,
   runnerHarnessVersion,
   sdkVersion,
@@ -344,6 +346,7 @@ const runSelection = async ({ positionals, values }) => {
       report(
         await runBatches(
           chunk(jobsFor({ record, runs, selected, values }), CONCURRENCY),
+          record.isCutOff,
         ),
       ),
     identity,
@@ -374,5 +377,5 @@ try {
   await main();
 } catch (error) {
   console.error(error);
-  process.exitCode = 1;
+  process.exitCode = runExitCode(error);
 }

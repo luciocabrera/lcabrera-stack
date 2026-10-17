@@ -38,8 +38,14 @@ const {
 const MODEL_A_FIRST = '11111111-1111-4111-8111-111111111111';
 const MODEL_A_SECOND = '33333333-3333-4333-8333-333333333333';
 const MODEL_B = '22222222-2222-4222-8222-222222222222';
+const CONTINUED = '44444444-4444-4444-8444-444444444444';
 
 const { skills } = await baselineFixtures();
+
+type RecordEnvelopesArgs = {
+  readonly baselineId: string;
+  readonly envelopes: readonly ReturnType<typeof stubBaselineRun>[];
+};
 
 type RunsOfArgs = {
   readonly baselineId: string;
@@ -47,19 +53,19 @@ type RunsOfArgs = {
   readonly passes: number;
 };
 
-const runsOf = ({ baselineId, modelId, passes }: RunsOfArgs) =>
-  [0, 1].map(() =>
-    stubBaselineRun({
-      baselineId,
-      fixture: skills,
-      modelId,
-      trialsBySkill: {
-        'react-19': [0, 1, 2, 3].map((index) => ({
-          outcome: index < passes ? 'pass' : 'fail',
-        })),
-      },
-    }),
-  );
+const runOf = ({ baselineId, modelId, passes }: RunsOfArgs) =>
+  stubBaselineRun({
+    baselineId,
+    fixture: skills,
+    modelId,
+    trialsBySkill: {
+      'react-19': [0, 1, 2, 3].map((index) => ({
+        outcome: index < passes ? 'pass' : 'fail',
+      })),
+    },
+  });
+
+const runsOf = (args: RunsOfArgs) => [runOf(args), runOf(args)];
 
 const probeWith = (client: () => Promise<pg.Client>) =>
   probeDatabase({
@@ -90,10 +96,12 @@ describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
 
   const writerClient = () => clientAs(writer.name);
 
-  const record = async (args: RunsOfArgs) => {
-    const envelopes = runsOf(args);
+  const recordEnvelopes = async ({
+    baselineId,
+    envelopes,
+  }: RecordEnvelopesArgs) => {
     const summary = await recordBaseline({
-      baselineId: args.baselineId,
+      baselineId,
       connect: async () => ({
         client: await writerClient(),
         end: () => Promise.resolve(),
@@ -108,6 +116,9 @@ describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
 
     return summary.exitCode;
   };
+
+  const record = (args: RunsOfArgs) =>
+    recordEnvelopes({ baselineId: args.baselineId, envelopes: runsOf(args) });
 
   beforeAll(async () => {
     const admin = await connect();
@@ -218,5 +229,35 @@ describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
     expect(
       await readBaseline({ client, modelId: 'model-c', suite: 'skills' }),
     ).toEqual([]);
+  });
+
+  it('rewrites a continued baseline over every run it holds, as the writer', async () => {
+    const args = { baselineId: CONTINUED, modelId: 'model-c', passes: 4 };
+    const first = runsOf(args);
+
+    expect(
+      await recordEnvelopes({ baselineId: CONTINUED, envelopes: first }),
+    ).toBe(0);
+    expect(
+      await recordEnvelopes({
+        baselineId: CONTINUED,
+        envelopes: [...first, runOf({ ...args, passes: 1 })],
+      }),
+    ).toBe(0);
+
+    const client = await writerClient();
+    const { rows } = await client.query<{
+      readonly mean: number;
+      readonly n_runs: number;
+    }>(
+      `select n_runs, mean from evals.eval_baseline
+        where baseline_id = $1 order by subject_id nulls first`,
+      [CONTINUED],
+    );
+
+    expect(rows).toEqual([
+      { mean: 0.75, n_runs: 3 },
+      { mean: 0.75, n_runs: 3 },
+    ]);
   });
 });

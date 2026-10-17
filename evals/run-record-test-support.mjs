@@ -1,14 +1,15 @@
 /**
  * What a `recordRun` test needs around it: a fresh results directory removed
- * when the test finishes, an ingest spy, and a stand-in for the process's
- * signal events, so no test shares state with the one before it.
+ * when the test finishes, an ingest spy, a stand-in for the process's signal
+ * events and a console kept quiet, so no test shares state with the one
+ * before it.
  * Usage: imported by the `*.test.mjs` files under `evals/`.
  */
 
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { onTestFinished, vi } from 'vite-plus/test';
+import { afterEach, beforeEach, onTestFinished, vi } from 'vite-plus/test';
 
 import { STARTED_AT, testIdentity } from './envelope-test-support.mjs';
 import { recordRun } from './run-record.mjs';
@@ -64,4 +65,14 @@ export const recording = ({ plan }) => {
         ),
       ),
   };
+};
+
+export const quietConsole = () => {
+  beforeEach(() => {
+    vi.spyOn(console, 'log').mockImplementation(() => undefined);
+    vi.spyOn(console, 'error').mockImplementation(() => undefined);
+  });
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
 };

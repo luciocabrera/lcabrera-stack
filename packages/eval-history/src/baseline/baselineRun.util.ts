@@ -2,6 +2,7 @@ import type { RunEnvelope } from '../envelope/envelope.types.ts';
 
 import { harnessProblem } from './harnessProblem.util.ts';
 import { isBaselineSuite } from './isBaselineSuite.util.ts';
+import { sessionLimitProblem } from './sessionLimitProblem.util.ts';
 
 const excluded = (reason: string) => ({ kind: 'excluded', reason }) as const;
 
@@ -11,6 +12,12 @@ export const baselineRun = (envelope: RunEnvelope) => {
 
   if (baseline_id === null) {
     return excluded(`run ${run_id} belongs to no baseline`);
+  }
+
+  const limited = sessionLimitProblem(envelope);
+
+  if (limited !== undefined) {
+    return excluded(`${limited}, so it is left out`);
   }
   if (status !== 'complete') {
     return excluded(`run ${run_id} is ${status}, so it is left out`);

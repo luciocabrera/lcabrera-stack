@@ -72,7 +72,7 @@ export const probeDatabase = async ({
     return (await isWritable(reached.connection))
       ? ({ ok: true } as const)
       : refused(
-          `${label} has no evals.eval_run and evals.eval_baseline this role can insert into; run \`vp run evals:migrate\` against it, or point EVALS_DATABASE_URL at the evals_writer role`,
+          `${label} has no evals.eval_run and evals.eval_baseline this role can insert into, with delete on evals.eval_baseline to rewrite a continued baseline; run \`vp run evals:migrate\` against it, or point EVALS_DATABASE_URL at the evals_writer role`,
         );
   } catch (error) {
     return refused(`cannot check ${label}: ${errorReason(error)}`);

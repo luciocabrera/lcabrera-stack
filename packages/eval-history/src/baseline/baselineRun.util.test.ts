@@ -27,6 +27,25 @@ describe('baselineRun', () => {
     });
   });
 
+  it('excludes a run the session limit cut off, with that reason', () => {
+    const envelope = stubBaselineRun({
+      baselineId: BASELINE,
+      fixture: skills,
+      status: 'partial',
+      trialsBySkill: {
+        'react-19': [
+          { outcome: 'pass' },
+          { errorClass: 'session_limit', outcome: 'error' },
+        ],
+      },
+    });
+
+    expect(baselineRun(envelope)).toEqual({
+      kind: 'excluded',
+      reason: `run ${envelope.run.run_id} was cut off by the session limit, so it is left out`,
+    });
+  });
+
   it('excludes an aborted run and says why', () => {
     const envelope = stubBaselineRun({
       baselineId: BASELINE,

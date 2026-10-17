@@ -2,7 +2,7 @@
 id: evals-baseline-chunks
 title: Build a baseline one run at a time and stop a run at the session limit
 owner: agent:claude
-status: active
+status: review
 branch: feat/1395-evals-baseline-chunks
 area:
   - evals/**
@@ -10,7 +10,7 @@ area:
 started: 2026-10-17
 updated: 2026-10-17
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1396
 issue: #1395
 ---
 

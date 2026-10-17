@@ -1,6 +1,14 @@
 import type { RunEnvelope } from '../envelope/envelope.types.ts';
 
-export const harnessProblem = ({ run, trials }: RunEnvelope) => {
+import { sessionLimitProblem } from './sessionLimitProblem.util.ts';
+
+export const harnessProblem = (envelope: RunEnvelope) => {
+  const { run, trials } = envelope;
+  const limited = sessionLimitProblem(envelope);
+
+  if (limited !== undefined) {
+    return limited;
+  }
   if (run.status !== 'complete') {
     return `run ${run.run_id} is ${run.status}, so its runner stopped before it finished`;
   }
