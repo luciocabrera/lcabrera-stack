@@ -133,7 +133,7 @@
   and the pre-push hook all failed.
 
   A tree created by an earlier version keeps the commands it has. `devkit init
---upgrade` wires `deps:audit`, which makes its `audit` command run, and prints
+  --upgrade` wires `deps:audit`, which makes its `audit` command run, and prints
   `test: kept "vp run test" (would infer "vp run test:all")` so you can correct
   `test` by hand.
 
@@ -208,7 +208,7 @@
   `npm run`. It is new, the shipped command reference carries a placeholder for it,
   and a file whose placeholders cannot all be answered is not written: without the
   key `COMMANDS.md` is reported as `unresolved` rather than materialised. `devkit
-init --upgrade` adds it and keeps everything else you set — and `sync` and
+  init --upgrade` adds it and keeps everything else you set — and `sync` and
   `doctor --check` now say so themselves, instead of sending you to the one command
   that cannot write a config key.
 

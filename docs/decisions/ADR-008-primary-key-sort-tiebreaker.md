@@ -26,14 +26,14 @@ columns**.
 1. **`isPrimaryKey` on `TableColumn`** — one or more columns may be flagged. The
    ordered set of flagged columns is the table's primary key.
 2. **`TableCrudConfig` is now only DB operation flags** — `{ create?, read?,
-update?, delete? }`. It is non-generic (no longer parameterised by `TData`).
+   update?, delete? }`. It is non-generic (no longer parameterised by `TData`).
 3. **`idAccessor` / `TableCrudIdAccessor` removed** — the row id is derived from
    the primary-key column(s) via `resolveCrudRowId({ columns, row })`. A single
    primary key yields the raw (URL-encoded) value; a composite key joins each
    encoded value with `PRIMARY_KEY_ID_DELIMITER` (`_`) in declaration order.
 4. **`deleteActionPath` moved out of `crud`** into `TableMetaState.deleteActionPath`.
 5. **Primary-key sort tiebreaker** — `appendPrimaryKeySorting({ columns,
-sorting })` appends the primary-key column(s) (ascending, declaration order)
+   sorting })` appends the primary-key column(s) (ascending, declaration order)
    to the sort **at query-build time**. A primary-key column the user already
    sorts by keeps the user's entry and is not duplicated.
 
