@@ -4,6 +4,7 @@ import { Link, useLoaderData } from 'react-router';
 import type { loader } from './evals-overview.loader';
 
 import { Sparkline } from '../Sparkline';
+import { compareHref } from '../utils/compareHref.util';
 import { costLabel } from '../utils/costLabel.util';
 import { durationLabel } from '../utils/durationLabel.util';
 import { evalsHref } from '../utils/evalsHref.util';
@@ -17,12 +18,21 @@ export const EvalsOverview = () => {
   return (
     <div {...stylex.props(styles.page)}>
       <h1 {...stylex.props(styles.title)}>Evals</h1>
+      <nav aria-label='Eval views' {...stylex.props(styles.views)}>
+        <Link to='/evals/compare'>Compare runs</Link>
+        <Link to='/evals/heatmap'>Heatmap</Link>
+        <Link to='/evals/cost'>Cost and latency</Link>
+      </nav>
       {regressions.map(({ latest, previous, suite }) => (
         <p key={suite} role='alert' {...stylex.props(styles.banner)}>
           {suite} regressed on main: {passRateLabel(latest)} in{' '}
           <Link to={evalsHref({ runId: latest.runId })}>the latest run</Link>,
           below the {intervalLabel(previous)} of{' '}
-          <Link to={evalsHref({ runId: previous.runId })}>the run before</Link>.
+          <Link to={evalsHref({ runId: previous.runId })}>the run before</Link>.{' '}
+          <Link to={compareHref({ a: previous.runId, b: latest.runId })}>
+            Compare them
+          </Link>
+          .
         </p>
       ))}
       {suites.length === 0 && <p>No eval runs are stored yet.</p>}

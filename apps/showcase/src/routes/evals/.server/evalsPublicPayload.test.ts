@@ -45,22 +45,17 @@ import { randomBytes, randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 import { z } from 'zod';
 
-import routes from '@/routes';
-
-import { evalsRouteEntries } from '../utils/evalsRouteEntries.util';
 import { routeLoaderArgs } from '../utils/routeLoaderArgs.util';
+import {
+  EVALS_ROUTE_ENTRIES as ENTRIES,
+  loadEvalsRouteModules,
+  routeModuleFor,
+} from './evalsRouteModules.fixtures';
 
 type JsonbColumn = keyof typeof JSONB_COLUMN_SCHEMAS;
 
-type RouteModule = {
-  readonly loader: (args: LoaderFunctionArgs) => Promise<unknown>;
-};
-
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
-
-const ENTRIES = evalsRouteEntries({ routes });
-const MODULES = import.meta.glob<RouteModule>('../**/{root,layout}.ts');
 
 const MARKER = `zzprivate${randomBytes(8).toString('hex')}`;
 
@@ -79,7 +74,14 @@ const ENVELOPE_FILES = Object.fromEntries(
 );
 
 const seededRowsSchema = z.array(
-  z.object({ runId: z.string(), taskKey: z.string(), trialId: z.string() }),
+  z.object({
+    otherRunId: z.string(),
+    runId: z.string(),
+    subjectKind: z.string(),
+    subjectName: z.string(),
+    taskKey: z.string(),
+    trialId: z.string(),
+  }),
 );
 
 const countSchema = z.array(z.object({ count: z.number().int() }));
@@ -155,8 +157,17 @@ describe.skipIf(!DATABASE_URL)('the public /evals payload', () => {
   const reader = { ...EVALS_READER_ROLE, name: `evals_reader_dash_${suffix}` };
   const roles = [migrator, writer.name, reader.name];
   const { close, connect } = scratchConnections(DATABASE_URL ?? '');
-  const loaded = new Map<string, RouteModule>();
-  const seeded = { runId: '', taskKey: '', trialId: '' };
+  const modules = {
+    loaded: new Map() as Awaited<ReturnType<typeof loadEvalsRouteModules>>,
+  };
+  const seeded = {
+    otherRunId: '',
+    runId: '',
+    subjectKind: '',
+    subjectName: '',
+    taskKey: '',
+    trialId: '',
+  };
   const seededColumns: string[] = [];
 
   const urlAs = (user: string) =>
@@ -225,20 +236,18 @@ select trial_id, dimension, 3, 'placeholder' from evals.eval_judge_score`,
   };
 
   const answer = async (path: string) => {
-    const routeModule = loaded.get(
-      ENTRIES.find((entry) => entry.path === path)?.file ?? '',
-    );
-
-    if (routeModule === undefined) {
-      throw new Error(`no route module was loaded for ${path}`);
-    }
+    const routeModule = routeModuleFor({ loaded: modules.loaded, path });
 
     try {
       const result = await routeModule.loader(
         routeLoaderArgs({
-          params: { runId: seeded.runId },
+          params: {
+            kind: seeded.subjectKind,
+            name: seeded.subjectName,
+            runId: seeded.runId,
+          },
           path,
-          search: `?trial=${seeded.trialId}`,
+          search: `?${new URLSearchParams({ a: seeded.otherRunId, b: seeded.runId, trial: seeded.trialId }).toString()}`,
         }) as LoaderFunctionArgs,
       );
 
@@ -298,11 +307,15 @@ select trial_id, dimension, 3, 'placeholder' from evals.eval_judge_score`,
     expect(ingested.exitCode, ingested.stderr.join('\n')).toBe(0);
 
     const { rows } = await writing.query(`select
-  run.run_id::text as "runId", task.task_key as "taskKey", trial.id::text as "trialId"
+  run.run_id::text as "runId", task.task_key as "taskKey", trial.id::text as "trialId",
+  subject.kind::text as "subjectKind", subject.name as "subjectName",
+  (select other.run_id::text from evals.eval_run other where other.run_id <> run.run_id order by other.started_at desc limit 1) as "otherRunId"
 from evals.eval_run run
 join evals.eval_trial trial on trial.run_id = run.run_id
 join evals.eval_task_version version on version.id = trial.task_version_id
 join evals.eval_task task on task.id = version.task_id
+join evals.eval_subject_version subject_version on subject_version.id = trial.subject_version_id
+join evals.eval_subject subject on subject.id = subject_version.subject_id
 where run.suite = 'skill-quality'
 order by run.started_at desc, trial.id
 limit 1`);
@@ -313,13 +326,7 @@ limit 1`);
     await seedRunJsonb(writing);
     await seedTextColumns(migrating);
 
-    for (const { file } of ENTRIES) {
-      const load = MODULES[file.replace(/^routes\/evals\//u, '../')];
-
-      if (load) {
-        loaded.set(file, await load());
-      }
-    }
+    modules.loaded = await loadEvalsRouteModules();
 
     vi.stubEnv('EVALS_DASHBOARD', '1');
     vi.stubEnv('EVALS_READER_DATABASE_URL', urlAs(reader.name));
@@ -383,7 +390,9 @@ limit 1`);
 
   it('loads a module for every /evals route', () => {
     expect(ENTRIES.length).toBeGreaterThan(0);
-    expect(loaded.keys().toArray()).toEqual(ENTRIES.map(({ file }) => file));
+    expect(modules.loaded.keys().toArray()).toEqual(
+      ENTRIES.map(({ file }) => file),
+    );
   });
 
   it.each(ENTRIES.map(({ path }) => ({ path })))(

@@ -7,6 +7,7 @@ import { runFigures } from './runFigures.util';
 const run: RunSummary = {
   arch: 'x64',
   branch: 'main',
+  catalogHash: undefined,
   ciRunner: 'ubuntu-latest',
   concurrency: 1,
   costUsd: 0.5,

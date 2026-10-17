@@ -3,15 +3,16 @@ import { z } from 'zod';
 import type { QueryClient } from './queries.types.ts';
 
 import { OUTCOMES, SUITES } from '../envelope/envelope.constants.ts';
+import { nullAsAbsent } from './nullAsAbsent.util.ts';
 import { runCompareQuery } from './runCompareQuery.util.ts';
 
 type ReadRunComparisonArgs = Parameters<typeof runCompareQuery>[0] & {
   readonly client: QueryClient;
 };
 
-const hash = z.string().nullable();
-const count = z.number().int().nullable();
-const outcomes = z.array(z.enum(OUTCOMES)).nullable();
+const hash = nullAsAbsent(z.string());
+const count = nullAsAbsent(z.number().int());
+const outcomes = nullAsAbsent(z.array(z.enum(OUTCOMES)));
 
 const runComparisonRowsSchema = z.array(
   z.object({

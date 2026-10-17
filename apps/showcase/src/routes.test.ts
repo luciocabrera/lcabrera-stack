@@ -34,4 +34,11 @@ describe('routes', () => {
     expect(registeredPaths).toContain('skill-scores');
     expect(registeredPaths).toContain('wide-alltypes-150');
   });
+
+  it('registers the eval views the dashboard links between', () => {
+    expect(registeredPaths).toContain('evals/compare');
+    expect(registeredPaths).toContain('evals/subjects/:kind/:name');
+    expect(registeredPaths).toContain('evals/heatmap');
+    expect(registeredPaths).toContain('evals/cost');
+  });
 });

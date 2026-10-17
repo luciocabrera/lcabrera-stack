@@ -3,7 +3,7 @@ import type { z } from 'zod';
 import type { OUTCOMES } from '../envelope/envelope.constants.ts';
 import type { regressionConfigSchema } from './regressionConfig.schema.ts';
 
-export type HashSet = Readonly<Record<string, null | string>>;
+export type HashSet = Readonly<Record<string, null | string | undefined>>;
 
 export type Outcome = (typeof OUTCOMES)[number];
 
