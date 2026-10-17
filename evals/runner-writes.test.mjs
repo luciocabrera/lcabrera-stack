@@ -1,7 +1,6 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import { relativeImports } from './run-envelope.mjs';
@@ -20,7 +19,7 @@ const ALLOWED = {
 const posix = (path) => path.replaceAll('\\', '/');
 
 const runners = readdirSync(EVALS_DIR, { recursive: true })
-  .map(posix)
+  .map((path) => posix(path))
   .filter((path) => !path.startsWith('node_modules/'))
   .filter((path) => /^verify-.*\.mjs$/.test(basename(path)));
 
@@ -41,13 +40,11 @@ const closure = (pending, seen = new Set()) => {
     : closure([...rest, ...importsOf(path)], new Set([...seen, path]));
 };
 
-const writers = closure([...runners, 'run-record.mjs']);
+const writers = closure([...runners, 'run-baseline.mjs', 'run-record.mjs']);
 
 const rawWrites = (path) =>
   [
-    ...new Set(
-      readFileSync(join(EVALS_DIR, path), 'utf8').match(RAW_WRITE) ?? [],
-    ),
+    ...new Set(readFileSync(join(EVALS_DIR, path), 'utf8').match(RAW_WRITE)),
   ].filter((call) => !(ALLOWED[path] ?? []).includes(call));
 
 describe('runner output', () => {
@@ -55,6 +52,8 @@ describe('runner output', () => {
     expect(writers).toStrictEqual(
       expect.arrayContaining([
         'agent-sessions.mjs',
+        'baseline-command.mjs',
+        'run-baseline.mjs',
         'run-record.mjs',
         'skill-quality/verify-skill-quality.mjs',
         'skills/trigger-matrix.mjs',

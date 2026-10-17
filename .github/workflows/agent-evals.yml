@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
         with:
           cache: false
           run-install: false
@@ -87,7 +87,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
         with:
           cache: false
           run-install: false
@@ -108,6 +108,34 @@ jobs:
           path: .tmp/skill-evals/
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Upload envelopes
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: eval-envelopes-skills
+          path: .tmp/eval-results/
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Ingest envelopes (advisory)
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          EVALS_DATABASE_URL: ${{ secrets.EVALS_DATABASE_URL }}
+        run: |
+          if [ -z "$EVALS_DATABASE_URL" ]; then
+            echo "::notice title=Eval history::EVALS_DATABASE_URL is not set, so ingest is skipped; the envelopes are in the eval-envelopes-skills artifact."
+            exit 0
+          fi
+          if [ ! -d .tmp/eval-results ]; then
+            echo "::notice title=Eval history::No envelope was written under .tmp/eval-results, so there is nothing to ingest."
+            exit 0
+          fi
+          if ! vp run evals:ingest -- .tmp/eval-results; then
+            echo "::warning title=Eval history::evals:ingest did not store every envelope; they are in the eval-envelopes-skills artifact, and vp run evals:ingest sends a downloaded copy."
+          fi
 
   verifier-fixtures:
     name: Verifier fixtures (Claude, advisory)
@@ -151,7 +179,7 @@ jobs:
 
       - name: Setup Vite+
         if: steps.scope.outputs.run == 'true'
-        uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f # v1.21.1
+        uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
         with:
           cache: false
           run-install: false
@@ -174,3 +202,31 @@ jobs:
           path: .tmp/verifier-evals/
           if-no-files-found: ignore
           retention-days: 7
+
+      - name: Upload envelopes
+        if: always() && steps.scope.outputs.run == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: eval-envelopes-verifier-fixtures
+          path: .tmp/eval-results/
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Ingest envelopes (advisory)
+        if: always() && steps.scope.outputs.run == 'true'
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          EVALS_DATABASE_URL: ${{ secrets.EVALS_DATABASE_URL }}
+        run: |
+          if [ -z "$EVALS_DATABASE_URL" ]; then
+            echo "::notice title=Eval history::EVALS_DATABASE_URL is not set, so ingest is skipped; the envelopes are in the eval-envelopes-verifier-fixtures artifact."
+            exit 0
+          fi
+          if [ ! -d .tmp/eval-results ]; then
+            echo "::notice title=Eval history::No envelope was written under .tmp/eval-results, so there is nothing to ingest."
+            exit 0
+          fi
+          if ! vp run evals:ingest -- .tmp/eval-results; then
+            echo "::warning title=Eval history::evals:ingest did not store every envelope; they are in the eval-envelopes-verifier-fixtures artifact, and vp run evals:ingest sends a downloaded copy."
+          fi

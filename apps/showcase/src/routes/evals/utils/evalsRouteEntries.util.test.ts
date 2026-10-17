@@ -33,6 +33,10 @@ describe('evalsRouteEntries', () => {
       'evals',
       'evals/runs/:runId',
       'evals/runs/:runId/trials',
+      'evals/compare',
+      'evals/subjects/:kind/:name',
+      'evals/heatmap',
+      'evals/cost',
     ]);
   });
 });

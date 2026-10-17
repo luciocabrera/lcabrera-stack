@@ -26,10 +26,17 @@ const TRIGGER_BY_EVENT = {
 
 const PULL_REF = /^refs\/pull\/(\d+)\//u;
 
-export const triggerOf = (env) =>
+export const BASELINE_ID_VARIABLE = 'EVALS_BASELINE_ID';
+
+export const baselineIdOf = (env) => env[BASELINE_ID_VARIABLE] || null;
+
+const ciTriggerOf = (env) =>
   env.GITHUB_ACTIONS === 'true'
     ? (TRIGGER_BY_EVENT[env.GITHUB_EVENT_NAME] ?? 'ci-manual')
     : 'local';
+
+export const triggerOf = (env) =>
+  baselineIdOf(env) === null ? ciTriggerOf(env) : 'baseline';
 
 export const prNumberOf = (env) => {
   const digits = PULL_REF.exec(env.GITHUB_REF ?? '')?.[1];
@@ -40,7 +47,7 @@ export const branchOf = ({ env, head }) =>
   env.GITHUB_HEAD_REF || env.GITHUB_REF_NAME || head;
 
 export const actorOf = ({ email, env, user }) =>
-  env.GITHUB_ACTOR || email?.split('@')[0] || user;
+  env.GITHUB_ACTOR || email?.split('@', 1)[0] || user;
 
 export const environmentOf = ({ arch, env, node, os }) => ({
   arch,
@@ -195,8 +202,8 @@ export const assembleEnvelope = ({
   trials,
 }) => ({
   run: {
-    ...identity,
     baseline_id: null,
+    ...identity,
     catalog_hash: plan.catalogHash ?? null,
     finished_at: new Date(finishedAt).toISOString(),
     harness_version: plan.harnessVersion,
@@ -267,4 +274,7 @@ export const envelopeProblems = (issues) =>
 const RELATIVE_IMPORT = /(?:from|import)\s+'(\.{1,2}\/[^']+)'/gu;
 
 export const relativeImports = (source) =>
-  [...source.matchAll(RELATIVE_IMPORT)].map(([, specifier]) => specifier);
+  source
+    .matchAll(RELATIVE_IMPORT)
+    .map(([, specifier]) => specifier)
+    .toArray();

@@ -41,12 +41,14 @@ const createTypescriptLanguageOptions = (tsconfigRootDir) => ({
  *
  * @param {{
  *   ignorePatterns?: readonly string[],
+ *   toolingScriptPatterns?: readonly string[],
  *   tsconfigRootDir?: string,
  * }} [options]
  * @returns {import('eslint').Linter.Config[]}
  */
 export const createBaseCustomRulesLintConfig = ({
   ignorePatterns = [],
+  toolingScriptPatterns = [],
   tsconfigRootDir = process.cwd(),
 } = {}) => {
   return [
@@ -69,7 +71,7 @@ export const createBaseCustomRulesLintConfig = ({
 
     { rules: { ...SHARED_PLUGIN_RULE_SEVERITIES } },
     createNodeScriptFileConfig({ globals }),
-    createToolingScriptFileConfig(),
+    createToolingScriptFileConfig(toolingScriptPatterns),
     createCommonJsFileConfig(),
     createTestFileConfig(),
     {

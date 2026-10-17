@@ -16,21 +16,21 @@
  * rewrite it; an aborted one is left for `vp run evals:ingest`.
  * Usage: imported by every runner under `evals/`.
  */
+
+import { parseEnvelope } from '@repo/eval-history/envelope/parseEnvelope.util';
+import { harnessVersion } from '@repo/eval-history/hashing/harnessVersion.util';
+import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { userInfo } from 'node:os';
 import { dirname, join, relative, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-import { parseEnvelope } from '@repo/eval-history/envelope/parseEnvelope.util';
-import { harnessVersion } from '@repo/eval-history/hashing/harnessVersion.util';
-import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
-
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
-
 import {
   actorOf,
   assembleEnvelope,
+  baselineIdOf,
   branchOf,
   envelopeProblems,
   environmentOf,
@@ -46,7 +46,7 @@ const EVALS_DIR = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = dirname(EVALS_DIR);
 export const RESULTS_DIR = '.tmp/eval-results';
 const SHARED_MODULE = join(EVALS_DIR, 'agent-sessions.mjs');
-const REGRESSION_CONFIG = join(EVALS_DIR, 'regression.config.json');
+export const REGRESSION_CONFIG = join(EVALS_DIR, 'regression.config.json');
 const SIGNALS = ['SIGINT', 'SIGTERM'];
 
 const git = (args) => runGit({ args, cwd: REPO_ROOT });
@@ -57,6 +57,7 @@ export const runIdentity = ({ env = process.env, now = Date.now() } = {}) => ({
     env,
     user: userInfo().username,
   }),
+  baseline_id: baselineIdOf(env),
   branch: branchOf({ env, head: git(['rev-parse', '--abbrev-ref', 'HEAD']) }),
   env: environmentOf({
     arch: process.arch,
@@ -80,12 +81,12 @@ export const sdkVersion = () => {
     .version;
 };
 
-const insideEvals = (file) => !relative(EVALS_DIR, file).startsWith('..');
+const isInsideEvals = (file) => !relative(EVALS_DIR, file).startsWith('..');
 
 const importsOf = (file) =>
   relativeImports(readFileSync(file, 'utf8'))
     .map((specifier) => resolve(dirname(file), specifier))
-    .filter(insideEvals);
+    .filter((path) => isInsideEvals(path));
 
 const importClosure = (pending, seen = new Set()) => {
   const [file, ...rest] = pending;
@@ -187,6 +188,7 @@ export const recordRun = async ({
     reportSaved({
       regressionConfig: thresholds,
       saved: saveEnvelope({
+        env,
         envelope: assembleEnvelope({
           finishedAt: clock(),
           identity,
@@ -195,7 +197,6 @@ export const recordRun = async ({
           status,
           trials,
         }),
-        env,
         resultsDir,
       }),
     });
@@ -216,7 +217,9 @@ export const recordRun = async ({
     signals.on(signal, listener);
   }
   const context = {
-    addTrial: (trial) => trials.push(trial),
+    addTrial: (trial) => {
+      trials.push(trial);
+    },
     transcript: ({ name, text }) =>
       saveTranscript({
         env,
@@ -227,17 +230,20 @@ export const recordRun = async ({
         text,
       }),
   };
+  const executeOrSavePartial = async () => {
+    try {
+      return await execute(context);
+    } catch (error) {
+      stopListening();
+      const saved = saveOrReport(() => save('partial'));
+      if (saved !== null) {
+        await ingest({ file: saved.file });
+      }
+      throw error;
+    }
+  };
   try {
-    const result = await Promise.resolve()
-      .then(() => execute(context))
-      .catch(async (error) => {
-        stopListening();
-        const saved = saveOrReport(() => save('partial'));
-        if (saved !== null) {
-          await ingest({ file: saved.file });
-        }
-        throw error;
-      });
+    const result = await executeOrSavePartial();
     stopListening();
     const saved = save('complete');
     await ingest({ file: saved.file });

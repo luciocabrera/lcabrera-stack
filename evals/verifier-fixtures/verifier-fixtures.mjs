@@ -25,7 +25,7 @@ const UNVERIFIED =
   /unverified|not verified|could(?:n't| not) (?:run|verify|check)/i;
 
 const criterionNumber = (row) => {
-  const cell = row.split('|')[1]?.trim().replace(/^C/i, '');
+  const cell = row.split('|', 2)[1]?.trim().replace(/^C/i, '');
   return /^\d+$/.test(cell ?? '') ? Number(cell) : undefined;
 };
 
@@ -47,19 +47,19 @@ export const definiteNotMet = (report) =>
   report
     .split('\n')
     .filter((line) => line.startsWith('|') && isFinding(line))
-    .map(criterionNumber)
+    .map((row) => criterionNumber(row))
     .filter((number) => number !== undefined)
     .toSorted((a, b) => a - b);
 
-export const sameNumbers = (a, b) => a.join(',') === b.join(',');
+export const haveSameNumbers = (a, b) => a.join(',') === b.join(',');
 
 const PASS_VERDICT = /^PASS\b/;
 
-export const runCounts = ({ expectedNotMet, run }) =>
+export const isRunMatching = ({ expectedNotMet, run }) =>
   run.error === undefined &&
   run.verdict !== undefined &&
   !PASS_VERDICT.test(run.verdict) &&
-  sameNumbers(run.notMet, expectedNotMet);
+  haveSameNumbers(run.notMet, expectedNotMet);
 
 export const readReport = ({ error, report = '' }) => ({
   error,
@@ -71,10 +71,10 @@ export const reportText = ({ error, report }) =>
   error === undefined ? report : `(${error})\n\n${report}`;
 
 export const judgeFixture = ({ expectedNotMet, fixture, runs: sessions }) => {
-  const runs = sessions.map(readReport);
-  const matched = runs.every((run) => runCounts({ expectedNotMet, run }));
+  const runs = sessions.map((session) => readReport(session));
+  const matched = runs.every((run) => isRunMatching({ expectedNotMet, run }));
   const stable = runs.every(({ notMet }) =>
-    sameNumbers(notMet, runs[0].notMet),
+    haveSameNumbers(notMet, runs[0].notMet),
   );
   return { expectedNotMet, fixture, matched, runs, stable };
 };
@@ -106,7 +106,7 @@ export const describeJudgement = ({
 }) =>
   fixtureLine({
     fixture,
-    lines: runs.map(describeRun),
+    lines: runs.map((run) => describeRun(run)),
     matched,
     stable,
     wanted: `expected not-met [${expectedNotMet.join(',')}], a verdict line that is not a PASS, and no session error`,

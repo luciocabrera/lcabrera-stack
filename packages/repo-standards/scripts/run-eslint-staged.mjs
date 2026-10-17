@@ -42,6 +42,7 @@ import {
   planLintGroups,
   spawnOutcome,
   workspaceEslintFlags,
+  workspaceLabel,
 } from './eslint-staged.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
@@ -60,7 +61,7 @@ const flagsFor = (directory) =>
 
 const reportBroken = (directory, reason) => {
   console.error(
-    `\nESLint could not be run in ${relative(REPO_ROOT, directory)}: ${reason}\n`,
+    `\nESLint could not be run in ${workspaceLabel({ directory, repoRoot: REPO_ROOT })}: ${reason}\n`,
   );
 };
 
@@ -87,7 +88,10 @@ const lintGroup = ({ directory, files, fix }) => {
 const report = (label, outcomes, kind) => {
   const directories = outcomes
     .filter((entry) => entry.outcome === kind)
-    .map((entry) => `  • ${relative(REPO_ROOT, entry.directory)}`);
+    .map(
+      (entry) =>
+        `  • ${workspaceLabel({ directory: entry.directory, repoRoot: REPO_ROOT })}`,
+    );
   if (directories.length === 0) return;
   console.error(
     `\n${label} in ${directories.length} workspace(s):\n${directories.join('\n')}\n`,

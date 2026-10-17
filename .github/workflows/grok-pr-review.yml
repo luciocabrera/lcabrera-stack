@@ -1,0 +1,212 @@
+name: Grok PR Review
+
+# A subscription review, beside grok-review.yml. That workflow is the
+# catalog pass and authenticates with XAI_API_KEY under its own GitHub App
+# (ADR-116). This one authenticates with the Grok Build session only and
+# posts with GITHUB_TOKEN. ADR-135 records that split.
+#
+# Create the secret once, on a machine where `grok models` says you are
+# logged in with grok.com. The value is the whole file, braces included:
+#
+#   cat ~/.grok/auth.json
+#
+# Paste that into the repository:
+# Settings → Secrets and variables → Actions → New repository secret
+# Name: GROK_AUTH_JSON
+#
+# Or, from that same machine, without printing the file:
+#
+#   gh secret set GROK_AUTH_JSON < ~/.grok/auth.json
+#
+# Do not commit the file and do not echo it in a log. It is a live login.
+# When a run says the session expired, run `grok login` again and replace
+# the secret. Do not add XAI_API_KEY here: the CLI falls back to an API key
+# only when no session is active, and this job must not take that path.
+#
+# The CLI is pinned by version and SHA-256 of the linux-x86_64 binary.
+# The install script's latest pointer is not used. ADR-116 rejected a
+# marketplace action for this reason, and this job follows that: the model
+# writes two files, and scripts/submit-pr-review.mjs posts them.
+# The deny rules are Read and Edit because that is the vocabulary the
+# pinned CLI matches, including grep and search_replace. ADR-135 records
+# the probe. Re-run it when the pin changes.
+#
+# The review is posted with GITHUB_TOKEN, so the author is
+# github-actions[bot]. That login is not an accepted reviewer
+# (scripts/lib/copilot-review.mjs), so this job cannot green
+# "Copilot review complete". The summary is the review body on the pulls
+# reviews API. pull-requests: write covers that call, and this file does
+# not grant issues: write.
+#
+# The session is written in its own step, which exits before the model
+# step starts. The model step does not receive GROK_AUTH_JSON. unset does
+# not remove a variable from /proc/pid/environ, so the shell that starts
+# grok must never have had the secret. The model step sets GITHUB_TOKEN
+# and GH_TOKEN empty. search_replace can edit the two review files.
+# Edit is denied on scripts/ and packages/, and the submit step runs
+# node scripts/submit-pr-review.mjs from that tree. The submit step is
+# the one that receives the token.
+# Checkout sets persist-credentials to false, so that token is not written
+# into .git/config either.
+#
+# Forks are skipped rather than failed. pull_request from a fork does not
+# receive secrets. Do not switch this job to pull_request_target. That
+# event runs the workflow from the default branch and passes secrets,
+# including to a fork, and this job checks out the pull request and runs
+# the prompt and the submit script from that checkout.
+#
+# A same-repo branch can edit this file. On pull_request, GitHub runs the
+# merge ref, and a same-repo pull request receives secrets, so the edited
+# workflow is what GROK_AUTH_JSON is handed to. An environment key in this
+# file does not close that: the branch can delete the key. Replacing the
+# secret is the revocation. ADR-135 records why the job stays on
+# pull_request. A same-repo pull request with an empty GROK_AUTH_JSON
+# fails in the step that writes the session.
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+# A superseded run reviews a head that is already gone and spends the
+# subscription's quota to do it. The group is not grok-review's, so a push
+# does not cancel the catalog pass.
+concurrency:
+  group: grok-pr-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  review:
+    # A draft is reviewed again when it is marked ready. A fork is another
+    # repository: head.repo.full_name differs, the job does not start, and
+    # GROK_AUTH_JSON is never passed in.
+    if: github.event.pull_request.draft == false && github.event.pull_request.head.repo.full_name == github.repository
+    name: Review the pull request with the Grok subscription
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      GROK_VERSION: '1.0.60'
+      GROK_SHA256: '10e6af64b24724fc1074c373e906b9ad121110044dddcbd97ad43c3a25f96d5f'
+    steps:
+      # The default checkout is the pull request merge ref, which is the
+      # revision of this workflow that is running. Pinning head.sha would
+      # drop a prompt or submit script that exists only on the base, and
+      # the job would fail before it reviewed. The review is still posted
+      # against head.sha below.
+      - name: Check out the merge ref for this pull request
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      # Pin the linux-x86_64 binary by version and digest. The URL is the
+      # file the upstream installer fetches for this platform; the checksum
+      # is of that file. Measured from the 1.0.60 artifact, which prints
+      # `grok 1.0.60` from --version.
+      - name: Install the pinned Grok CLI
+        run: |
+          set -euo pipefail
+
+          arch=$(uname -m)
+          if [ "$arch" != 'x86_64' ]; then
+            echo "::error::This install pins the linux-x86_64 Grok binary. Runner arch is $arch."
+            exit 1
+          fi
+
+          curl --proto '=https' --tlsv1.2 -fsSL -o grok.bin \
+            "https://x.ai/cli/grok-${GROK_VERSION}-linux-x86_64"
+          echo "${GROK_SHA256}  grok.bin" | sha256sum -c -
+          chmod +x grok.bin
+          mkdir -p "$HOME/.local/bin"
+          mv grok.bin "$HOME/.local/bin/grok"
+          echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+          "$HOME/.local/bin/grok" --version
+
+      # The diff is collected here so the model does not need a shell tool.
+      # The two output files are seeded with a placeholder so search_replace
+      # can fill them: that tool edits, it does not create. Neither seed is a
+      # valid answer. An unreplaced findings seed is not valid JSON, so
+      # submit-pr-review.mjs posts a body-only review and says so.
+      - name: Collect the pull request diff
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          set -euo pipefail
+          gh pr diff "$PR_NUMBER" --color=never > grok-subscription-diff.diff
+          printf '%s\n' '(replace this file with the review body)' > grok-subscription-body.md
+          printf '%s\n' '(replace this file with the findings array)' > grok-subscription-findings.json
+
+      # An empty secret on a same-repo pull request ends RED here. This
+      # step exits before grok starts, so the secret is not in the environ
+      # of any process still running when the model has tools. The session
+      # file is mode 600. Read/Edit deny rules on the next step cover it,
+      # and the file is removed before the submit step.
+      - name: Write the Grok session
+        env:
+          GROK_AUTH_JSON: ${{ secrets.GROK_AUTH_JSON }}
+        run: |
+          set -euo pipefail
+
+          if [ -z "${GROK_AUTH_JSON}" ]; then
+            echo "::error::GROK_AUTH_JSON is empty, so there is nothing to review with. On this repository the operator sets it from ~/.grok/auth.json."
+            exit 1
+          fi
+
+          install -d -m 700 "${HOME}/.grok"
+          umask 077
+          printf '%s\n' "${GROK_AUTH_JSON}" > "${HOME}/.grok/auth.json"
+
+      - name: Run the Grok subscription review
+        env:
+          GH_TOKEN: ''
+          GITHUB_TOKEN: ''
+          GROK_DISABLE_AUTOUPDATER: '1'
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          {
+            echo "Pull request #${PR_NUMBER} of ${REPOSITORY}."
+            echo "The unified diff is at grok-subscription-diff.diff."
+            echo
+            cat .github/workflows/grok-pr-review.prompt.md
+          } > grok-subscription-prompt.md
+
+          grok --prompt-file grok-subscription-prompt.md \
+            --model grok-4.7 \
+            --always-approve \
+            --deny 'Read(**/.grok/**)' \
+            --deny 'Read(~/.grok/**)' \
+            --deny 'Edit(**/.grok/**)' \
+            --deny 'Edit(~/.grok/**)' \
+            --deny 'Edit(**/scripts/**)' \
+            --deny 'Edit(**/packages/**)' \
+            --no-subagents \
+            --disable-web-search \
+            --tools 'read_file,grep,list_dir,search_replace' \
+            --max-turns 40 \
+            --cwd "$GITHUB_WORKSPACE" \
+            --no-alt-screen
+
+      - name: Remove the session file
+        if: always()
+        run: rm -f "${HOME}/.grok/auth.json"
+
+      # Posting is a step, not a tool the model holds. commit_id is the SHA
+      # this run was triggered for. A run that produced no review body fails
+      # in submit-pr-review.mjs.
+      - name: Submit the review against the head this run was triggered for
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: >
+          node scripts/submit-pr-review.mjs
+          --body grok-subscription-body.md
+          --findings grok-subscription-findings.json
+          --placeholder '(replace this file with the review body)'

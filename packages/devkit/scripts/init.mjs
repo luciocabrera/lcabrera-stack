@@ -57,7 +57,7 @@ const RUNNERS = [
     // because the install step below is the one that runs.
     ciSetup: [
       '- name: Set up Vite+',
-      '  uses: voidzero-dev/setup-vp@3754dd7dbdb32bd8f6d28b6043de13ad3a75f21f',
+      '  uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af',
       '  with:',
       '    run-install: false',
     ],

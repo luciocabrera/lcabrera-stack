@@ -1,9 +1,5 @@
 import { createHash } from 'node:crypto';
-import { EventEmitter } from 'node:events';
-import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-
+import { readFileSync } from 'node:fs';
 import {
   afterEach,
   beforeEach,
@@ -19,6 +15,7 @@ import {
   STARTED_AT,
   testIdentity,
 } from './envelope-test-support.mjs';
+import { fakeSignals, resultsDirectory } from './run-record-test-support.mjs';
 import { recordRun, saveTranscript } from './run-record.mjs';
 
 const PLANTED_ENV = {
@@ -45,20 +42,17 @@ const PLANTED_TEXT = JSON.stringify(
 
 const sha256Of = (bytes) => createHash('sha256').update(bytes).digest('hex');
 
-let resultsDir;
-
 beforeEach(() => {
-  resultsDir = mkdtempSync(join(tmpdir(), 'eval-results-'));
   vi.spyOn(console, 'log').mockImplementation(() => undefined);
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
-  rmSync(resultsDir, { force: true, recursive: true });
 });
 
 describe('a transcript with secrets in it', () => {
   it('is written redacted, and the envelope records the size and hash of that file', async () => {
+    const resultsDir = resultsDirectory();
     const outcome = await recordRun({
       clock: () => STARTED_AT + 2000,
       env: PLANTED_ENV,
@@ -72,7 +66,7 @@ describe('a transcript with secrets in it', () => {
       ingest: async () => undefined,
       plan: rulesPlan,
       resultsDir,
-      signals: new EventEmitter(),
+      signals: fakeSignals(),
     });
     const [recorded] = JSON.parse(readFileSync(outcome.file, 'utf8')).trials;
     const onDisk = readFileSync(recorded.transcript.uri);
@@ -104,6 +98,7 @@ describe('a transcript with secrets in it', () => {
 
 describe('a transcript with no secret in it', () => {
   it('is written byte for byte, with the hash of the text it was given', () => {
+    const resultsDir = resultsDirectory();
     const text = JSON.stringify(
       [{ content: 'Read https://github.com/org/repo/blob/main/a.ts' }],
       null,
@@ -128,6 +123,7 @@ describe('a transcript with no secret in it', () => {
 
 describe('an envelope with a secret in it', () => {
   it('is written scrubbed with the env recordRun was given, and returned as written', async () => {
+    const resultsDir = resultsDirectory();
     const secret = PLANTED_ENV.CLAUDE_CODE_OAUTH_TOKEN;
     const outcome = await recordRun({
       clock: () => STARTED_AT + 2000,
@@ -140,7 +136,7 @@ describe('an envelope with a secret in it', () => {
         settings: { ...rulesPlan.settings, argv: ['--token', secret] },
       },
       resultsDir,
-      signals: new EventEmitter(),
+      signals: fakeSignals(),
     });
     const onDisk = readFileSync(outcome.file, 'utf8');
     expect(onDisk).not.toContain(secret);

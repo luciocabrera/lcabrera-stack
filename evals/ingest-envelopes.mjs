@@ -8,37 +8,28 @@
  *   [--quiet-unreachable]  an unset or unreachable database warns and exits 0
  * Exit codes: 0 = every envelope stored or already present, 1 = otherwise.
  */
+
+import { ingestPaths } from '@repo/eval-history/ingest/ingestPaths.service';
 import { existsSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 
-import { ingestPaths } from '@repo/eval-history/ingest/ingestPaths.service';
-
 import { withoutSeparator } from './agent-sessions.mjs';
-import { printSummary } from './run-ingest.mjs';
 import { RESULTS_DIR } from './run-record.mjs';
+import { runSummaryCommand } from './summary-command.mjs';
 
 const defaultPaths = () => (existsSync(RESULTS_DIR) ? [RESULTS_DIR] : []);
 
-const main = async () => {
+const summarize = () => {
   const { positionals, values } = parseArgs({
     allowPositionals: true,
     args: withoutSeparator(process.argv.slice(2)),
     options: { 'quiet-unreachable': { default: false, type: 'boolean' } },
   });
-  const summary = await ingestPaths({
+  return ingestPaths({
     connectionString: process.env.EVALS_DATABASE_URL,
     paths: positionals.length === 0 ? defaultPaths() : positionals,
     quietUnreachable: values['quiet-unreachable'],
   });
-  printSummary({ summary });
-  process.exitCode = summary.exitCode;
 };
 
-try {
-  await main();
-} catch (error) {
-  console.error(
-    `evals:ingest: ${error instanceof Error ? error.message : String(error)}`,
-  );
-  process.exitCode = 1;
-}
+await runSummaryCommand({ name: 'evals:ingest', summarize });

@@ -33,32 +33,40 @@ const marker = (kind) => `[REDACTED:${kind}]`;
 
 const jsonEscaped = (value) => JSON.stringify(value).slice(1, -1);
 
-export const secretEnvValues = (env) =>
-  [
-    ...new Set(
-      Object.entries(env)
-        .filter(([name]) => SECRET_ENV_NAME.test(name))
-        .map(([, value]) => value)
-        .filter(
-          (value) =>
-            typeof value === 'string' && value.length >= MIN_SECRET_LENGTH,
-        )
-        .flatMap((value) => [value, jsonEscaped(value)]),
-    ),
-  ].toSorted((left, right) => right.length - left.length);
+const isSecretEntry = (name, value) =>
+  SECRET_ENV_NAME.test(name) &&
+  typeof value === 'string' &&
+  value.length >= MIN_SECRET_LENGTH;
+
+export const secretEnvValues = (env) => {
+  const values = new Set();
+  for (const [name, value] of Object.entries(env)) {
+    if (!isSecretEntry(name, value)) {
+      continue;
+    }
+
+    values.add(value);
+    values.add(jsonEscaped(value));
+  }
+  return [...values].toSorted((left, right) => right.length - left.length);
+};
 
 const redactValues = (text, values) =>
   values.reduce(
-    (scrubbed, value) => scrubbed.replaceAll(value, marker('env')),
+    (scrubbed, value) => scrubbed.replaceAll(value, () => marker('env')),
     text,
   );
 
 const redactUrlPasswords = (text) =>
-  text.replace(URL_PASSWORD, `$1:${marker('url-password')}@`);
+  text.replaceAll(
+    URL_PASSWORD,
+    (_match, prefix) => `${prefix}:${marker('url-password')}@`,
+  );
 
 const redactTokens = (text) =>
   TOKEN_SHAPES.reduce(
-    (scrubbed, [kind, pattern]) => scrubbed.replace(pattern, marker(kind)),
+    (scrubbed, [kind, pattern]) =>
+      scrubbed.replaceAll(pattern, () => marker(kind)),
     text,
   );
 
