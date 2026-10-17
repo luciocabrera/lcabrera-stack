@@ -24,6 +24,7 @@ no review at all.
 | [`.github/workflows/copilot-review-gate.yml`](../../.github/workflows/copilot-review-gate.yml) | when it recomputes                                                   |
 | [`.github/workflows/claude-review.yml`](../../.github/workflows/claude-review.yml)             | the second reviewer — posts a review, publishes no status            |
 | [`.github/workflows/grok-review.yml`](../../.github/workflows/grok-review.yml)                 | catalog reviewer — posts a review, not accepted, publishes no status |
+| [`.github/workflows/grok-pr-review.yml`](../../.github/workflows/grok-pr-review.yml)           | subscription reviewer — posts as `github-actions[bot]`, not accepted |
 | [`scripts/copilot-review-status.mjs`](../../scripts/copilot-review-status.mjs)                 | the I/O — reads the PR, posts the status                             |
 | [`scripts/lib/copilot-review.mjs`](../../scripts/lib/copilot-review.mjs)                       | the comparison, pure and unit-tested                                 |
 | [`scripts/lib/copilot-suppressed.mjs`](../../scripts/lib/copilot-suppressed.mjs)               | the suppressed-comment reader, pure and unit-tested                  |
@@ -109,6 +110,12 @@ must not green this status in place of Claude. The exclusion is asserted in
 Its BLOCKER and HIGH findings still open review threads, and
 `required_review_thread_resolution` holds the merge on those. The job itself is
 not a required check. The workflow does not dispatch this gate.
+
+[`.github/workflows/grok-pr-review.yml`](../../.github/workflows/grok-pr-review.yml)
+posts with `GITHUB_TOKEN`, so the author is `github-actions[bot]`. That login
+is already rejected by `isAcceptedReviewer`. The job does not dispatch this
+gate, and it is not a required check. Why the author is the runner, and why
+the credential is a Grok Build session, is ADR-135.
 
 ### Newest per reviewer, not newest overall
 
