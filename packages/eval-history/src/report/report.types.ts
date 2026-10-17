@@ -3,6 +3,7 @@ import type { readEnvelopeFile } from '../ingest/readEnvelopeFile.service.ts';
 import type { QueryClient } from '../queries/queries.types.ts';
 import type { Outcome, Rate } from '../stats/stats.types.ts';
 import type { compareRuns } from './compareRuns.util.ts';
+import type { readReportAgreement } from './readReportAgreement.service.ts';
 
 export type Comparison = Extract<
   RunComparison,
@@ -21,6 +22,8 @@ export type ReadEnvelope = (
 ) => ReturnType<typeof readEnvelopeFile>;
 
 export type Refusal = Extract<RunComparison, { readonly kind: 'refused' }>;
+
+export type ReportAgreement = Awaited<ReturnType<typeof readReportAgreement>>;
 
 export type ReportConnection = {
   readonly client: QueryClient;
