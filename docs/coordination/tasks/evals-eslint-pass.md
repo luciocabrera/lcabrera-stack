@@ -12,13 +12,14 @@ area:
   - pnpm-lock.yaml
   - packages/vite-configs/src/eslint.*.mjs
   - packages/vite-configs/README.md
+  - reports/api-surface/vite-config.txt
   - packages/repo-standards/scripts/*eslint-staged*
   - .github/skills/lint-toolchain/SKILL.md
   - .github/skills/quality-gate-workflow/SKILL.md
   - .changeset/*
-  - docs/decisions/ADR-135-lint-evals-*
+  - docs/decisions/ADR-136-lint-evals-*
 started: 2026-10-08
-updated: 2026-10-08
+updated: 2026-10-17
 plan: (none)
 pr: https://github.com/luciocabrera/lcabrera-stack/pull/1365
 issue: #1345

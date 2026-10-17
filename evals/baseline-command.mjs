@@ -55,7 +55,7 @@ const runsOf = ({ defaultRuns, runs }) =>
   runs === undefined ? defaultRuns : Number(runs);
 
 const runsProblem = ({ given, runs }) =>
-  Number.isInteger(runs) && runs >= 2
+  Number.isSafeInteger(runs) && runs >= 2
     ? null
     : `--runs must be a whole number of at least 2; got "${given}"`;
 

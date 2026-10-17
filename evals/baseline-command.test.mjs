@@ -1,6 +1,5 @@
-import { existsSync, readFileSync } from 'node:fs';
-
 import { BASELINE_SUITES } from '@repo/eval-history/baseline/baseline.constants';
+import { existsSync, readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import {
@@ -14,6 +13,8 @@ import {
 } from './baseline-command.mjs';
 
 const BASELINE = '11111111-1111-4111-8111-111111111111';
+
+const byName = (left, right) => left.localeCompare(right);
 
 const effectsFor = (overrides = {}) => ({
   error: vi.fn(),
@@ -103,8 +104,8 @@ describe('runner wiring', () => {
   });
 
   it('runs exactly the suites the package can aggregate', () => {
-    expect(Object.keys(BASELINE_RUNNERS).toSorted()).toEqual(
-      BASELINE_SUITES.toSorted(),
+    expect(Object.keys(BASELINE_RUNNERS).toSorted(byName)).toEqual(
+      BASELINE_SUITES.toSorted(byName),
     );
   });
 

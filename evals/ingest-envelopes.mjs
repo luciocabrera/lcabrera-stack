@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { ingestPaths } from '@repo/eval-history/ingest/ingestPaths.service';
 /**
  * Loads run envelopes into the eval-history database, one transaction per run
  * keyed on run_id, so ingesting a file twice changes nothing. This is how a
@@ -9,6 +8,8 @@ import { ingestPaths } from '@repo/eval-history/ingest/ingestPaths.service';
  *   [--quiet-unreachable]  an unset or unreachable database warns and exits 0
  * Exit codes: 0 = every envelope stored or already present, 1 = otherwise.
  */
+
+import { ingestPaths } from '@repo/eval-history/ingest/ingestPaths.service';
 import { existsSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 

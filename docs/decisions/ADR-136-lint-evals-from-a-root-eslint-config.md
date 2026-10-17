@@ -3,7 +3,7 @@ governs:
   - repository
 ---
 
-# ADR-135 — Lint evals/ from a root eslint config rather than making it a workspace
+# ADR-136 — Lint evals/ from a root eslint config rather than making it a workspace
 
 **Status:** Accepted
 
@@ -40,6 +40,13 @@ The root carries the eslint pass for `evals/`:
   `toolingScriptPatterns` option.
 - Every other finding is fixed in the code. Nothing under `evals/` is
   suppressed.
+- `perfectionist/sort-imports` treats a block comment as a partition, in
+  both factories. Without it, the sort's autofix counts a block comment that
+  sits directly on the first import as part of that import, so when another
+  import sorts ahead of it the file's header is carried down into the import
+  list. The header is the file's first comment block, and a script's usage and
+  exit codes live in it, so the sort must not move it. A partition comment is
+  never moved, and the imports on each side of it are sorted on their own.
 
 ## Consequences
 
@@ -51,6 +58,9 @@ The root carries the eslint pass for `evals/`:
   rules for every file under `evals/`. That is correct while the runners only
   read the repository. If one of them starts handling input from outside it,
   the pattern has to narrow.
+- A block comment placed between two imports now splits the import list: the
+  sort no longer reorders across it. Line comments still travel with the
+  import below them, as before.
 - `vp run lint:eslint:verify` does not probe the root pass. Its probe file is
   written to a fresh directory at the root of a workspace, which this config
   ignores. The fail-closed target above covers a pass that lints no files, but
@@ -67,6 +77,13 @@ The root carries the eslint pass for `evals/`:
   is the tooling-script block written out a second time, and the two copies
   would drift apart. Naming the directory through the factory option keeps one
   definition.
+- **Restore each displaced header by hand, with a blank line after it.** A
+  blank line does detach the header from the first import, but nothing keeps
+  the next file written that way, and the autofix would move that header too.
+- **Set `partitionByComment` in the shared `perfectionist` settings.** Rejected:
+  that setting reaches every perfectionist rule, so a block comment inside an
+  object or a type would split its sort as well. The header problem is only in
+  the import list.
 - **Rewrite the code to satisfy `unicorn/no-null`.** Rejected: the run envelope
   schema declares absent values as `null`, so replacing them with `undefined`
   changes what a runner writes.

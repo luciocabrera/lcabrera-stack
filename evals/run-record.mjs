@@ -1,6 +1,3 @@
-import { parseEnvelope } from '@repo/eval-history/envelope/parseEnvelope.util';
-import { harnessVersion } from '@repo/eval-history/hashing/harnessVersion.util';
-import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
 /**
  * Writes the run envelope every eval runner leaves behind, to
  * `.tmp/eval-results/<suite>/<run_id>.json`, with its transcripts beside it in
@@ -19,6 +16,10 @@ import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionCon
  * rewrite it; an aborted one is left for `vp run evals:ingest`.
  * Usage: imported by every runner under `evals/`.
  */
+
+import { parseEnvelope } from '@repo/eval-history/envelope/parseEnvelope.util';
+import { harnessVersion } from '@repo/eval-history/hashing/harnessVersion.util';
+import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
 import { createHash, randomUUID } from 'node:crypto';
 import { mkdirSync, readFileSync } from 'node:fs';
 import { userInfo } from 'node:os';
@@ -187,6 +188,7 @@ export const recordRun = async ({
     reportSaved({
       regressionConfig: thresholds,
       saved: saveEnvelope({
+        env,
         envelope: assembleEnvelope({
           finishedAt: clock(),
           identity,
@@ -195,7 +197,6 @@ export const recordRun = async ({
           status,
           trials,
         }),
-        env,
         resultsDir,
       }),
     });

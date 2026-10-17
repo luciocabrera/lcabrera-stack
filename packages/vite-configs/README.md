@@ -117,6 +117,12 @@ export default createBaseCustomRulesLintConfig({
 });
 ```
 
+Both factories sort imports with `perfectionist/sort-imports` and treat a block
+comment as a partition. A file's leading block comment therefore stays at the
+top of the file when the autofix reorders the imports below it, and a block
+comment between two imports sorts each side separately. A line comment still
+moves with the import it sits on.
+
 `./eslint-restrictions` also carries the tables both factories apply
 unconditionally, so you can re-compose them: `BARREL_SYNTAX_RESTRICTIONS`,
 `REACT_TYPE_IMPORT_PATHS`, `STATE_LIBRARY_IMPORT_PATTERNS` and

@@ -14,6 +14,10 @@
  */
 
 export const SHARED_PLUGIN_RULE_SEVERITIES = {
+  'perfectionist/sort-imports': [
+    'error',
+    { order: 'asc', partitionByComment: { block: true }, type: 'natural' },
+  ],
   'security/detect-non-literal-fs-filename': 'error',
   'security/detect-non-literal-regexp': 'error',
   'security/detect-object-injection': 'off',
