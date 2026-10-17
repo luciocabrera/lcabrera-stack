@@ -101,7 +101,7 @@ describe('gates.affectedTests.globalPackages', () => {
 describe('gates.affectedTests.rootSuites', () => {
   const { globalPackages, lintOnlyPatterns, rootSuites } = GATES.affectedTests;
 
-  const { scripts: MANIFEST_SCRIPTS } = JSON.parse(
+  const { name: ROOT_PACKAGE, scripts: MANIFEST_SCRIPTS } = JSON.parse(
     readFileSync(join(REPO_ROOT, 'package.json'), 'utf8'),
   );
 
@@ -131,8 +131,11 @@ describe('gates.affectedTests.rootSuites', () => {
       selectsWorkspaces ||= SELECTS_WORKSPACES.has(flag);
       index += TAKES_VALUE.has(flag) && !words[index].includes('=') ? 2 : 1;
     }
-    const task = words[index];
-    return selectsWorkspaces || task === undefined || task.includes('#')
+    const target = words[index] ?? '';
+    const task = target.startsWith(`${ROOT_PACKAGE}#`)
+      ? target.slice(ROOT_PACKAGE.length + 1)
+      : target;
+    return selectsWorkspaces || task === '' || task.includes('#')
       ? undefined
       : task;
   };
@@ -151,10 +154,17 @@ describe('gates.affectedTests.rootSuites', () => {
     return at === -1 ? undefined : words[at + 1];
   };
 
-  const SUITES = rootSuites.map(({ task }) => ({
+  const SUITES = rootSuites.map(({ patterns, task }) => ({
     dir: suiteDirOf(task),
+    patterns,
     task,
   }));
+
+  const SELECTS_EVERY_PATH = ['^'];
+
+  const isUnconditional = ({ patterns }) =>
+    patterns.length === SELECTS_EVERY_PATH.length &&
+    patterns.every((pattern, index) => pattern === SELECTS_EVERY_PATH[index]);
 
   const tracked = execFileSync('git', ['ls-files', '-z'], {
     cwd: REPO_ROOT,
@@ -214,13 +224,27 @@ describe('gates.affectedTests.rootSuites', () => {
     ).toEqual(['test:hooks', 'test:lint', 'test:docs']);
   });
 
+  it('reads a root task the root package names, and no other package', () => {
+    expect(
+      chainedTasks(
+        `vp run ${ROOT_PACKAGE}#test:hooks && vp run @scope/app#test`,
+      ),
+    ).toEqual(['test:hooks']);
+  });
+
   it('finds the directory each root suite runs from in its manifest command', () => {
     expect(
       SUITES.filter(({ dir }) => dir === undefined).map(({ task }) => task),
     ).toEqual([]);
   });
 
-  it.each(SUITES)(
+  it('selects test:scripts on every change, so narrowing it puts it under the scan below', () => {
+    expect(
+      SUITES.find(({ task }) => task === 'test:scripts')?.patterns,
+    ).toEqual(SELECTS_EVERY_PATH);
+  });
+
+  it.each(SUITES.filter((suite) => !isUnconditional(suite)))(
     'selects $task for every path its sources import or read',
     ({ dir, task }) => {
       const unselected = inputsOf(dir).filter(
@@ -238,19 +262,6 @@ describe('gates.affectedTests.rootSuites', () => {
       ]),
     );
     expect(inputsOf('scripts')).toContain('docs/coordination/README.md');
-  });
-
-  it('selects test:scripts for any change, because its suites read every part of the tree', () => {
-    for (const file of [
-      '.fallowrc.json',
-      'docs/coordination/README.md',
-      'apps/showcase/package.json',
-      'packages/ui/package.json',
-      'packages/utils/eslint.config.mjs',
-      'evals/run-record.mjs',
-    ]) {
-      expect(suitesFor(file)).toContain('test:scripts');
-    }
   });
 
   it.each([

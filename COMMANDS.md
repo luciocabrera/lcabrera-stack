@@ -224,9 +224,13 @@ full suite (a real dependency change always bumps the lockfile). The root
 suites no workspace selection would ever reach are selected by
 `gates.affectedTests.rootSuites` in [`devkit.config.json`](devkit.config.json),
 which names the paths whose change can fail each one; `vp run test:changed --
---dry-run` prints what a diff selects. `scripts/lib/gate-rosters.test.mjs`
-fails when a root test task `test:ci` runs is missing from that roster, or when
-a path a suite imports or names does not select it. Affected workspaces run plain `test`; with
+--dry-run` prints what a diff selects. **`test:scripts` is selected on every
+change, a docs-only one included**: a scan of its sources finds reads under
+nearly every top-level directory, so a narrower list would be one more roster to
+fall behind, and the suite costs seconds. `test:evals` is the selective one.
+`scripts/lib/gate-rosters.test.mjs` fails when a root test task `test:ci` runs
+is missing from that roster, when `test:scripts` stops matching every path, and
+when a path `test:evals` imports or names does not select it. Affected workspaces run plain `test`; with
 `--ci` (`repo-test-changed --ci`) `showcase` runs its coverage
 `test:ci` last, mirroring the root `test:ci` ordering. `--dry-run` prints the
 `vp run` commands without executing them. CI's Unit Tests job (and its coverage
