@@ -24,6 +24,6 @@ Add a pull-request workflow that reviews with the grok.com session in
 
 ## Status / next
 
-- Current step: ADR-135 records the session credential, the runner identity, the deny-rule probe, and the same-repo secret path.
+- Current step: the session is written in a step that exits before the model step, so GROK_AUTH_JSON is not in that shell's environ.
 - Blockers: the required checks restart on this commit, and Copilot review complete waits on a review of the new head.
-- Next: reply on the open threads, then merge once those checks are green and the threads are resolved.
+- Next: reply on the open thread, then merge once those checks are green and the threads are resolved.

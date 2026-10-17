@@ -42,7 +42,7 @@ describe('the subscription review does not use an API key', () => {
   });
 
   it('fails closed when GROK_AUTH_JSON is empty', () => {
-    const step = stepBlock(yaml(), RUN_STEP);
+    const step = stepBlock(yaml(), 'Write the Grok session');
     expect(step).toBeDefined();
     expect(stepEnvValue(step, 'GROK_AUTH_JSON')).toBe(
       expr('secrets.GROK_AUTH_JSON'),
@@ -61,7 +61,8 @@ describe('the subscription review does not use an API key', () => {
 
   it('keeps the session file out of the model tools', () => {
     const step = stepBlock(yaml(), RUN_STEP);
-    expect(step).toContain('unset GROK_AUTH_JSON');
+    expect(step).not.toContain('GROK_AUTH_JSON');
+    expect(stepEnvValue(step, 'GROK_AUTH_JSON')).toBeUndefined();
     for (const rule of [
       'Read(**/.grok)',
       'Read(**/.grok/**)',

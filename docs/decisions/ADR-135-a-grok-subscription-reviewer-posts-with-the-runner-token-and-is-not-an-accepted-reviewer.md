@@ -27,7 +27,7 @@ On `pull_request`, GitHub runs the workflow from the merge ref. Secrets are pass
 
 The model writes two files. `scripts/submit-pr-review.mjs` posts them with `GITHUB_TOKEN`, so the author is `github-actions[bot]`. That login stays out of `ACCEPTED_REVIEWERS`. The job is not a required check and does not dispatch `copilot-review-gate.yml`.
 
-The model step blanks `GITHUB_TOKEN` and `GH_TOKEN`, unsets `GROK_AUTH_JSON` before the CLI starts, and passes `--deny` rules for `Read` and `Edit` on the grok home. Those are the CLI's rule names. A `Read` rule also covers `grep`. An `Edit` rule covers `search_replace`. `--always-approve` does not override a matching deny. The probe below was run on 2026-10-17 against the binary this workflow pins, and it is redone when that pin changes. Each run had one denied path and one sibling that was allowed, with `--tools` limited to the tool under test:
+The session file is written by a step that exits before the model step. That step is the one that receives `GROK_AUTH_JSON`, and it fails when the secret is empty. The model step does not receive the secret. `unset` leaves a variable in `/proc/<pid>/environ`, which is the process's initial environment, so the shell that starts the CLI must never have had it. The model step blanks `GITHUB_TOKEN` and `GH_TOKEN` and passes `--deny` rules for `Read` and `Edit` on the grok home. Those are the CLI's rule names. A `Read` rule also covers `grep`. An `Edit` rule covers `search_replace`. `--always-approve` does not override a matching deny. The probe below was run on 2026-10-17 against the binary this workflow pins, and it is redone when that pin changes. Each run had one denied path and one sibling that was allowed, with `--tools` limited to the tool under test:
 
 - `--deny 'Read(**/secret.txt)'` with `--tools grep` refused `secret.txt` (`deny rule on read`) and returned the sibling file.
 - `--deny 'Edit(**/secret.txt)'` with `--tools read_file,search_replace` refused `search_replace` on `secret.txt` (`deny rule on edit`) and updated the sibling file.
@@ -41,7 +41,7 @@ The trigger stays `pull_request`. The job does not declare a GitHub environment.
 - A same-repo branch that rewrites this workflow receives the live session. Replacing `GROK_AUTH_JSON` is the revocation. The catalog job has the same trigger. Its credential is a key, and this one is a login.
 - A pull request that leaves the workflow alone still hands the model the workspace. The deny rules are what keep that model off the session file. The strings in `scripts/lib/grok-pr-review-workflow.test.mjs` only prove the flags are present. The probe above is what shows the pinned CLI honors them.
 - Every `synchronize` on a ready same-repo pull request spends subscription quota. Drafts and forks do not.
-- Until the secret exists, a same-repo pull request fails the model step. The job is not required, so the merge does not wait on it.
+- Until the secret exists, a same-repo pull request fails the step that writes the session. The job is not required, so the merge does not wait on it.
 - This review cannot green `Copilot review complete`. A dedicated GitHub App would give the threads a distinct author. It would still not green the gate unless that login were added to `ACCEPTED_REVIEWERS`. This decision leaves the login out.
 
 ## Alternatives considered

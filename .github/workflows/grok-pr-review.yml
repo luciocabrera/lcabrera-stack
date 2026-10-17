@@ -38,10 +38,14 @@ name: Grok PR Review
 # reviews API. pull-requests: write covers that call, and this file does
 # not grant issues: write.
 #
-# The model step sets GITHUB_TOKEN and GH_TOKEN empty. search_replace can
-# edit a file in the workspace; it cannot call GitHub. The submit step is
-# the one that receives the token. Checkout sets persist-credentials to
-# false, so that token is not written into .git/config either.
+# The session is written in its own step, which exits before the model
+# step starts. The model step does not receive GROK_AUTH_JSON. unset does
+# not remove a variable from /proc/pid/environ, so the shell that starts
+# grok must never have had the secret. The model step sets GITHUB_TOKEN
+# and GH_TOKEN empty. search_replace can edit a file in the workspace; it
+# cannot call GitHub. The submit step is the one that receives the token.
+# Checkout sets persist-credentials to false, so that token is not written
+# into .git/config either.
 #
 # Forks are skipped rather than failed. pull_request from a fork does not
 # receive secrets. Do not switch this job to pull_request_target. That
@@ -133,20 +137,14 @@ jobs:
           printf '%s\n' '(replace this file with the review body)' > grok-subscription-body.md
           printf '%s\n' '(replace this file with the findings array)' > grok-subscription-findings.json
 
-      # An empty secret on a same-repo pull request ends RED here. Writing
-      # the file and starting the CLI would spend a turn to learn the same
-      # fact from the binary. The session file is mode 600. The env var is
-      # unset before the CLI starts, and Read/Edit deny rules for the grok
-      # home still apply under --always-approve. The file is removed before
-      # the submit step.
-      - name: Run the Grok subscription review
+      # An empty secret on a same-repo pull request ends RED here. This
+      # step exits before grok starts, so the secret is not in the environ
+      # of any process still running when the model has tools. The session
+      # file is mode 600. Read/Edit deny rules on the next step cover it,
+      # and the file is removed before the submit step.
+      - name: Write the Grok session
         env:
-          GH_TOKEN: ''
-          GITHUB_TOKEN: ''
           GROK_AUTH_JSON: ${{ secrets.GROK_AUTH_JSON }}
-          GROK_DISABLE_AUTOUPDATER: '1'
-          PR_NUMBER: ${{ github.event.pull_request.number }}
-          REPOSITORY: ${{ github.repository }}
         run: |
           set -euo pipefail
 
@@ -158,7 +156,16 @@ jobs:
           install -d -m 700 "${HOME}/.grok"
           umask 077
           printf '%s\n' "${GROK_AUTH_JSON}" > "${HOME}/.grok/auth.json"
-          unset GROK_AUTH_JSON
+
+      - name: Run the Grok subscription review
+        env:
+          GH_TOKEN: ''
+          GITHUB_TOKEN: ''
+          GROK_DISABLE_AUTOUPDATER: '1'
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          set -euo pipefail
 
           {
             echo "Pull request #${PR_NUMBER} of ${REPOSITORY}."
