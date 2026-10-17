@@ -46,14 +46,14 @@ const missingFields = (data, required) =>
     .map((field) => `missing required field \`${field}\``);
 
 const statusError = (value, allowed) =>
-  value !== undefined && !allowed.has(value)
-    ? `status \`${value}\` is not one of ${[...allowed].join(', ')}`
-    : undefined;
+  value === undefined || allowed.has(value)
+    ? undefined
+    : `status \`${value}\` is not one of ${[...allowed].join(', ')}`;
 
 const patternError = (label, value, pattern, hint) =>
-  value !== undefined && !pattern.test(value)
-    ? `${label} \`${value}\` ${hint}`
-    : undefined;
+  value === undefined || pattern.test(value)
+    ? undefined
+    : `${label} \`${value}\` ${hint}`;
 
 const ownerError = (label, value) =>
   patternError(
@@ -76,9 +76,9 @@ const issueError = (label, value) =>
   );
 
 const slugMismatch = (slug, id) =>
-  id !== undefined && id !== slug
-    ? `id \`${id}\` must match the filename slug \`${slug}\``
-    : undefined;
+  id === undefined || id === slug
+    ? undefined
+    : `id \`${id}\` must match the filename slug \`${slug}\``;
 
 const dupId = (id, seen) =>
   id !== undefined && seen.has(id)
@@ -86,9 +86,9 @@ const dupId = (id, seen) =>
     : undefined;
 
 const slugForBranch = (slug, branch) =>
-  branch !== undefined && slug !== branchSlug(branch)
-    ? `filename must be the branch slug \`${branchSlug(branch)}.md\``
-    : undefined;
+  branch === undefined || slug === branchSlug(branch)
+    ? undefined
+    : `filename must be the branch slug \`${branchSlug(branch)}.md\``;
 
 export const taskErrors = ({ data, slug }, seen) =>
   [

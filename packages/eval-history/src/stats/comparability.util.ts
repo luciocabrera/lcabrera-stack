@@ -15,7 +15,7 @@ export const comparability = ({
     return { kind: 'incomparable', reason: 'model-changed' } as const;
   }
 
-  return !allowHarnessChange && main.harnessVersion !== pr.harnessVersion
-    ? ({ kind: 'incomparable', reason: 'harness-changed' } as const)
-    : ({ kind: 'comparable' } as const);
+  return allowHarnessChange || main.harnessVersion === pr.harnessVersion
+    ? ({ kind: 'comparable' } as const)
+    : ({ kind: 'incomparable', reason: 'harness-changed' } as const);
 };

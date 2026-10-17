@@ -27,7 +27,7 @@ export const prNumberOf = (value) => {
 
 const headRefOf = (value) => {
   const text = typeof value === 'string' ? value.trim() : '';
-  return text !== '' && !NO_BRANCH.has(text) ? text : undefined;
+  return text === '' || NO_BRANCH.has(text) ? undefined : text;
 };
 
 const isTemplate = ({ name }) => name.startsWith('_');
