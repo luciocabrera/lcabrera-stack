@@ -150,7 +150,8 @@ const runSuite = async ({ args, effects, total }) => {
       );
       return code;
     }
-    const problems = await effects.checkRuns({ ...args, runs: index });
+    const problems =
+      index < total ? await effects.checkRuns({ ...args, runs: index }) : [];
     if (problems.length > 0) {
       return stopped({ effects, index, problems, total });
     }

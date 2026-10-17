@@ -224,12 +224,12 @@ describe('runBaseline', () => {
     expect(effects.record).not.toHaveBeenCalled();
   });
 
-  it('checks the runs so far after each run of the baseline', async () => {
+  it('checks the runs so far after every run that has another after it', async () => {
     const effects = effectsFor();
 
     await runBaseline({
       argv: ['--suite', 'skills'],
-      defaultRuns: 2,
+      defaultRuns: 3,
       effects,
     });
 
@@ -237,6 +237,30 @@ describe('runBaseline', () => {
       [{ baselineId: BASELINE, model: undefined, runs: 1, suite: 'skills' }],
       [{ baselineId: BASELINE, model: undefined, runs: 2, suite: 'skills' }],
     ]);
+  });
+
+  it('leaves a failing last run to record, which keeps the good runs', async () => {
+    const effects = effectsFor({
+      checkRuns: vi.fn(({ runs }) =>
+        Promise.resolve(
+          runs === 5 ? ['every trial of run r ended in error'] : [],
+        ),
+      ),
+    });
+
+    expect(
+      await runBaseline({
+        argv: ['--suite', 'skills'],
+        defaultRuns: 5,
+        effects,
+      }),
+    ).toBe(0);
+    expect(effects.runOnce).toHaveBeenCalledTimes(5);
+    expect(effects.error).not.toHaveBeenCalled();
+    expect(effects.record).toHaveBeenCalledWith({
+      baselineId: BASELINE,
+      suite: 'skills',
+    });
   });
 
   it('stops after the first run that shows a failing harness', async () => {
