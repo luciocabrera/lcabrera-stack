@@ -20,6 +20,20 @@ describe('harnessProblem', () => {
     ).toBeUndefined();
   });
 
+  it('names the session limit rather than a partial run', () => {
+    const envelope = stubBaselineRun({
+      fixture: skills,
+      status: 'partial',
+      trialsBySkill: {
+        'react-19': [{ errorClass: 'session_limit', outcome: 'error' }],
+      },
+    });
+
+    expect(harnessProblem(envelope)).toBe(
+      `run ${envelope.run.run_id} was cut off by the session limit`,
+    );
+  });
+
   it('names a run whose every trial ended in error', () => {
     const envelope = stubBaselineRun({
       fixture: skills,

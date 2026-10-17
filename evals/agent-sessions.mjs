@@ -1,13 +1,16 @@
 /**
  * What the model-calling eval runners do with Agent SDK sessions: run them in
- * capped batches, collect a session's messages without letting a throw lose
- * the ones already received, stamp when it was queued, started, answered and
- * finished, read its cost, tokens and timing, say why a session failed or
- * held tools other than the ones it was given, check a --runs count, and sum
- * the cost a run's sessions reported.
+ * capped batches until told to stop, collect a session's messages without
+ * letting a throw lose the ones already received, stamp when it was queued,
+ * started, answered and finished, read its cost, tokens and timing, say why a
+ * session failed (the subscription's session limit apart from other rate
+ * limits) or held tools other than the ones it was given, check a --runs
+ * count, and sum the cost a run's sessions reported.
  * Usage: imported by `evals/skills/`, `evals/verifier-fixtures/` and
  * `evals/skill-quality/`.
  */
+import { SESSION_LIMIT_ERROR_CLASS } from '@repo/eval-history/envelope/envelope.constants';
+
 export const chunk = (items, size) =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, (index + 1) * size),
@@ -16,12 +19,12 @@ export const chunk = (items, size) =>
 export const errorText = (error) =>
   error instanceof Error ? error.message : String(error);
 
-export const runBatches = async ([batch, ...rest]) =>
-  batch === undefined
+export const runBatches = async ([batch, ...rest], isStopped = () => false) =>
+  batch === undefined || isStopped()
     ? []
     : [
         ...(await Promise.all(batch.map((job) => job()))),
-        ...(await runBatches(rest)),
+        ...(await runBatches(rest, isStopped)),
       ];
 
 const isAnswer = (message) =>
@@ -154,6 +157,19 @@ const THROW_CLASSES = [
   ],
 ];
 
+const SESSION_LIMIT_TEXT = /\bhit your session limit\b/iu;
+
+const isLimitRejection = (message) =>
+  message.type === 'rate_limit_event' &&
+  message.rate_limit_info?.status === 'rejected';
+
+const isLimitText = (text = '') => SESSION_LIMIT_TEXT.test(text);
+
+const hitSessionLimit = ({ messages, result, thrown }) =>
+  messages.some((message) => isLimitRejection(message)) ||
+  isLimitText(result?.result) ||
+  isLimitText(thrown);
+
 const resultClass = (result) =>
   RESULT_CLASSES.find(([, matches]) => matches(result))?.[0] ?? 'execution';
 
@@ -163,10 +179,15 @@ const thrownClass = (thrown) =>
 const hasEndedCleanly = (result, thrown) =>
   hasSucceeded(result) && thrown === undefined;
 
-const errorClass = (result, thrown = '') =>
+const failureClass = (result, thrown) =>
   result === undefined || hasSucceeded(result)
     ? thrownClass(thrown)
     : resultClass(result);
+
+const errorClass = ({ messages, result, thrown = '' }) =>
+  hitSessionLimit({ messages, result, thrown })
+    ? SESSION_LIMIT_ERROR_CLASS
+    : failureClass(result, thrown);
 
 const REPORTED_FIELDS = {
   cost_usd_reported: 'total_cost_usd',
@@ -214,7 +235,7 @@ export const sessionMetrics = (messages, timestamps, thrown) => {
     ...stampedTimes(result, timestamps),
     error_class: hasEndedCleanly(result, thrown)
       ? null
-      : errorClass(result, thrown),
+      : errorClass({ messages, result, thrown }),
     ...usageFields(result?.modelUsage),
   };
 };

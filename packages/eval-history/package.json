@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./baseline/baseline.constants": "./src/baseline/baseline.constants.ts",
+    "./baseline/baselineSoFar.service": "./src/baseline/baselineSoFar.service.ts",
     "./baseline/checkBaselineRun.service": "./src/baseline/checkBaselineRun.service.ts",
     "./baseline/probeDatabase.service": "./src/baseline/probeDatabase.service.ts",
     "./baseline/readBaseline.service": "./src/baseline/readBaseline.service.ts",

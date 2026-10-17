@@ -14,6 +14,7 @@ type StubBaselineRunArgs = {
 };
 
 type StubTrial = {
+  readonly errorClass?: string;
   readonly outcome: Outcome;
   readonly overall?: number;
 };
@@ -34,7 +35,7 @@ const taskKeyOf = (skill: string) => `stub/${skill}`;
 const stubTrial = ({
   index,
   skill,
-  stub: { outcome, overall },
+  stub: { errorClass = 'harness', outcome, overall },
   template,
 }: StubTrialArgs): Trial => ({
   ...template,
@@ -42,7 +43,7 @@ const stubTrial = ({
     overall !== undefined && template.detail.schema === 'quality/1'
       ? { ...template.detail, overall }
       : template.detail,
-  error_class: outcome === 'error' ? 'harness' : template.error_class,
+  error_class: outcome === 'error' ? errorClass : template.error_class,
   outcome,
   task_key: taskKeyOf(skill),
   trial_index: index,

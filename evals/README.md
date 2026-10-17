@@ -125,6 +125,28 @@ runners; the verifier runners fix their own model.
 
 Each row carries its suite, model and subject, and each baseline gets its own
 `baseline_id`. A baseline for another model never replaces one already stored.
+
+A baseline does not have to be built in one sitting. `--baseline-id <id>`
+adds `--runs` more runs to the baseline started under that id, which may be one
+run at a time. Rows are written once the baseline holds two usable runs, and
+each later chunk rewrites them from every run carrying the id. A chunk that
+leaves fewer than two usable runs ingests them and writes no rows. It exits 0
+when every run it started left a usable envelope, and 1 when one left none or
+was left out, so a crashed run never reads as a short chunk. Runs an earlier
+chunk left out do not count against it. Continuing is refused before any run when no readable envelope under
+`.tmp/eval-results/<suite>/` carries the id, or when HEAD is not the commit the
+baseline was started on. For skills and skill-quality, the model the baseline
+was started with is passed to the runner, and a different `--model` is
+refused. Either refusal names both commits or both models. Run every chunk
+from the same checkout, since the envelopes on its disk are what the rows are
+computed from.
+
+A trial that fails on the subscription's session limit is classed
+`session_limit`, not `rate_limit`. The runner starts no session after it,
+saves the run as `partial` and exits 75. `evals:baseline` then starts no
+further run, records the baseline from the runs it already holds, leaving the
+cut-off run out with that reason, and exits 75, so the chunk can be run again
+with `--baseline-id` once the limit resets.
 `readBaseline` in
 [`@repo/eval-history`](../packages/eval-history) returns the latest row for
 each subject of a suite and model.
@@ -137,11 +159,13 @@ right server, or a missing grant. None of those costs a model run. After
 each run but the last it reads that run's envelope and stops, writing nothing,
 when the run left none, left one carrying the baseline's id that fails to
 parse, ended partial, recorded no trials or saw every trial end in error: those
-point at the harness, and the remaining runs would fail the same way. A file in
+point at the harness, and the remaining runs would fail the same way. On a
+continued baseline it reads only the runs this chunk added, so an earlier cut-off
+run does not stop the next chunk. A file in
 the results directory that cannot be read names no baseline, so it never stops
 a run; it is reported when the baseline is recorded. The last run has none left to save, so a failure there is left out
 like any other unusable run and the baseline is written from the rest. A
-partial, aborted or dirty run is left out with its reason, as is a run with no
+run the session limit cut off, a partial, aborted or dirty run is left out with its reason, as is a run with no
 trials or only errored ones, an envelope carrying the baseline's id that fails
 to parse, a file that cannot be read, and a run that left no envelope at all. So is a subject
 with a counted result in fewer than two runs. A baseline whose runs span two

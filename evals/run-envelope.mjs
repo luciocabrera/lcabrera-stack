@@ -28,6 +28,8 @@ const PULL_REF = /^refs\/pull\/(\d+)\//u;
 
 export const BASELINE_ID_VARIABLE = 'EVALS_BASELINE_ID';
 
+export const SESSION_LIMIT_EXIT = 75;
+
 export const baselineIdOf = (env) => env[BASELINE_ID_VARIABLE] || null;
 
 const ciTriggerOf = (env) =>

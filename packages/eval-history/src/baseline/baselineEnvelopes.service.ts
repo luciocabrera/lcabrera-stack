@@ -13,6 +13,7 @@ type AttributionArgs = Required<
 
 type BaselineEnvelopesArgs = {
   readonly baselineId: string;
+  readonly exclude?: readonly string[];
   readonly fileSystem?: IngestFileSystem;
   readonly paths: readonly string[];
 };
@@ -37,14 +38,17 @@ const attribution = async ({
 
 export const baselineEnvelopes = async ({
   baselineId,
+  exclude = [],
   fileSystem = NODE_FILE_SYSTEM,
   paths,
 }: BaselineEnvelopesArgs) => {
   const { files } = await findEnvelopeFiles({ fileSystem, paths });
   const loaded = await Promise.all(
-    files.map((file) =>
-      readEnvelopeFile({ file, readBytes: fileSystem.readFile }),
-    ),
+    files
+      .filter((file) => !exclude.includes(file))
+      .map((file) =>
+        readEnvelopeFile({ file, readBytes: fileSystem.readFile }),
+      ),
   );
   const failed = await Promise.all(
     loaded
@@ -55,16 +59,20 @@ export const baselineEnvelopes = async ({
       })),
   );
 
+  const envelopes = loaded
+    .filter((entry) => entry.ok)
+    .filter(({ envelope }) => envelope.run.baseline_id === baselineId);
+  const invalid = failed
+    .filter(({ owner }) => owner === 'ours')
+    .map(({ entry }) => entry);
+
   return {
-    envelopes: loaded
-      .filter((entry) => entry.ok)
-      .filter(({ envelope }) => envelope.run.baseline_id === baselineId),
-    invalid: failed
-      .filter(({ owner }) => owner === 'ours')
-      .map(
-        ({ entry }) =>
-          `${entry.file} carries baseline ${baselineId} but is not a valid envelope, so it is left out: ${entry.problems.join('; ')}`,
-      ),
+    envelopes,
+    files: [...envelopes, ...invalid].map(({ file }) => file),
+    invalid: invalid.map(
+      ({ file, problems }) =>
+        `${file} carries baseline ${baselineId} but is not a valid envelope, so it is left out: ${problems.join('; ')}`,
+    ),
     unreadable: failed
       .filter(({ owner }) => owner === 'unreadable')
       .map(

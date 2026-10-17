@@ -5,6 +5,7 @@ import type { IngestQuery } from '../ingest/ingest.types.ts';
 import { envelopeFileSystem } from '../ingest/envelopeFileSystem.util.ts';
 import { memoryFileSystem } from '../ingest/memoryFileSystem.util.ts';
 import {
+  DELETE_BASELINE_SQL,
   INSERT_BASELINE_SQL,
   SELECT_SUBJECT_ID_SQL,
 } from './baseline.constants.ts';
@@ -28,6 +29,13 @@ const run = ({ baselineId, outcome }: RunArgs) =>
     baselineId,
     fixture: skills,
     trialsBySkill: { 'react-19': [{ outcome }, { outcome: 'pass' }] },
+  });
+
+const skipped = () =>
+  stubBaselineRun({
+    baselineId: BASELINE,
+    fixture: skills,
+    trialsBySkill: { 'react-19': [{ outcome: 'skipped' }] },
   });
 
 const ROWS_BY_STATEMENT = [
@@ -154,18 +162,96 @@ describe('recordBaseline', () => {
     );
   });
 
-  it('writes nothing, and says why, when one run is all it has', async () => {
+  it('ingests a first run, writes no rows yet, and says how to continue', async () => {
     const { connect, sent } = database();
     const summary = await recordRuns({
       connect: connect,
       envelopes: [run({ baselineId: BASELINE, outcome: 'pass' })],
     });
 
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toEqual([]);
+    expect(summary.stdout.at(-1)).toBe(
+      `evals:baseline: baseline ${BASELINE} holds 1 usable run(s) and is written once it holds 2; add runs with --baseline-id ${BASELINE}`,
+    );
+    expect(
+      sent.filter(({ text }) => text.includes('insert into evals.eval_run')),
+    ).toHaveLength(1);
+    expect(sent.map(({ text }) => text)).not.toContain(INSERT_BASELINE_SQL);
+    expect(sent.map(({ text }) => text)).not.toContain(DELETE_BASELINE_SQL);
+  });
+
+  it('rewrites the rows over every run once a continued baseline holds enough', async () => {
+    const { connect, sent } = database();
+    const summary = await recordRuns({
+      connect: connect,
+      envelopes: [
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        run({ baselineId: BASELINE, outcome: 'fail' }),
+        run({ baselineId: BASELINE, outcome: 'fail' }),
+      ],
+    });
+    const texts = sent.map(({ text }) => text);
+
+    expect(summary.exitCode).toBe(0);
+    expect(texts.indexOf(DELETE_BASELINE_SQL)).toBeLessThan(
+      texts.indexOf(INSERT_BASELINE_SQL),
+    );
+    expect(
+      sent.find(({ text }) => text === DELETE_BASELINE_SQL)?.values,
+    ).toEqual([BASELINE]);
+    expect(summary.stdout.at(-1)).toBe(
+      '  skill react-19 pass_rate: mean 0.6667, sd 0.2887 over 3 runs',
+    );
+  });
+
+  it('writes nothing when two usable runs give no subject a counted result', async () => {
+    const { connect, sent } = database();
+    const summary = await recordRuns({
+      connect: connect,
+      envelopes: [skipped(), skipped()],
+    });
+
     expect(summary.exitCode).toBe(1);
     expect(summary.stderr.at(-1)).toBe(
-      'evals:baseline: nothing had two usable runs, so no baseline was written',
+      'evals:baseline: no subject had a counted result in two runs, so no baseline was written',
     );
     expect(sent.map(({ text }) => text)).not.toContain(INSERT_BASELINE_SQL);
+  });
+
+  it('leaves out a run the session limit cut off, and says so', async () => {
+    const { connect } = database();
+    const limited = stubBaselineRun({
+      baselineId: BASELINE,
+      fixture: skills,
+      status: 'partial',
+      trialsBySkill: {
+        'react-19': [
+          { outcome: 'pass' },
+          { errorClass: 'session_limit', outcome: 'error' },
+        ],
+      },
+    });
+    const summary = await recordBaseline({
+      baselineId: BASELINE,
+      connect,
+      connectionString: URL_,
+      fileSystem: envelopeFileSystem([
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        limited,
+      ]),
+      paths: ['/results/skills'],
+      runs: 3,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toEqual([
+      `evals:baseline: run ${limited.run.run_id} was cut off by the session limit, so it is left out`,
+    ]);
+    expect(summary.stdout.at(-1)).toBe(
+      '  skill react-19 pass_rate: mean 1.0000, sd 0.0000 over 2 runs',
+    );
   });
 
   it('names an envelope of its baseline that fails to parse', async () => {
@@ -279,5 +365,89 @@ describe('recordBaseline', () => {
 
     expect(summary.exitCode).toBe(1);
     expect(summary.stderr[0]).toMatch(/EVALS_DATABASE_URL is unset/u);
+  });
+});
+
+const fileOf = (envelope: ReturnType<typeof run>) =>
+  `/results/skills/${envelope.run.run_id}.json`;
+
+const limitedRun = () =>
+  stubBaselineRun({
+    baselineId: BASELINE,
+    fixture: skills,
+    status: 'partial',
+    trialsBySkill: {
+      'react-19': [{ errorClass: 'session_limit', outcome: 'error' }],
+    },
+  });
+
+type ShortChunkArgs = {
+  readonly earlier?: readonly ReturnType<typeof run>[];
+  readonly envelopes: readonly ReturnType<typeof run>[];
+  readonly runs: number;
+};
+
+const shortChunk = ({ earlier = [], envelopes, runs }: ShortChunkArgs) =>
+  recordBaseline({
+    baselineId: BASELINE,
+    connect: database().connect,
+    connectionString: URL_,
+    earlier: earlier.map((envelope) => fileOf(envelope)),
+    fileSystem: envelopeFileSystem([...earlier, ...envelopes]),
+    paths: ['/results/skills'],
+    runs,
+  });
+
+describe('recordBaseline below the minimum', () => {
+  it('fails when a commissioned run left no envelope', async () => {
+    const summary = await shortChunk({
+      envelopes: [run({ baselineId: BASELINE, outcome: 'pass' })],
+      runs: 2,
+    });
+
+    expect(summary.exitCode).toBe(1);
+    expect(summary.stderr).toEqual([
+      `evals:baseline: 1 of 2 runs left no envelope for baseline ${BASELINE} under /results/skills, so a runner failed before recording`,
+      `evals:baseline: baseline ${BASELINE} holds 1 usable run(s) and is written once it holds 2, and a run this invocation commissioned left no usable envelope, so no baseline was written`,
+    ]);
+  });
+
+  it('fails when a commissioned run was left out', async () => {
+    const failed = run({ baselineId: BASELINE, outcome: 'error' });
+    const summary = await shortChunk({
+      envelopes: [
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        { ...failed, trials: failed.trials.slice(0, 1) },
+      ],
+      runs: 2,
+    });
+
+    expect(summary.exitCode).toBe(1);
+    expect(summary.stderr[0]).toBe(
+      `evals:baseline: every trial of run ${failed.run.run_id} ended in error, which points at the harness rather than the model, so it is left out`,
+    );
+  });
+
+  it('fails when the commissioned run was cut off by the session limit', async () => {
+    const limited = limitedRun();
+    const summary = await shortChunk({ envelopes: [limited], runs: 1 });
+
+    expect(summary.exitCode).toBe(1);
+    expect(summary.stderr[0]).toBe(
+      `evals:baseline: run ${limited.run.run_id} was cut off by the session limit, so it is left out`,
+    );
+  });
+
+  it('succeeds when every run this chunk commissioned is usable, whatever an earlier chunk left', async () => {
+    const summary = await shortChunk({
+      earlier: [limitedRun()],
+      envelopes: [run({ baselineId: BASELINE, outcome: 'pass' })],
+      runs: 2,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stdout.at(-1)).toBe(
+      `evals:baseline: baseline ${BASELINE} holds 1 usable run(s) and is written once it holds 2; add runs with --baseline-id ${BASELINE}`,
+    );
   });
 });

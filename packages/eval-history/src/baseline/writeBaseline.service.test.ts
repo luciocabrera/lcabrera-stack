@@ -4,6 +4,7 @@ import type { SqlQuery } from '../queries/queries.types.ts';
 import type { BaselineRow } from './baseline.types.ts';
 
 import {
+  DELETE_BASELINE_SQL,
   INSERT_BASELINE_SQL,
   SELECT_SUBJECT_ID_SQL,
 } from './baseline.constants.ts';
@@ -50,6 +51,7 @@ describe('writeBaseline', () => {
     ).toBe(2);
     expect(sent).toEqual([
       { text: 'begin', values: [] },
+      { text: DELETE_BASELINE_SQL, values: [ROW.baselineId] },
       {
         text: INSERT_BASELINE_SQL,
         values: [

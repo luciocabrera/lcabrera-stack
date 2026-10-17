@@ -29,3 +29,5 @@ export const DETAIL_SCHEMA_BY_SUITE = {
 } as const satisfies Record<(typeof SUITES)[number], string>;
 
 export const ENVELOPE_UPCASTERS: EnvelopeUpcasters = {};
+
+export const SESSION_LIMIT_ERROR_CLASS = 'session_limit';

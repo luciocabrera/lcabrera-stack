@@ -37,7 +37,7 @@ describe('probeDatabase', () => {
 
     expect(await probeDatabase({ connect, connectionString: URL_ })).toEqual({
       message: expect.stringMatching(
-        /^evals:baseline: localhost:5434\/eval_history has no evals\.eval_run and evals\.eval_baseline this role can insert into; run `vp run evals:migrate`/u,
+        /^evals:baseline: localhost:5434\/eval_history has no evals\.eval_run and evals\.eval_baseline this role can insert into, with delete on evals\.eval_baseline to rewrite a continued baseline; run `vp run evals:migrate`/u,
       ),
       ok: false,
     });

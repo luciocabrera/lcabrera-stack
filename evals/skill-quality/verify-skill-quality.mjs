@@ -11,7 +11,8 @@
  * Usage (from the repo root): vp run evals:skills:quality [-- <skill> ...] [--model <id>]
  * Needs a Claude login, or CLAUDE_CODE_OAUTH_TOKEN.
  * Exit codes: 0 = every skill was judged, 1 = a session failed or a reply did
- * not parse, or a name is no skill, 130/143 = interrupted.
+ * not parse, or a name is no skill, 75 = cut off by the session limit,
+ * 130/143 = interrupted.
  */
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
@@ -39,6 +40,7 @@ import {
 import { runSettings, skillSubjects } from '../run-envelope.mjs';
 import {
   recordRun,
+  runExitCode,
   runIdentity,
   runnerHarnessVersion,
   sdkVersion,
@@ -195,6 +197,7 @@ const judgeAll = ({ model, record, skills }) =>
       }),
       CONCURRENCY,
     ),
+    record.isCutOff,
   );
 
 const main = async () => {
@@ -223,5 +226,5 @@ try {
   await main();
 } catch (error) {
   console.error(error);
-  process.exitCode = 1;
+  process.exitCode = runExitCode(error);
 }

@@ -1,13 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import {
   rulesPlan as plan,
@@ -16,6 +9,7 @@ import {
 } from './envelope-test-support.mjs';
 import {
   fakeSignals,
+  quietConsole,
   recording,
   resultsDirectory,
 } from './run-record-test-support.mjs';
@@ -25,14 +19,7 @@ import {
   saveTranscript,
 } from './run-record.mjs';
 
-beforeEach(() => {
-  vi.spyOn(console, 'log').mockImplementation(() => undefined);
-  vi.spyOn(console, 'error').mockImplementation(() => undefined);
-});
-
-afterEach(() => {
-  vi.restoreAllMocks();
-});
+quietConsole();
 
 describe('recordRun', () => {
   it('writes a complete envelope on a normal finish and returns it', async () => {
