@@ -48,10 +48,18 @@ decides how the envelope is versioned.
   pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
   the views beneath, names a column in `EXCLUDED_COLUMNS`
   ([ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)).
-  `readRunSummaries` and `readRunTrials` read base tables instead, and reach
-  each one only through `projectedRelation`, which refuses a column outside
-  `PUBLIC_COLUMNS` (derived per read from `information_schema` by
-  `readPublicColumns`) and a `jsonb` field outside `PUBLIC_FIELD_PATHS`.
+  `readRunSummaries`, `readRunTrials`, `readSubjectRuns`, `readRunCosts` and
+  `readAnnotations` read base tables instead, and reach each one only through
+  `projectedRelation`, which refuses a column outside `PUBLIC_COLUMNS`
+  (derived per read from `information_schema` by `readPublicColumns`) and a
+  `jsonb` field outside `PUBLIC_FIELD_PATHS`. `readSubjectRuns` gives a
+  subject's pass counts per run, one row per run whatever subject versions it
+  held, over the newest runs of each suite that records the subject, with a
+  trial to link to, a failing one first;
+  `readRunCosts` gives tokens, the cost the SDK reported and the cost computed
+  from the `evals.model_price` row in force when the run started, kept apart,
+  and p50 and p95 trial duration, per run, suite and subject;
+  `readAnnotations` gives only an annotation's time and kind.
   `evalsReaderPool` is the pool they run on, built from
   `EVALS_READER_DATABASE_URL`.
 - `src/report/` — the comparison behind `vp run evals:report`: it reads two

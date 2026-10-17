@@ -58,6 +58,11 @@ export const styles = stylex.create({
     fontSize: typography.fontSizeLg,
     fontWeight: typography.fontWeightSemibold,
   },
+  views: {
+    gap: spacing.md,
+    display: 'flex',
+    flexWrap: 'wrap',
+  },
   title: {
     margin: 0,
     fontSize: typography.fontSizeXl,

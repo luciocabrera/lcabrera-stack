@@ -19,6 +19,7 @@ const publicColumns = new Set([
     'model_id',
     'harness_version',
     'sdk_version',
+    'catalog_hash',
   ].map((column) => `eval_run.${column}`),
   'eval_trial.cost_usd_reported',
   'eval_trial.outcome',
@@ -34,6 +35,26 @@ describe('runSummariesQuery', () => {
 
     expect(query.values).toEqual([30]);
     expect(query.text).toContain('where ranked.recency <= $1');
+  });
+
+  it('narrows the recent runs to one branch when asked', () => {
+    const query = runSummariesQuery({
+      publicColumns,
+      scope: { branch: 'feat/x', kind: 'recent', perSuite: 1 },
+    });
+
+    expect(query.values).toEqual([1, 'feat/x']);
+    expect(query.text).toContain('where run.branch = $2');
+    expect(query.text).toContain('where ranked.recency <= $1');
+  });
+
+  it('reads every branch when none is named', () => {
+    const query = runSummariesQuery({
+      publicColumns,
+      scope: { kind: 'recent', perSuite: 1 },
+    });
+
+    expect(query.text).not.toContain('run.branch =');
   });
 
   it('selects one run by id', () => {

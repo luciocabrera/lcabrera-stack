@@ -799,9 +799,9 @@ existing routes do.
 | `/evals/runs/:runId`                 | run header (allow-listed settings and env) and a trial page via `fetchPage`         | #1277 |
 | `/evals/runs/:runId.json`            | the run's projection allow-listed by ADR-133, never the stored envelope             | #1279 |
 | `/evals/compare?a=&b=` or `?branch=` | `evals.run_compare(a, b)` plus `attribute()`                                        | #1278 |
-| `/evals/subjects/:kind/:name`        | `v_subject_trend` for one subject, annotation fields ADR-133 allows, in range       | #1278 |
-| `/evals/heatmap`                     | subjects × last N runs from `v_subject_trend`, flaky set from `flaky_tasks(window)` | #1278 |
-| `/evals/cost`                        | tokens and both costs per run, suite and skill; p50/p95 duration                    | #1278 |
+| `/evals/subjects/:kind/:name`        | `readSubjectRuns` for one subject, annotation fields ADR-133 allows, in range       | #1278 |
+| `/evals/heatmap`                     | subjects × last N runs from `readSubjectRuns`, flaky set from `flaky_tasks(window)` | #1278 |
+| `/evals/cost`                        | `readRunCosts`: tokens and both costs per run, suite and skill; p50/p95 duration    | #1278 |
 | `/evals/confusion`                   | expected skill × invoked skill over `eval_trial_detail` for one run or a range      | #1280 |
 | `/evals/quality`                     | five rubric dimensions over time with each one's baseline band                      | #1280 |
 | `/evals/health`                      | outcome × error class counts, tool-list mismatches                                  | #1280 |

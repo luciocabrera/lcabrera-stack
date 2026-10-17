@@ -1,7 +1,11 @@
 import type { z } from 'zod';
 
+import type { costFiguresSchema } from './costFigures.schema.ts';
 import type { runSummaryRowSchema } from './runSummaryRow.schema.ts';
 import type { runTrialRowSchema } from './runTrialRow.schema.ts';
+import type { subjectRunRowSchema } from './subjectRunRow.schema.ts';
+
+export type CostFigures = z.output<typeof costFiguresSchema>;
 
 export type QueryClient = {
   readonly query: (query: SqlQuery) => Promise<{
@@ -24,6 +28,8 @@ export type SqlQuery = {
   readonly text: string;
   readonly values: unknown[];
 };
+
+export type SubjectRun = z.output<typeof subjectRunRowSchema>;
 
 export type TrialSort = {
   readonly column: string;

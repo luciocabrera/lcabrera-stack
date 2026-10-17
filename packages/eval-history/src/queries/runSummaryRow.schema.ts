@@ -8,6 +8,7 @@ const count = z.number().int().nonnegative();
 export const runSummaryRowSchema = z.object({
   arch: nullAsAbsent(z.string()),
   branch: z.string(),
+  catalogHash: nullAsAbsent(z.string()),
   ciRunner: nullAsAbsent(z.string()),
   concurrency: nullAsAbsent(z.number().int()),
   costUsd: nullAsAbsent(z.number()),

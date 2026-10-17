@@ -17,6 +17,7 @@ const RUN_COLUMNS = [
   'model_id',
   'harness_version',
   'sdk_version',
+  'catalog_hash',
 ];
 
 const TRIAL_COLUMNS = ['run_id', 'outcome', 'cost_usd_reported'];
@@ -29,6 +30,7 @@ const COLUMNS = [
 const row = {
   arch: 'x64',
   branch: 'main',
+  catalogHash: 'c'.repeat(64),
   ciRunner: 'ubuntu-latest',
   concurrency: 1,
   costUsd: 0.25,

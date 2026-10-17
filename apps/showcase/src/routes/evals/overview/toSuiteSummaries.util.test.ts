@@ -7,6 +7,7 @@ import { toSuiteSummaries } from './toSuiteSummaries.util';
 const run = (overrides: Partial<RunFigures>): RunFigures => ({
   arch: undefined,
   branch: 'main',
+  catalogHash: undefined,
   ciRunner: undefined,
   concurrency: undefined,
   costUsd: undefined,
