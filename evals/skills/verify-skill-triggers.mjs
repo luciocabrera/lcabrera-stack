@@ -16,6 +16,10 @@
  * Needs a Claude login, or CLAUDE_CODE_OAUTH_TOKEN in CI.
  * Exit codes: 0 = every task passed, 1 = otherwise, 130/143 = interrupted.
  */
+import { query } from '@anthropic-ai/claude-agent-sdk';
+import { fileSetHash } from '@repo/eval-history/hashing/fileSetHash.util';
+import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
+import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
 import {
   cpSync,
   existsSync,
@@ -30,11 +34,6 @@ import {
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
-
-import { query } from '@anthropic-ai/claude-agent-sdk';
-import { fileSetHash } from '@repo/eval-history/hashing/fileSetHash.util';
-import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
-import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
 
 import {
   chunk,
@@ -52,7 +51,7 @@ import {
   sdkVersion,
 } from '../run-record.mjs';
 import { writeScrubbed } from '../transcript-scrub.mjs';
-
+import { skillTask, skillTrial } from './skill-envelope.mjs';
 import {
   coverageProblems,
   describeVerdict,
@@ -72,7 +71,6 @@ import {
   trialCount,
   withoutSeparator,
 } from './skill-triggers.mjs';
-import { skillTask, skillTrial } from './skill-envelope.mjs';
 import {
   confusionMatrix,
   formatMatrix,
@@ -215,16 +213,24 @@ const coverage = () =>
     evals: new Map(evalDirectories().map((name) => [name, tasksOf(name)])),
   });
 
+const settledTask = async (args) => {
+  try {
+    return await attemptTask(args);
+  } catch (error) {
+    return {
+      error: errorText(error),
+      fixtureRead: true,
+      invoked: [],
+      passed: false,
+      skill: args.skill,
+      task: args.task,
+      trial: args.trial,
+    };
+  }
+};
+
 const runTask = async (args) => {
-  const result = await attemptTask(args).catch((error) => ({
-    error: errorText(error),
-    fixtureRead: true,
-    invoked: [],
-    passed: false,
-    skill: args.skill,
-    task: args.task,
-    trial: args.trial,
-  }));
+  const result = await settledTask(args);
   args.record.addTrial(skillTrial({ ...result, queuedAt: args.queuedAt }));
   return result;
 };
@@ -307,10 +313,10 @@ const jobsFor = ({ record, runs, selected, values }) =>
   );
 
 const report = (results) => {
-  const trials = results.map(trialRecord);
+  const trials = results.map((result) => trialRecord(result));
   writeScrubbed({ file: TRIALS_FILE, text: JSON.stringify(trials, null, 2) });
   const verdicts = taskVerdicts(results);
-  console.log(verdicts.map(describeVerdict).join('\n'));
+  console.log(verdicts.map((verdict) => describeVerdict(verdict)).join('\n'));
   console.log(`\n${formatMatrix(confusionMatrix(trials))}\n`);
   console.log(`Transcripts: ${REPORT_DIR}/`);
   console.log(`Trials: ${TRIALS_FILE}`);

@@ -14,12 +14,11 @@
  * Exit codes: 0 = every fixture matched and was stable, 1 = otherwise,
  * 130/143 = interrupted.
  */
+import { query } from '@anthropic-ai/claude-agent-sdk';
 import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
-
-import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import {
   chunk,
@@ -39,18 +38,6 @@ import {
   sdkVersion,
 } from '../run-record.mjs';
 import { writeScrubbed } from '../transcript-scrub.mjs';
-
-import {
-  agentBody,
-  describeJudgement,
-  judgeFixture,
-  readReport,
-  renderDispatch,
-  reportText,
-  runCount,
-  runCounts,
-  suiteEnd,
-} from './verifier-fixtures.mjs';
 import {
   agentPromptHash,
   CONTRACT_PATH,
@@ -58,6 +45,17 @@ import {
   verifierSubject,
   verifierTrial,
 } from './verifier-envelope.mjs';
+import {
+  agentBody,
+  describeJudgement,
+  isRunMatching,
+  judgeFixture,
+  readReport,
+  renderDispatch,
+  reportText,
+  runCount,
+  suiteEnd,
+} from './verifier-fixtures.mjs';
 
 const MODEL = 'claude-opus-5-5';
 const SUITE = 'verifier-fixtures';
@@ -115,7 +113,7 @@ const recordSession = ({
       error: session.error,
       expectedNotMet,
       fixture,
-      matched: runCounts({ expectedNotMet, run }),
+      matched: isRunMatching({ expectedNotMet, run }),
       metrics: session.metrics,
       queuedAt,
       run,
@@ -165,7 +163,7 @@ const runSuite = async ({ fixtures, record, runs, shared }) => {
   const { exitCode, footer } = suiteEnd({ judgements, reportDir: REPORT_DIR });
   console.log(
     [
-      ...judgements.map(describeJudgement),
+      ...judgements.map((judgement) => describeJudgement(judgement)),
       footer,
       costLine(results.map(({ metrics }) => metrics)),
     ].join('\n'),

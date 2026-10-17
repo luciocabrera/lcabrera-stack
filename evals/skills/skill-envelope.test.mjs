@@ -10,7 +10,6 @@ import {
   testPlan,
 } from '../envelope-test-support.mjs';
 import { assembleEnvelope, skillSubjects } from '../run-envelope.mjs';
-
 import { skillTask, skillTrial } from './skill-envelope.mjs';
 
 const SOURCE = 'id: trigger\nset: regression\n';

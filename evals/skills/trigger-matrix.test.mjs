@@ -33,7 +33,7 @@ const trials = [
     shouldTrigger: false,
   }),
   result({ error: 'the session ended with error_max_turns', invoked: [] }),
-].map(trialRecord);
+].map((trial) => trialRecord(trial));
 
 describe('trialRecord', () => {
   it('keeps every skill a trial invoked, once each, in the order it loaded them', () => {

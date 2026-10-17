@@ -11,6 +11,7 @@ import {
   planLintGroups,
   spawnOutcome,
   workspaceEslintFlags,
+  workspaceLabel,
 } from './eslint-staged.mjs';
 
 const REPO_ROOT = '/repo';
@@ -198,6 +199,20 @@ describe('findConfigDirectory at the repository root', () => {
         repoRoot: REPO_ROOT,
       }),
     ).toBe('/repo/packages/ui');
+  });
+});
+
+describe('workspaceLabel', () => {
+  it('names a workspace by its path from the root', () => {
+    expect(
+      workspaceLabel({ directory: '/repo/packages/ui', repoRoot: REPO_ROOT }),
+    ).toBe('packages/ui');
+  });
+
+  it('names the root config `.` rather than an empty string', () => {
+    expect(workspaceLabel({ directory: '/repo', repoRoot: REPO_ROOT })).toBe(
+      '.',
+    );
   });
 });
 

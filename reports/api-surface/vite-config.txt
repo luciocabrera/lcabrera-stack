@@ -3,10 +3,10 @@
 # One line per export: <name> <signature>. Do not edit by hand.
 
 ## ./eslint-base-custom-rules
-createBaseCustomRulesLintConfig [const] ({ ignorePatterns, tsconfigRootDir }?: { ignorePatterns?: readonly string[]; tsconfigRootDir?: string; }) => Linter.Config[]
+createBaseCustomRulesLintConfig [const] ({ ignorePatterns, toolingScriptPatterns, tsconfigRootDir }?: { ignorePatterns?: readonly string[]; toolingScriptPatterns?: readonly string[]; tsconfigRootDir?: string; }) => Linter.Config[]
 
 ## ./eslint-custom-rules
-createCustomRulesLintConfig [const] ({ ignorePatterns, publicImportBoundaryPatterns, serverOnlySyntaxRestrictions, tsconfigRootDir }?: { ignorePatterns?: readonly string[]; publicImportBoundaryPatterns?: readonly RestrictedImportPattern[]; serverOnlySyntaxRestrictions?: readonly RestrictedSyntaxEntry[]; tsconfigRootDir?: string; }) => Promise<Linter.Config[]>
+createCustomRulesLintConfig [const] ({ ignorePatterns, publicImportBoundaryPatterns, serverOnlySyntaxRestrictions, toolingScriptPatterns, tsconfigRootDir }?: { ignorePatterns?: readonly string[]; publicImportBoundaryPatterns?: readonly RestrictedImportPattern[]; serverOnlySyntaxRestrictions?: readonly RestrictedSyntaxEntry[]; toolingScriptPatterns?: readonly string[]; tsconfigRootDir?: string; }) => Promise<Linter.Config[]>
 RestrictedImportPattern [type] { readonly group: readonly string[]; readonly message: string; }
 RestrictedSyntaxEntry [type] { readonly message: string; readonly selector: string; }
 

@@ -1,7 +1,6 @@
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -19,7 +18,7 @@ const PRIVATE_KEY = [
   KEY_LINE('BEGIN'),
   'b3BlbnNzaC1rZXk',
   KEY_LINE('END'),
-].join('\\n');
+].join(String.raw`\n`);
 
 describe('scrubSecrets', () => {
   it('redacts the password in a URL and keeps the rest of it', () => {
@@ -77,8 +76,8 @@ describe('scrubSecrets', () => {
   });
 
   it('redacts a secret value as it appears inside a JSON string', () => {
-    const env = { SERVICE_PASSWORD: 'quote"and\\slash' };
-    const text = JSON.stringify({ output: 'pw is quote"and\\slash' });
+    const env = { SERVICE_PASSWORD: String.raw`quote"and\slash` };
+    const text = JSON.stringify({ output: String.raw`pw is quote"and\slash` });
     expect(scrubSecrets(text, { env })).toBe(
       JSON.stringify({ output: 'pw is [REDACTED:env]' }),
     );

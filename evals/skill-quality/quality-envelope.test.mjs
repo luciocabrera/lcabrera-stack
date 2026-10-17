@@ -10,7 +10,6 @@ import {
 } from '../envelope-test-support.mjs';
 import { assembleEnvelope, skillSubjects } from '../run-envelope.mjs';
 import { scrubSecrets } from '../transcript-scrub.mjs';
-
 import { qualityTask, qualityTrial } from './quality-envelope.mjs';
 import {
   envelopeResults,
@@ -54,7 +53,7 @@ const envelope = assembleEnvelope({
     catalogHash: hashes.catalog_hash,
     subjects: skillSubjects({ hashes, selected: ['react-19', 'unslop'] }),
     suite: 'skill-quality',
-    tasks: ['react-19', 'unslop'].map(qualityTask),
+    tasks: ['react-19', 'unslop'].map((skill) => qualityTask(skill)),
   }),
   regressionConfig: TEST_REGRESSION_CONFIG,
   status: 'complete',
@@ -72,9 +71,9 @@ describe('qualityTrial', () => {
   it('keeps the scores and the reply hash, not the reply', () => {
     expect(trialFor({})).toMatchObject({
       detail: {
-        problem: null,
         judge_model: 'claude-opus-5-5',
         overall: 4,
+        problem: null,
         reply_sha256: expect.stringMatching(/^[0-9a-f]{64}$/u),
         schema: 'quality/1',
         summary: 'Solid.',

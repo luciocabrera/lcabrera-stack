@@ -4,12 +4,11 @@
  * the trial's transcript; the trial keeps only its hash.
  * Usage: imported by `verify-skill-quality.mjs`.
  */
-import { createHash } from 'node:crypto';
 
 import { canonicalHash } from '@repo/eval-history/hashing/canonicalHash.util';
+import { createHash } from 'node:crypto';
 
 import { sessionTrial, taskRecord } from '../run-envelope.mjs';
-
 import { judgePrompt, RUBRIC } from './skill-quality.mjs';
 
 const qualityTaskKey = (skill) => `skill-quality/${skill}`;

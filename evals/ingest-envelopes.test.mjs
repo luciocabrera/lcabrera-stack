@@ -1,6 +1,5 @@
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-
 import { describe, expect, it } from 'vite-plus/test';
 
 const SCRIPT = fileURLToPath(new URL('ingest-envelopes.mjs', import.meta.url));

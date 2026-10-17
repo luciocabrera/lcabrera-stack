@@ -10,15 +10,13 @@
  *   [--allow-model-change] compares runs of two different models
  * Exit codes: 0 = compared, 1 = refused (a model change) or bad input.
  */
+import { evalsReport } from '@repo/eval-history/report/evalsReport.service';
+import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
-import { evalsReport } from '@repo/eval-history/report/evalsReport.service';
-import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
-
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
-
 import { withoutSeparator } from './agent-sessions.mjs';
 import { branchOf } from './run-envelope.mjs';
 import { REGRESSION_CONFIG } from './run-record.mjs';

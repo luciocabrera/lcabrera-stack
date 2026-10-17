@@ -39,7 +39,7 @@ const loadedOf = ({ error, invoked }) => {
 const sorted = (names) => [...names].toSorted((a, b) => a.localeCompare(b));
 
 const columnsOf = (trials) => {
-  const loaded = new Set(trials.flatMap(loadedOf));
+  const loaded = new Set(trials.flatMap((trial) => loadedOf(trial)));
   return [
     ...sorted(
       [...loaded].filter((name) => name !== NO_SKILL && name !== ERRORED),
@@ -50,10 +50,12 @@ const columnsOf = (trials) => {
 
 const rowOf = ({ columns, expected, trials }) => {
   const mine = trials.filter((trial) => expectedOf(trial) === expected);
-  const counts = mine.flatMap(loadedOf).reduce((tally, name) => {
-    tally[name] = (tally[name] ?? 0) + 1;
-    return tally;
-  }, {});
+  const counts = mine
+    .flatMap((trial) => loadedOf(trial))
+    .reduce((tally, name) => {
+      tally[name] = (tally[name] ?? 0) + 1;
+      return tally;
+    }, {});
   return {
     cells: columns.map((column) => counts[column] ?? 0),
     expected,
@@ -63,7 +65,9 @@ const rowOf = ({ columns, expected, trials }) => {
 
 export const confusionMatrix = (trials) => {
   const columns = columnsOf(trials);
-  const expectations = sorted(new Set(trials.map(expectedOf)));
+  const expectations = sorted(
+    new Set(trials.map((trial) => expectedOf(trial))),
+  );
   return {
     columns,
     rows: expectations.map((expected) => rowOf({ columns, expected, trials })),
@@ -85,7 +89,7 @@ export const formatMatrix = ({ columns, rows }) => {
     [CORNER, ...columns, 'trials'],
     ...rows.map(({ cells, expected, trials }) => [
       expected,
-      ...cells.map(cellText),
+      ...cells.map((count) => cellText(count)),
       String(trials),
     ]),
   ];
