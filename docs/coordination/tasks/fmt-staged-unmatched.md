@@ -19,6 +19,6 @@ fix(tooling): let the pre-commit hook pass a commit no formatter reads
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: fix committed, gate next
 - Blockers: none
 - Next:
