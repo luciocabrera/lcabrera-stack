@@ -113,7 +113,10 @@ describe('gates.affectedTests.rootSuites', () => {
       .map(wordsOf)
       .filter(
         (words) =>
-          words.length === 3 && words[0] === 'vp' && words[1] === 'run',
+          words[0] === 'vp' &&
+          words[1] === 'run' &&
+          words[2] !== undefined &&
+          !words[2].startsWith('-'),
       )
       .map((words) => words[2]);
 
@@ -168,6 +171,14 @@ describe('gates.affectedTests.rootSuites', () => {
         (task) => !rootSuites.some((suite) => suite.task === task),
       ),
     ).toEqual([]);
+  });
+
+  it('reads a root task from a step with arguments, and no workspace fan-out as one', () => {
+    expect(
+      chainedTasks(
+        "vp run --filter '!showcase' test && vp run -r test && vp run test:hooks -- --bail && vp run test:scripts",
+      ),
+    ).toEqual(['test:hooks', 'test:scripts']);
   });
 
   it('finds the directory each root suite runs from in its manifest command', () => {
