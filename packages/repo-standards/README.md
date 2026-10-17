@@ -317,7 +317,8 @@ the probe. That catches a root task that has left the fan-out as well as a root
 config that no longer loads the rule. An empty string, the default, and an
 absent key both mean the repository has no root pass to probe.
 
-`affectedTests` carries the three that are not rosters of workspaces to visit.
+Besides `globalPackages`, `affectedTests` carries keys that are not rosters of
+workspaces to visit.
 `globalPackages` names the shared config packages whose change must force the
 full run instead of a scoped one — that is the refusing one, because scoping a
 run that was due in full leaves the dependents untested and still reports a

@@ -247,7 +247,9 @@ describe('gates.affectedTests.rootSuites', () => {
   it.each(SUITES.filter((suite) => !isUnconditional(suite)))(
     'selects $task for every path its sources import or read',
     ({ dir, task }) => {
-      const unselected = inputsOf(dir).filter(
+      const inputs = inputsOf(dir);
+      expect(inputs.length).toBeGreaterThan(0);
+      const unselected = inputs.filter(
         (path) => !suitesFor(path).includes(task),
       );
       expect(unselected).toEqual([]);
