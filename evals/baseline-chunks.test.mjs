@@ -123,6 +123,7 @@ describe('runBaseline --baseline-id', () => {
     });
     expect(effects.record).toHaveBeenCalledWith({
       baselineId: BASELINE,
+      earlier: [PRIOR_FILE],
       runs: 3,
       suite: 'skills',
     });
@@ -199,13 +200,17 @@ describe('runBaseline at the session limit', () => {
     );
     expect(effects.record).toHaveBeenCalledWith({
       baselineId: BASELINE,
+      earlier: [],
       runs: 2,
       suite: 'skills',
     });
   });
 
-  it('exits non-zero even when the cut-off run is the last one', async () => {
-    const effects = effectsFor({ runOnce: limitedAt(1) });
+  it('exits 75 even when the cut-off run is the last one and recording fails', async () => {
+    const effects = effectsFor({
+      record: vi.fn(() => Promise.resolve(1)),
+      runOnce: limitedAt(1),
+    });
 
     expect(
       await runBaseline({
@@ -216,6 +221,7 @@ describe('runBaseline at the session limit', () => {
     ).toBe(75);
     expect(effects.record).toHaveBeenCalledWith({
       baselineId: BASELINE,
+      earlier: [PRIOR_FILE],
       runs: 2,
       suite: 'skills',
     });

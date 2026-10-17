@@ -130,8 +130,10 @@ A baseline does not have to be built in one sitting. `--baseline-id <id>`
 adds `--runs` more runs to the baseline started under that id, which may be one
 run at a time. Rows are written once the baseline holds two usable runs, and
 each later chunk rewrites them from every run carrying the id. A chunk that
-leaves fewer than two usable runs ingests them and exits 0 without writing
-rows. Continuing is refused before any run when no readable envelope under
+leaves fewer than two usable runs ingests them and writes no rows. It exits 0
+when every run it started left a usable envelope, and 1 when one left none or
+was left out, so a crashed run never reads as a short chunk. Runs an earlier
+chunk left out do not count against it. Continuing is refused before any run when no readable envelope under
 `.tmp/eval-results/<suite>/` carries the id, or when HEAD is not the commit the
 baseline was started on. For skills and skill-quality, the model the baseline
 was started with is passed to the runner, and a different `--model` is

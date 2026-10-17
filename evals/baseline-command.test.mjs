@@ -194,6 +194,7 @@ describe('runBaseline', () => {
     expect(effects.mintId).toHaveBeenCalledOnce();
     expect(effects.record).toHaveBeenCalledWith({
       baselineId: BASELINE,
+      earlier: [],
       runs: 3,
       suite: 'skills',
     });
@@ -266,6 +267,7 @@ describe('runBaseline', () => {
     expect(effects.error).not.toHaveBeenCalled();
     expect(effects.record).toHaveBeenCalledWith({
       baselineId: BASELINE,
+      earlier: [],
       runs: 5,
       suite: 'skills',
     });

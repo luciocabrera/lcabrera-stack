@@ -367,3 +367,87 @@ describe('recordBaseline', () => {
     expect(summary.stderr[0]).toMatch(/EVALS_DATABASE_URL is unset/u);
   });
 });
+
+const fileOf = (envelope: ReturnType<typeof run>) =>
+  `/results/skills/${envelope.run.run_id}.json`;
+
+const limitedRun = () =>
+  stubBaselineRun({
+    baselineId: BASELINE,
+    fixture: skills,
+    status: 'partial',
+    trialsBySkill: {
+      'react-19': [{ errorClass: 'session_limit', outcome: 'error' }],
+    },
+  });
+
+type ShortChunkArgs = {
+  readonly earlier?: readonly ReturnType<typeof run>[];
+  readonly envelopes: readonly ReturnType<typeof run>[];
+  readonly runs: number;
+};
+
+const shortChunk = ({ earlier = [], envelopes, runs }: ShortChunkArgs) =>
+  recordBaseline({
+    baselineId: BASELINE,
+    connect: database().connect,
+    connectionString: URL_,
+    earlier: earlier.map((envelope) => fileOf(envelope)),
+    fileSystem: envelopeFileSystem([...earlier, ...envelopes]),
+    paths: ['/results/skills'],
+    runs,
+  });
+
+describe('recordBaseline below the minimum', () => {
+  it('fails when a commissioned run left no envelope', async () => {
+    const summary = await shortChunk({
+      envelopes: [run({ baselineId: BASELINE, outcome: 'pass' })],
+      runs: 2,
+    });
+
+    expect(summary.exitCode).toBe(1);
+    expect(summary.stderr).toEqual([
+      `evals:baseline: 1 of 2 runs left no envelope for baseline ${BASELINE} under /results/skills, so a runner failed before recording`,
+      `evals:baseline: baseline ${BASELINE} holds 1 usable run(s) and is written once it holds 2, and a run this invocation commissioned left no usable envelope, so no baseline was written`,
+    ]);
+  });
+
+  it('fails when a commissioned run was left out', async () => {
+    const failed = run({ baselineId: BASELINE, outcome: 'error' });
+    const summary = await shortChunk({
+      envelopes: [
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        { ...failed, trials: failed.trials.slice(0, 1) },
+      ],
+      runs: 2,
+    });
+
+    expect(summary.exitCode).toBe(1);
+    expect(summary.stderr[0]).toBe(
+      `evals:baseline: every trial of run ${failed.run.run_id} ended in error, which points at the harness rather than the model, so it is left out`,
+    );
+  });
+
+  it('fails when the commissioned run was cut off by the session limit', async () => {
+    const limited = limitedRun();
+    const summary = await shortChunk({ envelopes: [limited], runs: 1 });
+
+    expect(summary.exitCode).toBe(1);
+    expect(summary.stderr[0]).toBe(
+      `evals:baseline: run ${limited.run.run_id} was cut off by the session limit, so it is left out`,
+    );
+  });
+
+  it('succeeds when every run this chunk commissioned is usable, whatever an earlier chunk left', async () => {
+    const summary = await shortChunk({
+      earlier: [limitedRun()],
+      envelopes: [run({ baselineId: BASELINE, outcome: 'pass' })],
+      runs: 2,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stdout.at(-1)).toBe(
+      `evals:baseline: baseline ${BASELINE} holds 1 usable run(s) and is written once it holds 2; add runs with --baseline-id ${BASELINE}`,
+    );
+  });
+});

@@ -295,6 +295,7 @@ const recordChunk = async ({ effects, ended, parsed }) => {
   }
   const recorded = await effects.record({
     baselineId,
+    earlier: priorFiles,
     runs: priorFiles.length + ended.index,
     suite,
   });

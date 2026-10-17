@@ -12,9 +12,13 @@
  * Refuses a dirty tree, and needs EVALS_DATABASE_URL and a Claude login.
  * Stops after any run but the last whose envelope shows a failing harness,
  * and after a run the session limit cut off.
- * Exit codes: 0 = runs recorded, and the rows written once the baseline holds
- *   enough runs, 1 = refused or not written, 75 = cut off by the session
- *   limit, 130/143 = interrupted.
+ * Exit codes: 0 = the rows were written, or the baseline still holds fewer
+ *   than two usable runs and every run this invocation started left a usable
+ *   envelope; 1 = refused before any run, stopped after a failing harness, a
+ *   run this invocation started left no usable envelope while the baseline
+ *   holds fewer than two usable runs, the runs did not reach the database, or
+ *   no subject had a counted result in two runs; 75 = the session limit cut
+ *   a run off, whatever was recorded; 130/143 = interrupted.
  */
 import { baselineSoFar } from '@repo/eval-history/baseline/baselineSoFar.service';
 import { checkBaselineRun } from '@repo/eval-history/baseline/checkBaselineRun.service';
@@ -56,10 +60,11 @@ const checkRuns = ({ baselineId, exclude, runs, suite }) =>
 
 const git = (args) => runGit({ args, cwd: dirname(EVALS_DIR) });
 
-const record = async ({ baselineId, runs, suite }) => {
+const record = async ({ baselineId, earlier, runs, suite }) => {
   const summary = await recordBaseline({
     baselineId,
     connectionString: process.env.EVALS_DATABASE_URL,
+    earlier,
     paths: [join(RESULTS_DIR, suite)],
     runs,
   });
