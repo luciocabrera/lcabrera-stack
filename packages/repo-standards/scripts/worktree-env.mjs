@@ -34,7 +34,7 @@ export const parseArgs = (argv, cwd) => {
   const flag = argv.indexOf('--target');
   const candidate = flag === -1 ? undefined : argv[flag + 1];
   const usable =
-    candidate !== undefined && !candidate.startsWith('-') ? candidate : cwd;
+    candidate === undefined || candidate.startsWith('-') ? cwd : candidate;
   return { dryRun: argv.includes('--dry-run'), target: resolve(usable) };
 };
 

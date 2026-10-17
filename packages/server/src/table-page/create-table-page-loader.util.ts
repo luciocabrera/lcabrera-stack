@@ -22,7 +22,9 @@ export const createTablePageLoader =
   async ({ request }: TablePageLoaderArgs) => {
     const resolved = await resolvePageRead(new URL(request.url).searchParams);
 
-    return resolved.kind === 'refused'
-      ? Response.json(toRefusedTablePage(resolved.message))
-      : Response.json(await selectPage(resolved.read));
+    return Response.json(
+      resolved.kind === 'refused'
+        ? toRefusedTablePage(resolved.message)
+        : await selectPage(resolved.read),
+    );
   };

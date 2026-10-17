@@ -25,7 +25,6 @@ export const resolveDistinctEstimate = ({
 
   return {
     kind: 'known',
-    value:
-      nDistinct > 0 ? Math.ceil(nDistinct) : Math.ceil(-nDistinct * relTuples),
+    value: Math.ceil(nDistinct > 0 ? nDistinct : -nDistinct * relTuples),
   };
 };

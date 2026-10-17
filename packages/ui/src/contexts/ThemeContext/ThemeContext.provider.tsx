@@ -12,11 +12,9 @@ export const ThemeProvider = ({
   appId,
   children,
   defaultTheme = 'light',
-  initialTheme,
+  initialTheme = defaultTheme,
 }: ThemeProviderProps) => {
-  const [themeState, setThemeState] = useState<ThemeMode>(
-    () => initialTheme ?? defaultTheme,
-  );
+  const [themeState, setThemeState] = useState<ThemeMode>(() => initialTheme);
 
   const setTheme = (newTheme: ThemeMode) => {
     setThemeState(newTheme);

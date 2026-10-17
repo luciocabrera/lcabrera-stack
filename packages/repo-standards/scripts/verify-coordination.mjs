@@ -161,9 +161,9 @@ const undeclaredSharedWarning = (branch, ids, declared) =>
     : undefined;
 
 const orphanBranchWarning = ({ data, name }, byBranch) =>
-  data !== undefined && data.status !== 'done' && !byBranch.has(data.branch)
-    ? `${name}: shared branch \`${data.branch}\` has no active task — delete the descriptor or add its tasks.`
-    : undefined;
+  data === undefined || data.status === 'done' || byBranch.has(data.branch)
+    ? undefined
+    : `${name}: shared branch \`${data.branch}\` has no active task — delete the descriptor or add its tasks.`;
 
 const checkSharedBranches = (tasks, branches, warnings) => {
   const declared = new Set(

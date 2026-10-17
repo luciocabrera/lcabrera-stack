@@ -28,20 +28,11 @@ const {
   tableColumnFiltersMock: {} as Record<string, unknown>,
 }));
 
-type ButtonProps = {
-  readonly children: ReactNode;
-  readonly isBusy?: boolean;
-  readonly isDisabled?: boolean;
-  readonly onClick?: () => void;
-};
+vi.mock('#ui/components/Button', async () => {
+  const { MockButton } = await import('#ui/utils/tests/createMockButton.util');
 
-vi.mock('#ui/components/Button', () => ({
-  Button: ({ children, isBusy, isDisabled, onClick }: ButtonProps) => (
-    <button disabled={isDisabled || isBusy} onClick={onClick} type='button'>
-      {children}
-    </button>
-  ),
-}));
+  return { Button: MockButton };
+});
 
 vi.mock('#ui/components/SidePanel', () => ({
   SidePanelFooter: ({ children }: { readonly children: ReactNode }) => (
