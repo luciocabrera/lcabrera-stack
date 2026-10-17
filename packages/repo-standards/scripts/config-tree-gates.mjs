@@ -111,15 +111,14 @@ const pathList = (value, fallback, key) =>
     : fallback;
 
 const optionalPath = (value, key) => {
-  if (value === undefined) {
-    return '';
-  }
-  if (typeof value !== 'string' || value.trim() === '') {
+  if (value !== undefined && typeof value !== 'string') {
     throw new Error(
-      `${CONFIG_FILE_NAME}: \`${key}\` must be a non-empty string when it is set.`,
+      `${CONFIG_FILE_NAME}: \`${key}\` must be a string, but is \`${JSON.stringify(value)}\`.`,
     );
   }
-  return repoRelative(value, value, key);
+  return readableString(value, '') === ''
+    ? ''
+    : repoRelative(value, value, key);
 };
 
 const resolvePath = (block, key, fallback, name) =>

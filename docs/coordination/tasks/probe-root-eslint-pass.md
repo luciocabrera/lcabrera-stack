@@ -10,6 +10,7 @@ area:
   - packages/repo-standards/scripts/eslint-pass-probe.test.mjs
   - packages/repo-standards/scripts/config-tree-gates.mjs
   - packages/repo-standards/scripts/config-tree-gates.test.mjs
+  - packages/repo-standards/scripts/config-gates.test.mjs
   - packages/repo-standards/README.md
   - devkit.config.json
   - docs/decisions/ADR-136-lint-evals-from-a-root-eslint-config.md

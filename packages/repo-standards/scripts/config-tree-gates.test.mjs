@@ -99,16 +99,18 @@ describe('resolveTreeGates', () => {
     ).toEqual(['packages/one']);
   });
 
-  it('leaves the root eslint pass unprobed until a directory is named', () => {
-    expect(resolveTreeGates({}).eslintPass.rootPassDir).toBe('');
+  it('leaves the root eslint pass unprobed when the key is absent or blank', () => {
+    for (const eslintPass of [{}, { rootPassDir: '' }, { rootPassDir: '  ' }]) {
+      expect(resolveTreeGates({ eslintPass }).eslintPass.rootPassDir).toBe('');
+    }
     expect(
       resolveTreeGates({ eslintPass: { rootPassDir: 'tools/' } }).eslintPass
         .rootPassDir,
     ).toBe('tools');
   });
 
-  it('refuses a root pass directory that is blank, not a string or outside the repository', () => {
-    for (const rootPassDir of ['', '  ', 3, null, '../elsewhere', '/abs']) {
+  it('refuses a root pass directory that is not a string or leaves the repository', () => {
+    for (const rootPassDir of [3, null, false, '../elsewhere', '/abs']) {
       expect(() => resolveTreeGates({ eslintPass: { rootPassDir } })).toThrow(
         /gates\.eslintPass\.rootPassDir/u,
       );

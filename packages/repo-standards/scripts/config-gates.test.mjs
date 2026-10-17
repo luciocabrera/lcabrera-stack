@@ -1,3 +1,4 @@
+import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { DEFAULT_GATES, resolveGates } from './config.mjs';
@@ -122,5 +123,21 @@ describe('resolveGates', () => {
     expect(
       gates({ docsPaths: { ignoredDocs: ['vendor/'] } }).docsPaths.ignoredDocs,
     ).toEqual(['vendor/']);
+  });
+
+  it('accepts the gates example the README ships', () => {
+    const readme = readFileSync(
+      new URL('../README.md', import.meta.url),
+      'utf8',
+    );
+    const example = readme
+      .matchAll(/```json\n([\s\S]*?)```/gu)
+      .map((match) => match[1])
+      .find((block) => block.includes('"gates"'));
+
+    expect(example).toBeDefined();
+    const resolved = resolveGates(example);
+    expect(resolved.eslintPass.rootPassDir).toBe('');
+    expect(resolved.eslintPass.probeWorkspaces).toEqual(['packages/ui']);
   });
 });

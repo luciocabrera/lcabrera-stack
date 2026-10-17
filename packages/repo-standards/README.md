@@ -311,8 +311,8 @@ root package's own `lint:eslint:check` lints. When it is set,
 `repo-verify-eslint-pass` plants its probe under that directory and runs
 `vp run -r lint:eslint:check` from the root, and fails unless the fan-out reports
 the probe. That catches a root task that has left the fan-out as well as a root
-config that no longer loads the rule. Empty, the default, means the repository
-has no root pass to probe.
+config that no longer loads the rule. An empty string, the default, and an
+absent key both mean the repository has no root pass to probe.
 
 `affectedTests` carries the two that are not rosters of workspaces to visit.
 `globalPackages` names the shared config packages whose change must force the
