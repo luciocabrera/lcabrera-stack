@@ -225,6 +225,8 @@ export const workspaceDispositions = ({ affected, changed, graph, groups }) => {
   });
 };
 
+const codeSpan = (text) => `\`${text}\``;
+
 export const renderSelectionMarkdown = (
   mode,
   dispositions,
@@ -241,7 +243,7 @@ export const renderSelectionMarkdown = (
     suites.length === 0
       ? []
       : [
-          `> Plus ${suites.map((task) => `\`${task}\``).join(', ')} — a file a root suite reads changed.`,
+          `> Plus ${suites.map((task) => codeSpan(task)).join(', ')} — a file a root suite reads changed.`,
           '',
         ];
   const runningBlock =

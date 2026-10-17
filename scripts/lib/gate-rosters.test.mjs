@@ -101,10 +101,32 @@ describe('gates.affectedTests.globalPackages', () => {
 describe('gates.affectedTests.rootSuites', () => {
   const { globalPackages, lintOnlyPatterns, rootSuites } = GATES.affectedTests;
 
-  const SUITE_DIRS = [
-    { dir: 'scripts', task: 'test:scripts' },
-    { dir: 'evals', task: 'test:evals' },
-  ];
+  const { scripts: MANIFEST_SCRIPTS } = JSON.parse(
+    readFileSync(join(REPO_ROOT, 'package.json'), 'utf8'),
+  );
+
+  const wordsOf = (command) => command.split(' ').filter((word) => word !== '');
+
+  const chainedTasks = (command) =>
+    command
+      .split('&&')
+      .map(wordsOf)
+      .filter(
+        (words) =>
+          words.length === 3 && words[0] === 'vp' && words[1] === 'run',
+      )
+      .map((words) => words[2]);
+
+  const suiteDirOf = (task) => {
+    const words = wordsOf(MANIFEST_SCRIPTS[task] ?? '');
+    const at = words.indexOf('--root');
+    return at === -1 ? undefined : words[at + 1];
+  };
+
+  const SUITES = rootSuites.map(({ task }) => ({
+    dir: suiteDirOf(task),
+    task,
+  }));
 
   const tracked = execFileSync('git', ['ls-files', '-z'], {
     cwd: REPO_ROOT,
@@ -131,15 +153,30 @@ describe('gates.affectedTests.rootSuites', () => {
     }).suites;
 
   it('names only tasks the root manifest defines', () => {
-    const { scripts } = JSON.parse(
-      readFileSync(join(REPO_ROOT, 'package.json'), 'utf8'),
-    );
     expect(
-      rootSuites.map((suite) => suite.task).filter((task) => !scripts[task]),
+      rootSuites
+        .map((suite) => suite.task)
+        .filter((task) => !MANIFEST_SCRIPTS[task]),
     ).toEqual([]);
   });
 
-  it.each(SUITE_DIRS)(
+  it('holds every root test task test:ci runs, so test:changed can select it', () => {
+    const chained = chainedTasks(MANIFEST_SCRIPTS['test:ci']);
+    expect(chained.length).toBeGreaterThan(0);
+    expect(
+      chained.filter(
+        (task) => !rootSuites.some((suite) => suite.task === task),
+      ),
+    ).toEqual([]);
+  });
+
+  it('finds the directory each root suite runs from in its manifest command', () => {
+    expect(
+      SUITES.filter(({ dir }) => dir === undefined).map(({ task }) => task),
+    ).toEqual([]);
+  });
+
+  it.each(SUITES)(
     'selects $task for every path its sources import or read',
     ({ dir, task }) => {
       const unselected = inputsOf(dir).filter(

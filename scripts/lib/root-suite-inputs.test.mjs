@@ -78,6 +78,26 @@ describe('suiteInputs', () => {
     ).toEqual(['.config/tool.json', 'docs/guide/planning.md', 'tools/run.mjs']);
   });
 
+  it('ignores a path named only in a comment, and reads past a regex literal', () => {
+    expect(
+      inputsOf(
+        {
+          'suite/a.mjs': [
+            '// see docs/guide/README.md',
+            'const ROW = /^\\| `([^`]+)`/u;',
+            "const GUIDE = 'docs/guide/planning.md';",
+          ].join('\n'),
+        },
+        ['docs/guide/README.md', 'docs/guide/planning.md'],
+      ),
+    ).toEqual(['docs/guide/planning.md']);
+  });
+
+  it('reads an unterminated REPO_ROOT join of many segments without backtracking', () => {
+    const source = `join(REPO_ROOT, ${"'a' ".repeat(28)}x`;
+    expect(inputsOf({ 'suite/a.mjs': source }, ['a'])).toEqual([]);
+  }, 1000);
+
   it('marks a directory it reads so a pattern for its contents is tested', () => {
     expect(
       inputsOf({ 'suite/a.mjs': "readdirSync('rules/agents');" }, [
