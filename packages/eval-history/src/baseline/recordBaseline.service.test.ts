@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 import type { IngestQuery } from '../ingest/ingest.types.ts';
 
 import { envelopeFileSystem } from '../ingest/envelopeFileSystem.util.ts';
+import { memoryFileSystem } from '../ingest/memoryFileSystem.util.ts';
 import {
   INSERT_BASELINE_SQL,
   SELECT_SUBJECT_ID_SQL,
@@ -72,6 +73,16 @@ const recordRuns = ({ connect, envelopes }: RecordRunsArgs) =>
     fileSystem: envelopeFileSystem(envelopes),
     paths: ['/results/skills'],
   });
+
+const filesOf = (
+  envelopes: readonly { readonly run: { readonly run_id: string } }[],
+) =>
+  Object.fromEntries(
+    envelopes.map((envelope) => [
+      `/results/skills/${envelope.run.run_id}.json`,
+      JSON.stringify(envelope),
+    ]),
+  );
 
 describe('recordBaseline', () => {
   it('ingests only its own runs, then writes the baseline rows', async () => {
@@ -152,6 +163,31 @@ describe('recordBaseline', () => {
       'evals:baseline: nothing had two usable runs, so no baseline was written',
     );
     expect(sent.map(({ text }) => text)).not.toContain(INSERT_BASELINE_SQL);
+  });
+
+  it('names an envelope of its baseline that fails to parse', async () => {
+    const { connect } = database();
+    const broken = {
+      ...run({ baselineId: BASELINE, outcome: 'pass' }),
+      schema_version: 99,
+    };
+    const valid = [
+      run({ baselineId: BASELINE, outcome: 'pass' }),
+      run({ baselineId: BASELINE, outcome: 'pass' }),
+    ];
+    const summary = await recordBaseline({
+      baselineId: BASELINE,
+      connect,
+      connectionString: URL_,
+      fileSystem: memoryFileSystem(filesOf([...valid, broken])),
+      paths: ['/results/skills'],
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toHaveLength(1);
+    expect(summary.stderr[0]).toContain(
+      `evals:baseline: /results/skills/${broken.run.run_id}.json is not a valid envelope, so it is left out: `,
+    );
   });
 
   it('refuses an unset database before reading anything', async () => {

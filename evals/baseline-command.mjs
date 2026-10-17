@@ -5,8 +5,10 @@
  * the refusals are testable without a model, a database or a dirty checkout.
  * Usage: imported by `run-baseline.mjs`.
  */
+import { MIN_BASELINE_RUNS } from '@repo/eval-history/stats/stats.constants';
 import { parseArgs } from 'node:util';
 
+import { wholeNumberProblem } from './agent-sessions.mjs';
 import { BASELINE_ID_VARIABLE } from './run-envelope.mjs';
 
 export const BASELINE_RUNNERS = {
@@ -54,10 +56,10 @@ const modelProblem = ({ model, suite }) =>
 const runsOf = ({ defaultRuns, runs }) =>
   runs === undefined ? defaultRuns : Number(runs);
 
-const runsProblem = ({ given, runs }) =>
-  Number.isSafeInteger(runs) && runs >= 2
+const runsProblem = (given) =>
+  given === undefined
     ? null
-    : `--runs must be a whole number of at least 2; got "${given}"`;
+    : wholeNumberProblem({ minimum: MIN_BASELINE_RUNS, value: given });
 
 const readArgs = (argv) => {
   try {
@@ -87,7 +89,7 @@ export const parseBaselineArgs = ({ argv, defaultRuns }) => {
   const problem = [
     suiteProblem(suite),
     modelProblem({ model, suite }),
-    runsProblem({ given, runs }),
+    runsProblem(given),
   ].find((found) => found !== null);
   return problem === undefined
     ? { model, ok: true, runs, suite }
@@ -127,7 +129,17 @@ export const runEnvironment = ({ baselineId, env }) => ({
   [BASELINE_ID_VARIABLE]: baselineId,
 });
 
-const runSuite = ({ args, effects, total }) => {
+const stopped = ({ effects, index, problems, total }) => {
+  for (const problem of problems) {
+    effects.error(`${PREFIX} ${problem}`);
+  }
+  effects.error(
+    `${PREFIX} stopped after run ${index} of ${total} rather than spend the rest on a failing harness; no baseline was written`,
+  );
+  return 1;
+};
+
+const runSuite = async ({ args, effects, total }) => {
   const indexes = Array.from({ length: total }, (_, offset) => offset + 1);
   for (const index of indexes) {
     effects.log(`${PREFIX} run ${index} of ${total}`);
@@ -137,6 +149,10 @@ const runSuite = ({ args, effects, total }) => {
         `${PREFIX} interrupted during run ${index}; no baseline was written`,
       );
       return code;
+    }
+    const problems = await effects.checkRuns({ ...args, runs: index });
+    if (problems.length > 0) {
+      return stopped({ effects, index, problems, total });
     }
   }
   return null;
@@ -165,7 +181,7 @@ export const runBaseline = async ({ argv, defaultRuns, effects }) => {
   effects.log(
     `${PREFIX} baseline ${baselineId}: ${parsed.runs} runs of ${parsed.suite}`,
   );
-  const interrupted = runSuite({
+  const interrupted = await runSuite({
     args: { baselineId, model: parsed.model, suite: parsed.suite },
     effects,
     total: parsed.runs,

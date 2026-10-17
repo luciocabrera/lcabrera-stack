@@ -14,7 +14,9 @@ decides how the envelope is versioned.
   that is partial, dirty or calls no model, and records nothing for a baseline
   spanning two commits or models. `writeBaseline` stores the rows in
   `evals.eval_baseline` in one transaction, and `readBaseline` reads back the
-  latest row per subject for a suite and model.
+  latest row per subject for a suite and model. `checkBaselineRun` reads the
+  runs a baseline has made so far and names any that left no envelope or
+  show a failing harness, so the command can stop before the next run.
 - `src/envelope/` — the run envelope as a Zod schema, the validator, the
   emitted `envelope.schema.json`, and one example envelope per suite under
   `fixtures/`. A skill-quality trial whose detail names no `judge_model`,

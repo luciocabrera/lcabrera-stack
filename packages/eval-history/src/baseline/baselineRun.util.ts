@@ -17,9 +17,14 @@ export const baselineRun = (envelope: RunEnvelope) => {
   if (git_dirty) {
     return excluded(`run ${run_id} ran on a dirty tree, so it is left out`);
   }
-  if (model_id === null || !isBaselineSuite(suite)) {
+  if (!isBaselineSuite(suite)) {
     return excluded(
       `run ${run_id} is a ${suite} run, which calls no model and has no baseline`,
+    );
+  }
+  if (model_id === null) {
+    return excluded(
+      `run ${run_id} recorded no model, so it cannot join a ${suite} baseline`,
     );
   }
 

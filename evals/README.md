@@ -133,8 +133,12 @@ It refuses a dirty tree, naming the changes, because a baseline has to describe
 a commit. It also refuses before any run when `EVALS_DATABASE_URL` is unset or
 unreachable, or when its role cannot insert into `evals.eval_run` and
 `evals.eval_baseline` there: an unmigrated database, the wrong database on the
-right server, or a missing grant. None of those costs a model run. A
-partial, aborted or dirty run is left out with its reason. So is a subject
+right server, or a missing grant. None of those costs a model run. After
+each run it reads that run's envelope and stops, writing nothing, when the run
+left none, ended partial, recorded no trials or saw every trial end in error:
+those point at the harness, and the remaining runs would fail the same way. A
+partial, aborted or dirty run is left out with its reason, and so is an
+envelope carrying the baseline's id that fails to parse. So is a subject
 with a counted result in fewer than two runs. A baseline whose runs span two
 commits or two models records nothing.
 

@@ -7,11 +7,10 @@ import type {
 
 import { connectIngest } from '../ingest/connectIngest.service.ts';
 import { evalsDatabaseUrl } from '../ingest/evalsDatabaseUrl.util.ts';
-import { findEnvelopeFiles } from '../ingest/findEnvelopeFiles.service.ts';
 import { ingestPaths } from '../ingest/ingestPaths.service.ts';
-import { readEnvelopeFile } from '../ingest/readEnvelopeFile.service.ts';
 import { aggregateBaseline } from './aggregateBaseline.util.ts';
 import { BASELINE_DATABASE_URL } from './baseline.constants.ts';
+import { baselineEnvelopes } from './baselineEnvelopes.service.ts';
 import { baselineHeading } from './baselineHeading.util.ts';
 import { baselineLine } from './baselineLine.util.ts';
 import { writeBaseline } from './writeBaseline.service.ts';
@@ -19,10 +18,6 @@ import { writeBaseline } from './writeBaseline.service.ts';
 type FailureArgs = {
   readonly stderr: readonly string[];
   readonly stdout?: readonly string[];
-};
-
-type LoadArgs = Pick<RecordBaselineArgs, 'baselineId' | 'paths'> & {
-  readonly fileSystem: IngestFileSystem;
 };
 
 type RecordBaselineArgs = {
@@ -42,23 +37,6 @@ const failure = ({ stderr, stdout = [] }: FailureArgs) => ({
   stderr,
   stdout,
 });
-
-const baselineEnvelopes = async ({
-  baselineId,
-  fileSystem,
-  paths,
-}: LoadArgs) => {
-  const { files } = await findEnvelopeFiles({ fileSystem, paths });
-  const loaded = await Promise.all(
-    files.map((file) =>
-      readEnvelopeFile({ file, readBytes: fileSystem.readFile }),
-    ),
-  );
-
-  return loaded
-    .filter((entry) => entry.ok)
-    .filter(({ envelope }) => envelope.run.baseline_id === baselineId);
-};
 
 const reportLines = (rows: ReturnType<typeof aggregateBaseline>['rows']) => {
   const headings = [...new Set(rows.map((row) => baselineHeading(row)))];
@@ -87,11 +65,14 @@ export const recordBaseline = async ({
     return failure({ stderr: [database.message] });
   }
 
-  const envelopes = await baselineEnvelopes({ baselineId, fileSystem, paths });
+  const loaded = await baselineEnvelopes({ baselineId, fileSystem, paths });
+  const unreadable = loaded.problems.map((problem) => `${PREFIX} ${problem}`);
+  const { envelopes } = loaded;
 
   if (envelopes.length === 0) {
     return failure({
       stderr: [
+        ...unreadable,
         `${PREFIX} no envelope under ${paths.join(', ')} belongs to baseline ${baselineId}`,
       ],
     });
@@ -118,7 +99,10 @@ export const recordBaseline = async ({
   const { problems, rows } = aggregateBaseline(
     envelopes.map(({ envelope }) => envelope),
   );
-  const warnings = problems.map((problem) => `${PREFIX} ${problem}`);
+  const warnings = [
+    ...unreadable,
+    ...problems.map((problem) => `${PREFIX} ${problem}`),
+  ];
 
   if (rows.length === 0) {
     return failure({
