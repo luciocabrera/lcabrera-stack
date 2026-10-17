@@ -8,6 +8,13 @@ decides how the envelope is versioned.
 
 - `src/annotations/` — a timeline note in `evals.eval_annotation`: its kinds,
   its schema and the insert `evals:annotate` runs.
+- `src/baseline/` — the A/A baseline behind `vp run evals:baseline`:
+  `aggregateBaseline` turns one baseline's run envelopes into the mean and
+  sample standard deviation per suite, model and subject. It leaves out a run
+  that is partial, dirty or calls no model, and records nothing for a baseline
+  spanning two commits or models. `writeBaseline` stores the rows in
+  `evals.eval_baseline` in one transaction, and `readBaseline` reads back the
+  latest row per subject for a suite and model.
 - `src/envelope/` — the run envelope as a Zod schema, the validator, the
   emitted `envelope.schema.json`, and one example envelope per suite under
   `fixtures/`. A skill-quality trial whose detail names no `judge_model`,
@@ -66,10 +73,11 @@ decides how the envelope is versioned.
 - `src/testing/` — the scratch-database harness the integration tests share:
   it creates and connects to databases beside the one
   `EVALS_TEST_DATABASE_URL` names and drops them, and the roles a test
-  created, afterwards. `markedEnvelopes`
-  builds one schema-valid envelope per suite with a marker in every field the
-  allow-list leaves out, for the showcase's `/evals` public-payload test. No
-  command imports either.
+  created, afterwards. `integrationDatabase` reads that variable, says when a
+  test file skips for want of it, and fails under `CI` without it.
+  `markedEnvelopes` builds one schema-valid envelope per suite with a marker in
+  every field the allow-list leaves out, for the showcase's `/evals`
+  public-payload test. No command imports any of them.
 
 `vp run evals:migrate` applies `migrations/` to the database
 `EVALS_MIGRATE_DATABASE_URL` names, connected as the migrating role, which
@@ -119,7 +127,7 @@ that is down only warns, and the file waits on disk for the next
 
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-The ingest, reporting and grade tests each create and drop a database of
+The ingest, baseline, reporting and grade tests each create and drop a database of
 their own on the same server. The reporting test seeds the synthetic year into
 its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
 budget. The `evals:migrate` script test runs `scripts/migrate.mjs` against a

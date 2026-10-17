@@ -60,6 +60,35 @@ the runner warns and still exits as its results say; `vp run evals:ingest`
 sends whatever is under `.tmp/eval-results/` later, and skips a run already
 stored. An aborted run is left for that command too.
 
+## Recording a noise floor
+
+Two runs of the same suite on the same commit and model do not score the same.
+`vp run evals:baseline -- --suite <suite>` measures how far apart they land.
+It runs the suite `--runs` times, `baseline.defaultRuns` from
+[`regression.config.json`](#regression-thresholds) unless told otherwise, and
+passes one `baseline_id` to every run, so each envelope is tagged
+`trigger: baseline`. It then stores the mean and sample standard deviation per
+suite and per subject in `evals.eval_baseline`. For skill-quality that is the
+judge's overall score; for the other suites it is the pass rate, with the same
+outcomes left out of n as the `Pass rate:` line. Unlike that line, a run below
+`minTrialsForRate` still contributes its rate. `--model <id>` reaches the skills and skill-quality
+runners; the verifier runners fix their own model.
+
+Each row carries its suite, model and subject, and each baseline gets its own
+`baseline_id`. A baseline for another model never replaces one already stored.
+`readBaseline` in
+[`@repo/eval-history`](../packages/eval-history) returns the latest row for
+each subject of a suite and model.
+
+It refuses a dirty tree, naming the changes, because a baseline has to describe
+a commit. It also refuses before any run when `EVALS_DATABASE_URL` is unset or
+unreachable, or when its role cannot insert into `evals.eval_run` and
+`evals.eval_baseline` there: an unmigrated database, the wrong database on the
+right server, or a missing grant. None of those costs a model run. A
+partial, aborted or dirty run is left out with its reason. So is a subject
+with a counted result in fewer than two runs. A baseline whose runs span two
+commits or two models records nothing.
+
 ## What a full run costs
 
 The skill-trigger and verifier suites run each task or fixture three times by
