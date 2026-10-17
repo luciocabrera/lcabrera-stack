@@ -64,12 +64,12 @@ describe('the subscription review does not use an API key', () => {
     expect(step).not.toContain('GROK_AUTH_JSON');
     expect(stepEnvValue(step, 'GROK_AUTH_JSON')).toBeUndefined();
     for (const rule of [
-      'Read(**/.grok)',
       'Read(**/.grok/**)',
-      'Read(~/.grok)',
       'Read(~/.grok/**)',
       'Edit(**/.grok/**)',
       'Edit(~/.grok/**)',
+      'Edit(**/scripts/**)',
+      'Edit(**/packages/**)',
     ]) {
       expect(step, rule).toContain(`--deny '${rule}'`);
     }

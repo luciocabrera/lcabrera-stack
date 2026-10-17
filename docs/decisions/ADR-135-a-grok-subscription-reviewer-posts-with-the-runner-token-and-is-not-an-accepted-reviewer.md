@@ -32,6 +32,8 @@ The session file is written by a step that exits before the model step. That ste
 - `--deny 'Read(**/secret.txt)'` with `--tools grep` refused `secret.txt` (`deny rule on read`) and returned the sibling file.
 - `--deny 'Edit(**/secret.txt)'` with `--tools read_file,search_replace` refused `search_replace` on `secret.txt` (`deny rule on edit`) and updated the sibling file.
 
+A later probe pointed `--cwd` at a different directory and asked for a file under the home directory. `Read(**/<name>/**)` and `Read(~/<name>/**)` refused both the absolute path and the `~` path. `Read(**/<name>)` and `Read(~/<name>)` returned the file, so the workflow does not carry those two spellings. `Edit(**/<name>/**)` refused `search_replace` on the absolute path. `Edit(**/scripts/**)` and `Edit(**/packages/**)` are the same shape, and they cover the tree `scripts/submit-pr-review.mjs` executes. The model can still edit the two review files. It cannot edit that tree and have the submit step run the edit.
+
 The session file is removed before the submit step.
 
 The trigger stays `pull_request`. The job does not declare a GitHub environment. On this event the merge ref is the workflow that runs, so a branch that deletes an `environment` key never waits for the reviewers that key would have required. `pull_request_target` is not used. That event runs the workflow from the default branch and passes secrets, including on a fork, and this job checks out the pull request and runs the prompt and the submit script from that checkout.

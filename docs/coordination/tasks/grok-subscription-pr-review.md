@@ -24,6 +24,6 @@ Add a pull-request workflow that reviews with the grok.com session in
 
 ## Status / next
 
-- Current step: the session is written in a step that exits before the model step, so GROK_AUTH_JSON is not in that shell's environ.
+- Current step: the model step denies Edit on scripts/ and packages/, and the Read rules that match a home file outside cwd are the /** spellings.
 - Blockers: the required checks restart on this commit, and Copilot review complete waits on a review of the new head.
 - Next: reply on the open thread, then merge once those checks are green and the threads are resolved.
