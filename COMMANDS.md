@@ -1220,9 +1220,9 @@ Vite+ owns the git hooks — `core.hooksPath` points at `.vite-hooks/`, installe
 `.vite-hooks/pre-commit` runs `vp staged`, which reads the `staged` block in the
 root `vite.config.ts`:
 
-| Glob | Commands, in order                                                                                    |
-| ---- | ----------------------------------------------------------------------------------------------------- |
-| `*`  | `vp check --fix` → `biome lint --write --no-errors-on-unmatched` → `repo-eslint-staged --` → `vp fmt` |
+| Glob | Commands, in order                                                                                                                    |
+| ---- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `*`  | `vp check --fix` → `biome lint --write --no-errors-on-unmatched` → `repo-eslint-staged --` → `vp fmt --no-error-on-unmatched-pattern` |
 
 They all write, and that is safe in this hook and nowhere else in the flow:
 lint-staged re-stages what a task changes, so a fix lands in the commit being
@@ -1230,6 +1230,11 @@ made rather than in the working tree behind it. They share one glob deliberately
 — the reason is in the `staged` block's own comment. Biome sat here check-only
 until #1116, which left its gate first failing in CI, after the commit it was
 meant to block.
+
+The two `unmatched` flags are what let a commit through when no staged file is
+one that tool reads — a commit of only `reports/api-surface/*.txt`, say. Without
+them Biome and Oxfmt each exit non-zero on an empty target list, and the hook
+refuses a commit with nothing in it to fix.
 
 `.vite-hooks/commit-msg` runs `node packages/repo-standards/scripts/verify-commit-msg.mjs "$1"`, validating
 the commit message against the Conventional-Commit standard before the commit is
