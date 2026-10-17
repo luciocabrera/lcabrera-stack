@@ -41,7 +41,7 @@ const closure = (pending, seen = new Set()) => {
     : closure([...rest, ...importsOf(path)], new Set([...seen, path]));
 };
 
-const writers = closure([...runners, 'run-record.mjs']);
+const writers = closure([...runners, 'run-baseline.mjs', 'run-record.mjs']);
 
 const rawWrites = (path) =>
   [
@@ -55,6 +55,8 @@ describe('runner output', () => {
     expect(writers).toStrictEqual(
       expect.arrayContaining([
         'agent-sessions.mjs',
+        'baseline-command.mjs',
+        'run-baseline.mjs',
         'run-record.mjs',
         'skill-quality/verify-skill-quality.mjs',
         'skills/trigger-matrix.mjs',
