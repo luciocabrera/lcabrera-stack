@@ -2,7 +2,7 @@
 id: vite-plus-1-3
 title: Take the Vite+ 1.3 upgrade now that declaration emit keeps private types private
 owner: agent:grok
-status: active
+status: review
 branch: build/1308-vite-plus-1-3
 area:
   - pnpm-workspace.yaml
@@ -18,7 +18,7 @@ area:
 started: 2026-10-17
 updated: 2026-10-17
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1386
 issue: https://github.com/luciocabrera/lcabrera-stack/issues/1308
 ---
 
@@ -30,4 +30,4 @@ Move the catalog pin, the Vite core alias, and the Vitest the toolchain bundles 
 
 - Current step: rebased onto `origin/main` after #1382 merged. The upgrade commit applied with no conflicts. `vp run check:safe` passed (92/92) on Node 26.7.0 before the earlier rebase onto the refresh branch.
 - Blockers: none.
-- Next: open the PR against `main`.
+- Next: CI on https://github.com/luciocabrera/lcabrera-stack/pull/1386. Do not merge it from here.
