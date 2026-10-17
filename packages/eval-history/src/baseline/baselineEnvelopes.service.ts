@@ -5,27 +5,33 @@ import type { IngestFileSystem } from '../ingest/ingest.types.ts';
 import { findEnvelopeFiles } from '../ingest/findEnvelopeFiles.service.ts';
 import { readEnvelopeFile } from '../ingest/readEnvelopeFile.service.ts';
 
+type AttributionArgs = Required<
+  Pick<BaselineEnvelopesArgs, 'baselineId' | 'fileSystem'>
+> & {
+  readonly file: string;
+};
+
 type BaselineEnvelopesArgs = {
   readonly baselineId: string;
   readonly fileSystem?: IngestFileSystem;
   readonly paths: readonly string[];
 };
 
-type MayBelongArgs = Required<
-  Pick<BaselineEnvelopesArgs, 'baselineId' | 'fileSystem'>
-> & {
-  readonly file: string;
-};
-
 const NODE_FILE_SYSTEM: IngestFileSystem = { readdir, readFile, stat };
 
-const mayBelong = async ({ baselineId, file, fileSystem }: MayBelongArgs) => {
+const attribution = async ({
+  baselineId,
+  file,
+  fileSystem,
+}: AttributionArgs) => {
   try {
     const bytes = await fileSystem.readFile(file);
 
-    return new TextDecoder().decode(bytes).includes(baselineId);
+    return new TextDecoder().decode(bytes).includes(baselineId)
+      ? 'ours'
+      : 'other';
   } catch {
-    return true;
+    return 'unreadable';
   }
 };
 
@@ -40,12 +46,12 @@ export const baselineEnvelopes = async ({
       readEnvelopeFile({ file, readBytes: fileSystem.readFile }),
     ),
   );
-  const unreadable = await Promise.all(
+  const failed = await Promise.all(
     loaded
       .filter((entry) => !entry.ok)
       .map(async (entry) => ({
-        belongs: await mayBelong({ baselineId, file: entry.file, fileSystem }),
         entry,
+        owner: await attribution({ baselineId, file: entry.file, fileSystem }),
       })),
   );
 
@@ -53,11 +59,17 @@ export const baselineEnvelopes = async ({
     envelopes: loaded
       .filter((entry) => entry.ok)
       .filter(({ envelope }) => envelope.run.baseline_id === baselineId),
-    problems: unreadable
-      .filter(({ belongs }) => belongs)
+    invalid: failed
+      .filter(({ owner }) => owner === 'ours')
       .map(
         ({ entry }) =>
-          `${entry.file} is not a valid envelope, so it is left out: ${entry.problems.join('; ')}`,
+          `${entry.file} carries baseline ${baselineId} but is not a valid envelope, so it is left out: ${entry.problems.join('; ')}`,
+      ),
+    unreadable: failed
+      .filter(({ owner }) => owner === 'unreadable')
+      .map(
+        ({ entry }) =>
+          `${entry.file} is left out, and no baseline can be read from it: ${entry.problems.join('; ')}`,
       ),
   };
 };

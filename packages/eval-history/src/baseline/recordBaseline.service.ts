@@ -72,12 +72,13 @@ export const recordBaseline = async ({
   const { envelopes } = loaded;
   const missing = missingRunsProblem({
     baselineId,
-    found: envelopes.length + loaded.problems.length,
+    found: envelopes.length + loaded.invalid.length,
     paths,
     runs,
   });
   const unreadable = [
-    ...loaded.problems,
+    ...loaded.invalid,
+    ...loaded.unreadable,
     ...(missing === undefined ? [] : [missing]),
   ].map((problem) => `${PREFIX} ${problem}`);
 

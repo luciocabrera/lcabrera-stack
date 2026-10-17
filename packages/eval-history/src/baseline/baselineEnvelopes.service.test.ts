@@ -39,9 +39,10 @@ describe('baselineEnvelopes', () => {
     expect(loaded.envelopes.map(({ envelope }) => envelope.run.run_id)).toEqual(
       [valid.run.run_id],
     );
-    expect(loaded.problems).toHaveLength(1);
-    expect(loaded.problems[0]).toContain(
-      `${fileOf(ours.run.run_id)} is not a valid envelope, so it is left out: `,
+    expect(loaded.unreadable).toEqual([]);
+    expect(loaded.invalid).toHaveLength(1);
+    expect(loaded.invalid[0]).toContain(
+      `${fileOf(ours.run.run_id)} carries baseline ${BASELINE} but is not a valid envelope, so it is left out: `,
     );
   });
 });

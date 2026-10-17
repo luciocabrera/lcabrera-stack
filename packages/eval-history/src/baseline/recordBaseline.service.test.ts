@@ -190,7 +190,7 @@ describe('recordBaseline', () => {
     expect(summary.exitCode).toBe(0);
     expect(summary.stderr).toHaveLength(1);
     expect(summary.stderr[0]).toContain(
-      `evals:baseline: /results/skills/${broken.run.run_id}.json is not a valid envelope, so it is left out: `,
+      `evals:baseline: /results/skills/${broken.run.run_id}.json carries baseline ${BASELINE} but is not a valid envelope, so it is left out: `,
     );
   });
 
@@ -234,6 +234,38 @@ describe('recordBaseline', () => {
     expect(summary.stderr).toEqual([
       `evals:baseline: every trial of run ${failed.run.run_id} ended in error, which points at the harness rather than the model, so it is left out`,
     ]);
+  });
+
+  it('warns about a file it cannot read and records the rest', async () => {
+    const { connect } = database();
+    const stale = '/results/skills/33333333-3333-4333-8333-333333333333.json';
+    const files = memoryFileSystem({
+      ...filesOf([
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+        run({ baselineId: BASELINE, outcome: 'pass' }),
+      ]),
+      [stale]: '',
+    });
+    const summary = await recordBaseline({
+      baselineId: BASELINE,
+      connect,
+      connectionString: URL_,
+      fileSystem: {
+        ...files,
+        readFile: (file: string) =>
+          file === stale
+            ? Promise.reject(new Error('permission denied'))
+            : files.readFile(file),
+      },
+      paths: ['/results/skills'],
+      runs: 2,
+    });
+
+    expect(summary.exitCode).toBe(0);
+    expect(summary.stderr).toHaveLength(1);
+    expect(summary.stderr[0]).toContain(
+      `evals:baseline: ${stale} is left out, and no baseline can be read from it: could not read`,
+    );
   });
 
   it('refuses an unset database before reading anything', async () => {

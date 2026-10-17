@@ -17,7 +17,7 @@ export const checkBaselineRun = async ({
   paths,
   runs,
 }: CheckBaselineRunArgs) => {
-  const { envelopes, problems } = await baselineEnvelopes({
+  const { envelopes, invalid } = await baselineEnvelopes({
     baselineId,
     fileSystem,
     paths,
@@ -27,10 +27,10 @@ export const checkBaselineRun = async ({
     .filter((problem) => problem !== undefined);
   const missing = missingRunsProblem({
     baselineId,
-    found: envelopes.length + problems.length,
+    found: envelopes.length + invalid.length,
     paths,
     runs,
   });
 
-  return [...problems, ...harness, ...(missing === undefined ? [] : [missing])];
+  return [...invalid, ...harness, ...(missing === undefined ? [] : [missing])];
 };
