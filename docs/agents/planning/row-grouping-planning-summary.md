@@ -62,7 +62,7 @@ order.
    `TableColumnDataType`. That vocabulary has five members and reports `point`,
    `jsonb` and `numeric` all as `string`, so a `point` column arrives as the type
    the design calls "the best key" — and fails `GROUP BY` with `could not identify
-an equality operator`. `min(jsonb)` does not exist while `GROUP BY` on jsonb
+   an equality operator`. `min(jsonb)` does not exist while `GROUP BY` on jsonb
    succeeds, so the failure is per-type, not per-family; and a `numeric` column
    mapped to `string` is never offered `sum`. The probe owns a fixture carrying
    those types. Legality now comes from two gates — the column's analytical role

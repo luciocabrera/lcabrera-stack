@@ -1,7 +1,5 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from 'react';
-
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import {
   afterEach,
@@ -11,6 +9,8 @@ import {
   it,
   vi,
 } from 'vite-plus/test';
+
+import '#ui/utils/tests/registerDrawerFooterMocks';
 
 const {
   batchSetColumnDrawerSettingsMock,
@@ -24,27 +24,6 @@ const {
   resetAllColumnDrawerSettingsMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(() => false),
   useGetTableIsLoadingMoreMock: vi.fn(() => false),
-}));
-
-type ButtonProps = {
-  readonly children: ReactNode;
-  readonly isBusy?: boolean;
-  readonly isDisabled?: boolean;
-  readonly onClick?: () => void;
-};
-
-vi.mock('#ui/components/Button', () => ({
-  Button: ({ children, isBusy, isDisabled, onClick }: ButtonProps) => (
-    <button disabled={isDisabled || isBusy} onClick={onClick} type='button'>
-      {children}
-    </button>
-  ),
-}));
-
-vi.mock('#ui/components/SidePanel', () => ({
-  SidePanelFooter: ({ children }: { readonly children: ReactNode }) => (
-    <div>{children}</div>
-  ),
 }));
 
 vi.mock('#ui/components/Table/contexts/TableConfig/meta/selectors', () => ({

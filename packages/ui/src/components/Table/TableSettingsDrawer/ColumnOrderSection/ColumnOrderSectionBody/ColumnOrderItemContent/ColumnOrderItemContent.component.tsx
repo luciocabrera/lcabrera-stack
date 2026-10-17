@@ -31,7 +31,7 @@ export const ColumnOrderItemContent = ({
     toggleColumnVisibility({ columnKey, isVisible: isChecked });
   };
 
-  const isLocked = isStatic || isGroupKey;
+  const isLocked = isGroupKey || isStatic;
 
   return (
     <div {...stylex.props(styles.columnItem)}>

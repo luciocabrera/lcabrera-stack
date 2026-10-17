@@ -11,8 +11,8 @@
 #
 # Tests run too, but only for the workspaces the push actually touches.
 # `test:changed` diffs against the merge base, asks the workspace graph which
-# groups cover the changed paths, and runs those plus their dependents — so a
-# docs-only push runs nothing. The whole suite is forced only by pnpm-lock.yaml,
+# groups cover the changed paths, and runs those plus their dependents, plus
+# each root suite `gates.affectedTests.rootSuites` selects for the diff. The whole suite is forced only by pnpm-lock.yaml,
 # pnpm-workspace.yaml, the root vite.config.ts, or the shared config packages
 # (@lcabrera/vite-config / @repo/ts-configs); a plain root file does NOT trigger it,
 # because a real dependency change always moves the lockfile. That keeps a warm

@@ -65,8 +65,11 @@ resolution is the block form, which both accept — **not** disabling a rule.
 (Non-Negotiable Rule 11). The public packages take none at all —
 `vp run suppressions:packages` prints which those are.
 
-`vp fmt` reads the `fmt` block in the root `vite.config.ts`, and lint config
-lives at the root only.
+`vp fmt` reads the `fmt` block in the root `vite.config.ts`. From the repo
+root, lint and format apply that config and do not apply a nested one. From
+a package directory they still use the root unless that package defines its
+own `lint` or `fmt` block, which Vite+ does not recommend. `vp check` always
+uses the root blocks.
 
 ## Docs
 

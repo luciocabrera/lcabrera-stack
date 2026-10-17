@@ -8,7 +8,8 @@
  * config against the real tree, and they live here rather than beside the gates
  * because what they read is this repository's own data.
  */
-import { existsSync, readdirSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -19,6 +20,7 @@ import {
   resolveAffected,
 } from '../../packages/repo-standards/scripts/affected-tests.mjs';
 import { readGates } from '../../packages/repo-standards/scripts/config.mjs';
+import { suiteInputs } from './root-suite-inputs.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -93,5 +95,192 @@ describe('gates.affectedTests.globalPackages', () => {
         lintOnlyPatterns,
       }).mode,
     ).toBe('scoped');
+  });
+});
+
+describe('gates.affectedTests.rootSuites', () => {
+  const { globalPackages, lintOnlyPatterns, rootSuites } = GATES.affectedTests;
+
+  const { name: ROOT_PACKAGE, scripts: MANIFEST_SCRIPTS } = JSON.parse(
+    readFileSync(join(REPO_ROOT, 'package.json'), 'utf8'),
+  );
+
+  const wordsOf = (command) => command.split(' ').filter((word) => word !== '');
+
+  const SELECTS_WORKSPACES = new Set([
+    '-r',
+    '--recursive',
+    '-t',
+    '--transitive',
+    '-F',
+    '--filter',
+  ]);
+
+  const TAKES_VALUE = new Set([
+    '-F',
+    '--filter',
+    '--log',
+    '--concurrency-limit',
+  ]);
+
+  const rootTaskOf = (words) => {
+    let index = 2;
+    let selectsWorkspaces = false;
+    while (index < words.length && words[index].startsWith('-')) {
+      const [flag] = words[index].split('=');
+      selectsWorkspaces ||= SELECTS_WORKSPACES.has(flag);
+      index += TAKES_VALUE.has(flag) && !words[index].includes('=') ? 2 : 1;
+    }
+    const target = words[index] ?? '';
+    const task = target.startsWith(`${ROOT_PACKAGE}#`)
+      ? target.slice(ROOT_PACKAGE.length + 1)
+      : target;
+    return selectsWorkspaces || task === '' || task.includes('#')
+      ? undefined
+      : task;
+  };
+
+  const chainedTasks = (command) =>
+    command
+      .split('&&')
+      .map(wordsOf)
+      .filter((words) => words[0] === 'vp' && words[1] === 'run')
+      .map(rootTaskOf)
+      .filter((task) => task !== undefined);
+
+  const suiteDirOf = (task) => {
+    const words = wordsOf(MANIFEST_SCRIPTS[task] ?? '');
+    const at = words.indexOf('--root');
+    return at === -1 ? undefined : words[at + 1];
+  };
+
+  const SUITES = rootSuites.map(({ patterns, task }) => ({
+    dir: suiteDirOf(task),
+    patterns,
+    task,
+  }));
+
+  const SELECTS_EVERY_PATH = ['^'];
+
+  const isUnconditional = ({ patterns }) =>
+    patterns.length === SELECTS_EVERY_PATH.length &&
+    patterns.every((pattern, index) => pattern === SELECTS_EVERY_PATH[index]);
+
+  const tracked = execFileSync('git', ['ls-files', '-z'], {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+  })
+    .split('\0')
+    .filter((file) => file !== '');
+
+  const inputsOf = (dir) =>
+    suiteInputs({
+      graph: GRAPH,
+      readSource: (file) => readFileSync(join(REPO_ROOT, file), 'utf8'),
+      suiteDir: dir,
+      tracked,
+    });
+
+  const suitesFor = (file) =>
+    resolveAffected({
+      files: [file],
+      globalPackages,
+      graph: GRAPH,
+      lintOnlyPatterns,
+      rootSuites,
+    }).suites;
+
+  it('names only tasks the root manifest defines', () => {
+    expect(
+      rootSuites
+        .map((suite) => suite.task)
+        .filter((task) => !MANIFEST_SCRIPTS[task]),
+    ).toEqual([]);
+  });
+
+  it('holds every root test task test:ci runs, so test:changed can select it', () => {
+    const chained = chainedTasks(MANIFEST_SCRIPTS['test:ci']);
+    expect(chained.length).toBeGreaterThan(0);
+    expect(
+      chained.filter(
+        (task) => !rootSuites.some((suite) => suite.task === task),
+      ),
+    ).toEqual([]);
+  });
+
+  it('reads a root task from a step with arguments, and no workspace fan-out as one', () => {
+    expect(
+      chainedTasks(
+        "vp run --filter '!showcase' test && vp run -r test && vp run -t @scope/app#test && vp run test:hooks -- --bail && vp run test:scripts",
+      ),
+    ).toEqual(['test:hooks', 'test:scripts']);
+  });
+
+  it('reads a root task from a step that targets the workspace root by flag', () => {
+    expect(
+      chainedTasks(
+        'vp run -w test:hooks && vp run --workspace-root --cache test:lint && vp run --log grouped test:docs',
+      ),
+    ).toEqual(['test:hooks', 'test:lint', 'test:docs']);
+  });
+
+  it('reads a root task the root package names, and no other package', () => {
+    expect(
+      chainedTasks(
+        `vp run ${ROOT_PACKAGE}#test:hooks && vp run @scope/app#test`,
+      ),
+    ).toEqual(['test:hooks']);
+  });
+
+  it('finds the directory each root suite runs from in its manifest command', () => {
+    expect(
+      SUITES.filter(({ dir }) => dir === undefined).map(({ task }) => task),
+    ).toEqual([]);
+  });
+
+  it('selects test:scripts on every change, so narrowing it puts it under the scan below', () => {
+    expect(
+      SUITES.find(({ task }) => task === 'test:scripts')?.patterns,
+    ).toEqual(SELECTS_EVERY_PATH);
+  });
+
+  it.each(SUITES.filter((suite) => !isUnconditional(suite)))(
+    'selects $task for every path its sources import or read',
+    ({ dir, task }) => {
+      const inputs = inputsOf(dir);
+      expect(inputs.length).toBeGreaterThan(0);
+      const unselected = inputs.filter(
+        (path) => !suitesFor(path).includes(task),
+      );
+      expect(unselected).toEqual([]);
+    },
+  );
+
+  it('sees reads made through a relative URL, a path constant and a workspace import', () => {
+    expect(inputsOf('evals')).toEqual(
+      expect.arrayContaining([
+        '.claude/agents/refactor-verifier.md',
+        'packages/eval-history/package.json',
+      ]),
+    );
+    expect(inputsOf('scripts')).toContain('docs/coordination/README.md');
+  });
+
+  it.each([
+    'evals/run-record.mjs',
+    'package.json',
+    'packages/eval-history/src/baseline/baseline.constants.ts',
+    'packages/repo-standards/scripts/git-exec.mjs',
+    '.claude/agents/refactor-verifier.md',
+    '.claude/rules/typescript.md',
+    '.github/skills/unslop/SKILL.md',
+    'docs/agents/refactor-verified-contract.md',
+  ])('selects test:evals for %s', (file) => {
+    expect(suitesFor(file)).toContain('test:evals');
+  });
+
+  it('leaves test:evals out for a workspace or doc it does not read', () => {
+    expect(suitesFor('packages/ui/src/index.ts')).toEqual(['test:scripts']);
+    expect(suitesFor('docs/README.md')).toEqual(['test:scripts']);
   });
 });

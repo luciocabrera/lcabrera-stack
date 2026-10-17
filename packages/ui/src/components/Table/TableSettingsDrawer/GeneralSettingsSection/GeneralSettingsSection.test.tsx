@@ -27,17 +27,12 @@ vi.mock('#ui/components/InfoBox', () => ({
   ),
 }));
 
-vi.mock('#ui/components/SidePanel', () => ({
-  SidePanelSection: ({ children }: { readonly children: ReactNode }) => (
-    <section>{children}</section>
-  ),
-  SidePanelSectionHeader: ({ title }: { readonly title: string }) => (
-    <h3>{title}</h3>
-  ),
-  SidePanelSectionMain: ({ children }: { readonly children: ReactNode }) => (
-    <main>{children}</main>
-  ),
-}));
+vi.mock('#ui/components/SidePanel', async () => {
+  const { mockSidePanelSection } =
+    await import('#ui/utils/tests/createMockSidePanelSection.util');
+
+  return mockSidePanelSection;
+});
 
 vi.mock('../ColumnOrderSection/ColumnOrderSectionToolbar', () => ({
   ColumnOrderSectionToolbar: ({ isBusy }: MockToolbarProps) => (

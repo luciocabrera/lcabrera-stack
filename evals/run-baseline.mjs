@@ -8,9 +8,11 @@
  *   vp run evals:baseline -- --suite <suite> [--runs <n>] [--model <id>]
  *   --runs defaults to baseline.defaultRuns in regression.config.json
  * Refuses a dirty tree, and needs EVALS_DATABASE_URL and a Claude login.
+ * Stops after any run but the last whose envelope shows a failing harness.
  * Exit codes: 0 = baseline written, 1 = refused or not written,
  *   130/143 = interrupted.
  */
+import { checkBaselineRun } from '@repo/eval-history/baseline/checkBaselineRun.service';
 import { probeDatabase } from '@repo/eval-history/baseline/probeDatabase.service';
 import { recordBaseline } from '@repo/eval-history/baseline/recordBaseline.service';
 import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
@@ -39,11 +41,15 @@ const runOnce = ({ baselineId, model, suite }) =>
     { env: runEnvironment({ baselineId, env: process.env }), stdio: 'inherit' },
   );
 
-const record = async ({ baselineId, suite }) => {
+const checkRuns = ({ baselineId, runs, suite }) =>
+  checkBaselineRun({ baselineId, paths: [join(RESULTS_DIR, suite)], runs });
+
+const record = async ({ baselineId, runs, suite }) => {
   const summary = await recordBaseline({
     baselineId,
     connectionString: process.env.EVALS_DATABASE_URL,
     paths: [join(RESULTS_DIR, suite)],
+    runs,
   });
   printSummary({ summary });
   return summary.exitCode;
@@ -57,6 +63,7 @@ const main = async () => {
     argv: withoutSeparator(process.argv.slice(2)),
     defaultRuns: config.baseline.defaultRuns,
     effects: {
+      checkRuns,
       error: (line) => console.error(line),
       gitStatus: () =>
         runGit({ args: ['status', '--porcelain'], cwd: dirname(EVALS_DIR) }),

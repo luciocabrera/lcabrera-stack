@@ -10,6 +10,7 @@ import {
   sessionProblem,
   timedDrain,
   wholeNumber,
+  wholeNumberProblem,
   withoutSeparator,
 } from './agent-sessions.mjs';
 
@@ -297,6 +298,18 @@ describe('wholeNumber', () => {
     expect(() =>
       wholeNumber({ minimum: 2, reason: ', so', value: '1.5' }),
     ).toThrow('at least 2, so; got "1.5"');
+  });
+});
+
+describe('wholeNumberProblem', () => {
+  it('returns the sentence wholeNumber throws, or null for a whole number', () => {
+    expect(wholeNumberProblem({ minimum: 2, value: '2' })).toBeNull();
+    expect(wholeNumberProblem({ minimum: 2, value: '1' })).toBe(
+      '--runs must be a whole number of at least 2; got "1"',
+    );
+    expect(() => wholeNumber({ minimum: 2, value: '1' })).toThrow(
+      wholeNumberProblem({ minimum: 2, value: '1' }),
+    );
   });
 });
 

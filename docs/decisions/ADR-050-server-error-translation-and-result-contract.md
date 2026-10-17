@@ -28,7 +28,7 @@ when each consumer solves it alone.
 
 1. **Security.** A pg message embeds table, column and index names, and its
    `detail` line quotes the offending values (`Key (email)=(a@b.c) already
-exists`). Every consumer that stringifies an error was shipping that to the
+   exists`). Every consumer that stringifies an error was shipping that to the
    client.
 2. **Correctness / UX.** Every persistence failure is routed to one hard-coded
    field regardless of which column actually failed.

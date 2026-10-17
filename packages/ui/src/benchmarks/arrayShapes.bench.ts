@@ -1,6 +1,6 @@
 /** Real-function counterpart to `scripts/bench-array-operations.mjs` (ADR-054). */
 
-import { bench, describe } from 'vite-plus/test';
+import { describe, test } from 'vite-plus/test';
 
 import type {
   ColumnSizingState,
@@ -39,58 +39,63 @@ for (const size of SIZES) {
 
   // ---- resolvePrimaryKeyColumnKeys — filter().map(), keeps 1 of `size` ------
   describe(`resolvePrimaryKeyColumnKeys (n=${size})`, () => {
-    bench('current: filter().map()', () => {
-      sink.total += resolvePrimaryKeyColumnKeys({ columns }).length;
-    });
+    test('compare', async ({ bench }) => {
+      const current = bench('current: filter().map()', () => {
+        sink.total += resolvePrimaryKeyColumnKeys({ columns }).length;
+      });
+      const fusedReduce = bench('fused: reduce()+push', () => {
+        sink.total += columns.reduce<DataKey<Row>[]>((keys, column) => {
+          if (column.isPrimaryKey === true && column.key !== 'actions') {
+            keys.push(column.key);
+          }
 
-    bench('fused: reduce()+push', () => {
-      sink.total += columns.reduce<DataKey<Row>[]>((keys, column) => {
-        if (column.isPrimaryKey === true && column.key !== 'actions') {
-          keys.push(column.key);
-        }
-
-        return keys;
-      }, []).length;
-    });
-
-    bench('fused: flatMap() wrapping', () => {
-      sink.total += columns.flatMap((column) =>
-        column.isPrimaryKey === true && column.key !== 'actions'
-          ? [column.key]
-          : [],
-      ).length;
+          return keys;
+        }, []).length;
+      });
+      const fusedFlatMap = bench('fused: flatMap() wrapping', () => {
+        sink.total += columns.flatMap((column) =>
+          column.isPrimaryKey === true && column.key !== 'actions'
+            ? [column.key]
+            : [],
+        ).length;
+      });
+      await bench.compare(current, fusedReduce, fusedFlatMap);
     });
   });
 
   // ---- getStaticColumnKeys — filter().map() feeding new Set() --------------
   describe(`getStaticColumnKeys (n=${size})`, () => {
-    bench('current: filter().map() -> Set', () => {
-      sink.total += getStaticColumnKeys(columns).size;
-    });
-
-    bench('fused: for...of + set.add', () => {
-      const keys = new Set<string>();
-      for (const column of columns) if (column.isStatic) keys.add(column.key);
-      sink.total += keys.size;
+    test('compare', async ({ bench }) => {
+      const current = bench('current: filter().map() -> Set', () => {
+        sink.total += getStaticColumnKeys(columns).size;
+      });
+      const fused = bench('fused: for...of + set.add', () => {
+        const keys = new Set<string>();
+        for (const column of columns) if (column.isStatic) keys.add(column.key);
+        sink.total += keys.size;
+      });
+      await bench.compare(current, fused);
     });
   });
 
   // ---- buildPresetColumnSizing — map(as const).filter() -> fromEntries -----
   describe(`buildPresetColumnSizing (n=${size})`, () => {
-    bench('current: map().filter() -> fromEntries', () => {
-      sink.total += Object.keys(
-        buildPresetColumnSizing({ columns, preset: 'max' }),
-      ).length;
-    });
+    test('compare', async ({ bench }) => {
+      const current = bench('current: map().filter() -> fromEntries', () => {
+        sink.total += Object.keys(
+          buildPresetColumnSizing({ columns, preset: 'max' }),
+        ).length;
+      });
+      const fused = bench('fused: reduce() into an object', () => {
+        const sizing = columns.reduce<Record<string, number>>((acc, column) => {
+          const width = column.maxWidth;
+          if (width) acc[column.key] = width;
 
-    bench('fused: reduce() into an object', () => {
-      const sizing = columns.reduce<Record<string, number>>((acc, column) => {
-        const width = column.maxWidth;
-        if (width) acc[column.key] = width;
-
-        return acc;
-      }, {}) as ColumnSizingState<Row>;
-      sink.total += Object.keys(sizing).length;
+          return acc;
+        }, {}) as ColumnSizingState<Row>;
+        sink.total += Object.keys(sizing).length;
+      });
+      await bench.compare(current, fused);
     });
   });
 
@@ -100,37 +105,41 @@ for (const size of SIZES) {
   );
 
   describe(`AddSortSection options (n=${size}, sorting=${sorting.length})`, () => {
-    bench('current: filter(every).map()', () => {
-      sink.total += columns
-        .filter(
-          (col) =>
-            col.isSortable !== false &&
-            sorting.every((s) => s.columnKey !== col.key),
-        )
-        .map((col) => ({ label: col.label, value: col.key })).length;
-    });
+    test('compare', async ({ bench }) => {
+      const current = bench('current: filter(every).map()', () => {
+        sink.total += columns
+          .filter(
+            (col) =>
+              col.isSortable !== false &&
+              sorting.every((s) => s.columnKey !== col.key),
+          )
+          .map((col) => ({ label: col.label, value: col.key })).length;
+      });
+      const fused = bench('fused: reduce()+push', () => {
+        sink.total += columns.reduce<{ label: string; value: string }[]>(
+          (options, col) => {
+            if (
+              col.isSortable !== false &&
+              sorting.every((s) => s.columnKey !== col.key)
+            ) {
+              options.push({ label: col.label, value: col.key });
+            }
 
-    bench('fused: reduce()+push', () => {
-      sink.total += columns.reduce<{ label: string; value: string }[]>(
-        (options, col) => {
-          if (
-            col.isSortable !== false &&
-            sorting.every((s) => s.columnKey !== col.key)
-          ) {
-            options.push({ label: col.label, value: col.key });
-          }
-
-          return options;
-        },
-        [],
-      ).length;
-    });
-
-    bench('alternative: Set of sorted keys + filter().map()', () => {
-      const sortedKeys = new Set(sorting.map((s) => s.columnKey));
-      sink.total += columns
-        .filter((col) => col.isSortable !== false && !sortedKeys.has(col.key))
-        .map((col) => ({ label: col.label, value: col.key })).length;
+            return options;
+          },
+          [],
+        ).length;
+      });
+      const alternative =
+        bench('alternative: Set of sorted keys + filter().map()', () => {
+          const sortedKeys = new Set(sorting.map((s) => s.columnKey));
+          sink.total += columns
+            .filter(
+              (col) => col.isSortable !== false && !sortedKeys.has(col.key),
+            )
+            .map((col) => ({ label: col.label, value: col.key })).length;
+        });
+      await bench.compare(current, fused, alternative);
     });
   });
 
@@ -139,41 +148,45 @@ for (const size of SIZES) {
   );
 
   describe(`useAddFilterSection options (n=${size})`, () => {
-    bench('current: filter().map()', () => {
-      sink.total += columns
-        .filter((col) => col.isFilterable !== false)
-        .map((col) => {
-          const hasActiveFilter = Object.hasOwn(activeFilters, col.key);
-
-          return {
-            label: hasActiveFilter ? `${col.label} (filtered)` : col.label,
-            value: col.key,
-          };
-        }).length;
-    });
-
-    bench('fused: reduce()+push', () => {
-      sink.total += columns.reduce<{ label: string; value: string }[]>(
-        (options, col) => {
-          if (col.isFilterable !== false) {
+    test('compare', async ({ bench }) => {
+      const current = bench('current: filter().map()', () => {
+        sink.total += columns
+          .filter((col) => col.isFilterable !== false)
+          .map((col) => {
             const hasActiveFilter = Object.hasOwn(activeFilters, col.key);
-            options.push({
+
+            return {
               label: hasActiveFilter ? `${col.label} (filtered)` : col.label,
               value: col.key,
-            });
-          }
+            };
+          }).length;
+      });
+      const fused = bench('fused: reduce()+push', () => {
+        sink.total += columns.reduce<{ label: string; value: string }[]>(
+          (options, col) => {
+            if (col.isFilterable !== false) {
+              const hasActiveFilter = Object.hasOwn(activeFilters, col.key);
+              options.push({
+                label: hasActiveFilter ? `${col.label} (filtered)` : col.label,
+                value: col.key,
+              });
+            }
 
-          return options;
-        },
-        [],
-      ).length;
+            return options;
+          },
+          [],
+        ).length;
+      });
+      await bench.compare(current, fused);
     });
   });
 
   // ---- appendPrimaryKeySorting — filter().map() over the PK list (n=1) -----
   describe(`appendPrimaryKeySorting (n=${size} cols, 1 pk)`, () => {
-    bench('current: filter().map()', () => {
-      sink.total += appendPrimaryKeySorting({ columns, sorting }).length;
+    test('current: filter().map()', async ({ bench }) => {
+      await bench('current: filter().map()', () => {
+        sink.total += appendPrimaryKeySorting({ columns, sorting }).length;
+      }).run();
     });
   });
 }
@@ -195,26 +208,31 @@ describe('NotificationCenter placements (n=4, fixed)', () => {
     'top-right': [],
   };
 
-  bench('current: map().filter()', () => {
-    sink.total += PLACEMENTS.map((placement) => ({
-      placement,
-      placementNotifications: byPlacement[placement] ?? [],
-    })).filter(
-      ({ placementNotifications }) => placementNotifications.length > 0,
-    ).length;
-  });
+  test('compare', async ({ bench }) => {
+    const current = bench('current: map().filter()', () => {
+      sink.total += PLACEMENTS.map((placement) => ({
+        placement,
+        placementNotifications: byPlacement[placement] ?? [],
+      })).filter(
+        ({ placementNotifications }) => placementNotifications.length > 0,
+      ).length;
+    });
+    const fused = bench('fused: reduce()+push', () => {
+      sink.total += PLACEMENTS.reduce<
+        {
+          placement: string;
+          placementNotifications: readonly { id: string }[];
+        }[]
+      >((acc, placement) => {
+        const placementNotifications = byPlacement[placement] ?? [];
+        if (placementNotifications.length > 0) {
+          acc.push({ placement, placementNotifications });
+        }
 
-  bench('fused: reduce()+push', () => {
-    sink.total += PLACEMENTS.reduce<
-      { placement: string; placementNotifications: readonly { id: string }[] }[]
-    >((acc, placement) => {
-      const placementNotifications = byPlacement[placement] ?? [];
-      if (placementNotifications.length > 0) {
-        acc.push({ placement, placementNotifications });
-      }
-
-      return acc;
-    }, []).length;
+        return acc;
+      }, []).length;
+    });
+    await bench.compare(current, fused);
   });
 });
 

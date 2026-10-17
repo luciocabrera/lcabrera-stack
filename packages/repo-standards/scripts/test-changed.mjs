@@ -5,8 +5,9 @@
  * the monorepo is untouched. It reads the changed file paths on STDIN (the
  * caller runs git, matching `pr-labels.mjs`), asks `affected-tests.mjs` which
  * `vp run` groups cover them, and runs each group. A root/shared change falls
- * back to the full suite; a change under `scripts/` adds the root `test:scripts`
- * group (those suites are in no workspace); a docs-only change runs nothing.
+ * back to the full suite; a file a root suite reads adds that suite's task as
+ * its own group (those suites are in no workspace); any other change outside a
+ * workspace runs nothing.
  *
  * Usage (from the repo root):
  *   git diff --name-only "$(git merge-base origin/main HEAD)" | repo-test-changed
@@ -41,15 +42,16 @@ const main = async () => {
 
   const files = readChangedFiles();
   const graph = readWorkspaceGraph(REPO_ROOT);
-  const { coverageTaskPackage, globalPackages, lintOnlyPatterns } =
+  const { coverageTaskPackage, globalPackages, lintOnlyPatterns, rootSuites } =
     readGates(REPO_ROOT).affectedTests;
-  const { changed, groups, mode, packages, scripts } = resolveTestGroups({
+  const { changed, groups, mode, packages, suites } = resolveTestGroups({
     ci: isCi,
     coverageTaskPackage,
     files,
     globalPackages,
     graph,
     lintOnlyPatterns,
+    rootSuites,
   });
   const dispositions = workspaceDispositions({
     affected: packages,
@@ -60,16 +62,16 @@ const main = async () => {
 
   if (isMarkdown) {
     process.stdout.write(
-      `${renderSelectionMarkdown(mode, dispositions, { scripts })}\n`,
+      `${renderSelectionMarkdown(mode, dispositions, { suites })}\n`,
     );
     return;
   }
 
   printReport({
     dispositions,
-    extra: scripts
-      ? ['test:scripts — a scripts/ file changed, and it is in no workspace']
-      : [],
+    extra: suites.map(
+      (task) => `${task} — a file it reads changed, and it is in no workspace`,
+    ),
     label: 'test:changed',
     mode,
     verb: 'tests',

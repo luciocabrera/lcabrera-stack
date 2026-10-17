@@ -182,8 +182,9 @@ hook was the only thing that ran **tests** locally. What still covers the rest:
 So types are still caught before a commit, and ESLint plus the affected tests
 before a push. `test:changed` selects on the diff rather than running
 everything, and it selects on **both** halves — the affected workspaces _and_
-the root `scripts/` suites, which are in no workspace — so a docs-only push runs
-nothing while a tooling-script edit is still tested here, not first in CI. What
+the root suites, which are in no workspace — so a workspace edit skips the
+workspaces it cannot affect, while a tooling-script edit is still tested here,
+not first in CI. What
 it selects, and what forces the full suite instead, is stated once in
 [COMMANDS.md § Gate & CI](../COMMANDS.md#gate--ci); this file does not restate
 it.

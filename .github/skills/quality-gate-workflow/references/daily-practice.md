@@ -108,8 +108,8 @@ docs/comment-only change" row whose minimum was two stages, which contradicted
 the skill's own "do not skip a stage" — and understated the bar rather than
 merely relaxing it. A markdown edit fails in `docs:verify`, `commands:verify`,
 `registers:verify`, `adr:verify` and `renames:verify`, and **none of the eight
-stages runs any of them**: stage 8 is `test:changed`, which selects nothing for a
-docs-only diff. `check:safe` is what chains those gates, so it is the minimum
+stages runs any of them**: stage 8 is `test:changed`, which runs test suites,
+not those gates. `check:safe` is what chains those gates, so it is the minimum
 here, not the shortcut. The only shortening on offer is the WIP loop above, and
 it ends before the work is called done.
 

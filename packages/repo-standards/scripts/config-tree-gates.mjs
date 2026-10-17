@@ -17,6 +17,7 @@
  */
 
 import {
+  CONFIG_FILE_NAME,
   isPlainObject,
   patternList,
   readableString,
@@ -30,6 +31,12 @@ export const DEFAULT_TREE_GATES = {
     coverageTaskPackage: '',
     globalPackages: [],
     lintOnlyPatterns: [],
+    rootSuites: [
+      {
+        patterns: [String.raw`^scripts/.+\.(mjs|cjs|js)$`],
+        task: 'test:scripts',
+      },
+    ],
   },
   commandsDoc: { file: 'COMMANDS.md' },
   coverage: {
@@ -40,7 +47,7 @@ export const DEFAULT_TREE_GATES = {
   },
   departedNames: { rosterFile: 'scripts/departed-names.json' },
   depsAudit: { allowanceFile: 'docs/agents/dependency-advisories.json' },
-  eslintPass: { probeWorkspaces: [] },
+  eslintPass: { probeWorkspaces: [], rootPassDir: '' },
   inventory: {
     baselineFile: 'scripts/inventory-drift-baseline.json',
     trees: [],
@@ -99,6 +106,26 @@ const treeList = (value, fallback, key) =>
       }))
     : fallback;
 
+const isSuiteEntry = (entry) =>
+  isPlainObject(entry) &&
+  typeof entry.task === 'string' &&
+  entry.task.trim() !== '' &&
+  Array.isArray(entry.patterns) &&
+  entry.patterns.length > 0;
+
+const suiteList = (value, fallback, key) =>
+  Array.isArray(value)
+    ? rejectMalformed({
+        entries: value,
+        isValid: isSuiteEntry,
+        key,
+        requirement: 'must name a `task` and a non-empty `patterns` list',
+      }).map((entry) => ({
+        patterns: patternList(entry.patterns, [], `${key}[].patterns`),
+        task: entry.task.trim(),
+      }))
+    : fallback;
+
 const pathList = (value, fallback, key) =>
   Array.isArray(value)
     ? rejectMalformed({
@@ -108,6 +135,17 @@ const pathList = (value, fallback, key) =>
         requirement: 'must be a non-empty string',
       }).map((entry) => repoRelative(entry, entry, `${key}[]`))
     : fallback;
+
+const optionalPath = (value, key) => {
+  if (value !== undefined && typeof value !== 'string') {
+    throw new Error(
+      `${CONFIG_FILE_NAME}: \`${key}\` must be a string, but is \`${JSON.stringify(value)}\`.`,
+    );
+  }
+  return readableString(value, '') === ''
+    ? ''
+    : repoRelative(value, value, key);
+};
 
 const resolvePath = (block, key, fallback, name) =>
   repoRelative(block[key], fallback, name);
@@ -141,6 +179,11 @@ export const resolveTreeGates = (gates) => {
         affectedTests.lintOnlyPatterns,
         defaults.affectedTests.lintOnlyPatterns,
         'gates.affectedTests.lintOnlyPatterns',
+      ),
+      rootSuites: suiteList(
+        affectedTests.rootSuites,
+        defaults.affectedTests.rootSuites,
+        'gates.affectedTests.rootSuites',
       ),
     },
     commandsDoc: {
@@ -196,6 +239,10 @@ export const resolveTreeGates = (gates) => {
         eslintPass.probeWorkspaces,
         defaults.eslintPass.probeWorkspaces,
         'gates.eslintPass.probeWorkspaces',
+      ),
+      rootPassDir: optionalPath(
+        eslintPass.rootPassDir,
+        'gates.eslintPass.rootPassDir',
       ),
     },
     inventory: {

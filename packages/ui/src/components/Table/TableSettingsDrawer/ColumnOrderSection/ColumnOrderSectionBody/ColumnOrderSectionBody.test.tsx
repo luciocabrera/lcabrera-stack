@@ -20,22 +20,22 @@ import {
 
 const {
   mockColumns,
-  mockGroupingKeys,
   mockRenderedColumnKeys,
   mockReorderColumns,
   mockToggleColumnPin,
   mockToggleColumnVisibility,
+  mockUseGetGroupingKeys,
 } = vi.hoisted(() => ({
   mockColumns: [
     { key: 'id', label: 'ID' },
     { isStatic: true, key: 'name', label: 'Name' },
     { key: 'skip', label: 'Skip', render: () => 'cell' },
   ],
-  mockGroupingKeys: [] as string[],
   mockRenderedColumnKeys: ['id'] as string[],
   mockReorderColumns: vi.fn(),
   mockToggleColumnPin: vi.fn(),
   mockToggleColumnVisibility: vi.fn(),
+  mockUseGetGroupingKeys: vi.fn<() => readonly string[]>(),
 }));
 
 vi.mock('#ui/components/DraggableList', () => ({
@@ -88,7 +88,7 @@ vi.mock(
   () => ({
     useGetColumnOrder: () => ['name', 'id'],
     useGetColumnPinning: () => ({ left: ['id'], right: [] }),
-    useGetGroupingKeys: () => mockGroupingKeys,
+    useGetGroupingKeys: mockUseGetGroupingKeys,
   }),
 );
 
@@ -111,6 +111,9 @@ vi.mock('../ColumnOrderSectionContext/actions', () => ({
 
 import { ColumnOrderSectionBody } from './ColumnOrderSectionBody.component';
 
+const noGroupingKeys: readonly string[] = [];
+const groupedById: readonly string[] = ['id'];
+
 afterEach(() => {
   cleanup();
 });
@@ -119,6 +122,8 @@ beforeEach(() => {
   mockReorderColumns.mockReset();
   mockToggleColumnPin.mockReset();
   mockToggleColumnVisibility.mockReset();
+  mockUseGetGroupingKeys.mockReset();
+  mockUseGetGroupingKeys.mockReturnValue(noGroupingKeys);
 });
 
 describe('ColumnOrderSectionBody', () => {
@@ -133,6 +138,22 @@ describe('ColumnOrderSectionBody', () => {
     expect(idRow.dataset.draggable).toBe('true');
 
     expect(screen.queryByTestId('item-skip')).toBeNull();
+  });
+
+  it('locks a grouping key that is not a static column', () => {
+    mockUseGetGroupingKeys.mockReturnValue(groupedById);
+
+    render(<ColumnOrderSectionBody />);
+
+    const idRow = within(screen.getByTestId('item-id'));
+    expect(idRow.getByTestId('lock-icon')).toBeDefined();
+    expect(
+      idRow.getByRole<HTMLButtonElement>('button', { name: 'Pin-on' }).disabled,
+    ).toBe(true);
+    expect(
+      idRow.getByRole<HTMLButtonElement>('button', { name: 'Show-on' })
+        .disabled,
+    ).toBe(true);
   });
 
   it('dispatches toggle actions from row controls', () => {

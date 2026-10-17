@@ -4,7 +4,7 @@ import { baselineFixtures } from './baselineFixtures.service.ts';
 import { baselineRun } from './baselineRun.util.ts';
 import { stubBaselineRun } from './stubBaselineRun.service.ts';
 
-const { skills } = await baselineFixtures();
+const { rules, skills } = await baselineFixtures();
 
 const BASELINE = '11111111-1111-4111-8111-111111111111';
 
@@ -38,6 +38,55 @@ describe('baselineRun', () => {
     expect(baselineRun(envelope)).toEqual({
       kind: 'excluded',
       reason: `run ${envelope.run.run_id} is aborted, so it is left out`,
+    });
+  });
+
+  it('says a model suite run recorded no model rather than that it calls none', () => {
+    const tagged = stubBaselineRun({
+      baselineId: BASELINE,
+      fixture: skills,
+      trialsBySkill: { 'react-19': [{ outcome: 'pass' }] },
+    });
+    const envelope = {
+      ...tagged,
+      run: { ...tagged.run, model_id: rules.run.model_id },
+    };
+
+    expect(envelope.run.model_id).toBeNull();
+
+    expect(baselineRun(envelope)).toEqual({
+      kind: 'excluded',
+      reason: `run ${envelope.run.run_id} recorded no model, so it cannot join a skills baseline`,
+    });
+  });
+
+  it('says a suite with no baseline calls no model', () => {
+    const envelope = {
+      ...rules,
+      run: {
+        ...rules.run,
+        baseline_id: BASELINE,
+        git_dirty: false,
+        status: 'complete',
+      },
+    } as const;
+
+    expect(baselineRun(envelope)).toEqual({
+      kind: 'excluded',
+      reason: `run ${envelope.run.run_id} is a rules-consistency run, which calls no model and has no baseline`,
+    });
+  });
+
+  it('excludes a run whose every trial ended in error and says why', () => {
+    const envelope = stubBaselineRun({
+      baselineId: BASELINE,
+      fixture: skills,
+      trialsBySkill: { 'react-19': [{ outcome: 'error' }] },
+    });
+
+    expect(baselineRun(envelope)).toEqual({
+      kind: 'excluded',
+      reason: `every trial of run ${envelope.run.run_id} ended in error, which points at the harness rather than the model, so it is left out`,
     });
   });
 });

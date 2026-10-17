@@ -13,6 +13,7 @@ import { compareRuns } from './compareRuns.util.ts';
 import { connectionUrl } from './connectionUrl.util.ts';
 import { isRunId } from './isRunId.util.ts';
 import { latestRunPairs } from './latestRunPairs.service.ts';
+import { readReportAgreement } from './readReportAgreement.service.ts';
 import { ReportInputError } from './reportInput.error.ts';
 import { reportMarkdown } from './reportMarkdown.util.ts';
 import { resolveRunRef } from './resolveRunRef.service.ts';
@@ -145,14 +146,18 @@ export const evalsReport = async ({
       const comparisons = pairs.map(({ a, b }) =>
         compareRuns({ a, allowModelChange, b, thresholds }),
       );
+      const agreement = await readReportAgreement({
+        client: connection?.client,
+        thresholds,
+      });
 
       return {
         exitCode: comparisons.some(({ kind }) => kind === 'refused') ? 1 : 0,
         stderr: [],
         stdout: [
           json
-            ? JSON.stringify({ comparisons }, undefined, 2)
-            : reportMarkdown(comparisons),
+            ? JSON.stringify({ agreement, comparisons }, undefined, 2)
+            : reportMarkdown({ agreement, comparisons, thresholds }),
         ],
       };
     } finally {

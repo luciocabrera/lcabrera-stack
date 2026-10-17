@@ -5,6 +5,7 @@
   "type": "module",
   "exports": {
     "./baseline/baseline.constants": "./src/baseline/baseline.constants.ts",
+    "./baseline/checkBaselineRun.service": "./src/baseline/checkBaselineRun.service.ts",
     "./baseline/probeDatabase.service": "./src/baseline/probeDatabase.service.ts",
     "./baseline/readBaseline.service": "./src/baseline/readBaseline.service.ts",
     "./baseline/recordBaseline.service": "./src/baseline/recordBaseline.service.ts",
@@ -34,6 +35,7 @@
     "./stats/hasPassHatK.util": "./src/stats/hasPassHatK.util.ts",
     "./stats/regressionConfig.schema": "./src/stats/regressionConfig.schema.ts",
     "./stats/scoredRegression.util": "./src/stats/scoredRegression.util.ts",
+    "./stats/stats.constants": "./src/stats/stats.constants.ts",
     "./stats/stats.types": "./src/stats/stats.types.ts",
     "./stats/summarize.util": "./src/stats/summarize.util.ts",
     "./stats/triggerPrecisionRecall.util": "./src/stats/triggerPrecisionRecall.util.ts",

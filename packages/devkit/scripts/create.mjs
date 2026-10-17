@@ -246,14 +246,14 @@ export const initialManifest = ({ name, profile = '' }) => {
  * @returns {string[]}
  */
 export const commitIdentityArgs = ({ email = '', name = '' } = {}) =>
-  email !== '' && name !== ''
-    ? []
-    : [
+  email === '' || name === ''
+    ? [
         '-c',
         `user.name=${DEFAULT_COMMIT_IDENTITY.name}`,
         '-c',
         `user.email=${DEFAULT_COMMIT_IDENTITY.email}`,
-      ];
+      ]
+    : [];
 
 /**
  * `create` makes a git repository, so a machine without git cannot be told

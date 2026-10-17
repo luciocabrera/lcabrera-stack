@@ -28,3 +28,9 @@ export const HASH_LABELS: Readonly<Record<string, string>> = {
 export const ABSENT_CELL = '—';
 
 export const SHORT_SHA_LENGTH = 7;
+
+export const AGREEMENT_HEADING =
+  '### Judge agreement (all recorded hand grades, by judge model and prompt hash)';
+
+export const AGREEMENT_NEEDS_DATABASE =
+  'Not shown: hand grades are stored only in the database, and both runs were read from envelope files. To include it, name a run by its id or use --compare, with EVALS_DATABASE_URL set.';

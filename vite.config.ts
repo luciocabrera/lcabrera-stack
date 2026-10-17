@@ -107,8 +107,10 @@ export const lintConfig = {
 
 export default defineConfig({
   fmt: fmtConfig,
-  // Vite+ reads `lint` from this file only; a workspace's own `lint` block is
-  // never loaded. Per-workspace differences are `overrides` inside this config.
+  // From the repo root, Vite+ applies this `lint` block and does not apply a
+  // workspace one. A package-directory `vp lint` still uses it unless that
+  // package defines its own `lint` block. `vp check` always uses this one.
+  // Per-workspace differences are `overrides` inside this config.
   lint: lintConfig,
   run: {
     tasks: {
@@ -149,7 +151,7 @@ export default defineConfig({
       'vp check --fix',
       'biome lint --write --no-errors-on-unmatched',
       'repo-eslint-staged --',
-      'vp fmt',
+      'vp fmt --no-error-on-unmatched-pattern',
     ],
   },
 });

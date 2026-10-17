@@ -86,6 +86,17 @@ branch. `--a <run> --b <run>` compares two runs given as run ids or as
 envelope files, so two CI artifacts compare with no database. `--json` prints
 the same comparison as JSON.
 
+The report ends with a section headed "Judge agreement (all recorded hand
+grades, by judge model and prompt hash)": the share of every recorded hand
+grade equal to the judge's score, per judge model and judge prompt hash, with
+n, its Wilson interval and the mean gap, exactly as `evals:grade` prints it.
+Agreement measures a judge, not a run, so its n counts hand grades on any run,
+not only on the two being compared. Hand grades are
+stored only in the database, so when both runs come from envelope files the
+section says agreement needs the database instead. Everything above that
+section is the same whichever way the runs were read. `--json` carries the same
+choice as `agreement`, with `kind` `read` or `needs-database`.
+
 A run holds the tasks it has trials for, and only the subjects those tasks
 name, whether it is read from a file or from the database. A task that a
 partial or aborted run planned but never reached is absent from it, so the
@@ -122,8 +133,17 @@ It refuses a dirty tree, naming the changes, because a baseline has to describe
 a commit. It also refuses before any run when `EVALS_DATABASE_URL` is unset or
 unreachable, or when its role cannot insert into `evals.eval_run` and
 `evals.eval_baseline` there: an unmigrated database, the wrong database on the
-right server, or a missing grant. None of those costs a model run. A
-partial, aborted or dirty run is left out with its reason. So is a subject
+right server, or a missing grant. None of those costs a model run. After
+each run but the last it reads that run's envelope and stops, writing nothing,
+when the run left none, left one carrying the baseline's id that fails to
+parse, ended partial, recorded no trials or saw every trial end in error: those
+point at the harness, and the remaining runs would fail the same way. A file in
+the results directory that cannot be read names no baseline, so it never stops
+a run; it is reported when the baseline is recorded. The last run has none left to save, so a failure there is left out
+like any other unusable run and the baseline is written from the rest. A
+partial, aborted or dirty run is left out with its reason, as is a run with no
+trials or only errored ones, an envelope carrying the baseline's id that fails
+to parse, a file that cannot be read, and a run that left no envelope at all. So is a subject
 with a counted result in fewer than two runs. A baseline whose runs span two
 commits or two models records nothing.
 

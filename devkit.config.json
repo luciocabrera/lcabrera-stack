@@ -207,7 +207,8 @@
         "packages/ui",
         "packages/vite-configs",
         "packages/devkit"
-      ]
+      ],
+      "rootPassDir": "evals"
     },
     "affectedTests": {
       "coverageTaskPackage": "showcase",
@@ -220,6 +221,21 @@
         "^packages/vite-configs/eslint\\.",
         "^packages/vite-configs/vite\\.(lint|fmt)\\.shared\\.config\\.ts$",
         "(^|/)eslint\\.config\\.mjs$"
+      ],
+      "rootSuites": [
+        { "task": "test:scripts", "patterns": ["^"] },
+        {
+          "task": "test:evals",
+          "patterns": [
+            "^evals/",
+            "^[^/]+$",
+            "^packages/eval-history/",
+            "^packages/repo-standards/scripts/git-exec\\.mjs$",
+            "^\\.claude/(agents|rules)/",
+            "^\\.github/skills/",
+            "^docs/agents/refactor-verified-contract\\.md$"
+          ]
+        }
       ]
     }
   },

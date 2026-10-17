@@ -10,11 +10,14 @@ decides how the envelope is versioned.
   its schema and the insert `evals:annotate` runs.
 - `src/baseline/` — the A/A baseline behind `vp run evals:baseline`:
   `aggregateBaseline` turns one baseline's run envelopes into the mean and
-  sample standard deviation per suite, model and subject. It leaves out a run
-  that is partial, dirty or calls no model, and records nothing for a baseline
-  spanning two commits or models. `writeBaseline` stores the rows in
+  sample standard deviation per suite, model and subject. It leaves out, by
+  name, a run that is partial, dirty, records no model or saw every trial end
+  in error, and records nothing for a baseline spanning two commits or models.
+  `recordBaseline` also names each commissioned run that left no envelope. `writeBaseline` stores the rows in
   `evals.eval_baseline` in one transaction, and `readBaseline` reads back the
-  latest row per subject for a suite and model.
+  latest row per subject for a suite and model. `checkBaselineRun` reads the
+  runs a baseline has made so far and names any that left no envelope or
+  show a failing harness, so the command can stop before the next run.
 - `src/envelope/` — the run envelope as a Zod schema, the validator, the
   emitted `envelope.schema.json`, and one example envelope per suite under
   `fixtures/`. A skill-quality trial whose detail names no `judge_model`,
@@ -65,7 +68,11 @@ decides how the envelope is versioned.
 - `src/report/` — the comparison behind `vp run evals:report`: it reads two
   runs from envelope files or from the database, refuses runs of two models
   unless told otherwise, and renders the flipped tasks, both pass rates, cost,
-  duration and the changed hashes as markdown or JSON.
+  duration and the changed hashes as markdown or JSON. It ends with the judge
+  agreement `evals:grade` prints when it read from the database, headed
+  "Judge agreement (all recorded hand grades, by judge model and prompt
+  hash)" because it covers every recorded hand grade rather than the two runs,
+  and says the section needs the database when both runs came from files.
 - `src/seed/` — a year of synthetic nightly history, about 15k trials, for
   timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of
@@ -191,8 +198,10 @@ judge model and judge prompt hash, because a change to either is a different
 judge. It carries n and its Wilson interval at the `z` and `minTrialsForRate`
 in [`evals/regression.config.json`](../../evals/regression.config.json), and
 says "insufficient data" below that floor; the mean absolute gap between the
-two scores is printed beside it. `evals:grade` prints it after recording, and
-`vp run evals:grade -- --agreement` prints it alone.
+two scores is printed beside it. `evals:grade` prints it after recording,
+`vp run evals:grade -- --agreement` prints it alone, and `evals:report` prints
+it after its comparisons whenever it connected to the database, over every
+recorded hand grade rather than only the two runs it compares.
 
 `vp run evals:annotate -- --kind <kind> "<text>"` records a timeline note —
 `model-change`, `harness-change`, `incident` or `note` — at `--at`, or now.

@@ -40,15 +40,15 @@ describe('renderSelectionMarkdown', () => {
     expect(markdown).not.toContain('test:scripts');
   });
 
-  it('explains a full run and notes the root script suite when asked', () => {
+  it('explains a full run and notes every selected root suite', () => {
     const markdown = renderSelectionMarkdown('full', DISPOSITIONS, {
-      scripts: true,
+      suites: ['test:scripts', 'test:evals'],
       title: 'Selection',
     });
     expect(markdown).toContain('## Selection');
     expect(markdown).toContain('**Full run**');
     expect(markdown).toContain('all 3 workspaces run');
-    expect(markdown).toContain('> Plus `test:scripts`');
+    expect(markdown).toContain('> Plus `test:scripts`, `test:evals`');
   });
 
   it('omits an empty block rather than rendering a headed nothing', () => {

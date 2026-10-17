@@ -109,9 +109,12 @@ const linkResolves = ({ fromFile, reference, repoRoot }) =>
  */
 const scriptPathResolves = ({ fromFile, reference, repoRoot }) =>
   fs.existsSync(
-    reference.startsWith('./') || reference.startsWith('../')
-      ? path.resolve(path.dirname(fromFile), reference)
-      : path.resolve(repoRoot, reference),
+    path.resolve(
+      reference.startsWith('./') || reference.startsWith('../')
+        ? path.dirname(fromFile)
+        : repoRoot,
+      reference,
+    ),
   );
 
 /**

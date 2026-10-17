@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { resolveAffected, resolveTestGroups } from './affected-tests.mjs';
+import { DEFAULT_TREE_GATES } from './config-tree-gates.mjs';
 
 const GRAPH = [
   {
@@ -116,26 +117,44 @@ describe('resolveAffected — ordinary scoping is unchanged', () => {
     expect(affected([]).mode).toBe('none');
   });
 });
-const scriptsGroup = (groups) =>
-  groups.find(
-    (group) => group.task === 'test:scripts' && group.packages.length === 0,
-  );
+const DEFAULT_ROOT_SUITES = DEFAULT_TREE_GATES.affectedTests.rootSuites;
 
-const groupsFor = (files) =>
+const FIXTURE_ROOT_SUITES = [
+  {
+    patterns: ['^scripts/', String.raw`^\.fallowrc\.json$`],
+    task: 'test:scripts',
+  },
+  { patterns: ['^evals/'], task: 'test:evals' },
+];
+
+const suiteGroup = (groups, task) =>
+  groups.find((group) => group.task === task && group.packages.length === 0);
+
+const groupsFor = (files, rootSuites = DEFAULT_ROOT_SUITES) =>
   resolveTestGroups({
     files,
     globalPackages: FIXTURE_GLOBAL_PACKAGES,
     graph: GRAPH,
     lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
+    rootSuites,
   });
 
-describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () => {
+const suitesFor = (files, rootSuites = DEFAULT_ROOT_SUITES) =>
+  resolveAffected({
+    files,
+    globalPackages: FIXTURE_GLOBAL_PACKAGES,
+    graph: GRAPH,
+    lintOnlyPatterns: FIXTURE_LINT_ONLY_PATTERNS,
+    rootSuites,
+  }).suites;
+
+describe('resolveTestGroups — the default root suite is test:scripts', () => {
   it('adds only the root test:scripts group for a scripts-only change', () => {
     const result = groupsFor(['scripts/lib/foo.mjs']);
-    expect(result.scripts).toBe(true);
+    expect(result.suites).toEqual(['test:scripts']);
     expect(result.mode).toBe('none');
     expect(result.groups).toHaveLength(1);
-    expect(scriptsGroup(result.groups)).toBeDefined();
+    expect(suiteGroup(result.groups, 'test:scripts')).toBeDefined();
   });
 
   it('runs test:scripts alongside an affected workspace', () => {
@@ -143,7 +162,7 @@ describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () =
       'scripts/lib/foo.mjs',
       'packages/utils/src/foo.ts',
     ]);
-    expect(scriptsGroup(groups)).toBeDefined();
+    expect(suiteGroup(groups, 'test:scripts')).toBeDefined();
     expect(
       groups.some(
         (group) => group.task === 'test' && group.packages.length > 0,
@@ -152,18 +171,70 @@ describe('resolveTestGroups — scripts/ runs the root test:scripts suite', () =
   });
 
   it('detects a scripts test file, not just a source script', () => {
-    expect(affected(['scripts/lib/foo.test.mjs']).scripts).toBe(true);
+    expect(suitesFor(['scripts/lib/foo.test.mjs'])).toEqual(['test:scripts']);
   });
 
-  it('adds no test:scripts group when scripts/ is untouched', () => {
-    expect(scriptsGroup(groupsFor(['packages/utils/src/foo.ts']).groups)).toBe(
-      undefined,
-    );
+  it('adds no root group when no suite input changed', () => {
+    expect(
+      suiteGroup(
+        groupsFor(['packages/utils/src/foo.ts']).groups,
+        'test:scripts',
+      ),
+    ).toBe(undefined);
   });
 
   it('ignores a non-code file under scripts/ (docs, JSON data)', () => {
-    expect(affected(['scripts/README.md']).scripts).toBe(false);
-    expect(affected(['scripts/script-size-baseline.json']).scripts).toBe(false);
+    expect(suitesFor(['scripts/README.md'])).toEqual([]);
+    expect(suitesFor(['scripts/script-size-baseline.json'])).toEqual([]);
+  });
+});
+
+describe('resolveTestGroups — configured root suites', () => {
+  it('selects a suite for a file outside its directory that it reads', () => {
+    const result = groupsFor(['.fallowrc.json'], FIXTURE_ROOT_SUITES);
+    expect(result.mode).toBe('none');
+    expect(result.groups).toEqual([{ packages: [], task: 'test:scripts' }]);
+  });
+
+  it('selects a second suite by its own patterns, and only that one', () => {
+    const result = groupsFor(['evals/run-record.mjs'], FIXTURE_ROOT_SUITES);
+    expect(result.groups).toEqual([{ packages: [], task: 'test:evals' }]);
+  });
+
+  it('selects every suite whose inputs changed, after the workspace groups', () => {
+    const { groups } = groupsFor(
+      ['evals/a.mjs', '.fallowrc.json', 'packages/utils/src/foo.ts'],
+      FIXTURE_ROOT_SUITES,
+    );
+    expect(groups.map((group) => group.task)).toEqual([
+      'test',
+      'test:scripts',
+      'test:evals',
+    ]);
+  });
+
+  it('selects no suite for a file none of them reads', () => {
+    expect(suitesFor(['docs/notes.md'], FIXTURE_ROOT_SUITES)).toEqual([]);
+  });
+
+  it('selects no suite when none is configured', () => {
+    expect(suitesFor(['scripts/lib/foo.mjs', 'evals/a.mjs'], [])).toEqual([]);
+    expect(
+      resolveAffected({
+        files: ['scripts/lib/foo.mjs'],
+        globalPackages: FIXTURE_GLOBAL_PACKAGES,
+        graph: GRAPH,
+      }).suites,
+    ).toEqual([]);
+  });
+
+  it('selects a suite for a lint-only file it reads, while no workspace runs', () => {
+    const result = groupsFor(
+      ['packages/utils/eslint.config.mjs'],
+      [{ patterns: ['^packages/'], task: 'test:scripts' }],
+    );
+    expect(result.mode).toBe('none');
+    expect(result.groups).toEqual([{ packages: [], task: 'test:scripts' }]);
   });
 });
 

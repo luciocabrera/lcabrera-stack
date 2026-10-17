@@ -4,6 +4,6 @@ type PruneColumnAxisArgs = {
 };
 
 export const pruneColumnAxis = ({ columnAxis, keys }: PruneColumnAxisArgs) =>
-  columnAxis !== undefined && !keys.includes(columnAxis)
-    ? columnAxis
-    : undefined;
+  columnAxis === undefined || keys.includes(columnAxis)
+    ? undefined
+    : columnAxis;

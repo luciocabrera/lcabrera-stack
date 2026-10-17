@@ -23,8 +23,7 @@ export const getFilteredOptions = ({
   if (listFilterMode === 'all') return result;
 
   const selected = new Set(selectedValues);
+  const isSelectedMode = listFilterMode === 'selected';
 
-  return listFilterMode === 'selected'
-    ? result.filter((option) => selected.has(option))
-    : result.filter((option) => !selected.has(option));
+  return result.filter((option) => selected.has(option) === isSelectedMode);
 };
