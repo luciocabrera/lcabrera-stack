@@ -1095,7 +1095,7 @@ that touches `.claude/agents/refactor-verifier.md`,
 `docs/agents/refactor-verified-contract.md` or `evals/verifier-fixtures/`, on
 `CLAUDE_CODE_OAUTH_TOKEN`. It is not a required check, so a spent usage limit
 cannot stall a merge. Both model jobs then upload `.tmp/eval-results/` (the run
-envelopes, with the scrubbed transcripts beside them) as an artifact kept for
+envelopes, with the scrubbed transcripts beside them) as an `eval-envelopes-<suite>` artifact kept for
 90 days, and run `evals:ingest` on it with the `EVALS_DATABASE_URL` secret.
 That step is `continue-on-error` and does not fail the job. With the secret
 unset it skips with a notice. When the database is unreachable or rejects an
