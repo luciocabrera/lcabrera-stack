@@ -28,6 +28,6 @@ Move the catalog pin, the Vite core alias, and the Vitest the toolchain bundles 
 
 ## Status / next
 
-- Current step: `vp run check:safe` passed (92/92) on Node 26.7.0. `api-surface:verify` passes; the only snapshot change is `createReactRouterRunConfig` nesting `env` and `input` under `cache`. `vp run --filter @lcabrera/ui bench` printed comparison tables.
-- Blockers: none on the emit. `origin/build/1381-deps-refresh` (PR #1382) is two commits ahead of this branch. Do not push onto that branch, and do not merge #1382 from here.
-- Next: rebase onto `origin/build/1381-deps-refresh`, then open the PR against that branch so this diff is only the Vite+ upgrade.
+- Current step: committed as `build(deps): take the vite-plus 1.3 upgrade` and rebased onto `origin/build/1381-deps-refresh`. `vp run check:safe` passed (92/92) on Node 26.7.0 before that rebase; the rebase applied with no conflicts.
+- Blockers: none on the emit. Do not push onto `build/1381-deps-refresh`, and do not merge #1382 from here.
+- Next: open the PR against `build/1381-deps-refresh`, so the diff is only the Vite+ upgrade.
