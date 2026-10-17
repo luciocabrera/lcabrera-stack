@@ -3,7 +3,7 @@ id: vite-plus-1-3
 title: Take the Vite+ 1.3 upgrade now that declaration emit keeps private types private
 owner: agent:grok
 status: active
-branch: build/1308-vite-plus-1.3
+branch: build/1308-vite-plus-1-3
 area:
   - pnpm-workspace.yaml
   - pnpm-lock.yaml
