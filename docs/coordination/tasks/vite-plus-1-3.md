@@ -28,6 +28,6 @@ Move the catalog pin, the Vite core alias, and the Vitest the toolchain bundles 
 
 ## Status / next
 
-- Current step: committed as `build(deps): take the vite-plus 1.3 upgrade` and rebased onto `origin/build/1381-deps-refresh`. `vp run check:safe` passed (92/92) on Node 26.7.0 before that rebase; the rebase applied with no conflicts.
-- Blockers: none on the emit. Do not push onto `build/1381-deps-refresh`, and do not merge #1382 from here.
-- Next: open the PR against `build/1381-deps-refresh`, so the diff is only the Vite+ upgrade.
+- Current step: rebased onto `origin/main` after #1382 merged. The upgrade commit applied with no conflicts. `vp run check:safe` passed (92/92) on Node 26.7.0 before the earlier rebase onto the refresh branch.
+- Blockers: none.
+- Next: open the PR against `main`.
