@@ -2,7 +2,8 @@
 /**
  * Answers "did this change make things better or worse": compares two eval
  * runs and prints the tasks that flipped, the pass rates with n and their
- * Wilson interval, cost and duration, and which input hashes changed.
+ * Wilson interval, cost and duration, which input hashes changed, and the
+ * judge's agreement with hand grades when it read from the database.
  * Usage (from the repo root):
  *   vp run evals:report -- --compare main [--suite <suite>] [--branch <name>]
  *   vp run evals:report -- --a <run id or envelope file> --b <run id or envelope file>

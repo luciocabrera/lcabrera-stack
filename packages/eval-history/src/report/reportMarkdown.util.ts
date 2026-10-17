@@ -1,13 +1,29 @@
-import type { RunComparison } from './report.types.ts';
+import type {
+  ReportAgreement,
+  RunComparison,
+  Thresholds,
+} from './report.types.ts';
 
+import { agreementMarkdown } from './agreementMarkdown.util.ts';
 import { comparisonMarkdown } from './comparisonMarkdown.util.ts';
 import { refusalMarkdown } from './refusalMarkdown.util.ts';
 
-export const reportMarkdown = (comparisons: readonly RunComparison[]) =>
-  comparisons
-    .map((comparison) =>
+type ReportMarkdownArgs = {
+  readonly agreement: ReportAgreement;
+  readonly comparisons: readonly RunComparison[];
+  readonly thresholds: Thresholds;
+};
+
+export const reportMarkdown = ({
+  agreement,
+  comparisons,
+  thresholds,
+}: ReportMarkdownArgs) =>
+  [
+    ...comparisons.map((comparison) =>
       comparison.kind === 'comparison'
         ? comparisonMarkdown(comparison)
         : refusalMarkdown(comparison),
-    )
-    .join('\n\n');
+    ),
+    agreementMarkdown({ agreement, thresholds }),
+  ].join('\n\n');

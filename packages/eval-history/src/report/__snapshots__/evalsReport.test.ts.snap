@@ -9,7 +9,11 @@ Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 91.7% (n=1
 
 Cost: $1.20 reported → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
 
-Changed: model. That is one cause."
+Changed: model. That is one cause.
+
+### Judge agreement (all recorded hand grades, by judge model and prompt hash)
+
+Not shown: hand grades are stored only in the database, and both runs were read from envelope files. To include it, name a run by its id or use --compare, with EVALS_DATABASE_URL set."
 `;
 
 exports[`evalsReport over fixture runs > names the one hash that changed, with n and the interval on each side 1`] = `
@@ -24,11 +28,18 @@ Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 83.3% (n=1
 
 Cost: $1.20 reported → $1.45 reported. Duration p50: 13.0 s → 14.0 s.
 
-Changed: \`react-19\` content hash. That is one cause."
+Changed: \`react-19\` content hash. That is one cause.
+
+### Judge agreement (all recorded hand grades, by judge model and prompt hash)
+
+Not shown: hand grades are stored only in the database, and both runs were read from envelope files. To include it, name a run by its id or use --compare, with EVALS_DATABASE_URL set."
 `;
 
 exports[`evalsReport over fixture runs > prints the same comparison as JSON under --json 1`] = `
 {
+  "agreement": {
+    "kind": "needs-database",
+  },
   "comparisons": [
     {
       "a": {
@@ -113,7 +124,11 @@ exports[`evalsReport over fixture runs > prints the same comparison as JSON unde
 exports[`evalsReport over fixture runs > refuses runs of two models and says why 1`] = `
 "### skills: main → feat/1234-tighten-react-19: not compared
 
-Run A used \`claude-opus-5-5\` and run B used \`claude-sonnet-5-5\`. A pass rate measures the model as much as the inputs, so a difference between two models would be blamed on whichever hash changed. Pass \`--allow-model-change\` to compare them anyway; the model is then listed among the changes."
+Run A used \`claude-opus-5-5\` and run B used \`claude-sonnet-5-5\`. A pass rate measures the model as much as the inputs, so a difference between two models would be blamed on whichever hash changed. Pass \`--allow-model-change\` to compare them anyway; the model is then listed among the changes.
+
+### Judge agreement (all recorded hand grades, by judge model and prompt hash)
+
+Not shown: hand grades are stored only in the database, and both runs were read from envelope files. To include it, name a run by its id or use --compare, with EVALS_DATABASE_URL set."
 `;
 
 exports[`evalsReport over fixture runs > says insufficient data, with n, when too few trials were counted 1`] = `
@@ -127,7 +142,11 @@ Pass rate, Wilson interval at z=1.96: insufficient data (n=2, 1 passed, 1 not co
 
 Cost: $1.20 reported → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
 
-Changed: \`react-19\` content hash. That is one cause."
+Changed: \`react-19\` content hash. That is one cause.
+
+### Judge agreement (all recorded hand grades, by judge model and prompt hash)
+
+Not shown: hand grades are stored only in the database, and both runs were read from envelope files. To include it, name a run by its id or use --compare, with EVALS_DATABASE_URL set."
 `;
 
 exports[`evalsReport over fixture runs > says multiple causes when two hashes changed 1`] = `
@@ -142,5 +161,9 @@ Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 83.3% (n=1
 
 Cost: $1.20 reported → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
 
-Changed: skill catalog hash, \`react-19\` content hash. That is multiple causes, so no single change explains the difference."
+Changed: skill catalog hash, \`react-19\` content hash. That is multiple causes, so no single change explains the difference.
+
+### Judge agreement (all recorded hand grades, by judge model and prompt hash)
+
+Not shown: hand grades are stored only in the database, and both runs were read from envelope files. To include it, name a run by its id or use --compare, with EVALS_DATABASE_URL set."
 `;
