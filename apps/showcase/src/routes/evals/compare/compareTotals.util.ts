@@ -6,6 +6,7 @@ import { durationLabel } from '../utils/durationLabel.util';
 import { intervalLabel } from '../utils/intervalLabel.util';
 import { passRateLabel } from '../utils/passRateLabel.util';
 import { pointsLabel } from '../utils/pointsLabel.util';
+import { intervalChange } from './intervalChange.util';
 import { signedChange } from './signedChange.util';
 
 type CompareTotalsArgs = {
@@ -27,10 +28,7 @@ export const compareTotals = ({ a, b }: CompareTotalsArgs) => [
   {
     a: intervalLabel(a),
     b: intervalLabel(b),
-    change:
-      b.upper !== undefined && a.lower !== undefined && b.upper < a.lower
-        ? 'B is below A'
-        : 'overlapping or too few trials',
+    change: intervalChange({ a, b }),
     metric: 'Interval',
   },
   {

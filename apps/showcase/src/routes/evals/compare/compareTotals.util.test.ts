@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import type { RunFigures } from '../types/runFigures.types';
 
+import { rateFigures } from '../utils/rateFigures.util';
 import { compareTotals } from './compareTotals.util';
 
 const run = (overrides: Partial<RunFigures>) =>
@@ -41,4 +42,25 @@ describe('compareTotals', () => {
 
     expect(cost).toMatchObject({ a: 'not reported', change: 'not comparable' });
   });
+
+  it.each([
+    { a: { k: 20, n: 20 }, b: { k: 0, n: 20 }, change: 'B is below A' },
+    { a: { k: 0, n: 20 }, b: { k: 20, n: 20 }, change: 'B is above A' },
+    { a: { k: 10, n: 20 }, b: { k: 11, n: 20 }, change: 'overlapping' },
+    {
+      a: { k: 10, n: 20 },
+      b: { k: 2, n: 3 },
+      change: 'too few trials to compare',
+    },
+  ])(
+    'reads the interval of A $a.k/$a.n against B $b.k/$b.n as "$change"',
+    ({ a, b, change }) => {
+      const interval = compareTotals({
+        a: run(rateFigures(a)),
+        b: run(rateFigures(b)),
+      }).find(({ metric }) => metric === 'Interval');
+
+      expect(interval?.change).toBe(change);
+    },
+  );
 });
