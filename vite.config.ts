@@ -151,7 +151,7 @@ export default defineConfig({
       'vp check --fix',
       'biome lint --write --no-errors-on-unmatched',
       'repo-eslint-staged --',
-      'vp fmt',
+      'vp fmt --no-error-on-unmatched-pattern',
     ],
   },
 });
