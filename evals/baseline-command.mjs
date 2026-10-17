@@ -139,6 +139,9 @@ const stopped = ({ effects, index, problems, total }) => {
   return 1;
 };
 
+const problemsBeforeNextRun = ({ args, effects, index, total }) =>
+  index < total ? effects.checkRuns({ ...args, runs: index }) : [];
+
 const runSuite = async ({ args, effects, total }) => {
   const indexes = Array.from({ length: total }, (_, offset) => offset + 1);
   for (const index of indexes) {
@@ -150,8 +153,12 @@ const runSuite = async ({ args, effects, total }) => {
       );
       return code;
     }
-    const problems =
-      index < total ? await effects.checkRuns({ ...args, runs: index }) : [];
+    const problems = await problemsBeforeNextRun({
+      args,
+      effects,
+      index,
+      total,
+    });
     if (problems.length > 0) {
       return stopped({ effects, index, problems, total });
     }
