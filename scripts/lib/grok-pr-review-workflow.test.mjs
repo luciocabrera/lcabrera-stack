@@ -140,4 +140,10 @@ describe('runs are bounded', () => {
       'gh secret set GROK_AUTH_JSON < ~/.grok/auth.json',
     );
   });
+
+  it('names the same-repo secret path and the decision that owns it', () => {
+    const source = yaml();
+    expect(source).toContain('ADR-135');
+    expect(source).toContain('A same-repo branch can edit this file');
+  });
 });

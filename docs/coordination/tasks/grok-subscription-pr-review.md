@@ -10,8 +10,9 @@ area:
   - scripts/lib/grok-pr-review-workflow.test.mjs
   - docs/tooling/copilot-review-gate.md
   - packages/devkit/CLASSIFICATION.md
+  - docs/decisions/ADR-135-a-grok-subscription-reviewer-posts-with-the-runner-token-and-is-not-an-accepted-reviewer.md
 started: 2026-10-16
-updated: 2026-10-16
+updated: 2026-10-17
 plan: (none)
 issue: #1375
 ---
@@ -23,6 +24,6 @@ Add a pull-request workflow that reviews with the grok.com session in
 
 ## Status / next
 
-- Current step: the review threads asked for the pinned CLI, and that is what the branch now runs.
-- Blockers: none.
-- Next: reply on the threads, then merge once the required checks are green.
+- Current step: ADR-135 records the session credential, the runner identity, the deny-rule probe, and the same-repo secret path.
+- Blockers: the required checks restart on this commit, and Copilot review complete waits on a review of the new head.
+- Next: reply on the open threads, then merge once those checks are green and the threads are resolved.

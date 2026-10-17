@@ -114,7 +114,8 @@ not a required check. The workflow does not dispatch this gate.
 [`.github/workflows/grok-pr-review.yml`](../../.github/workflows/grok-pr-review.yml)
 posts with `GITHUB_TOKEN`, so the author is `github-actions[bot]`. That login
 is already rejected by `isAcceptedReviewer`. The job does not dispatch this
-gate, and it is not a required check.
+gate, and it is not a required check. Why the author is the runner, and why
+the credential is a Grok Build session, is ADR-135.
 
 ### Newest per reviewer, not newest overall
 

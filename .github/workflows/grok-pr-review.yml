@@ -2,7 +2,8 @@ name: Grok PR Review
 
 # A subscription review, beside grok-review.yml. That workflow is the
 # catalog pass and authenticates with XAI_API_KEY under its own GitHub App
-# (ADR-116). This one authenticates with the Grok Build session only.
+# (ADR-116). This one authenticates with the Grok Build session only and
+# posts with GITHUB_TOKEN. ADR-135 records that split.
 #
 # Create the secret once, on a machine where `grok models` says you are
 # logged in with grok.com. The value is the whole file, braces included:
@@ -26,6 +27,9 @@ name: Grok PR Review
 # The install script's latest pointer is not used. ADR-116 rejected a
 # marketplace action for this reason, and this job follows that: the model
 # writes two files, and scripts/submit-pr-review.mjs posts them.
+# The deny rules are Read and Edit because that is the vocabulary the
+# pinned CLI matches, including grep and search_replace. ADR-135 records
+# the probe. Re-run it when the pin changes.
 #
 # The review is posted with GITHUB_TOKEN, so the author is
 # github-actions[bot]. That login is not an accepted reviewer
@@ -40,9 +44,18 @@ name: Grok PR Review
 # false, so that token is not written into .git/config either.
 #
 # Forks are skipped rather than failed. pull_request from a fork does not
-# receive secrets, and pull_request_target would run a fork's workflow
-# change with this secret. Do not switch the trigger. A same-repo pull
-# request with an empty GROK_AUTH_JSON fails in the model step.
+# receive secrets. Do not switch this job to pull_request_target. That
+# event runs the workflow from the default branch and passes secrets,
+# including to a fork, and this job checks out the pull request and runs
+# the prompt and the submit script from that checkout.
+#
+# A same-repo branch can edit this file. On pull_request, GitHub runs the
+# merge ref, and a same-repo pull request receives secrets, so the edited
+# workflow is what GROK_AUTH_JSON is handed to. An environment key in this
+# file does not close that: the branch can delete the key. Replacing the
+# secret is the revocation. ADR-135 records why the job stays on
+# pull_request. A same-repo pull request with an empty GROK_AUTH_JSON
+# fails in the model step.
 
 on:
   pull_request:
