@@ -207,7 +207,8 @@
         "packages/ui",
         "packages/vite-configs",
         "packages/devkit"
-      ]
+      ],
+      "rootPassDir": "evals"
     },
     "affectedTests": {
       "coverageTaskPackage": "showcase",

@@ -27,28 +27,38 @@
  * written inside the workspace so it resolves that workspace's flat config, and
  * eslint's non-zero exit on findings is expected, so the JSON report is read
  * off the thrown error rather than treated as a failure.
+ *
+ * A root package that lints a directory outside every workspace
+ * (`gates.eslintPass.rootPassDir`) is probed through the gate itself: the plant
+ * goes under that directory and `vp run -r lint:eslint:check` runs from the
+ * root, so a root task that leaves the fan-out fails here as well as a config
+ * that stops loading the rule.
  */
 
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, join } from 'node:path';
+import { basename, join, posix } from 'node:path';
 import process from 'node:process';
 
 import { readGates } from './config.mjs';
 import {
+  classifyFanOut,
   classifyProbe,
   PROBE_RULE,
   probeSource,
 } from './eslint-pass-probe.mjs';
 
 const REPO_ROOT = process.cwd();
-const PROBE_WORKSPACES = readGates(REPO_ROOT).eslintPass.probeWorkspaces;
+const { probeWorkspaces: PROBE_WORKSPACES, rootPassDir: ROOT_PASS_DIR } =
+  readGates(REPO_ROOT).eslintPass;
+const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
+const FAN_OUT = ['run', '-r', 'lint:eslint:check'];
 
 const eslintBin = (workspace) =>
   join(REPO_ROOT, workspace, 'node_modules', '.bin', 'eslint');
 
-const withProbeFile = (workspace, run) => {
-  const dir = mkdtempSync(join(REPO_ROOT, workspace, '.eslint-probe-'));
+const withProbeFile = (parent, run) => {
+  const dir = mkdtempSync(join(REPO_ROOT, parent, '.eslint-probe-'));
 
   try {
     writeFileSync(join(dir, 'probe.ts'), probeSource(), 'utf8');
@@ -73,7 +83,30 @@ const lintProbe = (workspace, target) => {
   }
 };
 
+const runFanOut = () => {
+  const options = {
+    cwd: REPO_ROOT,
+    encoding: 'utf8',
+    maxBuffer: 64 * 1024 * 1024,
+    stdio: ['ignore', 'pipe', 'pipe'],
+  };
+
+  try {
+    return { output: execFileSync(VP_BIN, FAN_OUT, options), status: 0 };
+  } catch (error) {
+    return {
+      output: `${error.stdout ?? ''}\n${error.stderr ?? ''}`,
+      status: error.status ?? 1,
+    };
+  }
+};
+
 const FAILURE_HINT = {
+  blocked:
+    `\`vp ${FAN_OUT.join(' ')}\` failed without reporting the probe planted\n` +
+    `  under this directory. The task runner stops the remaining tasks when\n` +
+    `  one fails, so the root task may never have run. Run the fan-out, fix\n` +
+    `  what it reports, and run this gate again.`,
   crashed:
     `a rule threw, so the pass checked nothing. Run\n` +
     `  vp run -r lint:eslint:check\n` +
@@ -84,10 +117,20 @@ const FAILURE_HINT = {
     `no eslint binary at \`node_modules/.bin/eslint\`. Run \`vp install\`.\n` +
     `  Reported separately because a probe that cannot spawn produces the same\n` +
     `  empty output as a rule that threw, and would otherwise be misread as #472.`,
+  'no-dir':
+    `\`gates.eslintPass.rootPassDir\` names a directory that does not exist,\n` +
+    `  so the root eslint pass could not be probed.`,
+  'no-vp': `no \`vp\` binary at \`node_modules/.bin/vp\`. Run \`vp install\`.`,
   silent:
     `the pass ran but never reported \`${PROBE_RULE}\` for a deliberately\n` +
     `  misordered import, so the rule is not loaded. Check the shared eslint\n` +
     `  configs in @lcabrera/vite-config.`,
+  unreported:
+    `\`vp ${FAN_OUT.join(' ')}\` never reported \`${PROBE_RULE}\` for a\n` +
+    `  misordered import planted under this directory. Check that the root\n` +
+    `  package still defines a \`lint:eslint:check\` script, that it lints this\n` +
+    `  directory, and that the root eslint config neither ignores it nor\n` +
+    `  drops the rule.`,
 };
 
 const verdictFor = (workspace) => {
@@ -100,11 +143,38 @@ const verdictFor = (workspace) => {
   );
 };
 
-const probeFailures = () =>
-  PROBE_WORKSPACES.flatMap((workspace) => {
-    const verdict = verdictFor(workspace);
+const rootVerdict = () => {
+  if (!existsSync(join(REPO_ROOT, ROOT_PASS_DIR))) {
+    return 'no-dir';
+  }
 
-    return verdict === 'reported' ? [] : [{ verdict, workspace }];
+  if (!existsSync(VP_BIN)) {
+    return 'no-vp';
+  }
+
+  return withProbeFile(ROOT_PASS_DIR, (file) =>
+    classifyFanOut({
+      ...runFanOut(),
+      probePath: posix.join(ROOT_PASS_DIR, file),
+    }),
+  );
+};
+
+const PROBE_TARGETS = [
+  ...PROBE_WORKSPACES.map((workspace) => ({
+    label: workspace,
+    verdict: () => verdictFor(workspace),
+  })),
+  ...(ROOT_PASS_DIR === ''
+    ? []
+    : [{ label: `the root pass over ${ROOT_PASS_DIR}`, verdict: rootVerdict }]),
+];
+
+const probeFailures = () =>
+  PROBE_TARGETS.flatMap((target) => {
+    const verdict = target.verdict();
+
+    return verdict === 'reported' ? [] : [{ label: target.label, verdict }];
   });
 
 const report = () => {
@@ -118,8 +188,8 @@ const report = () => {
   const failures = probeFailures();
 
   if (failures.length > 0) {
-    for (const { verdict, workspace } of failures) {
-      process.stderr.write(`✗ ${workspace}: ${FAILURE_HINT[verdict]}\n`);
+    for (const { label, verdict } of failures) {
+      process.stderr.write(`✗ ${label}: ${FAILURE_HINT[verdict]}\n`);
     }
 
     return 1;
@@ -127,7 +197,7 @@ const report = () => {
 
   process.stdout.write(
     `eslint pass verified: \`${PROBE_RULE}\` reports the planted violation in ` +
-      `${PROBE_WORKSPACES.join(', ')}.\n`,
+      `${PROBE_TARGETS.map((target) => target.label).join(', ')}.\n`,
   );
 
   return 0;
