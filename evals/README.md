@@ -27,6 +27,21 @@ session, with its tokens, cost and durations. Each suite's own output under
 `.tmp/` is still written, and skill quality builds `report.html` from the
 envelope.
 
+Every file a runner writes is scrubbed as it is written, through
+`writeScrubbed` in [`transcript-scrub.mjs`](./transcript-scrub.mjs): the
+envelope, the transcripts, and each runner's own output under `.tmp/`, such as
+`trials.json`, which CI uploads as an artifact. A test fails if a runner, or an `evals/` module it
+imports, writes a file any other way outside its own scratch directory. The scrubber redacts the value of every environment
+variable whose name marks it secret (a name ending in `TOKEN`, `SECRET`,
+`PASSWORD`, `API_KEY`, `ACCESS_KEY`, `DATABASE_URL` and the like, with a value
+of at least 8 characters), the password in any URL, with or without a user, and
+known token shapes such as GitHub, npm and API keys, JWTs and private key
+blocks. Each is replaced with `[REDACTED:<kind>]`. The size and sha256 the
+envelope records are taken from the scrubbed file, and a file with nothing to
+redact is written unchanged. A value is matched as written or JSON-escaped, so
+the same secret URL-encoded, base64-encoded or wrapped across lines is not
+caught unless its shape is.
+
 The envelope is written on every way out: `complete` on a normal finish,
 `partial` when the run throws, and `aborted` on Ctrl-C or SIGTERM. A runner
 whose envelope fails the schema writes none, names each failing field and exits 1.
@@ -44,6 +59,73 @@ A complete or partial envelope is then sent to the eval-history database that
 the runner warns and still exits as its results say; `vp run evals:ingest`
 sends whatever is under `.tmp/eval-results/` later, and skips a run already
 stored. An aborted run is left for that command too.
+
+## Comparing two runs
+
+`vp run evals:report -- --compare main` answers whether a change made a suite
+better or worse. It takes, from the database `EVALS_DATABASE_URL` names, the
+newest complete run of each suite on `main` and on the current branch, and
+prints one markdown section per suite that has both:
+
+1. the tasks that flipped, with passed over counted trials on each side. A
+   task flips when it went from passing every trial to not, from passing none
+   to some, or the other way, or when only one run has it;
+2. each run's pass rate with n and its Wilson interval, or `insufficient data`
+   below `minTrialsForRate` counted trials;
+3. the reported cost and the median trial duration of each run;
+4. which input hashes changed: the harness version, the skill catalog, the
+   content of each subject both runs hold, the task, fixture and expected
+   hashes of each task both runs hold, and the judge and agent prompts. A task
+   or subject only one run reached is not named as a cause; the task shows in
+   the flip list. One changed hash is
+   named as the one cause; more than one is reported as multiple causes,
+   because no single change then explains the difference.
+
+`--suite` narrows it to one suite and `--branch` names the run under test's
+branch. `--a <run> --b <run>` compares two runs given as run ids or as
+envelope files, so two CI artifacts compare with no database. `--json` prints
+the same comparison as JSON.
+
+A run holds the tasks it has trials for, and only the subjects those tasks
+name, whether it is read from a file or from the database. A task that a
+partial or aborted run planned but never reached is absent from it, so the
+report shows that task as present in only one run rather than as one that
+failed every trial.
+
+Runs of two models are not compared: the report says which models they used
+and exits 1, because a pass rate measures the model as much as the inputs.
+`--allow-model-change` compares them anyway and lists the model among the
+changes. Nothing here flags a regression yet; the report prints the figures
+the rule in [`regression.config.json`](#regression-thresholds) will read.
+
+## Recording a noise floor
+
+Two runs of the same suite on the same commit and model do not score the same.
+`vp run evals:baseline -- --suite <suite>` measures how far apart they land.
+It runs the suite `--runs` times, `baseline.defaultRuns` from
+[`regression.config.json`](#regression-thresholds) unless told otherwise, and
+passes one `baseline_id` to every run, so each envelope is tagged
+`trigger: baseline`. It then stores the mean and sample standard deviation per
+suite and per subject in `evals.eval_baseline`. For skill-quality that is the
+judge's overall score; for the other suites it is the pass rate, with the same
+outcomes left out of n as the `Pass rate:` line. Unlike that line, a run below
+`minTrialsForRate` still contributes its rate. `--model <id>` reaches the skills and skill-quality
+runners; the verifier runners fix their own model.
+
+Each row carries its suite, model and subject, and each baseline gets its own
+`baseline_id`. A baseline for another model never replaces one already stored.
+`readBaseline` in
+[`@repo/eval-history`](../packages/eval-history) returns the latest row for
+each subject of a suite and model.
+
+It refuses a dirty tree, naming the changes, because a baseline has to describe
+a commit. It also refuses before any run when `EVALS_DATABASE_URL` is unset or
+unreachable, or when its role cannot insert into `evals.eval_run` and
+`evals.eval_baseline` there: an unmigrated database, the wrong database on the
+right server, or a missing grant. None of those costs a model run. A
+partial, aborted or dirty run is left out with its reason. So is a subject
+with a counted result in fewer than two runs. A baseline whose runs span two
+commits or two models records nothing.
 
 ## What a full run costs
 

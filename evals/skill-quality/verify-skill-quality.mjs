@@ -1,7 +1,4 @@
 #!/usr/bin/env node
-import { query } from '@anthropic-ai/claude-agent-sdk';
-import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
-import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
 /**
  * Scores every skill's SKILL.md with the judge prompt and rubric `waza quality`
  * uses, on a Claude session with no tools, prints a markdown table, and writes
@@ -17,16 +14,19 @@ import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
  * not parse, or a name is no skill, 130/143 = interrupted.
  */
 import {
-  existsSync,
   mkdirSync,
   mkdtempSync,
-  readdirSync,
   readFileSync,
-  writeFileSync,
+  readdirSync,
+  existsSync,
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
+
+import { query } from '@anthropic-ai/claude-agent-sdk';
+import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
+import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
 
 import {
   chunk,
@@ -44,7 +44,17 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
+import { writeScrubbed } from '../transcript-scrub.mjs';
+
 import { qualityTask, qualityTrial } from './quality-envelope.mjs';
+
+import {
+  baselineTable,
+  judgePrompt,
+  parseJudgement,
+  selectedSkills,
+} from './skill-quality.mjs';
+
 import {
   envelopeResults,
   parseRun,
@@ -52,12 +62,6 @@ import {
   reportDataFromEnvelope,
   runRecord,
 } from './quality-report.mjs';
-import {
-  baselineTable,
-  judgePrompt,
-  parseJudgement,
-  selectedSkills,
-} from './skill-quality.mjs';
 
 const SKILLS_DIR = '.github/skills';
 const REPORT_DIR = '.tmp/skill-quality';
@@ -72,7 +76,7 @@ const catalog = () =>
     .filter((entry) => entry.isDirectory())
     .map((entry) => entry.name)
     .filter((name) => existsSync(join(SKILLS_DIR, name, 'SKILL.md')))
-    .toSorted((a, b) => a.localeCompare(b));
+    .toSorted();
 
 const judged = ({ reply, skill }) => {
   const { judgement, problems } = parseJudgement(reply);
@@ -85,7 +89,7 @@ const replyOf = (messages) => finalResult(messages)?.result ?? '';
 
 const outcome = ({ error, messages, skill, timestamps }) => {
   const reply = replyOf(messages);
-  writeFileSync(join(REPORT_DIR, `${skill}.json`), reply);
+  writeScrubbed({ file: join(REPORT_DIR, `${skill}.json`), text: reply });
   const problem = error ?? sessionProblem(messages);
   const metrics = sessionMetrics(messages, timestamps, error);
   return problem === undefined
@@ -132,7 +136,7 @@ const readHistory = () =>
   existsSync(RUNS_DIR)
     ? readdirSync(RUNS_DIR)
         .filter((name) => name.endsWith('.json'))
-        .toSorted((a, b) => a.localeCompare(b))
+        .toSorted()
         .map((name) => parseRun(readFileSync(join(RUNS_DIR, name), 'utf8')))
         .filter((run) => run !== undefined)
     : [];
@@ -141,23 +145,23 @@ const writeReport = (envelope) => {
   const history = readHistory();
   const generatedAt = envelope.run.finished_at;
   mkdirSync(RUNS_DIR, { recursive: true });
-  writeFileSync(
-    join(RUNS_DIR, `${generatedAt.replaceAll(':', '-')}.json`),
-    JSON.stringify(
+  writeScrubbed({
+    file: join(RUNS_DIR, `${generatedAt.replaceAll(':', '-')}.json`),
+    text: JSON.stringify(
       runRecord({
         generatedAt,
         model: envelope.run.model_id,
         results: envelopeResults(envelope),
       }),
     ),
-  );
-  writeFileSync(
-    REPORT_FILE,
-    renderReport({
+  });
+  writeScrubbed({
+    file: REPORT_FILE,
+    text: renderReport({
       data: reportDataFromEnvelope({ envelope, history }),
       template: readFileSync(TEMPLATE, 'utf8'),
     }),
-  );
+  });
 };
 
 const qualityPlan = async ({ model, skills }) => {
@@ -176,7 +180,7 @@ const qualityPlan = async ({ model, skills }) => {
     }),
     subjects: skillSubjects({ hashes, selected: skills }),
     suite: 'skill-quality',
-    tasks: skills.map((skill) => qualityTask(skill)),
+    tasks: skills.map(qualityTask),
   };
 };
 

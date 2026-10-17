@@ -1,5 +1,8 @@
-import { readFileSync } from 'node:fs';
+import { EventEmitter } from 'node:events';
+import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+
 import {
   afterEach,
   beforeEach,
@@ -10,75 +13,54 @@ import {
 } from 'vite-plus/test';
 
 import {
-  finishedSession,
+  rulesPlan as plan,
+  rulesTrial as trial,
   STARTED_AT,
   testIdentity,
-  testPlan,
 } from './envelope-test-support.mjs';
-import { sessionTrial } from './run-envelope.mjs';
 import {
-  fakeSignals,
-  recording,
-  resultsDirectory,
-} from './run-record-test-support.mjs';
-import {
-  runIdentity,
+  recordRun,
   runnerHarnessVersion,
   saveEnvelope,
   saveTranscript,
 } from './run-record.mjs';
 
-const TASK_KEY = 'rules-consistency/typescript/indexed';
+let resultsDir;
+let ingest;
 
-const plan = testPlan({
-  modelId: undefined,
-  subjects: [
-    {
-      content_hash: 'a'.repeat(64),
-      kind: 'rule',
-      name: 'typescript',
-      path: '.claude/rules/typescript.md',
-    },
-  ],
-  suite: 'rules-consistency',
-  tasks: [
-    {
-      agent_prompt_hash: null,
-      expected_hash: null,
-      fixture_hash: null,
-      judge_prompt_hash: null,
-      kind: 'rule-check',
-      set: 'regression',
-      source: null,
-      subject: { kind: 'rule', name: 'typescript' },
-      tags: [],
-      task_hash: 'b'.repeat(64),
-      task_key: TASK_KEY,
-    },
-  ],
-});
+const written = () =>
+  JSON.parse(
+    readFileSync(
+      join(resultsDir, 'rules-consistency', `${testIdentity.run_id}.json`),
+      'utf8',
+    ),
+  );
 
-const trial = sessionTrial({
-  detail: { check: 'indexed', findings: [], schema: 'rules/1' },
-  metrics: finishedSession(),
-  passed: true,
-  queuedAt: STARTED_AT,
-  taskKey: TASK_KEY,
-  trialIndex: 0,
-});
+const record = (overrides) =>
+  recordRun({
+    clock: () => STARTED_AT + 2000,
+    identity: testIdentity,
+    ingest,
+    plan,
+    resultsDir,
+    signals: new EventEmitter(),
+    ...overrides,
+  });
 
 beforeEach(() => {
+  resultsDir = mkdtempSync(join(tmpdir(), 'eval-results-'));
+  ingest = vi.fn(async () => undefined);
   vi.spyOn(console, 'log').mockImplementation(() => undefined);
   vi.spyOn(console, 'error').mockImplementation(() => undefined);
 });
 
 afterEach(() => {
   vi.restoreAllMocks();
+  rmSync(resultsDir, { force: true, recursive: true });
 });
 
 describe('recordRun', () => {
   it('writes a complete envelope on a normal finish and returns it', async () => {
-    const { record, written } = recording({ plan });
     const outcome = await record({
       execute: ({ addTrial }) => {
         addTrial(trial);
@@ -94,7 +76,6 @@ describe('recordRun', () => {
   });
 
   it('writes the trials finished so far as partial when the run throws', async () => {
-    const { record, written } = recording({ plan });
     await expect(
       record({
         execute: async ({ addTrial }) => {
@@ -109,9 +90,8 @@ describe('recordRun', () => {
   });
 
   it('writes an aborted envelope on SIGINT or SIGTERM, then raises the signal again', async () => {
-    const { record, written } = recording({ plan });
     for (const signal of ['SIGINT', 'SIGTERM']) {
-      const signals = fakeSignals();
+      const signals = new EventEmitter();
       const raise = vi.fn();
       const started = Promise.withResolvers();
       void record({
@@ -135,7 +115,6 @@ describe('recordRun', () => {
   });
 
   it('sends a complete or partial envelope once it is written', async () => {
-    const { ingest, record, resultsDir } = recording({ plan });
     const file = join(
       resultsDir,
       'rules-consistency',
@@ -155,16 +134,15 @@ describe('recordRun', () => {
   });
 
   it('sends the envelope only once its pass rate is written', async () => {
-    const { record } = recording({ plan });
     const sent = [];
+    ingest = vi.fn(async ({ file }) => {
+      sent.push(JSON.parse(readFileSync(file, 'utf8')).run.totals.pass_rate);
+    });
     await record({
       execute: ({ addTrial }) => {
         for (const trialIndex of [0, 1, 2, 3, 4, 5]) {
           addTrial({ ...trial, trial_index: trialIndex });
         }
-      },
-      ingest: async ({ file }) => {
-        sent.push(JSON.parse(readFileSync(file, 'utf8')).run.totals.pass_rate);
       },
     });
     expect(sent).toStrictEqual([
@@ -179,22 +157,21 @@ describe('recordRun', () => {
   });
 
   it('does not rewrite the saved envelope when a signal arrives during ingest', async () => {
-    const { record, written } = recording({ plan });
     for (const fails of [false, true]) {
-      const signals = fakeSignals();
+      const signals = new EventEmitter();
       const raise = vi.fn();
       const statuses = [];
+      ingest = vi.fn(async () => {
+        signals.emit('SIGINT');
+        signals.emit('SIGTERM');
+        statuses.push(written().run.status);
+      });
       const run = record({
         execute: ({ addTrial }) => {
           addTrial(trial);
           if (fails) {
             throw new Error('usage limit reached');
           }
-        },
-        ingest: async () => {
-          signals.emit('SIGINT');
-          signals.emit('SIGTERM');
-          statuses.push(written().run.status);
         },
         raise,
         signals,
@@ -208,8 +185,7 @@ describe('recordRun', () => {
   });
 
   it('leaves an aborted envelope on disk for evals:ingest', async () => {
-    const { ingest, record, written } = recording({ plan });
-    const signals = fakeSignals();
+    const signals = new EventEmitter();
     const started = Promise.withResolvers();
     void record({
       execute: () => {
@@ -226,7 +202,6 @@ describe('recordRun', () => {
   });
 
   it('prints the pass rate the envelope carries, at the thresholds in regression.config.json', async () => {
-    const { record, written } = recording({ plan });
     const outcome = await record({
       execute: ({ addTrial }) => {
         for (const trialIndex of [0, 1, 2, 3, 4, 5]) {
@@ -250,7 +225,6 @@ describe('recordRun', () => {
   });
 
   it('prints and records insufficient data below the minimum trials', async () => {
-    const { record, written } = recording({ plan });
     await record({ execute: ({ addTrial }) => addTrial(trial) });
     expect(written().run.totals.pass_rate).toStrictEqual({
       k: 1,
@@ -265,7 +239,6 @@ describe('recordRun', () => {
   });
 
   it('applies the thresholds it is given', async () => {
-    const { record, written } = recording({ plan });
     await record({
       execute: ({ addTrial }) => addTrial(trial),
       regressionConfig: Promise.resolve({ minTrialsForRate: 1, z: 1.96 }),
@@ -274,15 +247,13 @@ describe('recordRun', () => {
   });
 
   it('stops listening for signals once the run is recorded', async () => {
-    const { record } = recording({ plan });
-    const signals = fakeSignals();
+    const signals = new EventEmitter();
     await record({ execute: () => undefined, signals });
     expect(signals.listenerCount('SIGINT')).toBe(0);
     expect(signals.listenerCount('SIGTERM')).toBe(0);
   });
 
   it('refuses an envelope that fails validation and names the field', async () => {
-    const { record, written } = recording({ plan });
     await expect(
       record({
         execute: () => undefined,
@@ -295,7 +266,6 @@ describe('recordRun', () => {
 
 describe('saveEnvelope', () => {
   it('names every failing field in its error', () => {
-    const resultsDir = resultsDirectory();
     expect(() =>
       saveEnvelope({
         envelope: { run: { suite: 'skills' }, schema_version: 2 },
@@ -309,7 +279,6 @@ describe('saveEnvelope', () => {
 
 describe('saveTranscript', () => {
   it('writes beside the envelope and returns its size and hash', () => {
-    const resultsDir = resultsDirectory();
     const transcript = saveTranscript({
       name: 'react-19-trigger-1.json',
       resultsDir,
@@ -346,15 +315,5 @@ describe('runnerHarnessVersion', () => {
         new URL('skills/verify-skill-triggers.mjs', import.meta.url),
       ),
     ).not.toBe(version);
-  });
-});
-
-describe('runIdentity', () => {
-  it('reads the commit and mints a fresh uuid each run', () => {
-    const identity = runIdentity({ env: {}, now: STARTED_AT });
-    expect(identity.git_sha).toMatch(/^[0-9a-f]{40}$/u);
-    expect(identity.trigger).toBe('local');
-    expect(identity.started_at).toBe('2026-10-06T09:00:00.000Z');
-    expect(runIdentity({ env: {} }).run_id).not.toBe(identity.run_id);
   });
 });

@@ -1,10 +1,12 @@
 /**
  * Fixed inputs the envelope tests share: a run identity that passes the
- * schema, and the metrics a finished Agent SDK session yields, so each suite's
- * test builds a whole envelope and parses it instead of checking fields alone.
+ * schema, the metrics a finished Agent SDK session yields, and a one-task plan
+ * with a passing trial, so each suite's test builds a whole envelope and
+ * parses it instead of checking fields alone.
  * Usage: imported by the `*.test.mjs` files under `evals/`.
  */
 import { sessionMetrics } from './agent-sessions.mjs';
+import { sessionTrial } from './run-envelope.mjs';
 
 export const TEST_REGRESSION_CONFIG = { minTrialsForRate: 6, z: 1.96 };
 
@@ -69,4 +71,43 @@ export const testPlan = (overrides) => ({
   subjects: [],
   tasks: [],
   ...overrides,
+});
+
+const RULES_TASK_KEY = 'rules-consistency/typescript/indexed';
+
+export const rulesPlan = testPlan({
+  modelId: undefined,
+  subjects: [
+    {
+      content_hash: 'a'.repeat(64),
+      kind: 'rule',
+      name: 'typescript',
+      path: '.claude/rules/typescript.md',
+    },
+  ],
+  suite: 'rules-consistency',
+  tasks: [
+    {
+      agent_prompt_hash: null,
+      expected_hash: null,
+      fixture_hash: null,
+      judge_prompt_hash: null,
+      kind: 'rule-check',
+      set: 'regression',
+      source: null,
+      subject: { kind: 'rule', name: 'typescript' },
+      tags: [],
+      task_hash: 'b'.repeat(64),
+      task_key: RULES_TASK_KEY,
+    },
+  ],
+});
+
+export const rulesTrial = sessionTrial({
+  detail: { check: 'indexed', findings: [], schema: 'rules/1' },
+  metrics: finishedSession(),
+  passed: true,
+  queuedAt: STARTED_AT,
+  taskKey: RULES_TASK_KEY,
+  trialIndex: 0,
 });

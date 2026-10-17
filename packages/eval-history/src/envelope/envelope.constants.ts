@@ -10,6 +10,8 @@ export const SUITES = [
   'skill-quality',
 ] as const;
 
+export const SUBJECT_KINDS = ['skill', 'rule', 'agent', 'prompt'] as const;
+
 export const OUTCOMES = [
   'pass',
   'fail',

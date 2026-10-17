@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <meta
+      name="description"
+      content="A TypeScript monorepo that ships a React data-grid stack and the agent-driven toolchain that builds it."
+    />
+    <title>lcabrera-stack</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      rel="stylesheet"
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Condensed:wght@500;700&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&display=swap"
+    />
+    <link rel="stylesheet" href="site.css" />
+    <style>
+      .doors {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 16px;
+        margin-top: 8px;
+      }
+      a.door {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        padding: 22px;
+        border: 1px solid var(--rule);
+        background: var(--panel);
+        color: var(--ink);
+        text-decoration: none;
+        min-width: 0;
+      }
+      @media (prefers-reduced-motion: no-preference) {
+        a.door {
+          transition: border-color 0.15s;
+        }
+      }
+      a.door:hover {
+        border-color: var(--accent);
+      }
+      a.door h2 {
+        font-size: 1.6rem;
+      }
+      a.door ul {
+        margin: 0;
+        padding-left: 1.1em;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        color: var(--muted);
+        font-size: 0.94rem;
+      }
+      a.door .go {
+        font: 600 0.85rem var(--font-mono);
+        color: var(--accent);
+        margin-top: auto;
+      }
+      .facts {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 0;
+        border-top: 1px solid var(--rule);
+      }
+      .facts div {
+        padding: 16px 16px 16px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+      }
+      .facts strong {
+        font-family: var(--font-display);
+        font-size: 1.05rem;
+      }
+      .facts span {
+        color: var(--muted);
+        font-size: 0.92rem;
+      }
+      .refs {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px 22px;
+        font-size: 0.94rem;
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="site" aria-label="Site">
+      <div class="in">
+        <a class="brand" href="index.html">lcabrera-stack</a
+        ><a class="lk" href="workflow.html">Agentic workflow</a
+        ><a class="lk" href="packages.html">Product and packages</a
+        ><a
+          class="lk"
+          href="https://github.com/luciocabrera/lcabrera-stack"
+          target="_blank"
+          rel="noopener"
+          >GitHub</a
+        >
+      </div>
+    </nav>
+    <div class="wrap">
+      <header class="mast">
+        <span class="label">lcabrera-stack</span>
+        <h1>A data-grid stack, built by agents under interlock</h1>
+        <p class="lede">
+          A TypeScript monorepo by Lucio Cabrera. It ships a React data grid
+          with the browser and Postgres layers behind it, and the toolchain that
+          keeps the repository honest, including the agent setup that does most
+          of the building. It is a personal repository for practising
+          agent-driven delivery end to end, held to the standards of a product.
+        </p>
+      </header>
+
+      <div class="doors">
+        <a class="door" href="workflow.html">
+          <span class="label">How the work gets done</span>
+          <h2>Interlocked agent delivery</h2>
+          <ul>
+            <li>The route from issue to merge, and what gates each stage</li>
+            <li>Why the reviewer agent never sees the builder's reasoning</li>
+            <li>Hooks that enforce versus prompts that only advise</li>
+            <li>Evals that test the agents themselves</li>
+          </ul>
+          <span class="go">Open the workflow →</span>
+        </a>
+        <a class="door" href="packages.html">
+          <span class="label">What it ships</span>
+          <h2>Two products, one repository</h2>
+          <ul>
+            <li>The application stack and the repository toolchain</li>
+            <li>An interactive map of every package and its dependencies</li>
+            <li>The runtime boundary, and the imports it refuses</li>
+            <li>The personas and requirements the packages are judged by</li>
+          </ul>
+          <span class="go">Open the product →</span>
+        </a>
+      </div>
+
+      <section id="glance">
+        <div class="col stack"><span class="label">At a glance</span></div>
+        <div class="facts">
+          <div>
+            <strong>React Router, StyleX, Postgres</strong
+            ><span
+              >A virtualized, groupable grid over server-side SQL, with an
+              injection-safe query builder.</span
+            >
+          </div>
+          <div>
+            <strong>Vite+ and pnpm workspaces</strong
+            ><span
+              >One toolchain for format, three linters, two type passes and
+              tests, run in a fixed order.</span
+            >
+          </div>
+          <div>
+            <strong>Claude Code, Copilot and Gemini</strong
+            ><span
+              >All three read one instruction file. Path rules, skills and
+              subagents are versioned with the code.</span
+            >
+          </div>
+          <div>
+            <strong>Decisions on record</strong
+            ><span
+              >Architecture decisions are kept as ADRs, and requirements as a
+              register with a declared state.</span
+            >
+          </div>
+        </div>
+        <div class="refs">
+          <a
+            href="https://github.com/luciocabrera/lcabrera-stack"
+            target="_blank"
+            rel="noopener"
+            >Repository</a
+          >
+          <a
+            href="https://github.com/luciocabrera/lcabrera-stack/blob/main/AGENTS.md"
+            target="_blank"
+            rel="noopener"
+            >AGENTS.md</a
+          >
+          <a
+            href="https://github.com/luciocabrera/lcabrera-stack/tree/main/docs/decisions"
+            target="_blank"
+            rel="noopener"
+            >Decision records</a
+          >
+          <a
+            href="https://github.com/luciocabrera/lcabrera-stack/tree/main/docs/product"
+            target="_blank"
+            rel="noopener"
+            >Product requirements</a
+          >
+          <a
+            href="https://github.com/luciocabrera/lcabrera-stack/blob/main/COMMANDS.md"
+            target="_blank"
+            rel="noopener"
+            >Commands</a
+          >
+        </div>
+      </section>
+      <div class="pager">
+        <span></span><a href="workflow.html">Agentic workflow →</a>
+      </div>
+      <footer>
+        <span
+          >Source:
+          <a
+            href="https://github.com/luciocabrera/lcabrera-stack"
+            target="_blank"
+            rel="noopener"
+            >github.com/luciocabrera/lcabrera-stack</a
+          >. The documents in the repository are canonical; these pages
+          summarise them.</span
+        ><span>Lucio Cabrera</span>
+      </footer>
+    </div>
+  </body>
+</html>

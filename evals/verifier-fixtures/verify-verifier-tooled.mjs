@@ -1,5 +1,4 @@
 #!/usr/bin/env node
-import { query } from '@anthropic-ai/claude-agent-sdk';
 /**
  * Runs the refactor-verifier with its own tools against each fixture applied
  * in a scratch worktree, one fixture at a time, and checks the report: clean
@@ -13,10 +12,12 @@ import { query } from '@anthropic-ai/claude-agent-sdk';
  * Needs a Claude login and the local database the full quality gate uses.
  * Exit codes: 0 = every fixture matched, 1 = otherwise, 130/143 = interrupted.
  */
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
+
+import { query } from '@anthropic-ai/claude-agent-sdk';
 
 import {
   chunk,
@@ -35,6 +36,8 @@ import {
   runnerHarnessVersion,
   sdkVersion,
 } from '../run-record.mjs';
+import { writeScrubbed } from '../transcript-scrub.mjs';
+
 import {
   agentTools,
   describeTooledJudgement,
@@ -44,7 +47,6 @@ import {
   tooledRunCount,
   tooledRunCounts,
 } from './tooled-fixtures.mjs';
-import { cleanUp, git, prepare, treeProblem } from './tooled-worktree.mjs';
 import {
   agentPromptHash,
   CONTRACT_PATH,
@@ -53,6 +55,7 @@ import {
   verifierSubject,
 } from './verifier-envelope.mjs';
 import { agentBody, suiteEnd } from './verifier-fixtures.mjs';
+import { cleanUp, git, prepare, treeProblem } from './tooled-worktree.mjs';
 
 const MODEL = 'claude-opus-5-5';
 const SUITE = 'verifier-tooled';
@@ -138,7 +141,10 @@ const runText = ({ error, report, treeProblem: problem }) =>
 
 const save = ({ fixture, runs }) => {
   for (const [index, run] of runs.entries()) {
-    writeFileSync(join(REPORT_DIR, `${fixture}-${index + 1}.md`), runText(run));
+    writeScrubbed({
+      file: join(REPORT_DIR, `${fixture}-${index + 1}.md`),
+      text: runText(run),
+    });
   }
 };
 
@@ -225,7 +231,7 @@ const judgeAndPrint = async ({
 };
 
 const selected = ({ expected, names }) => {
-  const unknown = names.filter((name) => !Object.hasOwn(expected, name));
+  const unknown = names.filter((name) => !(name in expected));
   if (unknown.length > 0) {
     throw new Error(`no fixture named ${unknown.join(', ')} in expected.json`);
   }

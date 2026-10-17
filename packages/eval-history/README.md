@@ -6,9 +6,23 @@ decides why it exists and why it never ships, and
 [ADR-131](../../docs/decisions/ADR-131-version-the-eval-run-envelope-and-accept-the-previous-version.md)
 decides how the envelope is versioned.
 
+- `src/annotations/` — a timeline note in `evals.eval_annotation`: its kinds,
+  its schema and the insert `evals:annotate` runs.
+- `src/baseline/` — the A/A baseline behind `vp run evals:baseline`:
+  `aggregateBaseline` turns one baseline's run envelopes into the mean and
+  sample standard deviation per suite, model and subject. It leaves out a run
+  that is partial, dirty or calls no model, and records nothing for a baseline
+  spanning two commits or models. `writeBaseline` stores the rows in
+  `evals.eval_baseline` in one transaction, and `readBaseline` reads back the
+  latest row per subject for a suite and model.
 - `src/envelope/` — the run envelope as a Zod schema, the validator, the
   emitted `envelope.schema.json`, and one example envelope per suite under
-  `fixtures/`.
+  `fixtures/`. A skill-quality trial whose detail names no `judge_model`,
+  whose task carries no `judge_prompt_hash`, or whose dimension scores are not
+  whole numbers from 1 to 5 on distinct dimensions, fails the run schema.
+- `src/grades/` — hand grades of the quality judge: recording one against the
+  dimensions the judge scored on that trial, reading
+  `evals.v_judge_agreement`, and the agreement rate `evals:grade` prints.
 - `src/hashing/` — the input hashes of
   [the plan's §5](../../docs/agents/planning/eval-history-plan.md#5-hashing):
   normalized content hashes, the multi-file hash, canonical JSON, the skill
@@ -20,7 +34,9 @@ decides how the envelope is versioned.
   envelopes under the paths it is given, brings one written a version earlier
   up to date through its upcaster in `ENVELOPE_UPCASTERS` and rejects any
   other version by name (ADR-131), and stores each run in one transaction keyed
-  on `run_id`, so a run already stored is left alone.
+  on `run_id`, so a run already stored is left alone. A skill-quality trial's
+  judge model and dimension scores go into their own columns in the statement
+  that inserts the trial.
 - `src/prices/` — the schema of `model-prices.json` and its upsert into
   `evals.model_price`.
 - `src/queries/` — the read functions the dashboard calls, one per reporting
@@ -32,6 +48,16 @@ decides how the envelope is versioned.
   pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
   the views beneath, names a column in `EXCLUDED_COLUMNS`
   ([ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)).
+  `readRunSummaries` and `readRunTrials` read base tables instead, and reach
+  each one only through `projectedRelation`, which refuses a column outside
+  `PUBLIC_COLUMNS` (derived per read from `information_schema` by
+  `readPublicColumns`) and a `jsonb` field outside `PUBLIC_FIELD_PATHS`.
+  `evalsReaderPool` is the pool they run on, built from
+  `EVALS_READER_DATABASE_URL`.
+- `src/report/` — the comparison behind `vp run evals:report`: it reads two
+  runs from envelope files or from the database, refuses runs of two models
+  unless told otherwise, and renders the flipped tasks, both pass rates, cost,
+  duration and the changed hashes as markdown or JSON.
 - `src/seed/` — a year of synthetic nightly history, about 15k trials, for
   timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of
@@ -42,6 +68,14 @@ decides how the envelope is versioned.
   toward n. The thresholds are not in the code: `loadRegressionConfig` reads
   them from [`evals/regression.config.json`](../../evals/regression.config.json)
   and rejects a file that fails `regressionConfigSchema`.
+- `src/testing/` — the scratch-database harness the integration tests share:
+  it creates and connects to databases beside the one
+  `EVALS_TEST_DATABASE_URL` names and drops them, and the roles a test
+  created, afterwards. `integrationDatabase` reads that variable, says when a
+  test file skips for want of it, and fails under `CI` without it.
+  `markedEnvelopes` builds one schema-valid envelope per suite with a marker in
+  every field the allow-list leaves out, for the showcase's `/evals`
+  public-payload test. No command imports any of them.
 
 `vp run evals:migrate` applies `migrations/` to the database
 `EVALS_MIGRATE_DATABASE_URL` names, connected as the migrating role, which
@@ -75,6 +109,14 @@ the role's connection string will carry, `EVALS_DATABASE_URL` for the writer.
 Neither role owns anything in schema `evals` or can create in it, so neither
 can alter or drop what the migrating role created.
 
+After granting, the run checks each role with `has_schema_privilege` and
+`has_table_privilege`, and prints `granted` only for a role that holds every
+listed privilege. Postgres does not fail a `grant` from a role that does not
+own the object; it warns and grants nothing. So a role still missing a
+privilege is listed with each privilege and object it lacks, and the run
+exits 1. Point `EVALS_MIGRATE_DATABASE_URL` at the role that owns the `evals`
+objects.
+
 `vp run evals:ingest` reads `EVALS_DATABASE_URL` and connects as
 `evals_writer`. Every eval runner calls it on
 its own envelope with `--quiet-unreachable`, so an unset variable or a database
@@ -83,11 +125,15 @@ that is down only warns, and the file waits on disk for the next
 
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-The ingest test and the reporting test each create and drop a database of
+The ingest, baseline, reporting and grade tests each create and drop a database of
 their own on the same server. The reporting test seeds the synthetic year into
 its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
-budget. Without the variable all three skip and say why, except under `CI`,
-where they fail.
+budget. The `evals:migrate` script test runs `scripts/migrate.mjs` against a
+database of its own, as the owner and then as a role that owns nothing, and
+checks its exit code. Because the script grants `evals_writer` and
+`evals_reader` by name, it creates either role only when the server lacks it,
+and drops only the ones it created. Without the variable every one of them
+skips and says why, except under `CI`, where they fail.
 
 `vp run --filter @repo/eval-history seed:synthetic` migrates and grants
 through `EVALS_MIGRATE_DATABASE_URL`, as `evals:migrate` does, then writes the
@@ -95,6 +141,53 @@ synthetic year as the writer through `EVALS_DATABASE_URL`. It needs both and
 exits 1 naming whichever is missing. It refuses a
 database that already holds a run, so point it at an empty one, never at the
 history you keep.
+
+## Grading the judge
+
+`migrations/0003-grades-and-annotations.sql` adds `evals.eval_judge_score`,
+the judge's 1-5 score per trial and rubric dimension, and a `judge_model`
+column on `evals.eval_trial_detail`. Ingest fills both from a skill-quality
+trial's `detail` in the statement that inserts the trial, and a check keeps
+`judge_model` equal to the model the `detail` names. It also adds
+`evals.eval_human_grade`, one score from 1 to 5 per judged dimension and
+grader, whose key references the judge score it grades and is deleted with it,
+so a grade can only exist beside a judge score. `evals.v_judge_agreement` puts
+each hand grade next to that judge score, with the judge model and the judge
+prompt hash of the trial's task version, and reads no field of `detail`. The
+database refuses a skill-quality trial detail without a `judge_model`, and one
+whose task version has no `judge_prompt_hash`, so every judged trial says which
+judge produced it.
+
+On a database that already holds quality trials, 0003 fills `judge_model`
+and `eval_judge_score` from each trial's `detail` before it adds the
+constraints. It first checks every quality trial, and when one names no
+`judge_model`, has no judge prompt hash on its task version, scores a
+dimension outside the whole numbers 1 to 5 or scores one twice, it stops with
+the trial's id and the reason, leaving the database at 0002. Fix that row,
+then run `vp run evals:migrate` again.
+
+`vp run evals:grade -- --trial <id> --score <dimension>=<1-5> [--score ...]`
+records a grade; a grader who grades the same dimension again replaces their
+earlier score. It accepts only a trial with judge scores and only the
+dimensions the judge scored there, and when no `--score` is given it lists
+them without showing the judge's scores. The grader is `--grader`, else the
+GitHub actor, else the local part of git's `user.email`.
+
+`evals:grade` and `evals:annotate` read `EVALS_DATABASE_URL` and connect as
+`evals_writer`; the `select`, `insert` and `update` that role holds on the
+tables are all they need. The judge-pin trigger runs as the writing role and
+reads only `evals.eval_trial` and `evals.eval_task_version`.
+
+Agreement is the share of graded scores equal to the judge's, reported per
+judge model and judge prompt hash, because a change to either is a different
+judge. It carries n and its Wilson interval at the `z` and `minTrialsForRate`
+in [`evals/regression.config.json`](../../evals/regression.config.json), and
+says "insufficient data" below that floor; the mean absolute gap between the
+two scores is printed beside it. `evals:grade` prints it after recording, and
+`vp run evals:grade -- --agreement` prints it alone.
+
+`vp run evals:annotate -- --kind <kind> "<text>"` records a timeline note —
+`model-change`, `harness-change`, `incident` or `note` — at `--at`, or now.
 
 The source is TypeScript with erasable syntax only, so a plain `.mjs` runner
 imports it through `exports` with no build and no loader.

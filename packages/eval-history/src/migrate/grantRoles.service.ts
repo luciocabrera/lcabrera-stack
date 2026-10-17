@@ -1,8 +1,14 @@
 import { z } from 'zod';
 
-import type { EvalsRole, MigrationClient } from './migrate.types.ts';
+import type {
+  EvalsRole,
+  MigrationClient,
+  UngrantedRole,
+} from './migrate.types.ts';
 
+import { inSequence } from '../ingest/inSequence.service.ts';
 import { grantStatements } from './grantStatements.util.ts';
+import { lackingPrivileges } from './lackingPrivileges.service.ts';
 import { revokeStatements } from './revokeStatements.util.ts';
 
 type GrantRolesArgs = {
@@ -44,14 +50,31 @@ const applyGrants = async ({ client, roles }: GrantRolesArgs) => {
   }
 };
 
-export const grantRoles = async ({ client, roles }: GrantRolesArgs) => {
-  const existing = await existingRoleNames({ client, roles });
-  const granted = roles.filter(({ name }) => existing.has(name));
-
-  await applyGrants({ client, roles: granted });
+const checkGrants = async ({ client, roles }: GrantRolesArgs) => {
+  const checked: readonly UngrantedRole[] = await inSequence({
+    items: roles,
+    step: async (role) => ({
+      lacking: await lackingPrivileges({ client, role }),
+      role,
+    }),
+  });
 
   return {
-    granted,
+    granted: checked
+      .filter(({ lacking }) => lacking.length === 0)
+      .map(({ role }) => role),
+    ungranted: checked.filter(({ lacking }) => lacking.length > 0),
+  };
+};
+
+export const grantRoles = async ({ client, roles }: GrantRolesArgs) => {
+  const existing = await existingRoleNames({ client, roles });
+  const present = roles.filter(({ name }) => existing.has(name));
+
+  await applyGrants({ client, roles: present });
+
+  return {
+    ...(await checkGrants({ client, roles: present })),
     missing: roles.filter(({ name }) => !existing.has(name)),
   };
 };

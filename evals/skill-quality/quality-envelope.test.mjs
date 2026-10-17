@@ -9,6 +9,8 @@ import {
   testPlan,
 } from '../envelope-test-support.mjs';
 import { assembleEnvelope, skillSubjects } from '../run-envelope.mjs';
+import { scrubSecrets } from '../transcript-scrub.mjs';
+
 import { qualityTask, qualityTrial } from './quality-envelope.mjs';
 import {
   envelopeResults,
@@ -52,7 +54,7 @@ const envelope = assembleEnvelope({
     catalogHash: hashes.catalog_hash,
     subjects: skillSubjects({ hashes, selected: ['react-19', 'unslop'] }),
     suite: 'skill-quality',
-    tasks: ['react-19', 'unslop'].map((skill) => qualityTask(skill)),
+    tasks: ['react-19', 'unslop'].map(qualityTask),
   }),
   regressionConfig: TEST_REGRESSION_CONFIG,
   status: 'complete',
@@ -70,9 +72,9 @@ describe('qualityTrial', () => {
   it('keeps the scores and the reply hash, not the reply', () => {
     expect(trialFor({})).toMatchObject({
       detail: {
+        problem: null,
         judge_model: 'claude-opus-5-5',
         overall: 4,
-        problem: null,
         reply_sha256: expect.stringMatching(/^[0-9a-f]{64}$/u),
         schema: 'quality/1',
         summary: 'Solid.',
@@ -91,6 +93,48 @@ describe('qualityTrial', () => {
 describe('a skill-quality envelope', () => {
   it('passes the schema', () => {
     expect(parseEnvelope(envelope).ok).toBe(true);
+  });
+
+  it('keeps the judge model and every dimension score through the secret scrubber', () => {
+    const token = `ghp_${'a'.repeat(36)}`;
+    const leaky = assembleEnvelope({
+      finishedAt: STARTED_AT + 5000,
+      identity: testIdentity,
+      plan: testPlan({
+        catalogHash: hashes.catalog_hash,
+        subjects: skillSubjects({ hashes, selected: ['unslop'] }),
+        suite: 'skill-quality',
+        tasks: [qualityTask('unslop')],
+      }),
+      regressionConfig: TEST_REGRESSION_CONFIG,
+      status: 'complete',
+      trials: [
+        trialFor({
+          judgement: {
+            ...judgement,
+            dimensions: judgement.dimensions.map((dimension) => ({
+              ...dimension,
+              feedback: `Echoes ${token} and postgres://user:hunter2-secret@db/x`,
+            })),
+            summary: 'Quotes the value s3cret-value-123 from the session.',
+          },
+        }),
+      ],
+    });
+    const scrubbed = JSON.parse(
+      scrubSecrets(JSON.stringify(leaky), {
+        env: { EVALS_API_TOKEN: 's3cret-value-123' },
+      }),
+    );
+    const parsed = parseEnvelope(scrubbed);
+    const [trial] = scrubbed.trials;
+
+    expect(parsed.ok).toBe(true);
+    expect(JSON.stringify(scrubbed)).not.toMatch(/ghp_a|hunter2|s3cret/u);
+    expect(trial.detail.judge_model).toBe('claude-opus-5-5');
+    expect(
+      trial.detail.dimensions.map(({ name, score }) => [name, score]),
+    ).toEqual(RUBRIC.map(({ name }) => [name, 4]));
   });
 
   it('feeds the report the data it built from the in-memory results', () => {

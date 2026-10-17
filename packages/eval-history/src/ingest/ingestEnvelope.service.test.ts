@@ -110,10 +110,13 @@ describe('ingestEnvelope', () => {
         trial?.transcript?.sha256,
       ]),
     );
-    expect(values.slice(-3)).toEqual([
+    expect(values.slice(-6)).toEqual([
       '2027-01-04T09:05:00.000Z',
       'skills/1',
       trial?.detail,
+      undefined,
+      [],
+      [],
     ]);
   });
 
