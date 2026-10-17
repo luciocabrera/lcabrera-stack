@@ -79,7 +79,7 @@ const verdictScript = ({ entry, routeId }) =>
     `const build = await import(${JSON.stringify(pathToFileURL(entry).href)});`,
     `const route = build.routes[${JSON.stringify(routeId)}];`,
     'const answer = route === undefined ? null : await route.module.loader();',
-    `process.stdout.write('\\n${VERDICT_MARK}' + JSON.stringify(answer) + '\\n');`,
+    String.raw`process.stdout.write('\n${VERDICT_MARK}' + JSON.stringify(answer) + '\n');`,
   ].join('\n');
 
 /**
