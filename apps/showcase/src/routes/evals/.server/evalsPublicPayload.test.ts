@@ -32,6 +32,7 @@ import {
   EXCLUDED_COLUMNS,
   EXCLUDED_TABLES,
   JSONB_COLUMN_SCHEMAS,
+  PUBLIC_JSONB_COLUMNS,
 } from '@repo/eval-history/queries/queries.constants';
 import {
   readPublicColumns,
@@ -444,11 +445,17 @@ limit 1`);
     ).toEqual([]);
   });
 
-  it('names a schema for every jsonb column and lets no free text pass whole', async () => {
+  it('names a schema for every jsonb column but the public copies and lets no free text pass whole', async () => {
     const client = await connect(databaseName);
     const schemaColumns = await readSchemaColumns({ client });
     const jsonbColumns = schemaColumns
       .filter(({ dataType }) => dataType === 'jsonb')
+      .filter(({ column, table }) =>
+        Object.entries(PUBLIC_JSONB_COLUMNS).every(
+          ([source, copy]) =>
+            copy !== column || !source.startsWith(`${table}.`),
+        ),
+      )
       .map(({ column, table }) => `${table}.${column}`);
 
     expect(
