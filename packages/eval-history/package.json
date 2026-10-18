@@ -61,6 +61,7 @@
     "./queries/readRunSummaries.service": "./src/queries/readRunSummaries.service.ts",
     "./queries/readRunJudgeScores.service": "./src/queries/readRunJudgeScores.service.ts",
     "./queries/readRunTrials.service": "./src/queries/readRunTrials.service.ts",
+    "./queries/runProjection.util": "./src/queries/runProjection.util.ts",
     "./queries/readAnnotations.service": "./src/queries/readAnnotations.service.ts",
     "./queries/readRunCosts.service": "./src/queries/readRunCosts.service.ts",
     "./queries/readSubjectRuns.service": "./src/queries/readSubjectRuns.service.ts",

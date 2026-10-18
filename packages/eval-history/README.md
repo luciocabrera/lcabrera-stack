@@ -64,6 +64,8 @@ decides how the envelope is versioned.
   and p50 and p95 trial duration, per run, suite and subject;
   `readRunJudgeScores` gives every judge score of one run, by trial and
   dimension, from `evals.eval_judge_score`;
+  `runProjection` turns one run's summary, trials and judge scores into the
+  envelope-named answer the dashboard's `.json` route serves;
   `readAnnotations` gives only an annotation's time and kind.
   `evalsReaderPool` is the pool they run on, built from
   `EVALS_READER_DATABASE_URL`.

@@ -1,3 +1,4 @@
+import { runProjection } from '@repo/eval-history/queries/runProjection.util';
 import { JSDOM } from 'jsdom';
 import { readFileSync } from 'node:fs';
 import { describe, expect, it, vi } from 'vite-plus/test';
@@ -36,42 +37,43 @@ const embeddedHtml = renderReport({
   template,
 });
 
-const storedRun = {
-  run: {
-    finished_at: '2026-10-02T02:40:00.000Z',
-    model_id: 'stored-model',
-    run_id: '6f1d4c4e-8a4f-4b8c-9a0e-0c1f2d3e4f50',
-  },
-  tasks: [
-    {
-      kind: 'quality',
-      subject: { kind: 'skill', name: 'stored-skill' },
-      task_key: 'skill-quality/stored-skill',
+const storedRun = await Response.json(
+  runProjection({
+    run: {
+      finishedAt: new Date('2026-10-02T02:40:00.000Z'),
+      modelId: 'stored-model',
+      runId: '6f1d4c4e-8a4f-4b8c-9a0e-0c1f2d3e4f50',
+      startedAt: new Date('2026-10-02T02:00:00.000Z'),
     },
-    {
-      kind: 'quality',
-      subject: { kind: 'skill', name: 'unjudged-skill' },
-      task_key: 'skill-quality/unjudged-skill',
-    },
-  ],
-  trials: [
-    {
-      detail: {
-        dimensions: RUBRIC.map(({ name }) => ({ name, score: 2 })),
+    scores: RUBRIC.map(({ name }) => ({
+      dimension: name,
+      score: 2,
+      trialId: '7',
+    })),
+    trials: [
+      {
+        outcome: 'pass',
         overall: 2,
+        subjectKind: 'skill',
+        subjectName: 'stored-skill',
+        taskKey: 'skill-quality/stored-skill',
+        taskKind: 'quality',
+        trialId: '7',
+        trialIndex: 0,
       },
-      error_class: null,
-      outcome: 'pass',
-      task_key: 'skill-quality/stored-skill',
-    },
-    {
-      detail: { dimensions: [] },
-      error_class: 'unparsed_reply',
-      outcome: 'error',
-      task_key: 'skill-quality/unjudged-skill',
-    },
-  ],
-};
+      {
+        errorClass: 'unparsed_reply',
+        outcome: 'error',
+        subjectKind: 'skill',
+        subjectName: 'unjudged-skill',
+        taskKey: 'skill-quality/unjudged-skill',
+        taskKind: 'quality',
+        trialId: '8',
+        trialIndex: 0,
+      },
+    ],
+  }),
+).json();
 
 const answering = (response) =>
   vi.fn(() =>

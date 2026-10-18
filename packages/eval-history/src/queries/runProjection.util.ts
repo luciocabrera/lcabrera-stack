@@ -1,8 +1,4 @@
-import type {
-  RunJudgeScore,
-  RunSummary,
-  RunTrial,
-} from '@repo/eval-history/queries/queries.types';
+import type { RunJudgeScore, RunSummary, RunTrial } from './queries.types.ts';
 
 type RunProjectionArgs = {
   readonly run: RunSummary;

@@ -1,11 +1,12 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
+import { runProjection } from '@repo/eval-history/queries/runProjection.util';
+
 import {
   selectRunJudgeScores,
   selectRunTrials,
 } from '../.server/evalsHistory.service';
 import { requireStoredRun } from '../.server/requireStoredRun.service';
-import { runProjection } from '../utils/runProjection.util';
 
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   const run = await requireStoredRun(params.runId);

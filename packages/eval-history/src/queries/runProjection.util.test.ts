@@ -1,11 +1,8 @@
-import type {
-  RunSummary,
-  RunTrial,
-} from '@repo/eval-history/queries/queries.types';
-
 import { describe, expect, it } from 'vite-plus/test';
 
-import { runProjection } from './runProjection.util';
+import type { RunSummary, RunTrial } from './queries.types.ts';
+
+import { runProjection } from './runProjection.util.ts';
 
 const RUN_ID = '6f1d4c4e-8a4f-4b8c-9a0e-0c1f2d3e4f50';
 

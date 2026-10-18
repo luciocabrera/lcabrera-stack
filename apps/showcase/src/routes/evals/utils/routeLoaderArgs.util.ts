@@ -4,7 +4,7 @@ type RouteLoaderArgsArgs = {
   readonly search?: string;
 };
 
-const DYNAMIC_SEGMENT = /^:([\w-]+)(.*)$/u;
+const DYNAMIC_SEGMENT = /^:[\w-]+/u;
 
 export const routeLoaderArgs = ({
   params,
@@ -12,9 +12,15 @@ export const routeLoaderArgs = ({
   search = '',
 }: RouteLoaderArgsArgs) => {
   const segments = path.split('/').map((segment) => {
-    const [, name, suffix = ''] = DYNAMIC_SEGMENT.exec(segment) ?? [];
+    const [dynamic] = DYNAMIC_SEGMENT.exec(segment) ?? [];
 
-    return name === undefined ? { segment } : { name, segment, suffix };
+    return dynamic === undefined
+      ? { segment }
+      : {
+          name: dynamic.slice(1),
+          segment,
+          suffix: segment.slice(dynamic.length),
+        };
   });
   const missing = segments
     .filter(({ name }) => name !== undefined && !Object.hasOwn(params, name))
