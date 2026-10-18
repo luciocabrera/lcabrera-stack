@@ -59,6 +59,8 @@ report.html?run=http://localhost:5173/evals/runs/<run id>.json
 That answer holds only what
 [ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)
 lets a dashboard route return, so a stored run shows its scores but not the
-judge's summary or feedback, and has no change column. If the fetch fails or
+judge's summary or feedback, and has no change column. Its dimension columns
+are the ones it was scored on; when they differ from this file's rubric the
+page says so, and a dimension the rubric does not hold has no description. If the fetch fails or
 the answer is not a stored run, the page says so and shows the run it was
 written with.

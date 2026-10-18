@@ -37,43 +37,46 @@ const embeddedHtml = renderReport({
   template,
 });
 
-const storedRun = await Response.json(
-  runProjection({
-    run: {
-      finishedAt: new Date('2026-10-02T02:40:00.000Z'),
-      modelId: 'stored-model',
-      runId: '6f1d4c4e-8a4f-4b8c-9a0e-0c1f2d3e4f50',
-      startedAt: new Date('2026-10-02T02:00:00.000Z'),
-    },
-    scores: RUBRIC.map(({ name }) => ({
-      dimension: name,
-      score: 2,
-      trialId: '7',
-    })),
-    trials: [
-      {
-        outcome: 'pass',
-        overall: 2,
-        subjectKind: 'skill',
-        subjectName: 'stored-skill',
-        taskKey: 'skill-quality/stored-skill',
-        taskKind: 'quality',
+const storedRunScoring = async (scores) =>
+  Response.json(
+    runProjection({
+      run: {
+        finishedAt: new Date('2026-10-02T02:40:00.000Z'),
+        modelId: 'stored-model',
+        runId: '6f1d4c4e-8a4f-4b8c-9a0e-0c1f2d3e4f50',
+        startedAt: new Date('2026-10-02T02:00:00.000Z'),
+      },
+      scores: scores.map(([dimension, score]) => ({
+        dimension,
+        score,
         trialId: '7',
-        trialIndex: 0,
-      },
-      {
-        errorClass: 'unparsed_reply',
-        outcome: 'error',
-        subjectKind: 'skill',
-        subjectName: 'unjudged-skill',
-        taskKey: 'skill-quality/unjudged-skill',
-        taskKind: 'quality',
-        trialId: '8',
-        trialIndex: 0,
-      },
-    ],
-  }),
-).json();
+      })),
+      trials: [
+        {
+          outcome: 'pass',
+          overall: 2,
+          subjectKind: 'skill',
+          subjectName: 'stored-skill',
+          taskKey: 'skill-quality/stored-skill',
+          taskKind: 'quality',
+          trialId: '7',
+          trialIndex: 0,
+        },
+        {
+          errorClass: 'unparsed_reply',
+          outcome: 'error',
+          subjectKind: 'skill',
+          subjectName: 'unjudged-skill',
+          taskKey: 'skill-quality/unjudged-skill',
+          taskKind: 'quality',
+          trialId: '8',
+          trialIndex: 0,
+        },
+      ],
+    }),
+  ).json();
+
+const storedRun = await storedRunScoring(RUBRIC.map(({ name }) => [name, 2]));
 
 const answering = (response) =>
   vi.fn(() =>
@@ -93,12 +96,16 @@ const open = ({ fetch, search = '' }) => {
     url: `file:///tmp/report.html${search}`,
   });
   const text = (id) => window.document.getElementById(id).textContent;
+  const headKeys = () =>
+    [...window.document.querySelectorAll('#head button')].map(
+      (button) => button.dataset.key,
+    );
   const rows = () =>
     [...window.document.querySelectorAll('#rows tr')].map((row) =>
       [...row.cells].map((cell) => cell.textContent),
     );
 
-  return { rows, text, window };
+  return { headKeys, rows, text, window };
 };
 
 const withRun = `?run=${encodeURIComponent(RUN_URL)}`;
@@ -114,12 +121,13 @@ describe('the report explorer', () => {
     ]);
     expect(text('meta')).toContain('Judge embedded-model');
     expect(text('detail-summary')).toBe('embedded summary');
+    expect(text('detail')).toContain('embedded feedback');
     expect(window.document.getElementById('source').hidden).toBe(true);
   });
 
   it('renders a stored run fetched from the URL ?run= names', async () => {
     const fetch = answering({ body: storedRun, status: 200 });
-    const { rows, text } = open({ fetch, search: withRun });
+    const { rows, text, window } = open({ fetch, search: withRun });
 
     await vi.waitFor(() => expect(rows()).toHaveLength(2));
 
@@ -131,6 +139,10 @@ describe('the report explorer', () => {
     expect(text('meta')).toContain('Judge stored-model');
     expect(text('source')).toBe(`Stored run loaded from ${RUN_URL}`);
     expect(text('detail-title')).toBe('stored-skill — 2.0 overall');
+    expect(text('detail')).not.toContain('undefined');
+    expect(window.document.querySelectorAll('#detail .dim')).toHaveLength(
+      RUBRIC.length,
+    );
   });
 
   it.each([
@@ -156,4 +168,35 @@ describe('the report explorer', () => {
       expect(text('source')).toContain(reason);
     },
   );
+
+  it('draws a stored run with its own dimensions when they differ from the rubric', async () => {
+    const fetch = answering({
+      body: await storedRunScoring([
+        ['clarity', 2],
+        ['depth', 3],
+        ['completeness', 2],
+      ]),
+      status: 200,
+    });
+    const { headKeys, rows, text, window } = open({ fetch, search: withRun });
+
+    await vi.waitFor(() => expect(rows()).toHaveLength(2));
+
+    expect(headKeys()).toEqual([
+      'skill',
+      'clarity',
+      'completeness',
+      'depth',
+      'overall',
+      'change',
+    ]);
+    expect(rows()[0]).toEqual(['stored-skill', '2', '2', '3', '2.0', '—']);
+    expect(text('rows')).not.toContain('undefined');
+    expect(window.document.querySelector('#rows .sNaN')).toBeNull();
+    expect(text('bars')).not.toContain('NaN');
+    expect(text('rubric')).toContain('not described in this file');
+    expect(text('source')).toContain(
+      "its dimensions (clarity, completeness, depth) differ from this file's rubric",
+    );
+  });
 });
