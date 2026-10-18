@@ -5,6 +5,7 @@ import {
   commentBody,
   newestEnvelope,
   reportCommentOf,
+  runStatusLines,
   selectionLine,
   selectionOf,
   upsertOptionProblems,
@@ -139,5 +140,15 @@ describe('upsertOptionProblems', () => {
     expect(
       upsertOptionProblems({ 'body-file': 'b.md', pr: '12', repo: 'o/r' }),
     ).toStrictEqual([]);
+  });
+});
+
+describe('runStatusLines', () => {
+  it('says nothing of a complete run and names a partial or aborted one', () => {
+    expect(runStatusLines('complete')).toStrictEqual([]);
+    expect(runStatusLines('partial')).toStrictEqual([
+      'This run is a partial run, so it holds only the trials that finished.',
+    ]);
+    expect(runStatusLines('aborted')[0]).toContain('an aborted run');
   });
 });

@@ -182,7 +182,7 @@ pull request's run. Otherwise it reads the newest unexpired
 run, the comment gives the pull request's run alone, with its `Pass rate:` line.
 Either way a side below `minTrialsForRate` counted trials reads
 `insufficient data`. A run the session limit cut off is partial, and the
-comment says so. The job is not a required check.
+comment says so. The skill run step is capped at 90 minutes. The job is not a required check.
 
 ## Recording a noise floor
 

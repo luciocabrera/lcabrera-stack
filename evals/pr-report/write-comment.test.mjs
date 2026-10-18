@@ -186,6 +186,19 @@ describe('write-comment', () => {
     },
   );
 
+  it('says the PR run alone is partial when the session limit cut it off', () => {
+    const { stdout } = writeComment([
+      '--scope',
+      'all',
+      '--pr-results',
+      resultsDir([{ ...PR, run: { ...PR.run, status: 'partial' } }]),
+      '--main-results',
+      resultsDir([]),
+    ]);
+    expect(stdout).toContain("so this is the pull request's run alone");
+    expect(stdout).toContain('This run is a partial run');
+  });
+
   it('says so when the run left no envelope', () => {
     const { stdout } = writeComment([
       '--scope',

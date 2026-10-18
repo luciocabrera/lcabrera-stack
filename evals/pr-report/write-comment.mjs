@@ -26,6 +26,7 @@ import {
   newestEnvelope,
   NO_ENVELOPE,
   NO_SUITE_RAN,
+  runStatusLines,
   selectionLine,
   selectionOf,
 } from './comment-body.mjs';
@@ -114,6 +115,7 @@ const fromArtifact = async ({ base, pr, report }) => {
         regressionConfig: report.thresholds,
         totals: pr.envelope.run.totals,
       }),
+      ...runStatusLines(pr.envelope.run.status),
     ];
   }
   return [

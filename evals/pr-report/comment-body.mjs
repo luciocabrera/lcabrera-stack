@@ -20,6 +20,13 @@ export const selectionLine = ({ scope, skills }) =>
     ? "Ran every skill's trigger tasks, because a skill's name, description or paths changed, and that catalog is what every session sees."
     : `Ran the trigger tasks of ${codeList(skills)}, the skills whose directory this pull request changes.`;
 
+export const runStatusLines = (status) =>
+  status === 'complete'
+    ? []
+    : [
+        `This run is ${status === 'partial' ? 'a partial' : 'an aborted'} run, so it holds only the trials that finished.`,
+      ];
+
 export const commentBody = (sections) =>
   `${[COMMENT_MARKER, HEADING, ...sections].join('\n\n')}\n`;
 
