@@ -45,8 +45,11 @@ decides how the envelope is versioned.
 - `src/queries/` — the read functions the dashboard calls, one per reporting
   view or function of `migrations/0002-reporting.sql`: `readTaskPassRates`
   (`evals.v_task_pass_rate`), `readSubjectTrend` (`evals.v_subject_trend`),
-  `readFlakyTasks` (`evals.flaky_tasks(run_window)`, the plan's `v_flaky_tasks`, a
-  function so the window comes from `evals/regression.config.json`) and
+  `readFlakyTasks` (`evals.flaky_tasks(run_window, excluded_runs)`, the plan's
+  `v_flaky_tasks`, a function so the window comes from
+  `evals/regression.config.json`; `migrations/0005-flaky-tasks-excluding-runs.sql`
+  adds the run list, which `evals:report` fills with the two runs it compares,
+  and keeps the one-argument form as the same function with none left out) and
   `readRunComparison` (`evals.run_compare(a, b)`). Each builds its SQL in a
   pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
   the views beneath, names a column in `EXCLUDED_COLUMNS`
@@ -74,7 +77,11 @@ decides how the envelope is versioned.
 - `src/report/` — the comparison behind `vp run evals:report`: it reads two
   runs from envelope files or from the database, refuses runs of two models
   unless told otherwise, and renders the flipped tasks, both pass rates, cost,
-  duration and the changed hashes as markdown or JSON. It ends with the judge
+  duration and the changed hashes as markdown or JSON. With a database it
+  applies the binary or scored rule from `src/stats/` to the pair, reading the
+  baseline for the model under test and the suite's flaky tasks, names the
+  subject of each finding, and says `no baseline for <model>` instead of
+  flagging when there is none. It ends with the judge
   agreement `evals:grade` prints when it read from the database, headed
   "Judge agreement (all recorded hand grades, by judge model and prompt
   hash)" because it covers every recorded hand grade rather than the two runs,

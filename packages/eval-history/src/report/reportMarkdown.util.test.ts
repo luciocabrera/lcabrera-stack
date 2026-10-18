@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { compareRuns } from './compareRuns.util.ts';
+import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
 import {
   AGREEMENT_HEADING,
   AGREEMENT_NEEDS_DATABASE,
@@ -10,11 +11,14 @@ import { reportRunFixture } from './reportRunFixture.util.ts';
 
 const run = reportRunFixture();
 
-const thresholds = { minTrialsForRate: 6, z: 1.96 };
+const thresholds = regressionConfigFixture();
+
+const history = { kind: 'needs-database' } as const;
 
 const comparison = compareRuns({
   a: run,
   b: { ...run, branch: 'feat/x' },
+  history,
   thresholds,
 });
 
@@ -27,6 +31,7 @@ describe('reportMarkdown', () => {
         compareRuns({
           a: run,
           b: { ...run, branch: 'feat/y', modelId: 'model-b' },
+          history,
           thresholds,
         }),
       ],

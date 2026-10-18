@@ -1,5 +1,6 @@
 import type { RunEnvelope } from '../envelope/envelope.types.ts';
 
+import { judgeScores } from '../stats/judgeScores.util.ts';
 import { subjectKey } from './subjectKey.util.ts';
 
 export const reportRunFromEnvelope = ({
@@ -36,17 +37,23 @@ export const reportRunFromEnvelope = ({
         name,
       })),
     suite: run.suite,
-    tasks: trialledTasks.map((task) => ({
-      agentPromptHash: task.agent_prompt_hash ?? undefined,
-      expectedHash: task.expected_hash ?? undefined,
-      fixtureHash: task.fixture_hash ?? undefined,
-      judgePromptHash: task.judge_prompt_hash ?? undefined,
-      outcomes: trials
+    tasks: trialledTasks.map((task) => {
+      const taskTrials = trials
         .filter(({ task_key }) => task_key === task.task_key)
-        .toSorted((left, right) => left.trial_index - right.trial_index)
-        .map(({ outcome }) => outcome),
-      taskHash: task.task_hash,
-      taskKey: task.task_key,
-    })),
+        .toSorted((left, right) => left.trial_index - right.trial_index);
+
+      return {
+        agentPromptHash: task.agent_prompt_hash ?? undefined,
+        expectedHash: task.expected_hash ?? undefined,
+        fixtureHash: task.fixture_hash ?? undefined,
+        judgePromptHash: task.judge_prompt_hash ?? undefined,
+        outcomes: taskTrials.map(({ outcome }) => outcome),
+        scores: judgeScores(taskTrials),
+        set: task.set,
+        subject: task.subject,
+        taskHash: task.task_hash,
+        taskKey: task.task_key,
+      };
+    }),
   };
 };

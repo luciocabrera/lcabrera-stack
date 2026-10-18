@@ -12,6 +12,8 @@ export const SUITES = [
 
 export const SUBJECT_KINDS = ['skill', 'rule', 'agent', 'prompt'] as const;
 
+export const TASK_SETS = ['regression', 'capability'] as const;
+
 export const OUTCOMES = [
   'pass',
   'fail',

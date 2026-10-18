@@ -5,17 +5,20 @@
  * print exactly what the envelope path prints for the same two runs, or a
  * comparison read from history would disagree with one read from CI
  * artifacts. The judge agreement section is the one difference, because hand
- * grades are stored only in the database. It creates a database of its own beside the one
- * EVALS_TEST_DATABASE_URL names and drops it afterwards. Unset, it skips
- * locally and fails under CI.
+ * grades are stored only in the database. The regression rule's reads run as
+ * a writer role the migrator granted, the role evals:report connects as. It
+ * creates databases and that role beside the one EVALS_TEST_DATABASE_URL
+ * names and drops them afterwards. Unset, it skips locally and fails under CI.
  */
 
+import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import type { RunEnvelope } from '../envelope/envelope.types.ts';
 import type { ReadEnvelope } from './report.types.ts';
 
+import { INSERT_BASELINE_SQL } from '../baseline/baseline.constants.ts';
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { judgeAgreementLines } from '../grades/judgeAgreementLines.util.ts';
@@ -23,21 +26,33 @@ import { sha256Hex } from '../hashing/sha256Hex.util.ts';
 import { ingestPaths } from '../ingest/ingestPaths.service.ts';
 import { memoryFileSystem } from '../ingest/memoryFileSystem.util.ts';
 import { applyMigrations } from '../migrate/applyMigrations.service.ts';
+import { EVALS_WRITER_ROLE } from '../migrate/migrate.constants.ts';
+import { migrateEvals } from '../migrate/migrateEvals.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
+import { readModelPrices } from '../prices/readModelPrices.service.ts';
 import { databaseUrl } from '../queries/databaseUrl.util.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { evalsReport } from './evalsReport.service.ts';
 import { fixtureEnvelope } from './fixtureEnvelope.util.ts';
+import { hiddenSkillOutcomes } from './hiddenSkillOutcomes.util.ts';
+import { readReportRun } from './readReportRun.service.ts';
+import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
 import {
   AGREEMENT_HEADING,
   AGREEMENT_NEEDS_DATABASE,
+  REGRESSION_NEEDS_DATABASE,
 } from './report.constants.ts';
+import { reportRunFromEnvelope } from './reportRunFromEnvelope.util.ts';
+import { skillsRunFixture } from './skillsRunFixture.util.ts';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
 const SCRATCH = `evals_report_${String(process.pid)}_${String(Date.now())}`;
 const FEATURE = 'feat/1234-tighten-react-19';
-const THRESHOLDS = { minTrialsForRate: 6, z: 1.96 };
+const THRESHOLDS = regressionConfigFixture();
+const RULE_SCRATCH = `${SCRATCH}_rule`;
+const SQL_NULL: unknown = JSON.parse('null');
+const HIDDEN = 'feat/1274-hide-react-19';
 
 const fixtures = await readJsonFiles({
   directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),
@@ -115,10 +130,65 @@ const HISTORY_AGREEMENT = [
   }),
 ].join('\n\n');
 
-const withHistoryAgreement = (fileMarkdown = '') => {
-  expect(fileMarkdown.endsWith(FILE_AGREEMENT)).toBe(true);
+const NO_BASELINE =
+  'Regression rule: no baseline for claude-opus-5-5, so nothing is flagged. Record one with `vp run evals:baseline -- --suite skills` on that model before comparing.';
 
-  return `${fileMarkdown.slice(0, -FILE_AGREEMENT.length)}${HISTORY_AGREEMENT}`;
+const flakyAgainst = (label: string) =>
+  [
+    'Flaky, left out of the rule:',
+    label === FEATURE
+      ? `- \`skills/react-19/trigger-2\`: main 3/3 (+1 not counted), ${label} 3/3; its trials disagreed in 1 of its last 1 runs`
+      : `- \`skills/react-19/trigger-1\`: main 3/3, ${label} 3/3; its trials disagreed in 1 of its last 1 runs`,
+  ].join('\n');
+
+type WithHistoryArgs = {
+  readonly fileMarkdown: string | undefined;
+  readonly label: string;
+};
+
+const withHistory = ({ fileMarkdown = '', label }: WithHistoryArgs) => {
+  expect(fileMarkdown.endsWith(FILE_AGREEMENT)).toBe(true);
+  expect(fileMarkdown).toContain(REGRESSION_NEEDS_DATABASE);
+
+  return `${fileMarkdown.slice(0, -FILE_AGREEMENT.length)}${HISTORY_AGREEMENT}`.replace(
+    REGRESSION_NEEDS_DATABASE,
+    () => `${NO_BASELINE}\n\n${flakyAgainst(label)}`,
+  );
+};
+
+const ruleRun = (args: Omit<Parameters<typeof skillsRunFixture>[0], 'base'>) =>
+  skillsRunFixture({ ...args, base });
+
+const WOBBLES = ['pass', 'fail', 'pass'] as const;
+
+const ruleMain = ruleRun({ runId: '00000000-0000-4000-8000-0000000000d1' });
+
+const RULE_RUNS = {
+  hidden: ruleRun({
+    branch: HIDDEN,
+    hidden: ['react-19'],
+    outcomesOf: hiddenSkillOutcomes('react-19'),
+    runId: '00000000-0000-4000-8000-0000000000d2',
+  }),
+  rerun: ruleRun({
+    branch: HIDDEN,
+    runId: '00000000-0000-4000-8000-0000000000d3',
+  }),
+  wobbleA: ruleRun({
+    outcomesOf: (taskKey) =>
+      taskKey === 'store-pattern/near-miss'
+        ? WOBBLES
+        : ['pass', 'pass', 'pass'],
+    runId: '00000000-0000-4000-8000-0000000000d4',
+  }),
+  wobbleB: ruleRun({
+    branch: HIDDEN,
+    outcomesOf: (taskKey) =>
+      taskKey === 'store-pattern/near-miss'
+        ? ['fail', 'fail', 'pass']
+        : ['pass', 'pass', 'pass'],
+    runId: '00000000-0000-4000-8000-0000000000d5',
+  }),
 };
 
 if (!DATABASE_URL && !IS_CI) {
@@ -195,7 +265,7 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
     expect(fromHistory.stderr).toEqual([]);
     expect(fromHistory.exitCode).toBe(0);
     expect(fromHistory.stdout).toEqual([
-      withHistoryAgreement(fromFiles.stdout[0]),
+      withHistory({ fileMarkdown: fromFiles.stdout[0], label: FEATURE }),
     ]);
     expect(fromHistory.stdout[0]).toContain('multiple causes');
     expect(fromHistory.stdout[0]).toContain('no hand grades yet');
@@ -224,10 +294,221 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
 
     expect(fromHistory.exitCode).toBe(0);
     expect(fromHistory.stdout).toEqual([
-      withHistoryAgreement(fromFile.stdout[0]),
+      withHistory({
+        fileMarkdown: fromFile.stdout[0],
+        label: aborted.run.branch,
+      }),
     ]);
     expect(fromHistory.stdout[0]).toContain(
       'Changed: no input hash, so nothing recorded explains a difference.',
     );
   });
 });
+
+const quality: RunEnvelope = runEnvelopeSchema.parse(
+  fixtures.get('skill-quality.json'),
+);
+
+const resultFiles = (envelopes: readonly RunEnvelope[]) =>
+  Object.fromEntries(
+    envelopes.map((envelope) => [
+      `/results/skills/${envelope.run.run_id}.json`,
+      JSON.stringify(envelope),
+    ]),
+  );
+
+const SHORT_MAIN = ruleRun({ runId: '00000000-0000-4000-8000-0000000000e1' });
+
+const SHORT_HISTORY = [
+  ruleRun({
+    outcomesOf: (taskKey) =>
+      taskKey === 'store-pattern/near-miss'
+        ? WOBBLES
+        : ['pass', 'pass', 'pass'],
+    runId: '00000000-0000-4000-8000-0000000000e2',
+  }),
+  ruleRun({ runId: '00000000-0000-4000-8000-0000000000e3' }),
+  SHORT_MAIN,
+];
+
+const SHORT_REGRESSED = ruleRun({
+  branch: HIDDEN,
+  outcomesOf: (taskKey) =>
+    ['react-19/near-miss', 'store-pattern/near-miss'].includes(taskKey)
+      ? ['pass', 'fail', 'fail']
+      : ['pass', 'pass', 'pass'],
+  runId: '00000000-0000-4000-8000-0000000000e4',
+});
+
+type RuleDatabaseArgs = {
+  readonly database: string;
+  readonly envelopes: readonly RunEnvelope[];
+  readonly main: RunEnvelope;
+};
+
+const ruleDatabase = ({ database, envelopes, main }: RuleDatabaseArgs) => {
+  const { close, connect } = scratchConnections(DATABASE_URL ?? '');
+  const connectionString = databaseUrl({
+    database,
+    url: DATABASE_URL ?? 'postgres://localhost',
+  });
+  const writer = {
+    ...EVALS_WRITER_ROLE,
+    name: `evals_writer_report_${randomUUID().replaceAll('-', '')}`,
+  };
+
+  const connectAsWriter = async () => {
+    const client = await connect(database);
+
+    await client.query(`set role "${writer.name}"`);
+
+    return { client, end: () => Promise.resolve() };
+  };
+
+  beforeAll(async () => {
+    const admin = await connect();
+
+    await admin.query(`create database ${database}`);
+    await admin.query(`create role "${writer.name}" nologin`);
+
+    const client = await connect(database);
+    const migrated = await migrateEvals({
+      client,
+      migrations: await readMigrations(),
+      prices: await readModelPrices(),
+      roles: [writer],
+    });
+
+    expect(migrated.granted.map(({ name }) => name)).toEqual([writer.name]);
+
+    const ingested = await ingestPaths({
+      connectionString,
+      fileSystem: memoryFileSystem(resultFiles(envelopes)),
+      paths: ['/results'],
+      quietUnreachable: false,
+    });
+
+    expect(ingested.exitCode).toBe(0);
+
+    await client.query({
+      text: INSERT_BASELINE_SQL,
+      values: [
+        randomUUID(),
+        'skills',
+        'claude-opus-5-5',
+        SQL_NULL,
+        'pass_rate',
+        main.run.git_sha,
+        5,
+        1,
+        0,
+      ],
+    });
+  });
+
+  afterAll(() => close({ databases: [database], roles: [writer.name] }));
+
+  return {
+    againstMain: (b: string) =>
+      evalsReport({
+        a: main.run.run_id,
+        allowModelChange: false,
+        b,
+        connect: connectAsWriter,
+        connectionString,
+        json: false,
+        thresholds: THRESHOLDS,
+      }),
+    connectAsWriter,
+  };
+};
+
+describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
+  const { againstMain: againstRuleMain, connectAsWriter } = ruleDatabase({
+    database: RULE_SCRATCH,
+    envelopes: [ruleMain, quality, ...Object.values(RULE_RUNS)],
+    main: ruleMain,
+  });
+
+  it('flags a run with a hidden skill and names the skill', async () => {
+    const { exitCode, stdout } = await againstRuleMain(
+      RULE_RUNS.hidden.run.run_id,
+    );
+
+    expect(exitCode).toBe(0);
+    expect(stdout[0]).toContain(
+      '**Regression flagged** in the suite pass rate, skill `react-19`:',
+    );
+    expect(stdout[0]).toContain(
+      '- skill `react-19`: `react-19/trigger` failed 3 of 3 counted trials',
+    );
+  });
+
+  it('reads the judge scores, set and subject of a run the way its envelope does, as the writer', async () => {
+    const { client } = await connectAsWriter();
+    const stored = await readReportRun({ client, runId: quality.run.run_id });
+    const fromFile = reportRunFromEnvelope(quality);
+
+    expect(fromFile.tasks.flatMap(({ scores }) => scores)).not.toEqual([]);
+    expect(
+      stored?.tasks.map(({ scores, set, subject }) => ({
+        scores,
+        set,
+        subject,
+      })),
+    ).toEqual(
+      fromFile.tasks.map(({ scores, set, subject }) => ({
+        scores,
+        set,
+        subject,
+      })),
+    );
+  });
+
+  it('flags nothing on an unchanged rerun', async () => {
+    const { stdout } = await againstRuleMain(RULE_RUNS.rerun.run.run_id);
+
+    expect(stdout[0]).toContain('Regression rule: nothing flagged.');
+    expect(stdout[0]).not.toContain('Regression flagged');
+  });
+
+  it('lists the task whose trials disagree across runs as flaky, and does not flag it', async () => {
+    const { stdout } = await againstRuleMain(RULE_RUNS.wobbleB.run.run_id);
+
+    expect(stdout[0]).toContain(
+      '- `store-pattern/near-miss`: main 3/3, feat/1274-hide-react-19 1/3; its trials disagreed in 1 of its last 3 runs',
+    );
+    expect(stdout[0]).toContain('Regression rule: nothing flagged.');
+  });
+});
+
+describe.skipIf(!DATABASE_URL)(
+  'the regression rule against a short Postgres history',
+  () => {
+    const { againstMain } = ruleDatabase({
+      database: `${RULE_SCRATCH}_short`,
+      envelopes: [...SHORT_HISTORY, SHORT_REGRESSED],
+      main: SHORT_MAIN,
+    });
+
+    it('judges flakiness without the compared runs, so a regression in run B is flagged', async () => {
+      const { stdout } = await againstMain(SHORT_REGRESSED.run.run_id);
+
+      expect(stdout[0]).toContain(
+        [
+          '**Regression flagged** in skill `react-19`:',
+          '- skill `react-19`: `react-19/near-miss` failed 2 of 3 counted trials on feat/1274-hide-react-19 after passing every trial on main',
+        ].join('\n'),
+      );
+    });
+
+    it('keeps out a task its earlier runs alone make flaky', async () => {
+      const { stdout } = await againstMain(SHORT_REGRESSED.run.run_id);
+
+      expect(stdout[0]).toContain(
+        '- `store-pattern/near-miss`: main 3/3, feat/1274-hide-react-19 1/3; its trials disagreed in 1 of its last 2 runs',
+      );
+      expect(stdout[0]).not.toContain('`store-pattern/near-miss` failed');
+    });
+  },
+);

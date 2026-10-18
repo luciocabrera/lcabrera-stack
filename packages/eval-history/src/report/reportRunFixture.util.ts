@@ -1,5 +1,7 @@
 import type { ReportRun } from './report.types.ts';
 
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
+
 export const reportRunFixture = (overrides: Partial<ReportRun> = {}) =>
   ({
     branch: 'main',
@@ -13,12 +15,6 @@ export const reportRunFixture = (overrides: Partial<ReportRun> = {}) =>
     status: 'complete',
     subjects: [{ contentHash: 'c1', kind: 'skill', name: 'react-19' }],
     suite: 'skills',
-    tasks: [
-      {
-        outcomes: ['pass', 'pass', 'fail', 'error'],
-        taskHash: 't1',
-        taskKey: 'skills/react-19/trigger-1',
-      },
-    ],
+    tasks: [reportTaskFixture()],
     ...overrides,
   }) satisfies ReportRun;

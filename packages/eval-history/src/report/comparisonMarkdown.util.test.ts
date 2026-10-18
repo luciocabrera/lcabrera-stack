@@ -4,14 +4,21 @@ import type { Comparison, ReportRun } from './report.types.ts';
 
 import { compareRuns } from './compareRuns.util.ts';
 import { comparisonMarkdown } from './comparisonMarkdown.util.ts';
+import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
+import { REGRESSION_NEEDS_DATABASE } from './report.constants.ts';
 import { reportRunFixture } from './reportRunFixture.util.ts';
 
 const run = reportRunFixture();
 
-const thresholds = { minTrialsForRate: 6, z: 1.96 };
+const thresholds = regressionConfigFixture();
 
 const comparisonOf = (b: ReportRun) => {
-  const comparison = compareRuns({ a: run, b, thresholds });
+  const comparison = compareRuns({
+    a: run,
+    b,
+    history: { kind: 'needs-database' },
+    thresholds,
+  });
 
   if (comparison.kind !== 'comparison') {
     throw new Error('expected the two runs to compare');
@@ -32,6 +39,7 @@ describe('comparisonMarkdown', () => {
       expect.stringContaining('Pass rate, Wilson interval at z=1.96'),
       'Cost: $1.00 reported → $1.00 reported. Duration p50: 2.0 s → 2.0 s.',
       'Changed: skill catalog hash. That is one cause.',
+      REGRESSION_NEEDS_DATABASE,
     ]);
   });
 

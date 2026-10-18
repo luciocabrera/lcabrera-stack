@@ -216,6 +216,10 @@ describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
       [MODEL_A_SECOND, { kind: 'skill', name: 'react-19' }, 1],
       [MODEL_A_SECOND, undefined, 1],
     ]);
+    expect(modelA.map(({ harnessVersion }) => harnessVersion)).toEqual([
+      skills.run.harness_version,
+      skills.run.harness_version,
+    ]);
     expect(
       modelB.map(({ baselineId, mean, modelId }) => [
         baselineId,

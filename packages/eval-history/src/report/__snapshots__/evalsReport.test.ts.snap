@@ -11,6 +11,8 @@ Cost: $1.20 reported → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
 
 Changed: model. That is one cause.
 
+Regression rule: not applied. The noise floor and the flaky-task history are stored only in the database, and both runs were read from envelope files. To apply it, name a run by its id or use --compare, with EVALS_DATABASE_URL set.
+
 ### Judge agreement (all recorded hand grades, by judge model and prompt hash)
 
 Not shown: hand grades are stored only in the database, and both runs were read from envelope files. To include it, name a run by its id or use --compare, with EVALS_DATABASE_URL set."
@@ -29,6 +31,8 @@ Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 83.3% (n=1
 Cost: $1.20 reported → $1.45 reported. Duration p50: 13.0 s → 14.0 s.
 
 Changed: \`react-19\` content hash. That is one cause.
+
+Regression rule: not applied. The noise floor and the flaky-task history are stored only in the database, and both runs were read from envelope files. To apply it, name a run by its id or use --compare, with EVALS_DATABASE_URL set.
 
 ### Judge agreement (all recorded hand grades, by judge model and prompt hash)
 
@@ -111,6 +115,12 @@ exports[`evalsReport over fixture runs > prints the same comparison as JSON unde
         },
       ],
       "kind": "comparison",
+      "regression": {
+        "flaky": [],
+        "rule": {
+          "kind": "needs-database",
+        },
+      },
       "suite": "skills",
       "thresholds": {
         "minTrialsForRate": 6,
@@ -144,6 +154,8 @@ Cost: $1.20 reported → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
 
 Changed: \`react-19\` content hash. That is one cause.
 
+Regression rule: not applied. The noise floor and the flaky-task history are stored only in the database, and both runs were read from envelope files. To apply it, name a run by its id or use --compare, with EVALS_DATABASE_URL set.
+
 ### Judge agreement (all recorded hand grades, by judge model and prompt hash)
 
 Not shown: hand grades are stored only in the database, and both runs were read from envelope files. To include it, name a run by its id or use --compare, with EVALS_DATABASE_URL set."
@@ -162,6 +174,8 @@ Pass rate, Wilson interval at z=1.96: 91.7% (n=12, 64.6%–98.5%) → 83.3% (n=1
 Cost: $1.20 reported → $1.20 reported. Duration p50: 13.0 s → 13.0 s.
 
 Changed: skill catalog hash, \`react-19\` content hash. That is multiple causes, so no single change explains the difference.
+
+Regression rule: not applied. The noise floor and the flaky-task history are stored only in the database, and both runs were read from envelope files. To apply it, name a run by its id or use --compare, with EVALS_DATABASE_URL set.
 
 ### Judge agreement (all recorded hand grades, by judge model and prompt hash)
 

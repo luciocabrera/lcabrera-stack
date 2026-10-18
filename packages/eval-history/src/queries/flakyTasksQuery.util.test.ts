@@ -6,10 +6,22 @@ describe('flakyTasksQuery', () => {
   it('passes the window to the function and keeps tasks above the fraction', () => {
     const query = flakyTasksQuery({ disagreeFraction: 0.2, window: 10 });
 
-    expect(query.text).toMatch(/from evals\.flaky_tasks\(\$1\)/);
+    expect(query.text).toMatch(/from evals\.flaky_tasks\(\$1, \$3::uuid\[\]\)/);
     expect(query.text).toMatch(
       /where disagreeing > \$2::double precision \* runs/,
     );
-    expect(query.values).toEqual([10, 0.2]);
+    expect(query.values).toEqual([10, 0.2, []]);
+  });
+
+  it('passes the runs to leave out of the window', () => {
+    const run = '00000000-0000-4000-8000-000000000001';
+
+    expect(
+      flakyTasksQuery({
+        disagreeFraction: 0.2,
+        excludedRuns: [run],
+        window: 10,
+      }).values,
+    ).toEqual([10, 0.2, [run]]);
   });
 });
