@@ -48,6 +48,19 @@ describe('reportRunQueries', () => {
     );
   });
 
+  it("reads each task's set and subject, and the judge score of each passed quality trial", () => {
+    expect(queries.tasks.text).toContain('task.task_set::text as set');
+    expect(queries.tasks.text).toContain(
+      'join evals.eval_subject subject on subject.id = task.subject_id',
+    );
+    expect(queries.tasks.text).toContain(
+      'left join evals.eval_trial_detail detail on detail.trial_id = trial.id',
+    );
+    expect(queries.tasks.text).toContain(
+      "filter (where trial.outcome = 'pass' and detail.detail_schema = 'quality/1')",
+    );
+  });
+
   it('aliases every column to the field the reader expects', () => {
     const aliases = [
       queries.run.text,
@@ -70,6 +83,8 @@ describe('reportRunQueries', () => {
       'durationsMs',
       'contentHash',
       'taskKey',
+      'subjectKind',
+      'subjectName',
       'taskHash',
       'fixtureHash',
       'expectedHash',

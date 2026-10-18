@@ -1,4 +1,15 @@
-import type { ReportRun } from './report.types.ts';
+import type { ReportRun, ReportTask } from './report.types.ts';
+
+export const reportTaskFixture = (overrides: Partial<ReportTask> = {}) =>
+  ({
+    outcomes: ['pass', 'pass', 'fail', 'error'],
+    scores: [],
+    set: 'regression',
+    subject: { kind: 'skill', name: 'react-19' },
+    taskHash: 't1',
+    taskKey: 'skills/react-19/trigger-1',
+    ...overrides,
+  }) satisfies ReportTask;
 
 export const reportRunFixture = (overrides: Partial<ReportRun> = {}) =>
   ({
@@ -13,12 +24,6 @@ export const reportRunFixture = (overrides: Partial<ReportRun> = {}) =>
     status: 'complete',
     subjects: [{ contentHash: 'c1', kind: 'skill', name: 'react-19' }],
     suite: 'skills',
-    tasks: [
-      {
-        outcomes: ['pass', 'pass', 'fail', 'error'],
-        taskHash: 't1',
-        taskKey: 'skills/react-19/trigger-1',
-      },
-    ],
+    tasks: [reportTaskFixture()],
     ...overrides,
   }) satisfies ReportRun;

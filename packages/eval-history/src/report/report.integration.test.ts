@@ -10,12 +10,14 @@
  * locally and fails under CI.
  */
 
+import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import type { RunEnvelope } from '../envelope/envelope.types.ts';
 import type { ReadEnvelope } from './report.types.ts';
 
+import { INSERT_BASELINE_SQL } from '../baseline/baseline.constants.ts';
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { judgeAgreementLines } from '../grades/judgeAgreementLines.util.ts';
@@ -28,16 +30,25 @@ import { databaseUrl } from '../queries/databaseUrl.util.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { evalsReport } from './evalsReport.service.ts';
 import { fixtureEnvelope } from './fixtureEnvelope.util.ts';
+import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
 import {
   AGREEMENT_HEADING,
   AGREEMENT_NEEDS_DATABASE,
+  REGRESSION_NEEDS_DATABASE,
 } from './report.constants.ts';
+import {
+  hiddenSkillOutcomes,
+  skillsRunFixture,
+} from './skillsRunFixture.util.ts';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
 const SCRATCH = `evals_report_${String(process.pid)}_${String(Date.now())}`;
 const FEATURE = 'feat/1234-tighten-react-19';
-const THRESHOLDS = { minTrialsForRate: 6, z: 1.96 };
+const THRESHOLDS = regressionConfigFixture();
+const RULE_SCRATCH = `${SCRATCH}_rule`;
+const SQL_NULL: unknown = JSON.parse('null');
+const HIDDEN = 'feat/1274-hide-react-19';
 
 const fixtures = await readJsonFiles({
   directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),
@@ -115,10 +126,65 @@ const HISTORY_AGREEMENT = [
   }),
 ].join('\n\n');
 
-const withHistoryAgreement = (fileMarkdown = '') => {
-  expect(fileMarkdown.endsWith(FILE_AGREEMENT)).toBe(true);
+const NO_BASELINE =
+  'Regression rule: no baseline for claude-opus-5-5, so nothing is flagged. Record one with `vp run evals:baseline -- --suite skills` on that model before comparing.';
 
-  return `${fileMarkdown.slice(0, -FILE_AGREEMENT.length)}${HISTORY_AGREEMENT}`;
+const flakyAgainst = (label: string) =>
+  [
+    'Flaky, left out of the rule:',
+    `- \`skills/react-19/trigger-3\`: main 2/3, ${label} —; its trials disagreed in 1 of its last 1 runs`,
+    `- \`skills/react-19/trigger-1\`: main 3/3, ${label} ${label === FEATURE ? '1/3' : '3/3'}; its trials disagreed in 1 of its last 3 runs`,
+    `- \`skills/react-19/trigger-2\`: main 3/3 (+1 not counted), ${label} ${label === FEATURE ? '3/3' : '1/2'}; its trials disagreed in 1 of its last 3 runs`,
+  ].join('\n');
+
+type WithHistoryArgs = {
+  readonly fileMarkdown: string | undefined;
+  readonly label: string;
+};
+
+const withHistory = ({ fileMarkdown = '', label }: WithHistoryArgs) => {
+  expect(fileMarkdown.endsWith(FILE_AGREEMENT)).toBe(true);
+  expect(fileMarkdown).toContain(REGRESSION_NEEDS_DATABASE);
+
+  return `${fileMarkdown.slice(0, -FILE_AGREEMENT.length)}${HISTORY_AGREEMENT}`.replace(
+    REGRESSION_NEEDS_DATABASE,
+    () => `${NO_BASELINE}\n\n${flakyAgainst(label)}`,
+  );
+};
+
+const ruleRun = (args: Omit<Parameters<typeof skillsRunFixture>[0], 'base'>) =>
+  skillsRunFixture({ ...args, base });
+
+const WOBBLES = ['pass', 'fail', 'pass'] as const;
+
+const ruleMain = ruleRun({ runId: '00000000-0000-4000-8000-0000000000d1' });
+
+const RULE_RUNS = {
+  hidden: ruleRun({
+    branch: HIDDEN,
+    hidden: ['react-19'],
+    outcomesOf: hiddenSkillOutcomes('react-19'),
+    runId: '00000000-0000-4000-8000-0000000000d2',
+  }),
+  rerun: ruleRun({
+    branch: HIDDEN,
+    runId: '00000000-0000-4000-8000-0000000000d3',
+  }),
+  wobbleA: ruleRun({
+    outcomesOf: (taskKey) =>
+      taskKey === 'store-pattern/near-miss'
+        ? WOBBLES
+        : ['pass', 'pass', 'pass'],
+    runId: '00000000-0000-4000-8000-0000000000d4',
+  }),
+  wobbleB: ruleRun({
+    branch: HIDDEN,
+    outcomesOf: (taskKey) =>
+      taskKey === 'store-pattern/near-miss'
+        ? ['fail', 'fail', 'pass']
+        : ['pass', 'pass', 'pass'],
+    runId: '00000000-0000-4000-8000-0000000000d5',
+  }),
 };
 
 if (!DATABASE_URL && !IS_CI) {
@@ -195,7 +261,7 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
     expect(fromHistory.stderr).toEqual([]);
     expect(fromHistory.exitCode).toBe(0);
     expect(fromHistory.stdout).toEqual([
-      withHistoryAgreement(fromFiles.stdout[0]),
+      withHistory({ fileMarkdown: fromFiles.stdout[0], label: FEATURE }),
     ]);
     expect(fromHistory.stdout[0]).toContain('multiple causes');
     expect(fromHistory.stdout[0]).toContain('no hand grades yet');
@@ -224,10 +290,104 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
 
     expect(fromHistory.exitCode).toBe(0);
     expect(fromHistory.stdout).toEqual([
-      withHistoryAgreement(fromFile.stdout[0]),
+      withHistory({
+        fileMarkdown: fromFile.stdout[0],
+        label: aborted.run.branch,
+      }),
     ]);
     expect(fromHistory.stdout[0]).toContain(
       'Changed: no input hash, so nothing recorded explains a difference.',
     );
+  });
+});
+
+const RULE_FILES = Object.fromEntries(
+  [ruleMain, ...Object.values(RULE_RUNS)].map((envelope) => [
+    `/results/skills/${envelope.run.run_id}.json`,
+    JSON.stringify(envelope),
+  ]),
+);
+
+describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
+  const { close, connect } = scratchConnections(DATABASE_URL ?? '');
+  const connectionString = databaseUrl({
+    database: RULE_SCRATCH,
+    url: DATABASE_URL ?? 'postgres://localhost',
+  });
+
+  const againstRuleMain = (b: string) =>
+    evalsReport({
+      a: ruleMain.run.run_id,
+      allowModelChange: false,
+      b,
+      connectionString,
+      json: false,
+      thresholds: THRESHOLDS,
+    });
+
+  beforeAll(async () => {
+    const admin = await connect();
+
+    await admin.query(`create database ${RULE_SCRATCH}`);
+
+    const client = await connect(RULE_SCRATCH);
+
+    await applyMigrations({ client, migrations: await readMigrations() });
+
+    const ingested = await ingestPaths({
+      connectionString,
+      fileSystem: memoryFileSystem(RULE_FILES),
+      paths: ['/results'],
+      quietUnreachable: false,
+    });
+
+    expect(ingested.exitCode).toBe(0);
+
+    await client.query({
+      text: INSERT_BASELINE_SQL,
+      values: [
+        randomUUID(),
+        'skills',
+        'claude-opus-5-5',
+        SQL_NULL,
+        'pass_rate',
+        ruleMain.run.git_sha,
+        5,
+        1,
+        0,
+      ],
+    });
+  });
+
+  afterAll(() => close({ databases: [RULE_SCRATCH] }));
+
+  it('flags a run with a hidden skill and names the skill', async () => {
+    const { exitCode, stdout } = await againstRuleMain(
+      RULE_RUNS.hidden.run.run_id,
+    );
+
+    expect(exitCode).toBe(0);
+    expect(stdout[0]).toContain(
+      '**Regression flagged** in the suite pass rate, skill `react-19`:',
+    );
+    expect(stdout[0]).toContain(
+      '- skill `react-19`: `react-19/trigger` failed 3 of 3 counted trials',
+    );
+  });
+
+  it('flags nothing on an unchanged rerun', async () => {
+    const { stdout } = await againstRuleMain(RULE_RUNS.rerun.run.run_id);
+
+    expect(stdout[0]).toContain('Regression rule: nothing flagged.');
+    expect(stdout[0]).not.toContain('Regression flagged');
+  });
+
+  it('lists the task whose trials disagree across runs as flaky, and does not flag it', async () => {
+    const { stdout } = await againstRuleMain(RULE_RUNS.wobbleB.run.run_id);
+
+    expect(stdout[0]).toContain(
+      '- `store-pattern/near-miss`: main 3/3, feat/1274-hide-react-19 1/3; its trials disagreed in 2 of its last 5 runs',
+    );
+    expect(stdout[0]).toContain('Regression rule: nothing flagged.');
   });
 });

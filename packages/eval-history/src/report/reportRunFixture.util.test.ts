@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { reportRunFixture } from './reportRunFixture.util.ts';
+import {
+  reportRunFixture,
+  reportTaskFixture,
+} from './reportRunFixture.util.ts';
 
 describe('reportRunFixture', () => {
   it('is a complete run on main with one task', () => {
@@ -17,6 +20,15 @@ describe('reportRunFixture', () => {
     ).toMatchObject({
       branch: 'feat/x',
       modelId: undefined,
+    });
+  });
+
+  it('builds a regression-set task of one skill, overridable', () => {
+    expect(reportTaskFixture({ set: 'capability' })).toMatchObject({
+      scores: [],
+      set: 'capability',
+      subject: { kind: 'skill', name: 'react-19' },
+      taskKey: 'skills/react-19/trigger-1',
     });
   });
 });

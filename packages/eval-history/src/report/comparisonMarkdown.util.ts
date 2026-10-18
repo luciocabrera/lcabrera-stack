@@ -6,6 +6,7 @@ import { durationText } from './durationText.util.ts';
 import { flipTable } from './flipTable.util.ts';
 import { modelText } from './modelText.util.ts';
 import { rateLine } from './rateLine.util.ts';
+import { regressionMarkdown } from './regressionMarkdown.util.ts';
 import { sideLabels } from './sideLabels.util.ts';
 import { statusLines } from './statusLines.util.ts';
 
@@ -19,5 +20,11 @@ export const comparisonMarkdown = (comparison: Comparison) => {
     `Cost: ${costText(comparison.a)} → ${costText(comparison.b)}. Duration p50: ${durationText(comparison.a)} → ${durationText(comparison.b)}.`,
     changedLine(comparison.changed),
     ...statusLines({ comparison, labels }),
+    regressionMarkdown({
+      labels,
+      minTrialsForRate: comparison.thresholds.minTrialsForRate,
+      regression: comparison.regression,
+      suite: comparison.suite,
+    }),
   ].join('\n\n');
 };

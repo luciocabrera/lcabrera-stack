@@ -2,7 +2,12 @@ import { z } from 'zod';
 
 import type { QueryClient } from '../queries/queries.types.ts';
 
-import { OUTCOMES, SUITES } from '../envelope/envelope.constants.ts';
+import {
+  OUTCOMES,
+  SUBJECT_KINDS,
+  SUITES,
+  TASK_SETS,
+} from '../envelope/envelope.constants.ts';
 import { reportRunQueries } from './reportRunQueries.util.ts';
 
 type ReadReportRunArgs = {
@@ -41,17 +46,26 @@ const subjectRowsSchema = z.array(
   z.object({ contentHash: z.string(), kind: z.string(), name: z.string() }),
 );
 
-const taskRowsSchema = z.array(
-  z.object({
+const taskRowSchema = z
+  .object({
     agentPromptHash: hash,
     expectedHash: hash,
     fixtureHash: hash,
     judgePromptHash: hash,
     outcomes,
+    scores: z.array(z.number()),
+    set: z.enum(TASK_SETS),
+    subjectKind: z.enum(SUBJECT_KINDS),
+    subjectName: z.string(),
     taskHash: z.string(),
     taskKey: z.string(),
-  }),
-);
+  })
+  .transform(({ subjectKind, subjectName, ...task }) => ({
+    ...task,
+    subject: { kind: subjectKind, name: subjectName },
+  }));
+
+const taskRowsSchema = z.array(taskRowSchema);
 
 export const readReportRun = async ({ client, runId }: ReadReportRunArgs) => {
   const queries = reportRunQueries(runId);

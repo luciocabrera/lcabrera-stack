@@ -1,6 +1,6 @@
 import type { z } from 'zod';
 
-import type { OUTCOMES } from '../envelope/envelope.constants.ts';
+import type { OUTCOMES, TASK_SETS } from '../envelope/envelope.constants.ts';
 import type { regressionConfigSchema } from './regressionConfig.schema.ts';
 
 export type HashSet = Readonly<Record<string, null | string | undefined>>;
@@ -40,7 +40,7 @@ export type RegressionFinding =
 
 export type RunIdentity = {
   readonly harnessVersion: string;
-  readonly modelId: null | string;
+  readonly modelId?: string;
 };
 
 export type TaskRunOutcomes = {
@@ -50,7 +50,7 @@ export type TaskRunOutcomes = {
 
 export type TaskTrials = {
   readonly outcomes: readonly Outcome[];
-  readonly set: 'capability' | 'regression';
+  readonly set: (typeof TASK_SETS)[number];
   readonly taskKey: string;
 };
 

@@ -106,8 +106,42 @@ failed every trial.
 Runs of two models are not compared: the report says which models they used
 and exits 1, because a pass rate measures the model as much as the inputs.
 `--allow-model-change` compares them anyway and lists the model among the
-changes. Nothing here flags a regression yet; the report prints the figures
-the rule in [`regression.config.json`](#regression-thresholds) will read.
+changes.
+
+### The regression rule
+
+Each comparison ends with the verdict of the rule in
+[`regression.config.json`](#regression-thresholds), applied to run B against
+run A. A binary suite is flagged when B's pass rate falls below the lower
+bound of A's Wilson interval, or when a regression-set task that passed every
+trial in A fails `binary.flip` of its trials in B. skill-quality is flagged when
+a subject's mean judge score in B falls more than `scored.sigma` standard
+deviations below its baseline mean. Every finding names its subject, so a run
+with `--hide react-19` is flagged as `skill react-19`, and an unchanged rerun
+is not flagged.
+
+The rule reads two things only the database holds, so it needs
+`EVALS_DATABASE_URL` and a run named by its id or `--compare`. With two
+envelope files the report says it was not applied.
+
+- **The noise floor.** For every suite `evals:baseline` records, the rule
+  applies only when `evals.eval_baseline` holds a baseline for run B's model.
+  Without one the report says `no baseline for <model>` and flags nothing, so
+  changing a runner's default `--model` means recording a baseline before the
+  first comparison. A refused comparison of two models says the same when the
+  new model has none. rules-consistency runs no model and needs no baseline.
+- **Flaky tasks.** A task whose trials disagreed in more than
+  `flaky.disagreeFraction` of its last `flaky.window` runs is flaky. The
+  report lists each one under "Flaky, left out of the rule" with its passed
+  over counted trials in both runs and how many recent runs disagreed, and the
+  rule ignores it.
+
+A binary suite also needs the same model and harness version in both runs.
+skill-quality is judged against the baseline rather than run A, so it needs the
+harness version the baseline's runs recorded. `--allow-harness-change` lifts
+the harness condition when the harness is what changed. A flagged
+regression is a finding, not a gate: the command still exits 0, and `--json`
+carries the verdict as `regression` on each comparison.
 
 ## Recording a noise floor
 

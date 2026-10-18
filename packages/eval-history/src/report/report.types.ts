@@ -1,9 +1,16 @@
 import type { SUITES } from '../envelope/envelope.constants.ts';
 import type { readEnvelopeFile } from '../ingest/readEnvelopeFile.service.ts';
 import type { QueryClient } from '../queries/queries.types.ts';
-import type { Outcome, Rate } from '../stats/stats.types.ts';
+import type {
+  Outcome,
+  Rate,
+  RegressionFinding,
+  TaskTrials,
+} from '../stats/stats.types.ts';
 import type { compareRuns } from './compareRuns.util.ts';
 import type { readReportAgreement } from './readReportAgreement.service.ts';
+import type { readRuleHistory } from './readRuleHistory.service.ts';
+import type { regressionVerdict } from './regressionVerdict.util.ts';
 
 export type Comparison = Extract<
   RunComparison,
@@ -22,6 +29,8 @@ export type ReadEnvelope = (
 ) => ReturnType<typeof readEnvelopeFile>;
 
 export type Refusal = Extract<RunComparison, { readonly kind: 'refused' }>;
+
+export type Regression = ReturnType<typeof regressionVerdict>;
 
 export type ReportAgreement = Awaited<ReturnType<typeof readReportAgreement>>;
 
@@ -57,9 +66,20 @@ export type ReportTask = {
   readonly fixtureHash?: string;
   readonly judgePromptHash?: string;
   readonly outcomes: readonly Outcome[];
+  readonly scores: readonly number[];
+  readonly set: TaskTrials['set'];
+  readonly subject: TaskSubject;
   readonly taskHash: string;
   readonly taskKey: string;
 };
+
+export type RuleFinding =
+  | (Extract<RegressionFinding, { readonly kind: 'flip' | 'mean' }> & {
+      readonly subject: TaskSubject | undefined;
+    })
+  | Extract<RegressionFinding, { readonly kind: 'rate' }>;
+
+export type RuleHistory = Awaited<ReturnType<typeof readRuleHistory>>;
 
 export type RunComparison = ReturnType<typeof compareRuns>;
 
@@ -93,6 +113,8 @@ export type TaskFlip = {
   readonly b?: TaskCount;
   readonly taskKey: string;
 };
+
+export type TaskSubject = Pick<ReportSubject, 'kind' | 'name'>;
 
 export type Thresholds = {
   readonly minTrialsForRate: number;

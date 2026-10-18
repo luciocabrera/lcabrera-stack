@@ -6,6 +6,7 @@ import {
   OUTCOMES,
   SUBJECT_KINDS,
   SUITES,
+  TASK_SETS,
 } from './envelope.constants.ts';
 import { envelopeConsistencyIssues } from './envelopeConsistencyIssues.util.ts';
 
@@ -168,7 +169,7 @@ const taskSchema = z.object({
   fixture_hash: sha256.nullable(),
   judge_prompt_hash: sha256.nullable(),
   kind: z.enum(['trigger', 'near-miss', 'fixture', 'quality', 'rule-check']),
-  set: z.enum(['regression', 'capability']),
+  set: z.enum(TASK_SETS),
   source: z.literal('incident').nullable(),
   subject: subjectReferenceSchema,
   tags: strings,

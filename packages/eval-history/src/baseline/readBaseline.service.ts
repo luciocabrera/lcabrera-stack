@@ -21,6 +21,7 @@ const baselineRowsSchema = z.array(
     .object({
       baselineId: z.uuid(),
       gitSha: z.string(),
+      harnessVersion: z.string().nullable(),
       mean: z.number(),
       metric: z.enum(BASELINE_METRICS),
       modelId: z.string(),

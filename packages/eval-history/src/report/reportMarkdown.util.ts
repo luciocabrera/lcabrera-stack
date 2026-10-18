@@ -23,7 +23,10 @@ export const reportMarkdown = ({
     ...comparisons.map((comparison) =>
       comparison.kind === 'comparison'
         ? comparisonMarkdown(comparison)
-        : refusalMarkdown(comparison),
+        : refusalMarkdown({
+            minTrialsForRate: thresholds.minTrialsForRate,
+            refusal: comparison,
+          }),
     ),
     agreementMarkdown({ agreement, thresholds }),
   ].join('\n\n');

@@ -1,13 +1,17 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { reportRunFixture } from './reportRunFixture.util.ts';
+import {
+  reportRunFixture,
+  reportTaskFixture,
+} from './reportRunFixture.util.ts';
 import { sharedRun } from './sharedRun.util.ts';
 
-const task = (taskKey: string) => ({
-  outcomes: ['pass' as const],
-  taskHash: `hash-${taskKey}`,
-  taskKey,
-});
+const task = (taskKey: string) =>
+  reportTaskFixture({
+    outcomes: ['pass'],
+    taskHash: `hash-${taskKey}`,
+    taskKey,
+  });
 
 const subject = (name: string) => ({
   contentHash: `content-${name}`,

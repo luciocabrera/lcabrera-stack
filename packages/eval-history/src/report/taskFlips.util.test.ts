@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import type { Outcome } from '../stats/stats.types.ts';
 import type { ReportRun } from './report.types.ts';
 
+import { reportTaskFixture } from './reportRunFixture.util.ts';
 import { taskFlips } from './taskFlips.util.ts';
 
 const runOf = (
@@ -17,11 +18,9 @@ const runOf = (
   status: 'complete',
   subjects: [],
   suite: 'skills',
-  tasks: Object.entries(outcomes).map(([taskKey, taskOutcomes]) => ({
-    outcomes: taskOutcomes,
-    taskHash: taskKey,
-    taskKey,
-  })),
+  tasks: Object.entries(outcomes).map(([taskKey, taskOutcomes]) =>
+    reportTaskFixture({ outcomes: taskOutcomes, taskHash: taskKey, taskKey }),
+  ),
 });
 
 describe('taskFlips', () => {

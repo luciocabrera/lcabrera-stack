@@ -17,6 +17,7 @@ const refusal = (reason: Refusal['reason']): Refusal => ({
   b: { ...side, modelId: undefined, suite: 'verifier-fixtures' },
   kind: 'refused',
   reason,
+  regression: undefined,
   suite: 'verifier-fixtures',
 });
 

@@ -54,7 +54,14 @@ select distinct on (b.subject_id, b.metric)
   b.git_sha as "gitSha",
   b.n_runs as "nRuns",
   b.mean,
-  b.stddev
+  b.stddev,
+  (
+    select run.harness_version
+    from evals.eval_run run
+    where run.baseline_id = b.baseline_id
+    order by run.started_at
+    limit 1
+  ) as "harnessVersion"
 from evals.eval_baseline b
 left join evals.eval_subject s on s.id = b.subject_id
 where b.suite = $1 and b.model_id = $2

@@ -11,6 +11,7 @@ const NO_SUBJECT: Readonly<Record<string, unknown>> = JSON.parse(
 const ROW = {
   baselineId: '11111111-1111-4111-8111-111111111111',
   gitSha: 'a'.repeat(40),
+  harnessVersion: 'aaaaaaaaaaaa',
   mean: 0.75,
   metric: 'pass_rate',
   modelId: 'model-a',

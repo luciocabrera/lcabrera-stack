@@ -37,7 +37,15 @@ order by kind, subject.name`,
   tasks: {
     text: `select
   task.task_key as "taskKey",
+  task.task_set::text as set,
+  subject.kind::text as "subjectKind",
+  subject.name as "subjectName",
   array_agg(trial.outcome::text order by trial.trial_index) as outcomes,
+  coalesce(
+    array_agg((detail.detail ->> 'overall')::double precision order by trial.trial_index)
+      filter (where trial.outcome = 'pass' and detail.detail_schema = 'quality/1'),
+    '{}'
+  ) as scores,
   task_version.task_hash::text as "taskHash",
   task_version.fixture_hash::text as "fixtureHash",
   task_version.expected_hash::text as "expectedHash",
@@ -46,8 +54,10 @@ order by kind, subject.name`,
 from evals.eval_trial trial
 join evals.eval_task_version task_version on task_version.id = trial.task_version_id
 join evals.eval_task task on task.id = task_version.task_id
+join evals.eval_subject subject on subject.id = task.subject_id
+left join evals.eval_trial_detail detail on detail.trial_id = trial.id
 where trial.run_id = $1
-group by task.id, task.task_key, task_version.id
+group by task.id, task.task_key, task_version.id, subject.id
 order by task.task_key`,
     values: [runId],
   },

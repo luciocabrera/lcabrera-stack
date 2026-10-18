@@ -1,25 +1,25 @@
 import type { QueryClient } from '../queries/queries.types.ts';
-import type {
-  ReadEnvelope,
-  ReportConnection,
-  Thresholds,
-} from './report.types.ts';
+import type { RegressionConfig } from '../stats/stats.types.ts';
+import type { ReadEnvelope, ReportConnection } from './report.types.ts';
 
 import { SUITES } from '../envelope/envelope.constants.ts';
 import { connectIngest } from '../ingest/connectIngest.service.ts';
 import { errorReason } from '../ingest/errorReason.util.ts';
+import { inSequence } from '../ingest/inSequence.service.ts';
 import { readEnvelopeFile } from '../ingest/readEnvelopeFile.service.ts';
 import { compareRuns } from './compareRuns.util.ts';
 import { connectionUrl } from './connectionUrl.util.ts';
 import { isRunId } from './isRunId.util.ts';
 import { latestRunPairs } from './latestRunPairs.service.ts';
 import { readReportAgreement } from './readReportAgreement.service.ts';
+import { readRuleHistory } from './readRuleHistory.service.ts';
 import { ReportInputError } from './reportInput.error.ts';
 import { reportMarkdown } from './reportMarkdown.util.ts';
 import { resolveRunRef } from './resolveRunRef.service.ts';
 
 type EvalsReportArgs = {
   readonly a?: string;
+  readonly allowHarnessChange?: boolean;
   readonly allowModelChange: boolean;
   readonly b?: string;
   readonly branch?: string;
@@ -29,7 +29,7 @@ type EvalsReportArgs = {
   readonly json: boolean;
   readonly readEnvelope?: ReadEnvelope;
   readonly suite?: string;
-  readonly thresholds: Thresholds;
+  readonly thresholds: RegressionConfig;
 };
 
 type RunPairsArgs = Pick<
@@ -120,6 +120,7 @@ const failure = (error: unknown) => ({
 });
 
 export const evalsReport = async ({
+  allowHarnessChange = false,
   allowModelChange,
   connect = connectIngest,
   connectionString,
@@ -143,9 +144,22 @@ export const evalsReport = async ({
         client: connection?.client,
         readEnvelope,
       });
-      const comparisons = pairs.map(({ a, b }) =>
-        compareRuns({ a, allowModelChange, b, thresholds }),
-      );
+      const comparisons = await inSequence({
+        items: pairs,
+        step: async ({ a, b }) =>
+          compareRuns({
+            a,
+            allowHarnessChange,
+            allowModelChange,
+            b,
+            history: await readRuleHistory({
+              client: connection?.client,
+              config: thresholds,
+              run: b,
+            }),
+            thresholds,
+          }),
+      });
       const agreement = await readReportAgreement({
         client: connection?.client,
         thresholds,

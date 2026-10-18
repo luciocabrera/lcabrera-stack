@@ -68,7 +68,11 @@ decides how the envelope is versioned.
 - `src/report/` — the comparison behind `vp run evals:report`: it reads two
   runs from envelope files or from the database, refuses runs of two models
   unless told otherwise, and renders the flipped tasks, both pass rates, cost,
-  duration and the changed hashes as markdown or JSON. It ends with the judge
+  duration and the changed hashes as markdown or JSON. With a database it
+  applies the binary or scored rule from `src/stats/` to the pair, reading the
+  baseline for the model under test and the suite's flaky tasks, names the
+  subject of each finding, and says `no baseline for <model>` instead of
+  flagging when there is none. It ends with the judge
   agreement `evals:grade` prints when it read from the database, headed
   "Judge agreement (all recorded hand grades, by judge model and prompt
   hash)" because it covers every recorded hand grade rather than the two runs,

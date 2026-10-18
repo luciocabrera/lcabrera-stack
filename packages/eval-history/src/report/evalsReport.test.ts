@@ -5,15 +5,18 @@ import type { RunEnvelope } from '../envelope/envelope.types.ts';
 import type { QueryClient } from '../queries/queries.types.ts';
 import type { ReadEnvelope } from './report.types.ts';
 
+import { SELECT_LATEST_BASELINE_SQL } from '../baseline/baseline.constants.ts';
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { judgeAgreementQuery } from '../grades/judgeAgreementQuery.util.ts';
 import { sha256Hex } from '../hashing/sha256Hex.util.ts';
 import { evalsReport } from './evalsReport.service.ts';
 import { fixtureEnvelope } from './fixtureEnvelope.util.ts';
+import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
 import {
   AGREEMENT_HEADING,
   AGREEMENT_NEEDS_DATABASE,
+  REGRESSION_NEEDS_DATABASE,
 } from './report.constants.ts';
 import { reportRunFromEnvelope } from './reportRunFromEnvelope.util.ts';
 import { reportRunQueries } from './reportRunQueries.util.ts';
@@ -168,16 +171,39 @@ const AGREEMENT_ROWS = [
   { ...JUDGE_ROW, humanScore: 2 },
 ];
 
+const CONFIG = regressionConfigFixture();
+
 const storedMain = reportRunFromEnvelope(mainRun);
 const storedQueries = reportRunQueries(storedMain.runId);
 
+const BASELINE_ROW = {
+  baselineId: '11111111-1111-4111-8111-111111111111',
+  gitSha: 'b'.repeat(40),
+  harnessVersion: mainRun.run.harness_version,
+  mean: 1,
+  metric: 'pass_rate',
+  modelId: 'claude-opus-5-5',
+  nRuns: 5,
+  stddev: 0,
+  subjectKind: SQL_NULL,
+  subjectName: SQL_NULL,
+  suite: 'skills',
+};
+
 const DATABASE_ROWS = new Map<string, readonly unknown[]>([
   [judgeAgreementQuery().text, AGREEMENT_ROWS],
+  [SELECT_LATEST_BASELINE_SQL, [BASELINE_ROW]],
   [storedQueries.run.text, [asDatabaseRow(storedMain)]],
   [storedQueries.subjects.text, storedMain.subjects],
   [
     storedQueries.tasks.text,
-    storedMain.tasks.map((task) => asDatabaseRow(task)),
+    storedMain.tasks.map(({ subject, ...task }) =>
+      asDatabaseRow({
+        ...task,
+        subjectKind: subject.kind,
+        subjectName: subject.name,
+      }),
+    ),
   ],
 ]);
 
@@ -203,7 +229,7 @@ const report = ({ a, allowModelChange = false, b, json = false }: ReportArgs) =>
     connectionString: undefined,
     json,
     readEnvelope,
-    thresholds: { minTrialsForRate: 6, z: 1.96 },
+    thresholds: CONFIG,
   });
 
 describe('evalsReport over fixture runs', () => {
@@ -315,16 +341,26 @@ describe('evalsReport over fixture runs', () => {
       connectionString: 'postgres://report@localhost/evals',
       json: false,
       readEnvelope,
-      thresholds: { minTrialsForRate: 6, z: 1.96 },
+      thresholds: CONFIG,
     });
     const fromFiles = await report({ a: 'main.json', b: 'one-cause.json' });
     const [databaseMarkdown = ''] = fromDatabase.stdout;
     const [fileMarkdown = ''] = fromFiles.stdout;
     const comparisonsOf = (markdown: string) =>
       markdown.slice(0, markdown.lastIndexOf(`\n\n${AGREEMENT_HEADING}\n\n`));
+    const ruleFromDatabase = [
+      '**Regression flagged** in skill `react-19`:',
+      '- skill `react-19`: `skills/react-19/trigger-1` failed 2 of 3 counted trials on feat/1234-tighten-react-19 after passing every trial on main',
+    ].join('\n');
 
     expect(fromDatabase.exitCode).toBe(0);
-    expect(comparisonsOf(databaseMarkdown)).toBe(comparisonsOf(fileMarkdown));
+    expect(comparisonsOf(fileMarkdown)).toContain(REGRESSION_NEEDS_DATABASE);
+    expect(comparisonsOf(databaseMarkdown)).toBe(
+      comparisonsOf(fileMarkdown).replace(
+        REGRESSION_NEEDS_DATABASE,
+        () => ruleFromDatabase,
+      ),
+    );
     expect(comparisonsOf(databaseMarkdown)).toContain('### skills: main');
     expect(databaseMarkdown).not.toContain(AGREEMENT_NEEDS_DATABASE);
     expect(databaseMarkdown).toContain(
@@ -341,7 +377,7 @@ describe('evalsReport over fixture runs', () => {
       connectionString: 'postgres://report@localhost/evals',
       json: true,
       readEnvelope,
-      thresholds: { minTrialsForRate: 6, z: 1.96 },
+      thresholds: CONFIG,
     });
 
     expect(JSON.parse(stdout[0] ?? '')).toMatchObject({
@@ -382,7 +418,7 @@ describe('evalsReport input', () => {
       connectionString: undefined,
       json: false,
       readEnvelope,
-      thresholds: { minTrialsForRate: 6, z: 1.96 },
+      thresholds: CONFIG,
     });
 
     expect(result.exitCode).toBe(1);
@@ -398,7 +434,7 @@ describe('evalsReport input', () => {
       json: false,
       readEnvelope,
       suite: 'skills',
-      thresholds: { minTrialsForRate: 6, z: 1.96 },
+      thresholds: CONFIG,
     });
 
     expect(result.exitCode).toBe(1);
@@ -424,7 +460,7 @@ describe('evalsReport input', () => {
       connectionString: undefined,
       json: false,
       readEnvelope,
-      thresholds: { minTrialsForRate: 6, z: 1.96 },
+      thresholds: CONFIG,
     });
 
     expect(result.exitCode).toBe(1);

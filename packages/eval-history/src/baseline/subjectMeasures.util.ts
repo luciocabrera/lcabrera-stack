@@ -6,6 +6,7 @@ import type {
 } from './baseline.types.ts';
 
 import { countOutcomes } from '../stats/countOutcomes.util.ts';
+import { judgeScores } from '../stats/judgeScores.util.ts';
 
 type IsSameSubjectArgs = {
   readonly candidate: BaselineSubject | undefined;
@@ -26,11 +27,7 @@ const passRate = (trials: Trials) => {
 };
 
 const qualityOverall = (trials: Trials) => {
-  const scores = trials
-    .filter(({ outcome }) => outcome === 'pass')
-    .map(({ detail }) => detail)
-    .filter((detail) => detail.schema === 'quality/1')
-    .map(({ overall }) => overall);
+  const scores = judgeScores(trials);
 
   return scores.length === 0
     ? undefined
