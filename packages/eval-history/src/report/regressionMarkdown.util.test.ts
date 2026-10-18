@@ -19,7 +19,7 @@ const markdown = (regression: Regression) =>
 
 const ruleOnly = (
   rule: Exclude<Regression['rule'], { readonly kind: 'needs-database' }>,
-): Regression => ({ flaky: [], rule });
+) => ({ flaky: [], rule });
 
 describe('regressionMarkdown', () => {
   it('heads a regression with every subject and gives one line per finding', () => {

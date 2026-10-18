@@ -138,8 +138,8 @@ type HistoryArgs = {
 const historyClient = ({
   baselineModels = [MODEL],
   flaky = [],
-}: HistoryArgs): QueryClient => {
-  const answer = ({ text, values }: SqlQuery): readonly unknown[] => {
+}: HistoryArgs) => {
+  const answer = ({ text, values }: SqlQuery) => {
     const [first, second] = values;
     const stored = STORED.get(String(first));
 
@@ -175,7 +175,7 @@ const historyClient = ({
 
   return {
     query: (query) => Promise.resolve({ rows: answer(query) }),
-  };
+  } satisfies QueryClient;
 };
 
 type RuleReportArgs = HistoryArgs & {

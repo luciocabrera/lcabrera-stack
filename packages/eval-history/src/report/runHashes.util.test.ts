@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import type { ReportRun, ReportTask } from './report.types.ts';
+import type { ReportRun } from './report.types.ts';
 
 import { reportTaskFixture } from './reportTaskFixture.util.ts';
 import { runHashes } from './runHashes.util.ts';
@@ -10,7 +10,7 @@ type TaskArgs = {
   readonly taskKey: string;
 };
 
-const task = ({ agentPromptHash, taskKey }: TaskArgs): ReportTask =>
+const task = ({ agentPromptHash, taskKey }: TaskArgs) =>
   reportTaskFixture({
     agentPromptHash,
     fixtureHash: `fixture-${taskKey}`,
