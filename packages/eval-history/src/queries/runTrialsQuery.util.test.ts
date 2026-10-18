@@ -74,7 +74,7 @@ describe('runTrialsQuery', () => {
   it('reads the detail only through its allowed fields', () => {
     const { page } = runTrialsQuery(base);
 
-    expect(page.text).toContain("detail -> 'verdict' as detail_verdict");
+    expect(page.text).toContain("detail_public -> 'verdict' as detail_verdict");
     expect(page.text).not.toMatch(/select[^()]*\bdetail\s*(?:,|from)/u);
   });
 });

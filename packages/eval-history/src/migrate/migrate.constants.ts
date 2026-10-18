@@ -30,10 +30,15 @@ export const EVALS_WRITER_ROLE = {
   name: 'evals_writer',
 } as const satisfies EvalsRole;
 
+export const VIEWS_TARGET = /^all views in schema (\w+)$/;
+
+export const PUBLIC_COLUMNS_TARGET = 'public columns in schema evals';
+
 export const EVALS_READER_ROLE = {
   grants: [
     { on: 'schema evals', privileges: 'usage' },
-    { on: 'all tables in schema evals', privileges: 'select' },
+    { on: 'all views in schema evals', privileges: 'select' },
+    { on: PUBLIC_COLUMNS_TARGET, privileges: 'select' },
   ],
   name: 'evals_reader',
 } as const satisfies EvalsRole;

@@ -20,6 +20,11 @@ the privileges `EVALS_WRITER_ROLE` lists and owns none of them. The
 `EVALS_DATABASE_URL` stays the writer's. Everything else here stands, and the
 body below keeps its original reasoning.
 
+**Amended by:** [ADR-137](ADR-137-the-evals-reader-role-is-the-reporting-privacy-boundary.md).
+The "Two roles" paragraph below gives `evals_reader` `SELECT` on every table
+and view. Instead it holds `select` on every view and column-level `select` on
+the reader columns of each base table, and nothing on `schema_migration`.
+
 `governs` is `repository`: this ADR is adopted before `packages/eval-history`
 exists (#1265), so `adr:verify` would reject the workspace name, and the
 decision is about this repository's own tooling in any case.

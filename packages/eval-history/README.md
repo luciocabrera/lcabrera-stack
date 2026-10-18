@@ -55,7 +55,9 @@ decides how the envelope is versioned.
   `readRunCosts` and `readAnnotations` read base tables instead, and reach each one only through
   `projectedRelation`, which refuses a column outside `PUBLIC_COLUMNS`
   (derived per read from `information_schema` by `readPublicColumns`) and a
-  `jsonb` field outside `PUBLIC_FIELD_PATHS`. `readSubjectRuns` gives a
+  `jsonb` field outside `PUBLIC_FIELD_PATHS`, and reads an allowed field from
+  the generated copy `PUBLIC_JSONB_COLUMNS` names (`settings_public`,
+  `env_public`, `detail_public`), never from the source column. `readSubjectRuns` gives a
   subject's pass counts per run, one row per run whatever subject versions it
   held, over the newest runs of each suite that records the subject, with a
   trial to link to, a failing one first;
@@ -118,9 +120,14 @@ Last, it grants `evals_writer` and `evals_reader` the privileges
 whatever else the owner granted that role on the same objects, so for grants
 made by the owner or a superuser the lists are exactly what each role ends up
 with. A grant made by a non-owner holding grant option is left alone. The writer gets `usage` on schema `evals`, with no
-`create`, and DML on its tables. The reader gets `usage` on schema `evals` and
-`select` on its tables and views, and nothing else: it is the role the
-dashboard connects as. When a role does not exist,
+`create`, and DML on its tables. The reader gets `usage` on schema `evals`,
+`select` on every view in it, and `select` on the columns `readerColumns`
+allows in each base table, and nothing else: it is the role the dashboard
+connects as. Its two targets, `all views in schema evals` and
+`public columns in schema evals`, are resolved against the migrated schema on
+every run, and every view runs with `security_invoker`, so a reporting view
+or function can read only what the reader can
+([ADR-137](../../docs/decisions/ADR-137-the-evals-reader-role-is-the-reporting-privacy-boundary.md)). When a role does not exist,
 the run prints the `create role` and `grant` statements and still exits 0:
 creating a role needs a privilege some hosts withhold, so that step is the
 operator's. The printed `create role` sets no password; set the credential
@@ -128,8 +135,8 @@ the role's connection string will carry, `EVALS_DATABASE_URL` for the writer.
 Neither role owns anything in schema `evals` or can create in it, so neither
 can alter or drop what the migrating role created.
 
-After granting, the run checks each role with `has_schema_privilege` and
-`has_table_privilege`, and prints `granted` only for a role that holds every
+After granting, the run checks each role with `has_schema_privilege`,
+`has_table_privilege` and `has_column_privilege`, and prints `granted` only for a role that holds every
 listed privilege. Postgres does not fail a `grant` from a role that does not
 own the object; it warns and grants nothing. So a role still missing a
 privilege is listed with each privilege and object it lacks, and the run
@@ -144,8 +151,11 @@ that is down only warns, and the file waits on disk for the next
 
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-The ingest, baseline, reporting and grade tests each create and drop a database of
-their own on the same server. The reporting test seeds the synthetic year into
+The ingest, baseline, reporting, reader boundary and grade tests each create
+and drop a database of their own on the same server. The reader boundary test
+replaces a reporting view or function with one that reads excluded data, in a
+transaction it rolls back, and asserts that Postgres refuses it to the reader
+or that its catalog checks name it. The reporting test seeds the synthetic year into
 its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
 budget. The `evals:migrate` script test runs `scripts/migrate.mjs` against a
 database of its own, as the owner and then as a role that owns nothing, and
