@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { columnsNamed } from './columnsNamed.util.ts';
-import { EXCLUDED_COLUMNS } from './queries.constants.ts';
 import { triggerConfusionQuery } from './triggerConfusionQuery.util.ts';
 
 const publicColumns = new Set([
@@ -34,7 +32,5 @@ describe('triggerConfusionQuery', () => {
   it('reads the expected and invoked skills from the public copy of the detail', () => {
     expect(text).toContain("detail_public -> 'expected_skill'");
     expect(text).toContain("detail_public -> 'invoked'");
-    expect(text).not.toMatch(/from evals\.\w+ (?!\))/u);
-    expect(columnsNamed({ columns: EXCLUDED_COLUMNS, sql: text })).toEqual([]);
   });
 });

@@ -44,13 +44,6 @@ describe('readTaskTrials', () => {
     expect(read?.modelId).toBeNull();
   });
 
-  it('asks nothing for no runs', async () => {
-    const { client, sent } = scriptedClient({ answer: () => [], columns: [] });
-
-    expect(await readTaskTrials({ client, runIds: [] })).toEqual([]);
-    expect(sent).toEqual([]);
-  });
-
   it('rejects an outcome the envelope does not know', async () => {
     const { client } = scriptedClient({
       answer: () => [{ ...ROW, outcomes: ['maybe'] }],

@@ -3,6 +3,7 @@ import { Link, useLoaderData } from 'react-router';
 
 import type { loader } from './evals-confusion.loader';
 
+import { pageStyles } from '../evalsPage.stylex';
 import { EvalsPageHeader } from '../EvalsPageHeader';
 import { FiguresTable } from '../FiguresTable';
 import { evalsHref } from '../utils/evalsHref.util';
@@ -19,9 +20,9 @@ export const EvalsConfusion = () => {
       : `the run of ${only?.label ?? selectedRunId}`;
 
   return (
-    <div {...stylex.props(styles.page)}>
+    <div {...stylex.props(pageStyles.page)}>
       <EvalsPageHeader title='Trigger confusion' trail='confusion' />
-      <p {...stylex.props(styles.note)}>
+      <p {...stylex.props(pageStyles.note)}>
         One row per expectation: a trigger task expects its skill to load, a
         near-miss task (<em>not</em> the skill) expects it to stay unloaded. One
         column per skill any trial loaded. A trial that loaded two skills counts
@@ -30,7 +31,7 @@ export const EvalsConfusion = () => {
         the task did not expect it, or none loading where one was expected.
         Skipped trials are left out.
       </p>
-      <nav aria-label='Runs' {...stylex.props(styles.section)}>
+      <nav aria-label='Runs' {...stylex.props(pageStyles.section)}>
         <ul {...stylex.props(styles.choices)}>
           <li>
             {selectedRunId === undefined ? (
@@ -55,7 +56,7 @@ export const EvalsConfusion = () => {
         </ul>
       </nav>
       {selectedRunId !== undefined && (
-        <p {...stylex.props(styles.note)}>
+        <p {...stylex.props(pageStyles.note)}>
           <Link to={evalsHref({ runId: selectedRunId })}>Open the run</Link>
         </p>
       )}

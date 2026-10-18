@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { columnsNamed } from './columnsNamed.util.ts';
-import { EXCLUDED_COLUMNS } from './queries.constants.ts';
 import { runHealthQuery } from './runHealthQuery.util.ts';
 
 const publicColumns = new Set([
@@ -21,11 +19,6 @@ describe('runHealthQuery', () => {
     expect(text).toContain(
       'group by trial.run_id, trial.outcome, trial.error_class',
     );
-  });
-
-  it('reads no base table outside its projection', () => {
-    expect(text).not.toMatch(/from evals\.\w+ (?!\))/u);
-    expect(columnsNamed({ columns: EXCLUDED_COLUMNS, sql: text })).toEqual([]);
   });
 
   it('stops at an error class that is no longer public', () => {

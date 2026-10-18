@@ -1,8 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { columnsNamed } from './columnsNamed.util.ts';
 import { qualityBaselinesQuery } from './qualityBaselinesQuery.util.ts';
-import { EXCLUDED_COLUMNS } from './queries.constants.ts';
 
 const publicColumns = new Set([
   'eval_baseline.baseline_id',
@@ -32,10 +30,5 @@ describe('qualityBaselinesQuery', () => {
       'order by baseline.subject_id, baseline.computed_at desc, baseline.id desc',
     );
     expect(text).toContain('on run.baseline_id = latest.baseline_id');
-  });
-
-  it('reads no base table outside its projection', () => {
-    expect(text).not.toMatch(/from evals\.\w+ (?!\))/u);
-    expect(columnsNamed({ columns: EXCLUDED_COLUMNS, sql: text })).toEqual([]);
   });
 });

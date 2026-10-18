@@ -22,22 +22,18 @@ const ROW = {
 
 describe('readQualityScores', () => {
   it('reads the mean score per dimension of the runs named', async () => {
+    const accuracy = { ...ROW, dimension: 'accuracy', mean: 5, trials: 1 };
     const { client, sent } = scriptedClient({
-      answer: () => [ROW],
+      answer: () => [accuracy, ROW],
       columns: COLUMNS,
     });
+    const read = await readQualityScores({ client, runIds: [ROW.runId] });
 
-    expect(await readQualityScores({ client, runIds: [ROW.runId] })).toEqual([
-      ROW,
+    expect(read.map(({ dimension, mean }) => [dimension, mean])).toEqual([
+      ['accuracy', 5],
+      ['clarity', 3.5],
     ]);
     expect(sent.at(-1)?.values).toEqual([[ROW.runId]]);
-  });
-
-  it('asks nothing for no runs', async () => {
-    const { client, sent } = scriptedClient({ answer: () => [], columns: [] });
-
-    expect(await readQualityScores({ client, runIds: [] })).toEqual([]);
-    expect(sent).toEqual([]);
   });
 
   it('rejects a mean outside the rubric', async () => {

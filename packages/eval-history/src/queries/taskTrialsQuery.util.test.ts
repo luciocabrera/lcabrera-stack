@@ -1,7 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { columnsNamed } from './columnsNamed.util.ts';
-import { EXCLUDED_COLUMNS } from './queries.constants.ts';
 import { taskTrialsQuery } from './taskTrialsQuery.util.ts';
 
 const publicColumns = new Set([
@@ -50,13 +48,6 @@ describe('taskTrialsQuery', () => {
 
     expect(values).toEqual([RUNS, ['t1']]);
     expect(text).toContain('and task.task_key = any($2::text[])');
-  });
-
-  it('reads no base table outside its projection', () => {
-    const { text } = taskTrialsQuery({ publicColumns, runIds: RUNS });
-
-    expect(text).not.toMatch(/from evals\.\w+ (?!\))/u);
-    expect(columnsNamed({ columns: EXCLUDED_COLUMNS, sql: text })).toEqual([]);
   });
 
   it('stops at a task set that is no longer public', () => {

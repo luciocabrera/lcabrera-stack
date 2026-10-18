@@ -4,12 +4,12 @@ import { Link, useLoaderData } from 'react-router';
 import type { loader } from './evals-quality.loader';
 
 import { EVALS_SCORED } from '../constants/evalsDashboard.constants';
+import { pageStyles as styles } from '../evalsPage.stylex';
 import { EvalsPageHeader } from '../EvalsPageHeader';
 import { FiguresTable } from '../FiguresTable';
 import { Sparkline } from '../Sparkline';
 import { subjectHref } from '../utils/subjectHref.util';
 import { QUALITY_TOP_SCORE } from './EvalsQuality.constants';
-import { styles } from './EvalsQuality.stylex';
 
 const COLUMNS = [
   { key: 'dimension', label: 'Dimension' },

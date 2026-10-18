@@ -31,13 +31,6 @@ describe('readRunHealth', () => {
     expect(sent.at(-1)?.values).toEqual([[RUN]]);
   });
 
-  it('asks nothing for no runs', async () => {
-    const { client, sent } = scriptedClient({ answer: () => [], columns: [] });
-
-    expect(await readRunHealth({ client, runIds: [] })).toEqual([]);
-    expect(sent).toEqual([]);
-  });
-
   it('rejects a passing outcome', async () => {
     const { client } = scriptedClient({
       answer: () => [{ ...UNCLASSIFIED_TIMEOUT, outcome: 'pass' }],

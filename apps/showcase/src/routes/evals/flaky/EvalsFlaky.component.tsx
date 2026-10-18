@@ -4,6 +4,7 @@ import { Link, useLoaderData } from 'react-router';
 import type { loader } from './evals-flaky.loader';
 
 import { EVALS_FLAKY } from '../constants/evalsDashboard.constants';
+import { pageStyles } from '../evalsPage.stylex';
 import { EvalsPageHeader } from '../EvalsPageHeader';
 import { FiguresTable } from '../FiguresTable';
 import { styles } from './EvalsFlaky.stylex';
@@ -12,9 +13,9 @@ export const EvalsFlaky = () => {
   const { suites } = useLoaderData<typeof loader>();
 
   return (
-    <div {...stylex.props(styles.page)}>
+    <div {...stylex.props(pageStyles.page)}>
       <EvalsPageHeader title='Flaky tasks' trail='flaky' />
-      <p {...stylex.props(styles.note)}>
+      <p {...stylex.props(pageStyles.note)}>
         A task is flaky when, over its last {EVALS_FLAKY.window} runs, more than{' '}
         {EVALS_FLAKY.disagreeFraction * 100}% had trials that disagreed. A flaky
         task is left out of the regression rule behind the banner on{' '}
@@ -23,10 +24,10 @@ export const EvalsFlaky = () => {
       </p>
       {suites.length === 0 && <p>No eval runs are stored yet.</p>}
       {suites.map(({ runs, suite, tasks }) => (
-        <section key={suite} {...stylex.props(styles.section)}>
-          <h2 {...stylex.props(styles.heading)}>{suite}</h2>
+        <section key={suite} {...stylex.props(pageStyles.section)}>
+          <h2 {...stylex.props(pageStyles.heading)}>{suite}</h2>
           {tasks.length === 0 ? (
-            <p {...stylex.props(styles.note)}>
+            <p {...stylex.props(pageStyles.note)}>
               No flaky task in its last {runs.length} runs.
             </p>
           ) : (

@@ -5,7 +5,7 @@ import {
 import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
 import * as stylex from '@stylexjs/stylex';
 
-export const styles = stylex.create({
+export const pageStyles = stylex.create({
   heading: {
     margin: 0,
     fontSize: typography.fontSizeLg,

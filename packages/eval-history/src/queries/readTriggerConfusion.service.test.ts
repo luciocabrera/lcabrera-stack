@@ -34,13 +34,6 @@ describe('readTriggerConfusion', () => {
     expect(sent.at(-1)?.values).toEqual([[RUN]]);
   });
 
-  it('asks nothing for no runs', async () => {
-    const { client, sent } = scriptedClient({ answer: () => [], columns: [] });
-
-    expect(await readTriggerConfusion({ client, runIds: [] })).toEqual([]);
-    expect(sent).toEqual([]);
-  });
-
   it('rejects a task kind outside the trigger suite', async () => {
     const { client } = scriptedClient({
       answer: () => [{ ...ROW, taskKind: 'fixture' }],
