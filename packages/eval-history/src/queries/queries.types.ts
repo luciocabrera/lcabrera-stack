@@ -1,6 +1,7 @@
 import type { z } from 'zod';
 
 import type { costFiguresSchema } from './costFigures.schema.ts';
+import type { runJudgeScoreRowSchema } from './runJudgeScoreRow.schema.ts';
 import type { runSummaryRowSchema } from './runSummaryRow.schema.ts';
 import type { runTrialRowSchema } from './runTrialRow.schema.ts';
 import type { subjectRunRowSchema } from './subjectRunRow.schema.ts';
@@ -12,6 +13,8 @@ export type QueryClient = {
     readonly rows: readonly unknown[];
   }>;
 };
+
+export type RunJudgeScore = z.output<typeof runJudgeScoreRowSchema>;
 
 export type RunSummary = z.output<typeof runSummaryRowSchema>;
 

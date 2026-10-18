@@ -307,6 +307,7 @@
   <header>
     <h1>Skill quality report</h1>
     <p class="muted" id="meta"></p>
+    <p class="muted" hidden id="source"></p>
     <p class="note">
       Each skill's SKILL.md was scored from 1 to 5 by Claude, using the judge
       prompt and rubric of <span class="mono">waza quality</span>. It is a
@@ -398,7 +399,87 @@
 </script>
 <script>
   (() => {
-    const data = JSON.parse(document.getElementById('report-data').textContent);
+    const embedded = JSON.parse(
+      document.getElementById('report-data').textContent,
+    );
+    const storedReport = (stored) => {
+      if (
+        typeof stored?.run !== 'object' ||
+        !Array.isArray(stored.tasks) ||
+        !Array.isArray(stored.trials)
+      )
+        throw new Error('the answer is not a stored run');
+      const subjects = new Map(
+        stored.tasks.map((t) => [t.task_key, t.subject?.name]),
+      );
+      const skills = stored.trials.map((t) => {
+        const skill = subjects.get(t.task_key) ?? t.task_key;
+        if (t.outcome !== 'pass' || typeof t.detail?.overall !== 'number')
+          return { error: t.error_class ?? t.outcome, skill };
+        return {
+          dimensions: t.detail.dimensions ?? [],
+          overall: t.detail.overall,
+          skill,
+        };
+      });
+      const known = embedded.rubric.map((d) => d.name);
+      const rank = (name) =>
+        known.includes(name) ? known.indexOf(name) : known.length;
+      const names = [
+        ...new Set(
+          skills.flatMap((s) => (s.dimensions ?? []).map((d) => d.name)),
+        ),
+      ].sort((a, b) => rank(a) - rank(b) || a.localeCompare(b));
+      const dims = names.length ? names : known;
+      const differs =
+        dims.length !== known.length || dims.some((d, i) => d !== known[i]);
+      return {
+        generatedAt: stored.run.finished_at,
+        model: stored.run.model_id,
+        note: differs
+          ? `; its dimensions (${dims.join(', ')}) differ from this file's rubric (${known.join(', ')})`
+          : '',
+        rubric: dims.map(
+          (name) =>
+            embedded.rubric.find((d) => d.name === name) ?? {
+              description: 'not described in this file',
+              name,
+            },
+        ),
+        skills,
+      };
+    };
+    const showSource = (text) => {
+      const source = document.getElementById('source');
+      source.textContent = text;
+      source.hidden = false;
+    };
+    const runUrl = new URLSearchParams(location.search).get('run');
+    if (runUrl) {
+      fetch(new URL(runUrl, location.href))
+        .then((response) =>
+          response.ok
+            ? response.json()
+            : Promise.reject(new Error(`it answered ${response.status}`)),
+        )
+        .then(storedReport)
+        .then(
+          (data) => {
+            showSource(`Stored run loaded from ${runUrl}${data.note}`);
+            return data;
+          },
+          (error) => {
+            showSource(
+              `Could not load ${runUrl} (${error.message}); showing the run this file was written with.`,
+            );
+            return embedded;
+          },
+        )
+        .then(show);
+    } else show(embedded);
+  })();
+
+  function show(data) {
     const dims = data.rubric.map((d) => d.name);
     const label = (name) => name.replaceAll('_', ' ');
     const el = (tag, props = {}, kids = []) => {
@@ -407,25 +488,54 @@
       return node;
     };
     const chip = (score) =>
-      el('span', {
-        className: `cell s${Math.round(score)}`,
-        textContent: String(score),
-      });
+      typeof score === 'number'
+        ? el('span', {
+            className: `cell s${Math.round(score)}`,
+            textContent: String(score),
+          })
+        : el('span', { className: 'muted', textContent: '—' });
     const fixed = (n) => n.toFixed(1);
     const mean = (xs) => xs.reduce((a, b) => a + b, 0) / xs.length;
     const judged = data.skills.filter((s) => s.overall !== undefined);
     const failed = data.skills.filter((s) => s.overall === undefined);
     const scoreOf = (s, dim) =>
       s.dimensions?.find((d) => d.name === dim)?.score;
-    const dimMeans = dims.map((d) => ({
-      name: d,
-      value: judged.length ? mean(judged.map((s) => scoreOf(s, d))) : 0,
-    }));
+    const dimMeans = dims.map((d) => {
+      const scores = judged
+        .map((s) => scoreOf(s, d))
+        .filter((score) => typeof score === 'number');
+      return {
+        name: d,
+        scored: scores.length > 0,
+        value: scores.length ? mean(scores) : 0,
+      };
+    });
+    const head = document.getElementById('head');
+    const fixedKeys = new Set(['skill', 'overall', 'change']);
+    const headDims = [...head.querySelectorAll('button')]
+      .map((button) => button.dataset.key)
+      .filter((key) => !fixedKeys.has(key));
+    if (headDims.join() !== dims.join()) {
+      for (const button of head.querySelectorAll('button')) {
+        if (!fixedKeys.has(button.dataset.key)) button.closest('th').remove();
+      }
+      const headCell = (d) => {
+        const button = el('button', { type: 'button', textContent: label(d) });
+        button.dataset.key = d;
+        return el('th', { scope: 'col' }, [button]);
+      };
+      [...head.querySelectorAll('button')]
+        .find((button) => button.dataset.key === 'overall')
+        .closest('th')
+        .before(...dims.map(headCell));
+    }
 
     document.getElementById('meta').textContent =
       `Judge ${data.model} · ${new Date(data.generatedAt).toLocaleString()} · ${data.skills.length} skill(s)`;
 
-    const weakest = [...dimMeans].sort((a, b) => a.value - b.value)[0];
+    const weakest = dimMeans
+      .filter((d) => d.scored)
+      .sort((a, b) => a.value - b.value)[0];
     const tiles = [
       [
         judged.length ? fixed(mean(judged.map((s) => s.overall))) : '—',
@@ -476,7 +586,7 @@
             ]),
             el('span', {
               className: 'val',
-              textContent: judged.length ? fixed(d.value) : '—',
+              textContent: d.scored ? fixed(d.value) : '—',
             }),
           ],
         ),
@@ -577,7 +687,9 @@
               el('h3', { textContent: label(d.name) }),
               chip(d.score),
             ]),
-            el('p', { textContent: d.feedback }),
+            ...(typeof d.feedback === 'string'
+              ? [el('p', { textContent: d.feedback })]
+              : []),
           ]),
         ),
       );
@@ -612,5 +724,5 @@
       );
     document.getElementById('filter').addEventListener('input', render);
     render();
-  })();
+  }
 </script>

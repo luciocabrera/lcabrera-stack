@@ -3,6 +3,7 @@ import { readAnnotations } from '@repo/eval-history/queries/readAnnotations.serv
 import { readFlakyTasks } from '@repo/eval-history/queries/readFlakyTasks.service';
 import { readRunComparison } from '@repo/eval-history/queries/readRunComparison.service';
 import { readRunCosts } from '@repo/eval-history/queries/readRunCosts.service';
+import { readRunJudgeScores } from '@repo/eval-history/queries/readRunJudgeScores.service';
 import { readRunSummaries } from '@repo/eval-history/queries/readRunSummaries.service';
 import { readRunTrials } from '@repo/eval-history/queries/readRunTrials.service';
 import { readSubjectRuns } from '@repo/eval-history/queries/readSubjectRuns.service';
@@ -24,6 +25,10 @@ export const selectRunComparison = (
 
 export const selectRunCosts = (args: ReaderArgs<typeof readRunCosts>) =>
   readRunCosts({ ...args, client: evalsReaderPool() });
+
+export const selectRunJudgeScores = (
+  args: ReaderArgs<typeof readRunJudgeScores>,
+) => readRunJudgeScores({ ...args, client: evalsReaderPool() });
 
 export const selectRunSummaries = (args: ReaderArgs<typeof readRunSummaries>) =>
   readRunSummaries({ ...args, client: evalsReaderPool() });
