@@ -300,6 +300,16 @@ heatmap and the matrix are small, fixed shapes.
 > two ways, and the marker seeded into the path would land in an allowed column.
 > No other `detail` field is widened.
 
+> **Amended by
+> [ADR-137](ADR-137-the-evals-reader-role-is-the-reporting-privacy-boundary.md)**
+> (2026-10-18). A view or set-returning function is no longer governed by its
+> definition alone. `evals_reader` holds `select` only on the reader columns
+> of each base table and on the views, every view runs with
+> `security_invoker`, and Postgres refuses the reader anything else. The
+> allowed `jsonb` fields of `settings`, `env` and `detail` are read from the
+> generated copies `settings_public`, `env_public` and `detail_public`, and the
+> source columns stay unreadable to the reader.
+
 ## References
 
 - [`eval-history-plan.md`](../agents/planning/eval-history-plan.md) §8 and §12

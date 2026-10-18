@@ -89,6 +89,12 @@ export const PUBLIC_FIELD_PATHS = [
 
 export const ALLOWED_WHOLE_JSONB = ['eval_run.totals'] as const;
 
+export const PUBLIC_JSONB_COLUMNS = {
+  'eval_run.env': 'env_public',
+  'eval_run.settings': 'settings_public',
+  'eval_trial_detail.detail': 'detail_public',
+} as const;
+
 export const TEXT_TYPES = ['character', 'character varying', 'text'] as const;
 
 export const TEXT_ARRAY_UDT_NAMES = ['_bpchar', '_text', '_varchar'] as const;

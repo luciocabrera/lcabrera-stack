@@ -33,7 +33,28 @@ export type MigrationQuery = {
   readonly values?: unknown[];
 };
 
+export type PrivilegeCheck =
+  | {
+      readonly column: string;
+      readonly kind: 'column';
+      readonly privilege: string;
+      readonly schema: string;
+      readonly table: string;
+    }
+  | {
+      readonly kind: 'schema' | 'tables';
+      readonly privilege: string;
+      readonly schema: string;
+    }
+  | {
+      readonly kind: 'table';
+      readonly privilege: string;
+      readonly schema: string;
+      readonly table: string;
+    };
+
 export type RoleGrant = {
+  readonly columns?: readonly string[];
   readonly on: string;
   readonly privileges: string;
 };

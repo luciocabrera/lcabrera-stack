@@ -9,6 +9,16 @@ const role = (name: string): EvalsRole => ({
   name,
 });
 
+const viewer = (name: string): EvalsRole => ({
+  grants: [{ on: 'all views in schema evals', privileges: 'select' }],
+  name,
+});
+
+const viewGranted = (name: string): EvalsRole => ({
+  grants: [{ on: 'table evals.v_task_pass_rate', privileges: 'select' }],
+  name,
+});
+
 type FakeArgs = {
   readonly existing: readonly string[];
   readonly failOn?: string;
@@ -29,6 +39,10 @@ const fakeClient = ({ existing, failOn, lacking = [] }: FakeArgs) => {
 
       if (text.includes('pg_roles')) {
         return { rows: existing.map((rolname) => ({ rolname })) };
+      }
+
+      if (text.includes("relkind = 'v'")) {
+        return { rows: [{ name: 'v_task_pass_rate' }] };
       }
 
       const lacks =
@@ -100,6 +114,23 @@ describe('grantRoles', () => {
           role: role('unheld'),
         },
       ],
+    });
+  });
+
+  it('revokes on every table the declared target covers and grants what it resolves to', async () => {
+    const { client, statements } = fakeClient({ existing: ['present'] });
+    const result = await grantRoles({
+      client,
+      roles: [viewer('present'), viewer('absent')],
+    });
+
+    expect(statements).toContain(
+      'revoke all on all tables in schema evals from "present";\ngrant select on table evals.v_task_pass_rate to "present";',
+    );
+    expect(result).toEqual({
+      granted: [viewGranted('present')],
+      missing: [viewGranted('absent')],
+      ungranted: [],
     });
   });
 
