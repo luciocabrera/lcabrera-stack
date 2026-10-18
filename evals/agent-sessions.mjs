@@ -9,10 +9,7 @@
  * Usage: imported by `evals/skills/`, `evals/verifier-fixtures/` and
  * `evals/skill-quality/`.
  */
-import {
-  RATE_LIMIT_ERROR_CLASS,
-  SESSION_LIMIT_ERROR_CLASS,
-} from '@repo/eval-history/envelope/envelope.constants';
+import { SESSION_LIMIT_ERROR_CLASS } from '@repo/eval-history/envelope/envelope.constants';
 
 export const chunk = (items, size) =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
@@ -140,7 +137,7 @@ const RESULT_CLASSES = [
       result.terminal_reason === 'budget_exhausted',
   ],
   [
-    RATE_LIMIT_ERROR_CLASS,
+    'rate_limit',
     (result) =>
       result.api_error_status === 429 ||
       ['blocking_limit', 'rapid_refill_breaker'].includes(
@@ -153,7 +150,7 @@ const RESULT_CLASSES = [
 const THROW_CLASSES = [
   ['max_turns', /maximum number of turns/iu],
   ['budget', /budget/iu],
-  [RATE_LIMIT_ERROR_CLASS, /rate.?limit|usage limit|\b429\b/iu],
+  ['rate_limit', /rate.?limit|usage limit|\b429\b/iu],
   [
     'auth',
     /\b40[13]\b|authenticat|unauthori[sz]ed|not logged in|invalid api key/iu,
