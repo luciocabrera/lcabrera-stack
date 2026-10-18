@@ -4,7 +4,9 @@ Checks for the agent-facing surface: the skills under `.github/skills/`, the
 subagents under `.claude/agents/` and the path rules under `.claude/rules/`.
 `vp run harness:verify` already checks each one's frontmatter and that every
 path it names resolves; nothing here repeats that. CI runs this directory in
-[`agent-evals.yml`](../.github/workflows/agent-evals.yml). Locally, `check:push`
+[`agent-evals.yml`](../.github/workflows/agent-evals.yml), and the model suites
+weekly on `main` in
+[`evals-scheduled.yml`](../.github/workflows/evals-scheduled.yml). Locally, `check:push`
 and `check:safe` run the rules check, and `test:all` and `test:ci` run the
 suites' own tests.
 
