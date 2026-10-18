@@ -27,7 +27,7 @@ const FLAKY = {
 describe('flakySuites', () => {
   it("lays each flaky task's trial split across its suite's runs, oldest first", () => {
     const [suite] = flakySuites({
-      flaky: [FLAKY],
+      judged: [],
       runs: [run({ runId: '2' }), run({ runId: '1' })],
       trials: [
         {
@@ -45,6 +45,7 @@ describe('flakySuites', () => {
           taskSet: 'regression',
         },
       ],
+      unexcluded: [FLAKY],
     });
 
     expect(suite?.runs.map(({ runId }) => runId)).toEqual(['1', '2']);
@@ -68,12 +69,13 @@ describe('flakySuites', () => {
 
   it('says a task did not run, and keeps a suite with no flaky task', () => {
     const suites = flakySuites({
-      flaky: [FLAKY],
+      judged: [],
       runs: [
         run({ runId: '1' }),
         run({ runId: '3', suite: 'verifier-fixtures' }),
       ],
       trials: [],
+      unexcluded: [FLAKY],
     });
 
     expect(suites[0]?.tasks[0]?.cells[0]).toMatchObject({ label: 'not run' });

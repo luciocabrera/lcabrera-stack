@@ -67,7 +67,7 @@ export const EvalsOverview = () => {
       )}
       {suites.length === 0 && <p>No eval runs are stored yet.</p>}
       <div {...stylex.props(styles.grid)}>
-        {suites.map(({ latest, points, suite }) => (
+        {suites.map(({ flakyLeftOut, latest, points, suite }) => (
           <section key={suite} {...stylex.props(styles.card)}>
             <h2 {...stylex.props(styles.suiteName)}>
               <Link to={evalsHref({ runId: latest.runId })}>{suite}</Link>
@@ -88,6 +88,14 @@ export const EvalsOverview = () => {
               <dt {...stylex.props(styles.factTerm)}>Duration</dt>
               <dd {...stylex.props(styles.factValue)}>
                 {durationLabel(latest.durationMs)}
+              </dd>
+              <dt {...stylex.props(styles.factTerm)}>Flaky, left out</dt>
+              <dd {...stylex.props(styles.factValue)}>
+                {flakyLeftOut === undefined ? (
+                  'no main pair to judge'
+                ) : (
+                  <Link to='/evals/flaky'>{flakyLeftOut.length} tasks</Link>
+                )}
               </dd>
               <dt {...stylex.props(styles.factTerm)}>Run</dt>
               <dd {...stylex.props(styles.factValue)}>

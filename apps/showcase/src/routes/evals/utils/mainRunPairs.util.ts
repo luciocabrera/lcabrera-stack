@@ -1,5 +1,5 @@
+import type { MainRunPair } from '../overview/EvalsOverview.types';
 import type { RunFigures } from '../types/runFigures.types';
-import type { MainRunPair } from './EvalsOverview.types';
 
 import { EVALS_MAIN_BRANCH } from '../constants/evalsDashboard.constants';
 

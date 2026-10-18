@@ -1,7 +1,10 @@
-import { SESSION_LIMIT_ERROR_CLASS } from '@repo/eval-history/envelope/envelope.constants';
+import {
+  RATE_LIMIT_ERROR_CLASS,
+  SESSION_LIMIT_ERROR_CLASS,
+} from '@repo/eval-history/envelope/envelope.constants';
 
 export const RATE_LIMIT_CLASSES: readonly string[] = [
-  'rate_limit',
+  RATE_LIMIT_ERROR_CLASS,
   SESSION_LIMIT_ERROR_CLASS,
 ];
 

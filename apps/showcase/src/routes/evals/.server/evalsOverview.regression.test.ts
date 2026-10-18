@@ -1,12 +1,13 @@
 // @vitest-environment node
 
 /**
- * The overview's regression banner against a real Postgres holding only two
- * main runs of the skills suite, read as the reader role. With history that
- * short, a flaky window that counted the two compared runs would call the
- * newer run's own 3/3 to 1/3 drop flaky and leave it out; the banner has to
- * judge flakiness without them, as evals:report does, and flag the drop.
- * Unset, it skips locally and fails under CI.
+ * The overview's regression banner and the flaky page against a real
+ * Postgres holding four main runs of the skills suite, read as the reader
+ * role. With history that short, a flaky window that counted the two compared
+ * runs would call the newer run's own 3/3 to 1/3 drop flaky and leave it out;
+ * the banner has to judge flakiness without them, as evals:report does, and
+ * the flaky page has to list exactly what the banner left out. Unset, it
+ * skips locally and fails under CI.
  */
 
 import { INSERT_BASELINE_SQL } from '@repo/eval-history/baseline/baseline.constants';
@@ -17,6 +18,7 @@ import { markedEnvelopes } from '@repo/eval-history/testing/markedEnvelopes.util
 import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
+import { loader as flakyLoader } from '../flaky/evals-flaky.loader';
 import { loader } from '../overview/evals-overview.loader';
 import { readerDatabase } from './readerDatabase.fixtures';
 
@@ -25,6 +27,7 @@ const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
 const MODEL = 'claude-opus-5-5';
 const STEADY = 'skills/react-19/trigger-1';
 const DROPPED = 'skills/react-19/trigger-2';
+const WOBBLY = 'skills/react-19/trigger-3';
 const SQL_NULL: unknown = JSON.parse('null');
 
 const skillsBase = markedEnvelopes({
@@ -32,13 +35,16 @@ const skillsBase = markedEnvelopes({
   startedAt: '2026-10-01T02:00:00.000Z',
 }).find(({ run }) => run.suite === 'skills');
 
+type Outcomes = readonly ('fail' | 'pass')[];
+
 type RunArgs = {
-  readonly dropped: readonly ('fail' | 'pass')[];
+  readonly dropped: Outcomes;
   readonly runId: string;
   readonly startedAt: string;
+  readonly wobbly: Outcomes;
 };
 
-const mainRun = ({ dropped, runId, startedAt }: RunArgs) => {
+const mainRun = ({ dropped, runId, startedAt, wobbly }: RunArgs) => {
   if (skillsBase === undefined) {
     throw new Error('markedEnvelopes holds no skills envelope');
   }
@@ -46,7 +52,11 @@ const mainRun = ({ dropped, runId, startedAt }: RunArgs) => {
   const envelope = fixtureEnvelope({
     base: skillsBase,
     modelId: MODEL,
-    outcomes: { [DROPPED]: dropped, [STEADY]: ['pass', 'pass', 'pass'] },
+    outcomes: {
+      [DROPPED]: dropped,
+      [STEADY]: ['pass', 'pass', 'pass'],
+      [WOBBLY]: wobbly,
+    },
     runId,
   });
 
@@ -61,20 +71,41 @@ const mainRun = ({ dropped, runId, startedAt }: RunArgs) => {
   };
 };
 
+const PASSING = ['pass', 'pass', 'pass'] as const;
+
+const SPLIT = ['pass', 'fail', 'pass'] as const;
+
+const EARLIER = [
+  mainRun({
+    dropped: PASSING,
+    runId: '00000000-0000-4000-8000-000000000181',
+    startedAt: '2026-09-29T02:00:00.000Z',
+    wobbly: SPLIT,
+  }),
+  mainRun({
+    dropped: PASSING,
+    runId: '00000000-0000-4000-8000-000000000191',
+    startedAt: '2026-09-30T02:00:00.000Z',
+    wobbly: SPLIT,
+  }),
+];
+
 const OLDER = mainRun({
-  dropped: ['pass', 'pass', 'pass'],
+  dropped: PASSING,
   runId: '00000000-0000-4000-8000-0000000001a1',
   startedAt: '2026-10-01T02:00:00.000Z',
+  wobbly: PASSING,
 });
 
 const NEWER = mainRun({
   dropped: ['pass', 'fail', 'fail'],
   runId: '00000000-0000-4000-8000-0000000001b1',
   startedAt: '2026-10-02T02:00:00.000Z',
+  wobbly: PASSING,
 });
 
 const RESULT_FILES = Object.fromEntries(
-  [OLDER, NEWER].map((envelope) => [
+  [...EARLIER, OLDER, NEWER].map((envelope) => [
     `/results/${envelope.run.run_id}.json`,
     JSON.stringify(envelope),
   ]),
@@ -136,11 +167,30 @@ describe.skipIf(!DATABASE_URL)(
       expect(regressions).toHaveLength(1);
       expect(regressions[0]).toMatchObject({
         findings: [{ failed: 2, kind: 'flip', taskKey: DROPPED, trials: 3 }],
-        flakyLeftOut: [],
+        flakyLeftOut: [WOBBLY],
         latest: { runId: NEWER.run.run_id },
         previous: { runId: OLDER.run.run_id },
         suite: 'skills',
       });
+    });
+
+    it('lists on the flaky page exactly what the banner left out, suite by suite', async () => {
+      const [overview, flaky] = await Promise.all([loader(), flakyLoader()]);
+      const leftOut = new Map(
+        overview.suites.map(({ flakyLeftOut, suite }) => [suite, flakyLeftOut]),
+      );
+
+      expect(flaky.suites.map(({ suite }) => suite)).toEqual(['skills']);
+
+      for (const { basis, suite, tasks } of flaky.suites) {
+        expect(
+          tasks.map(({ taskKey }) => taskKey),
+          suite,
+        ).toEqual(leftOut.get(suite));
+        expect(basis.kind, suite).toBe('pair');
+      }
+
+      expect(leftOut.get('skills')).toEqual([WOBBLY]);
     });
   },
 );

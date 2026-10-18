@@ -16,23 +16,37 @@ export const EvalsFlaky = () => {
     <div {...stylex.props(pageStyles.page)}>
       <EvalsPageHeader title='Flaky tasks' trail='flaky' />
       <p {...stylex.props(pageStyles.note)}>
-        A task is flaky when, over its last {EVALS_FLAKY.window} runs, more than{' '}
-        {EVALS_FLAKY.disagreeFraction * 100}% had trials that disagreed. A flaky
-        task is left out of the regression rule behind the banner on{' '}
-        <Link to='/evals'>the overview</Link> until it is fixed. Each cell is
-        the task&apos;s passing trials out of its scored ones in that run.
+        Per suite, the tasks the regression rule behind the banner on{' '}
+        <Link to='/evals'>the overview</Link> leaves out when it judges
+        main&apos;s latest run against the one before. Such a task had trials
+        that disagreed in more than {EVALS_FLAKY.disagreeFraction * 100}% of its
+        last {EVALS_FLAKY.window} runs, not counting those two runs, so a drop
+        in the run being judged cannot make its own task flaky. A suite with
+        fewer than two main runs has no pair to judge, and its list counts every
+        run. Each cell is the task&apos;s passing trials out of its scored ones
+        in that run.
       </p>
       {suites.length === 0 && <p>No eval runs are stored yet.</p>}
-      {suites.map(({ runs, suite, tasks }) => (
+      {suites.map(({ basis, runs, suite, tasks }) => (
         <section key={suite} {...stylex.props(pageStyles.section)}>
           <h2 {...stylex.props(pageStyles.heading)}>{suite}</h2>
+          <p {...stylex.props(pageStyles.note)}>
+            {basis.kind === 'pair' ? (
+              <>
+                Left out when judging{' '}
+                <Link to={basis.latest.href}>{basis.latest.label}</Link> against{' '}
+                <Link to={basis.previous.href}>{basis.previous.label}</Link>.
+                Neither run counts toward flakiness.
+              </>
+            ) : (
+              'Fewer than two main runs, so there is no pair to judge and no run is left out of the count.'
+            )}
+          </p>
           {tasks.length === 0 ? (
-            <p {...stylex.props(pageStyles.note)}>
-              No flaky task in its last {runs.length} runs.
-            </p>
+            <p {...stylex.props(pageStyles.note)}>No flaky task is left out.</p>
           ) : (
             <FiguresTable
-              caption={`${suite}: ${String(tasks.length)} flaky tasks over its last ${String(runs.length)} runs, oldest first`}
+              caption={`${suite}: ${String(tasks.length)} flaky tasks left out, each over the suite's last ${String(runs.length)} runs, oldest first`}
               columns={[
                 { key: 'task', label: 'Task' },
                 { isNumeric: true, key: 'disagreeing', label: 'Split runs' },
