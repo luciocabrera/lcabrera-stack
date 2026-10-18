@@ -307,6 +307,7 @@
   <header>
     <h1>Skill quality report</h1>
     <p class="muted" id="meta"></p>
+    <p class="muted" hidden id="source"></p>
     <p class="note">
       Each skill's SKILL.md was scored from 1 to 5 by Claude, using the judge
       prompt and rubric of <span class="mono">waza quality</span>. It is a
@@ -398,7 +399,67 @@
 </script>
 <script>
   (() => {
-    const data = JSON.parse(document.getElementById('report-data').textContent);
+    const embedded = JSON.parse(
+      document.getElementById('report-data').textContent,
+    );
+    const storedReport = (stored) => {
+      if (
+        typeof stored?.run !== 'object' ||
+        !Array.isArray(stored.tasks) ||
+        !Array.isArray(stored.trials)
+      )
+        throw new Error('the answer is not a stored run');
+      const subjects = new Map(
+        stored.tasks.map((t) => [t.task_key, t.subject?.name]),
+      );
+      const skills = stored.trials.map((t) => {
+        const skill = subjects.get(t.task_key) ?? t.task_key;
+        if (t.outcome !== 'pass' || typeof t.detail?.overall !== 'number')
+          return { error: t.error_class ?? t.outcome, skill };
+        return {
+          dimensions: t.detail.dimensions ?? [],
+          overall: t.detail.overall,
+          skill,
+        };
+      });
+      return {
+        generatedAt: stored.run.finished_at,
+        model: stored.run.model_id,
+        rubric: embedded.rubric,
+        skills,
+      };
+    };
+    const showSource = (text) => {
+      const source = document.getElementById('source');
+      source.textContent = text;
+      source.hidden = false;
+    };
+    const runUrl = new URLSearchParams(location.search).get('run');
+    if (runUrl) {
+      fetch(new URL(runUrl, location.href))
+        .then((response) =>
+          response.ok
+            ? response.json()
+            : Promise.reject(new Error(`it answered ${response.status}`)),
+        )
+        .then(storedReport)
+        .then(
+          (data) => {
+            showSource(`Stored run loaded from ${runUrl}`);
+            return data;
+          },
+          (error) => {
+            showSource(
+              `Could not load ${runUrl} (${error.message}); showing the run this file was written with.`,
+            );
+            return embedded;
+          },
+        )
+        .then(show);
+    } else show(embedded);
+  })();
+
+  function show(data) {
     const dims = data.rubric.map((d) => d.name);
     const label = (name) => name.replaceAll('_', ' ');
     const el = (tag, props = {}, kids = []) => {
@@ -612,5 +673,5 @@
       );
     document.getElementById('filter').addEventListener('input', render);
     render();
-  })();
+  }
 </script>

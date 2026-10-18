@@ -142,6 +142,7 @@
     "@vitest/coverage-v8": "catalog:test",
     "eslint": "catalog:lint",
     "fallow": "catalog:tooling",
+    "jsdom": "catalog:test",
     "react-doctor": "catalog:lint",
     "semver": "catalog:tooling",
     "ts-morph": "catalog:tooling",

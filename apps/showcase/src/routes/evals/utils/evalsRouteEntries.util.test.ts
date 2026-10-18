@@ -31,6 +31,7 @@ describe('evalsRouteEntries', () => {
   it('finds the dashboard routes in the app route config', () => {
     expect(evalsRouteEntries({ routes }).map(({ path }) => path)).toEqual([
       'evals',
+      'evals/runs/:runId.json',
       'evals/runs/:runId',
       'evals/runs/:runId/trials',
       'evals/compare',

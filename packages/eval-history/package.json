@@ -59,6 +59,7 @@
     "./queries/markedSamples.util": "./src/queries/markedSamples.util.ts",
     "./queries/readPublicColumns.service": "./src/queries/readPublicColumns.service.ts",
     "./queries/readRunSummaries.service": "./src/queries/readRunSummaries.service.ts",
+    "./queries/readRunJudgeScores.service": "./src/queries/readRunJudgeScores.service.ts",
     "./queries/readRunTrials.service": "./src/queries/readRunTrials.service.ts",
     "./queries/readAnnotations.service": "./src/queries/readAnnotations.service.ts",
     "./queries/readRunCosts.service": "./src/queries/readRunCosts.service.ts",

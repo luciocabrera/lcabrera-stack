@@ -48,3 +48,17 @@ small record of its overall scores. Delete that folder to start the history
 again. The page is built from
 [`report-template.html`](./report-template.html), which
 [`quality-report.mjs`](./quality-report.mjs) fills with the run's data.
+
+To read a stored run in the same page, add `?run=` with the address of its JSON
+on the showcase's eval dashboard, `/evals/runs/<run id>.json`:
+
+```text
+report.html?run=http://localhost:5173/evals/runs/<run id>.json
+```
+
+That answer holds only what
+[ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)
+lets a dashboard route return, so a stored run shows its scores but not the
+judge's summary or feedback, and has no change column. If the fetch fails or
+the answer is not a stored run, the page says so and shows the run it was
+written with.

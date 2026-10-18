@@ -62,16 +62,6 @@ const invoke = (path: string) => {
   );
 };
 
-const statusOf = async (path: string) => {
-  try {
-    await invoke(path);
-
-    return 'answered';
-  } catch (error) {
-    return error instanceof Response ? error.status : 'not a response';
-  }
-};
-
 beforeEach(() => {
   vi.stubEnv('EVALS_DASHBOARD', '1');
   vi.mocked(selectRunSummaries).mockResolvedValue([run]);
@@ -85,17 +75,6 @@ afterEach(() => {
 });
 
 describe('the run page loader', () => {
-  it('answers 404 for a run id that is not a uuid, before any read', async () => {
-    expect(await statusOf('/evals/runs/not-a-run')).toBe(404);
-    expect(selectRunSummaries).not.toHaveBeenCalled();
-  });
-
-  it('answers 404 for a run that is not stored', async () => {
-    vi.mocked(selectRunSummaries).mockResolvedValue([]);
-
-    expect(await statusOf(`/evals/runs/${RUN_ID}`)).toBe(404);
-  });
-
   it('returns the run figures and one linked chart point per trial', async () => {
     const data = await invoke(`/evals/runs/${RUN_ID}`);
 

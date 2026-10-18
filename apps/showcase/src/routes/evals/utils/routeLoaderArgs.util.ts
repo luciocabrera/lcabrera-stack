@@ -4,26 +4,31 @@ type RouteLoaderArgsArgs = {
   readonly search?: string;
 };
 
+const DYNAMIC_SEGMENT = /^:([\w-]+)(.*)$/u;
+
 export const routeLoaderArgs = ({
   params,
   path,
   search = '',
 }: RouteLoaderArgsArgs) => {
-  const segments = path.split('/');
+  const segments = path.split('/').map((segment) => {
+    const [, name, suffix = ''] = DYNAMIC_SEGMENT.exec(segment) ?? [];
+
+    return name === undefined ? { segment } : { name, segment, suffix };
+  });
   const missing = segments
-    .filter((segment) => segment.startsWith(':'))
-    .map((segment) => segment.slice(1))
-    .filter((name) => !Object.hasOwn(params, name));
+    .filter(({ name }) => name !== undefined && !Object.hasOwn(params, name))
+    .map(({ name }) => name);
 
   if (missing.length > 0) {
     throw new Error(`no value for :${missing.join(', :')} in ${path}`);
   }
 
   const pathname = segments
-    .map((segment) =>
-      segment.startsWith(':')
-        ? encodeURIComponent(params[segment.slice(1)] ?? '')
-        : segment,
+    .map(({ name, segment, suffix = '' }) =>
+      name === undefined
+        ? segment
+        : `${encodeURIComponent(params[name] ?? '')}${suffix}`,
     )
     .join('/');
 
