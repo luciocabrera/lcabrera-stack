@@ -131,10 +131,10 @@ envelope files the report says it was not applied.
   first comparison. A refused comparison of two models says the same when the
   new model has none. rules-consistency runs no model and needs no baseline.
 - **Flaky tasks.** A task whose trials disagreed in more than
-  `flaky.disagreeFraction` of its last `flaky.window` runs is flaky. The
-  report lists each one under "Flaky, left out of the rule" with its passed
-  over counted trials in both runs and how many recent runs disagreed, and the
-  rule ignores it.
+  `flaky.disagreeFraction` of its last `flaky.window` runs, on any model, is
+  flaky. The report lists each one under "Flaky, left out of the rule" with
+  its passed over counted trials in both runs and how many recent runs
+  disagreed, and the rule ignores it.
 
 A binary suite also needs the same model and harness version in both runs.
 skill-quality is judged against the baseline rather than run A, so it needs the

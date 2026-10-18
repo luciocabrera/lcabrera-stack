@@ -19,6 +19,8 @@ type RegressionMarkdownArgs = {
   readonly suite: Suite;
 };
 
+const codeSpan = (text: string) => `\`${text}\``;
+
 const subjectText = (subject: TaskSubject | undefined) =>
   subject === undefined
     ? 'the suite as a whole'
@@ -65,7 +67,7 @@ const ruleText = ({
     case 'insufficient': {
       return rule.unjudged.length === 0
         ? `Regression rule: insufficient data, so nothing is flagged. A pass rate needs ${String(minTrialsForRate)} counted trials on each side.`
-        : `Regression rule: insufficient data, so nothing is flagged. Too few counted trials to judge ${rule.unjudged.map((key) => `\`${key}\``).join(', ')}.`;
+        : `Regression rule: insufficient data, so nothing is flagged. Too few counted trials to judge ${rule.unjudged.map((key) => codeSpan(key)).join(', ')}.`;
     }
     case 'needs-database': {
       return REGRESSION_NEEDS_DATABASE;
