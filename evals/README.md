@@ -116,9 +116,12 @@ run A. A binary suite is flagged when B's pass rate falls below the lower
 bound of A's Wilson interval, or when a regression-set task that passed every
 trial in A fails `binary.flip` of its trials in B. skill-quality is flagged when
 a subject's mean judge score in B falls more than `scored.sigma` standard
-deviations below its baseline mean. Every finding names its subject, so a run
-with `--hide react-19` is flagged as `skill react-19`, and an unchanged rerun
-is not flagged.
+deviations below its baseline mean. Both rules compare like with like. The
+binary rule pools only the tasks both runs hold, so a skill added since run A
+cannot pull B's rate down. The suite-wide score counts only the subjects the
+baseline covers. Every finding names its subject, so a run with
+`--hide react-19` is flagged as `skill react-19`, and an unchanged rerun is not
+flagged.
 
 The rule reads two things only the database holds, so it needs
 `EVALS_DATABASE_URL` and a run named by its id or `--compare`. With two

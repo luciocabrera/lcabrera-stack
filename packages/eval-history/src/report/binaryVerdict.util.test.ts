@@ -83,4 +83,24 @@ describe('binaryVerdict', () => {
       kind: 'clear',
     });
   });
+
+  it("does not count a task main never ran against main's pass rate", () => {
+    const withNewSkill = {
+      ...main,
+      tasks: [
+        ...main.tasks,
+        ...[1, 2, 3].map((index) =>
+          reportTaskFixture({
+            outcomes: ['fail', 'fail', 'fail'],
+            subject: { kind: 'skill', name: 'epic' },
+            taskKey: `epic/trigger-${String(index)}`,
+          }),
+        ),
+      ],
+    };
+
+    expect(binaryVerdict({ ...args, b: withNewSkill })).toEqual({
+      kind: 'clear',
+    });
+  });
 });

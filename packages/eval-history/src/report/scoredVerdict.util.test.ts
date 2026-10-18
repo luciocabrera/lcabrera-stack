@@ -137,4 +137,26 @@ describe('scoredVerdict', () => {
       unjudged: ['skill:renamed-react-19', 'skill:renamed-unslop'],
     });
   });
+
+  it('compares the suite only over the subjects its baseline covers', () => {
+    const run = runScoring(() => [4, 4, 4]);
+
+    expect(
+      scoredVerdict({
+        ...args,
+        b: {
+          ...run,
+          tasks: [
+            ...run.tasks,
+            reportTaskFixture({
+              outcomes: ['pass', 'pass', 'pass'],
+              scores: [1, 1, 1],
+              subject: { kind: 'skill', name: 'epic' },
+              taskKey: 'skill-quality/epic',
+            }),
+          ],
+        },
+      }),
+    ).toEqual({ kind: 'clear' });
+  });
 });

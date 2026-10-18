@@ -2,6 +2,7 @@ import type { RegressionConfig } from '../stats/stats.types.ts';
 import type { ReportRun, RuleFinding } from './report.types.ts';
 
 import { binaryRegression } from '../stats/binaryRegression.util.ts';
+import { sharedRun } from './sharedRun.util.ts';
 
 type BinaryVerdictArgs = {
   readonly a: ReportRun;
@@ -22,8 +23,8 @@ export const binaryVerdict = ({
     allowHarnessChange,
     config,
     flaky,
-    main: { identity: a, tasks: a.tasks },
-    pr: { identity: b, tasks: b.tasks },
+    main: { identity: a, tasks: sharedRun({ other: b, run: a }).tasks },
+    pr: { identity: b, tasks: sharedRun({ other: a, run: b }).tasks },
   });
 
   if (verdict.kind !== 'regression') {

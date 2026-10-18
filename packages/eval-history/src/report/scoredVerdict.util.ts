@@ -30,6 +30,12 @@ export const scoredVerdict = ({
   const subjects = [
     ...new Set(b.tasks.map(({ subject }) => subjectKey(subject))),
   ];
+  const baselined = new Set(
+    baseline
+      .map(({ subject }) => subject)
+      .filter((subject) => subject !== undefined)
+      .map((subject) => subjectKey(subject)),
+  );
   const eligible = b.tasks.filter(
     ({ set, taskKey }) => set === 'regression' && !flaky.includes(taskKey),
   );
@@ -56,7 +62,9 @@ export const scoredVerdict = ({
       pr: {
         identity: b,
         scores: eligible
-          .filter((task) => isTaskOfSubject({ subject: row.subject, task }))
+          .filter((task) =>
+            isTaskOfSubject({ baselined, subject: row.subject, task }),
+          )
           .flatMap(({ scores }) => scores),
       },
     }),
