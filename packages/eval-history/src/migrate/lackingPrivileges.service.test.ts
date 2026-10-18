@@ -31,6 +31,49 @@ describe('lackingPrivileges', () => {
         ['usage'],
         ['evals', 'evals', 'evals', 'evals'],
         ['select', 'insert', 'update', 'delete'],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+        [],
+      ],
+    ]);
+  });
+
+  it('passes each table check and each column check as parallel arrays', async () => {
+    const { client, queries } = fakeClient([]);
+
+    await lackingPrivileges({
+      client,
+      role: {
+        grants: [
+          { on: 'table evals.v_task_pass_rate', privileges: 'select' },
+          {
+            columns: ['run_id', 'suite'],
+            on: 'table evals.eval_run',
+            privileges: 'select',
+          },
+        ],
+        name: 'reader',
+      },
+    });
+
+    expect(queries.map(({ values }) => values)).toEqual([
+      [
+        'reader',
+        [],
+        [],
+        [],
+        [],
+        ['evals'],
+        ['v_task_pass_rate'],
+        ['select'],
+        ['evals', 'evals'],
+        ['eval_run', 'eval_run'],
+        ['run_id', 'suite'],
+        ['select', 'select'],
       ],
     ]);
   });

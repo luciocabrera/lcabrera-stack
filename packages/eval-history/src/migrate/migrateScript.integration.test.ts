@@ -135,7 +135,8 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
       'evals:migrate: role evals_reader still lacks these privileges after the grant',
     );
     expect(stdout).toContain('  usage on schema evals');
-    expect(stdout).toContain('  select on table evals.eval_run');
+    expect(stdout).toContain('  select on column evals.eval_run.run_id');
+    expect(stdout).toContain('  select on table evals.v_task_pass_rate');
     expect(stdout).not.toContain('granted evals_reader');
   });
 });

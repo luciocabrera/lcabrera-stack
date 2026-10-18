@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { EVALS_WRITER_ROLE } from './migrate.constants.ts';
+import { EVALS_READER_ROLE, EVALS_WRITER_ROLE } from './migrate.constants.ts';
 import { revokeStatements } from './revokeStatements.util.ts';
 
 describe('revokeStatements', () => {
@@ -8,6 +8,13 @@ describe('revokeStatements', () => {
     expect(revokeStatements(EVALS_WRITER_ROLE)).toEqual([
       'revoke all on schema evals from "evals_writer"',
       'revoke all on all tables in schema evals from "evals_writer"',
+    ]);
+  });
+
+  it('revokes everything on every table and view once for the reader, so a privilege its list no longer names goes', () => {
+    expect(revokeStatements(EVALS_READER_ROLE)).toEqual([
+      'revoke all on schema evals from "evals_reader"',
+      'revoke all on all tables in schema evals from "evals_reader"',
     ]);
   });
 

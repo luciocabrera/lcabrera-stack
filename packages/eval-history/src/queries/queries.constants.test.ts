@@ -3,7 +3,12 @@ import { describe, expect, it } from 'vite-plus/test';
 import { judgeAgreementQuery } from '../grades/judgeAgreementQuery.util.ts';
 import { columnsNamed } from './columnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
-import { EXCLUDED_COLUMNS, REPORTING_RELATIONS } from './queries.constants.ts';
+import {
+  EXCLUDED_COLUMNS,
+  PUBLIC_FIELD_PATHS,
+  PUBLIC_JSONB_COLUMNS,
+  REPORTING_RELATIONS,
+} from './queries.constants.ts';
 import { runCompareQuery } from './runCompareQuery.util.ts';
 import { subjectTrendQuery } from './subjectTrendQuery.util.ts';
 import { taskPassRatesQuery } from './taskPassRatesQuery.util.ts';
@@ -40,4 +45,14 @@ describe('the generated reporting SQL', () => {
       ).toEqual([]);
     },
   );
+});
+
+describe('the public jsonb copies', () => {
+  it('give every jsonb column with an allowed field a public copy, and no other', () => {
+    const sources = new Set(
+      PUBLIC_FIELD_PATHS.map((path) => path.split('.', 2).join('.')),
+    );
+
+    expect(new Set(Object.keys(PUBLIC_JSONB_COLUMNS))).toEqual(sources);
+  });
 });

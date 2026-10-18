@@ -11,6 +11,23 @@ describe('grantStatements', () => {
     ]);
   });
 
+  it('grants a privilege on the listed columns only', () => {
+    expect(
+      grantStatements({
+        grants: [
+          {
+            columns: ['run_id', 'suite'],
+            on: 'table evals.eval_run',
+            privileges: 'select, update',
+          },
+        ],
+        name: 'reader',
+      }),
+    ).toEqual([
+      'grant select ("run_id", "suite"), update ("run_id", "suite") on table evals.eval_run to "reader"',
+    ]);
+  });
+
   it('quotes a role name that holds a double quote', () => {
     expect(
       grantStatements({

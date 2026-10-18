@@ -15,14 +15,16 @@ describe('projectedRelation', () => {
     ).toBe('(select run_id, suite from evals.eval_run)');
   });
 
-  it('selects an allowed jsonb field under a flattened name', () => {
+  it('selects an allowed jsonb field from its public copy under a flattened name', () => {
     expect(
       projectedRelation({
         columns: ['settings.runs'],
         publicColumns,
         table: 'eval_run',
       }),
-    ).toBe("(select settings -> 'runs' as settings_runs from evals.eval_run)");
+    ).toBe(
+      "(select settings_public -> 'runs' as settings_runs from evals.eval_run)",
+    );
   });
 
   it('selects a jsonb column whose fields all pass, whole or by field', () => {
