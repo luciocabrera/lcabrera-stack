@@ -19,10 +19,6 @@ export const readerDatabase = ({ prefix, url }: ReaderDatabaseArgs) => {
   const password = randomBytes(16).toString('hex');
   const reader = { ...EVALS_READER_ROLE, name: `${prefix}_reader_${suffix}` };
   const { close, connect } = scratchConnections(url);
-  const ownerUrl = new URL(url);
-
-  ownerUrl.pathname = `/${databaseName}`;
-
   const open = async () => {
     const admin = await connect();
 
@@ -45,7 +41,11 @@ export const readerDatabase = ({ prefix, url }: ReaderDatabaseArgs) => {
       databaseUrl({ database: databaseName, password, url, user: reader.name }),
     );
 
-    return client;
+    const ownerUrl = new URL(url);
+
+    ownerUrl.pathname = `/${databaseName}`;
+
+    return { client, ownerUrl: ownerUrl.href };
   };
 
   const shut = async () => {
@@ -54,5 +54,5 @@ export const readerDatabase = ({ prefix, url }: ReaderDatabaseArgs) => {
     await close({ databases: [databaseName], roles: [reader.name] });
   };
 
-  return { open, ownerUrl: ownerUrl.href, shut };
+  return { open, shut };
 };

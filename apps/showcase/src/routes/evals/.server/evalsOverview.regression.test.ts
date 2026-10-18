@@ -102,9 +102,9 @@ describe.skipIf(!DATABASE_URL)(
     });
 
     beforeAll(async () => {
-      const client = await database.open();
+      const { client, ownerUrl } = await database.open();
       const ingested = await ingestPaths({
-        connectionString: database.ownerUrl,
+        connectionString: ownerUrl,
         fileSystem: memoryFileSystem(RESULT_FILES),
         paths: ['/results'],
         quietUnreachable: false,

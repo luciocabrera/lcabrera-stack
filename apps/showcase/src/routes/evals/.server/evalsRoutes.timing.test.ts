@@ -74,7 +74,7 @@ describe.skipIf(!DATABASE_URL)('the /evals routes on a year of history', () => {
     );
 
   beforeAll(async () => {
-    const client = await database.open();
+    const { client } = await database.open();
 
     Object.assign(
       seeded,
