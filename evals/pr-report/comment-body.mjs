@@ -41,7 +41,7 @@ export const newestEnvelope = ({ candidates, completeOnly }) =>
     )
     .at(0);
 
-export const upsertRequest = ({ bodyFile, existing, pr, repo }) =>
+export const upsertRequest = ({ body, existing, pr, repo }) =>
   existing === undefined
     ? {
         args: [
@@ -49,8 +49,8 @@ export const upsertRequest = ({ bodyFile, existing, pr, repo }) =>
           '--method',
           'POST',
           `repos/${repo}/issues/${pr}/comments`,
-          '--field',
-          `body=@${bodyFile}`,
+          '--raw-field',
+          `body=${body}`,
         ],
         summary: `Posted the eval report on #${pr}.`,
       }
@@ -60,8 +60,8 @@ export const upsertRequest = ({ bodyFile, existing, pr, repo }) =>
           '--method',
           'PATCH',
           `repos/${repo}/issues/comments/${String(existing.id)}`,
-          '--field',
-          `body=@${bodyFile}`,
+          '--raw-field',
+          `body=${body}`,
         ],
         summary: `Updated the eval report on #${pr}, comment ${String(existing.id)}.`,
       };

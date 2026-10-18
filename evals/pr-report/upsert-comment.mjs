@@ -4,13 +4,13 @@
  * carries the hidden marker, or posts it when there is none, so a new push
  * updates the report instead of adding another. Needs GH_TOKEN.
  * Usage (from the repo root): node evals/pr-report/upsert-comment.mjs
- *   --repo <owner/name> --pr <number> --body-file <path>
+ *   --repo <owner/name> --pr <number> --body-file <path inside the repository or RUNNER_TEMP>
  * Exit codes: 0 = posted or edited, 1 = bad input or a failed gh call.
  */
-import { readFileSync } from 'node:fs';
 import { parseArgs } from 'node:util';
 
 import { runGh } from '../../packages/repo-standards/scripts/gh-exec.mjs';
+import { readTextWithin } from '../../packages/repo-standards/scripts/safe-read.mjs';
 import {
   COMMENT_MARKER,
   reportCommentOf,
@@ -35,7 +35,11 @@ const readOptions = () => {
 
 const main = () => {
   const values = readOptions();
-  const body = readFileSync(values['body-file'], 'utf8');
+  const body = readTextWithin(
+    values['body-file'],
+    process.cwd(),
+    [process.env.RUNNER_TEMP].filter(Boolean),
+  );
   if (!body.startsWith(COMMENT_MARKER)) {
     throw new Error(`the body does not start with ${COMMENT_MARKER}`);
   }
@@ -48,7 +52,7 @@ const main = () => {
     ]),
   );
   const request = upsertRequest({
-    bodyFile: values['body-file'],
+    body,
     existing: reportCommentOf(pages),
     pr: values.pr,
     repo: values.repo,

@@ -89,7 +89,7 @@ const writeComment = (args) =>
   spawnSync(process.execPath, [SCRIPT, ...args], {
     cwd: REPO_ROOT,
     encoding: 'utf8',
-    env: { PATH: process.env.PATH ?? '' },
+    env: { PATH: process.env.PATH ?? '', RUNNER_TEMP: tmpdir() },
   });
 
 const PR = skillsEnvelope({
@@ -194,6 +194,17 @@ describe('write-comment', () => {
       resultsDir([]),
     ]);
     expect(stdout).toContain(NO_ENVELOPE);
+  });
+
+  it('refuses a results directory outside the repository and RUNNER_TEMP', () => {
+    const { status, stderr } = writeComment([
+      '--scope',
+      'all',
+      '--pr-results',
+      '/etc',
+    ]);
+    expect(status).toBe(1);
+    expect(stderr).toContain('refusing to read results outside');
   });
 
   it('refuses a selection that names no skill', () => {

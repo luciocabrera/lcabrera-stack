@@ -60,7 +60,7 @@ describe('reportCommentOf', () => {
 });
 
 describe('upsertRequest', () => {
-  const args = { bodyFile: 'body.md', pr: '7', repo: 'o/r' };
+  const args = { body: 'Report.', pr: '7', repo: 'o/r' };
 
   it('posts when no report comment exists', () => {
     expect(upsertRequest({ ...args, existing: undefined }).args).toStrictEqual([
@@ -68,8 +68,8 @@ describe('upsertRequest', () => {
       '--method',
       'POST',
       'repos/o/r/issues/7/comments',
-      '--field',
-      'body=@body.md',
+      '--raw-field',
+      'body=Report.',
     ]);
   });
 
@@ -80,8 +80,8 @@ describe('upsertRequest', () => {
         '--method',
         'PATCH',
         'repos/o/r/issues/comments/42',
-        '--field',
-        'body=@body.md',
+        '--raw-field',
+        'body=Report.',
       ],
     );
   });

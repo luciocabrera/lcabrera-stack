@@ -5,18 +5,22 @@
  * EVALS_DATABASE_URL reaches one and from main's newest envelope artifact
  * otherwise, or the PR run alone when main has no complete run.
  * Usage (from the repo root): node evals/pr-report/write-comment.mjs
- *   --scope <none|some|all> [--skill <name> ...] [--pr-results <dir>] [--main-results <dir>]
+ *   --scope <none|some|all> [--skill <name> ...]
+ *   [--pr-results <dir>]    the PR run's envelopes, .tmp/eval-results by default
+ *   [--main-results <dir>]  main's downloaded envelopes, .tmp/main-eval-results by default
+ *   each results directory must sit inside the repository or RUNNER_TEMP
  * Exit codes: 0 = printed, 1 = bad input.
  */
 import { parseEnvelope } from '@repo/eval-history/envelope/parseEnvelope.util';
 import { evalsReport } from '@repo/eval-history/report/evalsReport.service';
 import { loadRegressionConfig } from '@repo/eval-history/stats/loadRegressionConfig.service';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { existsSync, readdirSync } from 'node:fs';
+import { join, resolve, sep } from 'node:path';
 import { parseArgs } from 'node:util';
 
+import { readTextWithin } from '../../packages/repo-standards/scripts/safe-read.mjs';
 import { passRateLine } from '../run-envelope.mjs';
-import { REGRESSION_CONFIG } from '../run-record.mjs';
+import { REGRESSION_CONFIG, RESULTS_DIR } from '../run-record.mjs';
 import {
   commentBody,
   newestEnvelope,
@@ -28,16 +32,24 @@ import {
 
 const SUITE = 'skills';
 
+const MAIN_RESULTS_DIR = '.tmp/main-eval-results';
+
 const OPTIONS = {
-  'main-results': { type: 'string' },
-  'pr-results': { type: 'string' },
+  'main-results': { default: MAIN_RESULTS_DIR, type: 'string' },
+  'pr-results': { default: RESULTS_DIR, type: 'string' },
   scope: { type: 'string' },
   skill: { default: [], multiple: true, type: 'string' },
 };
 
+const ROOTS = [process.cwd(), process.env.RUNNER_TEMP].filter(
+  (root) => typeof root === 'string' && root !== '',
+);
+
 const readCandidate = (file) => {
   try {
-    const parsed = parseEnvelope(JSON.parse(readFileSync(file, 'utf8')));
+    const parsed = parseEnvelope(
+      JSON.parse(readTextWithin(file, ROOTS[0], ROOTS.slice(1))),
+    );
     return parsed.ok ? [{ envelope: parsed.envelope, file }] : [];
   } catch {
     return [];
@@ -45,13 +57,19 @@ const readCandidate = (file) => {
 };
 
 const envelopesIn = (directory) => {
-  const suiteDirectory =
-    directory === undefined ? undefined : join(directory, SUITE);
-  return suiteDirectory === undefined || !existsSync(suiteDirectory)
-    ? []
-    : readdirSync(suiteDirectory)
-        .filter((name) => name.endsWith('.json'))
-        .flatMap((name) => readCandidate(join(suiteDirectory, name)));
+  const suiteDirectory = resolve(directory, SUITE);
+  for (const root of ROOTS) {
+    if (suiteDirectory.startsWith(root + sep)) {
+      return existsSync(suiteDirectory)
+        ? readdirSync(suiteDirectory)
+            .filter((name) => name.endsWith('.json'))
+            .flatMap((name) => readCandidate(join(suiteDirectory, name)))
+        : [];
+    }
+  }
+  throw new Error(
+    `refusing to read results outside the repository and RUNNER_TEMP: ${directory}`,
+  );
 };
 
 const reportText = ({ exitCode, stderr, stdout }) =>
