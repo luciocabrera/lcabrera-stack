@@ -3,9 +3,6 @@ import { describe, expect, it } from 'vite-plus/test';
 import { taskTrialsQuery } from './taskTrialsQuery.util.ts';
 
 const publicColumns = new Set([
-  'eval_run.harness_version',
-  'eval_run.model_id',
-  'eval_run.run_id',
   'eval_task.id',
   'eval_task.suite',
   'eval_task.task_key',
@@ -30,13 +27,6 @@ describe('taskTrialsQuery', () => {
     expect(text).toContain(
       'array_agg(trial.outcome::text order by trial.trial_index, trial.id)',
     );
-  });
-
-  it("carries each run's model and harness, which a regression verdict compares", () => {
-    const { text } = taskTrialsQuery({ publicColumns, runIds: RUNS });
-
-    expect(text).toContain('run.model_id as "modelId"');
-    expect(text).toContain('run.harness_version as "harnessVersion"');
   });
 
   it('narrows to the named tasks', () => {

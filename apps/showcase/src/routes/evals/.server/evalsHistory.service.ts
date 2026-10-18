@@ -12,6 +12,8 @@ import { readRunTrials } from '@repo/eval-history/queries/readRunTrials.service'
 import { readSubjectRuns } from '@repo/eval-history/queries/readSubjectRuns.service';
 import { readTaskTrials } from '@repo/eval-history/queries/readTaskTrials.service';
 import { readTriggerConfusion } from '@repo/eval-history/queries/readTriggerConfusion.service';
+import { readReportRun } from '@repo/eval-history/report/readReportRun.service';
+import { readRuleHistory } from '@repo/eval-history/report/readRuleHistory.service';
 
 type ReaderArgs<TRead extends (args: never) => unknown> = Omit<
   Parameters<TRead>[0],
@@ -30,6 +32,12 @@ export const selectQualityBaselines = () =>
 export const selectQualityScores = (
   args: ReaderArgs<typeof readQualityScores>,
 ) => readQualityScores({ ...args, client: evalsReaderPool() });
+
+export const selectReportRun = (args: ReaderArgs<typeof readReportRun>) =>
+  readReportRun({ ...args, client: evalsReaderPool() });
+
+export const selectRuleHistory = (args: ReaderArgs<typeof readRuleHistory>) =>
+  readRuleHistory({ ...args, client: evalsReaderPool() });
 
 export const selectRunComparison = (
   args: ReaderArgs<typeof readRunComparison>,

@@ -28,6 +28,8 @@ import { revokeStatements } from '../migrate/revokeStatements.util.ts';
 import { readModelPrices } from '../prices/readModelPrices.service.ts';
 import { readLatestRunId } from '../report/readLatestRunId.service.ts';
 import { readReportRun } from '../report/readReportRun.service.ts';
+import { readRuleHistory } from '../report/readRuleHistory.service.ts';
+import { regressionConfigFixture } from '../report/regressionConfigFixture.util.ts';
 import { SYNTHETIC_PRIVATE_TEXT } from '../seed/seed.constants.ts';
 import { seedSyntheticHistory } from '../seed/seedSyntheticHistory.service.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
@@ -520,6 +522,12 @@ values ($1, 'skills/1', jsonb_build_object(
       await readRunHealth({ client, runIds: [seeded.runId] }),
       await readQualityScores({ client, runIds: [seeded.runId] }),
       await readQualityBaselines({ client }),
+      await readRuleHistory({
+        client,
+        config: regressionConfigFixture(),
+        excludedRuns: [seeded.runId],
+        run: { modelId: 'synthetic-model-b', suite: 'skills' },
+      }),
     ];
     const results = [
       ...dashboard,

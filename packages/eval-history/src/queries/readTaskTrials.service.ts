@@ -16,8 +16,6 @@ type ReadTaskTrialsArgs = Omit<
 const outcomesSchema = z.array(z.enum(OUTCOMES));
 
 const taskTrialRowSchema = z.object({
-  harnessVersion: z.string(),
-  modelId: z.string().nullable(),
   outcomes: outcomesSchema,
   runId: z.guid(),
   suite: z.enum(SUITES),

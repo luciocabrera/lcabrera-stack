@@ -12,13 +12,18 @@ import { readRunTrials } from '@repo/eval-history/queries/readRunTrials.service'
 import { readSubjectRuns } from '@repo/eval-history/queries/readSubjectRuns.service';
 import { readTaskTrials } from '@repo/eval-history/queries/readTaskTrials.service';
 import { readTriggerConfusion } from '@repo/eval-history/queries/readTriggerConfusion.service';
+import { readReportRun } from '@repo/eval-history/report/readReportRun.service';
+import { readRuleHistory } from '@repo/eval-history/report/readRuleHistory.service';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { EVALS_REGRESSION } from '../constants/evalsDashboard.constants';
 import {
   selectAnnotations,
   selectFlakyTasks,
   selectQualityBaselines,
   selectQualityScores,
+  selectReportRun,
+  selectRuleHistory,
   selectRunComparison,
   selectRunCosts,
   selectRunHealth,
@@ -88,6 +93,14 @@ vi.mock('@repo/eval-history/queries/readTaskTrials.service', () => ({
 
 vi.mock('@repo/eval-history/queries/readTriggerConfusion.service', () => ({
   readTriggerConfusion: vi.fn(() => Promise.resolve([])),
+}));
+
+vi.mock('@repo/eval-history/report/readReportRun.service', () => ({
+  readReportRun: vi.fn(() => Promise.resolve()),
+}));
+
+vi.mock('@repo/eval-history/report/readRuleHistory.service', () => ({
+  readRuleHistory: vi.fn(() => Promise.resolve({ kind: 'needs-database' })),
 }));
 
 afterEach(() => {
@@ -167,5 +180,23 @@ describe('the evals history service', () => {
     });
     expect(readTriggerConfusion).toHaveBeenCalledWith({ client: POOL, runIds });
     expect(evalsReaderPool).toHaveBeenCalledTimes(5);
+  });
+
+  it("reads the regression rule's runs and history on the reader pool", async () => {
+    const run = { modelId: 'model-a', suite: 'skills' } as const;
+    const config = EVALS_REGRESSION;
+
+    await Promise.all([
+      selectReportRun({ runId: 'run' }),
+      selectRuleHistory({ config, excludedRuns: ['a', 'b'], run }),
+    ]);
+
+    expect(readReportRun).toHaveBeenCalledWith({ client: POOL, runId: 'run' });
+    expect(readRuleHistory).toHaveBeenCalledWith({
+      client: POOL,
+      config,
+      excludedRuns: ['a', 'b'],
+      run,
+    });
   });
 });

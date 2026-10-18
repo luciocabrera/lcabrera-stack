@@ -9,8 +9,6 @@ type RunArgs = {
   readonly suite?: string;
 };
 
-const IDENTITY = { harnessVersion: 'abcdefabcdef', modelId: 'model-a' };
-
 const run = ({ runId, suite = 'skills' }: RunArgs) =>
   ({
     runId,
@@ -33,7 +31,6 @@ describe('flakySuites', () => {
       runs: [run({ runId: '2' }), run({ runId: '1' })],
       trials: [
         {
-          ...IDENTITY,
           outcomes: ['pass', 'error', 'fail'],
           runId: '2',
           suite: 'skills',
@@ -41,7 +38,6 @@ describe('flakySuites', () => {
           taskSet: 'regression',
         },
         {
-          ...IDENTITY,
           outcomes: ['pass', 'pass', 'pass'],
           runId: '1',
           suite: 'skills',

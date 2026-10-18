@@ -1,17 +1,16 @@
-import type { RegressionFinding } from '@repo/eval-history/stats/stats.types';
+import type { Regression } from '@repo/eval-history/report/report.types';
 
 import type { SparklinePoint } from '../Sparkline';
 import type { RunFigures } from '../types/runFigures.types';
+
+export type JudgedRunPair = MainRunPair & {
+  readonly verdict: Regression;
+};
 
 export type MainRunPair = {
   readonly latest: RunFigures;
   readonly previous: RunFigures;
   readonly suite: string;
-};
-
-export type SuiteRegression = MainRunPair & {
-  readonly findings: readonly RegressionFinding[];
-  readonly flakyLeftOut: readonly string[];
 };
 
 export type SuiteSummary = {

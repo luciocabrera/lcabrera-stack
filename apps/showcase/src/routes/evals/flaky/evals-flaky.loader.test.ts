@@ -19,8 +19,6 @@ vi.mock('../.server/evalsHistory.service', () => ({
   selectTaskTrials: vi.fn(() =>
     Promise.resolve([
       {
-        harnessVersion: 'abcdefabcdef',
-        modelId: 'model-a',
         outcomes: ['pass', 'fail', 'pass'],
         runId: RUN_A,
         suite: 'skills',
