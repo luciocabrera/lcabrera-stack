@@ -1,3 +1,4 @@
+import type { BaselineRow } from '../baseline/baseline.types.ts';
 import type { SUITES } from '../envelope/envelope.constants.ts';
 import type { readEnvelopeFile } from '../ingest/readEnvelopeFile.service.ts';
 import type { QueryClient } from '../queries/queries.types.ts';
@@ -11,6 +12,7 @@ import type { compareRuns } from './compareRuns.util.ts';
 import type { readReportAgreement } from './readReportAgreement.service.ts';
 import type { readRuleHistory } from './readRuleHistory.service.ts';
 import type { regressionVerdict } from './regressionVerdict.util.ts';
+import type { sideLabels } from './sideLabels.util.ts';
 
 export type Comparison = Extract<
   RunComparison,
@@ -94,6 +96,15 @@ export type RunSide = {
   readonly runId: string;
   readonly status: ReportRun['status'];
 };
+
+export type ScoredBaselineRow = Pick<
+  BaselineRow,
+  'mean' | 'modelId' | 'nRuns' | 'stddev' | 'subject'
+> & {
+  readonly harnessVersion: null | string;
+};
+
+export type SideLabels = ReturnType<typeof sideLabels>;
 
 export type SidePair<Side> = {
   readonly a: Side;

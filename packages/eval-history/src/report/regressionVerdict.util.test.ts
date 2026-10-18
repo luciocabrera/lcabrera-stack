@@ -2,10 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
 import { regressionVerdict } from './regressionVerdict.util.ts';
-import {
-  reportRunFixture,
-  reportTaskFixture,
-} from './reportRunFixture.util.ts';
+import { reportRunFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
 
 const TASK_KEYS = [
   'react-19/trigger',

@@ -11,13 +11,11 @@ import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { sha256Hex } from '../hashing/sha256Hex.util.ts';
 import { flakyTasksQuery } from '../queries/flakyTasksQuery.util.ts';
 import { evalsReport } from './evalsReport.service.ts';
+import { hiddenSkillOutcomes } from './hiddenSkillOutcomes.util.ts';
 import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
 import { reportRunFromEnvelope } from './reportRunFromEnvelope.util.ts';
 import { reportRunQueries } from './reportRunQueries.util.ts';
-import {
-  hiddenSkillOutcomes,
-  skillsRunFixture,
-} from './skillsRunFixture.util.ts';
+import { skillsRunFixture } from './skillsRunFixture.util.ts';
 
 const fixtures = await readJsonFiles({
   directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),

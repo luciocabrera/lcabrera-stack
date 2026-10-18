@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { reportTaskFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
 import { taskHashes } from './taskHashes.util.ts';
 
 describe('taskHashes', () => {

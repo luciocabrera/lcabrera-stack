@@ -96,7 +96,9 @@ describe('regressionMarkdown', () => {
       markdown(
         ruleOnly({ kind: 'insufficient', unjudged: ['react-19/trigger'] }),
       ),
-    ).toContain('Too few counted trials to judge `react-19/trigger`.');
+    ).toContain(
+      'Could not judge `react-19/trigger`: too few counted trials, or no baseline row for that subject.',
+    );
   });
 
   it('lists flaky tasks after the verdict with their trial split', () => {

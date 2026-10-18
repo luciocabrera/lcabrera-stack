@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { outcomesByTask } from './outcomesByTask.util.ts';
-import { reportTaskFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
 
 describe('outcomesByTask', () => {
   it('maps each task key to its outcomes', () => {

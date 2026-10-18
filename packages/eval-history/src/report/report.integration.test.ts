@@ -34,6 +34,7 @@ import { databaseUrl } from '../queries/databaseUrl.util.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { evalsReport } from './evalsReport.service.ts';
 import { fixtureEnvelope } from './fixtureEnvelope.util.ts';
+import { hiddenSkillOutcomes } from './hiddenSkillOutcomes.util.ts';
 import { readReportRun } from './readReportRun.service.ts';
 import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
 import {
@@ -42,10 +43,7 @@ import {
   REGRESSION_NEEDS_DATABASE,
 } from './report.constants.ts';
 import { reportRunFromEnvelope } from './reportRunFromEnvelope.util.ts';
-import {
-  hiddenSkillOutcomes,
-  skillsRunFixture,
-} from './skillsRunFixture.util.ts';
+import { skillsRunFixture } from './skillsRunFixture.util.ts';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');

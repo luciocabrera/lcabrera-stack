@@ -1,31 +1,14 @@
-import type { BaselineRow } from '../baseline/baseline.types.ts';
 import type { RegressionConfig } from '../stats/stats.types.ts';
 import type {
   ReportRun,
-  ReportTask,
   RuleFinding,
-  TaskSubject,
+  ScoredBaselineRow,
 } from './report.types.ts';
 
 import { scoredRegression } from '../stats/scoredRegression.util.ts';
+import { isTaskOfSubject } from './isTaskOfSubject.util.ts';
+import { judgedBaselineRows } from './judgedBaselineRows.util.ts';
 import { subjectKey } from './subjectKey.util.ts';
-
-type IsOfSubjectArgs = {
-  readonly subject: TaskSubject | undefined;
-  readonly task: Pick<ReportTask, 'subject'>;
-};
-
-type JudgedRowsArgs = {
-  readonly baseline: readonly ScoredBaselineRow[];
-  readonly subjects: ReadonlySet<string>;
-};
-
-type ScoredBaselineRow = Pick<
-  BaselineRow,
-  'mean' | 'modelId' | 'nRuns' | 'stddev' | 'subject'
-> & {
-  readonly harnessVersion: null | string;
-};
 
 type ScoredVerdictArgs = {
   readonly allowHarnessChange: boolean;
@@ -37,24 +20,6 @@ type ScoredVerdictArgs = {
 
 const UNRECORDED_HARNESS = '';
 
-const judgedRows = ({ baseline, subjects }: JudgedRowsArgs) => {
-  const perSubject = baseline.filter(
-    ({ subject }) => subject !== undefined && subjects.has(subjectKey(subject)),
-  );
-  const subjectRows = baseline.filter(({ subject }) => subject !== undefined);
-  const isEverySubjectJudged = perSubject.length === subjectRows.length;
-
-  return [
-    ...(isEverySubjectJudged
-      ? baseline.filter(({ subject }) => subject === undefined)
-      : []),
-    ...perSubject,
-  ];
-};
-
-const isOfSubject = ({ subject, task }: IsOfSubjectArgs) =>
-  subject === undefined || subjectKey(task.subject) === subjectKey(subject);
-
 export const scoredVerdict = ({
   allowHarnessChange,
   b,
@@ -62,12 +27,15 @@ export const scoredVerdict = ({
   config,
   flaky,
 }: ScoredVerdictArgs) => {
+  const subjects = [
+    ...new Set(b.tasks.map(({ subject }) => subjectKey(subject))),
+  ];
   const eligible = b.tasks.filter(
     ({ set, taskKey }) => set === 'regression' && !flaky.includes(taskKey),
   );
-  const verdicts = judgedRows({
+  const verdicts = judgedBaselineRows({
     baseline,
-    subjects: new Set(b.tasks.map(({ subject }) => subjectKey(subject))),
+    subjects: new Set(subjects),
   }).map((row) => ({
     subject: row.subject,
     verdict: scoredRegression({
@@ -88,11 +56,16 @@ export const scoredVerdict = ({
       pr: {
         identity: b,
         scores: eligible
-          .filter((task) => isOfSubject({ subject: row.subject, task }))
+          .filter((task) => isTaskOfSubject({ subject: row.subject, task }))
           .flatMap(({ scores }) => scores),
       },
     }),
   }));
+
+  if (verdicts.length === 0) {
+    return { kind: 'insufficient', unjudged: subjects } as const;
+  }
+
   const incomparable = verdicts
     .map(({ verdict }) => verdict)
     .find((verdict) => verdict.kind === 'incomparable');

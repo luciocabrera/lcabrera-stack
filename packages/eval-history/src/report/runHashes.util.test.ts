@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import type { ReportRun, ReportTask } from './report.types.ts';
 
-import { reportTaskFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
 import { runHashes } from './runHashes.util.ts';
 
 type TaskArgs = {

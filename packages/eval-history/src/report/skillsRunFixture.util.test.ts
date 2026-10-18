@@ -3,10 +3,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
-import {
-  hiddenSkillOutcomes,
-  skillsRunFixture,
-} from './skillsRunFixture.util.ts';
+import { hiddenSkillOutcomes } from './hiddenSkillOutcomes.util.ts';
+import { skillsRunFixture } from './skillsRunFixture.util.ts';
 
 const fixtures = await readJsonFiles({
   directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),

@@ -3,6 +3,7 @@ import type { Outcome } from '../stats/stats.types.ts';
 
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { sha256Hex } from '../hashing/sha256Hex.util.ts';
+import { ALL_PASS } from './report.constants.ts';
 
 type SkillsRunFixtureArgs = {
   readonly base: RunEnvelope;
@@ -14,10 +15,6 @@ type SkillsRunFixtureArgs = {
 };
 
 const SKILLS = ['react-19', 'store-pattern'] as const;
-
-const PASSES: readonly Outcome[] = ['pass', 'pass', 'pass'];
-
-const FAILS: readonly Outcome[] = ['fail', 'fail', 'fail'];
 
 const TASKS = SKILLS.flatMap(
   (skill) =>
@@ -43,15 +40,12 @@ const TASKS = SKILLS.flatMap(
     ] as const,
 );
 
-export const hiddenSkillOutcomes = (skill: string) => (taskKey: string) =>
-  taskKey.startsWith(`${skill}/trigger`) ? FAILS : PASSES;
-
 export const skillsRunFixture = ({
   base,
   branch = 'main',
   hidden = [],
   modelId = 'claude-opus-5-5',
-  outcomesOf = () => PASSES,
+  outcomesOf = () => ALL_PASS,
   runId,
 }: SkillsRunFixtureArgs) => {
   const [subject] = base.subjects;

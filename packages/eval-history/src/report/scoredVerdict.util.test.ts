@@ -1,10 +1,9 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
-import {
-  reportRunFixture,
-  reportTaskFixture,
-} from './reportRunFixture.util.ts';
+import { reportRunFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
+import { scoredBaselineRowFixture } from './scoredBaselineRowFixture.util.ts';
 import { scoredVerdict } from './scoredVerdict.util.ts';
 
 const SKILLS = ['react-19', 'unslop'] as const;
@@ -22,16 +21,10 @@ const runScoring = (scoresOf: (skill: string) => readonly number[]) =>
     ),
   });
 
-const row = (name: string | undefined) => ({
-  harnessVersion: 'h1',
-  mean: 4,
-  modelId: 'model-a',
-  nRuns: 5,
-  stddev: 0.25,
-  subject: name === undefined ? undefined : ({ kind: 'skill', name } as const),
-});
-
-const baseline = [row(undefined), ...SKILLS.map((skill) => row(skill))];
+const baseline = [
+  scoredBaselineRowFixture(undefined),
+  ...SKILLS.map((skill) => scoredBaselineRowFixture(skill)),
+];
 
 const args = {
   allowHarnessChange: false,
@@ -122,6 +115,26 @@ describe('scoredVerdict', () => {
     });
     expect(scoredVerdict({ ...args, allowHarnessChange: true, b })).toEqual({
       kind: 'clear',
+    });
+  });
+
+  it('judges nothing, and says so, when no subject of the run has a baseline row', () => {
+    const run = runScoring(() => [1, 1, 1]);
+
+    expect(
+      scoredVerdict({
+        ...args,
+        b: {
+          ...run,
+          tasks: run.tasks.map((task) => ({
+            ...task,
+            subject: { kind: 'skill', name: `renamed-${task.subject.name}` },
+          })),
+        },
+      }),
+    ).toEqual({
+      kind: 'insufficient',
+      unjudged: ['skill:renamed-react-19', 'skill:renamed-unslop'],
     });
   });
 });

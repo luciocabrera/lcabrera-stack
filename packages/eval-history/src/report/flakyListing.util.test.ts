@@ -1,10 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { flakyListing } from './flakyListing.util.ts';
-import {
-  reportRunFixture,
-  reportTaskFixture,
-} from './reportRunFixture.util.ts';
+import { reportRunFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
 
 const row = (taskKey: string) => ({
   disagreeFraction: 0.3,

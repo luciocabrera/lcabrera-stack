@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import {
-  reportRunFixture,
-  reportTaskFixture,
-} from './reportRunFixture.util.ts';
+import { reportRunFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
 import { sharedRun } from './sharedRun.util.ts';
 
 const task = (taskKey: string) =>

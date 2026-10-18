@@ -4,10 +4,8 @@ import type { Outcome } from '../stats/stats.types.ts';
 
 import { binaryVerdict } from './binaryVerdict.util.ts';
 import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
-import {
-  reportRunFixture,
-  reportTaskFixture,
-} from './reportRunFixture.util.ts';
+import { reportRunFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
 
 const PASSES: readonly Outcome[] = ['pass', 'pass', 'pass'];
 

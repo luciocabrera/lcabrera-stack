@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import type { Outcome } from '../stats/stats.types.ts';
 import type { ReportRun } from './report.types.ts';
 
-import { reportTaskFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
 import { taskFlips } from './taskFlips.util.ts';
 
 const runOf = (

@@ -2,10 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { compareRuns } from './compareRuns.util.ts';
 import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
-import {
-  reportRunFixture,
-  reportTaskFixture,
-} from './reportRunFixture.util.ts';
+import { reportRunFixture } from './reportRunFixture.util.ts';
+import { reportTaskFixture } from './reportTaskFixture.util.ts';
 
 const thresholds = regressionConfigFixture();
 
