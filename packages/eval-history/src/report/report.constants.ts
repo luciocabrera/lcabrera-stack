@@ -1,3 +1,5 @@
+import type { Outcome } from '../stats/stats.types.ts';
+
 export const RUN_HASH_KEYS = {
   agentPrompt: 'agent-prompt',
   catalog: 'catalog',
@@ -34,3 +36,10 @@ export const AGREEMENT_HEADING =
 
 export const AGREEMENT_NEEDS_DATABASE =
   'Not shown: hand grades are stored only in the database, and both runs were read from envelope files. To include it, name a run by its id or use --compare, with EVALS_DATABASE_URL set.';
+
+export const REGRESSION_NEEDS_DATABASE =
+  'Regression rule: not applied. The noise floor and the flaky-task history are stored only in the database, and both runs were read from envelope files. To apply it, name a run by its id or use --compare, with EVALS_DATABASE_URL set.';
+
+export const ALL_PASS: readonly Outcome[] = ['pass', 'pass', 'pass'];
+
+export const ALL_FAIL: readonly Outcome[] = ['fail', 'fail', 'fail'];

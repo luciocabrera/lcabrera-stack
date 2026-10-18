@@ -36,6 +36,10 @@ const taskRow = {
   fixtureHash: 'f'.repeat(64),
   judgePromptHash: DATABASE_NULLS.judgePromptHash,
   outcomes: ['pass', 'fail', 'error'],
+  scores: [],
+  set: 'regression',
+  subjectKind: 'skill',
+  subjectName: 'react-19',
   taskHash: 't'.repeat(64),
   taskKey: 'skills/react-19/trigger-1',
 };
@@ -73,10 +77,16 @@ describe('readReportRun', () => {
       subjects: [subjectRow],
       tasks: [
         {
-          ...taskRow,
           agentPromptHash: undefined,
           expectedHash: undefined,
+          fixtureHash: taskRow.fixtureHash,
           judgePromptHash: undefined,
+          outcomes: taskRow.outcomes,
+          scores: [],
+          set: 'regression',
+          subject: { kind: 'skill', name: 'react-19' },
+          taskHash: taskRow.taskHash,
+          taskKey: taskRow.taskKey,
         },
       ],
     });
@@ -88,6 +98,17 @@ describe('readReportRun', () => {
 
     expect(await readReportRun({ client, runId: RUN_ID })).toBeUndefined();
     expect(sent).toEqual([queries.run]);
+  });
+
+  it('rejects a task set the schema does not name', async () => {
+    const { client } = clientAnswering(
+      new Map([
+        [queries.run.text, [runRow]],
+        [queries.tasks.text, [{ ...taskRow, set: 'stretch' }]],
+      ]),
+    );
+
+    await expect(readReportRun({ client, runId: RUN_ID })).rejects.toThrow();
   });
 
   it('rejects an outcome the schema does not name', async () => {

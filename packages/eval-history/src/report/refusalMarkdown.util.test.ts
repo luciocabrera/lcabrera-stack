@@ -13,11 +13,15 @@ const side = {
 describe('refusalMarkdown', () => {
   it('heads the refusal with the suite and both sides, then says why', () => {
     const [heading, reason] = refusalMarkdown({
-      a: side,
-      b: { ...side, branch: 'feat/x', modelId: 'model-b' },
-      kind: 'refused',
-      reason: 'model-changed',
-      suite: 'skills',
+      minTrialsForRate: 6,
+      refusal: {
+        a: side,
+        b: { ...side, branch: 'feat/x', modelId: 'model-b' },
+        kind: 'refused',
+        reason: 'model-changed',
+        regression: undefined,
+        suite: 'skills',
+      },
     }).split('\n\n', 2);
 
     expect(heading).toBe('### skills: main → feat/x: not compared');

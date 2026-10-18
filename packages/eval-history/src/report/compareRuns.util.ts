@@ -1,7 +1,9 @@
-import type { ReportRun, Thresholds } from './report.types.ts';
+import type { RegressionConfig } from '../stats/stats.types.ts';
+import type { ReportRun, RuleHistory } from './report.types.ts';
 
 import { attribute } from '../stats/attribute.util.ts';
 import { refusalReason } from './refusalReason.util.ts';
+import { regressionVerdict } from './regressionVerdict.util.ts';
 import { runHashes } from './runHashes.util.ts';
 import { runReference } from './runReference.util.ts';
 import { runSide } from './runSide.util.ts';
@@ -10,18 +12,30 @@ import { taskFlips } from './taskFlips.util.ts';
 
 type CompareRunsArgs = {
   readonly a: ReportRun;
+  readonly allowHarnessChange?: boolean;
   readonly allowModelChange?: boolean;
   readonly b: ReportRun;
-  readonly thresholds: Thresholds;
+  readonly history: RuleHistory;
+  readonly thresholds: RegressionConfig;
 };
 
 export const compareRuns = ({
   a,
+  allowHarnessChange = false,
   allowModelChange = false,
   b,
+  history,
   thresholds,
 }: CompareRunsArgs) => {
   const reason = refusalReason({ a, allowModelChange, b });
+  const regression = () =>
+    regressionVerdict({
+      a,
+      allowHarnessChange,
+      b,
+      config: thresholds,
+      history,
+    });
 
   if (reason !== undefined) {
     return {
@@ -29,6 +43,7 @@ export const compareRuns = ({
       b: runReference(b),
       kind: 'refused',
       reason,
+      regression: reason === 'model-changed' ? regression() : undefined,
       suite: b.suite,
     } as const;
   }
@@ -42,6 +57,7 @@ export const compareRuns = ({
     }),
     flips: taskFlips({ a, b }),
     kind: 'comparison',
+    regression: regression(),
     suite: b.suite,
     thresholds: {
       minTrialsForRate: thresholds.minTrialsForRate,
