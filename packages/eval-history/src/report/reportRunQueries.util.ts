@@ -42,7 +42,7 @@ order by kind, subject.name`,
   subject.name as "subjectName",
   array_agg(trial.outcome::text order by trial.trial_index) as outcomes,
   coalesce(
-    array_agg((detail.detail ->> 'overall')::double precision order by trial.trial_index)
+    array_agg((detail.detail_public ->> 'overall')::double precision order by trial.trial_index)
       filter (where trial.outcome = 'pass' and detail.detail_schema = 'quality/1'),
     '{}'
   ) as scores,

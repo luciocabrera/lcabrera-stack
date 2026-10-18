@@ -5,9 +5,10 @@
  * print exactly what the envelope path prints for the same two runs, or a
  * comparison read from history would disagree with one read from CI
  * artifacts. The judge agreement section is the one difference, because hand
- * grades are stored only in the database. It creates a database of its own beside the one
- * EVALS_TEST_DATABASE_URL names and drops it afterwards. Unset, it skips
- * locally and fails under CI.
+ * grades are stored only in the database. The regression rule's reads run as
+ * a writer role the migrator granted, the role evals:report connects as. It
+ * creates databases and that role beside the one EVALS_TEST_DATABASE_URL
+ * names and drops them afterwards. Unset, it skips locally and fails under CI.
  */
 
 import { randomUUID } from 'node:crypto';
@@ -25,17 +26,22 @@ import { sha256Hex } from '../hashing/sha256Hex.util.ts';
 import { ingestPaths } from '../ingest/ingestPaths.service.ts';
 import { memoryFileSystem } from '../ingest/memoryFileSystem.util.ts';
 import { applyMigrations } from '../migrate/applyMigrations.service.ts';
+import { EVALS_WRITER_ROLE } from '../migrate/migrate.constants.ts';
+import { migrateEvals } from '../migrate/migrateEvals.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
+import { readModelPrices } from '../prices/readModelPrices.service.ts';
 import { databaseUrl } from '../queries/databaseUrl.util.ts';
 import { scratchConnections } from '../testing/scratchConnections.service.ts';
 import { evalsReport } from './evalsReport.service.ts';
 import { fixtureEnvelope } from './fixtureEnvelope.util.ts';
+import { readReportRun } from './readReportRun.service.ts';
 import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
 import {
   AGREEMENT_HEADING,
   AGREEMENT_NEEDS_DATABASE,
   REGRESSION_NEEDS_DATABASE,
 } from './report.constants.ts';
+import { reportRunFromEnvelope } from './reportRunFromEnvelope.util.ts';
 import {
   hiddenSkillOutcomes,
   skillsRunFixture,
@@ -301,8 +307,12 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
   });
 });
 
+const quality: RunEnvelope = runEnvelopeSchema.parse(
+  fixtures.get('skill-quality.json'),
+);
+
 const RULE_FILES = Object.fromEntries(
-  [ruleMain, ...Object.values(RULE_RUNS)].map((envelope) => [
+  [ruleMain, quality, ...Object.values(RULE_RUNS)].map((envelope) => [
     `/results/skills/${envelope.run.run_id}.json`,
     JSON.stringify(envelope),
   ]),
@@ -314,12 +324,25 @@ describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
     database: RULE_SCRATCH,
     url: DATABASE_URL ?? 'postgres://localhost',
   });
+  const writer = {
+    ...EVALS_WRITER_ROLE,
+    name: `evals_writer_report_${randomUUID().replaceAll('-', '')}`,
+  };
+
+  const connectAsWriter = async () => {
+    const client = await connect(RULE_SCRATCH);
+
+    await client.query(`set role "${writer.name}"`);
+
+    return { client, end: () => Promise.resolve() };
+  };
 
   const againstRuleMain = (b: string) =>
     evalsReport({
       a: ruleMain.run.run_id,
       allowModelChange: false,
       b,
+      connect: connectAsWriter,
       connectionString,
       json: false,
       thresholds: THRESHOLDS,
@@ -329,10 +352,17 @@ describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
     const admin = await connect();
 
     await admin.query(`create database ${RULE_SCRATCH}`);
+    await admin.query(`create role "${writer.name}" nologin`);
 
     const client = await connect(RULE_SCRATCH);
+    const migrated = await migrateEvals({
+      client,
+      migrations: await readMigrations(),
+      prices: await readModelPrices(),
+      roles: [writer],
+    });
 
-    await applyMigrations({ client, migrations: await readMigrations() });
+    expect(migrated.granted.map(({ name }) => name)).toEqual([writer.name]);
 
     const ingested = await ingestPaths({
       connectionString,
@@ -359,7 +389,7 @@ describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
     });
   });
 
-  afterAll(() => close({ databases: [RULE_SCRATCH] }));
+  afterAll(() => close({ databases: [RULE_SCRATCH], roles: [writer.name] }));
 
   it('flags a run with a hidden skill and names the skill', async () => {
     const { exitCode, stdout } = await againstRuleMain(
@@ -372,6 +402,27 @@ describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
     );
     expect(stdout[0]).toContain(
       '- skill `react-19`: `react-19/trigger` failed 3 of 3 counted trials',
+    );
+  });
+
+  it('reads the judge scores, set and subject of a run the way its envelope does, as the writer', async () => {
+    const { client } = await connectAsWriter();
+    const stored = await readReportRun({ client, runId: quality.run.run_id });
+    const fromFile = reportRunFromEnvelope(quality);
+
+    expect(fromFile.tasks.flatMap(({ scores }) => scores)).not.toEqual([]);
+    expect(
+      stored?.tasks.map(({ scores, set, subject }) => ({
+        scores,
+        set,
+        subject,
+      })),
+    ).toEqual(
+      fromFile.tasks.map(({ scores, set, subject }) => ({
+        scores,
+        set,
+        subject,
+      })),
     );
   });
 
