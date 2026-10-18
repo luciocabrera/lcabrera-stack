@@ -49,6 +49,10 @@ describe('routes', () => {
     expect(registeredPaths).toContain('evals/subjects/:kind/:name');
     expect(registeredPaths).toContain('evals/heatmap');
     expect(registeredPaths).toContain('evals/cost');
+    expect(registeredPaths).toContain('evals/flaky');
+    expect(registeredPaths).toContain('evals/confusion');
+    expect(registeredPaths).toContain('evals/quality');
+    expect(registeredPaths).toContain('evals/health');
   });
 
   it('serves a stored run as JSON beside the run page', () => {

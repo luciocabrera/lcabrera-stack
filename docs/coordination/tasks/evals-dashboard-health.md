@@ -2,7 +2,7 @@
 id: evals-dashboard-health
 title: Add confusion, quality, flaky and run-health views to /evals
 owner: agent:claude
-status: active
+status: review
 branch: feat/1280-evals-dashboard-health
 area:
   - apps/showcase/src/routes/evals/**
@@ -11,10 +11,11 @@ area:
   - apps/showcase/src/INVENTORY.md
   - packages/eval-history/src/queries/**
   - packages/eval-history/package.json
+  - packages/eval-history/README.md
 started: 2026-10-18
 updated: 2026-10-18
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1400
 issue: #1280
 ---
 

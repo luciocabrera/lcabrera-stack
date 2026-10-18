@@ -1,24 +1,67 @@
-import type { RunFigures } from '../types/runFigures.types';
-import type { SuiteRegression } from './EvalsOverview.types';
+import { binaryRegression } from '@repo/eval-history/stats/binaryRegression.util';
 
-const MAIN_BRANCH = 'main';
+import type { FlakyTaskRow, TaskTrialsRow } from '../types/historyRows.types';
+import type { MainRunPair, SuiteRegression } from './EvalsOverview.types';
 
-export const suiteRegressions = (runs: readonly RunFigures[]) => {
-  const mainRuns = runs.filter(({ branch }) => branch === MAIN_BRANCH);
-  const suites = [...new Set(mainRuns.map(({ suite }) => suite))];
+import { EVALS_REGRESSION } from '../constants/evalsDashboard.constants';
 
-  return suites.flatMap((suite) => {
-    const [latest, previous] = mainRuns.filter((run) => run.suite === suite);
+type SuiteRegressionsArgs = {
+  readonly flaky: readonly Pick<FlakyTaskRow, 'suite' | 'taskKey'>[];
+  readonly pairs: readonly MainRunPair[];
+  readonly trials: readonly TaskTrialsRow[];
+};
 
-    if (
-      latest?.rate === undefined ||
-      previous?.lower === undefined ||
-      latest.rate >= previous.lower
-    ) {
+export const suiteRegressions = ({
+  flaky,
+  pairs,
+  trials,
+}: SuiteRegressionsArgs) => {
+  const sideOf = (runId: string) => {
+    const rows = trials.filter((row) => row.runId === runId);
+    const [first] = rows;
+
+    return first === undefined
+      ? undefined
+      : {
+          identity: {
+            harnessVersion: first.harnessVersion,
+            modelId: first.modelId,
+          },
+          tasks: rows.map(({ outcomes, taskKey, taskSet }) => ({
+            outcomes,
+            set: taskSet,
+            taskKey,
+          })),
+        };
+  };
+
+  return pairs.flatMap((pair) => {
+    const main = sideOf(pair.previous.runId);
+    const pr = sideOf(pair.latest.runId);
+
+    if (main === undefined || pr === undefined) {
       return [];
     }
 
-    const regression: SuiteRegression = { latest, previous, suite };
+    const flakyLeftOut = flaky
+      .filter(({ suite }) => suite === pair.suite)
+      .map(({ taskKey }) => taskKey);
+    const verdict = binaryRegression({
+      config: EVALS_REGRESSION,
+      flaky: flakyLeftOut,
+      main,
+      pr,
+    });
+
+    if (verdict.kind !== 'regression') {
+      return [];
+    }
+
+    const regression: SuiteRegression = {
+      ...pair,
+      findings: verdict.findings,
+      flakyLeftOut,
+    };
 
     return [regression];
   });

@@ -37,9 +37,14 @@ import { readAnnotations } from './readAnnotations.service.ts';
 import { readerColumns } from './readerColumns.util.ts';
 import { readFlakyTasks } from './readFlakyTasks.service.ts';
 import { readSchemaColumns } from './readPublicColumns.service.ts';
+import { readQualityBaselines } from './readQualityBaselines.service.ts';
+import { readQualityScores } from './readQualityScores.service.ts';
+import { readRunHealth } from './readRunHealth.service.ts';
 import { readRunSummaries } from './readRunSummaries.service.ts';
 import { readRunTrials } from './readRunTrials.service.ts';
 import { readSubjectTrend } from './readSubjectTrend.service.ts';
+import { readTaskTrials } from './readTaskTrials.service.ts';
+import { readTriggerConfusion } from './readTriggerConfusion.service.ts';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
@@ -509,7 +514,15 @@ values ($1, 'skills/1', jsonb_build_object(
       sorting: [],
       trialId: seeded.trialId,
     });
+    const dashboard = [
+      await readTaskTrials({ client, runIds: [seeded.runId] }),
+      await readTriggerConfusion({ client, runIds: [seeded.runId] }),
+      await readRunHealth({ client, runIds: [seeded.runId] }),
+      await readQualityScores({ client, runIds: [seeded.runId] }),
+      await readQualityBaselines({ client }),
+    ];
     const results = [
+      ...dashboard,
       summary,
       trials,
       await readSubjectTrend({
@@ -536,6 +549,9 @@ values ($1, 'skills/1', jsonb_build_object(
 
     expect(summary).toMatchObject({ node: 'synthetic', os: 'linux', runs: 1 });
     expect(trials.data).toMatchObject([
+      { expectedSkill: 'synthetic-skill-01', invoked: ['synthetic-skill-01'] },
+    ]);
+    expect(dashboard[1]).toMatchObject([
       { expectedSkill: 'synthetic-skill-01', invoked: ['synthetic-skill-01'] },
     ]);
     expect(results.at(-4)).toMatchObject({ runId: seeded.runId });

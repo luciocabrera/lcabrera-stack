@@ -1,23 +1,33 @@
 import { evalsReaderPool } from '@repo/eval-history/queries/evalsReaderPool.service';
 import { readAnnotations } from '@repo/eval-history/queries/readAnnotations.service';
 import { readFlakyTasks } from '@repo/eval-history/queries/readFlakyTasks.service';
+import { readQualityBaselines } from '@repo/eval-history/queries/readQualityBaselines.service';
+import { readQualityScores } from '@repo/eval-history/queries/readQualityScores.service';
 import { readRunComparison } from '@repo/eval-history/queries/readRunComparison.service';
 import { readRunCosts } from '@repo/eval-history/queries/readRunCosts.service';
+import { readRunHealth } from '@repo/eval-history/queries/readRunHealth.service';
 import { readRunJudgeScores } from '@repo/eval-history/queries/readRunJudgeScores.service';
 import { readRunSummaries } from '@repo/eval-history/queries/readRunSummaries.service';
 import { readRunTrials } from '@repo/eval-history/queries/readRunTrials.service';
 import { readSubjectRuns } from '@repo/eval-history/queries/readSubjectRuns.service';
+import { readTaskTrials } from '@repo/eval-history/queries/readTaskTrials.service';
+import { readTriggerConfusion } from '@repo/eval-history/queries/readTriggerConfusion.service';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import {
   selectAnnotations,
   selectFlakyTasks,
+  selectQualityBaselines,
+  selectQualityScores,
   selectRunComparison,
   selectRunCosts,
+  selectRunHealth,
   selectRunJudgeScores,
   selectRunSummaries,
   selectRunTrials,
   selectSubjectRuns,
+  selectTaskTrials,
+  selectTriggerConfusion,
 } from './evalsHistory.service';
 
 const POOL = { query: vi.fn() };
@@ -58,6 +68,26 @@ vi.mock('@repo/eval-history/queries/readRunTrials.service', () => ({
 
 vi.mock('@repo/eval-history/queries/readSubjectRuns.service', () => ({
   readSubjectRuns: vi.fn(() => Promise.resolve([])),
+}));
+
+vi.mock('@repo/eval-history/queries/readQualityBaselines.service', () => ({
+  readQualityBaselines: vi.fn(() => Promise.resolve([])),
+}));
+
+vi.mock('@repo/eval-history/queries/readQualityScores.service', () => ({
+  readQualityScores: vi.fn(() => Promise.resolve([])),
+}));
+
+vi.mock('@repo/eval-history/queries/readRunHealth.service', () => ({
+  readRunHealth: vi.fn(() => Promise.resolve([])),
+}));
+
+vi.mock('@repo/eval-history/queries/readTaskTrials.service', () => ({
+  readTaskTrials: vi.fn(() => Promise.resolve([])),
+}));
+
+vi.mock('@repo/eval-history/queries/readTriggerConfusion.service', () => ({
+  readTriggerConfusion: vi.fn(() => Promise.resolve([])),
 }));
 
 afterEach(() => {
@@ -114,5 +144,28 @@ describe('the evals history service', () => {
     });
     expect(readSubjectRuns).toHaveBeenCalledWith({ client: POOL, scope });
     expect(evalsReaderPool).toHaveBeenCalledTimes(6);
+  });
+
+  it('reads the flaky, confusion, quality and health views on the reader pool', async () => {
+    const runIds = ['run'];
+
+    await Promise.all([
+      selectQualityBaselines(),
+      selectQualityScores({ runIds }),
+      selectRunHealth({ runIds }),
+      selectTaskTrials({ runIds, taskKeys: ['task'] }),
+      selectTriggerConfusion({ runIds }),
+    ]);
+
+    expect(readQualityBaselines).toHaveBeenCalledWith({ client: POOL });
+    expect(readQualityScores).toHaveBeenCalledWith({ client: POOL, runIds });
+    expect(readRunHealth).toHaveBeenCalledWith({ client: POOL, runIds });
+    expect(readTaskTrials).toHaveBeenCalledWith({
+      client: POOL,
+      runIds,
+      taskKeys: ['task'],
+    });
+    expect(readTriggerConfusion).toHaveBeenCalledWith({ client: POOL, runIds });
+    expect(evalsReaderPool).toHaveBeenCalledTimes(5);
   });
 });
