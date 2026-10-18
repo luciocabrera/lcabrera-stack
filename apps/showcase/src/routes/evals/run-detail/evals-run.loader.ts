@@ -7,13 +7,9 @@ import { APP_ID } from '@/constants/app.constants';
 
 import type { TrialPage, TrialTableRow } from '../types/trialTableRow.types';
 
-import {
-  selectRunSummaries,
-  selectRunTrials,
-} from '../.server/evalsHistory.service';
-import { requireEvalsDashboard } from '../.server/requireEvalsDashboard.service';
+import { selectRunTrials } from '../.server/evalsHistory.service';
+import { requireStoredRun } from '../.server/requireStoredRun.service';
 import { EVALS_CHART_TRIALS } from '../constants/evalsDashboard.constants';
-import { isRunId } from '../utils/isRunId.util';
 import { parseTrialId } from '../utils/parseTrialId.util';
 import { runFigures } from '../utils/runFigures.util';
 import { toTrialPage } from '../utils/toTrialPage.util';
@@ -27,22 +23,8 @@ import {
 } from './EvalsRun.constants';
 
 export const loader = async (args: LoaderFunctionArgs) => {
-  requireEvalsDashboard();
-
-  const { runId } = args.params;
-
-  if (!isRunId(runId)) {
-    throw new Response('Not Found', { status: 404 });
-  }
-
-  const [run] = await selectRunSummaries({
-    scope: { kind: 'run', runId },
-  });
-
-  if (run === undefined) {
-    throw new Response('Not Found', { status: 404 });
-  }
-
+  const run = await requireStoredRun(args.params.runId);
+  const { runId } = run;
   const trialId = parseTrialId(
     new URL(args.request.url).searchParams.get('trial'),
   );

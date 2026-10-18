@@ -3,6 +3,7 @@ import { readAnnotations } from '@repo/eval-history/queries/readAnnotations.serv
 import { readFlakyTasks } from '@repo/eval-history/queries/readFlakyTasks.service';
 import { readRunComparison } from '@repo/eval-history/queries/readRunComparison.service';
 import { readRunCosts } from '@repo/eval-history/queries/readRunCosts.service';
+import { readRunJudgeScores } from '@repo/eval-history/queries/readRunJudgeScores.service';
 import { readRunSummaries } from '@repo/eval-history/queries/readRunSummaries.service';
 import { readRunTrials } from '@repo/eval-history/queries/readRunTrials.service';
 import { readSubjectRuns } from '@repo/eval-history/queries/readSubjectRuns.service';
@@ -13,6 +14,7 @@ import {
   selectFlakyTasks,
   selectRunComparison,
   selectRunCosts,
+  selectRunJudgeScores,
   selectRunSummaries,
   selectRunTrials,
   selectSubjectRuns,
@@ -40,6 +42,10 @@ vi.mock('@repo/eval-history/queries/readRunCosts.service', () => ({
   readRunCosts: vi.fn(() =>
     Promise.resolve({ runs: [], subjects: [], suites: [] }),
   ),
+}));
+
+vi.mock('@repo/eval-history/queries/readRunJudgeScores.service', () => ({
+  readRunJudgeScores: vi.fn(() => Promise.resolve([])),
 }));
 
 vi.mock('@repo/eval-history/queries/readRunSummaries.service', () => ({
@@ -86,6 +92,7 @@ describe('the evals history service', () => {
       selectFlakyTasks({ disagreeFraction: 0.2, window: 10 }),
       selectRunComparison({ a: 'a', b: 'b' }),
       selectRunCosts({ perSuite: 5 }),
+      selectRunJudgeScores({ runId: 'run' }),
       selectSubjectRuns({ scope }),
     ]);
 
@@ -101,7 +108,11 @@ describe('the evals history service', () => {
       client: POOL,
     });
     expect(readRunCosts).toHaveBeenCalledWith({ client: POOL, perSuite: 5 });
+    expect(readRunJudgeScores).toHaveBeenCalledWith({
+      client: POOL,
+      runId: 'run',
+    });
     expect(readSubjectRuns).toHaveBeenCalledWith({ client: POOL, scope });
-    expect(evalsReaderPool).toHaveBeenCalledTimes(5);
+    expect(evalsReaderPool).toHaveBeenCalledTimes(6);
   });
 });
