@@ -135,7 +135,9 @@ envelope files the report says it was not applied.
   new model has none. rules-consistency runs no model and needs no baseline.
 - **Flaky tasks.** A task whose trials disagreed in more than
   `flaky.disagreeFraction` of its last `flaky.window` runs, on any model, is
-  flaky. The report lists each one under "Flaky, left out of the rule" with
+  flaky. Those runs leave out the two being compared, so a task that regresses
+  in run B is judged on its earlier history and is not excused as flaky by its
+  own regression. The report lists each one under "Flaky, left out of the rule" with
   its passed over counted trials in both runs and how many recent runs
   disagreed, and the rule ignores it.
 

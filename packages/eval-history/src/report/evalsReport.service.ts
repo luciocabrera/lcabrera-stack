@@ -155,6 +155,7 @@ export const evalsReport = async ({
             history: await readRuleHistory({
               client: connection?.client,
               config: thresholds,
+              excludedRuns: [a.runId, b.runId],
               run: b,
             }),
             thresholds,

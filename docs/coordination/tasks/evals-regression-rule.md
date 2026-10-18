@@ -9,6 +9,9 @@ area:
   - packages/eval-history/src/stats/**
   - packages/eval-history/src/baseline/**
   - packages/eval-history/src/envelope/envelope.constants.ts
+  - packages/eval-history/migrations/0005-flaky-tasks-excluding-runs.sql
+  - packages/eval-history/src/queries/flakyTasksQuery.util.ts
+  - packages/eval-history/src/queries/flakyTasksQuery.util.test.ts
   - packages/eval-history/src/envelope/envelope.schema.ts
   - packages/eval-history/README.md
   - evals/report-runs.mjs

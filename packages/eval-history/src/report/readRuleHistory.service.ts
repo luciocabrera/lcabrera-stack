@@ -8,12 +8,14 @@ import { readRuleBaseline } from './readRuleBaseline.service.ts';
 type ReadRuleHistoryArgs = {
   readonly client: QueryClient | undefined;
   readonly config: RegressionConfig;
+  readonly excludedRuns: readonly string[];
   readonly run: Pick<ReportRun, 'modelId' | 'suite'>;
 };
 
 export const readRuleHistory = async ({
   client,
   config,
+  excludedRuns,
   run,
 }: ReadRuleHistoryArgs) => {
   if (client === undefined) {
@@ -23,6 +25,7 @@ export const readRuleHistory = async ({
   const flaky = await readFlakyTasks({
     client,
     disagreeFraction: config.flaky.disagreeFraction,
+    excludedRuns,
     window: config.flaky.window,
   });
 

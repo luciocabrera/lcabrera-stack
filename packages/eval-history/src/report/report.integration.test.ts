@@ -136,9 +136,9 @@ const NO_BASELINE =
 const flakyAgainst = (label: string) =>
   [
     'Flaky, left out of the rule:',
-    `- \`skills/react-19/trigger-3\`: main 2/3, ${label} —; its trials disagreed in 1 of its last 1 runs`,
-    `- \`skills/react-19/trigger-1\`: main 3/3, ${label} ${label === FEATURE ? '1/3' : '3/3'}; its trials disagreed in 1 of its last 3 runs`,
-    `- \`skills/react-19/trigger-2\`: main 3/3 (+1 not counted), ${label} ${label === FEATURE ? '3/3' : '1/2'}; its trials disagreed in 1 of its last 3 runs`,
+    label === FEATURE
+      ? `- \`skills/react-19/trigger-2\`: main 3/3 (+1 not counted), ${label} 3/3; its trials disagreed in 1 of its last 1 runs`
+      : `- \`skills/react-19/trigger-1\`: main 3/3, ${label} 3/3; its trials disagreed in 1 of its last 1 runs`,
   ].join('\n');
 
 type WithHistoryArgs = {
@@ -309,17 +309,47 @@ const quality: RunEnvelope = runEnvelopeSchema.parse(
   fixtures.get('skill-quality.json'),
 );
 
-const RULE_FILES = Object.fromEntries(
-  [ruleMain, quality, ...Object.values(RULE_RUNS)].map((envelope) => [
-    `/results/skills/${envelope.run.run_id}.json`,
-    JSON.stringify(envelope),
-  ]),
-);
+const resultFiles = (envelopes: readonly RunEnvelope[]) =>
+  Object.fromEntries(
+    envelopes.map((envelope) => [
+      `/results/skills/${envelope.run.run_id}.json`,
+      JSON.stringify(envelope),
+    ]),
+  );
 
-describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
+const SHORT_MAIN = ruleRun({ runId: '00000000-0000-4000-8000-0000000000e1' });
+
+const SHORT_HISTORY = [
+  ruleRun({
+    outcomesOf: (taskKey) =>
+      taskKey === 'store-pattern/near-miss'
+        ? WOBBLES
+        : ['pass', 'pass', 'pass'],
+    runId: '00000000-0000-4000-8000-0000000000e2',
+  }),
+  ruleRun({ runId: '00000000-0000-4000-8000-0000000000e3' }),
+  SHORT_MAIN,
+];
+
+const SHORT_REGRESSED = ruleRun({
+  branch: HIDDEN,
+  outcomesOf: (taskKey) =>
+    ['react-19/near-miss', 'store-pattern/near-miss'].includes(taskKey)
+      ? ['pass', 'fail', 'fail']
+      : ['pass', 'pass', 'pass'],
+  runId: '00000000-0000-4000-8000-0000000000e4',
+});
+
+type RuleDatabaseArgs = {
+  readonly database: string;
+  readonly envelopes: readonly RunEnvelope[];
+  readonly main: RunEnvelope;
+};
+
+const ruleDatabase = ({ database, envelopes, main }: RuleDatabaseArgs) => {
   const { close, connect } = scratchConnections(DATABASE_URL ?? '');
   const connectionString = databaseUrl({
-    database: RULE_SCRATCH,
+    database,
     url: DATABASE_URL ?? 'postgres://localhost',
   });
   const writer = {
@@ -328,31 +358,20 @@ describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
   };
 
   const connectAsWriter = async () => {
-    const client = await connect(RULE_SCRATCH);
+    const client = await connect(database);
 
     await client.query(`set role "${writer.name}"`);
 
     return { client, end: () => Promise.resolve() };
   };
 
-  const againstRuleMain = (b: string) =>
-    evalsReport({
-      a: ruleMain.run.run_id,
-      allowModelChange: false,
-      b,
-      connect: connectAsWriter,
-      connectionString,
-      json: false,
-      thresholds: THRESHOLDS,
-    });
-
   beforeAll(async () => {
     const admin = await connect();
 
-    await admin.query(`create database ${RULE_SCRATCH}`);
+    await admin.query(`create database ${database}`);
     await admin.query(`create role "${writer.name}" nologin`);
 
-    const client = await connect(RULE_SCRATCH);
+    const client = await connect(database);
     const migrated = await migrateEvals({
       client,
       migrations: await readMigrations(),
@@ -364,7 +383,7 @@ describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
 
     const ingested = await ingestPaths({
       connectionString,
-      fileSystem: memoryFileSystem(RULE_FILES),
+      fileSystem: memoryFileSystem(resultFiles(envelopes)),
       paths: ['/results'],
       quietUnreachable: false,
     });
@@ -379,7 +398,7 @@ describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
         'claude-opus-5-5',
         SQL_NULL,
         'pass_rate',
-        ruleMain.run.git_sha,
+        main.run.git_sha,
         5,
         1,
         0,
@@ -387,7 +406,29 @@ describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
     });
   });
 
-  afterAll(() => close({ databases: [RULE_SCRATCH], roles: [writer.name] }));
+  afterAll(() => close({ databases: [database], roles: [writer.name] }));
+
+  return {
+    againstMain: (b: string) =>
+      evalsReport({
+        a: main.run.run_id,
+        allowModelChange: false,
+        b,
+        connect: connectAsWriter,
+        connectionString,
+        json: false,
+        thresholds: THRESHOLDS,
+      }),
+    connectAsWriter,
+  };
+};
+
+describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
+  const { againstMain: againstRuleMain, connectAsWriter } = ruleDatabase({
+    database: RULE_SCRATCH,
+    envelopes: [ruleMain, quality, ...Object.values(RULE_RUNS)],
+    main: ruleMain,
+  });
 
   it('flags a run with a hidden skill and names the skill', async () => {
     const { exitCode, stdout } = await againstRuleMain(
@@ -435,8 +476,39 @@ describe.skipIf(!DATABASE_URL)('the regression rule against Postgres', () => {
     const { stdout } = await againstRuleMain(RULE_RUNS.wobbleB.run.run_id);
 
     expect(stdout[0]).toContain(
-      '- `store-pattern/near-miss`: main 3/3, feat/1274-hide-react-19 1/3; its trials disagreed in 2 of its last 5 runs',
+      '- `store-pattern/near-miss`: main 3/3, feat/1274-hide-react-19 1/3; its trials disagreed in 1 of its last 3 runs',
     );
     expect(stdout[0]).toContain('Regression rule: nothing flagged.');
   });
 });
+
+describe.skipIf(!DATABASE_URL)(
+  'the regression rule against a short Postgres history',
+  () => {
+    const { againstMain } = ruleDatabase({
+      database: `${RULE_SCRATCH}_short`,
+      envelopes: [...SHORT_HISTORY, SHORT_REGRESSED],
+      main: SHORT_MAIN,
+    });
+
+    it('judges flakiness without the compared runs, so a regression in run B is flagged', async () => {
+      const { stdout } = await againstMain(SHORT_REGRESSED.run.run_id);
+
+      expect(stdout[0]).toContain(
+        [
+          '**Regression flagged** in skill `react-19`:',
+          '- skill `react-19`: `react-19/near-miss` failed 2 of 3 counted trials on feat/1274-hide-react-19 after passing every trial on main',
+        ].join('\n'),
+      );
+    });
+
+    it('keeps out a task its earlier runs alone make flaky', async () => {
+      const { stdout } = await againstMain(SHORT_REGRESSED.run.run_id);
+
+      expect(stdout[0]).toContain(
+        '- `store-pattern/near-miss`: main 3/3, feat/1274-hide-react-19 1/3; its trials disagreed in 1 of its last 2 runs',
+      );
+      expect(stdout[0]).not.toContain('`store-pattern/near-miss` failed');
+    });
+  },
+);

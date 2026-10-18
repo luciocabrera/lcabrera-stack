@@ -9,6 +9,11 @@ import { regressionConfigFixture } from './regressionConfigFixture.util.ts';
 
 const config = regressionConfigFixture();
 
+const RUNS = [
+  '00000000-0000-4000-8000-00000000000a',
+  '00000000-0000-4000-8000-00000000000b',
+];
+
 const flakyRow = (suite: string) => ({
   disagreeFraction: 0.3,
   disagreeing: 3,
@@ -41,18 +46,20 @@ describe('readRuleHistory', () => {
       await readRuleHistory({
         client: undefined,
         config,
+        excludedRuns: RUNS,
         run: { modelId: 'model-a', suite: 'skills' },
       }),
     ).toEqual({ kind: 'needs-database' });
   });
 
-  it("reads the suite's flaky tasks over the configured window, and the model's baseline", async () => {
+  it("reads the suite's flaky tasks over the configured window without the compared runs, and the model's baseline", async () => {
     const { client, sent } = answering([]);
 
     expect(
       await readRuleHistory({
         client,
         config,
+        excludedRuns: RUNS,
         run: { modelId: 'model-a', suite: 'skills' },
       }),
     ).toEqual({
@@ -61,7 +68,7 @@ describe('readRuleHistory', () => {
       kind: 'read',
     });
     expect(sent).toEqual([
-      flakyTasksQuery(config.flaky),
+      flakyTasksQuery({ ...config.flaky, excludedRuns: RUNS }),
       { text: SELECT_LATEST_BASELINE_SQL, values: ['skills', 'model-a'] },
     ]);
   });
@@ -73,6 +80,7 @@ describe('readRuleHistory', () => {
       await readRuleHistory({
         client,
         config,
+        excludedRuns: RUNS,
         run: { modelId: undefined, suite: 'verifier-fixtures' },
       }),
     ).toMatchObject({ baseline: { kind: 'rows', rows: [] } });
@@ -86,6 +94,7 @@ describe('readRuleHistory', () => {
       await readRuleHistory({
         client,
         config,
+        excludedRuns: RUNS,
         run: { modelId: undefined, suite: 'rules-consistency' },
       }),
     ).toMatchObject({ baseline: { kind: 'not-required' }, flaky: [] });

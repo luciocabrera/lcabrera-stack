@@ -45,8 +45,11 @@ decides how the envelope is versioned.
 - `src/queries/` — the read functions the dashboard calls, one per reporting
   view or function of `migrations/0002-reporting.sql`: `readTaskPassRates`
   (`evals.v_task_pass_rate`), `readSubjectTrend` (`evals.v_subject_trend`),
-  `readFlakyTasks` (`evals.flaky_tasks(run_window)`, the plan's `v_flaky_tasks`, a
-  function so the window comes from `evals/regression.config.json`) and
+  `readFlakyTasks` (`evals.flaky_tasks(run_window, excluded_runs)`, the plan's
+  `v_flaky_tasks`, a function so the window comes from
+  `evals/regression.config.json`; `migrations/0005-flaky-tasks-excluding-runs.sql`
+  adds the run list, which `evals:report` fills with the two runs it compares,
+  and keeps the one-argument form as the same function with none left out) and
   `readRunComparison` (`evals.run_compare(a, b)`). Each builds its SQL in a
   pure `*Query.util.ts`, so a test can read what is sent, and none of them, nor
   the views beneath, names a column in `EXCLUDED_COLUMNS`
