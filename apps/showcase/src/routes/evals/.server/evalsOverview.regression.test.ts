@@ -12,19 +12,13 @@
 import { INSERT_BASELINE_SQL } from '@repo/eval-history/baseline/baseline.constants';
 import { ingestPaths } from '@repo/eval-history/ingest/ingestPaths.service';
 import { memoryFileSystem } from '@repo/eval-history/ingest/memoryFileSystem.util';
-import { EVALS_READER_ROLE } from '@repo/eval-history/migrate/migrate.constants';
-import { migrateEvals } from '@repo/eval-history/migrate/migrateEvals.service';
-import { readMigrations } from '@repo/eval-history/migrate/readMigrations.service';
-import { readModelPrices } from '@repo/eval-history/prices/readModelPrices.service';
-import { databaseUrl } from '@repo/eval-history/queries/databaseUrl.util';
-import { closeEvalsReaderPool } from '@repo/eval-history/queries/evalsReaderPool.service';
 import { fixtureEnvelope } from '@repo/eval-history/report/fixtureEnvelope.util';
 import { markedEnvelopes } from '@repo/eval-history/testing/markedEnvelopes.util';
-import { scratchConnections } from '@repo/eval-history/testing/scratchConnections.service';
-import { randomBytes, randomUUID } from 'node:crypto';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
+import { randomUUID } from 'node:crypto';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { loader } from '../overview/evals-overview.loader';
+import { readerDatabase } from './readerDatabase.fixtures';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
@@ -102,35 +96,15 @@ it.runIf(IS_CI)('has a database to judge the overview against', () => {
 describe.skipIf(!DATABASE_URL)(
   'the overview banner on two runs of history',
   () => {
-    const suffix = randomUUID().replaceAll('-', '').slice(0, 16);
-    const databaseName = `evals_overview_${suffix}`;
-    const password = randomBytes(16).toString('hex');
-    const reader = { ...EVALS_READER_ROLE, name: `evals_reader_ovr_${suffix}` };
-    const { close, connect } = scratchConnections(DATABASE_URL ?? '');
+    const database = readerDatabase({
+      prefix: 'evals_overview',
+      url: DATABASE_URL ?? '',
+    });
 
     beforeAll(async () => {
-      const admin = await connect();
-
-      await admin.query(`create database "${databaseName}"`);
-      await admin.query(
-        `create role "${reader.name}" login password '${password}'`,
-      );
-
-      const client = await connect(databaseName);
-
-      await migrateEvals({
-        client,
-        migrations: await readMigrations(),
-        prices: await readModelPrices(),
-        roles: [reader],
-      });
-
-      const scratchUrl = new URL(DATABASE_URL ?? '');
-
-      scratchUrl.pathname = `/${databaseName}`;
-
+      const client = await database.open();
       const ingested = await ingestPaths({
-        connectionString: scratchUrl.href,
+        connectionString: database.ownerUrl,
         fileSystem: memoryFileSystem(RESULT_FILES),
         paths: ['/results'],
         quietUnreachable: false,
@@ -152,24 +126,9 @@ describe.skipIf(!DATABASE_URL)(
           0,
         ],
       });
-
-      vi.stubEnv('EVALS_DASHBOARD', '1');
-      vi.stubEnv(
-        'EVALS_READER_DATABASE_URL',
-        databaseUrl({
-          database: databaseName,
-          password,
-          url: DATABASE_URL ?? '',
-          user: reader.name,
-        }),
-      );
     }, 60_000);
 
-    afterAll(async () => {
-      vi.unstubAllEnvs();
-      await closeEvalsReaderPool();
-      await close({ databases: [databaseName], roles: [reader.name] });
-    });
+    afterAll(() => database.shut());
 
     it('flags a 3/3 to 1/3 drop in the newer run, which the flaky window does not count', async () => {
       const { regressions } = await loader();
