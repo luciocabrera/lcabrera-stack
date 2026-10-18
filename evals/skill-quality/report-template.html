@@ -511,14 +511,13 @@
       };
     });
     const head = document.getElementById('head');
-    const fixedKeys = ['skill', 'overall', 'change'];
+    const fixedKeys = new Set(['skill', 'overall', 'change']);
     const headDims = [...head.querySelectorAll('button')]
       .map((button) => button.dataset.key)
-      .filter((key) => !fixedKeys.includes(key));
+      .filter((key) => !fixedKeys.has(key));
     if (headDims.join() !== dims.join()) {
       for (const button of head.querySelectorAll('button')) {
-        if (!fixedKeys.includes(button.dataset.key))
-          button.closest('th').remove();
+        if (!fixedKeys.has(button.dataset.key)) button.closest('th').remove();
       }
       const headCell = (d) => {
         const button = el('button', { type: 'button', textContent: label(d) });
