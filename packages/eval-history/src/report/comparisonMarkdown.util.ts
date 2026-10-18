@@ -5,6 +5,7 @@ import { costText } from './costText.util.ts';
 import { durationText } from './durationText.util.ts';
 import { flipTable } from './flipTable.util.ts';
 import { modelText } from './modelText.util.ts';
+import { narrowedLine } from './narrowedLine.util.ts';
 import { rateLine } from './rateLine.util.ts';
 import { regressionMarkdown } from './regressionMarkdown.util.ts';
 import { sideLabels } from './sideLabels.util.ts';
@@ -15,6 +16,7 @@ export const comparisonMarkdown = (comparison: Comparison) => {
 
   return [
     `### ${comparison.suite}: ${labels.a} → ${labels.b} (${modelText(comparison)})`,
+    ...narrowedLine(comparison.subjects),
     flipTable({ flips: comparison.flips, labels }),
     rateLine(comparison),
     `Cost: ${costText(comparison.a)} → ${costText(comparison.b)}. Duration p50: ${durationText(comparison.a)} → ${durationText(comparison.b)}.`,

@@ -183,6 +183,7 @@ type RuleReportArgs = HistoryArgs & {
   readonly allowModelChange?: boolean;
   readonly b: string;
   readonly json?: boolean;
+  readonly subjects?: readonly string[];
 };
 
 const ruleReport = async ({
@@ -190,6 +191,7 @@ const ruleReport = async ({
   allowModelChange = false,
   b,
   json = false,
+  subjects,
   ...history
 }: RuleReportArgs) => {
   const result = await evalsReport({
@@ -204,6 +206,7 @@ const ruleReport = async ({
     connectionString: 'postgres://report@localhost/evals',
     json,
     readEnvelope,
+    subjects,
     thresholds: CONFIG,
   });
 
@@ -250,6 +253,17 @@ describe('evalsReport applies the regression rule', () => {
         },
       ],
     });
+  });
+
+  it('compares only the named subjects when the report is narrowed', async () => {
+    const { output } = await ruleReport({
+      b: 'hidden.json',
+      subjects: ['store-pattern'],
+    });
+
+    expect(output).toContain('Narrowed to `store-pattern`');
+    expect(output).toContain('Regression rule: nothing flagged.');
+    expect(output).not.toContain('react-19/trigger');
   });
 
   it('flags nothing on an unchanged rerun', async () => {

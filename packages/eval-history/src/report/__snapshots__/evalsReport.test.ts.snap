@@ -121,6 +121,7 @@ exports[`evalsReport over fixture runs > prints the same comparison as JSON unde
           "kind": "needs-database",
         },
       },
+      "subjects": [],
       "suite": "skills",
       "thresholds": {
         "minTrialsForRate": 6,

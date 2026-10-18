@@ -11,6 +11,7 @@ import { compareRuns } from './compareRuns.util.ts';
 import { connectionUrl } from './connectionUrl.util.ts';
 import { isRunId } from './isRunId.util.ts';
 import { latestRunPairs } from './latestRunPairs.service.ts';
+import { narrowRun } from './narrowRun.util.ts';
 import { readReportAgreement } from './readReportAgreement.service.ts';
 import { readRuleHistory } from './readRuleHistory.service.ts';
 import { ReportInputError } from './reportInput.error.ts';
@@ -28,6 +29,7 @@ type EvalsReportArgs = {
   readonly connectionString: string | undefined;
   readonly json: boolean;
   readonly readEnvelope?: ReadEnvelope;
+  readonly subjects?: readonly string[];
   readonly suite?: string;
   readonly thresholds: RegressionConfig;
 };
@@ -126,6 +128,7 @@ export const evalsReport = async ({
   connectionString,
   json,
   readEnvelope = (file) => readEnvelopeFile({ file }),
+  subjects = [],
   thresholds,
   ...selection
 }: EvalsReportArgs) => {
@@ -145,7 +148,10 @@ export const evalsReport = async ({
         readEnvelope,
       });
       const comparisons = await inSequence({
-        items: pairs,
+        items: pairs.map(({ a, b }) => ({
+          a: narrowRun({ run: a, subjects }),
+          b: narrowRun({ run: b, subjects }),
+        })),
         step: async ({ a, b }) =>
           compareRuns({
             a,
@@ -158,6 +164,7 @@ export const evalsReport = async ({
               excludedRuns: [a.runId, b.runId],
               run: b,
             }),
+            subjects,
             thresholds,
           }),
       });

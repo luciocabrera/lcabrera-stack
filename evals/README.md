@@ -82,7 +82,10 @@ prints one markdown section per suite that has both:
    because no single change then explains the difference.
 
 `--suite` narrows it to one suite and `--branch` names the run under test's
-branch. `--a <run> --b <run>` compares two runs given as run ids or as
+branch. `--subject <name>`, repeatable, narrows both runs to those subjects'
+tasks, so a run of one skill compares with a run of every skill. The report
+then names the subjects it kept, and its cost and duration still cover each
+whole run. `--a <run> --b <run>` compares two runs given as run ids or as
 envelope files, so two CI artifacts compare with no database. `--json` prints
 the same comparison as JSON.
 
@@ -147,6 +150,39 @@ harness version the baseline's runs recorded. `--allow-harness-change` lifts
 the harness condition when the harness is what changed. A flagged
 regression is a finding, not a gate: the command still exits 0, and `--json`
 carries the verdict as `regression` on each comparison.
+
+## The pull request comment
+
+The **Eval report (Claude, advisory)** job in
+[`agent-evals.yml`](../.github/workflows/agent-evals.yml) runs on a pull
+request from this repository that touches `.github/skills/`,
+`.claude/rules/`, `.claude/agents/` or `evals/`, and keeps one comment on it.
+The comment starts with `<!-- eval-history-report -->`.
+[`upsert-comment.mjs`](./pr-report/upsert-comment.mjs) edits the bot comment
+that starts with that marker, reading every page of the pull request's
+comments, and posts one only when there is none. A new push rewrites the same
+comment.
+
+[`select-skills.mjs`](./pr-report/select-skills.mjs) decides what runs from
+the diff against the merge base:
+
+- when a `SKILL.md`'s name, description or paths changed, or a skill was
+  added or removed, every skill runs, because that catalog is what every
+  session sees;
+- otherwise, each skill whose `.github/skills/<skill>/` or
+  `evals/skills/<skill>/` directory changed runs;
+- otherwise no model suite runs and the comment says so.
+
+[`write-comment.mjs`](./pr-report/write-comment.mjs) then compares the
+pull request's run with main's, narrowed with `--subject` to the skills that
+ran. With `EVALS_DATABASE_URL` set and the run complete, it reads main from the
+database, as `--compare main` does, and only once the database holds the
+pull request's run. Otherwise it reads the newest unexpired
+`eval-envelopes-skills` artifact from a run on main. When main has no complete
+run, the comment gives the pull request's run alone, with its `Pass rate:` line.
+Either way a side below `minTrialsForRate` counted trials reads
+`insufficient data`. A run the session limit cut off is partial, and the
+comment says so. The job is not a required check.
 
 ## Recording a noise floor
 
