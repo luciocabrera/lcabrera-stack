@@ -118,6 +118,7 @@
       "nursery": {
         // === Phase 5 (ADR-035 §7). NURSERY — re-check on any Biome upgrade. ===
         "noFloatingPromises": "error",
+        "useExhaustiveSwitchCases": "error",
       },
       "correctness": {
         "noUndeclaredVariables": "error", // Phase 2: agrees with `no-undef` (safety net)

@@ -266,6 +266,8 @@ off until a change of its own clears it.
   in-repo through hoisting and breaks for an installer.
 - `noFloatingPromises` (`nursery`) — a promise neither awaited, returned nor
   handled, whose rejection nothing observes.
+- `useExhaustiveSwitchCases` (`nursery`) — a `switch` over a union that
+  misses a member and has no `default`.
 
 **Nursery rules carry an upgrade duty.** Every rule `biome.jsonc` enables under
 a `nursery` key can be renamed, change behaviour, or graduate
