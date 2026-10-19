@@ -134,7 +134,7 @@ const ROOT_ONLY_KEYS = {
   staged:
     '  `vp staged` run from that package reads this block instead of the\n' +
     '  root one, and the pre-commit hook runs from the root. Add the\n' +
-    '  command to the root `staged` chain (ADR-035).\n',
+    '  command to the root `staged` chain.\n',
 };
 
 const rosterSources = async () => [

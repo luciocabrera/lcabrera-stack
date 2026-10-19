@@ -142,4 +142,13 @@ The root block and its `overrides` remain the only place a rule is set.
 
 The gate now rejects a workspace `fmt` or `staged` key as well: `vp fmt` from a
 package directory applies that package's `fmt` block where `vp check` does not,
-and `vp staged` reads only the `vite.config.ts` in its working directory.
+and `vp staged` reads only the `vite.config.ts` in its working directory. The
+guide does not say the second part; a probe on Vite+ 1.3 does, recorded in
+[#1430](https://github.com/luciocabrera/lcabrera-stack/pull/1430). With one
+file staged that Biome fixes and Oxlint does not, `vp staged --verbose` run from
+`apps/showcase` ran only that package's `vp check --fix` and left the file
+unfixed. Run from the root it ran the root chain and Biome fixed the file. Run
+from `packages/server`, which had no `staged` block, it stopped with
+`No "staged" config found in vite.config.ts`. The pre-commit hook runs
+`vp staged` from the root whatever the probe shows, so a workspace block can
+only differ from the chain the hook runs.
