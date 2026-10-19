@@ -163,9 +163,9 @@ export const renderPlan = ({
   ...prunable.map(
     (path) => `  ${'prune'.padEnd(22)} ${path} — its directory is gone`,
   ),
-  ...containers.map(
-    (entry) =>
-      `  ${`${entry.action} container`.padEnd(22)} ${entry.name} — ${entry.reason}`,
-  ),
+  ...containers.map((entry) => {
+    const label = `${entry.action} container`;
+    return `  ${label.padEnd(22)} ${entry.name} — ${entry.reason}`;
+  }),
   ...notes.map((note) => `note: ${note}`),
 ];

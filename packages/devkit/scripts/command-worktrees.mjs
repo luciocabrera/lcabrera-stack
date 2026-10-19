@@ -36,23 +36,31 @@ const VALUE_FLAGS = new Set(['--base', '--threshold']);
 
 const isValue = (value) => value !== undefined && !value.startsWith('-');
 
+const unexpected = (entry) => ({
+  error: `devkit worktrees: unexpected argument ${entry}`,
+  width: 1,
+});
+
+const readFlag = ({ argv, index }) => {
+  const entry = argv[index] ?? '';
+  if (BOOLEAN_FLAGS.has(entry)) return { pair: [entry, true], width: 1 };
+  const value = argv[index + 1];
+  return VALUE_FLAGS.has(entry) && isValue(value)
+    ? { pair: [entry, value], width: 2 }
+    : unexpected(entry);
+};
+
 const readFlags = (argv) => {
-  const flags = {};
+  const pairs = [];
+  const errors = [];
   let index = 0;
-  while (index < argv.length && flags.error === undefined) {
-    const entry = argv[index] ?? '';
-    const value = argv[index + 1];
-    if (BOOLEAN_FLAGS.has(entry)) {
-      flags[entry] = true;
-      index += 1;
-    } else if (VALUE_FLAGS.has(entry) && isValue(value)) {
-      flags[entry] = value;
-      index += 2;
-    } else {
-      flags.error = `devkit worktrees: unexpected argument ${entry}`;
-    }
+  while (index < argv.length) {
+    const read = readFlag({ argv, index });
+    if (read.pair === undefined) errors.push(read.error);
+    else pairs.push(read.pair);
+    index += read.width;
   }
-  return flags;
+  return { errors, flags: Object.fromEntries(pairs) };
 };
 
 const thresholdOf = (value) => {
@@ -271,9 +279,9 @@ const runPlan = ({ flags, hosts, root }) => {
  * @param {{ argv: string[], hosts: object, root: string }} args
  */
 export const runWorktreesWith = ({ argv, hosts, root }) => {
-  const flags = readFlags(argv);
-  if (flags.error !== undefined) {
-    console.error(flags.error);
+  const { errors, flags } = readFlags(argv);
+  if (errors.length > 0) {
+    console.error(errors.join('\n'));
     return 1;
   }
   return flags['--hint'] === true
