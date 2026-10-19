@@ -5,6 +5,12 @@ export type EvalsRole = {
   readonly name: string;
 };
 
+export type ExposedRole = {
+  readonly definerFunctions: readonly string[];
+  readonly definerViews: readonly string[];
+  readonly role: EvalsRole;
+};
+
 export type LackingPrivilege = {
   readonly object: string;
   readonly privilege: string;
