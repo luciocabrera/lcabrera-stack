@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 /**
- * Runs React Doctor and gates on its error-severity findings.
+ * Runs React Doctor and gates on the findings at the severity the config's
+ * `blocking` names (`error` when absent).
  *
  * Why a script instead of calling the CLI from a package.json line:
  *
@@ -16,18 +17,23 @@
  *    `ok` before it believes the count — the same failure mode that makes
  *    Biome's silent config fallback dangerous (AGENTS.md §4).
  *
+ * 3. The CLI is told `--blocking none` so its exit code never stands in for
+ *    the report; this script applies `blocking` itself, after `ok` is known.
+ *    A `doctor.config.{ts,js,json,…}` beside the `.jsonc` would replace it, so
+ *    one present fails the gate before anything is scanned.
+ *
  * Both modes write the report, so the findings behind a failure are on disk
  * without a second scan. Nothing is committed (ADR-049).
  *
  * Usage:
- *   repo-verify-react-doctor            # gate: fails on any error
+ *   repo-verify-react-doctor            # gate: fails on a blocking finding
  *   repo-verify-react-doctor --report   # report only, never fails
  *
- * Exit codes: 0 = no error-severity findings, 1 = findings or a failed run.
+ * Exit codes: 0 = no blocking findings, 1 = findings, a bad config or a failed run.
  */
 
 import { execFileSync } from 'node:child_process';
-import { mkdirSync, readFileSync, realpathSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
@@ -35,7 +41,12 @@ import { fileURLToPath } from 'node:url';
 import { readGates } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 import { parseJsonc } from './jsonc.mjs';
-import { renderFinding } from './react-doctor-finding.mjs';
+import {
+  blockingFindings,
+  blockingSeverities,
+  findShadowingConfigs,
+  renderFinding,
+} from './react-doctor-finding.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
@@ -76,12 +87,23 @@ const fail = (message) => {
   throw new Error(message);
 };
 
-const assertConfigParses = () => {
-  const path = join(REPO_ROOT, CONFIG);
-  try {
-    parseJsonc(readFileSync(path, 'utf8'));
-  } catch (error) {
+const assertNotShadowed = () => {
+  const shadowing = findShadowingConfigs((name) =>
+    existsSync(join(REPO_ROOT, name)),
+  );
+  if (shadowing.length > 0)
     fail(
+      `${shadowing.join(', ')} shadows ${CONFIG}: React Doctor loads it instead,\n` +
+        `  so the scan would run on rules this gate never read. Delete it, or move\n` +
+        `  its settings into ${CONFIG}.`,
+    );
+};
+
+const readConfig = () => {
+  try {
+    return parseJsonc(readFileSync(join(REPO_ROOT, CONFIG), 'utf8'));
+  } catch (error) {
+    return fail(
       `${CONFIG} is not valid JSONC: ${error.message}\n` +
         '  React Doctor would ignore it and scan with default rules while still\n' +
         '  reporting success, so this fails here instead.',
@@ -89,8 +111,17 @@ const assertConfigParses = () => {
   }
 };
 
+const readBlocking = (config) => {
+  try {
+    return blockingSeverities(config);
+  } catch (error) {
+    return fail(`${CONFIG}: ${error.message}`);
+  }
+};
+
 const main = () => {
-  assertConfigParses();
+  assertNotShadowed();
+  const { level, severities } = readBlocking(readConfig());
   const report = scan();
 
   if (report.ok !== true) {
@@ -110,22 +141,23 @@ const main = () => {
     return;
   }
 
-  const errors = report.diagnostics.filter(
-    (finding) => finding.severity === 'error',
-  );
+  const blocking = blockingFindings(report.diagnostics, severities);
 
-  if (errors.length > 0) {
-    process.stderr.write('\nReact Doctor error-severity finding(s):\n');
-    for (const finding of errors)
+  if (blocking.length > 0) {
+    process.stderr.write(
+      `\nReact Doctor finding(s) at blocking level "${level}":\n`,
+    );
+    for (const finding of blocking)
       process.stderr.write(`${renderFinding(finding)}\n`);
     fail(
-      `${errors.length} error-severity finding(s). Fix the code; a genuine false ` +
-        `positive needs a justified entry in doctor.config.jsonc (see ADR-055).`,
+      `${blocking.length} blocking finding(s). Fix the code; a genuine false ` +
+        `positive needs a justified entry in ${CONFIG} (see ADR-055).`,
     );
   }
 
   process.stdout.write(
-    `React Doctor gate passed: 0 errors, ${warningCount} warning(s) (advisory). Report: ${REPORT}\n`,
+    `React Doctor gate passed at blocking level "${level}": ${errorCount} error(s), ` +
+      `${warningCount} warning(s). Report: ${REPORT}\n`,
   );
 };
 

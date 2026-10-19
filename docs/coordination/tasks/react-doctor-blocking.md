@@ -2,7 +2,7 @@
 id: react-doctor-blocking
 title: feat(repo-standards): fail the React Doctor gate on warnings
 owner: agent:claude
-status: active
+status: review
 branch: feat/1418-react-doctor-blocking
 area:
   - packages/repo-standards/scripts/verify-react-doctor*
@@ -11,10 +11,14 @@ area:
   - docs/decisions/ADR-055-*
   - docs/agents/react-doctor-triage.md
   - .changeset/*react-doctor*
+  - packages/repo-standards/README.md
+  - COMMANDS.md
+  - .github/skills/quality-gate-workflow/SKILL.md
+  - .github/skills/quality-gate-workflow/references/daily-practice.md
 started: 2026-10-19
 updated: 2026-10-19
 plan: (none)
-pr: (none)
+pr: '#1437'
 issue: #1418
 ---
 
@@ -24,6 +28,6 @@ feat(repo-standards): fail the React Doctor gate on warnings
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, gate green, PR ready
 - Blockers: none
 - Next:

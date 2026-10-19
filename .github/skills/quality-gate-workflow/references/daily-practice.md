@@ -22,7 +22,7 @@ vp fmt .
 vp lint .
 vp run -r lint:eslint:check # -r: every workspace
 vp run lint:biome:check     # from the repo ROOT
-vp run react-doctor:verify  # from the repo ROOT — errors block
+vp run react-doctor:verify  # from the repo ROOT — warnings and errors block
 vp check
 vp run typecheck
 vp run test:changed         # from the repo ROOT — reaches root scripts/ too
@@ -36,7 +36,7 @@ vp run test:changed         # from the repo ROOT — reaches root scripts/ too
 | 2    | `vp lint .`                   | rule violations, unsafe patterns, architecture guardrails                  | avoids type/test noise from known lint failures           |
 | 3    | `vp run -r lint:eslint:check` | import/module order, react/stylex rules, `local-rules`                     | eslint-only rule sets no other stage runs                 |
 | 4    | `vp run lint:biome:check`     | the React-domain rules the other two miss                                  | root-only pass; last of the three linters                 |
-| 5    | `vp run react-doctor:verify`  | effect cleanup, server/client boundaries, render cost                      | the only pass covering these; errors block                |
+| 5    | `vp run react-doctor:verify`  | effect cleanup, server/client boundaries, render cost                      | the only pass covering these; warnings and errors block   |
 | 6    | `vp check`                    | fmt + Oxlint + the tsgolint type pass                                      | verifies structural correctness before runtime assertions |
 | 7    | `vp run typecheck`            | real `tsc`; `check:public-api` in `packages/ui`                            | the reference type-check the tsgolint pass approximates   |
 | 8    | `vp run test:changed`         | behavioral regressions, in every affected suite — untracked files included | highest-cost stage, run after static checks pass          |
@@ -50,7 +50,7 @@ gate. `vp run lint:all` chains those three with autofix and stops there — it d
 
 **Stage 5 is not a linter, and no other stage substitutes for it.** React Doctor
 is the only pass checking effect cleanup, server/client boundaries and render-path
-cost; its errors block ([ADR-055](../../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md)).
+cost; its warnings and errors block ([ADR-055](../../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md)).
 Root-only and repo-wide like Biome. When it fails, read
 [`react-doctor-triage.md`](../../../../docs/agents/react-doctor-triage.md) before
 reaching for any suppression.
@@ -148,7 +148,7 @@ vp fmt .
 vp lint .
 vp run -r lint:eslint:check # -r: every workspace
 vp run lint:biome:check     # from the repo ROOT
-vp run react-doctor:verify  # from the repo ROOT — errors block
+vp run react-doctor:verify  # from the repo ROOT — warnings and errors block
 vp check
 vp run typecheck
 vp run test:changed         # from the repo ROOT — reaches root scripts/ too
