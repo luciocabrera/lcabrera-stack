@@ -261,6 +261,9 @@ off until a change of its own clears it.
 
 - `noImportCycles` (`suspicious`) — a module that reaches itself through its
   imports.
+- `noUndeclaredDependencies` (`correctness`) — an import resolved from a
+  package the nearest `package.json` does not declare, the edge that works
+  in-repo through hoisting and breaks for an installer.
 
 **Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
 (and any future nursery adoption) can be renamed, change behaviour, or graduate
