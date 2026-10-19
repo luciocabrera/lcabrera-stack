@@ -23,8 +23,13 @@ export const selectionLine = ({ scope, skills }) =>
     ? "Ran every skill's trigger tasks, because a skill's name, description or paths changed, and that catalog is what every session sees."
     : `Ran the trigger tasks of ${codeList(skills)}, the skills whose directory this pull request changes.`;
 
-export const optInLine = ({ scope, skills }) =>
-  `No model suite ran: the eval report runs only on a pull request labelled \`evals\`. With the label, this change runs ${scope === 'all' ? "every skill's trigger tasks, because a skill's name, description or paths changed" : `the trigger tasks of ${codeList(skills)}, the skills whose directory it changes`}. Adding the label starts the run without a new push, and each later push re-runs it while the label stays.`;
+const optInTarget = ({ scope, skills }) =>
+  scope === 'all'
+    ? "every skill's trigger tasks, because a skill's name, description or paths changed"
+    : `the trigger tasks of ${codeList(skills)}, the skills whose directory it changes`;
+
+export const optInLine = (selection) =>
+  `No model suite ran: the eval report runs only on a pull request labelled \`evals\`. With the label, this change runs ${optInTarget(selection)}. Adding the label starts the run without a new push, and each later push re-runs it while the label stays.`;
 
 export const noRunSections = ({ labelled, selection }) => {
   if (selection.scope === 'out') {
