@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/packages/devkit/scripts/devkit.mjs\" worktrees --hint --threshold 10",
+            "command": "node \"$CLAUDE_PROJECT_DIR/packages/repo-standards/scripts/housekeeping-prune.mjs\" --hint --threshold 10",
             "timeout": 30
           }
         ]

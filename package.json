@@ -41,7 +41,6 @@
     "devkit:closure": "devkit closure",
     "devkit:doctor": "devkit doctor",
     "devkit:sync": "devkit sync",
-    "devkit:worktrees": "devkit worktrees",
     "docs:for-package": "repo-docs-for-package",
     "docs:verify": "repo-verify-docs-paths",
     "evals:annotate": "vp run --filter @repo/eval-history annotate",

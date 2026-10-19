@@ -40,8 +40,8 @@ repo are the only channel you have to it.
   database or any other container you run for the gate gets
   `--label devkit.throwaway=<absolute path of your worktree>`, and you remove it
   with `docker rm -f <name>` before you report. If your run dies first, the label
-  is what lets `devkit worktrees` find it: a stopped one, or one whose worktree is
-  gone, is removed by its `--apply`.
+  is what lets `vp run housekeeping:prune` find it: a stopped one, or one whose
+  worktree is gone, is removed by its `-- --apply`.
 - **Never `gh pr create`, and never merge.** The claim already opened a draft PR,
   so `create` silently returns that URL and drops your title and body — the work
   then lands titled `chore(coordination): claim …`. Use `gh pr edit` instead,

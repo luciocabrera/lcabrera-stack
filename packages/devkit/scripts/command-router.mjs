@@ -11,7 +11,6 @@ import { runClosure } from './command-closure.mjs';
 import { runCreate } from './command-create.mjs';
 import { runInit } from './command-init.mjs';
 import { runDoctor, runSync } from './command-sync.mjs';
-import { runWorktrees } from './command-worktrees.mjs';
 
 const USAGE = [
   'usage:',
@@ -22,8 +21,6 @@ const USAGE = [
   '  devkit doctor --accept <path> --reason "<why>"',
   '  devkit closure [--profile <name>] <directory> [<directory> ...]',
   '  devkit closure [--profile <name>] --shipped',
-  '  devkit worktrees [--apply] [--include-superseded] [--base <ref>]',
-  '  devkit worktrees --hint [--threshold <n>] [--base <ref>]',
 ].join('\n');
 
 const COMMANDS = {
@@ -32,7 +29,6 @@ const COMMANDS = {
   doctor: runDoctor,
   init: runInit,
   sync: runSync,
-  worktrees: runWorktrees,
 };
 
 const withoutSeparator = (argv) => argv.filter((entry) => entry !== '--');

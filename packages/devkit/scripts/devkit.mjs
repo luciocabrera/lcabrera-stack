@@ -17,12 +17,9 @@
  *   devkit doctor --accept <path> --reason "<why>"
  *   devkit closure [--profile <name>] <directory> [<directory> ...]
  *   devkit closure [--profile <name>] --shipped
- *   devkit worktrees [--apply] [--include-superseded] [--base <ref>]
- *   devkit worktrees --hint [--threshold <n>] [--base <ref>]
  *
  * Exit codes: 0 = nothing to report, 1 = findings, drift under --check, bad
- * arguments, a step `create` ran after its commit that failed, or a removal
- * `worktrees --apply` could not carry out.
+ * arguments, or a step `create` ran after its commit that failed.
  */
 
 import { runCommand } from './command-router.mjs';

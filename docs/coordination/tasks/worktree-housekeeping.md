@@ -6,6 +6,7 @@ status: review
 branch: feat/1409-worktree-housekeeping
 area:
   - packages/devkit/**
+  - packages/repo-standards/**
   - .github/skills/worktree-housekeeping/**
   - evals/skills/worktree-housekeeping/**
   - docs/agents/epic-orchestration.md
@@ -15,7 +16,8 @@ area:
   - COMMANDS.md
   - package.json
   - .devkit-manifest.json
-  - .changeset/devkit-worktrees.md
+  - .changeset/housekeeping-superseded-worktrees.md
+  - .changeset/worktree-housekeeping-skill.md
   - reports/api-surface/**
 started: 2026-10-19
 updated: 2026-10-19
@@ -30,6 +32,6 @@ feat(devkit): find and remove worktrees whose work has merged
 
 ## Status / next
 
-- Current step: gate green, PR ready for review
+- Current step: round 2 gate green — housekeeping:prune extended, devkit command removed
 - Blockers: none
 - Next: review

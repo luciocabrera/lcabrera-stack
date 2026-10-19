@@ -1,13 +1,13 @@
 /**
- * Pure classification for `housekeeping:prune` (see
- * ../housekeeping-prune.mjs). Given real git state joined with GitHub PR state,
- * it decides which local branches and worktrees are safe to delete — and, more
- * importantly, which are NOT. The safety rule is the whole point: a branch with
- * unique un-PR'd commits, a worktree with uncommitted changes, and any stash are
- * *reported*, never destroyed. That rule is why this is a separate, unit-tested
- * pure module rather than inline in the shell: the cost of it being wrong is
- * deleted work, so it is exercised without a repo in
- * housekeeping-prune.test.mjs.
+ * Pure classification for `housekeeping:prune` (see ./housekeeping-prune.mjs).
+ * Given git state joined with pull request state, it decides which local
+ * branches, worktrees and throwaway containers are safe to delete, and which
+ * are not. A branch with unique un-PR'd commits, a worktree with a change no
+ * history holds or an untracked file, and any stash are reported, never
+ * destroyed. A dirty worktree whose every change is already in history is
+ * removed only when the caller asks for superseded ones. The cost of a wrong
+ * verdict is deleted work, so it is exercised without a repository in
+ * housekeeping-plan.test.mjs.
  *
  * Trunk and release lines are never pruned, whatever their pull request state
  * says.
@@ -73,18 +73,49 @@ export const classifyBranch = ({
   };
 };
 
-export const classifyWorktree = ({ branch, dirty, isPrimary, pr }) => {
-  if (isPrimary) {
-    return { action: 'keep', reason: 'primary checkout' };
-  }
-  if (dirty) {
+const contentSummary = ({ counts, untracked }) =>
+  `${counts.base} match the default branch, ${counts.branch} match its own history, ${counts.neither} match neither, ${untracked} untracked`;
+
+const isSuperseded = ({ counts, untracked }) =>
+  counts !== undefined && counts.neither === 0 && untracked === 0;
+
+const classifyDirty = (worktree) => {
+  if (worktree.counts === undefined) {
     return {
       action: 'report',
       reason: 'uncommitted changes — resolve manually',
     };
   }
+  const summary = contentSummary(worktree);
+  if (!isSuperseded(worktree)) {
+    return { action: 'report', reason: `uncommitted changes: ${summary}` };
+  }
+  return worktree.includeSuperseded
+    ? { action: 'remove', force: true, reason: `superseded: ${summary}` }
+    : {
+        action: 'report',
+        reason: `every change already in history (${summary}) — --include-superseded removes it`,
+      };
+};
+
+export const classifyWorktree = (worktree) => {
+  const { branch, dirty, isPrimary, locked, onBase, pr } = worktree;
+  if (isPrimary) {
+    return { action: 'keep', reason: 'primary checkout' };
+  }
+  if (locked) {
+    return { action: 'keep', reason: 'locked' };
+  }
+  if (dirty) {
+    return classifyDirty(worktree);
+  }
   if (branch === undefined) {
-    return { action: 'report', reason: 'detached HEAD — resolve manually' };
+    return onBase
+      ? {
+          action: 'remove',
+          reason: 'detached on a commit the default branch contains',
+        }
+      : { action: 'report', reason: 'detached HEAD — resolve manually' };
   }
   if (pr !== undefined && MERGED_OR_CLOSED.has(pr.state)) {
     return {
@@ -92,11 +123,34 @@ export const classifyWorktree = ({ branch, dirty, isPrimary, pr }) => {
       reason: `branch ${branch} merged (PR #${pr.number})`,
     };
   }
+  if (pr === undefined && worktree.hasPrData === false) {
+    return { action: 'report', reason: 'no pull request data — kept' };
+  }
   return {
     action: 'keep',
     reason: pr === undefined ? 'branch not merged' : `PR #${pr.number} open`,
   };
 };
+
+/**
+ * @param {string | undefined} porcelain
+ * @returns {Map<string, { head: string, locked: boolean, prunable: boolean }>}
+ */
+export const parseWorktreeState = (porcelain = '') =>
+  new Map(
+    String(porcelain)
+      .split(/\n\s*\n/u)
+      .map((block) => block.trim().split('\n'))
+      .filter((lines) => lines[0]?.startsWith('worktree '))
+      .map((lines) => [
+        lines[0].slice('worktree '.length),
+        {
+          head: lines.find((line) => line.startsWith('HEAD '))?.slice(5) ?? '',
+          locked: lines.some((line) => line.startsWith('locked')),
+          prunable: lines.some((line) => line.startsWith('prunable')),
+        },
+      ]),
+  );
 
 export const parseWorktrees = (porcelain) => {
   if (!porcelain) {
@@ -119,20 +173,74 @@ export const parseWorktrees = (porcelain) => {
     .filter((entry) => entry.path !== undefined);
 };
 
+export const THROWAWAY_LABEL = 'devkit.throwaway';
+
+const isGone = ({ isOnDisk, live, worktree }) =>
+  worktree !== '' && !live.has(worktree) && !isOnDisk(worktree);
+
+/**
+ * @param {{ containers: { id: string, name: string, running: boolean,
+ *   worktree: string }[], isOnDisk: (path: string) => boolean,
+ *   live: Set<string> }} args
+ */
+export const classifyContainers = ({ containers, isOnDisk, live }) =>
+  containers.map((container) => {
+    if (!container.running) {
+      return { ...container, action: 'remove', reason: 'stopped' };
+    }
+    return isGone({ isOnDisk, live, worktree: container.worktree })
+      ? {
+          ...container,
+          action: 'remove',
+          reason: `orphaned: ${container.worktree} is gone`,
+        }
+      : { ...container, action: 'keep', reason: 'running' };
+  });
+
+const hintLine = (count) =>
+  `${count} ${count === 1 ? 'git worktree looks' : 'git worktrees look'} removable — run /worktree-housekeeping to review and remove them.`;
+
+/**
+ * @param {{ count: number, threshold: number }} args
+ */
+export const renderHint = ({ count, threshold }) =>
+  count > threshold ? hintLine(count) : undefined;
+
 export const buildPlan = ({
   branches,
   checkedOutBranches,
+  containers = [],
   currentBranch,
+  hasPrData,
+  includeSuperseded = false,
+  isOnDisk = () => true,
   keep,
   prByHead,
   stashes,
   uniqueByBranch,
   worktrees,
 }) => {
+  const worktreeVerdicts = worktrees.map((worktree) => ({
+    ...worktree,
+    ...classifyWorktree({
+      ...worktree,
+      hasPrData,
+      includeSuperseded,
+      pr:
+        worktree.branch === undefined
+          ? undefined
+          : prByHead.get(worktree.branch),
+    }),
+  }));
+  const freed = new Set(
+    worktreeVerdicts
+      .filter((entry) => entry.action === 'remove')
+      .map((entry) => entry.branch),
+  );
   const branchVerdicts = branches.map((name) => ({
     name,
     ...classifyBranch({
-      isCheckedOut: checkedOutBranches.has(name),
+      isCheckedOut: checkedOutBranches.has(name) && !freed.has(name),
       isCurrent: name === currentBranch,
       keep,
       name,
@@ -140,18 +248,19 @@ export const buildPlan = ({
       uniqueCount: uniqueByBranch.get(name),
     }),
   }));
-  const worktreeVerdicts = worktrees.map((worktree) => ({
-    ...worktree,
-    ...classifyWorktree({
-      ...worktree,
-      pr:
-        worktree.branch === undefined
-          ? undefined
-          : prByHead.get(worktree.branch),
-    }),
-  }));
+  const containerVerdicts = classifyContainers({
+    containers,
+    isOnDisk,
+    live: new Set(worktrees.map((worktree) => worktree.path)),
+  });
   return {
     deleteBranches: branchVerdicts.filter((entry) => entry.action === 'delete'),
+    keepContainers: containerVerdicts.filter(
+      (entry) => entry.action === 'keep',
+    ),
+    removeContainers: containerVerdicts.filter(
+      (entry) => entry.action === 'remove',
+    ),
     removeWorktrees: worktreeVerdicts.filter(
       (entry) => entry.action === 'remove',
     ),

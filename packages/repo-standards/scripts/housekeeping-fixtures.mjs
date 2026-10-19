@@ -1,16 +1,19 @@
-/*
- * Scratch repositories for the `worktrees` suites: one linked worktree of each
- * kind the plan sorts, built with real git so the readers are exercised as a
- * consumer's repository would exercise them.
+/**
+ * Scratch repositories for the housekeeping suites: one linked worktree of
+ * each kind the plan sorts, built with real git so the readers run as they
+ * would in a consumer's repository.
  */
-
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
-import { runGit } from './git-exec.mjs';
+import { runGitStatus } from './git-exec.mjs';
 
-export const gitIn = (cwd, ...args) => runGit({ args, cwd });
+export const gitIn = (cwd, ...args) => {
+  const { status, stdout } = runGitStatus({ args, cwd });
+  if (status !== 0) throw new Error(`git ${args.join(' ')} failed in ${cwd}`);
+  return stdout;
+};
 
 const commitAll = (cwd, message) => {
   gitIn(cwd, 'add', '-A');
@@ -20,8 +23,7 @@ const commitAll = (cwd, message) => {
 
 const write = (cwd, file, content) => writeFileSync(join(cwd, file), content);
 
-const initRepository = (repo) => {
-  gitIn(repo, 'init', '-q', '-b', 'main');
+export const configureIdentity = (repo) => {
   gitIn(repo, 'config', 'user.email', 'fixture@example.invalid');
   gitIn(repo, 'config', 'user.name', 'Fixture');
   gitIn(repo, 'config', 'commit.gpgsign', 'false');
@@ -37,7 +39,7 @@ export const scratchRoots = () => {
       }
     },
     make: () => {
-      const root = mkdtempSync(join(tmpdir(), 'devkit-worktrees-'));
+      const root = mkdtempSync(join(tmpdir(), 'repo-housekeeping-'));
       made.push(root);
       return root;
     },
@@ -56,13 +58,13 @@ const addWorktree = ({ from, name, repo, root }) => {
 export const buildSortingRepository = (root) => {
   const repo = join(root, 'repo');
   gitIn(root, 'init', '-q', '-b', 'main', repo);
-  initRepository(repo);
+  configureIdentity(repo);
   write(repo, 'file.txt', 'one\n');
   const first = commitAll(repo, 'one');
 
   const merged = addWorktree({ from: 'main', name: 'merged', repo, root });
   write(merged, 'file.txt', 'two\n');
-  const mergedHead = commitAll(merged, 'two on the branch');
+  commitAll(merged, 'two on the branch');
   write(repo, 'file.txt', 'two\n');
   commitAll(repo, 'two, squashed onto main');
 
@@ -85,28 +87,17 @@ export const buildSortingRepository = (root) => {
   const detached = join(root, 'detached');
   gitIn(repo, 'worktree', 'add', '-q', '--detach', detached, first);
 
-  return { detached, merged, mergedHead, noPr, open, repo, superseded, unique };
+  return { detached, merged, noPr, open, repo, superseded, unique };
 };
 
-const pullRequestStates = ({ mergedHead, supersededHead }) => ({
-  merged: { headRefOid: mergedHead, number: 1, state: 'MERGED' },
-  open: { headRefOid: '', number: 2, state: 'OPEN' },
-  superseded: { headRefOid: supersededHead, number: 3, state: 'MERGED' },
-});
-
-/**
- * @param {{ mergedHead: string, supersededHead: string }} heads
- */
-export const pullRequestsFor = (heads) => {
-  const states = pullRequestStates(heads);
-  return () =>
-    ({ branch }) =>
-      states[branch] ?? { state: 'NONE' };
-};
+export const PULL_REQUESTS = [
+  { headRefName: 'merged', number: 1, state: 'MERGED' },
+  { headRefName: 'open', number: 2, state: 'OPEN' },
+];
 
 export const noContainers = {
-  containers: () => ({ containers: [] }),
-  removeContainer: () => ({ ok: true }),
+  list: () => ({ containers: [] }),
+  remove: () => ({ ok: true }),
 };
 
 /**
