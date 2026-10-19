@@ -25,6 +25,11 @@ const SCRIPT = fileURLToPath(
   new URL('../../scripts/migrate.mjs', import.meta.url),
 );
 
+type AsOwnerArgs = {
+  readonly database: string;
+  readonly statements: readonly string[];
+};
+
 type ConnectAsArgs = {
   readonly database: string;
   readonly password?: string;
@@ -85,6 +90,7 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
       items: absent,
       step: (name) => admin.query(`create role "${name}" nologin`),
     });
+    await admin.end();
   };
 
   const nonOwnerUrl = async (database: string) => {
@@ -101,6 +107,29 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     );
 
     return connectionUrl({ database, password, user });
+  };
+
+  const asOwner = async ({ database, statements }: AsOwnerArgs) => {
+    const owner = await connect(database);
+
+    try {
+      await inSequence({
+        items: statements,
+        step: (statement) => owner.query(statement),
+      });
+    } finally {
+      await owner.end();
+    }
+  };
+
+  const migratedDatabase = async () => {
+    await createdRoles();
+    const database = await createDatabase('evals_migrate_script');
+    const url = connectionUrl({ database });
+
+    expect(runScript(url).status).toBe(0);
+
+    return { database, url };
   };
 
   afterAll(() => close({ roles }));
@@ -138,5 +167,98 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     expect(stdout).toContain('  select on column evals.eval_run.run_id');
     expect(stdout).toContain('  select on table evals.v_task_pass_rate');
     expect(stdout).not.toContain('granted evals_reader');
+  });
+
+  it('exits 1 naming a reporting view recreated without security_invoker', async () => {
+    const { database, url } = await migratedDatabase();
+
+    await asOwner({
+      database,
+      statements: [
+        `do $$ begin execute 'create or replace view evals.v_subject_trend as ' || pg_get_viewdef('evals.v_subject_trend'::regclass); end $$`,
+      ],
+    });
+
+    const { status, stdout } = runScript(url);
+
+    expect(status).toBe(1);
+    expect(stdout).toContain(
+      'evals:migrate: role evals_reader can reach objects that run with their owner',
+    );
+    expect(stdout).toContain(
+      '  view evals.v_subject_trend without security_invoker',
+    );
+    expect(stdout).not.toContain('granted evals_reader');
+  });
+
+  it('exits 1 naming a security definer function the reader can execute', async () => {
+    const { database, url } = await migratedDatabase();
+
+    await asOwner({
+      database,
+      statements: [
+        'create function evals.probe_definer() returns integer language sql security definer as $$ select 1 $$',
+      ],
+    });
+
+    const { status, stdout } = runScript(url);
+
+    expect(status).toBe(1);
+    expect(stdout).toContain(
+      '  function evals.probe_definer() is security definer',
+    );
+  });
+
+  it('exits 0 when the owner-privilege views and functions belong to an extension', async () => {
+    const { database, url } = await migratedDatabase();
+
+    await asOwner({
+      database,
+      statements: [
+        'create extension pg_stat_statements',
+        'create function public.probe_extension_definer() returns integer language sql security definer as $$ select 1 $$',
+        'alter extension pg_stat_statements add function public.probe_extension_definer()',
+      ],
+    });
+
+    const { status, stdout } = runScript(url);
+
+    expect(status).toBe(0);
+    expect(stdout).toContain('evals:migrate: granted evals_reader');
+    expect(stdout).not.toContain('pg_stat_statements');
+    expect(stdout).not.toContain('probe_extension_definer');
+  });
+
+  it('skips a security definer function in another session temp schema and still names one in public', async () => {
+    const { database, url } = await migratedDatabase();
+    const session = await connect(database);
+
+    try {
+      await session.query(
+        'create function pg_temp.probe_temp_definer() returns integer language sql security definer as $$ select 1 $$',
+      );
+
+      const temporary = runScript(url);
+
+      expect(temporary.status).toBe(0);
+      expect(temporary.stdout).not.toContain('probe_temp_definer');
+
+      await asOwner({
+        database,
+        statements: [
+          'create function public.probe_public_definer() returns integer language sql security definer as $$ select 1 $$',
+        ],
+      });
+
+      const exposed = runScript(url);
+
+      expect(exposed.status).toBe(1);
+      expect(exposed.stdout).toContain(
+        '  function public.probe_public_definer() is security definer',
+      );
+      expect(exposed.stdout).not.toContain('probe_temp_definer');
+    } finally {
+      await session.end();
+    }
   });
 });

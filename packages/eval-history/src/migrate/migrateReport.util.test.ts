@@ -15,6 +15,7 @@ describe('migrateReport', () => {
     expect(
       migrateReport({
         applied: [migration],
+        exposed: [],
         granted: [EVALS_WRITER_ROLE],
         missing: [],
         pricesUpserted: 3,
@@ -33,6 +34,7 @@ describe('migrateReport', () => {
     expect(
       migrateReport({
         applied: [],
+        exposed: [],
         granted: [],
         missing: [EVALS_WRITER_ROLE],
         pricesUpserted: 3,
@@ -53,6 +55,7 @@ describe('migrateReport', () => {
   it('does not report a role as granted when it still lacks a privilege', () => {
     const report = migrateReport({
       applied: [],
+      exposed: [],
       granted: [EVALS_WRITER_ROLE],
       missing: [],
       pricesUpserted: 3,
@@ -70,5 +73,28 @@ describe('migrateReport', () => {
       'evals:migrate: role evals_reader still lacks these privileges after the grant',
     );
     expect(report).toContain('  usage on schema evals');
+  });
+
+  it('names each owner-privilege object and says the migrations stay applied', () => {
+    const report = migrateReport({
+      applied: [migration],
+      exposed: [
+        {
+          definerFunctions: ['evals.flaky_tasks(integer)'],
+          definerViews: ['evals.v_subject_trend'],
+          role: EVALS_READER_ROLE,
+        },
+      ],
+      granted: [EVALS_WRITER_ROLE],
+      missing: [],
+      pricesUpserted: 3,
+      ungranted: [],
+    });
+
+    expect(report.split('\n').slice(-3)).toEqual([
+      "evals:migrate: role evals_reader can reach objects that run with their owner's privileges. The migrations above are applied and stay recorded; add a migration that gives each view security_invoker = true and drops security definer from each function:",
+      '  view evals.v_subject_trend without security_invoker',
+      '  function evals.flaky_tasks(integer) is security definer',
+    ]);
   });
 });
