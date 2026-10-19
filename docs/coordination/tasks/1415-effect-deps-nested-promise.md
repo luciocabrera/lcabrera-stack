@@ -2,7 +2,7 @@
 id: 1415-effect-deps-nested-promise
 title: fix(ui): fix effect-dependency, nested-component and promise findings
 owner: agent:claude
-status: active
+status: review
 branch: fix/1415-1415-effect-deps-nested-promise
 area:
   - packages/ui/src/**
@@ -10,7 +10,7 @@ area:
 started: 2026-10-19
 updated: 2026-10-19
 plan: (none)
-pr: (none)
+pr: #1434
 issue: #1415
 ---
 

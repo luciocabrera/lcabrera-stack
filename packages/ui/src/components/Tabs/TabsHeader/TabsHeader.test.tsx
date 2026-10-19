@@ -9,6 +9,8 @@ import {
 } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import type { TabsHeaderProps } from './TabsHeader.types';
+
 import { focusedTab, TABS_FIXTURE as tabs } from '../Tabs.fixtures';
 import { TabsHeader } from './TabsHeader.component';
 
@@ -209,6 +211,12 @@ type StubViewportArgs = {
 
 const VIEWPORT_LEFT = 640;
 
+const LEADING_TAB = {
+  children: <span>Content Z</span>,
+  header: 'Tab Z',
+  key: 'z',
+};
+
 const stubViewport = ({
   clientWidth,
   scrollLeft = 0,
@@ -258,6 +266,31 @@ const renderHeader = async () => {
   );
 
   await act(async () => {});
+};
+
+const rerenderScrolledAway = async (nextTabs: TabsHeaderProps['tabs']) => {
+  const position = stubViewport({
+    clientWidth: 200,
+    scrollLeft: 300,
+    scrollWidth: 600,
+    tabLeft: VIEWPORT_LEFT - 300,
+  });
+  const header = (headerTabs: TabsHeaderProps['tabs']) => (
+    <TabsHeader
+      activeTab='a'
+      isBusy={false}
+      label='Settings tabs'
+      onSelectTab={vi.fn()}
+      tabs={headerTabs}
+    />
+  );
+  const { rerender } = render(header(tabs));
+
+  await act(async () => {});
+  position.current = 300;
+  rerender(header(nextTabs));
+
+  return position;
 };
 
 describe('TabsHeader when the tabs do not fit', () => {
@@ -335,5 +368,50 @@ describe('TabsHeader when the tabs do not fit', () => {
 
     expect(wasHandled).toBe(false);
     expect(document.activeElement).not.toBe(button);
+  });
+
+  it('brings the active tab back into view when a tab is inserted before it', async () => {
+    const position = await rerenderScrolledAway([LEADING_TAB, ...tabs]);
+
+    expect(position.current).toBe(0);
+  });
+
+  it('leaves the strip where it is when a tab is appended after the active one', async () => {
+    const position = await rerenderScrolledAway([...tabs, LEADING_TAB]);
+
+    expect(position.current).toBe(300);
+  });
+
+  it('re-measures the overflow when the observed strip resizes', async () => {
+    const observed: Element[] = [];
+    const callbacks: (() => void)[] = [];
+
+    vi.stubGlobal(
+      'ResizeObserver',
+      class {
+        constructor(callback: () => void) {
+          callbacks.push(callback);
+        }
+
+        disconnect() {}
+
+        observe(target: Element) {
+          observed.push(target);
+        }
+      },
+    );
+    stubViewport({ clientWidth: 400, scrollWidth: 400 });
+    await renderHeader();
+
+    expect(screen.queryByTestId('tabs-scroll-end')).toBeNull();
+    expect(observed).toContain(screen.getByRole('tablist'));
+
+    stubViewport({ clientWidth: 200, scrollWidth: 600 });
+    act(() => {
+      for (const callback of callbacks) callback();
+    });
+
+    expect(screen.getByTestId('tabs-scroll-end')).not.toBeNull();
+    vi.unstubAllGlobals();
   });
 });

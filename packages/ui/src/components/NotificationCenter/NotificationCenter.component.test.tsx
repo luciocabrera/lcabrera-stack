@@ -10,21 +10,32 @@ import {
   vi,
 } from 'vite-plus/test';
 
-const { dismissNotificationMock, notificationsMock, showPopoverMock } =
+import type { AppNotification } from '#ui/contexts/NotificationContext';
+
+const { dismissNotificationMock, notificationsRef, showPopoverMock } =
   vi.hoisted(() => ({
     dismissNotificationMock: vi.fn(),
-    notificationsMock: [
-      {
-        durationMs: 3000,
-        id: 'n-1',
-        message: 'Fix invalid filters before accepting table settings.',
-        placement: 'bottom-right',
-        title: 'Invalid filters',
-        variant: 'warning',
-      },
-    ],
+    notificationsRef: { current: [] as readonly AppNotification[] },
     showPopoverMock: vi.fn(),
   }));
+
+const INVALID_FILTERS: AppNotification = {
+  durationMs: 3000,
+  id: 'n-1',
+  message: 'Fix invalid filters before accepting table settings.',
+  placement: 'bottom-right',
+  title: 'Invalid filters',
+  variant: 'warning',
+};
+
+const SAVED: AppNotification = {
+  durationMs: 3000,
+  id: 'n-2',
+  message: 'Settings saved.',
+  placement: 'top-left',
+  title: 'Saved',
+  variant: 'success',
+};
 
 const originalShowPopoverDescriptorRef: {
   current: PropertyDescriptor | undefined;
@@ -35,6 +46,7 @@ const originalShowPopoverDescriptorRef: {
 beforeEach(() => {
   dismissNotificationMock.mockReset();
   showPopoverMock.mockReset();
+  notificationsRef.current = [INVALID_FILTERS];
 
   originalShowPopoverDescriptorRef.current = Object.getOwnPropertyDescriptor(
     HTMLDivElement.prototype,
@@ -67,7 +79,7 @@ vi.mock('#ui/contexts/NotificationContext/actions', () => ({
 }));
 
 vi.mock('#ui/contexts/NotificationContext/selectors', () => ({
-  useGetNotifications: () => notificationsMock,
+  useGetNotifications: () => notificationsRef.current,
 }));
 
 import { NotificationCenter } from './NotificationCenter.component';
@@ -94,5 +106,33 @@ describe('NotificationCenter', () => {
     );
 
     expect(dismissNotificationMock).toHaveBeenCalledWith('n-1');
+  });
+
+  it('opens a corner once, when it first holds a notification', () => {
+    const { rerender } = render(<NotificationCenter />);
+
+    expect(showPopoverMock).toHaveBeenCalledOnce();
+
+    notificationsRef.current = [INVALID_FILTERS, SAVED];
+    rerender(<NotificationCenter />);
+
+    expect(showPopoverMock).toHaveBeenCalledTimes(2);
+
+    notificationsRef.current = [SAVED, INVALID_FILTERS];
+    rerender(<NotificationCenter />);
+
+    expect(showPopoverMock).toHaveBeenCalledTimes(2);
+  });
+
+  it('opens a corner again after it emptied and refilled', () => {
+    const { rerender } = render(<NotificationCenter />);
+
+    notificationsRef.current = [SAVED];
+    rerender(<NotificationCenter />);
+
+    notificationsRef.current = [SAVED, INVALID_FILTERS];
+    rerender(<NotificationCenter />);
+
+    expect(showPopoverMock).toHaveBeenCalledTimes(3);
   });
 });

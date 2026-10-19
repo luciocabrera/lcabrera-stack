@@ -28,9 +28,13 @@ export const firePrefetch = <TResponse, TData = unknown>({
 
   prefetchRef.current = initialCache;
 
-  void resolution.then((resolvedCache) => {
+  const adoptResolvedCache = async () => {
+    const resolvedCache = await resolution;
+
     if (prefetchRef.current.skip === initialCache.skip) {
       prefetchRef.current = resolvedCache;
     }
-  });
+  };
+
+  void adoptResolvedCache();
 };

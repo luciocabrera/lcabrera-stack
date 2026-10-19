@@ -58,4 +58,21 @@ describe('useNotifyOnError', () => {
 
     expect(notifyMock).toHaveBeenCalledTimes(1);
   });
+
+  it('does not notify while there is no error', () => {
+    renderHook(() => useNotifyOnError(undefined));
+
+    expect(notifyMock).not.toHaveBeenCalled();
+  });
+
+  it('notifies once an error arrives after none', () => {
+    const { rerender } = renderHook<void, { readonly error: unknown }>(
+      ({ error }) => useNotifyOnError(error),
+      { initialProps: { error: undefined } },
+    );
+
+    rerender({ error: new Error('late') });
+
+    expect(notifyMock).toHaveBeenCalledOnce();
+  });
 });
