@@ -49,3 +49,7 @@ export const EVALS_ROLES: readonly EvalsRole[] = [
 ];
 
 export const MIGRATE_REPORT_PREFIX = 'evals:migrate:';
+
+export const USER_SCHEMA_PREDICATE = String.raw`n.nspname not in ('pg_catalog', 'information_schema')
+  and n.nspname not like 'pg\_toast%'
+  and n.nspname not like 'pg\_temp%'`;

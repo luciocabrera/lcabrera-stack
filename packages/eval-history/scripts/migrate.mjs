@@ -2,14 +2,16 @@
  * Applies `migrations/` to the eval-history database named by
  * EVALS_MIGRATE_DATABASE_URL, under the advisory lock and checksum check
  * ADR-130 decides, upserts `model-prices.json` into evals.model_price, and
- * grants each existing role its privileges, then checks the role holds them.
+ * grants each existing role its privileges, then checks the role holds them
+ * and that the reader reaches no view or function running as its owner (ADR-137).
  * It connects as the migrating role that owns the evals objects, never as the
  * writer EVALS_DATABASE_URL names (ADR-134). A missing role is printed as the statements that create it.
  *
  * Usage: vp run evals:migrate
  * Exit codes: 0 applied or already current, missing roles included; 1 on an
  * invalid env, a changed applied file, an invalid price file, a failed
- * statement, or a role that still lacks a privilege after the grant.
+ * statement, a role that still lacks a privilege after the grant, or a reader
+ * that can reach an owner-privilege view or function, the migrations staying applied.
  */
 import process from 'node:process';
 import pg from 'pg';
@@ -48,7 +50,7 @@ if (env.success) {
 
     console.log(migrateReport(result));
 
-    if (result.ungranted.length > 0) {
+    if (result.ungranted.length > 0 || result.exposed.length > 0) {
       process.exitCode = 1;
     }
   } catch (error) {

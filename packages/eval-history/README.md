@@ -167,6 +167,13 @@ privilege is listed with each privilege and object it lacks, and the run
 exits 1. Point `EVALS_MIGRATE_DATABASE_URL` at the role that owns the `evals`
 objects.
 
+It then checks the reader for anything that runs with its owner's privileges:
+a view it can select that lacks `security_invoker`, or a `security definer`
+function it can execute. Each one is printed, `granted` is not printed for the
+reader, and the run exits 1. The migrations are already applied and recorded at
+that point, so fix it with a further migration
+([ADR-137](../../docs/decisions/ADR-137-the-evals-reader-role-is-the-reporting-privacy-boundary.md)).
+
 `vp run evals:ingest` reads `EVALS_DATABASE_URL` and connects as
 `evals_writer`. Every eval runner calls it on
 its own envelope with `--quiet-unreachable`, so an unset variable or a database
@@ -182,8 +189,9 @@ transaction it rolls back, and asserts that Postgres refuses it to the reader
 or that its catalog checks name it. The reporting test seeds the synthetic year into
 its database and times every query with `EXPLAIN ANALYZE` against a 500 ms
 budget. The `evals:migrate` script test runs `scripts/migrate.mjs` against a
-database of its own, as the owner and then as a role that owns nothing, and
-checks its exit code. Because the script grants `evals_writer` and
+database of its own, as the owner, as a role that owns nothing, and after
+the owner recreates a reporting view without `security_invoker` or adds a
+`security definer` function, and checks its exit code. Because the script grants `evals_writer` and
 `evals_reader` by name, it creates either role only when the server lacks it,
 and drops only the ones it created. Without the variable every one of them
 skips and says why, except under `CI`, where they fail.

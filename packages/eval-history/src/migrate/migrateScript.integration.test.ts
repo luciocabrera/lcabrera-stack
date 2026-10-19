@@ -103,6 +103,16 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     return connectionUrl({ database, password, user });
   };
 
+  const migratedAsOwner = async () => {
+    await createdRoles();
+    const database = await createDatabase('evals_migrate_script');
+    const url = connectionUrl({ database });
+
+    expect(runScript(url).status).toBe(0);
+
+    return { owner: await connect(database), url };
+  };
+
   afterAll(() => close({ roles }));
 
   it('exits 0 and prints granted for each role when the owner migrates', async () => {
@@ -138,5 +148,42 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     expect(stdout).toContain('  select on column evals.eval_run.run_id');
     expect(stdout).toContain('  select on table evals.v_task_pass_rate');
     expect(stdout).not.toContain('granted evals_reader');
+  });
+
+  it('exits 1 naming a reporting view recreated without security_invoker', async () => {
+    const { owner, url } = await migratedAsOwner();
+    const { rows } = await owner.query<{ readonly body: string }>(
+      "select pg_get_viewdef('evals.v_subject_trend'::regclass) as body",
+    );
+
+    await owner.query(
+      `create or replace view evals.v_subject_trend as ${rows[0]?.body ?? ''}`,
+    );
+
+    const { status, stdout } = runScript(url);
+
+    expect(status).toBe(1);
+    expect(stdout).toContain(
+      'evals:migrate: role evals_reader can reach objects that run with their owner',
+    );
+    expect(stdout).toContain(
+      '  view evals.v_subject_trend without security_invoker',
+    );
+    expect(stdout).not.toContain('granted evals_reader');
+  });
+
+  it('exits 1 naming a security definer function the reader can execute', async () => {
+    const { owner, url } = await migratedAsOwner();
+
+    await owner.query(
+      'create function evals.probe_definer() returns integer language sql security definer as $$ select 1 $$',
+    );
+
+    const { status, stdout } = runScript(url);
+
+    expect(status).toBe(1);
+    expect(stdout).toContain(
+      '  function evals.probe_definer is security definer',
+    );
   });
 });
