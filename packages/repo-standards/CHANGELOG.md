@@ -1,5 +1,19 @@
 # @lcabrera/repo-standards
 
+## 0.9.0
+
+### Minor Changes
+
+- b3da006: `repo-verify-eslint-pass` can now probe a root eslint pass. Set `gates.eslintPass.rootPassDir` to a directory outside every workspace that the root package's `lint:eslint:check` lints. The gate then plants its misordered import there, runs `vp run -r lint:eslint:check` from the root, and fails unless that run reports the import. That catches a root `lint:eslint:check` script that has been removed or renamed, and a root config that no longer loads the rule. Left absent or set to an empty string, the key leaves the root pass unprobed, as before.
+- b03cca9: `repo-test-changed` now selects every root test suite from configuration. `gates.affectedTests.rootSuites` lists each test task that lives in no workspace, with the path patterns whose change can fail it, and a changed file matching one adds that task as its own group. A suite that reads root config can now be selected by a change to that config alone. Root suites are matched before `lintOnlyPatterns` drops a file, so a lint-only file a root suite reads still selects that suite. Left unset, the only root suite is `test:scripts` over the `.mjs`, `.cjs` and `.js` files under `scripts/`, which is the previous behaviour.
+
+  Breaking, for code importing `@lcabrera/repo-standards/affected-tests`: `resolveAffected` and `resolveTestGroups` take a `rootSuites` argument and return `suites`, the selected task names, in place of the `scripts` flag; `renderSelectionMarkdown` takes `suites` in place of `scripts`; and `SCRIPTS_TEST_TASK` is removed. Pass `rootSuites` from `readGates(root).affectedTests` and read `suites` where you read `scripts`.
+
+### Patch Changes
+
+- cd29a22: `repo-eslint-staged` names a config at the repository root `.` in its summary. It used to print an empty bullet, because the root's path relative to itself is the empty string.
+- 4bf2cc6: The coordination register checks (`repo-verify-claims` and the claim-close step), `repo-worktree-env` argument parsing and the conformance script-path check state their conditions positively. They report the same results for every input as before.
+
 ## 0.8.0
 
 ### Minor Changes

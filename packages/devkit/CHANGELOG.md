@@ -1,5 +1,23 @@
 # @lcabrera/devkit
 
+## 0.9.0
+
+### Minor Changes
+
+- d4f8a54: The `workspace` blueprint pins `vite-plus` and the Vite core alias at `1.3.0`, and `vitest` at `5.0.5`, in the catalog and in the typescript-config package it writes. The `vite` and `vitest` overrides are keyed `vite@*` and `vitest@*`. A bare key also matches a `catalog:` reference, and `vp up` then rewrites that reference to a concrete version.
+
+  The `tinypool@2` override is gone. Vite+ 1.3.0 installs `oxfmt` 0.73.0, which depends on `tinypool` 2.2.0 exactly, past the 2.1.2 floor that override existed to reach.
+
+  The blueprint gitignore ignores `.vitest/`. Vitest 5 writes that directory, and without the entry a created repository reports it as untracked.
+
+  **Action needed:** a repository this release creates installs Vite+ 1.3 and Vitest 5. `devkit sync` refreshes an unedited blueprint to the same pins and the same gitignore.
+
+### Patch Changes
+
+- 0333a26: The `full` and `workspace` blueprints now pass `allowDeclareFields: true` to `@babel/preset-typescript` in the web app's Vite config. Without it, preset 7 removes a class field that has no initializer, so a field such as `b: string | undefined;` was missing from the built class even though `tsc` with `useDefineForClassFields` keeps it. A tree created from either blueprint now builds such a field the way `tsc` compiles it. `sync` updates that config if you have not touched it. If you have edited it, it is left alone and reported as `modified`, so add the option to the preset yourself.
+- 1369e4c: `@lcabrera/server` now declares `zod` at `^4.6.7`, and `@lcabrera/eslint-plugin` declares `@typescript-eslint/utils` at `^8.71.2`. In a repository it writes, `@lcabrera/devkit` now pins Node 26.12.0 in `.node-version` and pnpm 12.14.0 in the root manifest's `packageManager`, and the CI workflow `init` writes sets up Vite+ with `voidzero-dev/setup-vp` at the v1.21.2 commit.
+- 4bf2cc6: `commitIdentityArgs`, which `devkit create` uses for its first commit, states its condition positively. It returns the same arguments for every identity as before.
+
 ## 0.8.0
 
 ### Minor Changes

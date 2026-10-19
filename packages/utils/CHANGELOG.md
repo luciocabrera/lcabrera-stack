@@ -1,5 +1,11 @@
 # @lcabrera/utils
 
+## 0.2.3
+
+### Patch Changes
+
+- 4bf2cc6: `mergeArrays` states its empty-input check positively. It returns the same result for every input as before.
+
 ## 0.2.2
 
 ### Patch Changes

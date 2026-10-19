@@ -1,5 +1,12 @@
 # @lcabrera/api
 
+## 0.5.1
+
+### Patch Changes
+
+- Updated dependencies [4bf2cc6]
+  - @lcabrera/utils@0.2.3
+
 ## 0.5.0
 
 ### Minor Changes
