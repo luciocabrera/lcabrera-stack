@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 /**
  * Prints, as step-output lines, which skills a pull request's eval report
- * runs: `scope` is out, none, some or all, and `skills` names the some.
+ * selects and whether it runs them: `scope` is out, none, some or all,
+ * `skills` names the some, and `run` is true only when the pull request
+ * carries the opt-in label.
  * Usage (from the repo root): node evals/pr-report/select-skills.mjs --base <ref>
+ *   [--labels <JSON array of the pull request's label names>]
  * Exit codes: 0 = printed, 1 = the base cannot be resolved.
  */
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -12,6 +15,8 @@ import { parseArgs } from 'node:util';
 import { runGit } from '../../packages/repo-standards/scripts/git-exec.mjs';
 import {
   catalogMoved,
+  parseLabels,
+  runDecision,
   selectionOutputs,
   SKILL_ENTRY,
   skillSelection,
@@ -58,7 +63,12 @@ const catalogEntries = ({ base, changed }) =>
     }));
 
 const main = () => {
-  const { values } = parseArgs({ options: { base: { type: 'string' } } });
+  const { values } = parseArgs({
+    options: {
+      base: { type: 'string' },
+      labels: { default: '[]', type: 'string' },
+    },
+  });
   const base = mergeBase(values.base);
   const changed = changedSince(base);
   const selection = skillSelection({
@@ -66,7 +76,11 @@ const main = () => {
     moved: catalogMoved(catalogEntries({ base, changed })),
     runnable: runnableSkills(),
   });
-  console.log(selectionOutputs(selection).join('\n'));
+  const decision = runDecision({
+    labels: parseLabels(values.labels),
+    scope: selection.scope,
+  });
+  console.log(selectionOutputs({ ...selection, ...decision }).join('\n'));
 };
 
 try {

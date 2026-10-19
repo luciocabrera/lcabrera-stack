@@ -1,7 +1,8 @@
 /**
- * Decides which skills a pull request's eval report runs: none when the PR
+ * Decides which skills a pull request's eval report selects: none when the PR
  * leaves the agent-facing surface alone, every skill when a catalog entry
- * moved, and otherwise only the skills whose directory changed.
+ * moved, and otherwise only the skills whose directory changed. A selection
+ * runs only on a pull request that carries the opt-in label.
  * Usage: imported by `select-skills.mjs`.
  */
 import { canonicalJson } from '@repo/eval-history/hashing/canonicalJson.util';
@@ -55,7 +56,29 @@ export const skillSelection = ({ changed, moved, runnable }) => {
   return { scope: skills.length === 0 ? 'none' : 'some', skills };
 };
 
-export const selectionOutputs = ({ scope, skills }) => [
+export const OPT_IN_LABEL = 'evals';
+
+const RUNNABLE_SCOPES = new Set(['all', 'some']);
+
+export const parseLabels = (text) => {
+  try {
+    const labels = JSON.parse(text);
+    return Array.isArray(labels)
+      ? labels.filter((label) => typeof label === 'string')
+      : [];
+  } catch {
+    return [];
+  }
+};
+
+export const runDecision = ({ labels, scope }) => {
+  const labelled = labels.includes(OPT_IN_LABEL);
+  return { labelled, run: labelled && RUNNABLE_SCOPES.has(scope) };
+};
+
+export const selectionOutputs = ({ labelled, run, scope, skills }) => [
   `scope=${scope}`,
   `skills=${skills.join(' ')}`,
+  `labelled=${String(labelled)}`,
+  `run=${String(run)}`,
 ];

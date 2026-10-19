@@ -4,9 +4,10 @@ Checks for the agent-facing surface: the skills under `.github/skills/`, the
 subagents under `.claude/agents/` and the path rules under `.claude/rules/`.
 `vp run harness:verify` already checks each one's frontmatter and that every
 path it names resolves; nothing here repeats that. CI runs this directory in
-[`agent-evals.yml`](../.github/workflows/agent-evals.yml), and the model suites
+[`agent-evals.yml`](../.github/workflows/agent-evals.yml), the model suites
 weekly on `main` in
-[`evals-scheduled.yml`](../.github/workflows/evals-scheduled.yml). Locally, `check:push`
+[`evals-scheduled.yml`](../.github/workflows/evals-scheduled.yml), and the
+pull request report in [`eval-report.yml`](../.github/workflows/eval-report.yml). Locally, `check:push`
 and `check:safe` run the rules check, and `test:all` and `test:ci` run the
 suites' own tests.
 
@@ -156,35 +157,48 @@ carries the verdict as `regression` on each comparison.
 ## The pull request comment
 
 The **Eval report (Claude, advisory)** job in
-[`agent-evals.yml`](../.github/workflows/agent-evals.yml) runs on a pull
-request from this repository that touches `.github/skills/`,
-`.claude/rules/`, `.claude/agents/` or `evals/`, and keeps one comment on it.
-The comment starts with `<!-- eval-history-report -->`.
+[`eval-report.yml`](../.github/workflows/eval-report.yml) runs on every push to
+a pull request from this repository, and again when the `evals` label is added.
+It keeps one comment, which starts with `<!-- eval-history-report -->`.
 [`upsert-comment.mjs`](./pr-report/upsert-comment.mjs) edits the bot comment
 that starts with that marker, reading every page of the pull request's
 comments, and posts one only when there is none. A new push rewrites the same
 comment.
 
-[`select-skills.mjs`](./pr-report/select-skills.mjs) decides what runs from
-the diff against the merge base:
+[`select-skills.mjs`](./pr-report/select-skills.mjs) selects skills from the
+diff against the merge base:
 
 - when a `SKILL.md`'s name, description or paths changed, or a skill was
-  added or removed, every skill runs, because that catalog is what every
+  added or removed, it selects every skill, because that catalog is what every
   session sees;
-- otherwise, each skill whose `.github/skills/<skill>/` or
-  `evals/skills/<skill>/` directory changed runs;
-- otherwise no model suite runs and the comment says so.
+- otherwise, it selects each skill whose `.github/skills/<skill>/` or
+  `evals/skills/<skill>/` directory changed.
 
-[`write-comment.mjs`](./pr-report/write-comment.mjs) then compares the
+Model runs are opt-in. `evals:skills` runs on the selection only when the pull
+request carries the `evals` label. Without it, the comment says no model suite
+ran, names the skills the label would run, and says that adding the label
+starts the run with no new push. Each later push re-runs it while the label
+stays. When the diff touches `.github/skills/`, `.claude/rules/`,
+`.claude/agents/` or `evals/` but selects no skill, the comment says nothing
+ran. When a push leaves those paths altogether, an existing comment is edited
+to say its earlier report no longer applies, and no comment is posted on a pull
+request that never had one.
+
+After a run, [`write-comment.mjs`](./pr-report/write-comment.mjs) compares the
 pull request's run with main's, narrowed with `--subject` to the skills that
 ran. With `EVALS_DATABASE_URL` set and the run complete, it reads main from the
 database, as `--compare main` does, and only once the database holds the
 pull request's run. Otherwise it reads the newest unexpired
-`eval-envelopes-skills` artifact from a run on main. When main has no complete
-run, the comment gives the pull request's run alone, with its `Pass rate:` line.
-Either way a side below `minTrialsForRate` counted trials reads
-`insufficient data`. A run the session limit cut off is partial, and the
-comment says so. The skill run step is capped at 90 minutes. The job is not a required check.
+`eval-envelopes-skills` artifact from a run on main, which
+[`evals-scheduled.yml`](../.github/workflows/evals-scheduled.yml) uploads. When
+main has no complete run, the comment gives the pull request's run alone, with
+its `Pass rate:` line. Either way a side below `minTrialsForRate` counted
+trials reads `insufficient data`. A run the session limit cut off is partial,
+and the comment says so. The skill run step is capped at 90 minutes.
+
+It is its own workflow because a `labeled` trigger on `agent-evals.yml` would
+rerun that workflow's verifier-fixtures model job on every label added. It is
+not a required check.
 
 ## Recording a noise floor
 

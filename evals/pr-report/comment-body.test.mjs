@@ -3,7 +3,11 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   COMMENT_MARKER,
   commentBody,
+  LEFT_SURFACE,
   newestEnvelope,
+  NO_SUITE_RAN,
+  noRunSections,
+  optInLine,
   reportCommentOf,
   runStatusLines,
   selectionLine,
@@ -74,6 +78,22 @@ describe('upsertRequest', () => {
     ]);
   });
 
+  it('posts nothing when only an existing comment may be edited', () => {
+    const request = upsertRequest({
+      ...args,
+      existing: undefined,
+      onlyExisting: true,
+    });
+    expect(request.args).toBeUndefined();
+    expect(request.summary).toContain('none was posted');
+  });
+
+  it('edits a stale report even when only an existing comment may be edited', () => {
+    expect(
+      upsertRequest({ ...args, existing: { id: 42 }, onlyExisting: true }).args,
+    ).toContain('repos/o/r/issues/comments/42');
+  });
+
   it('edits the existing report comment in place', () => {
     expect(upsertRequest({ ...args, existing: { id: 42 } }).args).toStrictEqual(
       [
@@ -121,7 +141,7 @@ describe('selectionOf', () => {
   });
 
   it('refuses an unknown scope and a some with no skill', () => {
-    expect(() => selectionOf({ scope: 'out' })).toThrow('--scope must be');
+    expect(() => selectionOf({ scope: 'every' })).toThrow('--scope must be');
     expect(() => selectionOf({ scope: 'some', skill: [] })).toThrow(
       'at least one --skill',
     );
@@ -150,5 +170,37 @@ describe('runStatusLines', () => {
       'This run is a partial run, so it holds only the trials that finished.',
     ]);
     expect(runStatusLines('aborted')[0]).toContain('an aborted run');
+  });
+});
+
+describe('noRunSections', () => {
+  const some = { scope: 'some', skills: ['react-19'] };
+
+  it('explains a pull request that left the surface or selects no skill', () => {
+    expect(
+      noRunSections({
+        labelled: true,
+        selection: { scope: 'out', skills: [] },
+      }),
+    ).toStrictEqual([LEFT_SURFACE]);
+    expect(
+      noRunSections({
+        labelled: true,
+        selection: { scope: 'none', skills: [] },
+      }),
+    ).toStrictEqual([NO_SUITE_RAN]);
+  });
+
+  it('asks for the label when skills were selected but not run', () => {
+    expect(noRunSections({ labelled: false, selection: some })).toStrictEqual([
+      optInLine(some),
+    ]);
+    expect(optInLine({ scope: 'all', skills: [] })).toContain(
+      "every skill's trigger tasks",
+    );
+  });
+
+  it('leaves a labelled selection to the report', () => {
+    expect(noRunSections({ labelled: true, selection: some })).toBeUndefined();
   });
 });

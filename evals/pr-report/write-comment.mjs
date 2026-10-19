@@ -3,9 +3,11 @@
  * Prints the body of a pull request's eval report comment: the PR's skill run
  * compared with main's, from the eval-history database when
  * EVALS_DATABASE_URL reaches one and from main's newest envelope artifact
- * otherwise, or the PR run alone when main has no complete run.
+ * otherwise, or the PR run alone when main has no complete run; when nothing
+ * ran, it says why and how to opt in.
  * Usage (from the repo root): node evals/pr-report/write-comment.mjs
- *   --scope <none|some|all> [--skill <name> ...]
+ *   --scope <out|none|some|all> [--skill <name> ...]
+ *   [--labelled]            the pull request carries the opt-in label, so the run happened
  *   [--pr-results <dir>]    the PR run's envelopes, .tmp/eval-results by default
  *   [--main-results <dir>]  main's downloaded envelopes, .tmp/main-eval-results by default
  *   each results directory must sit inside the repository or RUNNER_TEMP
@@ -25,7 +27,7 @@ import {
   commentBody,
   newestEnvelope,
   NO_ENVELOPE,
-  NO_SUITE_RAN,
+  noRunSections,
   runStatusLines,
   selectionLine,
   selectionOf,
@@ -36,6 +38,7 @@ const SUITE = 'skills';
 const MAIN_RESULTS_DIR = '.tmp/main-eval-results';
 
 const OPTIONS = {
+  labelled: { default: false, type: 'boolean' },
   'main-results': { default: MAIN_RESULTS_DIR, type: 'string' },
   'pr-results': { default: RESULTS_DIR, type: 'string' },
   scope: { type: 'string' },
@@ -160,12 +163,10 @@ const reportSections = async ({ selection, values }) => {
 };
 
 const sectionsFor = async ({ selection, values }) =>
-  selection.scope === 'none'
-    ? [NO_SUITE_RAN]
-    : [
-        selectionLine(selection),
-        ...(await reportSections({ selection, values })),
-      ];
+  noRunSections({ labelled: values.labelled, selection }) ?? [
+    selectionLine(selection),
+    ...(await reportSections({ selection, values })),
+  ];
 
 const main = async () => {
   const { values } = parseArgs({ options: OPTIONS });

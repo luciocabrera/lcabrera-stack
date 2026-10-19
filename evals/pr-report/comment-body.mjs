@@ -8,7 +8,10 @@ export const COMMENT_MARKER = '<!-- eval-history-report -->';
 const HEADING = '## Eval report';
 
 export const NO_SUITE_RAN =
-  "No skill's directory or catalog entry changed, so no model suite ran. A push that edits `.github/skills/<skill>/` or `evals/skills/<skill>/` runs that skill's trigger tasks; one that changes a skill's name, description or paths runs every skill.";
+  "No skill's directory or catalog entry changed, so no model suite ran. A change to `.github/skills/<skill>/` or `evals/skills/<skill>/` selects that skill's trigger tasks, and one to a skill's name, description or paths selects every skill; they run on a pull request labelled `evals`.";
+
+export const LEFT_SURFACE =
+  'This pull request no longer touches `.github/skills/`, `.claude/rules/`, `.claude/agents/` or `evals/`, so no model suite ran, and an earlier report here no longer applies.';
 
 export const NO_ENVELOPE =
   'The skill-trigger run left no envelope, so there is nothing to report. The job log says why.';
@@ -19,6 +22,19 @@ export const selectionLine = ({ scope, skills }) =>
   scope === 'all'
     ? "Ran every skill's trigger tasks, because a skill's name, description or paths changed, and that catalog is what every session sees."
     : `Ran the trigger tasks of ${codeList(skills)}, the skills whose directory this pull request changes.`;
+
+export const optInLine = ({ scope, skills }) =>
+  `No model suite ran: the eval report runs only on a pull request labelled \`evals\`. With the label, this change runs ${scope === 'all' ? "every skill's trigger tasks, because a skill's name, description or paths changed" : `the trigger tasks of ${codeList(skills)}, the skills whose directory it changes`}. Adding the label starts the run without a new push, and each later push re-runs it while the label stays.`;
+
+export const noRunSections = ({ labelled, selection }) => {
+  if (selection.scope === 'out') {
+    return [LEFT_SURFACE];
+  }
+  if (selection.scope === 'none') {
+    return [NO_SUITE_RAN];
+  }
+  return labelled ? undefined : [optInLine(selection)];
+};
 
 export const runStatusLines = (status) =>
   status === 'complete'
@@ -48,9 +64,13 @@ export const newestEnvelope = ({ candidates, completeOnly }) =>
     )
     .at(0);
 
-export const upsertRequest = ({ body, existing, pr, repo }) =>
-  existing === undefined
+const postRequest = ({ body, onlyExisting, pr, repo }) =>
+  onlyExisting
     ? {
+        args: undefined,
+        summary: `#${pr} has no eval report comment and does not touch the eval surface, so none was posted.`,
+      }
+    : {
         args: [
           'api',
           '--method',
@@ -60,7 +80,17 @@ export const upsertRequest = ({ body, existing, pr, repo }) =>
           `body=${body}`,
         ],
         summary: `Posted the eval report on #${pr}.`,
-      }
+      };
+
+export const upsertRequest = ({
+  body,
+  existing,
+  onlyExisting = false,
+  pr,
+  repo,
+}) =>
+  existing === undefined
+    ? postRequest({ body, onlyExisting, pr, repo })
     : {
         args: [
           'api',
@@ -73,11 +103,11 @@ export const upsertRequest = ({ body, existing, pr, repo }) =>
         summary: `Updated the eval report on #${pr}, comment ${String(existing.id)}.`,
       };
 
-const SCOPES = new Set(['all', 'none', 'some']);
+const SCOPES = new Set(['all', 'none', 'out', 'some']);
 
 const selectionProblem = ({ scope, skills }) => {
   if (!SCOPES.has(scope)) {
-    return '--scope must be none, some or all';
+    return '--scope must be out, none, some or all';
   }
   return scope === 'some' && skills.length === 0
     ? '--scope some needs at least one --skill'

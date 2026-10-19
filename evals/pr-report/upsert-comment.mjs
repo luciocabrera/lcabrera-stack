@@ -5,6 +5,7 @@
  * updates the report instead of adding another. Needs GH_TOKEN.
  * Usage (from the repo root): node evals/pr-report/upsert-comment.mjs
  *   --repo <owner/name> --pr <number> --body-file <path inside the repository or RUNNER_TEMP>
+ *   [--only-existing]  edit the comment if there is one, and post none otherwise
  * Exit codes: 0 = posted or edited, 1 = bad input or a failed gh call.
  */
 import { parseArgs } from 'node:util';
@@ -22,6 +23,7 @@ const readOptions = () => {
   const { values } = parseArgs({
     options: {
       'body-file': { type: 'string' },
+      'only-existing': { default: false, type: 'boolean' },
       pr: { type: 'string' },
       repo: { type: 'string' },
     },
@@ -54,10 +56,13 @@ const main = () => {
   const request = upsertRequest({
     body,
     existing: reportCommentOf(pages),
+    onlyExisting: values['only-existing'],
     pr: values.pr,
     repo: values.repo,
   });
-  runGh(request.args);
+  if (request.args !== undefined) {
+    runGh(request.args);
+  }
   console.log(request.summary);
 };
 

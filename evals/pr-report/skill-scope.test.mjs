@@ -3,6 +3,9 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   catalogMoved,
   changedSkills,
+  OPT_IN_LABEL,
+  parseLabels,
+  runDecision,
   selectionOutputs,
   skillSelection,
   touchesEvalSurface,
@@ -107,7 +110,45 @@ describe('skillSelection', () => {
 describe('selectionOutputs', () => {
   it('writes one step-output line per key', () => {
     expect(
-      selectionOutputs({ scope: 'some', skills: ['react-19', 'unslop'] }),
-    ).toStrictEqual(['scope=some', 'skills=react-19 unslop']);
+      selectionOutputs({
+        labelled: true,
+        run: true,
+        scope: 'some',
+        skills: ['react-19', 'unslop'],
+      }),
+    ).toStrictEqual([
+      'scope=some',
+      'skills=react-19 unslop',
+      'labelled=true',
+      'run=true',
+    ]);
+  });
+});
+
+describe('parseLabels', () => {
+  it('reads the label names the workflow passes, and nothing else', () => {
+    expect(parseLabels('["type: ci","evals"]')).toStrictEqual([
+      'type: ci',
+      'evals',
+    ]);
+    expect(parseLabels('[1,"evals"]')).toStrictEqual(['evals']);
+    expect(parseLabels('{"name":"evals"}')).toStrictEqual([]);
+    expect(parseLabels('not json')).toStrictEqual([]);
+  });
+});
+
+describe('runDecision', () => {
+  it.each([
+    [['evals'], 'some', true],
+    [['evals', 'type: ci'], 'all', true],
+    [['evals'], 'none', false],
+    [['evals'], 'out', false],
+    [[], 'some', false],
+    [['type: ci', 'Evals'], 'all', false],
+  ])('labels %j with scope %s runs: %s', (labels, scope, run) => {
+    expect(runDecision({ labels, scope })).toStrictEqual({
+      labelled: labels.includes(OPT_IN_LABEL),
+      run,
+    });
   });
 });

@@ -1105,19 +1105,29 @@ diff step instead, and a job skipped that way still reports. Its **Verifier fixt
 that touches `.claude/agents/refactor-verifier.md`,
 `docs/agents/refactor-verified-contract.md` or `evals/verifier-fixtures/`, on
 `CLAUDE_CODE_OAUTH_TOKEN`. It is not a required check, so a spent usage limit
-cannot stall a merge. Its **Eval report (Claude, advisory)** job runs on a
-same-repository pull request that touches `.github/skills/`, `.claude/rules/`,
-`.claude/agents/` or `evals/`: it runs `evals:skills` on the skills the diff
-changed, or on every skill when a catalog entry moved, and keeps one PR
-comment, found by `<!-- eval-history-report -->`, comparing that run with main's
-([evals/README.md](evals/README.md#the-pull-request-comment)). It is not a
-required check either. All three model jobs then upload `.tmp/eval-results/` (the run
+cannot stall a merge. Both model jobs then upload `.tmp/eval-results/` (the run
 envelopes, with the scrubbed transcripts beside them) as an `eval-envelopes-<suite>` artifact kept for
 90 days, and run `evals:ingest` on it with the `EVALS_DATABASE_URL` secret.
 That step is `continue-on-error` and does not fail the job. With the secret
 unset it skips with a notice. When the database is unreachable or rejects an
 envelope it leaves a warning, and `vp run evals:ingest` on the downloaded
 artifact sends the envelopes later.
+
+[`eval-report.yml`](.github/workflows/eval-report.yml) keeps one comment,
+found by `<!-- eval-history-report -->`, on every same-repository pull request
+that touches `.github/skills/`, `.claude/rules/`, `.claude/agents/` or
+`evals/`. Its **Eval report (Claude, advisory)** job selects the skills whose
+directory the diff changed, or every skill when a catalog entry moved, and runs
+`evals:skills` on them only when the pull request carries the **`evals`**
+label. Adding that label starts a run without a new push, and each later push
+re-runs it while the label stays; it then uploads and ingests the envelopes as
+the model jobs above do and compares the run with main's. Without the label it
+calls no model, and the comment names the skills the label would run. A push
+that takes the pull request off those paths edits an existing comment to say no
+report applies, and posts none otherwise. It is its own workflow because a
+`labeled` trigger on `agent-evals.yml` would rerun that workflow's model job on
+every label. Nothing requires it
+([evals/README.md](evals/README.md#the-pull-request-comment)).
 
 [`evals-scheduled.yml`](.github/workflows/evals-scheduled.yml) runs the model
 suites on `main` weekly: `evals:skills`, `evals:skills:quality` and

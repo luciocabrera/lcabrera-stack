@@ -1,0 +1,141 @@
+name: Eval report
+
+# Why this is its own workflow, and what runs when: evals/README.md, "The pull request comment".
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, labeled]
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+jobs:
+  eval-report:
+    name: Eval report (Claude, advisory)
+    concurrency:
+      group: eval-report-${{ github.event.pull_request.number }}-${{ github.event.action == 'labeled' && github.event.label.name != 'evals' && github.run_id || 'report' }}
+      cancel-in-progress: true
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      (github.event.action != 'labeled' || github.event.label.name == 'evals')
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Which skills the change selects
+        id: scope
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: node evals/pr-report/select-skills.mjs --base "origin/$BASE_REF" --labels "$LABELS" >> "$GITHUB_OUTPUT"
+
+      - name: Skill triggers on the selected skills
+        id: run
+        if: steps.scope.outputs.run == 'true'
+        continue-on-error: true
+        timeout-minutes: 90
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          SKILLS: ${{ steps.scope.outputs.skills }}
+        run: |
+          read -r -a selected <<< "$SKILLS"
+          vp run evals:skills -- "${selected[@]}"
+
+      - name: Upload envelopes
+        if: always() && steps.run.outcome != 'skipped'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: eval-envelopes-skills
+          path: .tmp/eval-results/
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Ingest envelopes (advisory)
+        if: always() && steps.run.outcome != 'skipped'
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          EVALS_DATABASE_URL: ${{ secrets.EVALS_DATABASE_URL }}
+        run: |
+          if [ -z "$EVALS_DATABASE_URL" ]; then
+            echo "::notice title=Eval history::EVALS_DATABASE_URL is not set, so ingest is skipped; the envelopes are in the eval-envelopes-skills artifact."
+            exit 0
+          fi
+          if [ ! -d .tmp/eval-results ]; then
+            echo "::notice title=Eval history::No envelope was written under .tmp/eval-results, so there is nothing to ingest."
+            exit 0
+          fi
+          if ! vp run evals:ingest -- .tmp/eval-results; then
+            echo "::warning title=Eval history::evals:ingest did not store every envelope; they are in the eval-envelopes-skills artifact, and vp run evals:ingest sends a downloaded copy."
+          fi
+
+      - name: Main's newest skills envelope
+        if: always() && steps.run.outcome != 'skipped'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          artifact="$(gh api --paginate \
+            "repos/$REPO/actions/artifacts?name=eval-envelopes-skills&per_page=100" \
+            --jq '.artifacts[] | select(.expired | not) | select(.workflow_run.head_branch == "main") | [.created_at, .id] | @tsv' \
+            | sort -r | head -n 1 | cut -f 2)"
+          if [ -z "$artifact" ]; then
+            echo "::notice title=Eval report::main has no unexpired eval-envelopes-skills artifact to compare against."
+            exit 0
+          fi
+          gh api "repos/$REPO/actions/artifacts/$artifact/zip" > "$RUNNER_TEMP/main-envelopes.zip"
+          mkdir -p "$RUNNER_TEMP/main-envelopes"
+          unzip -q -o "$RUNNER_TEMP/main-envelopes.zip" -d "$RUNNER_TEMP/main-envelopes"
+
+      - name: Write the report
+        id: report
+        if: always() && steps.scope.outcome == 'success'
+        env:
+          EVALS_DATABASE_URL: ${{ secrets.EVALS_DATABASE_URL }}
+          LABELLED: ${{ steps.scope.outputs.labelled }}
+          SCOPE: ${{ steps.scope.outputs.scope }}
+          SKILLS: ${{ steps.scope.outputs.skills }}
+        run: |
+          read -r -a selected <<< "$SKILLS"
+          args=(--scope "$SCOPE")
+          for skill in "${selected[@]}"; do
+            args+=(--skill "$skill")
+          done
+          if [ "$LABELLED" = true ]; then
+            args+=(--labelled)
+          fi
+          node evals/pr-report/write-comment.mjs "${args[@]}" \
+            --pr-results .tmp/eval-results \
+            --main-results "$RUNNER_TEMP/main-envelopes" \
+            > "$RUNNER_TEMP/eval-report.md"
+          cat "$RUNNER_TEMP/eval-report.md" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Post or update the PR comment
+        if: always() && steps.report.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+          SCOPE: ${{ steps.scope.outputs.scope }}
+        run: |
+          args=(--repo "$REPO" --pr "$PR_NUMBER" --body-file "$RUNNER_TEMP/eval-report.md")
+          if [ "$SCOPE" = out ]; then
+            args+=(--only-existing)
+          fi
+          node evals/pr-report/upsert-comment.mjs "${args[@]}"

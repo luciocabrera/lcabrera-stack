@@ -12,7 +12,14 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { passRateOf } from '../run-envelope.mjs';
-import { COMMENT_MARKER, NO_ENVELOPE, NO_SUITE_RAN } from './comment-body.mjs';
+import {
+  COMMENT_MARKER,
+  commentBody,
+  LEFT_SURFACE,
+  NO_ENVELOPE,
+  NO_SUITE_RAN,
+  optInLine,
+} from './comment-body.mjs';
 
 const SCRIPT = fileURLToPath(new URL('write-comment.mjs', import.meta.url));
 const REPO_ROOT = fileURLToPath(new URL('../..', import.meta.url));
@@ -106,6 +113,16 @@ const MAIN = skillsEnvelope({
   startedAt: '2026-10-07T09:00:00.000Z',
 });
 
+const someSkills = (skills) => [
+  '--scope',
+  'some',
+  ...skills.flatMap((skill) => ['--skill', skill]),
+  '--pr-results',
+  resultsDir([PR]),
+  '--main-results',
+  resultsDir([MAIN]),
+];
+
 afterEach(() => {
   for (const directory of scratch.splice(0)) {
     rmSync(directory, { force: true, recursive: true });
@@ -122,14 +139,8 @@ describe('write-comment', () => {
 
   it('compares the changed skill with main, with n and insufficient data', () => {
     const { status, stdout } = writeComment([
-      '--scope',
-      'some',
-      '--skill',
-      'react-19',
-      '--pr-results',
-      resultsDir([PR]),
-      '--main-results',
-      resultsDir([MAIN]),
+      '--labelled',
+      ...someSkills(['react-19']),
     ]);
     expect(status).toBe(0);
     expect(stdout.startsWith(COMMENT_MARKER)).toBe(true);
@@ -144,6 +155,7 @@ describe('write-comment', () => {
 
   it('gives the rate and its interval once there are enough trials', () => {
     const { stdout } = writeComment([
+      '--labelled',
       '--scope',
       'all',
       '--pr-results',
@@ -166,6 +178,7 @@ describe('write-comment', () => {
     'reports the PR run alone when main has no complete run',
     (outcomes, line) => {
       const { status, stdout } = writeComment([
+        '--labelled',
         '--scope',
         'all',
         '--pr-results',
@@ -188,6 +201,7 @@ describe('write-comment', () => {
 
   it('says the PR run alone is partial when the session limit cut it off', () => {
     const { stdout } = writeComment([
+      '--labelled',
       '--scope',
       'all',
       '--pr-results',
@@ -201,6 +215,7 @@ describe('write-comment', () => {
 
   it('says so when the run left no envelope', () => {
     const { stdout } = writeComment([
+      '--labelled',
       '--scope',
       'all',
       '--pr-results',
@@ -211,6 +226,7 @@ describe('write-comment', () => {
 
   it('refuses a results directory outside the repository and RUNNER_TEMP', () => {
     const { status, stderr } = writeComment([
+      '--labelled',
       '--scope',
       'all',
       '--pr-results',
@@ -218,6 +234,32 @@ describe('write-comment', () => {
     ]);
     expect(status).toBe(1);
     expect(stderr).toContain('refusing to read results outside');
+  });
+
+  it('says why nothing ran and how to opt in on an unlabelled pull request', () => {
+    const { status, stdout } = writeComment(someSkills(['react-19', 'unslop']));
+    expect(status).toBe(0);
+    expect(stdout.startsWith(COMMENT_MARKER)).toBe(true);
+    expect(stdout).toContain(
+      optInLine({ scope: 'some', skills: ['react-19', 'unslop'] }),
+    );
+    expect(stdout).toContain('labelled `evals`');
+    expect(stdout).toContain('`react-19`, `unslop`');
+    expect(stdout).not.toContain('Pass rate');
+  });
+
+  it('replaces a stale report once the pull request leaves the eval surface', () => {
+    const { status, stdout } = writeComment([
+      '--labelled',
+      '--scope',
+      'out',
+      '--pr-results',
+      resultsDir([PR]),
+      '--main-results',
+      resultsDir([MAIN]),
+    ]);
+    expect(status).toBe(0);
+    expect(stdout).toBe(commentBody([LEFT_SURFACE]));
   });
 
   it('refuses a selection that names no skill', () => {

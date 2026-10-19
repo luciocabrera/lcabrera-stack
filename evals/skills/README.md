@@ -159,8 +159,9 @@ The **Skill triggers (Claude)** job runs `vp run evals:skills` on
 transcripts. It is not a required check, so a spent usage limit cannot stall a
 merge.
 
-The **Eval report (Claude, advisory)** job runs the trigger tasks of the skills
-a pull request changes, or of every skill when a catalog entry moved, and keeps
-one comment on the pull request comparing them with main.
+The **Eval report (Claude, advisory)** job selects the skills a pull request
+changes, or every skill when a catalog entry moved, runs their trigger tasks
+when the pull request carries the `evals` label, and keeps one comment on the
+pull request comparing them with main.
 [The pull request comment](../README.md#the-pull-request-comment) says what it
-runs and what it compares against.
+selects, when it runs and what it compares against.

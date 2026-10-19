@@ -6,6 +6,7 @@ status: review
 branch: ci/1275-evals-pr-comment
 area:
   - .github/workflows/agent-evals.yml
+  - .github/workflows/eval-report.yml
   - evals/pr-report/**
   - evals/report-runs.mjs
   - evals/README.md
