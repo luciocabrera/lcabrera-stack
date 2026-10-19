@@ -254,6 +254,20 @@
       "status": "permanent",
       "reason": "Saves HTMLDialogElement prototype methods so teardown can restore them. Binding them, as the rule wants, produces new function identities and the restore silently stops restoring. Spelled oxlint-disable because only Oxlint recognises the typescript-eslint/ prefix.",
       "ref": ".github/skills/lint-toolchain/SKILL.md (a directive must name the engine that reads it)"
+    },
+    {
+      "key": "react-doctor src/components/Table/TableBody/TableBody.component.tsx react-doctor/no-redundant-roles",
+      "count": 1,
+      "status": "permanent",
+      "reason": "The same finding Biome's noRedundantRoles raises on this element, from a second engine, and it is wrong for the same reason. `TableBody.stylex.ts`'s `body()` makes the populated `<tbody>` a CSS grid, and a browser drops an element's implicit table role along with its table `display` — so `role=\"rowgroup\"` is the only source of the row ownership `role=\"grid\"` requires, not a restatement of a native one. The rule reads JSX and cannot see the stylesheet. Its suggested fix, deleting the attribute, is invisible to a jsdom role query (jsdom resolves the implicit role the override destroys), which is why `Table.gridRoles.test.tsx` and `TableBody.test.tsx` assert the attribute. The empty-state branch keeps `display: table-row-group` and declares no role, so the rule has nothing to report there. Scoped to this one file through `ignore.overrides` in doctor.config.jsonc; the rule stays on everywhere else.",
+      "ref": "ADR-062, ADR-055, packages/ui/src/components/Table/TableBody/ARCHITECTURE.md"
+    },
+    {
+      "key": "react-doctor src/components/Table/TableRow/TableRow.component.tsx react-doctor/no-redundant-roles",
+      "count": 1,
+      "status": "permanent",
+      "reason": "The same finding Biome's noRedundantRoles raises on this element, from a second engine, and it is wrong for the same reason. `TableRow.stylex.ts` sets every `<tr>` to `display: flex`, and a browser drops an element's implicit table role along with its table `display` — so `role=\"row\"` is the grid's only row semantics. The rule reads JSX and cannot see the stylesheet. Deleting the attribute, as it suggests, leaves a jsdom role query passing (jsdom still resolves the implicit role), which is why `Table.gridRoles.test.tsx` and `TableRow.test.tsx` assert the attribute. Scoped to this one file through `ignore.overrides` in doctor.config.jsonc; the rule stays on everywhere else.",
+      "ref": "ADR-062, ADR-055, packages/ui/src/components/Table/TableRow/ARCHITECTURE.md"
     }
   ]
 }
