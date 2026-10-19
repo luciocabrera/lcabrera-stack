@@ -268,6 +268,16 @@ off until a change of its own clears it.
   handled, whose rejection nothing observes.
 - `useExhaustiveSwitchCases` (`nursery`) — a `switch` over a union that
   misses a member and has no `default`.
+- The Playwright rules, on `apps/showcase/e2e/**` only. The override sets the
+  `playwright` domain to `recommended` **and names each rule at `error`**,
+  because every Playwright rule is still in `nursery` and a domain preset
+  enables no nursery rule: with the domain alone, even at `all`, a planted
+  `page.pause()` passes the gate. The domain key is kept so a rule that
+  graduates out of `nursery` is picked up without an edit.
+
+`noMisusedPromises` was a candidate and is not enabled: it reports a promise
+used as a condition in the prefetch cache helper of `@lcabrera/ui` and in a test
+mock that copies it, so it is not at zero.
 
 **Nursery rules carry an upgrade duty.** Every rule `biome.jsonc` enables under
 a `nursery` key can be renamed, change behaviour, or graduate

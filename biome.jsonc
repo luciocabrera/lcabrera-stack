@@ -221,6 +221,30 @@
       },
     },
     {
+      // Phase 5 (ADR-035 §7). Every Playwright rule is NURSERY, and a domain
+      // preset enables no nursery rule, so each is named — re-check on any
+      // Biome upgrade.
+      "includes": ["apps/showcase/e2e/**"],
+      "linter": {
+        "domains": { "playwright": "recommended" },
+        "rules": {
+          "nursery": {
+            "noPlaywrightElementHandle": "error",
+            "noPlaywrightEval": "error",
+            "noPlaywrightForceOption": "error",
+            "noPlaywrightMissingAwait": "error",
+            "noPlaywrightNetworkidle": "error",
+            "noPlaywrightPagePause": "error",
+            "noPlaywrightUselessAwait": "error",
+            "noPlaywrightWaitForNavigation": "error",
+            "noPlaywrightWaitForSelector": "error",
+            "noPlaywrightWaitForTimeout": "error",
+            "usePlaywrightValidDescribeCallback": "error",
+          },
+        },
+      },
+    },
+    {
       // Workspaces that contain no JSX. That is the only axis this splits on:
       // `api` and `utils` are client-safe, so a browser-hostile rule needs its
       // own narrower block, not this one.
