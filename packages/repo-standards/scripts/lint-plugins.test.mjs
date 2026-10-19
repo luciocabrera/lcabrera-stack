@@ -83,7 +83,7 @@ describe('configsDeclaringKeys', () => {
         },
         {
           path: 'apps/docs-site/vite.config.ts',
-          text: `  /* ${key}: old, */\n  test: t,`,
+          text: `  /*\n  ${key}: old,\n  */\n  test: t,`,
         },
       ];
       expect(configsDeclaringKeys(files, KEYS)).toEqual([]);
