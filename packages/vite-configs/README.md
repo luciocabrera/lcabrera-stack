@@ -77,6 +77,16 @@ export default createBaseCustomRulesLintConfig({
 });
 ```
 
+### The effect-dependency check runs in Oxlint, not here
+
+`createCustomRulesLintConfig` turns off `react-hooks/exhaustive-deps` and
+`react-x/exhaustive-deps`. The Oxlint config from `./lint` already reports a
+missing hook dependency as an error under its `correctness` category, and it
+caught every case the two ESLint rules caught, so leaving them on reported one
+defect up to three times. If you use `./eslint-custom-rules` without `./lint`,
+nothing from this package checks hook dependency arrays, so turn one of them
+back on in your own config.
+
 ### Import boundaries are tables you pass in
 
 `createCustomRulesLintConfig` takes your boundaries rather than switching ours

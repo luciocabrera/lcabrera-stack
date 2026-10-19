@@ -139,3 +139,31 @@ package as the working directory. On 1.3 that run would load a `lint` block in
 the package config. The decision is unchanged. A workspace config still carries
 no `lint` key, and `vp run lint:plugins:verify` still fails when one appears.
 The root block and its `overrides` remain the only place a rule is set.
+
+## Amendment 2026-10-19 — Oxlint owns the effect-dependency check
+
+The Decision above removed the ESLint rules that Oxlint was running a second
+time through `jsPlugins`. One overlap of the same kind was left, and this time
+ESLint held the extra copy. Oxlint's `react` plugin carries
+`react-hooks/exhaustive-deps` in the `correctness` category, which
+`createLintConfig` sets to `error`. The React ESLint config from
+`createCustomRulesLintConfig` turned on two more copies:
+`react-hooks/exhaustive-deps` from `eslint-plugin-react-hooks`'s recommended
+config, and `react-x/exhaustive-deps` from `eslint-plugin-react-x`'s. One
+missing dependency was therefore reported three times, by two engines.
+
+Three cases were planted in a React package, one file each, and both engines
+were run on each file. Oxlint reported all three as errors: a hook that reads a
+prop missing from its dependency array, a `useCallback` closing over a prop it
+does not list, and a ref's `.current` read in an effect cleanup. ESLint
+reported the same three under both rule names, as warnings. Oxlint caught every
+case ESLint caught, so the ESLint config now sets both rules to `off` and
+Oxlint is the only engine that reports a missing dependency.
+
+The other `react-hooks` rules stay in ESLint. In the same analysis Oxlint
+missed a conditional `useState` and a mutated prop, so `rules-of-hooks` and the
+compiler rules have no complete Oxlint equivalent and turning them off would
+lose coverage.
+
+A project that uses `./eslint-custom-rules` without `./lint` no longer gets an
+effect-dependency check from this package. The package README says so.
