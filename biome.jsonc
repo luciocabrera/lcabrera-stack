@@ -58,6 +58,8 @@
         // === Phase 3 (net-new; no eslint/oxlint equivalent — see ADR-035 §7) ===
         "noShadow": "error", // an inner binding hiding an outer one is a bug magnet
         "noEmptyBlockStatements": "error", // empty {} block = incomplete refactor
+        // === Phase 5 (ADR-035 §7) — 0 findings on adoption ===
+        "noImportCycles": "error",
       },
       "complexity": {
         "useArrayFind": "error", // filter(...)[0] -> find(...)

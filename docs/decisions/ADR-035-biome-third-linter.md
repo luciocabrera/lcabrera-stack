@@ -4,6 +4,7 @@
 **Amends:** ADR-019 (which split `linter` into independent `eslint` / `oxlint` scanners — this adds a third rule engine alongside them, but deliberately **not** a third reporting scanner; see Consequences).
 **Amended:** 2026-07-18 — §7 adds the phased rule-hardening beyond the `recommended` preset.
 **Amended:** 2026-09-08 — §4 reverses the check-only decision: Biome writes in the pre-commit hook, under the one glob every fixer shares, with a format-only pass last.
+**Amended:** 2026-10-19 — §7 adds Phase 5, the opt-in rules the tree was already clean on.
 
 ## Context
 
@@ -252,6 +253,14 @@ must match those globs or it false-positives, but _loudly_, at the gate, never
 silently. The value is a hard stop on a stray default export that the named-export
 convention (and `single-component-export` / `useComponentExportOnlyModules`) only
 discouraged softly — worth it for a mixed-skill, multi-agent codebase.
+
+**Phase 5 (2026-10-19) — rules already at zero.** Each rule below reported
+nothing on the tree under `--only` and fired on a planted file, so it went to
+`error` with no code change. A candidate that was not at zero on the day stays
+off until a change of its own clears it.
+
+- `noImportCycles` (`suspicious`) — a module that reaches itself through its
+  imports.
 
 **Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
 (and any future nursery adoption) can be renamed, change behaviour, or graduate
