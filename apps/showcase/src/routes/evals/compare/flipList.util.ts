@@ -1,7 +1,7 @@
 import type { RunComparisonRow } from './EvalsCompare.types';
 
+import { taskTally } from '../utils/taskTally.util';
 import { flipChange } from './flipChange.util';
-import { taskTally } from './taskTally.util';
 import { taskVerdict } from './taskVerdict.util';
 
 const ORDER = { changed: 2, improved: 1, regressed: 0 } as const;

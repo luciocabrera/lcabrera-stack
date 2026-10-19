@@ -38,6 +38,10 @@ describe('evalsRouteEntries', () => {
       'evals/subjects/:kind/:name',
       'evals/heatmap',
       'evals/cost',
+      'evals/flaky',
+      'evals/confusion',
+      'evals/quality',
+      'evals/health',
     ]);
   });
 });

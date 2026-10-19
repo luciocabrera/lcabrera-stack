@@ -1,3 +1,4 @@
+import { RATE_LIMIT_ERROR_CLASS } from '@repo/eval-history/envelope/envelope.constants';
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -176,13 +177,13 @@ describe('sessionMetrics', () => {
     expect(classOf({ subtype: 'error_max_structured_output_retries' })).toBe(
       'execution',
     );
-    expect(classOf({ api_error_status: 429 })).toBe('rate_limit');
+    expect(classOf({ api_error_status: 429 })).toBe(RATE_LIMIT_ERROR_CLASS);
     expect(
       classOf({
         subtype: 'error_during_execution',
         terminal_reason: 'blocking_limit',
       }),
-    ).toBe('rate_limit');
+    ).toBe(RATE_LIMIT_ERROR_CLASS);
     expect(classOf({ api_error_status: 401 })).toBe('auth');
     expect(classOf({ api_error_status: 403 })).toBe('auth');
     expect(classOf({ api_error_status: 500 })).toBe('execution');
@@ -223,7 +224,9 @@ describe('sessionMetrics', () => {
     });
     const thrown = (text) => sessionMetrics([], before, text).error_class;
     expect(thrown('Reached maximum number of turns (1)')).toBe('max_turns');
-    expect(thrown('API Error: 429 rate_limit_error')).toBe('rate_limit');
+    expect(thrown('API Error: 429 rate_limit_error')).toBe(
+      RATE_LIMIT_ERROR_CLASS,
+    );
     expect(thrown('Invalid API key · Please run /login')).toBe('auth');
     expect(sessionMetrics([], before).error_class).toBe('drain');
   });

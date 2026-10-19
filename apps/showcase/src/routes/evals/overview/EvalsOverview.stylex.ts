@@ -14,8 +14,14 @@ export const styles = stylex.create({
     borderRadius: borderRadius.md,
     borderStyle: 'solid',
     borderWidth: 1,
+    gap: spacing.xs,
     backgroundColor: colors.errorBackground,
     color: colors.errorText,
+    display: 'flex',
+    flexDirection: 'column',
+  },
+  bannerLine: {
+    margin: 0,
   },
   card: {
     padding: spacing.lg,
@@ -41,6 +47,10 @@ export const styles = stylex.create({
   factValue: {
     margin: 0,
     fontSize: typography.fontSizeSm,
+  },
+  findings: {
+    margin: 0,
+    paddingInlineStart: spacing.lg,
   },
   grid: {
     gap: spacing.lg,

@@ -11,6 +11,10 @@ import { evalsHref } from '../utils/evalsHref.util';
 import { intervalLabel } from '../utils/intervalLabel.util';
 import { passRateLabel } from '../utils/passRateLabel.util';
 import { styles } from './EvalsOverview.stylex';
+import {
+  regressionFindingKey,
+  regressionFindingLabel,
+} from './regressionFindingLabel.util';
 
 export const EvalsOverview = () => {
   const { regressions, suites } = useLoaderData<typeof loader>();
@@ -22,22 +26,49 @@ export const EvalsOverview = () => {
         <Link to='/evals/compare'>Compare runs</Link>
         <Link to='/evals/heatmap'>Heatmap</Link>
         <Link to='/evals/cost'>Cost and latency</Link>
+        <Link to='/evals/flaky'>Flaky tasks</Link>
+        <Link to='/evals/confusion'>Trigger confusion</Link>
+        <Link to='/evals/quality'>Quality dimensions</Link>
+        <Link to='/evals/health'>Run health</Link>
       </nav>
-      {regressions.map(({ latest, previous, suite }) => (
-        <p key={suite} role='alert' {...stylex.props(styles.banner)}>
-          {suite} regressed on main: {passRateLabel(latest)} in{' '}
-          <Link to={evalsHref({ runId: latest.runId })}>the latest run</Link>,
-          below the {intervalLabel(previous)} of{' '}
-          <Link to={evalsHref({ runId: previous.runId })}>the run before</Link>.{' '}
-          <Link to={compareHref({ a: previous.runId, b: latest.runId })}>
-            Compare them
-          </Link>
-          .
-        </p>
-      ))}
+      {regressions.map(
+        ({ findings, flakyLeftOut, latest, previous, suite }) => (
+          <div key={suite} role='alert' {...stylex.props(styles.banner)}>
+            <p {...stylex.props(styles.bannerLine)}>
+              {suite} regressed on main in{' '}
+              <Link to={evalsHref({ runId: latest.runId })}>
+                the latest run
+              </Link>{' '}
+              against{' '}
+              <Link to={evalsHref({ runId: previous.runId })}>
+                the run before
+              </Link>
+              .{' '}
+              <Link to={compareHref({ a: previous.runId, b: latest.runId })}>
+                Compare them
+              </Link>
+              .
+            </p>
+            <ul {...stylex.props(styles.findings)}>
+              {findings.map((finding) => (
+                <li key={regressionFindingKey(finding)}>
+                  {regressionFindingLabel(finding)}
+                </li>
+              ))}
+            </ul>
+            {flakyLeftOut.length > 0 && (
+              <p {...stylex.props(styles.bannerLine)}>
+                {flakyLeftOut.length} flaky{' '}
+                {flakyLeftOut.length === 1 ? 'task was' : 'tasks were'} left out
+                of the rule; <Link to='/evals/flaky'>see the flaky tasks</Link>.
+              </p>
+            )}
+          </div>
+        ),
+      )}
       {suites.length === 0 && <p>No eval runs are stored yet.</p>}
       <div {...stylex.props(styles.grid)}>
-        {suites.map(({ latest, points, suite }) => (
+        {suites.map(({ flakyLeftOut, latest, points, suite }) => (
           <section key={suite} {...stylex.props(styles.card)}>
             <h2 {...stylex.props(styles.suiteName)}>
               <Link to={evalsHref({ runId: latest.runId })}>{suite}</Link>
@@ -58,6 +89,14 @@ export const EvalsOverview = () => {
               <dt {...stylex.props(styles.factTerm)}>Duration</dt>
               <dd {...stylex.props(styles.factValue)}>
                 {durationLabel(latest.durationMs)}
+              </dd>
+              <dt {...stylex.props(styles.factTerm)}>Flaky, left out</dt>
+              <dd {...stylex.props(styles.factValue)}>
+                {flakyLeftOut === undefined ? (
+                  'no main pair to judge'
+                ) : (
+                  <Link to='/evals/flaky'>{flakyLeftOut.length} tasks</Link>
+                )}
               </dd>
               <dt {...stylex.props(styles.factTerm)}>Run</dt>
               <dd {...stylex.props(styles.factValue)}>

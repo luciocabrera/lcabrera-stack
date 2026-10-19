@@ -6,6 +6,7 @@ import {
   EVALS_COST_LABELS,
   EVALS_FLAKY,
   EVALS_INTERVAL,
+  EVALS_REGRESSION,
   EVALS_SUBJECT_KINDS,
 } from './evalsDashboard.constants';
 
@@ -21,6 +22,12 @@ describe('EVALS_INTERVAL', () => {
 describe('EVALS_FLAKY', () => {
   it('marks the tasks the regression check treats as flaky', () => {
     expect(EVALS_FLAKY).toEqual(regressionConfig.flaky);
+  });
+});
+
+describe('EVALS_REGRESSION', () => {
+  it('judges a regression by the whole config the regression check reads', () => {
+    expect(EVALS_REGRESSION).toEqual(regressionConfig);
   });
 });
 
