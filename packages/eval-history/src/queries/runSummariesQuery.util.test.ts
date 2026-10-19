@@ -73,7 +73,7 @@ describe('runSummariesQuery', () => {
       scope: { kind: 'recent', perSuite: 30 },
     });
 
-    expect(text).not.toMatch(/from evals\.\w+ (?!\))/u);
+    expect(text).not.toMatch(/(?:from|join) evals\.\w+\b(?!\))/u);
     expect(columnsNamed({ columns: EXCLUDED_COLUMNS, sql: text })).toEqual([]);
   });
 

@@ -1,25 +1,25 @@
-import type { RunFigures } from '../types/runFigures.types';
-import type { SuiteRegression } from './EvalsOverview.types';
+import type { Regression } from '@repo/eval-history/report/report.types';
 
-const MAIN_BRANCH = 'main';
+import type { JudgedRunPair } from './EvalsOverview.types';
 
-export const suiteRegressions = (runs: readonly RunFigures[]) => {
-  const mainRuns = runs.filter(({ branch }) => branch === MAIN_BRANCH);
-  const suites = [...new Set(mainRuns.map(({ suite }) => suite))];
+import { leftOutFlaky } from '../utils/leftOutFlaky.util';
 
-  return suites.flatMap((suite) => {
-    const [latest, previous] = mainRuns.filter((run) => run.suite === suite);
-
-    if (
-      latest?.rate === undefined ||
-      previous?.lower === undefined ||
-      latest.rate >= previous.lower
-    ) {
-      return [];
-    }
-
-    const regression: SuiteRegression = { latest, previous, suite };
-
-    return [regression];
-  });
+type RegressedPair = JudgedRunPair & {
+  readonly verdict: Regression & {
+    readonly rule: Extract<Regression['rule'], { readonly kind: 'regression' }>;
+  };
 };
+
+const isRegressed = (pair: JudgedRunPair): pair is RegressedPair =>
+  pair.verdict.rule.kind === 'regression';
+
+export const suiteRegressions = (pairs: readonly JudgedRunPair[]) =>
+  pairs
+    .filter((pair) => isRegressed(pair))
+    .map(({ latest, previous, suite, verdict }) => ({
+      findings: verdict.rule.findings,
+      flakyLeftOut: leftOutFlaky(verdict).map(({ taskKey }) => taskKey),
+      latest,
+      previous,
+      suite,
+    }));

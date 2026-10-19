@@ -33,6 +33,10 @@ export default [
   route('evals/subjects/:kind/:name', 'routes/evals/subject-trend/root.ts'),
   route('evals/heatmap', 'routes/evals/heatmap/root.ts'),
   route('evals/cost', 'routes/evals/cost/root.ts'),
+  route('evals/flaky', 'routes/evals/flaky/root.ts'),
+  route('evals/confusion', 'routes/evals/confusion/root.ts'),
+  route('evals/quality', 'routes/evals/quality/root.ts'),
+  route('evals/health', 'routes/evals/health/root.ts'),
   route('enterprise-orders', 'routes/enterprise-orders/root.ts', [
     route('new', 'routes/enterprise-orders/new-order/root.tsx'),
     route('edit/:orderId', 'routes/enterprise-orders/edit-order/root.tsx'),

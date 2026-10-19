@@ -32,4 +32,6 @@ export const DETAIL_SCHEMA_BY_SUITE = {
 
 export const ENVELOPE_UPCASTERS: EnvelopeUpcasters = {};
 
+export const RATE_LIMIT_ERROR_CLASS = 'rate_limit';
+
 export const SESSION_LIMIT_ERROR_CLASS = 'session_limit';

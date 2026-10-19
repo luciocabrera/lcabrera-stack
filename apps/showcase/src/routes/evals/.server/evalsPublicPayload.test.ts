@@ -82,6 +82,7 @@ const seededRowsSchema = z.array(
     subjectName: z.string(),
     taskKey: z.string(),
     trialId: z.string(),
+    triggerRunId: z.string(),
   }),
 );
 
@@ -168,6 +169,7 @@ describe.skipIf(!DATABASE_URL)('the public /evals payload', () => {
     subjectName: '',
     taskKey: '',
     trialId: '',
+    triggerRunId: '',
   };
   const seededColumns: string[] = [];
 
@@ -248,7 +250,7 @@ select trial_id, dimension, 3, 'placeholder' from evals.eval_judge_score`,
             runId: seeded.runId,
           },
           path,
-          search: `?${new URLSearchParams({ a: seeded.otherRunId, b: seeded.runId, trial: seeded.trialId }).toString()}`,
+          search: `?${new URLSearchParams({ a: seeded.otherRunId, b: seeded.runId, run: seeded.triggerRunId, trial: seeded.trialId }).toString()}`,
         }) as LoaderFunctionArgs,
       );
 
@@ -310,7 +312,8 @@ select trial_id, dimension, 3, 'placeholder' from evals.eval_judge_score`,
     const { rows } = await writing.query(`select
   run.run_id::text as "runId", task.task_key as "taskKey", trial.id::text as "trialId",
   subject.kind::text as "subjectKind", subject.name as "subjectName",
-  (select other.run_id::text from evals.eval_run other where other.run_id <> run.run_id order by other.started_at desc limit 1) as "otherRunId"
+  (select other.run_id::text from evals.eval_run other where other.run_id <> run.run_id order by other.started_at desc limit 1) as "otherRunId",
+  (select skills_run.run_id::text from evals.eval_run skills_run where skills_run.suite = 'skills' order by skills_run.started_at desc limit 1) as "triggerRunId"
 from evals.eval_run run
 join evals.eval_trial trial on trial.run_id = run.run_id
 join evals.eval_task_version version on version.id = trial.task_version_id
@@ -404,7 +407,9 @@ limit 1`);
       expect(status, payload.slice(0, 400)).toBeGreaterThanOrEqual(200);
       expect(status, payload.slice(0, 400)).toBeLessThan(300);
       expect(
-        payload.includes(seeded.runId) || payload.includes(seeded.taskKey),
+        [seeded.runId, seeded.taskKey, seeded.triggerRunId].some((value) =>
+          payload.includes(value),
+        ),
         'the answer carries none of the seeded rows',
       ).toBe(true);
       expect(payload).not.toContain(MARKER);

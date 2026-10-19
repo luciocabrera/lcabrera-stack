@@ -55,7 +55,8 @@ decides how the envelope is versioned.
   the views beneath, names a column in `EXCLUDED_COLUMNS`
   ([ADR-133](../../docs/decisions/ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md)).
   `readRunSummaries`, `readRunTrials`, `readRunJudgeScores`, `readSubjectRuns`,
-  `readRunCosts` and `readAnnotations` read base tables instead, and reach each one only through
+  `readRunCosts`, `readAnnotations`, `readTaskTrials`, `readTriggerConfusion`,
+  `readRunHealth`, `readQualityScores` and `readQualityBaselines` read base tables instead, and reach each one only through
   `projectedRelation`, which refuses a column outside `PUBLIC_COLUMNS`
   (derived per read from `information_schema` by `readPublicColumns`) and a
   `jsonb` field outside `PUBLIC_FIELD_PATHS`, and reads an allowed field from
@@ -72,6 +73,13 @@ decides how the envelope is versioned.
   `runProjection` turns one run's summary, trials and judge scores into the
   envelope-named answer the dashboard's `.json` route serves;
   `readAnnotations` gives only an annotation's time and kind.
+  For a set of runs, `readTaskTrials` gives each task's outcomes in trial
+  order with its set, `readTriggerConfusion` counts the trigger and near-miss
+  trials by expectation, invoked skills and whether the session failed,
+  `readRunHealth` counts the error and timeout trials by error class, and
+  `readQualityScores` averages each subject's judge scores per dimension;
+  `readQualityBaselines` gives each skill's latest `quality_overall` baseline
+  with the runs tagged with it.
   `evalsReaderPool` is the pool they run on, built from
   `EVALS_READER_DATABASE_URL`.
 - `src/report/` — the comparison behind `vp run evals:report`: it reads two

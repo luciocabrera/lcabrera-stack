@@ -4,9 +4,9 @@ import { useLoaderData } from 'react-router';
 import type { loader } from './evals-heatmap.loader';
 
 import { EVALS_FLAKY } from '../constants/evalsDashboard.constants';
+import { pageStyles as styles } from '../evalsPage.stylex';
 import { EvalsPageHeader } from '../EvalsPageHeader';
 import { HeatmapGrid } from '../HeatmapGrid';
-import { styles } from './EvalsHeatmap.stylex';
 
 export const EvalsHeatmap = () => {
   const { flaky, grids } = useLoaderData<typeof loader>();

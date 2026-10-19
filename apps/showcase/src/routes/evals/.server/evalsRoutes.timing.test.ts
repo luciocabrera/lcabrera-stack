@@ -13,17 +13,9 @@
 
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { EVALS_READER_ROLE } from '@repo/eval-history/migrate/migrate.constants';
-import { migrateEvals } from '@repo/eval-history/migrate/migrateEvals.service';
-import { readMigrations } from '@repo/eval-history/migrate/readMigrations.service';
-import { readModelPrices } from '@repo/eval-history/prices/readModelPrices.service';
-import { databaseUrl } from '@repo/eval-history/queries/databaseUrl.util';
-import { closeEvalsReaderPool } from '@repo/eval-history/queries/evalsReaderPool.service';
 import { seedSyntheticHistory } from '@repo/eval-history/seed/seedSyntheticHistory.service';
-import { scratchConnections } from '@repo/eval-history/testing/scratchConnections.service';
-import { randomBytes, randomUUID } from 'node:crypto';
 import { performance } from 'node:perf_hooks';
-import { afterAll, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
+import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 import { z } from 'zod';
 
 import { routeLoaderArgs } from '../utils/routeLoaderArgs.util';
@@ -32,6 +24,7 @@ import {
   loadEvalsRouteModules,
   routeModuleFor,
 } from './evalsRouteModules.fixtures';
+import { readerDatabase } from './readerDatabase.fixtures';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
@@ -61,11 +54,10 @@ it.runIf(IS_CI)('has a database to time the /evals routes against', () => {
 });
 
 describe.skipIf(!DATABASE_URL)('the /evals routes on a year of history', () => {
-  const suffix = randomUUID().replaceAll('-', '').slice(0, 16);
-  const databaseName = `evals_timing_${suffix}`;
-  const password = randomBytes(16).toString('hex');
-  const reader = { ...EVALS_READER_ROLE, name: `evals_reader_time_${suffix}` };
-  const { close, connect } = scratchConnections(DATABASE_URL ?? '');
+  const database = readerDatabase({
+    prefix: 'evals_timing',
+    url: DATABASE_URL ?? '',
+  });
   const modules = {
     loaded: new Map() as Awaited<ReturnType<typeof loadEvalsRouteModules>>,
   };
@@ -82,21 +74,8 @@ describe.skipIf(!DATABASE_URL)('the /evals routes on a year of history', () => {
     );
 
   beforeAll(async () => {
-    const admin = await connect();
+    const { client } = await database.open();
 
-    await admin.query(`create database "${databaseName}"`);
-    await admin.query(
-      `create role "${reader.name}" login password '${password}'`,
-    );
-
-    const client = await connect(databaseName);
-
-    await migrateEvals({
-      client,
-      migrations: await readMigrations(),
-      prices: await readModelPrices(),
-      roles: [reader],
-    });
     Object.assign(
       seeded,
       await seedSyntheticHistory({ client, endsOn: '2026-10-01' }),
@@ -112,24 +91,9 @@ from (select run_id from evals.eval_run order by started_at desc limit 1) latest
     Object.assign(picked, first);
 
     modules.loaded = await loadEvalsRouteModules();
-
-    vi.stubEnv('EVALS_DASHBOARD', '1');
-    vi.stubEnv(
-      'EVALS_READER_DATABASE_URL',
-      databaseUrl({
-        database: databaseName,
-        password,
-        url: DATABASE_URL ?? '',
-        user: reader.name,
-      }),
-    );
   }, 120_000);
 
-  afterAll(async () => {
-    vi.unstubAllEnvs();
-    await closeEvalsReaderPool();
-    await close({ databases: [databaseName], roles: [reader.name] });
-  });
+  afterAll(() => database.shut());
 
   it('holds at least 15k trials', () => {
     expect(seeded.trials).toBeGreaterThanOrEqual(SEEDED_TRIALS_AT_LEAST);

@@ -1,51 +1,132 @@
+import { regressionVerdict } from '@repo/eval-history/report/regressionVerdict.util';
 import { describe, expect, it } from 'vite-plus/test';
 
 import type { RunFigures } from '../types/runFigures.types';
 
+import { EVALS_REGRESSION } from '../constants/evalsDashboard.constants';
+import { reportRun, reportTask, ruleHistory } from './reportRun.fixtures';
 import { suiteRegressions } from './suiteRegressions.util';
 
-const run = (overrides: Partial<RunFigures>) =>
-  ({
-    branch: 'main',
-    runId: 'run',
-    suite: 'skills',
-    ...overrides,
-  }) as RunFigures;
+const RUN_A = '00000000-0000-4000-8000-00000000000a';
+const RUN_B = '00000000-0000-4000-8000-00000000000b';
+
+const PASSING = ['pass', 'pass', 'pass'] as const;
+
+const PAIR = {
+  latest: { runId: RUN_B } as RunFigures,
+  previous: { runId: RUN_A } as RunFigures,
+  suite: 'skills',
+};
+
+const OLDER = reportRun({
+  runId: RUN_A,
+  tasks: [
+    reportTask({
+      outcomes: [...PASSING],
+      taskKey: 'skills/react-19/trigger-1',
+    }),
+    reportTask({
+      outcomes: [...PASSING],
+      taskKey: 'skills/react-19/trigger-2',
+    }),
+  ],
+});
+
+const REGRESSED = reportRun({
+  runId: RUN_B,
+  tasks: [
+    reportTask({
+      outcomes: [...PASSING],
+      taskKey: 'skills/react-19/trigger-1',
+    }),
+    reportTask({
+      outcomes: ['pass', 'fail', 'fail'],
+      taskKey: 'skills/react-19/trigger-2',
+    }),
+  ],
+});
+
+type JudgeArgs = {
+  readonly a: ReturnType<typeof reportRun>;
+  readonly b: ReturnType<typeof reportRun>;
+  readonly history: ReturnType<typeof ruleHistory>;
+};
+
+const judge = ({ a, b, history }: JudgeArgs) =>
+  suiteRegressions([
+    {
+      ...PAIR,
+      verdict: regressionVerdict({
+        a,
+        allowHarnessChange: false,
+        b,
+        config: EVALS_REGRESSION,
+        history,
+      }),
+    },
+  ]);
 
 describe('suiteRegressions', () => {
-  it('flags a suite whose latest main rate fell below the previous interval', () => {
-    const latest = run({ lower: 0.3, rate: 0.5, runId: 'new' });
-    const previous = run({ lower: 0.6, rate: 0.8, runId: 'old' });
+  it('flags a 3/3 to 1/3 drop in the newer run of a task with two runs of history', () => {
+    const [regression] = judge({
+      a: OLDER,
+      b: REGRESSED,
+      history: ruleHistory([]),
+    });
 
-    expect(suiteRegressions([latest, previous])).toEqual([
-      { latest, previous, suite: 'skills' },
+    expect(regression?.findings).toMatchObject([
+      {
+        failed: 2,
+        kind: 'flip',
+        taskKey: 'skills/react-19/trigger-2',
+        trials: 3,
+      },
     ]);
+    expect(regression?.flakyLeftOut).toEqual([]);
   });
 
-  it('ignores a drop that stays inside the previous interval', () => {
+  it('leaves out a task the history marks flaky, and names it', () => {
+    const flaky = {
+      disagreeFraction: 0.5,
+      disagreeing: 5,
+      runs: 10,
+      suite: 'skills',
+      taskKey: 'skills/react-19/trigger-2',
+    } as const;
+
     expect(
-      suiteRegressions([
-        run({ lower: 0.5, rate: 0.7 }),
-        run({ lower: 0.6, rate: 0.8 }),
-      ]),
+      judge({ a: OLDER, b: REGRESSED, history: ruleHistory([flaky]) }),
     ).toEqual([]);
   });
 
-  it('compares main with main only', () => {
+  it('does not flag a suite for a new task the older run never held', () => {
+    const withNewSkill = reportRun({
+      runId: RUN_B,
+      tasks: [
+        ...OLDER.tasks,
+        reportTask({
+          outcomes: ['fail', 'fail', 'fail'],
+          taskKey: 'skills/brand-new/trigger-1',
+        }),
+        reportTask({
+          outcomes: ['fail', 'fail', 'fail'],
+          taskKey: 'skills/brand-new/trigger-2',
+        }),
+      ],
+    });
+
     expect(
-      suiteRegressions([
-        run({ branch: 'feature', lower: 0, rate: 0.1 }),
-        run({ lower: 0.6, rate: 0.8 }),
-      ]),
+      judge({ a: OLDER, b: withNewSkill, history: ruleHistory([]) }),
     ).toEqual([]);
   });
 
-  it('judges nothing without a previous interval', () => {
+  it('judges nothing between runs of two models', () => {
     expect(
-      suiteRegressions([
-        run({ rate: 0.1 }),
-        run({ lower: undefined, rate: 0.9 }),
-      ]),
+      judge({
+        a: OLDER,
+        b: { ...REGRESSED, modelId: 'model-b' },
+        history: ruleHistory([]),
+      }),
     ).toEqual([]);
   });
 });
