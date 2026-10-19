@@ -15,7 +15,13 @@ export const NotificationViewport = ({
   const isBottomPlacement = placement.startsWith('bottom');
 
   useEffect(() => {
-    viewportRef.current?.showPopover?.();
+    const viewport = viewportRef.current;
+
+    viewport?.showPopover?.();
+
+    return () => {
+      if (viewport?.matches(':popover-open')) viewport.hidePopover();
+    };
   }, []);
 
   return (

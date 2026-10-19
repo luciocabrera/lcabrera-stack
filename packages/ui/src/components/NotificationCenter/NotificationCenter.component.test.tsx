@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { StrictMode } from 'react';
 import {
   afterEach,
   beforeEach,
@@ -61,6 +62,8 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
+  vi.restoreAllMocks();
+  Reflect.deleteProperty(HTMLDivElement.prototype, 'hidePopover');
 
   if (originalShowPopoverDescriptorRef.current) {
     Object.defineProperty(
@@ -134,5 +137,41 @@ describe('NotificationCenter', () => {
     rerender(<NotificationCenter />);
 
     expect(showPopoverMock).toHaveBeenCalledTimes(3);
+  });
+
+  it('leaves its corner open under StrictMode without re-opening an open popover', () => {
+    const openViewports = new WeakSet<Element>();
+    vi.spyOn(Element.prototype, 'matches').mockImplementation(
+      function isPopoverOpen(this: Element) {
+        return openViewports.has(this);
+      },
+    );
+    const hidePopover = vi.fn(function hide(this: Element) {
+      openViewports.delete(this);
+    });
+    Object.defineProperty(HTMLDivElement.prototype, 'hidePopover', {
+      configurable: true,
+      value: hidePopover,
+    });
+    showPopoverMock.mockImplementation(function show(this: Element) {
+      if (openViewports.has(this)) {
+        throw new DOMException('Already showing', 'InvalidStateError');
+      }
+
+      openViewports.add(this);
+    });
+
+    expect(() =>
+      render(
+        <StrictMode>
+          <NotificationCenter />
+        </StrictMode>,
+      ),
+    ).not.toThrow();
+
+    const viewport = screen.getByText('Invalid filters').closest('[popover]');
+
+    expect(viewport).not.toBeNull();
+    expect(viewport?.matches(':popover-open')).toBe(true);
   });
 });
