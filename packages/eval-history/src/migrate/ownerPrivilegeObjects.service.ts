@@ -36,7 +36,8 @@ order by (n.nspname || '.' || c.relname) collate "C"`;
 const DEFINER_FUNCTIONS_SQL = `select n.nspname || '.' || p.proname || '(' || oidvectortypes(p.proargtypes) || ')' as name
 from pg_proc p
 join pg_namespace n on n.oid = p.pronamespace
-where p.prosecdef
+where ${USER_SCHEMA_PREDICATE}
+  and p.prosecdef
   and has_function_privilege($1, p.oid, 'execute')
   and not exists (
     select from pg_depend d

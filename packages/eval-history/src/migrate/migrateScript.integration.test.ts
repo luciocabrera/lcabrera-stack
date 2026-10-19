@@ -228,4 +228,37 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     expect(stdout).not.toContain('pg_stat_statements');
     expect(stdout).not.toContain('probe_extension_definer');
   });
+
+  it('skips a security definer function in another session temp schema and still names one in public', async () => {
+    const { database, url } = await migratedDatabase();
+    const session = await connect(database);
+
+    try {
+      await session.query(
+        'create function pg_temp.probe_temp_definer() returns integer language sql security definer as $$ select 1 $$',
+      );
+
+      const temporary = runScript(url);
+
+      expect(temporary.status).toBe(0);
+      expect(temporary.stdout).not.toContain('probe_temp_definer');
+
+      await asOwner({
+        database,
+        statements: [
+          'create function public.probe_public_definer() returns integer language sql security definer as $$ select 1 $$',
+        ],
+      });
+
+      const exposed = runScript(url);
+
+      expect(exposed.status).toBe(1);
+      expect(exposed.stdout).toContain(
+        '  function public.probe_public_definer() is security definer',
+      );
+      expect(exposed.stdout).not.toContain('probe_temp_definer');
+    } finally {
+      await session.end();
+    }
+  });
 });
