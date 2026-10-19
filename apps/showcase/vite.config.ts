@@ -1,7 +1,6 @@
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
-import { fmtConfig } from './config/vite.fmt.config.ts';
 import { pluginsConfig } from './config/vite.plugins.config.ts';
 import { runConfig } from './config/vite.run.config.ts';
 
@@ -12,7 +11,6 @@ export default defineConfig({
     // that this setting does not affect.
     sourcemap: false,
   },
-  fmt: fmtConfig,
   plugins: pluginsConfig,
   resolve: {
     alias: [
@@ -47,9 +45,6 @@ export default defineConfig({
         target: 'http://localhost:3001',
       },
     },
-  },
-  staged: {
-    '*': 'vp check --fix',
   },
   test: {
     exclude: ['e2e/**', '**/node_modules/**', '**/.git/**'],

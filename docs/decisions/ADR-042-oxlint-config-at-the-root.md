@@ -139,3 +139,7 @@ package as the working directory. On 1.3 that run would load a `lint` block in
 the package config. The decision is unchanged. A workspace config still carries
 no `lint` key, and `vp run lint:plugins:verify` still fails when one appears.
 The root block and its `overrides` remain the only place a rule is set.
+
+The gate now rejects a workspace `fmt` or `staged` key as well: `vp fmt` from a
+package directory applies that package's `fmt` block where `vp check` does not,
+and `vp staged` reads only the `vite.config.ts` in its working directory.

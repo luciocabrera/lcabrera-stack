@@ -2,11 +2,9 @@ import { VITEST_COVERAGE_FLAGS } from '@lcabrera/vite-config/run';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
-import { fmtConfig } from './config/vite.fmt.config.ts';
 import { pluginsConfig } from './config/vite.plugins.config.ts';
 
 export default defineConfig({
-  fmt: fmtConfig,
   plugins: pluginsConfig,
   resolve: {
     alias: {
