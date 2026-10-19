@@ -183,7 +183,21 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
 
     expect(status).toBe(1);
     expect(stdout).toContain(
-      '  function evals.probe_definer is security definer',
+      '  function evals.probe_definer() is security definer',
     );
+  });
+
+  it('exits 0 when an extension installs a view that runs as its owner', async () => {
+    await createdRoles();
+    const database = await createDatabase('evals_migrate_script');
+    const owner = await connect(database);
+
+    await owner.query('create extension pg_stat_statements');
+
+    const { status, stdout } = runScript(connectionUrl({ database }));
+
+    expect(status).toBe(0);
+    expect(stdout).toContain('evals:migrate: granted evals_reader');
+    expect(stdout).not.toContain('pg_stat_statements');
   });
 });

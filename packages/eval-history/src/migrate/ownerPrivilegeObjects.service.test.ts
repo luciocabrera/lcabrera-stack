@@ -24,13 +24,13 @@ describe('ownerPrivilegeObjects', () => {
     const { client, queries } = scriptedClient(({ text }) => [
       {
         name: text.includes('prosecdef')
-          ? 'evals.probe'
+          ? 'evals.probe(integer)'
           : 'evals.v_subject_trend',
       },
     ]);
 
     expect(await ownerPrivilegeObjects({ client, role: 'reader' })).toEqual({
-      definerFunctions: ['evals.probe'],
+      definerFunctions: ['evals.probe(integer)'],
       definerViews: ['evals.v_subject_trend'],
     });
     expect(queries.map(({ values }) => values)).toEqual([

@@ -80,7 +80,7 @@ describe('migrateReport', () => {
       applied: [migration],
       exposed: [
         {
-          definerFunctions: ['evals.flaky_tasks'],
+          definerFunctions: ['evals.flaky_tasks(integer)'],
           definerViews: ['evals.v_subject_trend'],
           role: EVALS_READER_ROLE,
         },
@@ -94,7 +94,7 @@ describe('migrateReport', () => {
     expect(report.split('\n').slice(-3)).toEqual([
       "evals:migrate: role evals_reader can reach objects that run with their owner's privileges. The migrations above are applied and stay recorded; add a migration that gives each view security_invoker = true and drops security definer from each function:",
       '  view evals.v_subject_trend without security_invoker',
-      '  function evals.flaky_tasks is security definer',
+      '  function evals.flaky_tasks(integer) is security definer',
     ]);
   });
 });

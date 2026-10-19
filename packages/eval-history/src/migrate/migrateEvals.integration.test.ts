@@ -647,21 +647,26 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     expect(ledger.map(({ name }) => name)).toContain('0006-probe.sql');
   });
 
-  it('names a security definer function the reader can execute', async () => {
-    const { after, reader } = await migrateWithReader(
-      () =>
-        'create function evals.probe_definer() returns integer language sql security definer as $$ select 1 $$',
+  it('names each overload of a security definer function the reader can execute', async () => {
+    const { after, reader } = await migrateWithReader(() =>
+      [
+        'create function evals.probe_definer() returns integer language sql security definer as $$ select 1 $$;',
+        'create function evals.probe_definer(integer) returns integer language sql security definer as $$ select $1 $$;',
+      ].join('\n'),
     );
 
     expect(after.exposed).toEqual([
       {
-        definerFunctions: ['evals.probe_definer'],
+        definerFunctions: [
+          'evals.probe_definer()',
+          'evals.probe_definer(integer)',
+        ],
         definerViews: [],
         role: reader,
       },
     ]);
     expect(migrateReport(after)).toContain(
-      '  function evals.probe_definer is security definer',
+      '  function evals.probe_definer(integer) is security definer',
     );
   });
 });

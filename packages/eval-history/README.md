@@ -169,9 +169,10 @@ objects.
 
 It then checks the reader for anything that runs with its owner's privileges:
 a view it can select that lacks `security_invoker`, or a `security definer`
-function it can execute. Each one is printed, `granted` is not printed for the
-reader, and the run exits 1. The migrations are already applied and recorded at
-that point, so fix it with a further migration
+function it can execute, leaving out objects an extension owns. Each one is
+printed, `granted` is not printed for the reader, and the run exits 1. The
+migrations are already applied and recorded at that point, so fix it with a
+further migration
 ([ADR-137](../../docs/decisions/ADR-137-the-evals-reader-role-is-the-reporting-privacy-boundary.md)).
 
 `vp run evals:ingest` reads `EVALS_DATABASE_URL` and connects as

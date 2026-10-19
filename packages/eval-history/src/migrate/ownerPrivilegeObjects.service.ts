@@ -19,6 +19,10 @@ join pg_namespace n on n.oid = c.relnamespace
 where ${USER_SCHEMA_PREDICATE}
   and c.relkind = 'v'
   and has_table_privilege($1, c.oid, 'select')
+  and not exists (
+    select from pg_depend d
+    where d.classid = 'pg_class'::regclass and d.objid = c.oid and d.deptype = 'e'
+  )
   and not coalesce(
     (
       select reloption.option_value::boolean
@@ -29,11 +33,16 @@ where ${USER_SCHEMA_PREDICATE}
   )
 order by (n.nspname || '.' || c.relname) collate "C"`;
 
-const DEFINER_FUNCTIONS_SQL = `select n.nspname || '.' || p.proname as name
+const DEFINER_FUNCTIONS_SQL = `select n.nspname || '.' || p.proname || '(' || oidvectortypes(p.proargtypes) || ')' as name
 from pg_proc p
 join pg_namespace n on n.oid = p.pronamespace
-where p.prosecdef and has_function_privilege($1, p.oid, 'execute')
-order by (n.nspname || '.' || p.proname) collate "C"`;
+where p.prosecdef
+  and has_function_privilege($1, p.oid, 'execute')
+  and not exists (
+    select from pg_depend d
+    where d.classid = 'pg_proc'::regclass and d.objid = p.oid and d.deptype = 'e'
+  )
+order by (n.nspname || '.' || p.proname || '(' || oidvectortypes(p.proargtypes) || ')') collate "C"`;
 
 const nameRowsSchema = z.array(z.object({ name: z.string() }));
 

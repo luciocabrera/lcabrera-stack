@@ -119,6 +119,17 @@ does not print `granted` for that role, and exits 1. The migration that caused
 it stays applied and recorded, so the fix is a further migration; the migrator
 does not roll one back
 ([#1404](https://github.com/luciocabrera/lcabrera-stack/issues/1404)).
+Functions are named with their argument types, so overloads are told apart.
+
+**Both checks skip extension members.** A view or function that an extension
+owns (a `pg_depend` row with `deptype = 'e'`) is left out of checks 2 and 3,
+in the migrator and in the test. `create extension pg_stat_statements`, for
+one, adds two views in `public` that run with the owner's privileges, and no
+migration here can alter an extension's objects, so counting them would make
+`evals:migrate` fail on every database that has the extension. Both checks
+still cover every non-system schema, so a view outside `evals` that a
+migration creates over evals data is still caught. The cost is that an
+extension installed into the database is trusted as it ships.
 
 The definition checks in `reporting.integration.test.ts` stay. They still name
 an excluded column a view or function selects directly, but they no longer

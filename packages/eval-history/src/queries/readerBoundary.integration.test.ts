@@ -439,7 +439,7 @@ values ($1, 'skills/1', jsonb_build_object(
       check: async (client) => {
         const { definerFunctions } = await boundaryProblems(client);
 
-        expect(definerFunctions).toEqual(['public.flaky_tasks']);
+        expect(definerFunctions).toEqual(['public.flaky_tasks(integer)']);
       },
       statements: [
         PUBLIC_FLAKY_TASKS.replace('stable as', 'stable security definer as'),
@@ -472,7 +472,7 @@ values ($1, 'skills/1', jsonb_build_object(
         check: async (client) => {
           const { definerFunctions } = await boundaryProblems(client);
 
-          expect(definerFunctions).toEqual(['evals.flaky_tasks']);
+          expect(definerFunctions).toEqual(['evals.flaky_tasks(integer)']);
         },
         statements: [
           `create or replace function ${FLAKY_SIGNATURE}\n${sql.replace(' stable as', ' stable security definer as')}`,

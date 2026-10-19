@@ -6,7 +6,7 @@ import { EVALS_READER_ROLE } from './migrate.constants.ts';
 describe('exposedRoleLines', () => {
   it('says the migrations stay applied, then names each view and function', () => {
     const [heading, ...objects] = exposedRoleLines({
-      definerFunctions: ['evals.probe'],
+      definerFunctions: ['evals.probe(integer)'],
       definerViews: ['evals.v_a', 'evals.v_b'],
       role: EVALS_READER_ROLE,
     });
@@ -18,7 +18,7 @@ describe('exposedRoleLines', () => {
     expect(objects).toEqual([
       '  view evals.v_a without security_invoker',
       '  view evals.v_b without security_invoker',
-      '  function evals.probe is security definer',
+      '  function evals.probe(integer) is security definer',
     ]);
   });
 });
