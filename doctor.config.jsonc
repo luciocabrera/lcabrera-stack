@@ -95,9 +95,26 @@
       "deslop/unused-dev-dependency",
     ],
 
-    // No overrides. If one is ever needed, note that the glob is matched against
-    // the path React Doctor reports, which is relative to the *project* it
-    // detected, not to the repo root — a repo-relative path matches nothing and
-    // fails silently, which reads identically to the override not being there.
+    // Each glob is matched against the path React Doctor reports, which is
+    // relative to the *project* it detected (`packages/ui`), not to the repo
+    // root — a repo-relative path matches nothing and fails silently, which
+    // reads identically to the override not being there.
+    "overrides": [
+      {
+        // The populated `<tbody>` is `display: grid` and every `<tr>` is
+        // `display: flex` (their own `.stylex.ts` files). A browser drops an
+        // element's implicit table role along with its table `display`, so the
+        // explicit `rowgroup` and `row` are the only source of the ownership
+        // `role="grid"` requires (ADR-062). The rule reads JSX and cannot see
+        // the stylesheet. Biome's `noRedundantRoles` is exempted on the same
+        // files for the same reason in `biome.jsonc`, and both are argued in
+        // `docs/agents/public-package-suppressions.json`.
+        "files": [
+          "src/components/Table/TableBody/TableBody.component.tsx",
+          "src/components/Table/TableRow/TableRow.component.tsx",
+        ],
+        "rules": ["react-doctor/no-redundant-roles"],
+      },
+    ],
   },
 }
