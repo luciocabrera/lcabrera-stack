@@ -264,8 +264,11 @@ off until a change of its own clears it.
 - `noUndeclaredDependencies` (`correctness`) — an import resolved from a
   package the nearest `package.json` does not declare, the edge that works
   in-repo through hoisting and breaks for an installer.
-- `noFloatingPromises` (`nursery`) — a promise neither awaited, returned nor
-  handled, whose rejection nothing observes.
+- `noFloatingPromises` (`nursery`) — an unhandled promise whose type Biome can
+  infer itself, such as a call to one of the repository's own `async`
+  functions, across modules included. A promise typed only by a dependency's
+  declarations can pass unreported: an unawaited `client.query()` on a `pg`
+  client does.
 - `useExhaustiveSwitchCases` (`nursery`) — a `switch` over a union that
   misses a member and has no `default`.
 - The Playwright rules, on `apps/showcase/e2e/**` only. The override sets the
