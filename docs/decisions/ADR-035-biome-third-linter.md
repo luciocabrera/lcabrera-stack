@@ -4,6 +4,7 @@
 **Amends:** ADR-019 (which split `linter` into independent `eslint` / `oxlint` scanners — this adds a third rule engine alongside them, but deliberately **not** a third reporting scanner; see Consequences).
 **Amended:** 2026-07-18 — §7 adds the phased rule-hardening beyond the `recommended` preset.
 **Amended:** 2026-09-08 — §4 reverses the check-only decision: Biome writes in the pre-commit hook, under the one glob every fixer shares, with a format-only pass last.
+**Amended:** 2026-10-19 — §4's closing format-only pass now also sorts imports, which moved from `perfectionist/sort-imports` to Oxfmt's `sortImports` ([ADR-138](ADR-138-oxfmt-sorts-imports-in-place-of-perfectionist.md)). The one glob and the order are unchanged.
 
 ## Context
 

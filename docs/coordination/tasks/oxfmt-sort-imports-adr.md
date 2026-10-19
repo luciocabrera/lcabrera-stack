@@ -2,7 +2,7 @@
 id: oxfmt-sort-imports-adr
 title: ADR for import sorting in Oxfmt
 owner: agent:claude
-status: active
+status: review
 branch: docs/1414-oxfmt-sort-imports-adr
 area:
   - docs/decisions/ADR-138-*
@@ -10,7 +10,7 @@ area:
 started: 2026-10-19
 updated: 2026-10-19
 plan: (none)
-pr: (none)
+pr: '#1435'
 issue: #1414
 ---
 
@@ -20,6 +20,6 @@ ADR for import sorting in Oxfmt
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: ADR-138 written, gate green, PR ready for the maintainer
 - Blockers: none
-- Next:
+- Next: maintainer approval; merging is the decision
