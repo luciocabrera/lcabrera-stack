@@ -115,6 +115,10 @@
       "performance": {
         "noDelete": "error", // aligns with immutability (Rule 6)
       },
+      "nursery": {
+        // === Phase 5 (ADR-035 §7). NURSERY — re-check on any Biome upgrade. ===
+        "noFloatingPromises": "error",
+      },
       "correctness": {
         "noUndeclaredVariables": "error", // Phase 2: agrees with `no-undef` (safety net)
         "noUndeclaredDependencies": "error", // Phase 5: an import its package.json does not declare

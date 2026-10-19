@@ -264,10 +264,12 @@ off until a change of its own clears it.
 - `noUndeclaredDependencies` (`correctness`) — an import resolved from a
   package the nearest `package.json` does not declare, the edge that works
   in-repo through hoisting and breaks for an installer.
+- `noFloatingPromises` (`nursery`) — a promise neither awaited, returned nor
+  handled, whose rejection nothing observes.
 
-**Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
-(and any future nursery adoption) can be renamed, change behaviour, or graduate
-to another group on a Biome minor bump. Biome is pinned (`2.5.4`, via the
+**Nursery rules carry an upgrade duty.** Every rule `biome.jsonc` enables under
+a `nursery` key can be renamed, change behaviour, or graduate
+to another group on a Biome minor bump. Biome is pinned (via the
 `pnpm-workspace.yaml` catalog and the `$schema` URL); on every upgrade, re-run the
 per-rule `--only` sweep for each nursery rule before trusting a green gate.
 
