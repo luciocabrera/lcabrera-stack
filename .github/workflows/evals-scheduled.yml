@@ -1,0 +1,127 @@
+name: Evals (scheduled)
+
+# The cadence and how to change or stop it: COMMANDS.md §6.
+on:
+  schedule:
+    - cron: '0 3 * * 0'
+  workflow_dispatch:
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
+
+concurrency:
+  group: evals-scheduled
+  cancel-in-progress: false
+
+jobs:
+  suite:
+    name: ${{ matrix.suite }} on main (Claude)
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: ${{ matrix.timeout }}
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      max-parallel: 1
+      matrix:
+        include:
+          - suite: skills
+            command: evals:skills
+            reports: .tmp/skill-evals/
+            timeout: 120
+          - suite: skill-quality
+            command: evals:skills:quality
+            reports: .tmp/skill-quality/
+            timeout: 30
+          - suite: verifier-fixtures
+            command: evals:verifier
+            reports: .tmp/verifier-evals/
+            timeout: 45
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Run the suite
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          EVALS_COMMAND: ${{ matrix.command }}
+        run: vp run "$EVALS_COMMAND"
+
+      - name: Upload reports
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: scheduled-reports-${{ matrix.suite }}
+          path: ${{ matrix.reports }}
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload envelopes
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: eval-envelopes-${{ matrix.suite }}
+          path: .tmp/eval-results/
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Ingest envelopes (advisory)
+        if: always()
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          EVALS_DATABASE_URL: ${{ secrets.EVALS_DATABASE_URL }}
+          EVALS_SUITE: ${{ matrix.suite }}
+        run: |
+          if [ -z "$EVALS_DATABASE_URL" ]; then
+            echo "::notice title=Eval history::EVALS_DATABASE_URL is not set, so ingest is skipped; the envelopes are in the eval-envelopes-$EVALS_SUITE artifact."
+            exit 0
+          fi
+          if [ ! -d .tmp/eval-results ]; then
+            echo "::notice title=Eval history::No envelope was written under .tmp/eval-results, so there is nothing to ingest."
+            exit 0
+          fi
+          if ! vp run evals:ingest -- .tmp/eval-results; then
+            echo "::warning title=Eval history::evals:ingest did not store every envelope; they are in the eval-envelopes-$EVALS_SUITE artifact, and vp run evals:ingest sends a downloaded copy."
+          fi
+
+  retain:
+    name: Apply eval-history retention
+    needs: suite
+    if: always() && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - name: Setup Vite+
+        uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Retention
+        env:
+          EVALS_DATABASE_URL: ${{ secrets.EVALS_DATABASE_URL }}
+        run: |
+          if [ -z "$EVALS_DATABASE_URL" ]; then
+            echo "::notice title=Eval history::EVALS_DATABASE_URL is not set, so retention is skipped; there is no stored history to prune."
+            exit 0
+          fi
+          vp run evals:retain

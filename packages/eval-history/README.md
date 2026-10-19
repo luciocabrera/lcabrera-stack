@@ -86,6 +86,15 @@ decides how the envelope is versioned.
   "Judge agreement (all recorded hand grades, by judge model and prompt
   hash)" because it covers every recorded hand grade rather than the two runs,
   and says the section needs the database when both runs came from files.
+- `src/retain/` — the retention rule behind `vp run evals:retain`, in one
+  transaction. It clears the transcript pointer of every trial past its
+  `transcript_expires_at` (the run's finish plus 90 days, set at ingest), or
+  more than 90 days past its run's finish when it records no expiry, unless
+  the run is on `main` or belongs to a baseline. The trial row and its outcome
+  stay. It then clears the `content` of each subject's snapshots beyond the
+  newest 20 that still hold one, ordered by `first_seen_at`, and keeps every
+  version row, since trials reference them. The scheduled workflow
+  `evals-scheduled.yml` runs it after the suites.
 - `src/seed/` — a year of synthetic nightly history, about 15k trials, for
   timing the views and building the dashboard against real volume.
 - `src/stats/` — the statistics of
@@ -158,7 +167,7 @@ that is down only warns, and the file waits on disk for the next
 
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-The ingest, baseline, reporting, reader boundary and grade tests each create
+The ingest, baseline, reporting, reader boundary, grade and retention tests each create
 and drop a database of their own on the same server. The reader boundary test
 replaces a reporting view or function with one that reads excluded data, in a
 transaction it rolls back, and asserts that Postgres refuses it to the reader
