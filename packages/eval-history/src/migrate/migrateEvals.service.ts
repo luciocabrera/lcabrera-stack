@@ -3,9 +3,9 @@ import type { EvalsRole, Migration, MigrationClient } from './migrate.types.ts';
 
 import { upsertModelPrices } from '../prices/upsertModelPrices.service.ts';
 import { applyMigrations } from './applyMigrations.service.ts';
+import { declaresViewGrant } from './declaresViewGrant.util.ts';
 import { exposedRoles } from './exposedRoles.service.ts';
 import { grantRoles } from './grantRoles.service.ts';
-import { readsViews } from './readsViews.util.ts';
 
 type MigrateEvalsArgs = {
   readonly client: MigrationClient;
@@ -28,7 +28,9 @@ export const migrateEvals = async ({
   );
   const exposed = await exposedRoles({
     client,
-    roles: roles.filter((role) => present.has(role.name) && readsViews(role)),
+    roles: roles.filter(
+      (role) => present.has(role.name) && declaresViewGrant(role),
+    ),
   });
   const exposedNames = new Set(exposed.map(({ role }) => role.name));
 
