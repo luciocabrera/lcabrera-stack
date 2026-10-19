@@ -108,6 +108,29 @@ fails with `42501`, or, for the variant that runs with the owner's
 privileges, that the second or third check names it. It also runs the
 dashboard's and the CLI's readers as the reader.
 
+**The migrator runs checks 2 and 3 on every run.** On PostgreSQL 18,
+`create or replace view` without the option resets `security_invoker`, so a
+migration can undo the boundary, and the test above only catches that where
+`EVALS_TEST_DATABASE_URL` is set. After granting, `evals:migrate` runs both
+queries for each role that is granted `all views in schema evals` and exists.
+They live in `src/migrate/ownerPrivilegeObjects.service.ts`, which the test
+calls too. When either names an object, the run prints the view or function,
+does not print `granted` for that role, and exits 1. The migration that caused
+it stays applied and recorded, so the fix is a further migration; the migrator
+does not roll one back
+([#1404](https://github.com/luciocabrera/lcabrera-stack/issues/1404)).
+Functions are named with their argument types, so overloads are told apart.
+
+**Both checks skip extension members.** A view or function that an extension
+owns (a `pg_depend` row with `deptype = 'e'`) is left out of checks 2 and 3,
+in the migrator and in the test. `create extension pg_stat_statements`, for
+one, adds two views in `public` that run with the owner's privileges, and no
+migration here can alter an extension's objects, so counting them would make
+`evals:migrate` fail on every database that has the extension. Both checks
+still cover every non-system schema, so a view outside `evals` that a
+migration creates over evals data is still caught. The cost is that an
+extension installed into the database is trusted as it ships.
+
 The definition checks in `reporting.integration.test.ts` stay. They still name
 an excluded column a view or function selects directly, but they no longer
 carry the boundary.
@@ -116,7 +139,8 @@ carry the boundary.
 
 - A migration that creates or replaces a view in `evals` must give it
   `security_invoker = true`. `create view` defaults to the owner's privileges,
-  and a view created without it fails check 2.
+  and a view created without it fails check 2, both in the test and in
+  `evals:migrate`.
 - Adding a top-level path to `PUBLIC_FIELD_PATHS` changes the expected
   expression, so check 4 fails until a migration rewrites the copy to match.
   Removing a path works the same way.
@@ -153,6 +177,7 @@ carry the boundary.
 ## References
 
 - [#1366](https://github.com/luciocabrera/lcabrera-stack/issues/1366),
+  [#1404](https://github.com/luciocabrera/lcabrera-stack/issues/1404),
   [#1359](https://github.com/luciocabrera/lcabrera-stack/pull/1359),
   [#1281](https://github.com/luciocabrera/lcabrera-stack/issues/1281)
 - [ADR-133](ADR-133-serve-the-eval-dashboard-from-the-showcase-as-aggregates-only.md),

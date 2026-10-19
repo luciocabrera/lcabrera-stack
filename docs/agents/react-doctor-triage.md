@@ -236,26 +236,30 @@ type is `SortingState<TData>[number]['direction']`, not a hand-written
 `'asc' | 'desc'`: `SortDirection` includes `undefined`, which a literal union
 rejects at the assignment.
 
-## Rule: `react-doctor/js-hoist-intl` — cost fixed, finding accepted
+## Rule: `react-doctor/js-hoist-intl` — fixed, by naming the formatter's inputs
 
-**Read this before "fixing"
 [`getCurrencySymbol.util.ts`](../../packages/ui/src/components/Form/fields/CurrencyField/utils/getCurrencySymbol.util.ts)
-again — it still reports, and that is the expected state.**
+no longer reports. An earlier version of this section said it had to, and that was
+wrong.
 
-The rule fires on `new Intl.X(…)` lexically inside a function body. Probed rather
-than inferred, with four variants in a scratch file: module-scope construction is
-clean, and a **memo cache, a module-scope factory, and the current shape all
-fire** — the constructor is still inside a function in every one of them. A fifth
-probe showed a `useMemo` callback is exempt.
+The rule fires on `new Intl.X(…)` lexically inside a function body, with a set of
+exits read from its source (`oxlint-plugin-react-doctor`, the `js-hoist-intl`
+definition) rather than its documentation: module scope, a `useMemo`/`useCallback`/
+`useRef` callback, a value passed straight to a cache's `.set()` or assigned with
+`??=`, and **a non-component function whose constructor arguments are its own
+parameters** — a formatter built from what the caller passes cannot be hoisted. The
+previous shape missed that last exit only because the constructor read
+`resolvedCurrency`, a local the rule cannot trace back to a parameter, and a locale
+from a call. Moving the construction into a private `readCurrencySymbol({ currency,
+locale })` passes both as parameters and satisfies it without changing what is
+built or how often.
 
-So the rule's two exits are module scope or `useMemo`, and neither is available:
-the currency varies per call, and ADR-004 (React Compiler owns memoization) means
-`packages/ui` contains no `useMemo` at all — verify with
-`grep -rn "useMemo" packages/ui/src --include=*.tsx | grep -v test`. The `useMemo`
-form would also be _worse_: it memoizes per component instance, so every
-`CurrencyField` mount rebuilds the formatter anyway.
+Neither `useMemo` nor module scope was available: the currency varies per call, and
+ADR-004 (React Compiler owns memoization) means `packages/ui` contains no `useMemo`
+at all. The `useMemo` form would also be _worse_: it memoizes per component
+instance, so every `CurrencyField` mount rebuilds the formatter anyway.
 
-**What was fixed is the cost the rule is pointing at, which was real and large.**
+**The cost the rule is pointing at was real and large, and is still paid once per key.**
 Constructing the formatter dominated the function by three orders of magnitude —
 it loads locale data — so the resolved _symbol_ is now memoized at module scope,
 keyed by `locale:currency`. Re-measure with `node -e` against the two shapes
@@ -294,12 +298,31 @@ it caught four independent state flags.
 
 Straightforward, and recorded only so they are not re-derived.
 
-| Rule                               | Site                                | What was wrong                                                                                                                                                                                                                                                                                                                                                     |
-| ---------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `rendering-svg-precision`          | `EraserIcon`, `RefreshIcon`         | Figma-export coordinates carrying 4–5 decimals in a `0 0 16 16` viewBox. Rounded to 2. **Fix every offending line in the file, not the reported one** — the rule reports once per file, so `RefreshIcon`'s remaining two paths would simply have taken the flagged line's place. Shared endpoints were rounded consistently so the arrowheads still meet the arcs. |
-| `prefer-module-scope-static-value` | `SettingsTabs`, `VirtualListFooter` | `tabs` / `modes` rebuilt per render with no local-state input. Hoisted. In `VirtualListFooter` only `modes` moves — the sibling `modeConfig` reads live counts and must stay.                                                                                                                                                                                      |
-| `no-unknown-property`              | `TooltipTrigger`                    | `popoverTarget` on a `<span>`. React does render the attribute (the rule's "React ignores it" wording is loose) but only `button`/`input` can be popover invokers, so it was inert — `Tooltip` drives the popover with `showPopover()`/`hidePopover()` on a ref. Removed, and a test now asserts its absence.                                                      |
-| `no-pass-live-state-to-parent`     | `useVirtualSelectDropdown`          | `onOpenChange` fired from a `useEffect`, so the parent rendered once with the stale value and got a spurious `false` on mount. Now called from the two handlers that change the state. Safe because every consumer initialises its own mirror to `false`, so the mount call was already a no-op.                                                                   |
+| Rule                               | Site                                 | What was wrong                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| ---------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `rendering-svg-precision`          | `EraserIcon`, `RefreshIcon`          | Figma-export coordinates carrying 4–5 decimals in a `0 0 16 16` viewBox. Rounded to 2. **Fix every offending line in the file, not the reported one** — the rule reports once per file, so `RefreshIcon`'s remaining two paths would simply have taken the flagged line's place. Shared endpoints were rounded consistently so the arrowheads still meet the arcs.                                                                                                    |
+| `prefer-module-scope-static-value` | `SettingsTabs`, `VirtualListFooter`  | `tabs` / `modes` rebuilt per render with no local-state input. Hoisted. In `VirtualListFooter` only `modes` moves — the sibling `modeConfig` reads live counts and must stay.                                                                                                                                                                                                                                                                                         |
+| `no-unknown-property`              | `TooltipTrigger`                     | `popoverTarget` on a `<span>`. React does render the attribute (the rule's "React ignores it" wording is loose) but only `button`/`input` can be popover invokers, so it was inert — `Tooltip` drives the popover with `showPopover()`/`hidePopover()` on a ref. Removed, and a test now asserts its absence.                                                                                                                                                         |
+| `no-pass-live-state-to-parent`     | `useVirtualSelectDropdown`           | `onOpenChange` fired from a `useEffect`, so the parent rendered once with the stale value and got a spurious `false` on mount. Now called from the two handlers that change the state. Safe because every consumer initialises its own mirror to `false`, so the mount call was already a no-op.                                                                                                                                                                      |
+| `async-await-in-loop`              | `apps/showcase/scripts/seed-db.mjs`  | The seed sources ran through `reduce(async (previous, …) => { await previous; … })`. Sequential, but only because each callback awaited the last one's promise. Now a recursive `applyInOrder` that awaits one source and then recurses on the rest, which is sequential by construction: each source still applies after the one before it, and a rejection still stops the run. Not a `.then` chain, which trades this finding for eslint's `unicorn/prefer-await`. |
+| `zod-v4-no-deprecated-schema-apis` | `SkillScores.cellRenderers.test.tsx` | `z.object(…).strict()` → `z.strictObject(…)`.                                                                                                                                                                                                                                                                                                                                                                                                                         |
+
+## Rule: `react-doctor/no-redundant-roles` — false positive, overridden per file
+
+`role="rowgroup"` on the populated `<tbody>` (`TableBody.component.tsx`) and
+`role="row"` on every `<tr>` (`TableRow.component.tsx`). Both elements lose their
+implicit table role to their own stylesheet's `display`, so the attribute is the only
+source of the row ownership `role="grid"` requires (ADR-062). Biome's
+`noRedundantRoles` makes the same mistake on the same files and carries the same
+argument in `biome.jsonc`.
+
+There is no code fix, so the rule stays on and the two files are named in
+`ignore.overrides` in `doctor.config.jsonc`, each with a `permanent` entry in
+[`public-package-suppressions.json`](public-package-suppressions.json). Do not answer
+it by deleting the role: a Testing Library role query cannot see the difference,
+because jsdom resolves the implicit role a browser drops. Deleting both attributes
+leaves `getAllByRole('rowgroup')` and `getAllByRole('row')` returning the same
+elements; only the attribute assertions in `Table.gridRoles.test.tsx` fail.
 
 ## The app workspaces
 

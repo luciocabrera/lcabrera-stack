@@ -99,16 +99,19 @@ const ensureDatabaseExists = async ({ connection, database }) => {
   });
 };
 
+const applyInOrder = async ({ client, sources }) => {
+  const [source, ...rest] = sources;
+  if (source === undefined) return;
+  console.log(`   applying ${source.path}`);
+  await client.query(source.prepare(readFileSync(source.path, 'utf8')));
+  await applyInOrder({ client, sources: rest });
+};
+
 const applySources = ({ connection, database, sources }) =>
   withClient({
     connection,
     database,
-    run: (client) =>
-      sources.reduce(async (previous, { path, prepare }) => {
-        await previous;
-        console.log(`   applying ${path}`);
-        return client.query(prepare(readFileSync(path, 'utf8')));
-      }, Promise.resolve()),
+    run: (client) => applyInOrder({ client, sources }),
   });
 
 const main = async () => {
