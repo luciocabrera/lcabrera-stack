@@ -27,7 +27,7 @@
  *
  * Usage:
  *   repo-verify-react-doctor            # gate: fails on a blocking finding
- *   repo-verify-react-doctor --report   # report only, never fails
+ *   repo-verify-react-doctor --report   # report only, never fails on findings
  *
  * Exit codes: 0 = no blocking findings, 1 = findings, a bad config or a failed run.
  */
@@ -42,9 +42,8 @@ import { readGates } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 import { parseJsonc } from './jsonc.mjs';
 import {
-  blockingFindings,
-  blockingSeverities,
   findShadowingConfigs,
+  judgeReport,
   renderFinding,
 } from './react-doctor-finding.mjs';
 
@@ -111,9 +110,9 @@ const readConfig = () => {
   }
 };
 
-const readBlocking = (config) => {
+const judge = (args) => {
   try {
-    return blockingSeverities(config);
+    return judgeReport(args);
   } catch (error) {
     return fail(`${CONFIG}: ${error.message}`);
   }
@@ -121,7 +120,7 @@ const readBlocking = (config) => {
 
 const main = () => {
   assertNotShadowed();
-  const { level, severities } = readBlocking(readConfig());
+  const config = readConfig();
   const report = scan();
 
   if (report.ok !== true) {
@@ -133,15 +132,19 @@ const main = () => {
   }
 
   const { errorCount = 0, warningCount = 0 } = report.summary ?? {};
+  const reportOnly = process.argv.includes('--report');
+  const { blocking, level } = judge({
+    config,
+    diagnostics: report.diagnostics,
+    reportOnly,
+  });
 
-  if (process.argv.includes('--report')) {
+  if (reportOnly) {
     process.stdout.write(
       `Wrote ${REPORT}: ${errorCount} error(s), ${warningCount} warning(s).\n`,
     );
     return;
   }
-
-  const blocking = blockingFindings(report.diagnostics, severities);
 
   if (blocking.length > 0) {
     process.stderr.write(

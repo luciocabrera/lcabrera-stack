@@ -3,7 +3,8 @@
  * findings block, which config files would shadow `doctor.config.jsonc`, and
  * how one blocking finding prints.
  *
- * `blocking` takes the CLI's own values and its default, `error`. The loader
+ * `blocking` takes the CLI's own values and its default, `error`, and is read
+ * only by the gate: report mode never fails on it. The loader
  * prefers every name in `SHADOWING_CONFIGS` over the `.jsonc`, so one present
  * means the scan ran on rules the gate never read.
  *
@@ -40,6 +41,12 @@ export const blockingSeverities = (config) => {
 
 export const blockingFindings = (diagnostics, severities) =>
   diagnostics.filter((finding) => severities.has(finding.severity));
+
+export const judgeReport = ({ config, diagnostics, reportOnly }) => {
+  if (reportOnly) return { blocking: [], level: undefined };
+  const { level, severities } = blockingSeverities(config);
+  return { blocking: blockingFindings(diagnostics, severities), level };
+};
 
 export const findShadowingConfigs = (exists) =>
   SHADOWING_CONFIGS.filter((name) => exists(name));

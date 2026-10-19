@@ -11,6 +11,7 @@ area:
   - docs/decisions/ADR-055-*
   - docs/agents/react-doctor-triage.md
   - .changeset/*react-doctor*
+  - docs/agents/public-package-suppressions.json
   - packages/repo-standards/README.md
   - COMMANDS.md
   - .github/skills/quality-gate-workflow/SKILL.md

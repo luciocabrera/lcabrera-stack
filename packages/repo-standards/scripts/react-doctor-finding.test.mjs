@@ -4,6 +4,7 @@ import {
   blockingFindings,
   blockingSeverities,
   findShadowingConfigs,
+  judgeReport,
   renderFinding,
   SHADOWING_CONFIGS,
 } from './react-doctor-finding.mjs';
@@ -103,5 +104,37 @@ describe('findShadowingConfigs', () => {
         (ext) => `doctor.config.${ext}`,
       ),
     );
+  });
+});
+
+describe('judgeReport', () => {
+  it('never fails report mode, even on an unknown blocking value', () => {
+    expect(
+      judgeReport({
+        config: { blocking: 'warn' },
+        diagnostics,
+        reportOnly: true,
+      }),
+    ).toEqual({ blocking: [], level: undefined });
+  });
+
+  it('rejects an unknown blocking value in gate mode', () => {
+    expect(() =>
+      judgeReport({
+        config: { blocking: 'warn' },
+        diagnostics,
+        reportOnly: false,
+      }),
+    ).toThrow(/is not one of/);
+  });
+
+  it('returns the blocking findings and level in gate mode', () => {
+    expect(
+      judgeReport({
+        config: { blocking: 'warning' },
+        diagnostics,
+        reportOnly: false,
+      }),
+    ).toEqual({ blocking: diagnostics, level: 'warning' });
   });
 });

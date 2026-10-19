@@ -33,7 +33,8 @@ are in [`react-doctor-facts.json`](react-doctor-facts.json). Read that before wi
 tool into anything; this file stays the authority on per-finding reasoning.
 
 The chained-iteration verdicts this file used to carry were dropped once React Doctor
-began shipping that rule disabled by default.
+began shipping that rule disabled by default; `doctor.config.jsonc` pins it off so a
+future default change cannot reopen them under the warning gate.
 [`react-doctor-triage-measured.md`](react-doctor-triage-measured.md) keeps the
 measurements behind them; read it before enabling the rule again.
 

@@ -158,6 +158,14 @@ enforcing what its config said.
   beside it would replace the rules the gate believes it reads. The gate now
   fails before scanning and names the file.
 
+- **A third rule is pinned off.** `react-doctor/js-combine-iterations` ships
+  disabled, and `doctor.config.jsonc` sets it `off` explicitly, as it does
+  `no-barrel-import`, so a change of default cannot make the warning gate block
+  on a fix [ADR-054](ADR-054-array-operation-hierarchy.md) measured as no
+  better than the chain it replaces. It carries an `acknowledged` entry in the
+  suppression register like the other two. The section above that says two
+  entries are off predates this amendment.
+
 Corrections to the record as first written:
 
 - It said React Doctor has no suppression-baseline file. The catalog's version

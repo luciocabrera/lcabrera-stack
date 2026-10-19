@@ -66,6 +66,13 @@
     // even where the installed version ships the rule off, so a future default
     // change cannot turn it on against ADR-007 under a `warning` gate.
     "react-doctor/no-barrel-import": "off",
+
+    // Pinned off for the same reason: the installed version ships it disabled,
+    // and a future default change would let the `warning` gate block on it. Its
+    // prescribed fix, fusing a `.filter().map()` chain into one pass, is what
+    // ADR-054 measured as slower than the chain it replaces in the `flatMap`
+    // form, and as not worth the readability elsewhere at this repo's sizes.
+    "react-doctor/js-combine-iterations": "off",
   },
 
   "ignore": {
