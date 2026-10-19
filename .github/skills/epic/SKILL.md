@@ -1,6 +1,6 @@
 ---
 name: epic
-description: Orchestrate a GitHub epic from open issues to merged on main — map the dependency graph, dispatch developer agents in waves, run blind reviewers, and hold the merge bar. Use when asked to orchestrate, run, drive, or continue an epic, to plan or start its next wave, or when invoked as /epic <number>.
+description: Orchestrate a GitHub epic from open issues to merged on main — map the dependency graph, dispatch developer agents in waves, run blind reviewers, and hold the merge bar. Use when asked to orchestrate, run, drive, or continue an epic, to plan or start its next wave, or when invoked as /epic <number>. Not for work on one issue, even a sub-issue of an epic, since editing, relabelling or implementing a single issue is not orchestrating its epic.
 user-invocable: true
 argument-hint: <epic-number>
 ---

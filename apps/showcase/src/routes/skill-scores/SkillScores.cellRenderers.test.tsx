@@ -21,7 +21,7 @@ import { SkillScores } from './SkillScores.component';
 
 type CellAt = { readonly columnKey: string; readonly skill: string };
 
-const starParams = z.object({ max: z.number().int().positive() }).strict();
+const starParams = z.strictObject({ max: z.number().int().positive() });
 
 const STARS: TableCellRenderer<z.infer<typeof starParams>> = {
   kind: 'stars',
