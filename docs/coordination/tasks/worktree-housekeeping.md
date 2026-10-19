@@ -2,7 +2,7 @@
 id: worktree-housekeeping
 title: feat(devkit): find and remove worktrees whose work has merged
 owner: agent:claude
-status: active
+status: review
 branch: feat/1409-worktree-housekeeping
 area:
   - packages/devkit/**
@@ -20,7 +20,7 @@ area:
 started: 2026-10-19
 updated: 2026-10-19
 plan: (none)
-pr: (none)
+pr: '#1432'
 issue: #1409
 ---
 
@@ -30,6 +30,6 @@ feat(devkit): find and remove worktrees whose work has merged
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR ready for review
 - Blockers: none
-- Next:
+- Next: review

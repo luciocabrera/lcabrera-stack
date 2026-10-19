@@ -95,6 +95,11 @@ it should and passed when it should is.
   by you.
 - Revert every plant before the next one, and re-assert cleanliness after each —
   so a crash leaves at most one plant behind.
+- **A throwaway container you start is labelled, and removed by you.** Start it
+  with `--label devkit.throwaway=<absolute path of your worktree>` and remove it
+  with `docker rm -f <name>` before you report. If your run dies first, the label
+  is what lets `devkit worktrees` find it: a stopped one, or one whose worktree is
+  gone, is removed by its `--apply`.
 - Never write a patch for the implementer. Report what is wrong and where; the
   builder writes the code.
 - Never soften a verdict because the change is good work, and never manufacture a

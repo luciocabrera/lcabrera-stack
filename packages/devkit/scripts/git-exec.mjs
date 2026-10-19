@@ -29,13 +29,12 @@
  */
 
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
-import { delimiter, join } from 'node:path';
 
 import {
   gitEnvironment,
   TRUSTED_GIT_DIRECTORIES,
 } from '../assets/workspace/scripts/hooks-path.mjs';
+import { pathDirectories, resolveExecutable } from './host-tool.mjs';
 
 export {
   GIT_REPOSITORY_VARIABLES,
@@ -47,26 +46,13 @@ const IS_ON_WINDOWS = process.platform === 'win32';
 
 const GIT_FILENAMES = IS_ON_WINDOWS ? ['git.exe', 'git'] : ['git'];
 
-const gitUnder = (directory) =>
-  GIT_FILENAMES.map((name) => join(directory, name)).find((path) =>
-    existsSync(path),
-  );
-
-const firstGitIn = (directories) =>
-  directories
-    .map((value) => gitUnder(value))
-    .find((path) => path !== undefined);
-
-const pathDirectories = () =>
-  (process.env.PATH ?? '').split(delimiter).filter((entry) => entry !== '');
-
 /**
  * @param {{ directories: string[], pathEntries: string[] }} args
  * @returns {string | undefined} the first git under `directories`, else the
  * first under `pathEntries`; always an absolute path, never a bare name
  */
 export const resolveGit = ({ directories, pathEntries }) =>
-  firstGitIn(directories) ?? firstGitIn(pathEntries);
+  resolveExecutable({ directories, filenames: GIT_FILENAMES, pathEntries });
 
 /** @returns {string | undefined} the git executable, named outright */
 export const gitBinary = () =>
@@ -89,13 +75,16 @@ export const requireGitBinary = (binary) => {
   return binary;
 };
 
-const execute = ({ args, binary, cwd }) =>
+const executeRaw = ({ args, binary, cwd }) =>
   execFileSync(binary, args, {
     cwd,
     encoding: 'utf8',
     env: gitEnvironment({ binary, env: process.env }),
+    maxBuffer: 64 * 1024 * 1024,
     stdio: ['ignore', 'pipe', 'pipe'],
-  }).trim();
+  });
+
+const execute = (args) => executeRaw(args).trim();
 
 /**
  * @param {{ args: string[], cwd: string }} args
@@ -103,6 +92,13 @@ const execute = ({ args, binary, cwd }) =>
  */
 export const runGit = ({ args, cwd }) =>
   execute({ args, binary: requireGitBinary(gitBinary()), cwd });
+
+/**
+ * @param {{ args: string[], cwd: string }} args
+ * @returns {string} stdout exactly as git wrote it; throws when git fails
+ */
+export const runGitRaw = ({ args, cwd }) =>
+  executeRaw({ args, binary: requireGitBinary(gitBinary()), cwd });
 
 /**
  * A command that failed answers `''` — which is what an unset `git config` key

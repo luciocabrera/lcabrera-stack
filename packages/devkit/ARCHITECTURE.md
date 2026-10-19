@@ -27,6 +27,12 @@ can travel, and **moving** it into a consumer's tree.
 | `init.mjs`                          | What `init` refuses, infers and wires, and when the run failed. Pure.                                             |
 | `command-materialise.mjs`           | The plan `sync`, `doctor` and `init` share, and the writer the latter two share.                                  |
 | `command-init.mjs`                  | `init`'s filesystem half: read the repository, write the config and the tasks, apply the plan.                    |
+| `host-tool.mjs`                     | Find a host tool by absolute path, and run it with PATH pinned; a missing tool is an answer, not an error.        |
+| `worktree-git.mjs`                  | Read the linked worktrees, their status, and whether a changed file's content is already in a history.            |
+| `worktree-hosts.mjs`                | A branch's pull request state from `gh`, and the labelled throwaway containers from Docker, each with a reason.   |
+| `worktree-plan.mjs`                 | Decide remove or keep for each worktree and container, and render the plan. Pure.                                 |
+| `worktree-hint.mjs`                 | The local-only count a session-start hook prints.                                                                 |
+| `command-worktrees.mjs`             | `worktrees`: gather the facts, print the plan, and apply exactly that plan under `--apply`.                       |
 | `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                                 |
 
 ## Decisions worth not undoing
@@ -245,6 +251,20 @@ directory, because the step before it is the only thing that touched the
 checkout. A second substitution namespace would need its own failure semantics —
 every path key has a default, so it could never be `unresolved` the way a command
 is — for a need no seed actually has.
+
+**`worktrees` applies the plan it printed, and the plan is decided before
+anything runs.** Facts are gathered once, `planWorktrees` decides from them
+alone, and `--apply` executes that list. A second look between printing and
+removing would let the two disagree, and the printed plan is what a reader
+agreed to. The one safety net under it is git's own: a removal without
+`--force` refuses a worktree that became dirty in between.
+
+**A dirty worktree is judged by content, never by ancestry.** A squash-merge
+leaves the branch's commits off the default branch, so `--is-ancestor` calls
+merged work unmerged. Each changed file's blob is looked up in the history of
+its path instead, and only a worktree with nothing outside both histories and no
+untracked file can be removed. An unknown pull request state is a keep for the
+same reason: what cannot be decided is left where it is.
 
 ## Assets
 

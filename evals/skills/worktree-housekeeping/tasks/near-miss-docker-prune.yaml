@@ -1,0 +1,15 @@
+id: near-miss-docker-prune
+name: Pruning images
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What does docker image prune -a remove, compared with docker system prune? Two sentences. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-worktree-housekeeping-alone
+    config:
+      forbidden_skills:
+        - worktree-housekeeping

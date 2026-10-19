@@ -238,12 +238,21 @@ Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
   [`merge-queue.md`](../tooling/merge-queue.md), and fix the cause before
   queueing it again — an ejection caused by another entry in the group is
   ordinary, one caused by this PR is not.
-- once merged: delete the branch, remove the worktree
+- once merged, **remove that PR's builder worktree and every reviewer worktree
+  that checked it out, and delete the merged local branch.** Run
+  `vp run devkit:worktrees` from the main checkout and read the line for each
+  of those paths: the builder's must say `remove + delete branch` and a
+  reviewer's `remove`. Then remove only those, with `git worktree remove <path>`
+  per worktree and `git branch -D <branch>` for the builder's branch. Do not
+  run `-- --apply` mid-wave: it also removes a clean worktree with no PR, which
+  is what a developer dispatched in this wave looks like before it pushes. A
+  `keep` line is the evidence that something there is not merged. Report it to
+  the human, and never `--force` it. The plan reads the PR's state and the
+  commit it merged, and compares a dirty file's content with history, so a
+  squash-merge, which defeats `--is-ancestor` and the three-dot diff, does not
+  fool it.
 - confirm the claim closed (the `coordination-close.yml` workflow deletes the task
   file) and `vp run coordination:verify` reports it gone
-- **before removing a worktree, prove it carries nothing unmerged by content
-  diff** — `git diff --stat <branch> origin/main -- <paths>` — never by ancestry.
-  A squash-merge defeats `--is-ancestor` and the three-dot diff both.
 - **`isMergeQueueEnabled: false` → rebase every remaining open PR in the wave**,
   as this workflow has always said. Without a queue that rebase is the only thing
   that re-runs a whole-tree gate against the base this merge just created, and a
@@ -257,7 +266,8 @@ Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
 
 ### Phase 5 — Close the wave
 
-Re-read the epic. Merged work usually unblocks issues and often reveals new ones.
+Once the wave's PRs are merged and no developer or reviewer is still running,
+the `/worktree-housekeeping` skill sweeps what Phase 4 missed. Re-read the epic. Merged work usually unblocks issues and often reveals new ones.
 Update `.tmp/epic-<n>/plan.md` **and the plan comment on the epic issue** — the
 second is the one anyone else can read, and a run that updates only the first
 leaves the epic looking exactly as it did before the wave. Report to the human,

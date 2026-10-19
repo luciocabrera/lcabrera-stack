@@ -316,6 +316,8 @@ devkit doctor [--profile <name>] [--check] [--verbose]   # report divergence; --
 devkit doctor --accept <path> --reason "<why>"   # this edit is deliberate
 devkit closure [--profile <name>] <dir> [<dir>...]   # what does this directory need that it lacks
 devkit closure [--profile <name>] --shipped          # the same, for everything the package places
+devkit worktrees [--apply] [--include-superseded] [--base <ref>]   # sort linked worktrees; --apply removes
+devkit worktrees --hint [--threshold <n>] [--base <ref>]           # one line when many look removable
 ```
 
 In this repository they are also `vp run devkit:sync`, `vp run devkit:doctor`
@@ -327,6 +329,66 @@ the rest measured by nothing, and it is the only way to catch a file in the smal
 profile pointing at one the large profile places: that reference resolves for a
 consumer who took everything and dangles for the one who did not, so it can only
 be seen by checking the smaller set on its own.
+
+## Removing worktrees whose work has merged
+
+Every agent run that gets its own worktree leaves it behind, with its own
+dependency install, and a worktree that shows changed files blocks cleanup until
+someone proves those changes are already somewhere else. `devkit worktrees`
+sorts each linked worktree, other than the main checkout and the one it runs
+in, and prints the plan. It changes nothing until `--apply`, which carries out
+exactly that plan and then runs `git worktree prune`.
+
+| A linked worktree that is…                                                   | Under `--apply`                                    |
+| ---------------------------------------------------------------------------- | -------------------------------------------------- |
+| clean, on a branch whose pull request merged                                 | removed, and the local branch deleted              |
+| clean, on a branch whose pull request closed unmerged or that has none       | removed, and the branch kept                       |
+| clean, on a branch whose pull request is open                                | kept                                               |
+| clean and detached, on a commit the default branch contains or a merged head | removed                                            |
+| dirty, with a change no history holds, or an untracked file                  | kept, under every flag                             |
+| dirty, every change found in the default branch's or its own history         | kept, unless `--include-superseded` is also passed |
+
+A merged branch is deleted only when the pull request carried the commit the
+branch points at, so commits added after the merge keep the branch. For a dirty
+worktree the plan counts the changed files whose content matches a blob in the
+default branch's history, in the worktree's own history (its HEAD and its
+upstream), or in neither. A squash-merge leaves no ancestry to follow, and these
+counts do not need it.
+
+Pull request state comes from `gh`. Without it, or when it cannot answer, every
+worktree whose verdict depends on that state is kept, and a `note:` line says
+why. The default branch is `origin/HEAD`, else `main`, else `master`; `--base`
+names another.
+
+It also lists containers labelled `devkit.throwaway`, whose value is the path of
+the worktree that started them. `--apply` removes a stopped one, and a running
+one whose worktree is gone. Without Docker it lists none and says so.
+
+`--hint` is for a session-start hook. It prints one line when more than
+`--threshold` worktrees (ten by default) look removable, and nothing otherwise.
+It counts a clean worktree detached on a commit the default branch contains, or
+one whose branch's upstream is gone after a pruning fetch. It reads local refs
+only, makes no network call and removes nothing. For Claude Code:
+
+```json
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/node_modules/.bin/devkit worktrees --hint"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+The `worktree-housekeeping` skill this package ships runs the plan, asks before
+applying it, and saves a patch for each dirty worktree it leaves in place.
 
 ## Profiles
 
