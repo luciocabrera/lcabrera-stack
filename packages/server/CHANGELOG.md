@@ -1,5 +1,15 @@
 # @lcabrera/server
 
+## 0.8.2
+
+### Patch Changes
+
+- 1369e4c: `@lcabrera/server` now declares `zod` at `^4.6.7`, and `@lcabrera/eslint-plugin` declares `@typescript-eslint/utils` at `^8.71.2`. In a repository it writes, `@lcabrera/devkit` now pins Node 26.12.0 in `.node-version` and pnpm 12.14.0 in the root manifest's `packageManager`, and the CI workflow `init` writes sets up Vite+ with `voidzero-dev/setup-vp` at the v1.21.2 commit.
+- 4bf2cc6: `createTablePageLoader`, and the distinct-value estimate that `resolveColumnCapability` reads from the catalog, now choose between their two branches inside a single call. Both return the same results for every input as before.
+- Updated dependencies [4bf2cc6]
+  - @lcabrera/utils@0.2.3
+  - @lcabrera/api@0.5.1
+
 ## 0.8.1
 
 ### Patch Changes

@@ -1,5 +1,37 @@
 # @lcabrera/vite-config
 
+## 0.8.0
+
+### Minor Changes
+
+- cd29a22: Both eslint factories now configure `perfectionist/sort-imports` to treat a block comment as a partition. The sort's autofix used to count a file's leading block comment as part of the first import, so sorting that import further down moved the file header into the import list. A block comment is now left where it is, and the imports above and below it are sorted separately. Line comments still move with the import they sit on.
+- cd29a22: `createBaseCustomRulesLintConfig` and `createCustomRulesLintConfig` accept a `toolingScriptPatterns` option. Each glob it names receives the tooling-script block that files under `scripts/` and `*.config.*` files already get, for a repository whose own commands live in a directory with another name. The default is `[]`, so an existing config lints exactly as before.
+- 1369e4c: The peer ranges move to the versions this package is now exercised against: `typescript-eslint` `^8.71.2`, and `eslint-plugin-react-dom` and `eslint-plugin-react-x` `^5.28.0`.
+
+  **This is the breaking part:** each floor rises inside its major, so a consumer on a release below any of them, such as `eslint-plugin-react-x` 5.24, now gets an unmet peer and must move up to the floor.
+
+- d4f8a54: The `vite-plus` peer moves to `1.3.0`, the exact pin this package is built against. A consumer still on `0.3.0` gets an unmet peer and has to move up with it.
+
+  `createReactRouterRunConfig` nests the build task's `env` and `input` under `cache`. Vite+ 1.3 rejects those two keys beside a `cache` setting, so a build task that still returns them there fails while loading its task graph.
+
+  **This is the breaking part:** a caller that read `tasks.build.env` or `tasks.build.input` now finds them on `tasks.build.cache`, and the peer no longer admits Vite+ 0.3.
+
+- 4bf2cc6: The `eslint-plugin-unicorn` peer range moves to `^78.0.0`. Both shared configs (`createCustomRulesLintConfig` and `createBaseCustomRulesLintConfig`) apply unicorn 78's recommended set with the same settings as before. No rule is switched on or off, and no option changes.
+
+  **This is the breaking part:** the range no longer admits unicorn 77, so a consumer on it gets an unmet peer and must move up. Some rules that were already on report more in 78, so code that passed lint before can now fail:
+
+  - `unicorn/no-negated-condition` reports a condition built from `&&` or `||` over negated operands, such as `a !== x && !b ? c : d`. Its autofix applies De Morgan's law and swaps the branches.
+  - `unicorn/prefer-minimal-ternary` now compares the parts the two branches share while ignoring formatting. A ternary such as `c ? f(a, x) : f(b, x)` is reported even when its branches wrap differently across lines.
+  - `unicorn/prefer-default-parameters` reports a destructured binding read only as `binding || earlier` or `binding ?? earlier`, where `earlier` is a binding declared before it in the same pattern. Its suggestion makes `earlier` the default, and a default applies only to `undefined`. With `||`, that changes behaviour for every other falsy value, so check the binding's type before you accept it: for a `boolean`, `a || b` is a disjunction, not a fallback.
+  - Many unicorn rules used to skip code that contains a comment. They now report it and only withhold a fix that would delete the comment.
+
+  The two rules unicorn 78 adds, `no-unnecessary-default-arguments` and `no-repeated-call-wrappers`, are not in its recommended set and stay off.
+
+### Patch Changes
+
+- Updated dependencies [1369e4c]
+  - @lcabrera/eslint-plugin@0.3.4
+
 ## 0.7.0
 
 ### Minor Changes
