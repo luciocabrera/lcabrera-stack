@@ -10,6 +10,8 @@ area:
   - packages/eval-history/scripts/migrate.mjs
   - packages/eval-history/README.md
   - docs/decisions/ADR-137-*
+  - packages/eval-history/src/testing/scratchConnections.service.ts
+  - COMMANDS.md
 started: 2026-10-19
 updated: 2026-10-19
 plan: (none)

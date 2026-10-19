@@ -25,6 +25,11 @@ const SCRIPT = fileURLToPath(
   new URL('../../scripts/migrate.mjs', import.meta.url),
 );
 
+type AsOwnerArgs = {
+  readonly database: string;
+  readonly statements: readonly string[];
+};
+
 type ConnectAsArgs = {
   readonly database: string;
   readonly password?: string;
@@ -85,6 +90,7 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
       items: absent,
       step: (name) => admin.query(`create role "${name}" nologin`),
     });
+    await admin.end();
   };
 
   const nonOwnerUrl = async (database: string) => {
@@ -103,14 +109,27 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     return connectionUrl({ database, password, user });
   };
 
-  const migratedAsOwner = async () => {
+  const asOwner = async ({ database, statements }: AsOwnerArgs) => {
+    const owner = await connect(database);
+
+    try {
+      await inSequence({
+        items: statements,
+        step: (statement) => owner.query(statement),
+      });
+    } finally {
+      await owner.end();
+    }
+  };
+
+  const migratedDatabase = async () => {
     await createdRoles();
     const database = await createDatabase('evals_migrate_script');
     const url = connectionUrl({ database });
 
     expect(runScript(url).status).toBe(0);
 
-    return { owner: await connect(database), url };
+    return { database, url };
   };
 
   afterAll(() => close({ roles }));
@@ -151,14 +170,14 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
   });
 
   it('exits 1 naming a reporting view recreated without security_invoker', async () => {
-    const { owner, url } = await migratedAsOwner();
-    const { rows } = await owner.query<{ readonly body: string }>(
-      "select pg_get_viewdef('evals.v_subject_trend'::regclass) as body",
-    );
+    const { database, url } = await migratedDatabase();
 
-    await owner.query(
-      `create or replace view evals.v_subject_trend as ${rows[0]?.body ?? ''}`,
-    );
+    await asOwner({
+      database,
+      statements: [
+        `do $$ begin execute 'create or replace view evals.v_subject_trend as ' || pg_get_viewdef('evals.v_subject_trend'::regclass); end $$`,
+      ],
+    });
 
     const { status, stdout } = runScript(url);
 
@@ -173,11 +192,14 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
   });
 
   it('exits 1 naming a security definer function the reader can execute', async () => {
-    const { owner, url } = await migratedAsOwner();
+    const { database, url } = await migratedDatabase();
 
-    await owner.query(
-      'create function evals.probe_definer() returns integer language sql security definer as $$ select 1 $$',
-    );
+    await asOwner({
+      database,
+      statements: [
+        'create function evals.probe_definer() returns integer language sql security definer as $$ select 1 $$',
+      ],
+    });
 
     const { status, stdout } = runScript(url);
 
@@ -187,17 +209,23 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     );
   });
 
-  it('exits 0 when an extension installs a view that runs as its owner', async () => {
-    await createdRoles();
-    const database = await createDatabase('evals_migrate_script');
-    const owner = await connect(database);
+  it('exits 0 when the owner-privilege views and functions belong to an extension', async () => {
+    const { database, url } = await migratedDatabase();
 
-    await owner.query('create extension pg_stat_statements');
+    await asOwner({
+      database,
+      statements: [
+        'create extension pg_stat_statements',
+        'create function public.probe_extension_definer() returns integer language sql security definer as $$ select 1 $$',
+        'alter extension pg_stat_statements add function public.probe_extension_definer()',
+      ],
+    });
 
-    const { status, stdout } = runScript(connectionUrl({ database }));
+    const { status, stdout } = runScript(url);
 
     expect(status).toBe(0);
     expect(stdout).toContain('evals:migrate: granted evals_reader');
     expect(stdout).not.toContain('pg_stat_statements');
+    expect(stdout).not.toContain('probe_extension_definer');
   });
 });

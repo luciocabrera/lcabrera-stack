@@ -33,6 +33,7 @@ export const scratchConnections = (databaseUrl: string) => {
     const admin = await connect();
 
     await admin.query(`create database "${name}"`);
+    await admin.end();
     created.push(name);
 
     return name;

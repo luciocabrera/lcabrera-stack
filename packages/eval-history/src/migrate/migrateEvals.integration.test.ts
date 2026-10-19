@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import {
   afterAll,
+  afterEach,
   beforeEach,
   describe,
   expect,
@@ -142,6 +143,10 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     await client.query('drop schema if exists evals cascade');
   });
 
+  afterEach(async () => {
+    await Promise.all(clients.splice(0).map((client) => client.end()));
+  });
+
   const scratchRoles: string[] = [];
 
   const scratchRole = () => {
@@ -172,9 +177,11 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     const { rows } = await admin.query<{ readonly body: string }>(
       "select pg_get_viewdef('evals.v_subject_trend'::regclass) as body",
     );
+    const nextVersion =
+      Math.max(...migrations.map(({ version }) => version)) + 1;
     const probe = toMigration({
       bytes: planted(rows[0]?.body ?? ''),
-      path: '0006-probe.sql',
+      path: `${String(nextVersion).padStart(4, '0')}-probe.sql`,
     });
     const after = await migrateEvals({
       client: admin,
@@ -183,7 +190,7 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
       roles: [reader],
     });
 
-    return { after, before, reader };
+    return { after, before, probe, reader };
   };
 
   const storedPrices = async () => {
@@ -579,10 +586,13 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
       `grant usage, create on schema evals to "${nonOwner.name}"`,
     );
     const [database] = await column('select current_database() as value');
-    const grantOnDatabase = (verb: 'grant' | 'revoke') =>
-      admin.query(
+    const grantOnDatabase = async (verb: 'grant' | 'revoke') => {
+      const client = await connect();
+
+      return client.query(
         `${verb} create on database "${String(database)}" ${verb === 'grant' ? 'to' : 'from'} "${nonOwner.name}"`,
       );
+    };
 
     await grantOnDatabase('grant');
     onTestFinished(async () => {
@@ -619,14 +629,14 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
   });
 
   it('names a reporting view a migration recreates without security_invoker, and keeps the migration applied', async () => {
-    const { after, before, reader } = await migrateWithReader(
+    const { after, before, probe, reader } = await migrateWithReader(
       (body) => `create or replace view evals.v_subject_trend as ${body}`,
     );
     const report = migrateReport(after);
 
     expect(before.exposed).toEqual([]);
     expect(before.granted.map(({ name }) => name)).toEqual([reader.name]);
-    expect(after.applied.map(({ name }) => name)).toEqual(['0006-probe.sql']);
+    expect(after.applied.map(({ name }) => name)).toEqual([probe.name]);
     expect(after.exposed).toEqual([
       {
         definerFunctions: [],
@@ -644,7 +654,7 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     );
     const ledger = await recorded();
 
-    expect(ledger.map(({ name }) => name)).toContain('0006-probe.sql');
+    expect(ledger.map(({ name }) => name)).toContain(probe.name);
   });
 
   it('names each overload of a security definer function the reader can execute', async () => {
