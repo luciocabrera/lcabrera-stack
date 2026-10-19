@@ -8,6 +8,7 @@
  * Usage (from the repo root):
  *   vp run evals:report -- --compare main [--suite <suite>] [--branch <name>]
  *   vp run evals:report -- --a <run id or envelope file> --b <run id or envelope file>
+ *   [--subject <name>] compares only that subject's tasks; repeat it for more
  *   [--json] prints the comparison as JSON instead of markdown
  *   [--allow-model-change] compares runs of two different models
  *   [--allow-harness-change] applies the rule across two harness versions
@@ -33,6 +34,7 @@ const OPTIONS = {
   branch: { type: 'string' },
   compare: { type: 'string' },
   json: { default: false, type: 'boolean' },
+  subject: { default: [], multiple: true, type: 'string' },
   suite: { type: 'string' },
 };
 
@@ -61,6 +63,7 @@ const summarize = async () => {
     compare: values.compare,
     connectionString: process.env.EVALS_DATABASE_URL,
     json: values.json,
+    subjects: values.subject,
     suite: values.suite,
     thresholds: await loadRegressionConfig({ file: REGRESSION_CONFIG }),
   });

@@ -16,6 +16,7 @@ type CompareRunsArgs = {
   readonly allowModelChange?: boolean;
   readonly b: ReportRun;
   readonly history: RuleHistory;
+  readonly subjects?: readonly string[];
   readonly thresholds: RegressionConfig;
 };
 
@@ -25,6 +26,7 @@ export const compareRuns = ({
   allowModelChange = false,
   b,
   history,
+  subjects = [],
   thresholds,
 }: CompareRunsArgs) => {
   const reason = refusalReason({ a, allowModelChange, b });
@@ -58,6 +60,7 @@ export const compareRuns = ({
     flips: taskFlips({ a, b }),
     kind: 'comparison',
     regression: regression(),
+    subjects,
     suite: b.suite,
     thresholds: {
       minTrialsForRate: thresholds.minTrialsForRate,

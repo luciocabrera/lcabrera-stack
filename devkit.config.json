@@ -230,7 +230,7 @@
             "^evals/",
             "^[^/]+$",
             "^packages/eval-history/",
-            "^packages/repo-standards/scripts/git-exec\\.mjs$",
+            "^packages/repo-standards/scripts/((gh|git)-exec|safe-read)\\.mjs$",
             "^\\.claude/(agents|rules)/",
             "^\\.github/skills/",
             "^docs/agents/refactor-verified-contract\\.md$"

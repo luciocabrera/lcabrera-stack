@@ -158,3 +158,10 @@ The **Skill triggers (Claude)** job runs `vp run evals:skills` on
 `workflow_dispatch` only, on `CLAUDE_CODE_OAUTH_TOKEN`, and uploads the
 transcripts. It is not a required check, so a spent usage limit cannot stall a
 merge.
+
+The **Eval report (Claude, advisory)** job selects the skills a pull request
+changes, or every skill when a catalog entry moved, runs their trigger tasks
+when the pull request carries the `evals` label, and keeps one comment on the
+pull request comparing them with main.
+[The pull request comment](../README.md#the-pull-request-comment) says what it
+selects, when it runs and what it compares against.
