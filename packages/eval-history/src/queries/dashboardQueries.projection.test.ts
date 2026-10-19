@@ -61,7 +61,7 @@ describe('the dashboard queries over a set of runs', () => {
       query: triggerConfusionQuery({ publicColumns, runIds }),
     },
   ])('$name reads no base table outside its projection', ({ query }) => {
-    expect(query.text).not.toMatch(/from evals\.\w+ (?!\))/u);
+    expect(query.text).not.toMatch(/(?:from|join) evals\.\w+\b(?!\))/u);
     expect(
       columnsNamed({ columns: EXCLUDED_COLUMNS, sql: query.text }),
     ).toEqual([]);

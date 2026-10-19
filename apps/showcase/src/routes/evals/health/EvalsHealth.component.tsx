@@ -3,6 +3,7 @@ import { Link, useLoaderData } from 'react-router';
 
 import type { loader } from './evals-health.loader';
 
+import { pageStyles } from '../evalsPage.stylex';
 import { EvalsPageHeader } from '../EvalsPageHeader';
 import { FiguresTable } from '../FiguresTable';
 import { Sparkline } from '../Sparkline';
@@ -28,9 +29,9 @@ export const EvalsHealth = () => {
   const { suites } = useLoaderData<typeof loader>();
 
   return (
-    <div {...stylex.props(styles.page)}>
+    <div {...stylex.props(pageStyles.page)}>
       <EvalsPageHeader title='Run health' trail='health' />
-      <p {...stylex.props(styles.note)}>
+      <p {...stylex.props(pageStyles.note)}>
         Trials that ended in an error or a timeout in the recent runs of each
         suite, counted by the error class the runner recorded. A rate limit is
         an error of class {RATE_LIMIT_CLASSES.join(' or ')}, so it counts among
@@ -39,7 +40,7 @@ export const EvalsHealth = () => {
       {suites.length === 0 && <p>No eval runs are stored yet.</p>}
       {suites.map(({ classes, points, runs, suite, totals, troubled }) => (
         <section key={suite} {...stylex.props(styles.card)}>
-          <h2 {...stylex.props(styles.heading)}>{suite}</h2>
+          <h2 {...stylex.props(pageStyles.heading)}>{suite}</h2>
           <dl {...stylex.props(styles.facts)}>
             <dt {...stylex.props(styles.factTerm)}>Runs</dt>
             <dd {...stylex.props(styles.factValue)}>{runs}</dd>
@@ -57,7 +58,7 @@ export const EvalsHealth = () => {
             points={points}
           />
           {classes.length === 0 ? (
-            <p {...stylex.props(styles.note)}>
+            <p {...stylex.props(pageStyles.note)}>
               No error or timeout in its last {runs} runs.
             </p>
           ) : (

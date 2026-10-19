@@ -11,7 +11,10 @@ import { evalsHref } from '../utils/evalsHref.util';
 import { intervalLabel } from '../utils/intervalLabel.util';
 import { passRateLabel } from '../utils/passRateLabel.util';
 import { styles } from './EvalsOverview.stylex';
-import { regressionFindingLabel } from './regressionFindingLabel.util';
+import {
+  regressionFindingKey,
+  regressionFindingLabel,
+} from './regressionFindingLabel.util';
 
 export const EvalsOverview = () => {
   const { regressions, suites } = useLoaderData<typeof loader>();
@@ -48,9 +51,7 @@ export const EvalsOverview = () => {
             </p>
             <ul {...stylex.props(styles.findings)}>
               {findings.map((finding) => (
-                <li
-                  key={finding.kind === 'flip' ? finding.taskKey : finding.kind}
-                >
+                <li key={regressionFindingKey(finding)}>
                   {regressionFindingLabel(finding)}
                 </li>
               ))}
