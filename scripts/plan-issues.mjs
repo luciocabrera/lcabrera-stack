@@ -109,7 +109,7 @@ const buildManifest = (audits, milestones, allowed) => ({
 });
 
 const creationOrder = (audits) =>
-  [...audits].sort(
+  [...audits].toSorted(
     (left, right) =>
       Number(left.record.kind !== 'epic') -
       Number(right.record.kind !== 'epic'),

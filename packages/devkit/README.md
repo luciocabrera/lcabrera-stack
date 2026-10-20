@@ -591,7 +591,9 @@ included, has to be installed on the host.
 - `enterpriseOrders.smoke.test.ts`, beside the DDL, reads that table back through
   `@lcabrera/server`, which the application now declares. It gates itself on
   `SMOKE_DB`. A plain test run, including `test:all` and CI, skips it.
-  `test:smoke` sets the variable and loads the same environment file.
+  `test:smoke` sets the variable. The application's `vite.config.ts` loads the
+  same environment file when the test run reads it, without overriding a
+  variable the shell already set.
 - The page at `/` reads that table. Its loader passes the request's sort,
   filters and grouping to `@lcabrera/server`'s table-page reader, so Postgres
   resolves each one, and every column the read accepts offers sorting and

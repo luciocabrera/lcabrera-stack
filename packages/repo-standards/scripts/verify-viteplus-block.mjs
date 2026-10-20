@@ -5,9 +5,9 @@
  * Why this exists: Vite+ rewrites the region between its markers whenever it
  * syncs agent instructions, and `vp install` does that — so every fresh worktree,
  * and every CI run, silently got the upstream template back. That template's
- * Review Checklist instructs agents to run `vp test`, which AGENTS.md §4 forbids,
- * so the refill landed guidance contradicting the file around it. Nothing caught
- * it; the block's comment asked a human to notice and delete it again each time.
+ * Review Checklist names `vp check` and `vp test` as the review, a second and
+ * shorter gate beside the one the file around it defines. Nothing caught it;
+ * the block's comment asked a human to notice and delete it again each time.
  *
  * The markers are now **removed** from AGENTS.md, which is what actually stops
  * the refill: Vite+'s `updateExistingAgentInstructions` documents "No Vite+
@@ -49,7 +49,7 @@ const EMPTY_BODY = `
 
 <!-- Deliberately empty, and gated by \`vp run viteplus:verify\`. Vite+ rewrites
      this region whenever it syncs agent instructions (\`vp install\` does), and the
-     upstream template it writes tells agents to run \`vp test\`, which §4 forbids.
+     upstream template it writes carries a review checklist this file did not write.
      Both markers must stay, and PAIRED — the END marker went missing once,
      leaving the region unterminated. To repair a refill: \`vp run viteplus:verify
      -- --write\`. -->
@@ -94,8 +94,8 @@ const main = () => {
 
   process.stderr.write(
     `The Vite+ managed region in ${AGENT_DOC} is not empty — a \`vp\` run refilled it with\n` +
-      'upstream template content, which this repo does not review and which tells agents\n' +
-      'to run `vp test` (forbidden by §4). Repair it with:\n\n' +
+      'upstream template content, which this repo does not review and whose checklist\n' +
+      'names a gate other than the one this file defines. Repair it with:\n\n' +
       '  vp run viteplus:verify -- --write\n\n' +
       `Rendered content (${offending.length} line(s)), first 5:\n`,
   );
