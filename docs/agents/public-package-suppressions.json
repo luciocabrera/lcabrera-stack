@@ -133,6 +133,12 @@
       "count": 1,
       "reason": "The rule does not apply to a Vite repo, and its own documentation says so: it names Vite tree-shaking as the false-positive case. Verified here rather than assumed — an entry importing one symbol from a flagged barrel builds to that symbol alone, with the barrel module elided. Acting on it would also contradict ADR-007, which requires importing through a curated barrel across a module boundary. Off repo-wide, not for these packages.",
       "ref": "ADR-055, ADR-007, PR #457"
+    },
+    {
+      "key": "react-doctor doctor.config.jsonc rule react-doctor/js-combine-iterations",
+      "count": 1,
+      "reason": "Pinned off at the rule's own shipped default, so a future default change cannot make the warning gate block on it. Its prescribed fix fuses a two-pass chain into one; ADR-054 makes the .filter().map() chain the default, treats fusing as a hot-path optimisation applied on evidence, and measured the flatMap form as slower than the chain it replaces. Off repo-wide, not for these packages.",
+      "ref": "ADR-055, ADR-054, #1418"
     }
   ],
   "approved": [
