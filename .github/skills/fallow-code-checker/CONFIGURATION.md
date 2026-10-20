@@ -143,6 +143,7 @@ commands and their output are in the pull request for #1422.
 | `test-only-dependencies`       | the root manifest's `jsdom` moved from `devDependencies` to `dependencies`; only test files import it                                                                                         | 0           | 1               |
 | `unused-optional-dependencies` | `probe-unused-optional` added to `optionalDependencies` in `packages/repo-standards/package.json`                                                                                             | 0           | 1               |
 | `re-export-cycle`              | a barrel in `apps/showcase/src/constants/` that re-exports itself, imported by `app.constants.ts`                                                                                             | 0           | 1               |
+| `package-cycle`                | a type-only relative import from `packages/utils/src` into `packages/ui/src`, which already imports `@lcabrera/utils`                                                                         | 0           | 1               |
 
 `duplicate-prop-shape` is reported and not enforced. The pinned fallow lists
 the three findings with `effective_severity: "error"`, yet its

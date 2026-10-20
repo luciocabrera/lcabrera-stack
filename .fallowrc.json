@@ -140,7 +140,8 @@
     "unused-dependency-overrides": "error",
     "test-only-dependencies": "error",
     "unused-optional-dependencies": "error",
-    "re-export-cycle": "error"
+    "re-export-cycle": "error",
+    "package-cycle": "error"
   },
   "overrides": [
     // Route loaders return serializable state/promises consumed by shared
