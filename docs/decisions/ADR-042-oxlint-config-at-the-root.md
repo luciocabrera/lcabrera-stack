@@ -178,3 +178,12 @@ lose coverage.
 
 A project that uses `./eslint-custom-rules` without `./lint` no longer gets an
 effect-dependency check from this package. The package README says so.
+
+With one engine left, an Oxlint upgrade that stopped reporting the rule would
+pass every gate silently. The `react` probe in `vp run lint:plugins:verify`
+uses `no-children-prop`, so it proves only that the family loads. The gate now
+carries a second `react` probe: a `.tsx` component whose effect reads a prop
+and passes an empty dependency array. It requires
+`react-hooks(exhaustive-deps)`, and its `scope` field names that prefix because
+it differs from the family name. Turning the rule off in the root lint config
+makes the gate fail on that probe alone.
