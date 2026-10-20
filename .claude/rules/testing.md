@@ -16,6 +16,7 @@ paths:
 - Use `@testing-library/react` for component tests.
 - Import test utilities from `vite-plus/test` (e.g. `import { expect, test, vi } from 'vite-plus/test'`) — never from `vitest` directly. It re-exports the vite-plus-bundled Vitest, so the test runtime always matches the toolchain ([ADR-045](../../docs/decisions/ADR-045-vite-plus-test-imports.md), which retired the earlier `vitest`-direct rule). Playwright specs in `apps/showcase/e2e/` import from `@playwright/test`, live in that directory, and run with `vp run --filter showcase test:e2e`.
 - Run tests from the workspace under test: `vp run test`. Each workspace's `test` task is `vp test run`, so the built-in `vp test run` in the same directory gives the same result; `vp run test` is preferred because it also covers a workspace whose task adds arguments.
+- A workspace with tests needs its own `vite.config.ts`, even an empty one. Without it, `vp run --filter <workspace> test` launched from the repo root fails with Vitest's "failed to find the current suite" before any test runs.
 - Run a single test file: `vp run test -- --reporter=verbose <path/to/file.test.tsx>`
 - 80% minimum unit test coverage target.
 - Store tests: use `createMockStore` from `packages/ui/src/utils/tests/createMockStore.util.ts` (inventory row: `packages/ui/src/INVENTORY.md` → `src/utils/tests/`).
