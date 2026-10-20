@@ -145,6 +145,26 @@ describe('judgeReport', () => {
     ).toThrow(/is not one of/);
   });
 
+  it('refuses "none" in gate mode, pointing at --report', () => {
+    expect(() =>
+      judgeReport({
+        config: { blocking: 'none' },
+        diagnostics,
+        reportOnly: false,
+      }),
+    ).toThrow(/cannot run at "blocking": "none"; use --report/);
+  });
+
+  it('accepts "none" in report mode', () => {
+    expect(
+      judgeReport({
+        config: { blocking: 'none' },
+        diagnostics,
+        reportOnly: true,
+      }),
+    ).toEqual({ blocking: [], level: undefined });
+  });
+
   it('returns the blocking findings and level in gate mode', () => {
     expect(
       judgeReport({

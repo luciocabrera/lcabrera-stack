@@ -72,7 +72,7 @@ disagree about the stages, the skill is right and this table is the bug.
 | 2   | `vp lint .`                   | Oxlint                                                                    |
 | 3   | `vp run -r lint:eslint:check` | eslint custom rules, every workspace and `evals/` — **not** in `vp check` |
 | 4   | `vp run lint:biome:check`     | Biome — **not** in `vp check` (run from root)                             |
-| 5   | `vp run react-doctor:verify`  | React Doctor — root-only, warnings and errors block                       |
+| 5   | `vp run react-doctor:verify`  | React Doctor — root-only, blocks at the configured `blocking` level       |
 | 6   | `vp check`                    | fmt + Oxlint + **tsgolint** type pass                                     |
 | 7   | `vp run typecheck`            | real **tsc** — **not** the same as step 6                                 |
 | 8   | `vp run test:changed`         | vitest — root-only; reaches `scripts/` too                                |

@@ -6,10 +6,10 @@ pinned at `catalog:lint`, and `doctor.config.jsonc` at the root holds its config
 still not one of the three linters in [AGENTS.md](../../AGENTS.md) §4 — it is a separate
 CLI with its own config and report.
 
-**Warnings block as well as errors.** `doctor.config.jsonc` sets `"blocking": "warning"`,
-and the gate reads that key itself (ADR-055, amended 2026-10-19). An accepted finding
-below therefore cannot simply stay in the report: it has to be fixed, or carried by an
-argued config entry. This file is the record of what has already been argued, so the next
+**The configured level decides what blocks.** The gate reads `blocking` from
+`doctor.config.jsonc` itself (ADR-055, amended 2026-10-19). An accepted finding below at
+or above that level cannot simply stay in the report: it has to be fixed, or carried by
+an argued config entry. This file is the record of what has already been argued, so the next
 agent spends one read instead of re-deriving the same judgements. Current findings are
 visible via `vp run react-doctor:report`.
 
@@ -102,10 +102,9 @@ accepted under this rule. A membership scan inside a loop is quadratic whatever
 the constant factor, and every fix was a local `new Set(...)` that left the
 surrounding expression declarative, which removed a real asymptotic term.
 
-**Promotion predates the warning gate.** It was promoted while only errors blocked,
-so that none of these could come back with the gate still exiting 0. Now that
-`blocking` is `warning` the rule would block at its default severity too; the
-`error` entry stays because this family is one React Doctor is reliably right about.
+**Promotion keeps it blocking at any level.** It was promoted so that none of these
+could come back with the gate still exiting 0, and the `error` entry holds that whatever
+`blocking` names, because this family is one React Doctor is reliably right about.
 
 **Two shapes needed care rather than a hoisted `Set`**, and both are the same
 trap: the array being searched is _rewritten by the loop doing the searching_.

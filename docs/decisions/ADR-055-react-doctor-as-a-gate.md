@@ -152,11 +152,13 @@ enforcing what its config said.
 - **`blocking` did nothing.** `verify-react-doctor.mjs` ran the CLI with
   `--blocking none` and failed only on `error` findings, whatever the config
   named. It now maps the key itself — `error` blocks errors, `warning` blocks
-  errors and warnings, `none` blocks nothing, and an absent key falls back to
+  errors and warnings, and an absent key falls back to
   the deprecated `failOn` and then to `error`, as the CLI resolves it. It
   keeps `--blocking none` on the CLI call, so the script still refuses a
   report whose `ok` is not `true` before it counts anything.
-  An unknown value fails the gate rather than falling back.
+  An unknown value fails the gate rather than falling back. `none` fails it
+  too: honoured, it would switch the gate off with a config edit that the
+  suppression register does not read. `--report` is the advisory run.
 - **This repository fails on warnings.** `doctor.config.jsonc` sets
   `"blocking": "warning"`. The maintainer chose that over `--baseline`: the
   tree is at zero warnings, so a warning is new debt the day it lands and needs

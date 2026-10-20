@@ -4,9 +4,10 @@
  * how one blocking finding prints.
  *
  * `blocking` takes the CLI's own values, its deprecated `failOn` alias and its
- * default, `error`, and is read only by the gate: report mode never fails on
- * it. The loader prefers every name in `SHADOWING_CONFIGS` over the `.jsonc`,
- * so one present beside it means the scan ran on rules the gate never read.
+ * default, `error`. Only the gate reads it, and the gate refuses `none`, which
+ * would pass without blocking anything; `--report` is the advisory run. The
+ * loader prefers every name in `SHADOWING_CONFIGS` over the `.jsonc`, so one
+ * present beside it means the scan ran on rules the gate never read.
  * Without the `.jsonc` there is nothing to shadow, and reading it fails.
  *
  * A finding's `id` may be a string, `null` or missing; only a string names the
@@ -48,6 +49,10 @@ export const blockingFindings = (diagnostics, severities) =>
 export const judgeReport = ({ config, diagnostics, reportOnly }) => {
   if (reportOnly) return { blocking: [], level: undefined };
   const { level, severities } = blockingSeverities(config);
+  if (level === 'none')
+    throw new Error(
+      'the gate cannot run at "blocking": "none"; use --report for an advisory run.',
+    );
   return { blocking: blockingFindings(diagnostics, severities), level };
 };
 
