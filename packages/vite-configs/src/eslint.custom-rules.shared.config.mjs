@@ -204,6 +204,8 @@ export const createCustomRulesLintConfig = async ({
     {
       rules: {
         ...SHARED_PLUGIN_RULE_SEVERITIES,
+        'react-hooks/exhaustive-deps': 'off',
+        'react-x/exhaustive-deps': 'off',
         'react-x/set-state-in-effect': 'error',
       },
     },
