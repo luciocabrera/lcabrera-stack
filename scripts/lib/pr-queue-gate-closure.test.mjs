@@ -43,7 +43,7 @@ const importClosure = (entry) => {
         pending.push(repoRelative(current, specifier));
     }
   }
-  return [...seen].sort((left, right) => left.localeCompare(right));
+  return [...seen].toSorted((left, right) => left.localeCompare(right));
 };
 
 const prTouching = (path) => ({

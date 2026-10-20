@@ -35,7 +35,7 @@ const inventoriesInTree = () =>
       .filter((entry) => entry.isDirectory())
       .map((entry) => `${root}/${entry.name}/src/INVENTORY.md`)
       .filter((file) => existsSync(join(REPO_ROOT, file))),
-  ).sort((left, right) => left.localeCompare(right));
+  ).toSorted((left, right) => left.localeCompare(right));
 
 describe('gates.inventory.trees', () => {
   const { trees } = GATES.inventory;
@@ -44,7 +44,7 @@ describe('gates.inventory.trees', () => {
     expect(
       trees
         .map((tree) => tree.inventory)
-        .sort((left, right) => left.localeCompare(right)),
+        .toSorted((left, right) => left.localeCompare(right)),
     ).toEqual(inventoriesInTree());
   });
 

@@ -54,7 +54,7 @@ describe('global severity downgrades', () => {
     });
     const rules = found
       .map((row) => row.rule)
-      .sort((left, right) => left.localeCompare(right));
+      .toSorted((left, right) => left.localeCompare(right));
     expect(rules).toEqual([
       'bucket compiler-cleanup',
       'category Maintainability',

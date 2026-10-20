@@ -188,3 +188,15 @@ and passes an empty dependency array. It requires
 `react-hooks(exhaustive-deps)`, and its `scope` field names that prefix because
 it differs from the family name. Turning the rule off in the root lint config
 makes the gate fail on that probe alone.
+
+## Amendment 2026-10-20 — a repo-only rule is a root override
+
+A rule that applies to this repository's paths alone is passed to
+`createLintConfig` as an `overrides` entry from the root `vite.config.ts`. The
+factory in `@lcabrera/vite-config/lint` does not carry it, because the globs are
+this repository's directory layout and a consumer's differs. The first such
+entry sets `unicorn/no-array-sort` to `error`, with
+`allowExpressionStatement: false`, on `scripts/**` and `packages/*/scripts/**`.
+Without that option the rule accepts a bare `.sort()` statement, which still
+mutates its receiver. `vp lint` reports a `.sort()` call planted in
+`scripts/lib/` under that rule (#1423).

@@ -305,7 +305,9 @@ describe('containment, for every value a review contributes', () => {
     const [comment] = collectSuppressedComments([
       REVIEW_WITH_ONE_SUPPRESSED,
     ]).comments;
-    expect(Object.keys(comment).sort()).toEqual(Object.keys(BENIGN).sort());
+    expect(Object.keys(comment).toSorted()).toEqual(
+      Object.keys(BENIGN).toSorted(),
+    );
   });
 
   for (const field of Object.keys(BENIGN)) {

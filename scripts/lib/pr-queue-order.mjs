@@ -100,20 +100,21 @@ export const topoSort = (numbers, edges) => {
     indegree.set(to, indegree.get(to) + 1);
   }
 
-  const ready = numbers
+  let ready = numbers
     .filter((number) => indegree.get(number) === 0)
-    .sort((a, b) => a - b);
+    .toSorted((a, b) => a - b);
   const order = [];
   while (ready.length > 0) {
-    const number = ready.shift();
+    const [number, ...rest] = ready;
     order.push(number);
+    const released = [];
     for (const next of successors.get(number)) {
       indegree.set(next, indegree.get(next) - 1);
       if (indegree.get(next) === 0) {
-        ready.push(next);
+        released.push(next);
       }
     }
-    ready.sort((a, b) => a - b);
+    ready = [...rest, ...released].toSorted((a, b) => a - b);
   }
 
   const placed = new Set(order);
