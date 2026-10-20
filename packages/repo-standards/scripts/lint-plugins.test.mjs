@@ -22,6 +22,18 @@ describe('probeCode', () => {
   });
 });
 
+describe('probeCode with a scope', () => {
+  it('prints the scope Oxlint reports instead of the family', () => {
+    expect(
+      probeCode({
+        plugin: 'react',
+        rule: 'exhaustive-deps',
+        scope: 'react-hooks',
+      }),
+    ).toBe('react-hooks(exhaustive-deps)');
+  });
+});
+
 describe('silentProbes', () => {
   const probes = [
     { code: '', plugin: 'oxc', rule: 'erasing-op' },
@@ -169,9 +181,17 @@ describe('staleRuntimeGlobs', () => {
 });
 
 describe('PLUGIN_PROBES', () => {
-  it('covers a distinct plugin family per probe', () => {
-    const plugins = PLUGIN_PROBES.map(({ plugin }) => plugin);
-    expect(new Set(plugins).size).toBe(plugins.length);
+  it('gives every probe its own file and its own diagnostic code', () => {
+    const files = PLUGIN_PROBES.map((probe) => probeFilename(probe));
+    const codes = PLUGIN_PROBES.map((probe) => probeCode(probe));
+    expect(new Set(files).size).toBe(PLUGIN_PROBES.length);
+    expect(new Set(codes).size).toBe(PLUGIN_PROBES.length);
+  });
+
+  it('proves the effect-dependency rule fires, not only that react loads', () => {
+    expect(PLUGIN_PROBES.map((probe) => probeCode(probe))).toContain(
+      'react-hooks(exhaustive-deps)',
+    );
   });
 
   it('gives every probe code to violate', () => {
@@ -187,14 +207,20 @@ describe('the react probe', () => {
   });
 
   it('is a .tsx probe, which is load-bearing', () => {
-    const react = PLUGIN_PROBES.find(({ plugin }) => plugin === 'react');
-    expect(react.ext).toBe('tsx');
+    const react = PLUGIN_PROBES.filter(({ plugin }) => plugin === 'react');
+    expect(react.map(({ ext }) => ext)).toEqual(react.map(() => 'tsx'));
   });
 });
 
 describe('probeFilename', () => {
   it('defaults to .ts when a probe declares no extension', () => {
     expect(probeFilename({ plugin: 'eslint' })).toBe('eslint.probe.ts');
+  });
+
+  it('names the file after the scope when a probe has one', () => {
+    expect(
+      probeFilename({ ext: 'tsx', plugin: 'react', scope: 'react-hooks' }),
+    ).toBe('react-hooks.probe.tsx');
   });
 
   it('honours an explicit extension', () => {
