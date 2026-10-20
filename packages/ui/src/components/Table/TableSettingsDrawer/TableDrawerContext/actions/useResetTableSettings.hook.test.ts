@@ -102,8 +102,6 @@ describe('useResetTableSettings', () => {
       shares: [],
       totalsPlacement: 'last',
     });
-    drawerColumnsStore.set.mockClear();
-    drawerGroupingStore.set.mockClear();
   });
 
   it('copies table config slices into drawer state when values exist', () => {

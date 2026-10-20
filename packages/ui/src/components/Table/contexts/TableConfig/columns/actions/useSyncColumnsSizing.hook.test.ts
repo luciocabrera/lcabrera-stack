@@ -40,7 +40,6 @@ describe('useSyncColumnsSizing', () => {
   beforeEach(() => {
     setColumnsState(createInitialColumnsState());
     resetMocks();
-    vi.clearAllMocks();
   });
 
   it('persists the stored widths through the column-sizing action', () => {

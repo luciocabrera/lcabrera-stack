@@ -9,7 +9,7 @@ import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { updateRows } from '@lcabrera/server/db/update-rows.util';
 import { GroupingRefusedError } from '@lcabrera/server/errors/grouping-refused.error';
 import { QueryCanceledError } from '@lcabrera/server/errors/query-canceled.error';
-import { beforeEach, expect, it, vi } from 'vite-plus/test';
+import { expect, it, vi } from 'vite-plus/test';
 
 import {
   ENTERPRISE_ORDER_GROUP_MAX_ROWS,
@@ -89,12 +89,6 @@ const grouping = ({
   periods,
   shares,
   totalsPlacement: 'last',
-});
-
-beforeEach(() => {
-  vi.mocked(selectRows).mockClear();
-  vi.mocked(getRowsCount).mockClear();
-  vi.mocked(selectGroupedRows).mockClear();
 });
 
 it('selects one order by its primary key', async () => {

@@ -1,4 +1,4 @@
-import { beforeEach, expect, it, vi } from 'vite-plus/test';
+import { expect, it, vi } from 'vite-plus/test';
 
 import { createRowDeleteAction } from './create-row-delete-action.util.ts';
 import { toIntegerRowId } from './to-integer-row-id.util.ts';
@@ -16,10 +16,6 @@ const submit = (fields: Record<string, string>) =>
       method: 'POST',
     }),
   });
-
-beforeEach(() => {
-  deleteRow.mockClear();
-});
 
 it('deletes the row the form names and reports it', async () => {
   const response = await submit({ id: '42', intent: 'delete' });

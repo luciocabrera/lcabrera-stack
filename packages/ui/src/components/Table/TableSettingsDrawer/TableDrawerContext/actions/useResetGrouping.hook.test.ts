@@ -45,7 +45,6 @@ const resetGrouping = () => {
 };
 
 beforeEach(() => {
-  drawerGroupingStore.set.mockClear();
   setConfigGrouping({
     aggregates: [],
     keys: [],

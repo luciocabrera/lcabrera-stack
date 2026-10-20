@@ -64,7 +64,6 @@ const resetColumnOrderAndVisibility = (state?: TableColumnsState) => {
 describe('useResetColumnOrderAndVisibility', () => {
   beforeEach(() => {
     setTableColumnsState(undefined);
-    drawerColumnsStore.set.mockClear();
   });
 
   it('copies order, pinning and visibility from the table config state', () => {

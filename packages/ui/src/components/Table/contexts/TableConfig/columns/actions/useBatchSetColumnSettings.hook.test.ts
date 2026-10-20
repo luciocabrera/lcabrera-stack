@@ -158,17 +158,8 @@ describe('useBatchSetColumnSettings', () => {
       sorting: [],
       staticKeys: new Set<string>(['id']),
     });
-    mockBuildPersistencePayload.mockClear();
-    mockColumnsStore.get.mockClear();
-    mockColumnsStore.set.mockClear();
-    mockDataStore.set.mockClear();
     mockGroupingStore.get.mockReturnValue(NO_GROUPING);
-    mockMetaStore.get.mockClear();
-    mockMetaStore.set.mockClear();
-    mockPersistUiFlags.mockClear();
-    mockPersistTableState.mockClear();
     mockPersistTableState.mockReturnValue(true);
-    mockResolveBatchColumnSettingsUpdate.mockClear();
   });
 
   it('orchestrates the extracted utilities and commits the merged state', () => {

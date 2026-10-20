@@ -25,7 +25,6 @@ import { Button } from './Button.component';
 
 afterEach(() => {
   cleanup();
-  MockTooltip.mockClear();
 });
 
 describe('Button', () => {

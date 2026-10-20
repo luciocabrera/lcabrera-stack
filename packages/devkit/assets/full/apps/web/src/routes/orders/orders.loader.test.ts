@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { selectPage } from './.server/orders.reader';
 import { loader } from './orders.loader';
@@ -25,10 +25,6 @@ const lastRead = () => {
 };
 
 const param = (value: unknown) => encodeURIComponent(JSON.stringify(value));
-
-beforeEach(() => {
-  vi.mocked(selectPage).mockClear();
-});
 
 describe('the orders loader', () => {
   it('orders the read by the sort the request names, then by the key', async () => {

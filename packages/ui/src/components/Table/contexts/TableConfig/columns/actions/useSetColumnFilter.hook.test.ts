@@ -79,7 +79,6 @@ describe('useSetColumnFilter', () => {
     });
     mockPersistTableState.mockReset();
     mockPersistTableState.mockReturnValue(true);
-    mockSerializeFiltersToURL.mockClear();
   });
 
   it('reads the latest column filters on every invocation', () => {

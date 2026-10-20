@@ -182,23 +182,12 @@ vi.mock('./utils/resolveBatchTableSettingsUpdate.util', () => ({
 
 describe('useBatchSetTableSettings', () => {
   beforeEach(() => {
-    mockBuildPersistencePayload.mockClear();
-    mockColumnsStore.get.mockClear();
-    mockColumnsStore.set.mockClear();
-    mockDataStore.set.mockClear();
-    mockLiveGroupingStore.get.mockClear();
     mockLiveGroupingStore.get.mockReturnValue(NO_GROUPING);
-    mockLiveGroupingStore.set.mockClear();
-    mockMetaStore.get.mockClear();
     mockMetaStore.get.mockReturnValue({
       isTableSettingsPinned: false,
       persistenceKey: 'orders-table',
     });
-    mockMetaStore.set.mockClear();
-    mockPersistUiFlags.mockClear();
-    mockPersistTableState.mockClear();
     mockPersistTableState.mockReturnValue(true);
-    mockResolveBatchTableSettingsUpdate.mockClear();
   });
 
   it('orchestrates derived state, persistence, and loading around a table-wide update', () => {

@@ -103,8 +103,6 @@ afterEach(() => {
 
 describe('TableDrawersSection', () => {
   afterEach(() => {
-    columnSettingsDrawerPropsSpy.mockClear();
-    tableSettingsDrawerPropsSpy.mockClear();
     useGetTableDrawersSyncNonceMock.mockReset();
     useGetTableDrawersSyncNonceMock.mockReturnValue(0);
   });

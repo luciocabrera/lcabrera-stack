@@ -48,7 +48,6 @@ vi.mock('../../utils', () => ({
 describe('ColumnAxisSection', () => {
   afterEach(() => {
     cleanup();
-    setColumnAxisMock.mockClear();
     useGetGroupingColumnAxisMock.mockReturnValue(undefined);
     useGetGroupingKeysMock.mockReturnValue(['region']);
     useGetTableIsGroupingLockedMock.mockReturnValue(false);

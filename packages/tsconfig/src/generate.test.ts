@@ -1,5 +1,5 @@
 import { mkdir, writeFile } from 'node:fs/promises';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TsConfigFileSystem } from './generate.ts';
 
@@ -67,10 +67,6 @@ describe('renderTsConfig', () => {
 });
 
 describe('writeTsConfigs', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('writes each entry through the supplied file system', async () => {
     const { fileSystem, writes } = createRecordingFileSystem();
 

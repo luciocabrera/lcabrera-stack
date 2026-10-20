@@ -14,7 +14,7 @@ import { readTaskTrials } from '@repo/eval-history/queries/readTaskTrials.servic
 import { readTriggerConfusion } from '@repo/eval-history/queries/readTriggerConfusion.service';
 import { readReportRun } from '@repo/eval-history/report/readReportRun.service';
 import { readRuleHistory } from '@repo/eval-history/report/readRuleHistory.service';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { EVALS_REGRESSION } from '../constants/evalsDashboard.constants';
 import {
@@ -102,10 +102,6 @@ vi.mock('@repo/eval-history/report/readReportRun.service', () => ({
 vi.mock('@repo/eval-history/report/readRuleHistory.service', () => ({
   readRuleHistory: vi.fn(() => Promise.resolve({ kind: 'needs-database' })),
 }));
-
-afterEach(() => {
-  vi.clearAllMocks();
-});
 
 describe('the evals history service', () => {
   it('reads run summaries on the reader pool', async () => {

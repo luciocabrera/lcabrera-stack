@@ -1,8 +1,7 @@
-import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-grouping-capabilities.util';
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
 import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { loader as paginatedLoader } from '@/routes/api/enterprise-orders-paginated/enterprise-orders-paginated.loader';
 import {
@@ -88,12 +87,6 @@ const getPaginated = async (search: string) =>
       `http://localhost/_api/enterprise-orders/paginated?${search}`,
     ),
   } as Parameters<typeof paginatedLoader>[0]);
-
-beforeEach(() => {
-  vi.mocked(selectRows).mockClear();
-  vi.mocked(getRowsCount).mockClear();
-  vi.mocked(getColumnGroupingCapabilities).mockClear();
-});
 
 describe('the resource route — GET /_api/enterprise-orders/paginated', () => {
   it('serves no more than the ceiling however large a limit is asked for', async () => {

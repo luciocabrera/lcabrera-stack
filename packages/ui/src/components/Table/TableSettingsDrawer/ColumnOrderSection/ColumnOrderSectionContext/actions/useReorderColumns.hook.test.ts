@@ -124,9 +124,6 @@ describe('useReorderColumns', () => {
     setDrawerState(undefined);
     setTableColumnsState(undefined);
     setPreference(undefined);
-    drawerColumnsStore.set.mockClear();
-    modalsStore.set.mockClear();
-    mockAcceptOrderConflict.mockClear();
   });
 
   it('applies a conflict-free reorder straight to the drawer store', () => {
