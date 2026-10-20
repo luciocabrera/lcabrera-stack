@@ -159,7 +159,6 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
 });
 
 /**

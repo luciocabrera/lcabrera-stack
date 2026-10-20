@@ -24,7 +24,10 @@ reports exactly the same clean pass as code that is correct.** Always confirm a
 lint change with a deliberate violation. That is also why `vp run
 lint:plugins:verify` lints a planted violation per plugin family rather than
 reading the config — reading the config is exactly what cannot tell a loaded
-family from a missing one.
+family from a missing one. It also plants one rule-level probe,
+`react-hooks(exhaustive-deps)`, because Oxlint is the only engine left
+reporting a missing hook dependency and a loaded family does not prove that one
+rule still fires.
 
 ## Oxlint
 
@@ -33,10 +36,11 @@ root, `vp lint`, `vp fmt` and `vp check` apply that config and do not apply a
 nested one. From a package directory, `vp lint` and `vp fmt` still use the
 root settings unless that package defines its own `lint` or `fmt` block,
 which Vite+ does not recommend; `vp check` always uses the root blocks. This
-repo rejects a `lint` key in a workspace config (`vp run lint:plugins:verify`),
-so the root block and its `overrides` stay the only place a rule is set, with
-globs resolved from the root (`packages/ui/**`). A package's own
-`vite.config.ts` is for its Vite/Vitest/framework config. See
+repo rejects a `lint`, `fmt` or `staged` key in a workspace config
+(`vp run lint:plugins:verify`), so the root blocks stay the only place a rule,
+a format setting or a staged command is set, with globs resolved from the root
+(`packages/ui/**`). A package's own `vite.config.ts` is for its
+Vite/Vitest/framework config. See
 `node_modules/vite-plus/docs/guide/monorepo.md`, including its "Composing
 Configuration Files" section, which is the supported way to keep the rule sets in
 separate files and merge them into overrides.
@@ -49,8 +53,8 @@ The repo ran the other way round for a long time, with a `lint` block in every
 workspace built from a `*-lint` factory. On Vite+ 0.3 none of it loaded, and
 that layer is gone. Vite+ 1.3 would load such a block when `vp lint` runs from
 the package directory, which is why the gate still rejects the key.
-`vp run lint:plugins:verify` fails on a `lint` key in any workspace config, so
-it cannot come back.
+`vp run lint:plugins:verify` fails on a `lint`, `fmt` or `staged` key in any
+workspace config, so none of them can come back.
 
 **Oxlint runs no ESLint-plugin rules.** The `jsPlugins` bridge is gone: the
 eslint pass already loads `react-x`, `react-dom`, `@stylexjs`, `local-rules`,
@@ -84,8 +88,33 @@ Four behaviours mask a broken setup as a clean one:
   category (Rule 14).
 
 One override semantic to know before writing one: **an override's `plugins` list
-replaces the base list** for matched files, so it must name every plugin that
-group needs.
+is added to the base list** for matched files. It does not replace it. With the
+test-file override below in place, the `lint:plugins:verify` probe code saved as
+a `.test.ts` or `.test.tsx` file still reports every base family. The other half
+of the trap still applies: a plugin named in an override brings every rule it has
+in an enabled category, so name each one you do not want as `off`.
+
+**A path-scoped rule is a repo fact, so it goes in the root's
+`createLintConfig({ overrides })` call, not in the published factory.** The root
+passes two today. `unicorn/no-array-sort` at `error` with
+`allowExpressionStatement: false` over `scripts/**` and `packages/*/scripts/**`,
+so a script sorts with `toSorted()`. The option matters: at its default the rule
+lets a bare `values.sort();` statement through, which is the in-place form the
+rule exists to stop.
+
+The second is the `vitest` plugin over `**/*.test.ts`, `**/*.test.tsx`,
+`**/*.test.mjs` and `**/*.test.cjs`, with five assertion rules at `error`: `expect-expect`,
+`valid-expect`, `no-conditional-expect`, `no-standalone-expect` and
+`require-to-throw-message`. Every other `vitest` rule the `correctness` category
+turns on is set to `off` by name. Two options matter.
+`assertFunctionNames: ['expect*']` counts a call to an `expect`-prefixed helper as
+an assertion. `maxArgs: 2` accepts Vitest's `expect(actual, message)`. Oxlint
+owns these checks and Biome's `useExpect` stays off
+([ADR-042](../../../docs/decisions/ADR-042-oxlint-config-at-the-root.md),
+amendment "Oxlint owns assertion hygiene in test files"). The rules do not see a test function bound
+by `require`, only a global or an ES `import`. `lint:plugins:verify`
+does not probe this override, so a rule change in it needs a planted test with
+no assertion, run through `vp lint`.
 
 The other categories are **not** free; measure one before enabling it
 (`vp lint . --format=json`).

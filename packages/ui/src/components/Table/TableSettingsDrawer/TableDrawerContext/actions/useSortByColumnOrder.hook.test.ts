@@ -68,7 +68,6 @@ describe('useSortByColumnOrder', () => {
   beforeEach(() => {
     setTableColumnsState(undefined);
     setDrawerState(undefined);
-    drawerColumnsStore.set.mockClear();
   });
 
   it('sorts every sortable column ascending, following the column order', () => {

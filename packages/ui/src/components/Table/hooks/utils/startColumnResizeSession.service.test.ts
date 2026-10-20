@@ -50,7 +50,6 @@ describe('startColumnResizeSession', () => {
   afterEach(() => {
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
-    vi.clearAllMocks();
     vi.unstubAllGlobals();
   });
 

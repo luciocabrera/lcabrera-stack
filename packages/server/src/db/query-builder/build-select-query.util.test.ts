@@ -56,7 +56,7 @@ describe('buildSelectQuery', () => {
         schema: 'reporting; DROP SCHEMA reporting',
         table: 't',
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "reporting; DROP SCHEMA reporting"');
   });
 
   it('rejects an unsafe table name', () => {
@@ -66,7 +66,7 @@ describe('buildSelectQuery', () => {
         schema: 'reporting',
         table: 't; DROP TABLE reporting.users',
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "t; DROP TABLE reporting.users"');
   });
 
   it('rejects an unsafe field name', () => {
@@ -76,7 +76,7 @@ describe('buildSelectQuery', () => {
         schema: 'reporting',
         table: 'v_order_totals',
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "a; DROP TABLE reporting.users"');
   });
 
   it('rejects a field not present in an optional allowedColumns list', () => {
@@ -87,7 +87,9 @@ describe('buildSelectQuery', () => {
         schema: 'reporting',
         table: 'v_order_totals',
       }),
-    ).toThrow();
+    ).toThrow(
+      'Column "password_hash" is not in the allowed list for this query.',
+    );
   });
 
   it('allows a field that is present in an optional allowedColumns list', () => {

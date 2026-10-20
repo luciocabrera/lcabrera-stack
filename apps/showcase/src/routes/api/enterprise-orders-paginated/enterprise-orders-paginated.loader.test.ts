@@ -37,8 +37,6 @@ it('translates the query and returns the page as JSON', async () => {
 });
 
 it('asks for the total only on the first page of a scroll session', async () => {
-  vi.mocked(selectOrdersPage).mockClear();
-
   await loader({
     request: new Request(
       'http://localhost/_api/enterprise-orders/paginated?limit=25&skip=0',
@@ -61,8 +59,6 @@ it('asks for the total only on the first page of a scroll session', async () => 
 });
 
 it('forwards a keyset cursor to the service', async () => {
-  vi.mocked(selectOrdersPage).mockClear();
-
   const cursor = encodeURIComponent(JSON.stringify(['2026-01-04', 4821]));
 
   await loader({

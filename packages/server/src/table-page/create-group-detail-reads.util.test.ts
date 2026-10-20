@@ -2,7 +2,6 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TablePageReader } from './create-table-page-reader.util.ts';
 
-import { getRowsCount } from '../db/get-rows-count.util.ts';
 import { selectRows } from '../db/select-rows.util.ts';
 import { createGroupDetailReads } from './create-group-detail-reads.util.ts';
 import { createTablePageReader } from './create-table-page-reader.util.ts';
@@ -38,8 +37,6 @@ const request = new Request('http://localhost/items/group?group=token');
 
 beforeEach(() => {
   resolveGroupRead.mockReset();
-  resolveGroupRestriction.mockClear();
-  selectPage.mockClear();
 });
 
 describe('fetchPage', () => {
@@ -134,9 +131,6 @@ describe('over a reader that declares ignored sort columns', () => {
   });
 
   it('drops a sort on an ignored column before it reaches the read', async () => {
-    vi.mocked(selectRows).mockClear();
-    vi.mocked(getRowsCount).mockClear();
-
     const groupToken = encodeURIComponent(
       JSON.stringify({
         isSubtotal: false,

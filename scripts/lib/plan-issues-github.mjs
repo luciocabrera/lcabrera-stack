@@ -21,7 +21,7 @@ const assertIsData = (field, value) => {
   return value;
 };
 
-export const existingMilestones = () =>
+const existingMilestones = () =>
   JSON.parse(
     runGh([
       'api',
@@ -75,7 +75,7 @@ export const createIssue = (issue, bodyPath, { dryRun, log }) => {
 const issueDatabaseId = (number) =>
   Number(runGh(['api', `repos/:owner/:repo/issues/${number}`, '--jq', '.id']));
 
-export const linkSubIssue = (
+const linkSubIssue = (
   { parentId, childId, parentNumber, childNumber },
   { dryRun, log },
 ) => {

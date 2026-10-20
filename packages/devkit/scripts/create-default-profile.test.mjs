@@ -23,7 +23,7 @@ import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 import { runCreate } from './command-create.mjs';
 import { runInit } from './command-init.mjs';
 import { runDoctor, runSync } from './command-sync.mjs';
-import { runGit } from './git-exec.mjs';
+import { runGitOrThrow } from './git-exec.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 
 const scratches = [];
@@ -34,7 +34,7 @@ const scratch = () => {
   return root;
 };
 
-const git = (args, cwd) => runGit({ args, cwd });
+const git = (args, cwd) => runGitOrThrow({ args, cwd });
 
 const quietly = (run) => {
   const silenced = silencedConsole(vi);

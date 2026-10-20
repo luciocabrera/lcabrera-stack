@@ -141,7 +141,9 @@ describe.skipIf(!DATABASE_URL)(
         quietUnreachable: false,
       });
 
-      expect(ingested.exitCode, ingested.stderr.join('\n')).toBe(0);
+      if (ingested.exitCode !== 0) {
+        throw new Error(ingested.stderr.join('\n'));
+      }
 
       await client.query({
         text: INSERT_BASELINE_SQL,

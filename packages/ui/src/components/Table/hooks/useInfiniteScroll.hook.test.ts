@@ -70,8 +70,6 @@ const createRef = (): RefObject<HTMLElement | null> => ({
 
 beforeEach(() => {
   observerRef.current = undefined;
-  disconnectSpy.mockClear();
-  observeSpy.mockClear();
   vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 });
 

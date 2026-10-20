@@ -1,11 +1,4 @@
-import {
-  beforeEach,
-  describe,
-  expect,
-  expectTypeOf,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { describe, expect, expectTypeOf, it, vi } from 'vite-plus/test';
 
 import { deleteRows } from '../db/delete-rows.util.ts';
 import { getColumnGroupingCapabilities } from '../db/get-column-grouping-capabilities.util.ts';
@@ -78,13 +71,6 @@ const grouping = (keys: readonly string[]) => ({
 const firstSelect = () => vi.mocked(selectRows).mock.calls[0]?.[0];
 const firstGroupedSelect = () =>
   vi.mocked(selectGroupedRows).mock.calls[0]?.[0];
-
-beforeEach(() => {
-  vi.mocked(selectRows).mockClear();
-  vi.mocked(getRowsCount).mockClear();
-  vi.mocked(selectGroupedRows).mockClear();
-  vi.mocked(getColumnGroupingCapabilities).mockClear();
-});
 
 describe('selectPage — rows', () => {
   it('returns a page with total and hasMore from the count query', async () => {

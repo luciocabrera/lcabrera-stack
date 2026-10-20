@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TablePageReader } from './create-table-page-reader.util.ts';
 
@@ -27,11 +27,6 @@ const GROUPING = {
   mode: 'flat',
   periods: {},
 } as const;
-
-beforeEach(() => {
-  selectPage.mockClear();
-  selectGroupingCapabilities.mockClear();
-});
 
 describe('fetchPage', () => {
   it('reads the first page in the order and under the filters the view states', async () => {

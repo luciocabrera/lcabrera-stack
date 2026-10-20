@@ -27,7 +27,6 @@ vi.mock('../../../TableDrawerContext/selectors', () => ({
 describe('TotalsPlacementSection', () => {
   afterEach(() => {
     cleanup();
-    setTotalsPlacementMock.mockClear();
     useGetGroupingModeMock.mockReturnValue('rollup');
     useGetTotalsPlacementMock.mockReturnValue('last');
   });

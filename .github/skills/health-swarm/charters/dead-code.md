@@ -6,7 +6,10 @@ Unused exports, vestigial devDependencies, orphan artifacts.
 
 - `vp run fallow:dead-code` (scope with `-w`), `vp run fallow:full`,
   `vp run fallow:health --file-scores --hotspots`.
-- `vp run fallow:audit --base main` mirrors what CI gates (`--gate new-only`).
+- `vp run fallow:audit --base main` mirrors what CI gates (`--gate new-only`),
+  and `vp run fallow:dead-code:verify` is the whole-tree dead-code gate CI
+  runs beside it — an error-severity finding there is a gate failure, not
+  inherited debt.
 - `vp run docs:verify` and `vp run commands:verify` surface orphan references.
 
 `reports/fallow/` is produced on demand; only `reports/fallow/baselines/` is
@@ -39,6 +42,6 @@ three workarounds in `packages/utils`); `react-doctor` lacking a load-bearing
 note. Still open as MECHANICAL: `pnpm-workspace.yaml`'s dangling ADR-047 path,
 which is the sole in-tree guard on `@vitest/coverage-v8`.
 
-Probed, unresolved: the per-workspace `fmt` blocks look dead the way the `lint`
-blocks were, but root `ignorePatterns` are a strict superset of theirs, so no
-probe separates "merged" from "ignored". Left unclaimed rather than guessed.
+Handled: the per-workspace `fmt` blocks are gone (#1411). A package-directory
+`vp fmt` applied them and `vp check` did not, and `vp run lint:plugins:verify`
+now rejects a workspace `fmt` key, as it does `lint` and `staged`.

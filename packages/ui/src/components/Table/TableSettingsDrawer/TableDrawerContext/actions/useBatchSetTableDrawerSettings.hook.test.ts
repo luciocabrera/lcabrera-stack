@@ -65,7 +65,6 @@ vi.mock('#ui/components/Table/contexts/TableConfig/columns/actions', () => ({
 }));
 
 beforeEach(() => {
-  batchSetTableSettings.mockClear();
   setDrawerState(undefined);
   setDrawerGrouping({
     aggregates: [],

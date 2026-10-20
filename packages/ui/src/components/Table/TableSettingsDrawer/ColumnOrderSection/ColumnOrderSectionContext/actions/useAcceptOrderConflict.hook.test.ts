@@ -140,8 +140,6 @@ describe('useAcceptOrderConflict', () => {
     setModalsState(undefined);
     setDrawerState(undefined);
     setTableColumnsState(undefined);
-    drawerColumnsStore.set.mockClear();
-    modalsStore.set.mockClear();
   });
 
   it('drops every pin for the reset-all-pins resolution', () => {

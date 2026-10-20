@@ -4,8 +4,8 @@
  * Vite+ owns the region between its two markers in AGENTS.md and rewrites it in
  * place whenever it syncs agent instructions — which `vp install` does, so every
  * fresh worktree gets the upstream template back. That template's Review
- * Checklist tells agents to run `vp test`, which this repo forbids (AGENTS.md
- * §4), so the refill actively contradicts the file it lands in.
+ * Checklist names `vp check` and `vp test` as the review, a shorter gate than
+ * the one the file it lands in defines.
  *
  * The invariant is "the region renders to nothing", not "the region does not
  * match today's upstream text": upstream wording changes, and anything rendered

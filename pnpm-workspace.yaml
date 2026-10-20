@@ -90,9 +90,9 @@ catalogs:
     # Both must be DECLARED to resolve, for different reasons, and neither is
     # safe to drop because "nothing imports it".
     #
-    # `vitest`: every workspace invokes its binary by path (`node
-    # node_modules/vitest/vitest.mjs`, via vite.run.shared.config.ts), and pnpm
-    # only materialises `node_modules/vitest` for a direct dep.
+    # `vitest`: showcase's `test:watch` invokes its binary by path, and pnpm
+    # only materialises `node_modules/vitest` for a direct dep. Every other
+    # test task runs `vp test`, which resolves the Vitest vite-plus depends on.
     #
     # `@vitest/coverage-v8`: an OPTIONAL PEER of vitest, which pnpm installs only
     # while some manifest declares it. The single root declaration is what holds
@@ -109,6 +109,7 @@ catalogs:
     fallow: ^3.33.1
     knip: ^6.41.0
     lighthouse: ^13.5.0
+    publint: ^0.3.25
     semver: ^7.8.5
     yaml: ^2.9.1
     ts-morph: ^28.0.0

@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "generate": "node ./generate.ts",
-    "test": "node node_modules/vitest/vitest.mjs run",
+    "test": "vitest run",
     "typecheck": "tsc --noEmit -p tsconfig.app.json"
   },
   "devDependencies": {

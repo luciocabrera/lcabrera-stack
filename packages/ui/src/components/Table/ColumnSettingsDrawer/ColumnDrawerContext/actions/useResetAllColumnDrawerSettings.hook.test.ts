@@ -95,7 +95,6 @@ describe('useResetAllColumnDrawerSettings', () => {
       wasTableSettingsOpenBeforeColumnSettings: false,
     });
     metaStore.set.mockReset();
-    mockGetTableColumnDrawerState.mockClear();
   });
 
   it('restores table settings open state when closing after column drawer takeover', () => {

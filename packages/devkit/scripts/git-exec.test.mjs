@@ -7,7 +7,7 @@ import {
   readGit,
   requireGitBinary,
   resolveGit,
-  runGit,
+  runGitOrThrow,
   TRUSTED_GIT_DIRECTORIES,
 } from './git-exec.mjs';
 
@@ -118,17 +118,20 @@ describe('requireGitBinary', () => {
   });
 });
 
-describe('runGit and readGit', () => {
-  test('runGit answers with trimmed stdout', () => {
-    expect(runGit({ args: ['--version'], cwd: process.cwd() })).toMatch(
+describe('runGitOrThrow and readGit', () => {
+  test('runGitOrThrow answers with trimmed stdout', () => {
+    expect(runGitOrThrow({ args: ['--version'], cwd: process.cwd() })).toMatch(
       /^git version /,
     );
   });
 
-  test('runGit throws when the command fails, so a caller cannot miss it', () => {
+  test('runGitOrThrow throws when the command fails, so a caller cannot miss it', () => {
     expect(() =>
-      runGit({ args: ['rev-parse', '--verify', 'no-such-ref'], cwd: '/' }),
-    ).toThrow();
+      runGitOrThrow({
+        args: ['rev-parse', '--verify', 'no-such-ref'],
+        cwd: '/',
+      }),
+    ).toThrow('rev-parse --verify no-such-ref');
   });
 
   test('readGit answers with the empty string instead, which is what an unset key means', () => {

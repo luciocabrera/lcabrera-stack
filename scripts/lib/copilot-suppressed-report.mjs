@@ -27,10 +27,10 @@ export const MARKERS = {
   source: '| ',
 };
 
-export const findingLocation = ({ line, path }) =>
+const findingLocation = ({ line, path }) =>
   oneLine(line === undefined ? path : `${path}:${line}`);
 
-export const latestOccurrence = (finding) =>
+const latestOccurrence = (finding) =>
   finding.occurrences.at(-1) ?? { review: undefined, text: '' };
 
 const declinedNote = ({ declined }) =>

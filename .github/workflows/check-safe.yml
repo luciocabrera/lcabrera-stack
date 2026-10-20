@@ -293,8 +293,9 @@ jobs:
         # Naming `lint.plugins` REPLACES Oxlint's default set, so dropping an
         # entry disables that whole family and reports nothing — the same clean
         # pass as correct code. This lints a deliberate violation per family
-        # instead of reading config, and rejects a `lint` block in a workspace
-        # config, which Vite+ never loads. See ADR-042.
+        # instead of reading config, and rejects a `lint`, `fmt` or `staged`
+        # block in a workspace config, which a package-directory run would use
+        # in place of the root one. See ADR-042.
         run: vp run lint:plugins:verify
 
       - name: The eslint pass still runs its rules
@@ -425,7 +426,8 @@ jobs:
         # Vite+ rewrites the region between its markers in AGENTS.md whenever it
         # syncs agent instructions, and `vp install` triggers that — so every
         # fresh worktree gets the upstream template back, whose Review Checklist
-        # tells agents to run `vp test`, forbidden by §4. Nothing caught it; the
+        # names `vp check` and `vp test` as the review — not this repo's quality
+        # gate, which the skill owns. Nothing caught it; the
         # block's comment asked a human to notice. Repair: `vp run
         # viteplus:verify -- --write`.
         run: vp run viteplus:verify
@@ -555,7 +557,7 @@ jobs:
           echo "| Lint (Oxlint) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (ESLint custom rules) | $ESLINT_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (Biome · react domain) | $BIOME_STATUS |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| React Doctor (errors block) | $REACT_DOCTOR_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| React Doctor (blocks at the configured level) | $REACT_DOCTOR_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsgolint via vp check) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsc · every workspace) | $TYPECHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| COMMANDS.md accuracy | $COMMANDS_STATUS |" >> "$GITHUB_STEP_SUMMARY"
@@ -628,6 +630,13 @@ jobs:
           awk 'found || /^[{[]/ {found=1; print}' fallow-audit.raw.txt > fallow-audit.json
           exit $STATUS
 
+      - name: Fallow dead code (whole tree)
+        # The audit above scores the diff's own files, so an export in an
+        # unchanged file that this change made unreachable is outside it. This
+        # scans the whole tree and fails on any error-severity dead-code finding.
+        if: ${{ !cancelled() }}
+        run: vp run fallow:dead-code:verify
+
       - name: Write fallow summary
         if: always()
         run: |
@@ -650,7 +659,7 @@ jobs:
               echo "| Duplication introduced | $(jq -r '.attribution.duplication_introduced // "n/a"' fallow-audit.json) |"
               echo "| Coverage source | $(jq -r '.complexity.summary.coverage_source_consistency // "n/a"' fallow-audit.json) |"
               echo ""
-              echo "> Gate \`new-only\`: only newly-introduced issues fail this job. Inherited findings are covered by \`reports/fallow/baselines/\`."
+              echo "> Gate \`new-only\`: the audit fails only on newly-introduced issues; inherited findings are covered by \`reports/fallow/baselines/\`. Dead code is also gated whole-tree by the \`fallow:dead-code:verify\` step."
               echo "> Coverage source \`mixed\` is expected: real Istanbul coverage is fed for the DB-free suites, and files with no tests at all still fall back to fallow's static estimate (which guesses 0% and inflates their CRAP)."
             else
               echo "❌ Audit did not produce JSON output — check the job log (exit 2 usually means an invalid base ref or config error)."

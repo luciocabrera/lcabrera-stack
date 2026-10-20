@@ -42,7 +42,6 @@ const getButton = (label: string) => {
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
   layoutLockRef.current = undefined;
 });
 

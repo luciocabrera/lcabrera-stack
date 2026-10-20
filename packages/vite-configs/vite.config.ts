@@ -1,13 +1,11 @@
 import { defineConfig } from 'vite-plus';
 
-import { createFmtConfig } from './src/vite.fmt.shared.config.ts';
 import { createPackConfig } from './src/vite.pack.shared.config.ts';
 import { VITEST_COVERAGE_FLAGS } from './src/vite.run.shared.config.ts';
 
 const packConfig = createPackConfig();
 
 export default defineConfig({
-  fmt: createFmtConfig(),
   pack: {
     ...packConfig,
     // The two ESLint flat configs and their restriction tables are `.mjs` —
@@ -22,11 +20,11 @@ export default defineConfig({
     tasks: {
       test: {
         cache: false,
-        command: 'node node_modules/vitest/vitest.mjs run',
+        command: 'vp test run',
       },
       'test:coverage': {
         cache: false,
-        command: `node node_modules/vitest/vitest.mjs run ${VITEST_COVERAGE_FLAGS}`,
+        command: `vp test run ${VITEST_COVERAGE_FLAGS}`,
       },
     },
   },

@@ -65,7 +65,6 @@ it('throws a 404 when the target order is gone', async () => {
 
 it('returns field errors for an invalid submission', async () => {
   vi.mocked(selectOrderById).mockResolvedValueOnce(existing);
-  vi.mocked(updateOrder).mockClear();
 
   const result = await run({
     fields: { ...buildValidOrderFormFields(), quantity: '0' },

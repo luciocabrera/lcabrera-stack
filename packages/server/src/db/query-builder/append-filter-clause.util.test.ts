@@ -135,7 +135,7 @@ describe('appendFilterClause', () => {
         accumulator: { clauses: [], paramIndex: 1, values: [] },
         filter: { column: 'foo; DROP TABLE x', operator: 'eq', value: 1 },
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "foo; DROP TABLE x"');
   });
 
   it('rejects a column not present in an optional allowedColumns list', () => {
@@ -145,6 +145,8 @@ describe('appendFilterClause', () => {
         allowedColumns: ['total_amount'],
         filter: { column: 'password_hash', operator: 'eq', value: 1 },
       }),
-    ).toThrow();
+    ).toThrow(
+      'Column "password_hash" is not in the allowed list for this query.',
+    );
   });
 });

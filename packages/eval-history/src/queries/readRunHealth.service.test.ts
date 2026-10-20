@@ -37,6 +37,10 @@ describe('readRunHealth', () => {
       columns: COLUMNS,
     });
 
-    await expect(readRunHealth({ client, runIds: [RUN] })).rejects.toThrow();
+    await expect(readRunHealth({ client, runIds: [RUN] })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'outcome'] })],
+      }),
+    );
   });
 });

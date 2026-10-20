@@ -137,8 +137,6 @@ describe('the application the rung places runs its route tests', () => {
   });
 
   test('and that task runs the test runner over the application', () => {
-    expect(createReactRouterRunConfig().tasks.test.command).toMatch(
-      /vitest\.mjs run$/,
-    );
+    expect(createReactRouterRunConfig().tasks.test.command).toBe('vp test run');
   });
 });

@@ -50,7 +50,6 @@ const getSelect = () =>
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
   capabilityRef.current = undefined;
   periodsRef.current = {};
 });

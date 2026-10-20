@@ -163,8 +163,7 @@ const collectPaths = (node) => {
   return [];
 };
 
-export const suppressionKey = ({ file, kind, rule }) =>
-  `${kind} ${file} ${rule}`;
+const suppressionKey = ({ file, kind, rule }) => `${kind} ${file} ${rule}`;
 
 export const tally = (found) => {
   const counts = new Map();
@@ -180,7 +179,7 @@ export const tally = (found) => {
       scope: finding.scope ?? 'targeted',
     });
   }
-  return [...counts.values()].sort((left, right) =>
+  return [...counts.values()].toSorted((left, right) =>
     left.key.localeCompare(right.key),
   );
 };

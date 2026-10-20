@@ -10,11 +10,14 @@ const CONFIRMATION_DURATION_MS = 1500;
 export const CopyButton = ({ label = 'Copy', value }: CopyButtonProps) => {
   const [isCopied, setIsCopied] = useState(false);
 
+  const copyValue = async () => {
+    await navigator.clipboard.writeText(value);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), CONFIRMATION_DURATION_MS);
+  };
+
   const handleClick = () => {
-    void navigator.clipboard.writeText(value).then(() => {
-      setIsCopied(true);
-      setTimeout(() => setIsCopied(false), CONFIRMATION_DURATION_MS);
-    });
+    void copyValue();
   };
 
   return (

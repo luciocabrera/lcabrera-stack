@@ -40,8 +40,7 @@ const INSTALL_TIME_FIELDS = new Set([
 
 const VERSION_COLLATOR = new Intl.Collator('en', { numeric: true });
 
-export const compareVersions = (left, right) =>
-  VERSION_COLLATOR.compare(left, right);
+const compareVersions = (left, right) => VERSION_COLLATOR.compare(left, right);
 
 export const flattenExportTargets = (node, trail = []) => {
   if (typeof node === 'string') {
@@ -77,7 +76,7 @@ export const sourceExportProblems = (manifest) =>
         `${describeExportPath(trail)} ships source: "${target}" — Node refuses to strip types inside node_modules`,
     );
 
-export const hasLocalProtocol = (range) =>
+const hasLocalProtocol = (range) =>
   range.includes('catalog:') || range.includes('workspace:');
 
 export const localProtocolProblems = (manifest) =>

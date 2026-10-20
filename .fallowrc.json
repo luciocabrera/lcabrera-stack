@@ -63,6 +63,10 @@
     {
       "file": "apps/showcase/src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.stylex.ts",
       "exports": ["*"]
+    },
+    {
+      "file": "vite.config.ts",
+      "exports": ["WORKSPACE_RUNTIMES", "lintConfig"]
     }
   ],
   "health": {
@@ -127,7 +131,17 @@
     "unused-dev-dependencies": "error",
     "prop-drilling": "error",
     "thin-wrapper": "error",
-    "duplicate-prop-shape": "warn"
+    "duplicate-prop-shape": "warn",
+    "stale-suppressions": "error",
+    "require-suppression-reason": "error",
+    "deprecated-exports-in-use": "error",
+    "unused-catalog-entries": "error",
+    "empty-catalog-groups": "error",
+    "unused-dependency-overrides": "error",
+    "test-only-dependencies": "error",
+    "unused-optional-dependencies": "error",
+    "re-export-cycle": "error",
+    "package-cycle": "error"
   },
   "overrides": [
     // Route loaders return serializable state/promises consumed by shared

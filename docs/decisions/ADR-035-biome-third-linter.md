@@ -4,6 +4,7 @@
 **Amends:** ADR-019 (which split `linter` into independent `eslint` / `oxlint` scanners — this adds a third rule engine alongside them, but deliberately **not** a third reporting scanner; see Consequences).
 **Amended:** 2026-07-18 — §7 adds the phased rule-hardening beyond the `recommended` preset.
 **Amended:** 2026-09-08 — §4 reverses the check-only decision: Biome writes in the pre-commit hook, under the one glob every fixer shares, with a format-only pass last.
+**Amended:** 2026-10-19 — §7 adds Phase 5, the opt-in rules the tree was already clean on.
 **Amended:** 2026-10-19 — §4's closing format-only pass now also sorts imports, which moved from `perfectionist/sort-imports` to Oxfmt's `sortImports` ([ADR-138](ADR-138-oxfmt-sorts-imports-in-place-of-perfectionist.md)). The one glob and the order are unchanged.
 
 ## Context
@@ -90,7 +91,7 @@ code_, and each of the seven carries that argument inline:
 | Scope                                | Rule                            | Why Biome is wrong here                                                                                                                                                                                                                                                                                     |
 | ------------------------------------ | ------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `enterpriseOrders.schema.ts`         | `noThenProperty`                | JSON Schema `if`/`then` keywords, never awaited. Oxlint already adjudicated the identical finding in this file.                                                                                                                                                                                             |
-| react workspaces                     | `useExhaustiveDependencies`     | `eslint-plugin-react-hooks` already owns this rule and passes. Two engines must not both arbitrate one rule.                                                                                                                                                                                                |
+| react workspaces                     | `useExhaustiveDependencies`     | Oxlint's `react-hooks/exhaustive-deps` owns this rule and passes ([ADR-042](ADR-042-oxlint-config-at-the-root.md), amendment 2026-10-19). Two engines must not both arbitrate one rule.                                                                                                                     |
 | `SpacerRow.component.tsx`            | `noAriaHiddenOnFocusable`       | Models `<tr>` as a focusable grid row; this Table sets no `role=grid`/`tabIndex`. Every alternative trips another rule or announces a blank row.                                                                                                                                                            |
 | `TabsContent.component.tsx`          | `noNoninteractiveTabindex`      | The APG Tabs pattern mandates `tabindex="0"` on a tabpanel. jsx-a11y allows it via `roles: ['tabpanel']`; Biome's port has no options.                                                                                                                                                                      |
 | `ResizeHandle.component.tsx`         | `useSemanticElements`           | ARIA window splitter — a focusable, valued separator. The suggested `<hr>` can take neither focus nor a value.                                                                                                                                                                                              |
@@ -170,7 +171,12 @@ removed rather than fought into place:
 - `noMisplacedAssertion` — flags `expect()` outside an `it`/`test` body, but cannot
   see through a helper. This repo uses the custom-assertion-helper pattern
   (`expectLoginRedirect`, controller helpers) which is good test hygiene, so the
-  rule false-positives on a pattern worth keeping.
+  rule false-positives on a pattern worth keeping. The nursery `useExpect` stays
+  off for the same reason: it has no option naming assertion helpers. Oxlint's
+  `vitest` plugin owns both checks in test files, with `expect*` helpers
+  counted as assertions
+  ([ADR-042](ADR-042-oxlint-config-at-the-root.md), amendment "Oxlint owns
+  assertion hygiene in test files").
 - `useNumberNamespace` — wants `Number.POSITIVE_INFINITY` / `Number.NaN`, which
   **directly conflicts** with the repo's ESLint `unicorn/prefer-global-number-constants`
   (wants the globals `Infinity` / `NaN` — also the repo's own convention, and its
@@ -254,9 +260,37 @@ silently. The value is a hard stop on a stray default export that the named-expo
 convention (and `single-component-export` / `useComponentExportOnlyModules`) only
 discouraged softly — worth it for a mixed-skill, multi-agent codebase.
 
-**Nursery rules carry an upgrade duty.** `noInlineStyles` and `useTestHooksOnTop`
-(and any future nursery adoption) can be renamed, change behaviour, or graduate
-to another group on a Biome minor bump. Biome is pinned (`2.5.4`, via the
+**Phase 5 (2026-10-19) — rules already at zero.** Each rule below reported
+nothing on the tree under `--only` and fired on a planted file, so it went to
+`error` with no code change. A candidate that was not at zero on the day stays
+off until a change of its own clears it.
+
+- `noImportCycles` (`suspicious`) — a module that reaches itself through its
+  imports.
+- `noUndeclaredDependencies` (`correctness`) — an import resolved from a
+  package the nearest `package.json` does not declare, the edge that works
+  in-repo through hoisting and breaks for an installer.
+- `noFloatingPromises` (`nursery`) — an unhandled promise whose type Biome can
+  infer itself, such as a call to one of the repository's own `async`
+  functions, across modules included. A promise typed only by a dependency's
+  declarations can pass unreported: an unawaited `client.query()` on a `pg`
+  client does.
+- `useExhaustiveSwitchCases` (`nursery`) — a `switch` over a union that
+  misses a member and has no `default`.
+- The Playwright rules, on `apps/showcase/e2e/**` only. The override sets the
+  `playwright` domain to `recommended` **and names each rule at `error`**,
+  because every Playwright rule is still in `nursery` and a domain preset
+  enables no nursery rule: with the domain alone, even at `all`, a planted
+  `page.pause()` passes the gate. The domain key is kept so a rule that
+  graduates out of `nursery` is picked up without an edit.
+
+`noMisusedPromises` was a candidate and is not enabled: it reports a promise
+used as a condition in the prefetch cache helper of `@lcabrera/ui` and in a test
+mock that copies it, so it is not at zero.
+
+**Nursery rules carry an upgrade duty.** Every rule `biome.jsonc` enables under
+a `nursery` key can be renamed, change behaviour, or graduate
+to another group on a Biome minor bump. Biome is pinned (via the
 `pnpm-workspace.yaml` catalog and the `$schema` URL); on every upgrade, re-run the
 per-rule `--only` sweep for each nursery rule before trusting a green gate.
 

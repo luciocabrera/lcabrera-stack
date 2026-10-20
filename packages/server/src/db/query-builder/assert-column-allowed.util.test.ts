@@ -22,6 +22,8 @@ describe('assertColumnAllowed', () => {
         allowedColumns: ['total_amount'],
         column: 'password_hash',
       }),
-    ).toThrow();
+    ).toThrow(
+      'Column "password_hash" is not in the allowed list for this query.',
+    );
   });
 });

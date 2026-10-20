@@ -10,7 +10,8 @@
  * and the gate fails when that stops being true. `ext` is per-probe because a
  * react rule needs `.tsx`: the same source saved as `.ts` reports only parse
  * errors, so one hardcoded extension would make a probe pass for the wrong
- * reason.
+ * reason. A second probe may share a family when it proves one rule that no
+ * other engine reports; `scope` is then the prefix Oxlint prints for it.
  */
 
 export const PLUGIN_PROBES = [
@@ -51,6 +52,13 @@ export const PLUGIN_PROBES = [
     plugin: 'react',
     rule: 'no-children-prop',
   },
+  {
+    code: "import { useEffect } from 'react';\n\nexport const A = ({ n }: { readonly n: number }) => {\n  useEffect(() => {\n    document.title = String(n);\n  }, []);\n  return null;\n};\n",
+    ext: 'tsx',
+    plugin: 'react',
+    rule: 'exhaustive-deps',
+    scope: 'react-hooks',
+  },
 ];
 
 export const UNPROBED_PLUGINS = {
@@ -59,8 +67,8 @@ export const UNPROBED_PLUGINS = {
     'TypeScript error first, so a probe passes whether or not the plugin loaded',
 };
 
-export const probeFilename = ({ ext = 'ts', plugin }) =>
-  `${plugin}.probe.${ext}`;
+export const probeFilename = ({ ext = 'ts', plugin, scope = plugin }) =>
+  `${scope}.probe.${ext}`;
 
 export const pluginsWithoutCoverage = (plugins) => {
   const covered = new Set([
@@ -70,18 +78,23 @@ export const pluginsWithoutCoverage = (plugins) => {
   return plugins.filter((plugin) => !covered.has(plugin));
 };
 
-export const probeCode = ({ plugin, rule }) => `${plugin}(${rule})`;
+export const probeCode = ({ plugin, rule, scope = plugin }) =>
+  `${scope}(${rule})`;
 
 export const silentProbes = ({ probes, reportedCodes }) => {
   const reported = new Set(reportedCodes);
   return probes.filter((probe) => !reported.has(probeCode(probe)));
 };
 
-export const configsDeclaringLint = (files) =>
+const hasKey = (text, key) =>
+  new RegExp(String.raw`^\s{0,4}${key}\s*:`, 'mu').test(stripComments(text));
+
+export const configsDeclaringKeys = (files, keys) =>
   files
     .filter(({ path }) => path !== 'vite.config.ts')
-    .filter(({ text }) => /^\s{0,4}lint\s*:/mu.test(stripComments(text)))
-    .map(({ path }) => path);
+    .flatMap(({ path, text }) =>
+      keys.filter((key) => hasKey(text, key)).map((key) => ({ key, path })),
+    );
 
 const stripComments = (text) =>
   text.replaceAll(/\/\*[\s\S]*?\*\//gu, '').replaceAll(/\/\/[^\n]*/gu, '');

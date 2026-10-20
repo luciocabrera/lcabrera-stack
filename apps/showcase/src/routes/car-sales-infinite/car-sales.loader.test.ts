@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { loader } from './car-sales.loader';
 
@@ -19,10 +19,6 @@ const invokeLoader = async () =>
   loader({
     request: new Request('http://localhost/car-sales-infinite'),
   } as LoaderFunctionArgs);
-
-beforeEach(() => {
-  readCarSalesPageMock.mockClear();
-});
 
 describe('car-sales-infinite loader', () => {
   it("reads its first page through the route's own server service", async () => {

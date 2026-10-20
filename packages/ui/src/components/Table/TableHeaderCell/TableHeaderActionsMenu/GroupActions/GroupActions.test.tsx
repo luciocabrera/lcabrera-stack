@@ -164,7 +164,6 @@ const getButton = (label: string) => {
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
   appliedAggregatesRef.current = [];
   capabilityRef.current = undefined;
   columnsRef.current = [];

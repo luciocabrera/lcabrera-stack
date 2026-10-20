@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 const notifyMock = vi.hoisted(() => vi.fn());
 
@@ -12,10 +12,6 @@ vi.mock('#ui/contexts/NotificationContext/actions', () => ({
 import { useNotifyOnError } from './useNotifyOnError.hook';
 
 describe('useNotifyOnError', () => {
-  beforeEach(() => {
-    notifyMock.mockClear();
-  });
-
   it('calls notify on mount with the correct error args', () => {
     renderHook(() => useNotifyOnError(new Error('boom')));
 
@@ -57,5 +53,22 @@ describe('useNotifyOnError', () => {
     rerender({ err: error });
 
     expect(notifyMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not notify while there is no error', () => {
+    renderHook(() => useNotifyOnError(undefined));
+
+    expect(notifyMock).not.toHaveBeenCalled();
+  });
+
+  it('notifies once an error arrives after none', () => {
+    const { rerender } = renderHook<void, { readonly error: unknown }>(
+      ({ error }) => useNotifyOnError(error),
+      { initialProps: { error: undefined } },
+    );
+
+    rerender({ error: new Error('late') });
+
+    expect(notifyMock).toHaveBeenCalledOnce();
   });
 });

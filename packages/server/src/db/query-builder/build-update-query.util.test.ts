@@ -53,7 +53,9 @@ describe('buildUpdateQuery', () => {
         table: 'widgets',
         values: { sku: 'W' },
       }),
-    ).toThrow();
+    ).toThrow(
+      'buildUpdateQuery requires at least one filter; refusing to build an unfiltered UPDATE.',
+    );
   });
 
   it('throws when there are no columns to update', () => {
@@ -64,7 +66,7 @@ describe('buildUpdateQuery', () => {
         table: 'widgets',
         values: {},
       }),
-    ).toThrow();
+    ).toThrow('buildUpdateQuery requires at least one column to update.');
   });
 
   it('rejects an unsafe SET column key', () => {
@@ -75,7 +77,7 @@ describe('buildUpdateQuery', () => {
         table: 'widgets',
         values: { 'sku; DROP TABLE users': 'W' },
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "sku; DROP TABLE users"');
   });
 
   it('rejects a SET column not present in an optional allowedColumns list', () => {
@@ -87,6 +89,6 @@ describe('buildUpdateQuery', () => {
         table: 'widgets',
         values: { forbidden: 'W' },
       }),
-    ).toThrow();
+    ).toThrow('Column "forbidden" is not in the allowed list for this query.');
   });
 });

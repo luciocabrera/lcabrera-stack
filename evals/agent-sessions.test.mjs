@@ -289,6 +289,11 @@ describe('withoutSeparator', () => {
       '3',
     ]);
     expect(withoutSeparator(['--runs', '3'])).toStrictEqual(['--runs', '3']);
+    expect(withoutSeparator(['epic', '--', 'epic'])).toStrictEqual([
+      'epic',
+      '--',
+      'epic',
+    ]);
   });
 });
 

@@ -139,3 +139,131 @@ package as the working directory. On 1.3 that run would load a `lint` block in
 the package config. The decision is unchanged. A workspace config still carries
 no `lint` key, and `vp run lint:plugins:verify` still fails when one appears.
 The root block and its `overrides` remain the only place a rule is set.
+
+The gate now rejects a workspace `fmt` or `staged` key as well. A `fmt` block
+is rejected because a package-directory `vp fmt` applies it and `vp check` never
+does (the guide bullets above), so the same file could be formatted two ways
+depending on where the command ran. A `staged` block is rejected because the
+pre-commit hook runs `vp staged` from the root, so a workspace block can only
+diverge from it, and a package `staged` block was observed replacing the root
+chain for a run started in that package. That observation holds only before
+[#1430](https://github.com/luciocabrera/lcabrera-stack/pull/1430) removed the
+one such block: afterwards every workspace directory stops with no `staged`
+config found, and #1430 records the probe run by run.
+
+## Amendment 2026-10-19 — Oxlint owns the effect-dependency check
+
+The Decision above removed the ESLint rules that Oxlint was running a second
+time through `jsPlugins`. One overlap of the same kind was left, and this time
+ESLint held the extra copy. Oxlint's `react` plugin carries
+`react-hooks/exhaustive-deps` in the `correctness` category, which
+`createLintConfig` sets to `error`. The React ESLint config from
+`createCustomRulesLintConfig` turned on two more copies:
+`react-hooks/exhaustive-deps` from `eslint-plugin-react-hooks`'s recommended
+config, and `react-x/exhaustive-deps` from `eslint-plugin-react-x`'s. One
+missing dependency was therefore reported by both engines, and twice by ESLint
+alone.
+
+Three cases were planted in a React package, one file each, and both engines
+were run on each file. Oxlint reported all three as errors: a hook that reads a
+prop missing from its dependency array, a `useCallback` closing over a prop it
+does not list, and a ref's `.current` read in an effect cleanup. ESLint
+reported the same three under both rule names, as warnings. Oxlint caught every
+case ESLint caught, so the ESLint config now sets both rules to `off` and
+Oxlint is the only engine that reports a missing dependency.
+
+The other `react-hooks` rules stay in ESLint. In the same analysis Oxlint
+missed a conditional `useState` and a mutated prop, so `rules-of-hooks` and the
+compiler rules have no complete Oxlint equivalent and turning them off would
+lose coverage.
+
+A project that uses `./eslint-custom-rules` without `./lint` no longer gets an
+effect-dependency check from this package. The package README says so.
+
+With one engine left, an Oxlint upgrade that stopped reporting the rule would
+pass every gate silently. The `react` probe in `vp run lint:plugins:verify`
+uses `no-children-prop`, so it proves only that the family loads. The gate now
+carries a second `react` probe: a `.tsx` component whose effect reads a prop
+and passes an empty dependency array. It requires
+`react-hooks(exhaustive-deps)`, and its `scope` field names that prefix because
+it differs from the family name. Turning the rule off in the root lint config
+makes the gate fail on that probe alone.
+
+## Amendment 2026-10-20 — a repo-only rule is a root override
+
+A rule that applies to this repository's paths alone is passed to
+`createLintConfig` as an `overrides` entry from the root `vite.config.ts`. The
+factory in `@lcabrera/vite-config/lint` does not carry it, because the globs are
+this repository's directory layout and a consumer's differs. The first such
+entry sets `unicorn/no-array-sort` to `error`, with
+`allowExpressionStatement: false`, on `scripts/**` and `packages/*/scripts/**`.
+Without that option the rule accepts a bare `.sort()` statement, which still
+mutates its receiver. `vp lint` reports a `.sort()` call planted in
+`scripts/lib/` under that rule (#1423).
+
+## Amendment 2026-10-20 — Oxlint owns assertion hygiene in test files
+
+The `vitest` plugin held back under Consequences is adopted for five rules.
+The root `vite.config.ts` passes an override over `**/*.test.ts`,
+`**/*.test.tsx`, `**/*.test.mjs` and `**/*.test.cjs` with `plugins: ['vitest']` and these rules
+at `error`:
+
+- `vitest/expect-expect`, with `assertFunctionNames: ['expect*']`. A call to a
+  helper whose name starts with `expect` counts as an assertion. Helpers that
+  assert are named that way.
+- `vitest/valid-expect`, with `maxArgs: 2`. Vitest's `expect(actual, message)`
+  takes a failure message as its second argument. The rule's default of one
+  argument reports every such call.
+- `vitest/no-conditional-expect`, `vitest/no-standalone-expect` and
+  `vitest/require-to-throw-message`, with their defaults.
+
+The plugin knows a test by its `it`/`test` call: a global, or a name bound
+by an ES `import` from the test module. It does not follow a CommonJS binding.
+In a `.test.cjs` or `.test.mjs` file, `const { it } = require('vite-plus/test')`
+followed by a test with no assertion was not reported. The same test using the
+global `it` was, and with `**/*.test.cjs` dropped from `files` it was not.
+A `.cjs` file cannot use `import`, so a `.test.cjs` file is checked only when
+it calls the global test functions. A new test file is an ES module that
+imports them.
+
+`*.spec.ts` is left out. Those files are the Playwright specs, and Biome's
+`playwright` domain covers them (ADR-035).
+
+The `correctness` category is at `error`, so naming the plugin also turns on
+every other `vitest` rule in that category. The override sets each of them to
+`off` by name: `hoisted-apis-on-top`, `no-conditional-tests`,
+`no-disabled-tests`, `no-focused-tests`, `prefer-snapshot-hint`,
+`require-awaited-expect-poll`,
+`require-local-test-context-for-concurrent-snapshots`,
+`require-mock-type-parameters`, `valid-describe-callback`,
+`valid-expect-in-promise`, `valid-title` and `warn-todo`. Turning any of them
+on is a separate decision.
+
+The plugins an override names are added to the base list for the files it
+matches. They do not replace it. A `.test.ts` and a `.test.tsx` file holding
+the `lint:plugins:verify` probe code still reported `eslint`, `oxc`,
+`typescript`, `unicorn`, `promise` and `react` findings with the override in
+place.
+
+**Biome does not arbitrate these rules.** Its counterpart, `useExpect`, is a
+nursery rule. The `test` domain preset enables no nursery rule and
+`biome.jsonc` does not name it, so on this config it is not loaded and reports
+nothing. With the rule named in the test-file override, it still differs from
+Oxlint in three ways. It has no option for assertion helpers, so a test that
+asserts only through `expectSomething()` is reported. It did not report an
+`it.each` test with no assertion. And the override's `includes` do not cover
+`*.test.mjs`, which holds most of the repository's script tests. Oxlint owns
+all five rules, and `useExpect` stays off.
+
+Two kinds of fix are worth knowing before writing a test. A check in
+`beforeAll` that the fixture was set up is a precondition, not an assertion.
+`no-standalone-expect` reports an `expect` there, so it throws an `Error`
+naming what went wrong. And `.toThrow()` takes an argument: the message, the
+error class, or `expect.objectContaining(...)` with the field that identifies
+the refusal, such as a schema error's `issues` paths.
+
+`vp run lint:plugins:verify` does not prove this override live. It reads the
+top-level `plugins` list, and its probes ship in `@lcabrera/repo-standards` to
+repositories that may not configure the override. A planted test with no
+assertion fails `vp lint` today. An Oxlint upgrade that stopped reporting one
+of these rules would pass every gate.

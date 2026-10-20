@@ -27,14 +27,14 @@ export default defineConfig({
       // success. Dropped so an empty run fails instead.
       test: {
         cache: false,
-        command: 'node node_modules/vitest/vitest.mjs run',
+        command: 'vp test run',
       },
       // Feeds the PR Coverage Report comment. Each rule is exercised through
       // RuleTester against source strings, so nothing here reaches a process,
       // a network or a service.
       'test:coverage': {
         cache: false,
-        command: `node node_modules/vitest/vitest.mjs run ${COVERAGE_FLAGS}`,
+        command: `vp test run ${COVERAGE_FLAGS}`,
       },
     },
   },

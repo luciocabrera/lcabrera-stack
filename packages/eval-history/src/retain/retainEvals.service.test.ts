@@ -53,7 +53,11 @@ describe('retainEvals', () => {
   it('rolls back and rethrows when a reply is not one count', async () => {
     const { client, sent } = countingClient({ counts: [[{ count: 3 }], []] });
 
-    await expect(retainEvals({ client, now: NOW })).rejects.toThrow();
+    await expect(retainEvals({ client, now: NOW })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [] })],
+      }),
+    );
     expect(sent.at(-1)).toEqual({ text: 'rollback', values: [] });
   });
 });

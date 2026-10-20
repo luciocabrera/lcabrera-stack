@@ -58,7 +58,6 @@ describe('useSetColumnSizingWithoutSync', () => {
   beforeEach(() => {
     setColumnsState(createInitialColumnsState());
     resetMocks();
-    vi.clearAllMocks();
   });
 
   it('writes the width through the shared util, against the columns store', () => {

@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { act, renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { SortingState } from '#ui/components/Table/Table.types';
 
@@ -14,10 +14,6 @@ const { drawerColumnsStore } = vi.hoisted(() => ({
 vi.mock('../useTableDrawerContextValue.hook', () => ({
   useTableDrawerContextValue: () => ({ columnsStore: drawerColumnsStore }),
 }));
-
-beforeEach(() => {
-  drawerColumnsStore.set.mockClear();
-});
 
 describe('useSetColumnsSortings', () => {
   it('stores the sorting state but drops the non-sortable actions column', () => {

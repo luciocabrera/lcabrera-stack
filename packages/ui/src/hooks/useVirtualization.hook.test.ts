@@ -67,8 +67,6 @@ const createContainer = ({
 describe('useVirtualization', () => {
   beforeEach(() => {
     resizeObserverCallbackRef.current = undefined;
-    requestAnimationFrameMock.mockClear();
-    cancelAnimationFrameMock.mockClear();
 
     vi.stubGlobal('requestAnimationFrame', requestAnimationFrameMock);
     vi.stubGlobal('cancelAnimationFrame', cancelAnimationFrameMock);

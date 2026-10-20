@@ -27,7 +27,6 @@ const mockOnClose = vi.fn();
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
 });
 
 describe('ManageColumnAction', () => {

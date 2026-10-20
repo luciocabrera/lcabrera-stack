@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 /**
  * Gate: the root lint configs are wired the way they claim — every Oxlint
- * plugin family loaded, no workspace config shadowing the root, and both the
- * Oxlint and Biome rosters classifying every workspace exactly once.
+ * plugin family loaded, no workspace config declaring a `lint`, `fmt` or
+ * `staged` block, and both the Oxlint and Biome rosters classifying every
+ * workspace exactly once.
  *
  * Two mechanisms, because the failures differ. A plugin family is proven by
  * planting a violation — loaded-and-clean looks identical to not-loaded. A
@@ -28,7 +29,7 @@ import process from 'node:process';
 
 import { parseJsonc } from './jsonc.mjs';
 import {
-  configsDeclaringLint,
+  configsDeclaringKeys,
   multiplyClassifiedWorkspaces,
   PLUGIN_PROBES,
   pluginsWithoutCoverage,
@@ -121,6 +122,21 @@ const workspaceConfigs = () =>
       text: readFileSync(join(REPO_ROOT, path), 'utf8'),
     }));
 
+const ROOT_ONLY_KEYS = {
+  fmt:
+    '  A package-directory `vp fmt` would use a workspace block, and\n' +
+    '  `vp check` would not. Move a path it must skip into the root\n' +
+    '  `fmt` `ignorePatterns`.\n',
+  lint:
+    '  A package-directory lint run would use a workspace block, and\n' +
+    '  `vp check` would not. Move it to the root config as a\n' +
+    '  `lint.overrides` entry.\n',
+  staged:
+    '  `vp staged` run from that package reads this block instead of the\n' +
+    '  root one, and the pre-commit hook runs from the root. Add the\n' +
+    '  command to the root `staged` chain.\n',
+};
+
 const rosterSources = async () => [
   {
     fix:
@@ -164,7 +180,10 @@ const main = async () => {
   const plugins = await configuredPlugins();
   const uncovered = pluginsWithoutCoverage(plugins);
 
-  const stray = configsDeclaringLint(workspaceConfigs());
+  const stray = configsDeclaringKeys(
+    workspaceConfigs(),
+    Object.keys(ROOT_ONLY_KEYS),
+  );
   const silent = withProbeDir((dir) => {
     for (const probe of PLUGIN_PROBES)
       writeFileSync(join(dir, probeFilename(probe)), probe.code);
@@ -174,18 +193,17 @@ const main = async () => {
     });
   });
 
-  for (const path of stray)
+  for (const { key, path } of stray)
     process.stdout.write(
-      `${path} declares \`lint\`. This repo keeps that block in the root config.\n` +
-        '  A package-directory lint run would use a workspace block, and\n' +
-        '  `vp check` would not. Move it to the root config as a\n' +
-        '  `lint.overrides` entry.\n',
+      `${path} declares \`${key}\`. This repo keeps that block in the root config.\n` +
+        ROOT_ONLY_KEYS[key],
     );
   for (const probe of silent)
     process.stdout.write(
       `Oxlint did not report ${probeCode(probe)} for a deliberate violation.\n` +
-        `  The \`${probe.plugin}\` family is not loaded — add it to PLUGINS in\n` +
-        '  packages/vite-configs/src/vite.lint.shared.config.ts.\n',
+        `  Either the \`${probe.plugin}\` family is not loaded — add it to PLUGINS in\n` +
+        '  packages/vite-configs/src/vite.lint.shared.config.ts — or the root lint\n' +
+        `  config turns \`${probeCode(probe)}\` off, or Oxlint no longer reports it.\n`,
     );
   for (const line of rosters) process.stdout.write(line);
   for (const plugin of uncovered)
@@ -203,8 +221,9 @@ const main = async () => {
     return;
   }
   process.stdout.write(
-    `Lint config: ${PLUGIN_PROBES.length} of ${plugins.length} plugin families ` +
+    `Lint config: ${new Set(PLUGIN_PROBES.map((probe) => probe.plugin)).size} of ${plugins.length} plugin families ` +
       `proven live by a planted violation (the rest documented as unprobeable), ` +
+      `${PLUGIN_PROBES.length} probes in all, ` +
       `${workspaces.length} workspaces classified exactly once by the Oxlint and ` +
       'Biome rosters alike, no workspace config shadows the root.\n',
   );

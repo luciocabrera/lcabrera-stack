@@ -21,7 +21,6 @@ const fetchMock = vi.fn<(url: string, init?: RequestInit) => Promise<Response>>(
 const requestedUrl = () => fetchMock.mock.calls.at(0)?.at(0) ?? '';
 
 beforeEach(() => {
-  fetchMock.mockClear();
   vi.stubGlobal('fetch', fetchMock);
 });
 

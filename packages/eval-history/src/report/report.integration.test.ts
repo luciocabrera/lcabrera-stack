@@ -238,7 +238,9 @@ describe.skipIf(!DATABASE_URL)('evalsReport against Postgres', () => {
       quietUnreachable: false,
     });
 
-    expect(ingested.exitCode).toBe(0);
+    if (ingested.exitCode !== 0) {
+      throw new Error(`Ingesting the fixtures exited ${ingested.exitCode}.`);
+    }
   });
 
   afterAll(() => close({ databases: [SCRATCH] }));

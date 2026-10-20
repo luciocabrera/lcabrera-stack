@@ -71,8 +71,6 @@ describe('car-sales loader', () => {
   });
 
   it('requests a bounded slice rather than the whole table', async () => {
-    readCarSalesPageMock.mockClear();
-
     await invokeLoader();
 
     expect(readCarSalesPageMock).toHaveBeenCalledTimes(1);
@@ -85,16 +83,12 @@ describe('car-sales loader', () => {
   });
 
   it("reads through the route's own server service, not an external API URL", async () => {
-    readCarSalesPageMock.mockClear();
-
     await invokeLoader();
 
     expect(readCarSalesPageMock).toHaveBeenCalledTimes(1);
   });
 
   it('carries the primary-key tiebreaker into the sort it asks for', async () => {
-    readCarSalesPageMock.mockClear();
-
     await invokeLoader();
 
     expect(readCarSalesPageMock).toHaveBeenCalledWith(

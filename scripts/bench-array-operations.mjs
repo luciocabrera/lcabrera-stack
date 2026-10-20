@@ -55,7 +55,7 @@ const WORK_UNITS = 20_000_000;
 
 /** @returns {number} median of a numeric list, without mutating it */
 const median = (values) => {
-  const sorted = [...values].sort((a, b) => a - b);
+  const sorted = [...values].toSorted((a, b) => a - b);
   const mid = Math.floor(sorted.length / 2);
   return sorted.length % 2 === 0
     ? (sorted[mid - 1] + sorted[mid]) / 2
@@ -110,7 +110,7 @@ const measureCase = (size, { keep, label }) => {
 const formatCase = ({ iterations, label, shapes, size }) => {
   const baseline = shapes['filter().map()'];
   const rows = Object.entries(shapes)
-    .sort((a, b) => a[1] - b[1])
+    .toSorted((a, b) => a[1] - b[1])
     .map(([name, ms]) => {
       const micros = (ms * 1000).toFixed(3).padStart(11);
       return `    ${name.padEnd(16)}${micros} us   ${(ms / baseline).toFixed(2)}x`;

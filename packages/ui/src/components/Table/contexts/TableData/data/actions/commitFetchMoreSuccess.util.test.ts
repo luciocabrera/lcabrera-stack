@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { firePrefetch } from '#ui/utils/prefetch/firePrefetch.util';
 import { createMockStore } from '#ui/utils/tests/createMockStore.util';
@@ -44,10 +44,6 @@ const makePrefetchRef = () => ({
 });
 
 describe('commitFetchMoreSuccess', () => {
-  beforeEach(() => {
-    firePrefetchMock.mockClear();
-  });
-
   it('updates dataStore with combined data and correct derived state', () => {
     const dataStore = createDataStore();
     const prefetchRef = makePrefetchRef();

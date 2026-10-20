@@ -92,10 +92,6 @@ describe('useAcceptColumnGroupingPrompt', () => {
     setColumns([{ key: 'ordered_at', label: 'Ordered At' }]);
     setHiddenKeys([]);
     setPrompt({ columnKey: 'ordered_at', isOpen: true });
-    addColumnAggregate.mockClear();
-    drawerColumnsStore.set.mockClear();
-    modalsStore.set.mockClear();
-    toggleGroupKey.mockClear();
   });
 
   it('adds the column to the grouping as a key', () => {

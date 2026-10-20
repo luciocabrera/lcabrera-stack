@@ -34,7 +34,6 @@ vi.mock('../.server/evalsHistory.service', () => ({
 
 afterEach(() => {
   vi.unstubAllEnvs();
-  vi.clearAllMocks();
 });
 
 describe('the quality loader', () => {

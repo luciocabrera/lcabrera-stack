@@ -39,6 +39,10 @@ describe('readTaskTrials', () => {
 
     await expect(
       readTaskTrials({ client, runIds: [ROW.runId] }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'outcomes', 0] })],
+      }),
+    );
   });
 });

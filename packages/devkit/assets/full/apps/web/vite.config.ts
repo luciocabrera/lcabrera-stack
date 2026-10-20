@@ -14,8 +14,9 @@
  *
  * The route reads Postgres through settings in the compose environment file,
  * which nothing else puts into the server's environment: the development
- * server loads it while this file is read, without overriding a variable the
- * shell already set, and `start` sources it before the application's own.
+ * server and every test run load it while this file is read, without
+ * overriding a variable the shell already set, and `start` sources it before
+ * the application's own.
  */
 
 import { createReactRouterPluginsConfig } from '@lcabrera/vite-config/plugins';

@@ -82,7 +82,17 @@ The verdict fails (exit 1) only for a rule at `error` severity. A `warn` rule
 yields verdict `warn` and exit 0, which is how a new unused export passed the
 gate until `unused-exports`, `unused-types`, `unused-dependencies` and
 `unused-dev-dependencies` were raised to `error` (#1095). New-only attribution
-keeps the inherited ones from failing.
+keeps the inherited ones from failing. #1422 raised every further rule that
+reported nothing across the tree and could be shown to fire. "Rules raised to
+error by #1422" below lists them, and the ones it left alone.
+
+Dead code has a second, whole-tree gate: `vp run fallow:dead-code:verify` runs
+`fallow dead-code` with no base and exits 1 on any error-severity dead-code
+finding anywhere (#1419). It is what catches an export in an unchanged file
+that a change made unreachable, which the audit's changed-file scope cannot
+see. It holds only because the tree carries no such finding, so a new one fails
+it whether or not the diff touched the file. `check:push`, `check:safe` and
+the CI Fallow Audit job run it; the plant that proved it is in the table below.
 
 A clone group has no entry in `rules`, so on its own an introduced one is
 warn-severity: the audit counts it under `duplication_introduced`, gives
@@ -105,6 +115,7 @@ the config or the fallow version moves. Run the audit as CI does:
 | Analysis                  | Plant                                                                                                                                                    | Observed                                                                                                                                 |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | unused export             | `export const probeUnused = 1;` appended to `packages/repo-standards/scripts/affected-tests.mjs` and `packages/repo-standards/scripts/config-values.mjs` | `fallow dead-code` reports both; audit `fail`, exit 1                                                                                    |
+| unused export, whole tree | `export const plantedUnused = 1;` appended to `packages/repo-standards/scripts/doc-registers.mjs`, no audit run (#1419)                                  | `vp run fallow:dead-code:verify` exit 1; reverted, exit 0                                                                                |
 | unused file               | a new one-export module dropped into `scripts/lib/` and into `packages/repo-standards/scripts/`, imported by nothing                                     | `unused_files` for both; audit `fail`                                                                                                    |
 | unused dependency         | `probe-unused-dep` added to `devDependencies` in the root and `packages/repo-standards` manifests                                                        | `unused_dev_dependencies`; audit `fail`. Pass `--no-cache` when probing a manifest: the incremental cache once missed the workspace edit |
 | cycle                     | `affected-tests.mjs` and `ci-commands.mjs` import each other; same in `config-values.mjs` and `error-message.mjs`                                        | `circular_dependencies` for both pairs; audit `fail`                                                                                     |
@@ -112,6 +123,56 @@ the config or the fallow version moves. Run the audit as CI does:
 | duplication, test files   | the same block appended to `packages/repo-standards/scripts/affected-tests.test.mjs` and `packages/repo-standards/scripts/config.test.mjs`               | nothing under `ignoreDefaults: true`; with it `false`, a `fallow dupes` clone group and audit `fail`, exit 1. See the next section       |
 | complexity                | a 22-branch function appended to the two source files above                                                                                              | `fallow health` finding; audit `fail`. Under `scripts/**` `exceeded` is `both`, since only CRAP is relaxed there                         |
 | coverage gap              | an untested cyclomatic-7 function in `packages/utils`, that workspace's `test:coverage` re-run and fed                                                   | `exceeded: crap`, `coverage_source: istanbul`; audit `fail`. Unfed, the estimate passes it; with a test that covers it, it passes        |
+
+## Rules raised to error by #1422, and the plant that proved each
+
+Each rule below reported nothing across the tree when it was raised. Each row
+is a plant, run through the audit as CI runs it (the command above) once with
+the rule at its previous severity and once at `error`, then reverted. The
+commands and their output are in the pull request for #1422.
+
+| Rule                           | Plant                                                                                                                                                                                | Exit before | Exit at `error` |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- | --------------- |
+| `stale-suppressions`           | `// fallow-ignore-next-line unused-export -- kept for the package entry` above `isObject` in `packages/utils/src/guards/is-object.util.ts`, an export the package entry keeps in use | 0           | 1               |
+| `require-suppression-reason`   | `// fallow-ignore-next-line unused-export`, with no reason, above a new unused export appended to `apps/showcase/src/constants/app.constants.ts` (the rule was `off`)                | 0           | 1               |
+| `deprecated-exports-in-use`    | a `@deprecated` export appended to `is-object.util.ts` and imported by `packages/utils/src/strings/empty-to-undefined.util.ts` (the rule was `off`)                                  | 0           | 1               |
+| `unused-catalog-entries`       | `left-pad: ^1.3.0` added to the `backend` catalog in `pnpm-workspace.yaml`                                                                                                           | 0           | 1               |
+| `empty-catalog-groups`         | `probe: {}` added under `catalogs` in `pnpm-workspace.yaml`                                                                                                                          | 0           | 1               |
+| `unused-dependency-overrides`  | `left-pad: 1.3.0` added under `overrides` in `pnpm-workspace.yaml`                                                                                                                   | 0           | 1               |
+| `test-only-dependencies`       | the root manifest's `jsdom` moved from `devDependencies` to `dependencies`; only test files import it                                                                                | 0           | 1               |
+| `unused-optional-dependencies` | `probe-unused-optional` added to `optionalDependencies` in `packages/repo-standards/package.json`                                                                                    | 0           | 1               |
+| `re-export-cycle`              | a barrel in `apps/showcase/src/constants/` that re-exports itself, imported by `app.constants.ts`                                                                                    | 0           | 1               |
+| `package-cycle`                | a type-only relative import from `packages/utils/src` into `packages/ui/src`, which already imports `@lcabrera/utils`                                                                | 0           | 1               |
+
+`test-only-dependencies` fired only on the root manifest. The same shape in a
+workspace manifest (`@testing-library/react` in `apps/showcase`, a test-only
+`isbot` in `packages/ui`, a test-only `zod` in `packages/server`) produced no
+finding, so at `error` it guards the root `dependencies` and nothing else.
+
+Six rules that also report nothing were left below `error`, because no plant
+made them fail this repository's gate:
+
+- `duplicate-prop-shape` — stays `warn`. Fallow 3.33.1 reports it at `error`
+  but leaves it out of the exit gate: two components beside
+  `PinAndHideActions` taking `ColumnPinningButtonProps`, with
+  `ColumnPinningButton` a group of three, are listed with
+  `effective_severity: "error"`, yet `error-severity-findings` observes none,
+  the audit's verdict is `pass` and `fallow dead-code` exits 0. At `error` it
+  would read as enforced when it is not. It moves to `error` once a fallow
+  release enforces it
+  ([#1457](https://github.com/luciocabrera/lcabrera-stack/issues/1457)). The
+  tree carries none of its findings: Pin Left, Pin Right and Clear Pinning
+  were folded into one `ColumnPinningButton`.
+- `type-only-dependencies` — fallow computes it only under `--production`. A
+  root dependency imported through `import type` alone is reported there and
+  by neither the audit nor `fallow dead-code`, and this repository runs
+  neither in production mode.
+- `unused-component-props` — a destructured prop that the React component never
+  reads produced no finding, as an arrow function or a function declaration,
+  with a named props type or an inline one.
+- `invalid-client-export`, `mixed-client-server-barrel`, `misplaced-directive` —
+  fallow runs these only in a project that declares `next`. A `'use client'`
+  placed after the imports produced no finding.
 
 ## Test files and duplication
 
@@ -150,13 +211,10 @@ is what the vitest plugin discovered, so it lists `packages/repo-standards/scrip
 as a gap although `affected-tests.test.mjs` imports it. The gated form of a
 coverage gap is the CRAP row above, which reads measured coverage.
 
-`vp run fallow:dead-code`, `fallow:health` and `fallow:dupes` scan the whole
-tree and exit 1 on the inherited findings the new-only gate attributes to the
-base. Run them before a PR anyway: a change that makes an export in an
-unchanged file unreachable is outside a changed-file audit's scope, and the
-full scan is the only thing that sees it. The findings the unblinded scan
-surfaces are listed in the pull request for #1095, not fixed there;
-`vp run fallow:dead-code` prints the current set.
+`vp run fallow:health` and `fallow:dupes` scan the whole tree and exit 1 on
+the inherited findings the new-only gate attributes to the base, so they stay
+on demand. Dead code left that list in #1419, which cleared the inherited
+findings and made the whole-tree scan the `fallow:dead-code:verify` gate above.
 
 ## Always feed the audit real coverage
 

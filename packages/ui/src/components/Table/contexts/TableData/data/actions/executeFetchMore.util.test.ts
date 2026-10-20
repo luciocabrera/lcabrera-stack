@@ -72,7 +72,6 @@ const runFetchMore = async ({
 describe('executeFetchMore', () => {
   beforeEach(() => {
     resolveFromCacheOrFetchMock.mockReset();
-    onLoadMore.mockClear();
   });
 
   it('sets isLoadingMore before fetching and resolves to false after success', async () => {

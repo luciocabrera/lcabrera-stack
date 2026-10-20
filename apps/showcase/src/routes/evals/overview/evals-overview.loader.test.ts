@@ -44,7 +44,6 @@ vi.mocked(selectReportRun).mockImplementation(({ runId }) =>
 
 afterEach(() => {
   vi.unstubAllEnvs();
-  vi.clearAllMocks();
 });
 
 describe('the overview loader', () => {

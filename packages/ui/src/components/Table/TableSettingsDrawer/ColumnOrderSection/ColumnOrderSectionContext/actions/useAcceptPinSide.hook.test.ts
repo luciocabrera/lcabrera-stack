@@ -88,7 +88,6 @@ const mockResolve = vi.mocked(resolveAcceptedPinSideUpdate);
 describe('useAcceptPinSide', () => {
   beforeEach(() => {
     resetMocks();
-    mockAcceptPinConflict.mockClear();
     modalsStore._state = {
       ...modalsStore._state,
       pinSideModal: PIN_SIDE_MODAL,

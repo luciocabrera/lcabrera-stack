@@ -67,8 +67,6 @@ describe('useBatchSetColumnDrawerSettings', () => {
       columnSizing: 220,
       sorting: 'desc',
     });
-    batchSetColumnSettingsMock.mockClear();
-    columnStore.get.mockClear();
   });
 
   it('passes the current drawer snapshot to the table batch action', () => {

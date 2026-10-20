@@ -2,11 +2,9 @@ import { VITEST_COVERAGE_FLAGS } from '@lcabrera/vite-config/run';
 import { fileURLToPath, URL } from 'node:url';
 import { defineConfig } from 'vite-plus';
 
-import { fmtConfig } from './config/vite.fmt.config.ts';
 import { pluginsConfig } from './config/vite.plugins.config.ts';
 
 export default defineConfig({
-  fmt: fmtConfig,
   plugins: pluginsConfig,
   resolve: {
     alias: {
@@ -27,11 +25,11 @@ export default defineConfig({
       // these up — see src/benchmarks/ARCHITECTURE.md.
       bench: {
         cache: false,
-        command: 'node node_modules/vitest/vitest.mjs bench --run',
+        command: 'vp test bench --run',
       },
       test: {
         cache: false,
-        command: 'node node_modules/vitest/vitest.mjs run',
+        command: 'vp test run',
       },
       // Feeds packages/repo-standards/scripts/merge-coverage.mjs, which feeds `fallow audit --coverage`.
       // Matters more here than elsewhere: packages/ui is heading for public
@@ -39,7 +37,7 @@ export default defineConfig({
       // rather than fallow's colocated-test-file guess.
       'test:coverage': {
         cache: false,
-        command: `node node_modules/vitest/vitest.mjs run ${VITEST_COVERAGE_FLAGS}`,
+        command: `vp test run ${VITEST_COVERAGE_FLAGS}`,
       },
     },
   },

@@ -82,5 +82,5 @@ export const conflictMarkerLines = (text) => {
     .map(({ index, line }) => ({ line: index + 1, text: line }));
 };
 
-export const formatFinding = ({ line, path, text }) =>
+export const formatConflictMarker = ({ line, path, text }) =>
   `${path}:${line}: ${text.trim()}`;

@@ -114,7 +114,6 @@ describe('createUrlStateCodec', () => {
   });
 
   it('logs the failure kind without echoing the param', () => {
-    debugSpy.mockClear();
     codec.deserialize('SESSIONTOKEN_abc123XYZ');
 
     const logged = debugSpy.mock.calls.flat().join(' ');

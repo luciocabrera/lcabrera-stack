@@ -118,7 +118,6 @@ const dialogMocks = mockDialogElement();
 
 afterEach(() => {
   cleanup();
-  dialogMocks.showModalMock.mockClear();
 });
 
 describe('ColumnOrderSection while the applied grouping names no declared column', () => {

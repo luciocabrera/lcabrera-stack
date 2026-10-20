@@ -78,8 +78,6 @@ beforeEach(() => {
   restoreRef.current = mockDialogElement(false).restore;
   setColumns([{ key: 'amount', label: 'Amount' }]);
   setPrompt({ columnKey: 'amount', isOpen: true });
-  acceptColumnGroupingPrompt.mockClear();
-  cancelColumnGroupingPrompt.mockClear();
 });
 
 describe('ColumnGroupingPromptModal', () => {

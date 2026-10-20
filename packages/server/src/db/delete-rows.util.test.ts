@@ -43,7 +43,9 @@ describe('deleteRows', () => {
   it('propagates the unfiltered-delete guard without touching the pool', async () => {
     await expect(
       deleteRows({ filters: [], schema: 'inventory', table: 'widgets' }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      'buildDeleteQuery requires at least one filter; refusing to build an unfiltered DELETE.',
+    );
 
     expect(query).not.toHaveBeenCalled();
   });
@@ -75,17 +77,17 @@ describe('deleteRows', () => {
       ),
     );
 
-    const rejects = expect(
-      deleteRows({
-        filters: [{ column: 'widget_id', operator: 'eq', value: 7 }],
-        schema: 'inventory',
-        table: 'widgets',
-      }),
-    ).rejects;
+    const deleting = deleteRows({
+      filters: [{ column: 'widget_id', operator: 'eq', value: 7 }],
+      schema: 'inventory',
+      table: 'widgets',
+    });
 
-    await rejects.toThrow(ForeignKeyViolationError);
-    await rejects.toThrow('A referenced record does not exist.');
-    await rejects.toMatchObject({
+    await expect(deleting).rejects.toThrow(ForeignKeyViolationError);
+    await expect(deleting).rejects.toThrow(
+      'A referenced record does not exist.',
+    );
+    await expect(deleting).rejects.toMatchObject({
       fields: { constraint: 'parts_widget_id_fkey' },
     });
   });

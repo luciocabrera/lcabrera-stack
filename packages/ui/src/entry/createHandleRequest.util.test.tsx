@@ -31,8 +31,6 @@ const streamedRequest = (userAgent?: string) =>
   });
 
 afterEach(() => {
-  streamHarness.abort.mockClear();
-  streamHarness.pipe.mockClear();
   streamHarness.options = undefined;
   vi.useRealTimers();
   vi.restoreAllMocks();

@@ -1,53 +1,56 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { Button } from '#ui/components/Button';
-import {
-  deriveToggleCommandState,
-  PIN_LEFT_COMMAND,
-} from '#ui/components/Table/commands';
+import { deriveToggleCommandState } from '#ui/components/Table/commands';
 import { useSetColumnPinning } from '#ui/components/Table/contexts/TableConfig/columns/actions';
 import { useGetNormalizedColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { tableActionsPopoverStyles } from '#ui/components/Table/TableActionsPopover';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
 import { resolveColumnPinningTitle } from '#ui/components/Table/utils/resolveColumnPinningTitle.util';
 
-import type { PinLeftButtonProps } from './PinLeftButton.types';
+import type { ColumnPinningButtonProps } from './ColumnPinningButton.types';
 
-export const PinLeftButton = <TData,>({
+import { COLUMN_PINNING_TARGETS } from './ColumnPinningButton.constants';
+
+export const ColumnPinningButton = <TData,>({
   columnKey,
   layoutLock,
   onClose,
   pinSide,
-}: PinLeftButtonProps<TData>) => {
+  target,
+}: ColumnPinningButtonProps<TData>) => {
   const setColumnPinning = useSetColumnPinning<TData>();
   const column = useGetNormalizedColumn<TData>(columnKey);
   const { isStatic } = resolveColumnCapabilities(column);
-  const { icon: PinLeftCommandIcon, label } = PIN_LEFT_COMMAND;
-  const { isActive, isEnabled } = deriveToggleCommandState({
+  const {
+    command: { icon: CommandIcon, label },
+    side,
+  } = COLUMN_PINNING_TARGETS[target];
+  const { isActive, isEnabled } = deriveToggleCommandState<'left' | 'right'>({
     current: pinSide,
     isDisabled: isStatic || layoutLock === 'group-key',
-    target: 'left',
+    target: side,
   });
 
   const title = resolveColumnPinningTitle(layoutLock);
 
-  const handlePinLeft = () => {
-    setColumnPinning({ columnKey, side: isActive ? undefined : 'left' });
+  const handleClick = () => {
+    setColumnPinning({ columnKey, side: isActive ? undefined : side });
     onClose();
   };
 
   return (
     <Button
-      aria-pressed={isActive}
+      {...(side !== undefined && { 'aria-pressed': isActive })}
       customStylex={tableActionsPopoverStyles.menuItem}
       icon={
         <span {...stylex.props(tableActionsPopoverStyles.menuIcon)}>
-          <PinLeftCommandIcon size={16} />
+          <CommandIcon size={16} />
         </span>
       }
       isDisabled={!isEnabled}
       {...(title !== undefined && { title })}
-      onClick={handlePinLeft}
+      onClick={handleClick}
       orientation='horizontal'
       size='mini'
       variant={isActive ? 'primary' : 'ghost'}

@@ -12,18 +12,11 @@
 'use strict';
 
 const {
-  SUPPORT_DIRECTORIES,
-} = require('../../packages/repo-standards/scripts/conformance-artifacts.cjs');
-const {
   checkConformance,
 } = require('../../packages/repo-standards/scripts/conformance-check.cjs');
 const {
   parseFrontmatter,
 } = require('../../packages/repo-standards/scripts/conformance-frontmatter.cjs');
-const {
-  extractRelativeLinks,
-  extractScriptPaths,
-} = require('../../packages/repo-standards/scripts/conformance-references.cjs');
 
 /**
  * @typedef {Object} ValidateSkillsResult
@@ -43,7 +36,7 @@ const validateSkills = (args = {}) => {
   const checkedSkills = [
     ...result.checked.skill,
     ...result.unreadableSkills,
-  ].sort((a, b) => a.localeCompare(b));
+  ].toSorted((a, b) => a.localeCompare(b));
 
   return {
     checkedSkillCount: checkedSkills.length,
@@ -56,9 +49,6 @@ const validateSkills = (args = {}) => {
 };
 
 module.exports = {
-  SUPPORT_DIRECTORIES,
-  extractRelativeLinks,
-  extractScriptPaths,
   parseFrontmatter,
   validateSkills,
 };
