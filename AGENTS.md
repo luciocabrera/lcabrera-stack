@@ -20,9 +20,9 @@ publishes TypeScript source just as `devkit` publishes `.mjs`.
 **What no in-repo run can validate is the delivery.** A `workspace:*` link
 resolves the source directory, so a packed tarball's file modes never appear —
 which is how `devkit`'s shipped git hooks once arrived inert. That is the reason
-`vp run tarball:verify` exists: it packs both distributed packages and installs
-them into a scratch repo outside this tree. It is chained into `check:safe` and
-runs as its own CI step
+`vp run tarball:verify` exists: it packs the distributed packages, runs publint
+over each tarball and installs them into a scratch repo outside this tree. It is
+chained into `check:safe` and runs as its own CI step
 ([ADR-073](docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md)).
 
 **The `apps/` exist to exercise the packages, and that is the tie-breaker.** When

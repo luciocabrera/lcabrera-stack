@@ -145,6 +145,7 @@
     "eslint": "catalog:lint",
     "fallow": "catalog:tooling",
     "jsdom": "catalog:test",
+    "publint": "catalog:tooling",
     "react-doctor": "catalog:lint",
     "semver": "catalog:tooling",
     "ts-morph": "catalog:tooling",
