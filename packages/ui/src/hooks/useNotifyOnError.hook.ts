@@ -8,6 +8,8 @@ export const useNotifyOnError = (error: unknown) => {
   const notify = useNotifyAction();
 
   useEffect(() => {
+    if (error === undefined) return;
+
     notify({
       durationMs: NOTIFY_ON_ERROR_DURATION_MS,
       message: 'Something went wrong.',
