@@ -136,7 +136,8 @@
     "require-suppression-reason": "error",
     "deprecated-exports-in-use": "error",
     "unused-catalog-entries": "error",
-    "empty-catalog-groups": "error"
+    "empty-catalog-groups": "error",
+    "unused-dependency-overrides": "error"
   },
   "overrides": [
     // Route loaders return serializable state/promises consumed by shared
