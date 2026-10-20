@@ -66,13 +66,13 @@ jobs:
         run: cd apps/showcase && vp exec playwright install chromium --with-deps
 
       - name: Seed the database
-        run: vp run --filter showcase seed
+        run: vp run --fail-if-no-match --filter showcase seed
 
       - name: Build production
         run: cd apps/showcase && vp run build
 
       - name: Run the browser suite
-        run: vp run --filter showcase test:e2e
+        run: vp run --fail-if-no-match --filter showcase test:e2e
 
       - name: Upload the Playwright report
         if: ${{ !cancelled() }}
