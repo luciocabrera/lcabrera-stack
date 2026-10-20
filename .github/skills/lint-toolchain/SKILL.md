@@ -88,16 +88,33 @@ Four behaviours mask a broken setup as a clean one:
   category (Rule 14).
 
 One override semantic to know before writing one: **an override's `plugins` list
-replaces the base list** for matched files, so it must name every plugin that
-group needs.
+is added to the base list** for matched files. It does not replace it. With the
+test-file override below in place, the `lint:plugins:verify` probe code saved as
+a `.test.ts` or `.test.tsx` file still reports every base family. The other half
+of the trap still applies: a plugin named in an override brings every rule it has
+in an enabled category, so name each one you do not want as `off`.
 
 **A path-scoped rule is a repo fact, so it goes in the root's
 `createLintConfig({ overrides })` call, not in the published factory.** The root
-passes one today: `unicorn/no-array-sort` at `error` with
+passes two today. `unicorn/no-array-sort` at `error` with
 `allowExpressionStatement: false` over `scripts/**` and `packages/*/scripts/**`,
 so a script sorts with `toSorted()`. The option matters: at its default the rule
 lets a bare `values.sort();` statement through, which is the in-place form the
 rule exists to stop.
+
+The second is the `vitest` plugin over `**/*.test.ts`, `**/*.test.tsx`,
+`**/*.test.mjs` and `**/*.test.cjs`, with five assertion rules at `error`: `expect-expect`,
+`valid-expect`, `no-conditional-expect`, `no-standalone-expect` and
+`require-to-throw-message`. Every other `vitest` rule the `correctness` category
+turns on is set to `off` by name. Two options matter.
+`assertFunctionNames: ['expect*']` counts a call to an `expect`-prefixed helper as
+an assertion. `maxArgs: 2` accepts Vitest's `expect(actual, message)`. Oxlint
+owns these checks and Biome's `useExpect` stays off
+([ADR-042](../../../docs/decisions/ADR-042-oxlint-config-at-the-root.md),
+amendment "Oxlint owns assertion hygiene in test files"). The rules do not see a test function bound
+by `require`, only a global or an ES `import`. `lint:plugins:verify`
+does not probe this override, so a rule change in it needs a planted test with
+no assertion, run through `vp lint`.
 
 The other categories are **not** free; measure one before enabling it
 (`vp lint . --format=json`).

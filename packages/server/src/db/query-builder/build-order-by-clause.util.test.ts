@@ -35,7 +35,7 @@ describe('buildOrderByClause', () => {
       buildOrderByClause({
         sort: [{ column: 'x; DROP TABLE y', direction: 'asc' }],
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "x; DROP TABLE y"');
   });
 
   it('rejects a column not present in an optional allowedColumns list', () => {
@@ -44,6 +44,8 @@ describe('buildOrderByClause', () => {
         allowedColumns: ['total_amount'],
         sort: [{ column: 'password_hash', direction: 'asc' }],
       }),
-    ).toThrow();
+    ).toThrow(
+      'Column "password_hash" is not in the allowed list for this query.',
+    );
   });
 });

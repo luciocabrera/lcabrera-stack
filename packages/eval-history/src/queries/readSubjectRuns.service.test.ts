@@ -58,6 +58,10 @@ describe('readSubjectRuns', () => {
 
     await expect(
       readSubjectRuns({ client, scope: { kind: 'recent', perSuite: 10 } }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'trialId'] })],
+      }),
+    );
   });
 });

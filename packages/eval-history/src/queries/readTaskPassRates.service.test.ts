@@ -32,8 +32,10 @@ describe('readTaskPassRates', () => {
   it('rejects a row whose counts are not integers', async () => {
     const { client } = recordingClient([{ ...row, n: '3' }]);
 
-    await expect(
-      readTaskPassRates({ client, runId: RUN_ID }),
-    ).rejects.toThrow();
+    await expect(readTaskPassRates({ client, runId: RUN_ID })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'n'] })],
+      }),
+    );
   });
 });

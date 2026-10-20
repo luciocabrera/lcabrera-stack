@@ -42,6 +42,10 @@ describe('readQualityBaselines', () => {
       columns: COLUMNS,
     });
 
-    await expect(readQualityBaselines({ client })).rejects.toThrow();
+    await expect(readQualityBaselines({ client })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'runIds', 0] })],
+      }),
+    );
   });
 });
