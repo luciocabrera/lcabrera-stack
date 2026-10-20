@@ -163,8 +163,7 @@ const collectPaths = (node) => {
   return [];
 };
 
-export const suppressionKey = ({ file, kind, rule }) =>
-  `${kind} ${file} ${rule}`;
+const suppressionKey = ({ file, kind, rule }) => `${kind} ${file} ${rule}`;
 
 export const tally = (found) => {
   const counts = new Map();

@@ -14,9 +14,9 @@
  * not a finding.
  */
 
-export const RUNNER_WORDS = ['vp '];
+const RUNNER_WORDS = ['vp '];
 
-export const UNIVERSAL_SECRETS = new Set(['GITHUB_TOKEN']);
+const UNIVERSAL_SECRETS = new Set(['GITHUB_TOKEN']);
 
 export const EXEMPTIONS = [];
 

@@ -37,7 +37,7 @@
  * read, which is the over-report described above.
  */
 
-export const GATING_TRIGGERS = new Set(['merge_group', 'pull_request', 'push']);
+const GATING_TRIGGERS = new Set(['merge_group', 'pull_request', 'push']);
 
 const indentOf = (line) => line.length - line.trimStart().length;
 

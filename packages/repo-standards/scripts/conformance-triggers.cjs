@@ -101,5 +101,4 @@ const descriptionFindings = (artifact) => {
 
 module.exports = {
   descriptionFindings,
-  MINIMUM_DESCRIPTION_WORDS,
 };

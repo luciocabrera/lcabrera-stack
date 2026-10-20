@@ -16,7 +16,7 @@ const namesIn = ({ directory, keep, strip }) =>
         .toSorted((a, b) => a.localeCompare(b))
     : [];
 
-export const listSkills = (repoRoot) =>
+const listSkills = (repoRoot) =>
   namesIn({
     directory: join(repoRoot, '.github', 'skills'),
     keep: (entry) =>
@@ -24,14 +24,14 @@ export const listSkills = (repoRoot) =>
       existsSync(join(repoRoot, '.github', 'skills', entry.name, 'SKILL.md')),
   });
 
-export const listSubagents = (repoRoot) =>
+const listSubagents = (repoRoot) =>
   namesIn({
     directory: join(repoRoot, '.claude', 'agents'),
     keep: (entry) => entry.isFile() && entry.name.endsWith('.md'),
     strip: (name) => name.replace(/\.md$/u, ''),
   });
 
-export const listWorkflows = (repoRoot) =>
+const listWorkflows = (repoRoot) =>
   namesIn({
     directory: join(repoRoot, '.github', 'workflows'),
     keep: (entry) =>
@@ -40,7 +40,7 @@ export const listWorkflows = (repoRoot) =>
       !entry.name.startsWith('.'),
   });
 
-export const listPathRules = (repoRoot) =>
+const listPathRules = (repoRoot) =>
   namesIn({
     directory: join(repoRoot, '.claude', 'rules'),
     keep: (entry) => entry.isFile() && entry.name.endsWith('.md'),

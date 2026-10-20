@@ -20,7 +20,7 @@ import { bodyOf, parseFrontmatter } from './doc-register-frontmatter.mjs';
 export const REQUIREMENTS_DIR = 'docs/product/requirements';
 export const PLANNING_DIR = 'docs/agents/planning';
 
-export const TEMPLATE_FILE = '_TEMPLATE.md';
+const TEMPLATE_FILE = '_TEMPLATE.md';
 
 export const REQUIREMENT_FIELDS = [
   'id',
@@ -62,7 +62,7 @@ export const PLANNING_STATUSES = new Set(['landed', 'live', 'superseded']);
 
 export const ISSUE_BEARING_KINDS = new Set(['plan']);
 
-export const slugOf = (file) => file.slice(file.lastIndexOf('/') + 1, -3);
+const slugOf = (file) => file.slice(file.lastIndexOf('/') + 1, -3);
 
 export const isTemplate = (file) => file.endsWith(`/${TEMPLATE_FILE}`);
 

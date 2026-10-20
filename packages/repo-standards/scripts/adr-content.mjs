@@ -41,7 +41,7 @@ const GOVERNS = 'governs';
 
 const KNOWN_KEYS = new Set([GOVERNS]);
 
-export const REQUIRED_SECTIONS = ['Context', 'Decision', 'Consequences'];
+const REQUIRED_SECTIONS = ['Context', 'Decision', 'Consequences'];
 
 export const ALTERNATIVE_SECTIONS = [
   'Options considered',
