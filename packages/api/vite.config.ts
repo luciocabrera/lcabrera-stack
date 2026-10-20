@@ -15,11 +15,11 @@ export default defineConfig({
     tasks: {
       test: {
         cache: false,
-        command: 'node node_modules/vitest/vitest.mjs run',
+        command: 'vp test run',
       },
       'test:coverage': {
         cache: false,
-        command: `node node_modules/vitest/vitest.mjs run ${VITEST_COVERAGE_FLAGS} ${COVERAGE_THRESHOLD_FLAGS}`,
+        command: `vp test run ${VITEST_COVERAGE_FLAGS} ${COVERAGE_THRESHOLD_FLAGS}`,
       },
     },
   },
