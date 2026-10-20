@@ -43,7 +43,7 @@ export const lintTarball = async (tarball) => {
 };
 
 /**
- * @param {{ exports: Record<string, string>, into: string, name: string }} args
+ * @param {{ exports: Record<string, unknown>, into: string, name: string }} args
  * @returns {string}
  */
 export const writeTarball = ({ exports, into, name }) => {
@@ -58,11 +58,11 @@ export const writeTarball = ({ exports, into, name }) => {
   return tarball;
 };
 
+const errorCount = (errors) =>
+  errors.length === 0 ? 'no errors' : `${errors.length} error(s)`;
+
 export const publintLines = (results) =>
-  results.map(
-    ({ errors, name }) =>
-      `publint ${name}: ${errors.length === 0 ? 'no errors' : `${errors.length} error(s)`}\n`,
-  );
+  results.map(({ errors, name }) => `publint ${name}: ${errorCount(errors)}\n`);
 
 export const publintFindings = ({ planted, results }) => [
   ...results.flatMap(({ errors, name }) =>
