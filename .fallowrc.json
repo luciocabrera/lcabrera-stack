@@ -133,7 +133,8 @@
     "thin-wrapper": "error",
     "duplicate-prop-shape": "error",
     "stale-suppressions": "error",
-    "require-suppression-reason": "error"
+    "require-suppression-reason": "error",
+    "deprecated-exports-in-use": "error"
   },
   "overrides": [
     // Route loaders return serializable state/promises consumed by shared
