@@ -26,6 +26,6 @@ Promote zero-finding Fallow rules to error
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: rules raised and documented; gate run
 - Blockers: none
 - Next:

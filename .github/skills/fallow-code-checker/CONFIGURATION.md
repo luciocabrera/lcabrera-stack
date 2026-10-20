@@ -149,9 +149,14 @@ commands and their output are in the pull request for #1422.
 the three findings with `effective_severity: "error"`, yet its
 `error-severity-findings` gate counts none of them, so the audit's verdict is
 `pass` and `fallow dead-code` exits 0. The rule stays at `error` so it gates the
-day fallow counts it; until then a fourth component with that shape passes. Its
+day fallow counts it; until then a new group of three passes the gate. Its
 three findings were cleared by folding Pin Left, Pin Right and Clear Pinning into
 one `ColumnPinningButton`.
+
+`test-only-dependencies` fired only on the root manifest. The same shape in a
+workspace manifest (`@testing-library/react` in `apps/showcase`, a test-only
+`isbot` in `packages/ui`, a test-only `zod` in `packages/server`) produced no
+finding, so at `error` it guards the root `dependencies` and nothing else.
 
 Five rules that also report nothing were left at their default, because no
 plant made them fire in this repository's gate:
