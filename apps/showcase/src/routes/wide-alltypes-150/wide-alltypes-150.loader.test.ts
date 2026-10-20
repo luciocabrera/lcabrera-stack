@@ -1,7 +1,7 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { INITIAL_PAGE_SIZE } from '@lcabrera/ui/components/Table/Table.constants';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { loader } from './wide-alltypes-150.loader';
 
@@ -23,11 +23,6 @@ const invokeLoader = async (search = '') =>
   loader({
     request: new Request(`http://localhost/wide-alltypes-150${search}`),
   } as LoaderFunctionArgs);
-
-beforeEach(() => {
-  readWideAlltypes150PageMock.mockClear();
-  resolveCapabilitiesMock.mockClear();
-});
 
 describe('wide-alltypes-150 loader', () => {
   it("reads its first page through the route's own server service", async () => {

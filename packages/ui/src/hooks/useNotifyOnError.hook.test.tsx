@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 const notifyMock = vi.hoisted(() => vi.fn());
 
@@ -12,10 +12,6 @@ vi.mock('#ui/contexts/NotificationContext/actions', () => ({
 import { useNotifyOnError } from './useNotifyOnError.hook';
 
 describe('useNotifyOnError', () => {
-  beforeEach(() => {
-    notifyMock.mockClear();
-  });
-
   it('calls notify on mount with the correct error args', () => {
     renderHook(() => useNotifyOnError(new Error('boom')));
 

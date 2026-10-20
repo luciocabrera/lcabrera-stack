@@ -51,7 +51,6 @@ describe('TableSkeleton', () => {
   });
 
   beforeEach(() => {
-    vi.clearAllMocks();
     useGetColumnsMock.mockReturnValue([{ key: 'name', label: 'Name' }]);
     useGetTablePlaceholderRowCountMock.mockReturnValue(3);
   });

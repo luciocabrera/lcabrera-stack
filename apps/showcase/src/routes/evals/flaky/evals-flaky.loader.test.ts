@@ -94,7 +94,6 @@ const JUDGED = {
 
 afterEach(() => {
   vi.unstubAllEnvs();
-  vi.clearAllMocks();
 });
 
 describe('the flaky loader', () => {

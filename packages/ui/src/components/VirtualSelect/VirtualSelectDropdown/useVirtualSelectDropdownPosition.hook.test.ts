@@ -67,7 +67,6 @@ const observe = () => {
 
 beforeEach(() => {
   observerCallbackRef.current = undefined;
-  disconnectMock.mockClear();
 
   vi.stubGlobal(
     'ResizeObserver',

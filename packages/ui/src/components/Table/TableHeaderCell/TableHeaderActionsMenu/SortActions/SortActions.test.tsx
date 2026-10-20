@@ -30,7 +30,6 @@ const getButton = (label: string) => {
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
 });
 
 describe('SortActions', () => {

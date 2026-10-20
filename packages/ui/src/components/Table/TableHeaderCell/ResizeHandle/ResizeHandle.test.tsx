@@ -44,7 +44,6 @@ const getSplitter = () =>
   screen.getByRole('separator', { name: 'Resize Name column' });
 
 beforeEach(() => {
-  vi.clearAllMocks();
   mockUseGetNormalizedColumn.mockReturnValue({ maxWidth: 400, minWidth: 80 });
   mockUseGetColumnWidth.mockReturnValue(120);
   mockUseColumnResize.mockReturnValue({

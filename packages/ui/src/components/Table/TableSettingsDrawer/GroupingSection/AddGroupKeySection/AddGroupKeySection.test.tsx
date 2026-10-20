@@ -77,7 +77,6 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
 });
 
 describe('AddGroupKeySection', () => {

@@ -81,8 +81,6 @@ const fetchPage = vi.fn<(query: PaginatedQuery) => Promise<Response>>(
 );
 
 beforeEach(() => {
-  tableLayoutMock.mockClear();
-  fetchPage.mockClear();
   useLoaderDataMock.mockReset();
   useLoaderDataMock.mockReturnValue(loaderData);
 });

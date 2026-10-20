@@ -76,8 +76,6 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  toggleDropdownMock.mockClear();
-  toggleOptionMock.mockClear();
   cleanup();
 });
 

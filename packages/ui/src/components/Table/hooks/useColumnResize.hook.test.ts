@@ -55,7 +55,6 @@ const renderResize = (args?: { readonly currentWidth?: number }) =>
   );
 
 beforeEach(() => {
-  vi.clearAllMocks();
   mockUseColumnDragSession.mockReturnValue({
     isResizing: false,
     onMouseDown: mockOnMouseDown,

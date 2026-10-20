@@ -68,7 +68,6 @@ describe('useColumnDragSession', () => {
     cleanup();
     document.body.style.cursor = '';
     document.body.style.userSelect = '';
-    vi.clearAllMocks();
     vi.unstubAllGlobals();
   });
 

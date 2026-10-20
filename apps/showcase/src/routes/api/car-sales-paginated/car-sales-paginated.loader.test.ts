@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { selectCarSalesPage } from '@/routes/car-sales/.server/carSales.service';
 
@@ -18,10 +18,6 @@ const invokeLoader = (query: string) =>
   loader({
     request: new Request(`http://localhost/_api/car-sales/paginated?${query}`),
   } as LoaderFunctionArgs);
-
-beforeEach(() => {
-  vi.mocked(selectCarSalesPage).mockClear();
-});
 
 describe('car-sales paginated resource route', () => {
   it("turns the search params into the service's window and sort", async () => {

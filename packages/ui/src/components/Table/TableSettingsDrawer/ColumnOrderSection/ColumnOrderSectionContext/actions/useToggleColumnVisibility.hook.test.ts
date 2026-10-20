@@ -167,9 +167,6 @@ describe('useToggleColumnVisibility', () => {
     setDrawerState(undefined);
     setGroupingKeys([]);
     setStaticKeys(new Set());
-    drawerColumnsStore.set.mockClear();
-    modalsStore.set.mockClear();
-    notify.mockClear();
   });
 
   it('hides a column by adding its key to the hidden set', () => {

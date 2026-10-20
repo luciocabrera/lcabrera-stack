@@ -49,7 +49,6 @@ class MockIntersectionObserver {
 }
 
 beforeEach(() => {
-  observeSpy.mockClear();
   vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
 });
 

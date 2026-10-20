@@ -226,15 +226,11 @@ beforeEach(() => {
     isTableSettingsPinned: true,
     persistenceKey: 'orders-table',
   });
-  persistTableState.mockClear();
   persistTableState.mockReturnValue(true);
-  persistUiFlags.mockClear();
-  notify.mockClear();
 });
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
 });
 
 describe('GroupingSection staging', () => {

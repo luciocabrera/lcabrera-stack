@@ -104,7 +104,6 @@ describe('TableConfig grouping hooks', () => {
     storesRef.dataStore = createMockStore({});
     storesRef.groupingStore = createMockStore<TableGroupingState>(NO_GROUPING);
     storesRef.metaStore = createMockStore<Partial<TableMetaState>>({});
-    persistTableState.mockClear();
     persistTableState.mockReturnValue(true);
   });
 
@@ -465,7 +464,6 @@ describe('an open settings drawer', () => {
     storesRef.dataStore = createMockStore({});
     storesRef.groupingStore = createMockStore<TableGroupingState>(NO_GROUPING);
     storesRef.metaStore = createMockStore<Partial<TableMetaState>>({});
-    persistTableState.mockClear();
     persistTableState.mockReturnValue(true);
   });
 

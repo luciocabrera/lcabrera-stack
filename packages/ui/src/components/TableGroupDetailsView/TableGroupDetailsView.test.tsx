@@ -11,14 +11,7 @@ import {
   waitFor,
 } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableLockedFilters } from '#ui/components/Table/Table.types';
 
@@ -63,11 +56,6 @@ afterEach(cleanup);
 const fetchPage = vi.fn<(query: TableGroupPageQuery) => Promise<Page>>(
   async () => ({ data: [], hasMore: false }),
 );
-
-beforeEach(() => {
-  fetchPage.mockClear();
-  routeViewMock.mockClear();
-});
 
 const LOCKED: TableLockedFilters = {
   entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
