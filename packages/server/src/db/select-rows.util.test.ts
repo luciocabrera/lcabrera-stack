@@ -61,7 +61,7 @@ describe('selectRows', () => {
         schema: 'reporting',
         table: 'v; DROP TABLE',
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('Unsafe identifier: "v; DROP TABLE"');
 
     expect(query).not.toHaveBeenCalled();
   });
@@ -90,15 +90,15 @@ describe('selectRows', () => {
       }),
     );
 
-    const rejects = expect(
-      selectRows({
-        fields: ['id'],
-        schema: 'reporting',
-        table: 'v_daily_totals',
-      }),
-    ).rejects;
+    const selecting = selectRows({
+      fields: ['id'],
+      schema: 'reporting',
+      table: 'v_daily_totals',
+    });
 
-    await rejects.toThrow(PersistenceError);
-    await rejects.toThrow('The database rejected the operation.');
+    await expect(selecting).rejects.toThrow(PersistenceError);
+    await expect(selecting).rejects.toThrow(
+      'The database rejected the operation.',
+    );
   });
 });

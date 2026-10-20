@@ -60,7 +60,9 @@ describe('insertRow', () => {
   it('propagates the builder rejection without touching the pool', async () => {
     await expect(
       insertRow({ schema: 'inventory', table: 'widgets', values: {} }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      'buildInsertQuery requires at least one column to insert.',
+    );
 
     expect(query).not.toHaveBeenCalled();
   });
@@ -92,17 +94,19 @@ describe('insertRow', () => {
       ),
     );
 
-    const rejects = expect(
-      insertRow({
-        schema: 'inventory',
-        table: 'widgets',
-        values: { sku: 'W-1' },
-      }),
-    ).rejects;
+    const inserting = insertRow({
+      schema: 'inventory',
+      table: 'widgets',
+      values: { sku: 'W-1' },
+    });
 
-    await rejects.toThrow(UniqueConstraintViolationError);
-    await rejects.toThrow('A record with these values already exists.');
-    await rejects.toMatchObject({ fields: { constraint: 'widgets_sku_key' } });
+    await expect(inserting).rejects.toThrow(UniqueConstraintViolationError);
+    await expect(inserting).rejects.toThrow(
+      'A record with these values already exists.',
+    );
+    await expect(inserting).rejects.toMatchObject({
+      fields: { constraint: 'widgets_sku_key' },
+    });
   });
 
   it('translates a 23503 foreign-key rejection', async () => {

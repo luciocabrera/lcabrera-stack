@@ -6,15 +6,16 @@ it('returns the numeric id for a valid param', () => {
   expect(parseOrderIdParam('7')).toBe(7);
 });
 
-it('throws for a missing param', () => {
-  expect(() => parseOrderIdParam(undefined)).toThrow();
-});
-
-it('throws for a non-numeric param', () => {
-  expect(() => parseOrderIdParam('abc')).toThrow();
-});
-
-it('throws for a non-positive id', () => {
-  expect(() => parseOrderIdParam('0')).toThrow();
-  expect(() => parseOrderIdParam('-3')).toThrow();
+it.each([
+  { name: 'a missing param', param: undefined },
+  { name: 'a non-numeric param', param: 'abc' },
+  { name: 'a zero id', param: '0' },
+  { name: 'a negative id', param: '-3' },
+])('throws a 400 for $name', ({ param }) => {
+  expect(() => parseOrderIdParam(param)).toThrow(
+    expect.objectContaining({
+      data: 'Invalid order ID.',
+      init: { status: 400 },
+    }),
+  );
 });

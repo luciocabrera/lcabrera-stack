@@ -157,7 +157,13 @@ describe.skipIf(!DATABASE_URL)('the reporting views against Postgres', () => {
       roles: [reader],
     });
 
-    expect(result.granted.map(({ name }) => name)).toEqual([reader.name]);
+    const granted = result.granted.map(({ name }) => name).join(', ');
+
+    if (granted !== reader.name) {
+      throw new Error(
+        `The migration granted [${granted}], not ${reader.name}.`,
+      );
+    }
     Object.assign(
       seeded,
       await seedSyntheticHistory({ client, endsOn: '2026-10-01' }),

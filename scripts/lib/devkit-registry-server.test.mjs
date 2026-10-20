@@ -68,7 +68,7 @@ describe('publishPort', () => {
     const portFile = join(directory, 'port');
     publishPort({ port: 4873, portFile });
     expect(readFileSync(portFile, 'utf8')).toBe('4873');
-    expect(() => readFileSync(`${portFile}.partial`)).toThrow();
+    expect(() => readFileSync(`${portFile}.partial`)).toThrow('ENOENT');
   });
 });
 

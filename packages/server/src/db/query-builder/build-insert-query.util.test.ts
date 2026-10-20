@@ -48,7 +48,7 @@ describe('buildInsertQuery', () => {
   it('throws when there are no columns to insert', () => {
     expect(() =>
       buildInsertQuery({ schema: 'inventory', table: 'widgets', values: {} }),
-    ).toThrow();
+    ).toThrow('buildInsertQuery requires at least one column to insert.');
   });
 
   it('rejects an unsafe schema name', () => {
@@ -58,7 +58,7 @@ describe('buildInsertQuery', () => {
         table: 'widgets',
         values: { sku: 'W' },
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "inventory; DROP SCHEMA public"');
   });
 
   it('rejects an unsafe table name', () => {
@@ -68,7 +68,7 @@ describe('buildInsertQuery', () => {
         table: 'widgets; DROP TABLE users',
         values: { sku: 'W' },
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "widgets; DROP TABLE users"');
   });
 
   it('rejects an unsafe column key', () => {
@@ -78,7 +78,7 @@ describe('buildInsertQuery', () => {
         table: 'widgets',
         values: { 'sku; DROP TABLE users': 'W' },
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "sku; DROP TABLE users"');
   });
 
   it('rejects a column not present in an optional allowedColumns list', () => {
@@ -89,6 +89,6 @@ describe('buildInsertQuery', () => {
         table: 'widgets',
         values: { secret_col: 'W' },
       }),
-    ).toThrow();
+    ).toThrow('Column "secret_col" is not in the allowed list for this query.');
   });
 });

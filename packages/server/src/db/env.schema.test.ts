@@ -52,14 +52,33 @@ describe('readEnvConfig', () => {
   it('rejects a non-positive tuning value rather than silently disabling the bound', () => {
     expect(() =>
       readEnvConfig({ env: { ...credentials, DB_POOL_MAX: '0' } }),
-    ).toThrow();
+    ).toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: ['DB_POOL_MAX'] })],
+      }),
+    );
     expect(() =>
       readEnvConfig({ env: { ...credentials, DB_STATEMENT_TIMEOUT_MS: '-1' } }),
-    ).toThrow();
+    ).toThrow(
+      expect.objectContaining({
+        issues: [
+          expect.objectContaining({ path: ['DB_STATEMENT_TIMEOUT_MS'] }),
+        ],
+      }),
+    );
   });
 
   it('still requires every credential key', () => {
-    expect(() => readEnvConfig({ env: { DB_HOST: 'localhost' } })).toThrow();
+    expect(() => readEnvConfig({ env: { DB_HOST: 'localhost' } })).toThrow(
+      expect.objectContaining({
+        issues: [
+          expect.objectContaining({ path: ['DB_NAME'] }),
+          expect.objectContaining({ path: ['DB_PASSWORD'] }),
+          expect.objectContaining({ path: ['DB_PORT'] }),
+          expect.objectContaining({ path: ['DB_USER'] }),
+        ],
+      }),
+    );
   });
 });
 
@@ -86,7 +105,13 @@ describe('readGroupStatementTimeoutMs', () => {
       readGroupStatementTimeoutMs({
         env: { DB_GROUP_STATEMENT_TIMEOUT_MS: '0' },
       }),
-    ).toThrow();
+    ).toThrow(
+      expect.objectContaining({
+        issues: [
+          expect.objectContaining({ path: ['DB_GROUP_STATEMENT_TIMEOUT_MS'] }),
+        ],
+      }),
+    );
   });
 });
 
@@ -104,6 +129,10 @@ describe('readPivotMaxDistinct', () => {
   it('rejects a non-positive value rather than disabling the bound', () => {
     expect(() =>
       readPivotMaxDistinct({ env: { DB_PIVOT_MAX_DISTINCT: '0' } }),
-    ).toThrow();
+    ).toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: ['DB_PIVOT_MAX_DISTINCT'] })],
+      }),
+    );
   });
 });

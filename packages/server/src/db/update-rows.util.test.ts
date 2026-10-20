@@ -49,7 +49,9 @@ describe('updateRows', () => {
         table: 'widgets',
         values: { sku: 'W' },
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      'buildUpdateQuery requires at least one filter; refusing to build an unfiltered UPDATE.',
+    );
 
     expect(query).not.toHaveBeenCalled();
   });

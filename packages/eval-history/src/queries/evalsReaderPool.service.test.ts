@@ -23,6 +23,12 @@ describe('evalsReaderPool', () => {
   });
 
   it('refuses an environment without a reader URL', () => {
-    expect(() => evalsReaderPool({})).toThrow();
+    expect(() => evalsReaderPool({})).toThrow(
+      expect.objectContaining({
+        issues: [
+          expect.objectContaining({ path: ['EVALS_READER_DATABASE_URL'] }),
+        ],
+      }),
+    );
   });
 });

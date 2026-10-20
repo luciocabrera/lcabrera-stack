@@ -144,7 +144,11 @@ describe('recordRun', () => {
         raise,
         signals,
       });
-      await (fails ? expect(run).rejects.toThrow('usage limit reached') : run);
+      const [settled] = await Promise.allSettled([run]);
+      expect(settled.status).toBe(fails ? 'rejected' : 'fulfilled');
+      expect(settled.reason?.message).toBe(
+        fails ? 'usage limit reached' : undefined,
+      );
       const status = fails ? 'partial' : 'complete';
       expect(statuses).toStrictEqual([status]);
       expect(written().run.status).toBe(status);
@@ -234,7 +238,7 @@ describe('recordRun', () => {
         identity: { ...testIdentity, git_sha: 'not-a-sha' },
       }),
     ).rejects.toThrow(/run\.git_sha/u);
-    expect(() => written()).toThrow();
+    expect(() => written()).toThrow('ENOENT');
   });
 });
 

@@ -29,6 +29,10 @@ describe('readSubjectTrend', () => {
   it('rejects a row from an unknown suite', async () => {
     const { client } = recordingClient([{ ...row, suite: 'unknown' }]);
 
-    await expect(readSubjectTrend({ client, ...args })).rejects.toThrow();
+    await expect(readSubjectTrend({ client, ...args })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'suite'] })],
+      }),
+    );
   });
 });

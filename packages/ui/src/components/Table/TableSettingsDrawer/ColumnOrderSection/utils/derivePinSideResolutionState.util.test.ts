@@ -114,8 +114,11 @@ describe('derivePinSideResolutionState', () => {
       pinSide: 'right',
     });
 
-    if (result.kind === 'resolved') {
-      expect(result.columnPinning).toEqual({ left: [], right: ['age'] });
-    }
+    expect(result).toEqual({
+      columnOrder: expect.any(Array),
+      columnPinning: { left: [], right: ['age'] },
+      kind: 'resolved',
+      side: 'right',
+    });
   });
 });

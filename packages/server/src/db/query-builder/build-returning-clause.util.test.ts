@@ -24,18 +24,20 @@ describe('buildReturningClause', () => {
   it('rejects "*" mixed with column names', () => {
     expect(() =>
       buildReturningClause({ returning: ['widget_id', '*'] }),
-    ).toThrow();
+    ).toThrow(
+      'RETURNING "*" must be the only entry; it cannot be mixed with column names.',
+    );
   });
 
   it('rejects an unsafe column name', () => {
     expect(() =>
       buildReturningClause({ returning: ['id; DROP TABLE x'] }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "id; DROP TABLE x"');
   });
 
   it('rejects a column not present in an optional allowedColumns list', () => {
     expect(() =>
       buildReturningClause({ allowedColumns: ['sku'], returning: ['secret'] }),
-    ).toThrow();
+    ).toThrow('Column "secret" is not in the allowed list for this query.');
   });
 });
