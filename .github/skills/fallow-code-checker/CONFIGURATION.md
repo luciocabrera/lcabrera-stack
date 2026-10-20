@@ -140,6 +140,7 @@ commands and their output are in the pull request for #1422.
 | `unused-catalog-entries`      | `left-pad: ^1.3.0` added to the `backend` catalog in `pnpm-workspace.yaml`                                                                                                                    | 0           | 1               |
 | `empty-catalog-groups`        | `probe: {}` added under `catalogs` in `pnpm-workspace.yaml`                                                                                                                                   | 0           | 1               |
 | `unused-dependency-overrides` | `left-pad: 1.3.0` added under `overrides` in `pnpm-workspace.yaml`                                                                                                                            | 0           | 1               |
+| `test-only-dependencies`      | the root manifest's `jsdom` moved from `devDependencies` to `dependencies`; only test files import it                                                                                         | 0           | 1               |
 
 `duplicate-prop-shape` is reported and not enforced. The pinned fallow lists
 the three findings with `effective_severity: "error"`, yet its

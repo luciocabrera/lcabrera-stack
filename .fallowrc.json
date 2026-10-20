@@ -137,7 +137,8 @@
     "deprecated-exports-in-use": "error",
     "unused-catalog-entries": "error",
     "empty-catalog-groups": "error",
-    "unused-dependency-overrides": "error"
+    "unused-dependency-overrides": "error",
+    "test-only-dependencies": "error"
   },
   "overrides": [
     // Route loaders return serializable state/promises consumed by shared
