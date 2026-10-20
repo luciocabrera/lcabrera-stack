@@ -156,3 +156,32 @@ describe('a superseded detached worktree held only by a branch this run deletes'
     expect(gitIn(repo, 'cat-file', '-t', head)).toBe('commit');
   });
 });
+
+describe('a worktree whose status cannot be read', () => {
+  it('is kept under every flag, and its merged branch is not deleted', () => {
+    const root = make();
+    const repo = baseRepository(root);
+    const work = join(root, 'unreadable');
+    gitIn(repo, 'worktree', 'add', '-q', '-b', 'unreadable', work, 'main');
+    writeFileSync(join(work, '.git'), 'gitdir: /nonexistent/worktree\n');
+    const pullRequests = [
+      { headRefName: 'unreadable', number: 5, state: 'MERGED' },
+    ];
+
+    const { lines } = runPrune({
+      argv: [],
+      docker: noContainers,
+      pullRequests,
+      root: repo,
+    });
+    for (const argv of ALL_FLAGS) {
+      runPrune({ argv, docker: noContainers, pullRequests, root: repo });
+    }
+
+    expect(lineFor(lines, work)).toContain('kept: could not read git status');
+    expect(worktreePaths(repo)).toContain(work);
+    expect(
+      gitIn(repo, 'branch', '--format=%(refname:short)').split('\n'),
+    ).toContain('unreadable');
+  });
+});

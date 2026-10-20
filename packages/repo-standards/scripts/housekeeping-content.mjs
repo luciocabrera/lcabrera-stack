@@ -113,23 +113,23 @@ const blobsOf = ({ change, cwd, git }) =>
     ? [UNMATCHABLE]
     : [...workingBlob({ change, cwd, git }), ...stagedBlob(change)];
 
-const historyOf = ({ cwd, git, paths, refs }) =>
-  parseRawBlobs(
-    git({
-      args: [
-        'log',
-        '--format=',
-        '--raw',
-        '--no-abbrev',
-        '--no-renames',
-        '-z',
-        ...refs,
-        '--',
-        ...paths,
-      ],
-      cwd,
-    }).stdout,
-  );
+const historyOf = ({ cwd, git, paths, refs }) => {
+  const { status, stdout } = git({
+    args: [
+      'log',
+      '--format=',
+      '--raw',
+      '--no-abbrev',
+      '--no-renames',
+      '-z',
+      ...refs,
+      '--',
+      ...paths,
+    ],
+    cwd,
+  });
+  return status === 0 ? parseRawBlobs(stdout) : undefined;
+};
 
 const isAbsentAt = ({ cwd, git, path, ref }) =>
   git({ args: ['cat-file', '-e', `${ref}:${path}`], cwd }).status !== 0;
@@ -164,7 +164,8 @@ const bucketOf = ({ base, change, cwd, git, histories, own }) => {
  * @param {{ base: string, changes: object[], cwd: string,
  *   git: (args: { args: string[], cwd: string }) => { status: number | null,
  *   stdout: string }, own: string[] }} args
- * @returns {{ base: number, branch: number, neither: number }}
+ * @returns {{ base: number, branch: number, neither: number,
+ *   unreadable?: string }}
  */
 export const countMatches = ({ base, changes, cwd, git, own }) => {
   const counts = { base: 0, branch: 0, neither: 0 };
@@ -174,6 +175,9 @@ export const countMatches = ({ base, changes, cwd, git, own }) => {
     base: historyOf({ cwd, git, paths, refs: [base] }),
     own: historyOf({ cwd, git, paths, refs: own }),
   };
+  if (histories.base === undefined || histories.own === undefined) {
+    return { ...counts, unreadable: 'git log of the changed paths' };
+  }
   for (const change of changes) {
     counts[bucketOf({ base, change, cwd, git, histories, own })] += 1;
   }

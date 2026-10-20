@@ -161,3 +161,18 @@ describe('buildPlan — a removed worktree frees its branch', () => {
     expect(plan.deleteBranches.map((b) => b.name)).toEqual(['feat/merged']);
   });
 });
+
+describe('classifyWorktree — a read that failed', () => {
+  it('keeps the worktree and names the read, whatever else it looks like', () => {
+    expect(
+      classifyWorktree({
+        branch: 'x',
+        dirty: false,
+        includeSuperseded: true,
+        isPrimary: false,
+        pr: { number: 1, state: 'MERGED' },
+        unreadable: 'git status',
+      }),
+    ).toEqual({ action: 'report', reason: 'kept: could not read git status' });
+  });
+});

@@ -18,6 +18,7 @@ import {
   renderHint,
   summarizePrs,
 } from './housekeeping-plan.mjs';
+import { renderPlan } from './housekeeping-render.mjs';
 
 const DEFAULT_THRESHOLD = 10;
 
@@ -94,23 +95,30 @@ const contentOf = ({ base, status, worktree }) =>
         ),
       });
 
+const unreadableFact = ({ counts, worktree }) =>
+  worktree.head === '' ? 'its HEAD' : counts?.unreadable;
+
 const withStatus = ({ base, worktree }) => {
-  const status = parseStatusV2(
-    runGit({
-      args: ['status', '--porcelain=v2', '-z', '--untracked-files=normal'],
-      cwd: worktree.path,
-    }) ?? '',
-  );
+  const output = runGit({
+    args: ['status', '--porcelain=v2', '-z', '--untracked-files=normal'],
+    cwd: worktree.path,
+  });
+  if (output === undefined) {
+    return { ...worktree, dirty: true, unreadable: 'git status', untracked: 0 };
+  }
+  const status = parseStatusV2(output);
   const isDirty = status.changes.length > 0 || status.untracked > 0;
   const headRefs =
     isDirty && worktree.branch === undefined ? refsContaining(worktree) : [];
+  const counts = isDirty ? contentOf({ base, status, worktree }) : undefined;
   return {
     ...worktree,
-    counts: isDirty ? contentOf({ base, status, worktree }) : undefined,
+    counts,
     dirty: isDirty,
     headRefs,
     isHeadReferenced: headRefs.length > 0,
     onBase: isOnBase({ base, ...worktree }),
+    unreadable: unreadableFact({ counts, worktree }),
     untracked: status.untracked,
   };
 };
@@ -207,48 +215,6 @@ const gatherPlan = ({ docker, flags, pullRequests, root }) => {
   };
 };
 
-const section = ({ rows, title }) => [
-  `\n${title}`,
-  ...(rows.length === 0 ? ['  (none)'] : rows.map((row) => `  ${row}`)),
-];
-
-const renderPlan = ({ apply, plan }) => {
-  const verb = (doing, would) => (apply ? doing : would);
-  return [
-    apply
-      ? 'housekeeping:prune — applying'
-      : 'housekeeping:prune — dry run (pass --apply to act)',
-    ...section({
-      rows: plan.deleteBranches.map((b) => `${b.name} — ${b.reason}`),
-      title: `${verb('Deleting', 'Would delete')} branches (merged/closed PR or cruft):`,
-    }),
-    ...section({
-      rows: plan.removeWorktrees.map(
-        (w) => `${w.path} [${w.branch ?? 'detached'}] — ${w.reason}`,
-      ),
-      title: `${verb('Removing', 'Would remove')} worktrees:`,
-    }),
-    ...section({
-      rows: plan.prunable.map((path) => `${path} — its directory is gone`),
-      title: `${verb('Pruning', 'Would prune')} stale worktree entries (\`git worktree prune\`, before any branch is deleted):`,
-    }),
-    ...section({
-      rows: plan.removeContainers.map((c) => `${c.name} — ${c.reason}`),
-      title: `${verb('Removing', 'Would remove')} throwaway containers:`,
-    }),
-    ...section({
-      rows: [
-        ...plan.reportBranches.map((b) => `branch ${b.name} — ${b.reason}`),
-        ...plan.reportWorktrees.map((w) => `worktree ${w.path} — ${w.reason}`),
-        ...plan.keepContainers.map((c) => `container ${c.name} — ${c.reason}`),
-        ...plan.stashes.map((s) => `stash ${s}`),
-      ],
-      title: 'KEEPING — review by hand, never auto-deleted:',
-    }),
-    ...plan.notes.map((note) => `note: ${note}`),
-  ];
-};
-
 const applyWorktree = ({ root, worktree }) =>
   runGit({
     args: [
@@ -262,24 +228,28 @@ const applyWorktree = ({ root, worktree }) =>
     ? [`worktree ${worktree.path}`]
     : [];
 
-const applyPlan = ({ docker, plan, root }) => [
-  ...plan.removeWorktrees.flatMap((worktree) =>
-    applyWorktree({ root, worktree }),
-  ),
-  ...(runGit({ args: ['worktree', 'prune'], cwd: root }) === undefined
-    ? ['git worktree prune']
-    : []),
-  ...plan.deleteBranches
-    .filter(
-      (branch) =>
-        runGit({ args: ['branch', '-D', branch.name], cwd: root }) ===
-        undefined,
-    )
-    .map((branch) => `branch ${branch.name}`),
-  ...plan.removeContainers
-    .filter((container) => !docker.remove(container.id).ok)
-    .map((container) => `container ${container.name}`),
-];
+const applyPlan = ({ docker, plan, root }) => {
+  const failures = [];
+  for (const worktree of plan.removeWorktrees) {
+    failures.push(...applyWorktree({ root, worktree }));
+  }
+  if (runGit({ args: ['worktree', 'prune'], cwd: root }) === undefined) {
+    failures.push('git worktree prune');
+  }
+  for (const branch of plan.deleteBranches) {
+    if (
+      runGit({ args: ['branch', '-D', branch.name], cwd: root }) === undefined
+    ) {
+      failures.push(`branch ${branch.name}`);
+    }
+  }
+  for (const container of plan.removeContainers) {
+    if (!docker.remove(container.id).ok) {
+      failures.push(`container ${container.name}`);
+    }
+  }
+  return failures;
+};
 
 const goneBranches = (root) =>
   new Set(

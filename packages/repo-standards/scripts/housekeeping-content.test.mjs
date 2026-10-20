@@ -6,7 +6,11 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { dockerBinary, parseContainers } from './housekeeping-containers.mjs';
-import { parseRawBlobs, parseStatusV2 } from './housekeeping-content.mjs';
+import {
+  countMatches,
+  parseRawBlobs,
+  parseStatusV2,
+} from './housekeeping-content.mjs';
 
 const ZERO = '0'.repeat(40);
 const ONE = '1'.repeat(40);
@@ -130,5 +134,35 @@ describe('parseContainers', () => {
 describe('dockerBinary', () => {
   it('answers undefined when no fixed directory holds docker', () => {
     expect(dockerBinary(['/nonexistent-directory'])).toBeUndefined();
+  });
+});
+
+const failingLog = ({ args }) =>
+  args[0] === 'log' ? { status: 128, stdout: '' } : { status: 0, stdout: ONE };
+
+describe('countMatches', () => {
+  it('reports the history lookup it could not read instead of counting', () => {
+    expect(
+      countMatches({
+        base: 'main',
+        changes: [
+          {
+            index: '.',
+            indexBlob: '',
+            path: 'a.txt',
+            unmerged: false,
+            worktree: 'M',
+          },
+        ],
+        cwd: '/nonexistent',
+        git: failingLog,
+        own: ['HEAD'],
+      }),
+    ).toEqual({
+      base: 0,
+      branch: 0,
+      neither: 0,
+      unreadable: 'git log of the changed paths',
+    });
   });
 });

@@ -153,6 +153,8 @@ touches the main checkout or the checkout it runs from.
   A worktree removed as superseded (below) keeps pinning its branch for that
   run, so content that matched only the branch's history is never left only
   in the reflog.
+- A worktree whose status, HEAD or history lookup cannot be read is kept
+  under every flag, and its line names the read that failed.
 - A dirty worktree is reported with a count of its changed files whose content
   matches a blob in the default branch's history, in its own history (HEAD and
   upstream), or in neither, plus its untracked files. Content rather than

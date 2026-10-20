@@ -112,6 +112,12 @@ export const classifyWorktree = (worktree) => {
   if (locked) {
     return { action: 'keep', reason: 'locked' };
   }
+  if (worktree.unreadable !== undefined) {
+    return {
+      action: 'report',
+      reason: `kept: could not read ${worktree.unreadable}`,
+    };
+  }
   if (dirty) {
     return classifyDirty(worktree);
   }
