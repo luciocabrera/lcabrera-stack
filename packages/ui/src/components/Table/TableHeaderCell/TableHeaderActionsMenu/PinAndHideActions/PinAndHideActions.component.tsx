@@ -3,10 +3,8 @@ import { TableActionsPopoverSeparator } from '#ui/components/Table/TableActionsP
 
 import type { PinAndHideActionsProps } from './PinAndHideActions.types';
 
-import { ClearPinningButton } from './ClearPinningButton/ClearPinningButton.component';
+import { ColumnPinningButton } from './ColumnPinningButton/ColumnPinningButton.component';
 import { HideColumnButton } from './HideColumnButton/HideColumnButton.component';
-import { PinLeftButton } from './PinLeftButton/PinLeftButton.component';
-import { PinRightButton } from './PinRightButton/PinRightButton.component';
 
 export const PinAndHideActions = <TData,>({
   columnKey,
@@ -17,23 +15,26 @@ export const PinAndHideActions = <TData,>({
 
   return (
     <>
-      <PinLeftButton
+      <ColumnPinningButton
         columnKey={columnKey}
         layoutLock={layoutLock}
         onClose={onClose}
         pinSide={pinSide}
+        target='left'
       />
-      <PinRightButton
+      <ColumnPinningButton
         columnKey={columnKey}
         layoutLock={layoutLock}
         onClose={onClose}
         pinSide={pinSide}
+        target='right'
       />
-      <ClearPinningButton
+      <ColumnPinningButton
         columnKey={columnKey}
         layoutLock={layoutLock}
         onClose={onClose}
         pinSide={pinSide}
+        target='clear'
       />
       <TableActionsPopoverSeparator />
       <HideColumnButton
