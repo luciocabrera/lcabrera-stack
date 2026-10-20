@@ -53,7 +53,7 @@ Both changes ship in the same `@lcabrera/vite-config` release.
 
 ### Evidence
 
-Measured on 2026-10-19 against `main` at `64f2fe370`, with `oxfmt` 0.73.0
+Measured on 2026-10-20 against `main` at `ed8313e34`, with `oxfmt` 0.73.0
 through `vite-plus` 1.3.0.
 
 To reproduce, pass the option through the root `vite.config.ts`'s existing
@@ -68,8 +68,8 @@ same command prints nothing, because the tree is clean.
 
 | Config                         | Non-markdown files under `packages/*/src` and `apps/*/src` | Non-markdown files repo-wide                                 | Markdown files (fenced code) |
 | ------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------- |
-| The groups above               | 0                                                          | 55: 54 under root `scripts/`, plus the root `vite.config.ts` | 20                           |
-| `sortImports: true` (defaults) | 1200                                                       | not counted                                                  | not counted                  |
+| The groups above               | 0                                                          | 57: 56 under root `scripts/`, plus the root `vite.config.ts` | 20                           |
+| `sortImports: true` (defaults) | 1210                                                       | not counted                                                  | not counted                  |
 
 The first row is what the decision rests on. With the groups above, Oxfmt
 produces the same order perfectionist already enforces in every file ESLint
@@ -114,11 +114,11 @@ perfectionist's order in most source files.
   file would go unchecked until someone noticed. A rule in the formatter covers
   those files because the formatter already reads them.
 - **Turn on `sortImports` with Oxfmt's default groups.** Rejected on the
-  evidence above: it reorders 1200 source files that perfectionist already
+  evidence above: it reorders 1210 source files that perfectionist already
   orders, which churns every consumer's tree and gains nothing.
 - **Run both sorters.** Rejected. Two engines would arbitrate one rule, and any
-  difference between them is a fix loop. ADR-035 already refuses that for Biome
-  and react-hooks.
+  difference between them is a fix loop. ADR-035 already refuses that for Biome's
+  `useExhaustiveDependencies`, which another engine owns.
 
 ## References
 
