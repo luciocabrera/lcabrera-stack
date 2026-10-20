@@ -140,7 +140,10 @@ the package config. The decision is unchanged. A workspace config still carries
 no `lint` key, and `vp run lint:plugins:verify` still fails when one appears.
 The root block and its `overrides` remain the only place a rule is set.
 
-The gate now rejects a workspace `fmt` or `staged` key as well, because the
+The gate now rejects a workspace `fmt` or `staged` key as well. A `fmt` block
+is rejected because a package-directory `vp fmt` applies it and `vp check` never
+does (the guide bullets above), so the same file could be formatted two ways
+depending on where the command ran. A `staged` block is rejected because the
 pre-commit hook runs `vp staged` from the root, so a workspace block can only
 diverge from it, and a package `staged` block was observed replacing the root
 chain for a run started in that package. That observation holds only before
