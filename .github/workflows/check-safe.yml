@@ -293,8 +293,9 @@ jobs:
         # Naming `lint.plugins` REPLACES Oxlint's default set, so dropping an
         # entry disables that whole family and reports nothing — the same clean
         # pass as correct code. This lints a deliberate violation per family
-        # instead of reading config, and rejects a `lint` block in a workspace
-        # config, which Vite+ never loads. See ADR-042.
+        # instead of reading config, and rejects a `lint`, `fmt` or `staged`
+        # block in a workspace config, which a package-directory run would use
+        # in place of the root one. See ADR-042.
         run: vp run lint:plugins:verify
 
       - name: The eslint pass still runs its rules
