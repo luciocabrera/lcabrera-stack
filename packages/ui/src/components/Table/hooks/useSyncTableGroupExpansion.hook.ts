@@ -15,6 +15,6 @@ export const useSyncTableGroupExpansion = <
   });
 
   useEffect(() => {
-    pruneExpansionRef.current();
+    pruneExpansionRef.current(data);
   }, [data]);
 };

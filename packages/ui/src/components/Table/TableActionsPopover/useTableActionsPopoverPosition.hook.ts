@@ -5,6 +5,7 @@ import { useEffect, useRef, useState } from 'react';
 import type { MenuPosition } from './TableActionsPopover.types';
 
 import { applyRepositionOutcome } from './utils/applyRepositionOutcome.util';
+import { closeTableActionsMenu } from './utils/closeTableActionsMenu.util';
 import { createViewportRect } from './utils/createViewportRect.util';
 import { handlePopoverToggle } from './utils/handlePopoverToggle.util';
 import { handleToggleMenu } from './utils/handleToggleMenu.util';
@@ -26,9 +27,7 @@ export const useTableActionsPopoverPosition = ({
   const [menuPosition, setMenuPosition] = useState<MenuPosition>();
 
   const closeMenu = () => {
-    setIsMenuOpen(false);
-    setMenuPosition(undefined);
-    menuRef.current?.hidePopover?.();
+    closeTableActionsMenu({ menuRef, setIsMenuOpen, setMenuPosition });
   };
 
   useEffect(() => {
@@ -42,7 +41,9 @@ export const useTableActionsPopoverPosition = ({
 
     const repositionWhenOpen = () => {
       applyRepositionOutcome({
-        closeMenu,
+        closeMenu: () => {
+          closeTableActionsMenu({ menuRef, setIsMenuOpen, setMenuPosition });
+        },
         outcome: resolveOpenMenuReposition({
           getContainerRect: () => containerElement.getBoundingClientRect(),
           menuElement,
