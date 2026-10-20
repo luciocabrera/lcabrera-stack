@@ -99,6 +99,26 @@ describe('a dirty detached worktree whose every change is in history', () => {
     expect(worktreePaths(repo)).toContain(work);
   });
 
+  it.each([
+    ['refs/worktree/mine', 'a per-worktree ref'],
+    ['refs/bisect/bad', 'a bisect ref'],
+  ])('is kept when only %s (%s) contains its commit', (ref) => {
+    const root = make();
+    const repo = baseRepository(root);
+    const work = dirtyDetached({ at: 'main', repo, root });
+    writeFileSync(
+      join(work, 'pinned.txt'),
+      'held only by a ref the removal deletes\n',
+    );
+    gitIn(work, 'add', 'pinned.txt');
+    gitIn(work, 'commit', '-q', '-m', 'pinned');
+    gitIn(work, 'update-ref', ref, 'HEAD');
+
+    for (const argv of ALL_FLAGS) prune({ argv, repo });
+
+    expect(worktreePaths(repo)).toContain(work);
+  });
+
   it('is removed with --include-superseded when a branch contains its commit', () => {
     const root = make();
     const repo = baseRepository(root);

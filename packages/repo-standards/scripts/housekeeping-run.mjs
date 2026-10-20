@@ -65,6 +65,8 @@ const isResolvable = ({ cwd, ref }) =>
   ref !== '' &&
   doesGitSucceed({ args: ['rev-parse', '--verify', '--quiet', ref], cwd });
 
+const SHARED_REF_NAMESPACES = ['refs/heads/', 'refs/tags/', 'refs/remotes/'];
+
 const isReferenced = ({ head, path }) =>
   head !== '' &&
   (runGit({
@@ -74,6 +76,7 @@ const isReferenced = ({ head, path }) =>
       '--format=%(refname)',
       '--contains',
       head,
+      ...SHARED_REF_NAMESPACES,
     ],
     cwd: path,
   }) ?? '') !== '';
