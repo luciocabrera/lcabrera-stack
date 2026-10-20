@@ -101,5 +101,6 @@ look removable, and nothing otherwise; `--threshold <n>` changes the number. It
 reads no stdin and local refs only. A clean worktree counts when it is detached
 on a commit the default branch contains, or when its branch's upstream is gone
 after a fetch that pruned. It makes no network call and removes nothing, so it
-is safe to run from a session-start hook. Its count is an estimate, and the plan
-in step 1 is what decides.
+is safe to run from a session-start hook. The line names the count and the
+pipe in step 1; when it appears, start at step 1. Its count is an estimate, and
+the plan is what decides.

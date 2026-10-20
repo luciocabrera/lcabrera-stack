@@ -8,4 +8,4 @@ A clean worktree detached on a commit the default branch contains is now removed
 
 The plan also lists containers labelled `devkit.throwaway`, whose value names the worktree that started them. `--apply` removes a stopped one, and a running one whose worktree is gone; a running one whose worktree is still there is listed under KEEPING with that reason. Without Docker it lists none and says so. When no pull request list arrives on stdin, every worktree whose verdict needs one is listed as kept, with a note saying why.
 
-New `--hint [--threshold <n>]` mode: one line when more than `n` worktrees (ten by default) look removable from local refs alone. It reads no stdin, calls neither `gh` nor Docker, and removes nothing, so a session-start hook can run it.
+New `--hint [--threshold <n>]` mode: one line when more than `n` worktrees (ten by default) look removable from local refs alone, naming the `gh pr list … | repo-housekeeping-prune` pipe that prints the full plan. It reads no stdin, calls neither `gh` nor Docker, and removes nothing, so a session-start hook can run it.

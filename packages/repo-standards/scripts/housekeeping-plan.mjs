@@ -202,8 +202,11 @@ export const classifyContainers = ({ containers, isOnDisk, live }) =>
       : { ...container, action: 'keep', reason: keptReason(container) };
   });
 
+const PLAN_COMMAND =
+  'gh pr list --state all --json number,headRefName,state --limit 400 | repo-housekeeping-prune';
+
 const hintLine = (count) =>
-  `${count} ${count === 1 ? 'git worktree looks' : 'git worktrees look'} removable — run /worktree-housekeeping to review and remove them.`;
+  `${count} ${count === 1 ? 'git worktree looks' : 'git worktrees look'} removable — print the plan with: ${PLAN_COMMAND}`;
 
 /**
  * @param {{ count: number, threshold: number }} args

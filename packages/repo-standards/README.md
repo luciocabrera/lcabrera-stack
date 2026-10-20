@@ -103,7 +103,7 @@ until you acknowledge it.
 | `repo-verify-viteplus-block`                                        | that the runner's managed region in the agent document renders nothing (`--write` repairs)                                                          |
 | `repo-verify-conflict-markers`                                      | that no tracked file carries a merge-conflict marker, raw or reshaped by a Markdown formatter                                                       |
 | `repo-verify-inventory [--write]`                                   | that every util export is named in its tree's inventory, with a baseline                                                                            |
-| `repo-verify-lint-plugins`                                          | that every configured lint plugin family reports a planted violation and every workspace is classified once                                         |
+| `repo-verify-lint-plugins`                                          | that plugins fire on a planted violation, each workspace is classified once, none sets `fmt`/`lint`/`staged`                                        |
 | `repo-verify-package-refs`                                          | that no published package's shipped text names an application directory                                                                             |
 | `repo-verify-react-doctor [--report]`                               | React Doctor's error-severity findings, asserting the run completed                                                                                 |
 | `repo-verify-route-artifacts`                                       | that a route folder's shared modules are named for an artifact the folder holds                                                                     |
@@ -172,8 +172,9 @@ worktree whose verdict needs a pull request state is kept and listed, and a
 `--hint [--threshold <n>]` reads no stdin and calls neither `gh` nor Docker. It
 prints one line when more than `n` worktrees (ten by default) look removable
 from local refs: clean and detached on a commit the default branch contains, or
-clean on a branch whose upstream is gone after a pruning fetch. It removes
-nothing, so a session-start hook can run it. For Claude Code:
+clean on a branch whose upstream is gone after a pruning fetch. The line names
+the count and the `gh pr list … | repo-housekeeping-prune` pipe that prints the
+full plan. It removes nothing, so a session-start hook can run it. For Claude Code:
 
 ```json
 {

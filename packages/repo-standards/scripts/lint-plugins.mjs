@@ -77,11 +77,15 @@ export const silentProbes = ({ probes, reportedCodes }) => {
   return probes.filter((probe) => !reported.has(probeCode(probe)));
 };
 
-export const configsDeclaringLint = (files) =>
+const hasKey = (text, key) =>
+  new RegExp(String.raw`^\s{0,4}${key}\s*:`, 'mu').test(stripComments(text));
+
+export const configsDeclaringKeys = (files, keys) =>
   files
     .filter(({ path }) => path !== 'vite.config.ts')
-    .filter(({ text }) => /^\s{0,4}lint\s*:/mu.test(stripComments(text)))
-    .map(({ path }) => path);
+    .flatMap(({ path, text }) =>
+      keys.filter((key) => hasKey(text, key)).map((key) => ({ key, path })),
+    );
 
 const stripComments = (text) =>
   text.replaceAll(/\/\*[\s\S]*?\*\//gu, '').replaceAll(/\/\/[^\n]*/gu, '');

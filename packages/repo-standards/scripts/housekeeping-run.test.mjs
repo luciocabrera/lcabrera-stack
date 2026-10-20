@@ -237,7 +237,10 @@ describe('repo-housekeeping-prune --hint', () => {
     expect(code).toBe(0);
     expect(lines).toHaveLength(1);
     expect(lines[0]).toContain('3 git worktrees look removable');
-    expect(lines[0]).toContain('/worktree-housekeeping');
+    expect(lines[0]).toContain(
+      'print the plan with: gh pr list --state all --json number,headRefName,state --limit 400 | repo-housekeeping-prune',
+    );
+    expect(lines[0]).not.toContain('/worktree-housekeeping');
   });
 
   it('prints nothing at or below the threshold, which defaults to ten', () => {
