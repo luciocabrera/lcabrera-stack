@@ -163,8 +163,11 @@ touches the main checkout or the checkout it runs from.
   path of the worktree that started the container. `--apply` removes a stopped
   one, and a running one whose worktree is gone; a running one whose worktree
   is still there is listed under KEEPING. Without Docker it lists none
-  and says so, and setting `REPO_STANDARDS_NO_DOCKER` turns the container
-  checks off even where Docker is installed.
+  and says so. Docker is looked up in the fixed install directories, never on
+  `PATH`; `REPO_STANDARDS_DOCKER` names the executable by absolute path
+  instead. `REPO_STANDARDS_NO_DOCKER` set to any non-empty value, `0`
+  included, turns the container checks off even where Docker is installed, so
+  a run never reaches it.
 
 With nothing on stdin, because `gh` is missing or cannot sign in, every
 worktree whose verdict needs a pull request state is kept and listed, and a

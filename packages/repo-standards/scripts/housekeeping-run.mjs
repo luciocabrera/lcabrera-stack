@@ -6,6 +6,7 @@
  * only and never touches the code host or the container engine.
  */
 import { existsSync, realpathSync } from 'node:fs';
+import { isAbsolute } from 'node:path';
 
 import { readConventions } from './config.mjs';
 import { runGit, runGitStatus } from './git-exec.mjs';
@@ -338,26 +339,38 @@ export const runHint = ({ argv, root }) => {
   return { code: 0, errors: [], lines: line === undefined ? [] : [line] };
 };
 
-/**
- * @param {string} variable
- */
-export const dockerOff = (variable) => ({
+export const NO_DOCKER_ENV = 'REPO_STANDARDS_NO_DOCKER';
+
+export const DOCKER_ENV = 'REPO_STANDARDS_DOCKER';
+
+const dockerOff = {
   list: () => ({
     containers: [],
-    error: `container checks are off because ${variable} is set`,
+    error: `container checks are off because ${NO_DOCKER_ENV} is set`,
   }),
-  remove: () => ({ ok: false, reason: `${variable} is set` }),
+  remove: () => ({ ok: false, reason: `${NO_DOCKER_ENV} is set` }),
+};
+
+const hostFor = (binary) => ({
+  list: () => listThrowawayContainers(binary),
+  remove: (id) => removeContainer({ binary, id }),
 });
+
+const namedExecutable = (path) =>
+  isAbsolute(path) && existsSync(path) ? path : undefined;
 
 /**
  * @param {string[]} [directories]
  */
-export const dockerHost = (directories) => {
-  const binary = dockerBinary(directories);
-  return {
-    list: () => listThrowawayContainers(binary),
-    remove: (id) => removeContainer({ binary, id }),
-  };
+export const dockerHost = (directories) => hostFor(dockerBinary(directories));
+
+/**
+ * @param {Record<string, string | undefined>} [env]
+ */
+export const dockerFor = (env = process.env) => {
+  if ((env[NO_DOCKER_ENV] ?? '') !== '') return dockerOff;
+  const named = env[DOCKER_ENV] ?? '';
+  return named === '' ? dockerHost() : hostFor(namedExecutable(named));
 };
 
 /**
@@ -368,7 +381,7 @@ export const dockerHost = (directories) => {
  */
 export const runPrune = ({
   argv,
-  docker = dockerHost(),
+  docker = dockerFor(),
   pullRequests,
   root,
 }) => {

@@ -3,7 +3,14 @@
  * each kind the plan sorts, built with real git so the readers run as they
  * would in a consumer's repository.
  */
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import {
+  chmodSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
@@ -122,6 +129,25 @@ export const repositoryWithGoneBranches = ({ gone, live, root }) => {
   }
   gitIn(repo, 'fetch', '-q', '--prune');
   return repo;
+};
+
+/**
+ * A docker that records every call and fails, placed in its own directory so
+ * a suite can put it first on PATH and name it outright.
+ *
+ * @param {string} root
+ */
+export const recordingDocker = (root) => {
+  const directory = join(root, 'stand-in-bin');
+  mkdirSync(directory, { recursive: true });
+  const path = join(directory, 'docker');
+  const marker = join(root, 'docker-was-called');
+  writeFileSync(
+    path,
+    `#!/bin/sh\necho "$@" >> '${marker}'\necho 'STAND-IN DOCKER CALLED' >&2\nexit 97\n`,
+  );
+  chmodSync(path, 0o755);
+  return { directory, path, wasCalled: () => existsSync(marker) };
 };
 
 export const PULL_REQUESTS = [
