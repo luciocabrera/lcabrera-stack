@@ -134,15 +134,28 @@ const historyOf = ({ cwd, git, paths, refs }) =>
 const isAbsentAt = ({ cwd, git, path, ref }) =>
   git({ args: ['cat-file', '-e', `${ref}:${path}`], cwd }).status !== 0;
 
-const matches = ({ blobs, change, cwd, git, history, tip }) =>
+const isDeletionHeld = ({ change, cwd, git, history, isOwnHead, tip }) =>
+  (isOwnHead || history.has(change.path)) &&
+  isAbsentAt({ cwd, git, path: change.path, ref: tip });
+
+const matches = ({ blobs, change, cwd, git, history, isOwnHead, tip }) =>
   blobs.length === 0
-    ? isAbsentAt({ cwd, git, path: change.path, ref: tip })
+    ? isDeletionHeld({ change, cwd, git, history, isOwnHead, tip })
     : blobs.every((blob) => history.get(change.path)?.has(blob) === true);
 
 const bucketOf = ({ base, change, cwd, git, histories, own }) => {
   const shared = { blobs: blobsOf({ change, cwd, git }), change, cwd, git };
-  if (matches({ ...shared, history: histories.base, tip: base })) return 'base';
-  return matches({ ...shared, history: histories.own, tip: own[0] ?? 'HEAD' })
+  if (
+    matches({ ...shared, history: histories.base, isOwnHead: false, tip: base })
+  ) {
+    return 'base';
+  }
+  return matches({
+    ...shared,
+    history: histories.own,
+    isOwnHead: true,
+    tip: own[0] ?? 'HEAD',
+  })
     ? 'branch'
     : 'neither';
 };

@@ -10,11 +10,15 @@ import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
+  DOCKER_ENV,
+  dockerFor,
+  NO_DOCKER_ENV,
+} from './housekeeping-containers.mjs';
+import {
   buildSortingRepository,
   recordingDocker,
   scratchRoots,
 } from './housekeeping-fixtures.mjs';
-import { DOCKER_ENV, dockerFor, NO_DOCKER_ENV } from './housekeeping-run.mjs';
 
 const { drain, make } = scratchRoots();
 

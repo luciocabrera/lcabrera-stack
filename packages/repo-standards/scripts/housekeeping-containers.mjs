@@ -4,9 +4,12 @@
  * absolute path from the fixed install directories, with PATH pinned for the
  * child, under the discipline `gh-exec.mjs` applies to gh. A machine without
  * Docker, or with its daemon down, answers with a reason instead of a list.
+ * REPO_STANDARDS_NO_DOCKER, set to any non-empty value, keeps a run off Docker
+ * entirely; REPO_STANDARDS_DOCKER names the executable by absolute path.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
+import { isAbsolute } from 'node:path';
 
 import { THROWAWAY_LABEL } from './housekeeping-plan.mjs';
 
@@ -74,7 +77,7 @@ const runDocker = ({ args, binary }) => {
  * @param {string | undefined} binary
  * @returns {{ containers: object[], error?: string }}
  */
-export const listThrowawayContainers = (binary) => {
+const listThrowawayContainers = (binary) => {
   if (binary === undefined) {
     return { containers: [], error: 'docker is not installed' };
   }
@@ -100,7 +103,41 @@ export const listThrowawayContainers = (binary) => {
 /**
  * @param {{ binary: string | undefined, id: string }} args
  */
-export const removeContainer = ({ binary, id }) =>
+const removeContainer = ({ binary, id }) =>
   binary === undefined
     ? { ok: false, reason: 'docker is not installed' }
     : runDocker({ args: ['rm', '-f', id], binary });
+
+export const NO_DOCKER_ENV = 'REPO_STANDARDS_NO_DOCKER';
+
+export const DOCKER_ENV = 'REPO_STANDARDS_DOCKER';
+
+const dockerOff = {
+  list: () => ({
+    containers: [],
+    error: `container checks are off because ${NO_DOCKER_ENV} is set`,
+  }),
+  remove: () => ({ ok: false, reason: `${NO_DOCKER_ENV} is set` }),
+};
+
+const hostFor = (binary) => ({
+  list: () => listThrowawayContainers(binary),
+  remove: (id) => removeContainer({ binary, id }),
+});
+
+const namedExecutable = (path) =>
+  isAbsolute(path) && existsSync(path) ? path : undefined;
+
+/**
+ * @param {string[]} [directories]
+ */
+export const dockerHost = (directories) => hostFor(dockerBinary(directories));
+
+/**
+ * @param {Record<string, string | undefined>} [env]
+ */
+export const dockerFor = (env = process.env) => {
+  if ((env[NO_DOCKER_ENV] ?? '') !== '') return dockerOff;
+  const named = env[DOCKER_ENV] ?? '';
+  return named === '' ? dockerHost() : hostFor(namedExecutable(named));
+};

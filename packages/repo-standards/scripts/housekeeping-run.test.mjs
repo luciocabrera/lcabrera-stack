@@ -2,6 +2,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { dockerHost } from './housekeeping-containers.mjs';
 import {
   branchNames,
   buildSortingRepository,
@@ -10,7 +11,7 @@ import {
   scratchRoots,
   worktreePaths,
 } from './housekeeping-fixtures.mjs';
-import { dockerHost, runPrune } from './housekeeping-run.mjs';
+import { runPrune } from './housekeeping-run.mjs';
 
 const { drain, make } = scratchRoots();
 

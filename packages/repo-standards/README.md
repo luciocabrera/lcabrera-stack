@@ -158,7 +158,11 @@ touches the main checkout or the checkout it runs from.
   upstream), or in neither, plus its untracked files. Content rather than
   ancestry, because a squash-merge leaves a branch's commits off the default
   branch. `--include-superseded` removes it only when "neither" and "untracked"
-  are both zero. Nothing removes one with a change found in neither.
+  are both zero. Nothing removes one with a change found in neither. An
+  uncommitted deletion matches a history only when that history once held the
+  path and its tip no longer does. A detached worktree is removed as superseded
+  only when a branch, tag or remote contains its commit, so its HEAD is never
+  the only thing holding that commit.
 - Containers labelled `devkit.throwaway` are listed; the label's value is the
   path of the worktree that started the container. `--apply` removes a stopped
   one, and a running one whose worktree is gone; a running one whose worktree

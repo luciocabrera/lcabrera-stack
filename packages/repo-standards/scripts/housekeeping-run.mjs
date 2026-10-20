@@ -6,15 +6,10 @@
  * only and never touches the code host or the container engine.
  */
 import { existsSync, realpathSync } from 'node:fs';
-import { isAbsolute } from 'node:path';
 
 import { readConventions } from './config.mjs';
 import { runGit, runGitStatus } from './git-exec.mjs';
-import {
-  dockerBinary,
-  listThrowawayContainers,
-  removeContainer,
-} from './housekeeping-containers.mjs';
+import { dockerFor } from './housekeeping-containers.mjs';
 import { countMatches, parseStatusV2 } from './housekeeping-content.mjs';
 import {
   buildPlan,
@@ -70,6 +65,19 @@ const isResolvable = ({ cwd, ref }) =>
   ref !== '' &&
   doesGitSucceed({ args: ['rev-parse', '--verify', '--quiet', ref], cwd });
 
+const isReferenced = ({ head, path }) =>
+  head !== '' &&
+  (runGit({
+    args: [
+      'for-each-ref',
+      '--count=1',
+      '--format=%(refname)',
+      '--contains',
+      head,
+    ],
+    cwd: path,
+  }) ?? '') !== '';
+
 const contentOf = ({ base, status, worktree }) =>
   base === undefined
     ? undefined
@@ -95,6 +103,8 @@ const withStatus = ({ base, worktree }) => {
     ...worktree,
     counts: isDirty ? contentOf({ base, status, worktree }) : undefined,
     dirty: isDirty,
+    isHeadReferenced:
+      isDirty && worktree.branch === undefined && isReferenced(worktree),
     onBase: isOnBase({ base, ...worktree }),
     untracked: status.untracked,
   };
@@ -337,40 +347,6 @@ export const runHint = ({ argv, root }) => {
     threshold,
   });
   return { code: 0, errors: [], lines: line === undefined ? [] : [line] };
-};
-
-export const NO_DOCKER_ENV = 'REPO_STANDARDS_NO_DOCKER';
-
-export const DOCKER_ENV = 'REPO_STANDARDS_DOCKER';
-
-const dockerOff = {
-  list: () => ({
-    containers: [],
-    error: `container checks are off because ${NO_DOCKER_ENV} is set`,
-  }),
-  remove: () => ({ ok: false, reason: `${NO_DOCKER_ENV} is set` }),
-};
-
-const hostFor = (binary) => ({
-  list: () => listThrowawayContainers(binary),
-  remove: (id) => removeContainer({ binary, id }),
-});
-
-const namedExecutable = (path) =>
-  isAbsolute(path) && existsSync(path) ? path : undefined;
-
-/**
- * @param {string[]} [directories]
- */
-export const dockerHost = (directories) => hostFor(dockerBinary(directories));
-
-/**
- * @param {Record<string, string | undefined>} [env]
- */
-export const dockerFor = (env = process.env) => {
-  if ((env[NO_DOCKER_ENV] ?? '') !== '') return dockerOff;
-  const named = env[DOCKER_ENV] ?? '';
-  return named === '' ? dockerHost() : hostFor(namedExecutable(named));
 };
 
 /**

@@ -2,7 +2,7 @@
 '@lcabrera/repo-standards': minor
 ---
 
-`repo-housekeeping-prune` now judges a dirty worktree by content. Its line in the plan counts the changed files whose content matches the default branch's history, the worktree's own history, or neither, plus its untracked files. With `--apply --include-superseded` it removes a dirty worktree only when none match neither and nothing is untracked; no flag removes one holding a change found in neither history. Without the flag a dirty worktree is still only reported.
+`repo-housekeeping-prune` now judges a dirty worktree by content. Its line in the plan counts the changed files whose content matches the default branch's history, the worktree's own history, or neither, plus its untracked files. With `--apply --include-superseded` it removes a dirty worktree only when none match neither and nothing is untracked; no flag removes one holding a change found in neither history. An uncommitted deletion counts as matching only where that history once held the path and no longer does, and a detached worktree is removed as superseded only when a branch, tag or remote contains its commit. Without the flag a dirty worktree is still only reported.
 
 A clean worktree detached on a commit the default branch contains is now removed, a locked worktree is kept, and a clean worktree removed in a run no longer stops that run from deleting its merged branch; a superseded one keeps its branch. `--apply` runs `git worktree prune` before deleting any branch, so a branch a stale entry still names is deleted as planned, and the dry run lists those stale entries under their own heading. The checkout the command runs from is never touched.
 

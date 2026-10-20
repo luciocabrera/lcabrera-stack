@@ -90,6 +90,12 @@ const classifyDirty = (worktree) => {
   if (!isSuperseded(worktree)) {
     return { action: 'report', reason: `uncommitted changes: ${summary}` };
   }
+  if (worktree.branch === undefined && worktree.isHeadReferenced !== true) {
+    return {
+      action: 'report',
+      reason: `every change already in history (${summary}), but it is detached on a commit no branch, tag or remote contains — removing it would lose that commit`,
+    };
+  }
   return worktree.includeSuperseded
     ? { action: 'remove', force: true, reason: `superseded: ${summary}` }
     : {

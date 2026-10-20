@@ -153,10 +153,11 @@ answers and one agent with a parameter beats two agents that drift apart.
 
 Hooks are shell commands the harness runs automatically on lifecycle events. They live in the **committed** `.claude/settings.json` (the standard location — not a separate hooks file) so the whole team shares them.
 
-| Event                                                   | Command                                 | Purpose                                                                                                                                                                                                                             |
-| ------------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs` | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception                                                   |
-| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`       | Per-file autofix after each Write/Edit — Oxlint `--fix` → Oxfmt; non-blocking. Biome and the ESLint pass are deliberately absent (a process launch per file, and this hook gates nothing), so quality-gate step 4 is still required |
+| Event                                                   | Command                                                                                          | Purpose                                                                                                                                                                                                                             |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SessionStart`                                          | `node packages/repo-standards/scripts/housekeeping-prune.mjs --hint --threshold 10 --advice "…"` | **Worktree count** — prints one line naming `/worktree-housekeeping` when more than ten linked worktrees look removable from local refs; reads no network, deletes nothing, prints nothing below the threshold                      |
+| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs`                                                          | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception                                                   |
+| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`                                                                | Per-file autofix after each Write/Edit — Oxlint `--fix` → Oxfmt; non-blocking. Biome and the ESLint pass are deliberately absent (a process launch per file, and this hook gates nothing), so quality-gate step 4 is still required |
 
 The `PreToolUse` **secrets guard** ([`scripts/claude-secrets-guard.mjs`](../scripts/claude-secrets-guard.mjs)) runs _before_ a tool executes and emits a `permissionDecision: "deny"` when a call would read a secret file (`.env`, `*.pem/.key/.p12`, `id_rsa`, `.npmrc`, `credentials`…) or write a credential (provider-format tokens + high-entropy assignments). The pure core is `scripts/lib/secrets-guard.mjs`, covered by [`scripts/lib/secrets-guard.test.mjs`](../scripts/lib/secrets-guard.test.mjs) — the deny/allow cases that `vp run test:scripts` runs, and CI runs via `test:ci`. False positives are handled by `.example` files, placeholder values, and inline `gitleaks:allow` markers.
 
@@ -211,6 +212,9 @@ Entries use glob-style patterns: `Bash(cd apps/showcase && vp lint*)` approves a
 ## How the Layers Interact
 
 ```text
+Session starts → SessionStart hook counts removable worktrees
+        │       (one line naming /worktree-housekeeping above ten; read-only)
+        ▼
 You ask Claude to do something
         │
         ▼
@@ -239,7 +243,7 @@ git push    → pre-push:   the full CI Quality Gate (adds ESLint + type-check),
                           workspaces and the root scripts/ suites
 ```
 
-There is no `SessionStart` hook and no `Stop` hook. The two above — `PreToolUse` and `PostToolUse` — are the complete set defined in `.claude/settings.json`.
+There is no `Stop` hook. The three above — `SessionStart`, `PreToolUse` and `PostToolUse` — are the complete set defined in `.claude/settings.json`.
 
 ---
 
