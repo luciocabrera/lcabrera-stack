@@ -61,6 +61,12 @@ export default defineConfig({
 A workspace config sets `fmt`, `pack`, `run` and its Vite/Vitest config — never
 `lint`.
 
+The config sets `denyWarnings`, so a rule at `warn` fails the run, and
+reports an `oxlint-disable` directive that silences nothing as an error. Oxlint
+does not read `eslint-disable` directives: those name ESLint rules, which Oxlint
+would report as unused, and they stay in force for the ESLint pass. So an
+Oxlint finding cannot be silenced with an `eslint-disable` comment.
+
 ## ESLint
 
 Both factories return a flat-config array. The React one is `async`: it resolves
