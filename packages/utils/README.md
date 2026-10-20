@@ -87,9 +87,11 @@ import { slugify } from '@lcabrera/utils/strings/slugify.util';
 - **kebab-case `*.util.ts`, one util per file**, grouped by domain under `src/`.
   Enforced by `local-rules/filename-convention` via its `suffixCase` option (the
   rule stays live — a camelCase `.util` here fails the gate; it is not turned off).
-- **≥95% coverage** (statements/branches/functions/lines), gated by
-  `test:coverage`. This is a public-facing package: it never baselines and is
-  suppression-free by construction (its `eslint-suppressions.json` is gitignored).
+- **≥95% coverage** (statements/branches/functions/lines), declared in
+  `test.coverage.thresholds` in `vite.config.ts`, so every coverage run
+  enforces it, `test:coverage` included. This is a public-facing package: it
+  never baselines and is suppression-free by construction (its
+  `eslint-suppressions.json` is gitignored).
 
 ## Links
 
