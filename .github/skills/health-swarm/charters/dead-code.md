@@ -39,6 +39,6 @@ three workarounds in `packages/utils`); `react-doctor` lacking a load-bearing
 note. Still open as MECHANICAL: `pnpm-workspace.yaml`'s dangling ADR-047 path,
 which is the sole in-tree guard on `@vitest/coverage-v8`.
 
-Probed, unresolved: the per-workspace `fmt` blocks look dead the way the `lint`
-blocks were, but root `ignorePatterns` are a strict superset of theirs, so no
-probe separates "merged" from "ignored". Left unclaimed rather than guessed.
+Handled: the per-workspace `fmt` blocks are gone (#1411). A package-directory
+`vp fmt` applied them and `vp check` did not, and `vp run lint:plugins:verify`
+now rejects a workspace `fmt` key, as it does `lint` and `staged`.
