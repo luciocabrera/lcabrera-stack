@@ -82,7 +82,9 @@ The verdict fails (exit 1) only for a rule at `error` severity. A `warn` rule
 yields verdict `warn` and exit 0, which is how a new unused export passed the
 gate until `unused-exports`, `unused-types`, `unused-dependencies` and
 `unused-dev-dependencies` were raised to `error` (#1095). New-only attribution
-keeps the inherited ones from failing.
+keeps the inherited ones from failing. #1422 raised every further rule that
+reported nothing across the tree and could be shown to fire. "Rules raised to
+error by #1422" below lists them, and the ones it left alone.
 
 Dead code has a second, whole-tree gate: `vp run fallow:dead-code:verify` runs
 `fallow dead-code` with no base and exits 1 on any error-severity dead-code
@@ -121,6 +123,39 @@ the config or the fallow version moves. Run the audit as CI does:
 | duplication, test files   | the same block appended to `packages/repo-standards/scripts/affected-tests.test.mjs` and `packages/repo-standards/scripts/config.test.mjs`               | nothing under `ignoreDefaults: true`; with it `false`, a `fallow dupes` clone group and audit `fail`, exit 1. See the next section       |
 | complexity                | a 22-branch function appended to the two source files above                                                                                              | `fallow health` finding; audit `fail`. Under `scripts/**` `exceeded` is `both`, since only CRAP is relaxed there                         |
 | coverage gap              | an untested cyclomatic-7 function in `packages/utils`, that workspace's `test:coverage` re-run and fed                                                   | `exceeded: crap`, `coverage_source: istanbul`; audit `fail`. Unfed, the estimate passes it; with a test that covers it, it passes        |
+
+## Rules raised to error by #1422, and the plant that proved each
+
+Each rule below reported nothing across the tree when it was raised. Each row
+is a plant, run through the audit as CI runs it (the command above) once with
+the rule at its previous severity and once at `error`, then reverted. The
+commands and their output are in the pull request for #1422.
+
+| Rule                   | Plant                                                                                                                                                                                         | Exit before | Exit at `error` |
+| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------- |
+| `duplicate-prop-shape` | two components in two new files beside `PinAndHideActions`, each taking `ColumnPinningButtonProps` and rendered by it, so three components share one prop-name set with `ColumnPinningButton` | 0           | 0               |
+
+`duplicate-prop-shape` is reported and not enforced. The pinned fallow lists
+the three findings with `effective_severity: "error"`, yet its
+`error-severity-findings` gate counts none of them, so the audit's verdict is
+`pass` and `fallow dead-code` exits 0. The rule stays at `error` so it gates the
+day fallow counts it; until then a fourth component with that shape passes. Its
+three findings were cleared by folding Pin Left, Pin Right and Clear Pinning into
+one `ColumnPinningButton`.
+
+Five rules that also report nothing were left at their default, because no
+plant made them fire in this repository's gate:
+
+- `type-only-dependencies` — fallow computes it only under `--production`. A
+  root dependency imported through `import type` alone is reported there and
+  by neither the audit nor `fallow dead-code`, and this repository runs
+  neither in production mode.
+- `unused-component-props` — a destructured prop that the React component never
+  reads produced no finding, as an arrow function or a function declaration,
+  with a named props type or an inline one.
+- `invalid-client-export`, `mixed-client-server-barrel`, `misplaced-directive` —
+  fallow runs these only in a project that declares `next`. A `'use client'`
+  placed after the imports produced no finding.
 
 ## Test files and duplication
 
