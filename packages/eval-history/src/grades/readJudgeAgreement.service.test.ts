@@ -22,6 +22,10 @@ describe('readJudgeAgreement', () => {
   it('rejects a row whose hand grade is not a whole number', async () => {
     const { client } = recordingClient([{ ...row, humanScore: 3.5 }]);
 
-    await expect(readJudgeAgreement({ client })).rejects.toThrow();
+    await expect(readJudgeAgreement({ client })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'humanScore'] })],
+      }),
+    );
   });
 });

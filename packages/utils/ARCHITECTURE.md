@@ -24,9 +24,10 @@ importable by any consumer (`@lcabrera/ui`, `@lcabrera/server`, apps).
 
 - **kebab-case `*.util.ts`** enforced via the `filename-convention` rule's
   `suffixCase: { util: 'kebab-case' }` option — asserted, not silenced.
-- **≥95% test coverage** (statements/branches/functions/lines) gated by
-  `test:coverage`; `@lcabrera/utils` is included in the `coverage:merge` /
-  `coverage-report` fan-outs.
+- **≥95% test coverage** (statements/branches/functions/lines), declared in
+  `test.coverage.thresholds` in `vite.config.ts` and enforced by any coverage
+  run, `test:coverage` included; `@lcabrera/utils` is included in the
+  `coverage:merge` / `coverage-report` fan-outs.
 - **Suppression-free by construction** — `eslint-suppressions.json` is gitignored
   and never committed; any real finding fails the gate.
 
@@ -39,7 +40,8 @@ bare specifier back would have closed a workspace cycle.
 [ADR-069](../../docs/decisions/ADR-069-publish-the-shared-toolchain.md) dropped
 that edge — there was no import site for it — so both now import
 `@lcabrera/vite-config` by name like every other workspace. The 95% coverage
-thresholds stay local: they are this package's own gate, not a shared value.
+thresholds stay local, in this package's `test.coverage.thresholds`: they are
+its own gate, not a shared value.
 
 ## Current Exports
 

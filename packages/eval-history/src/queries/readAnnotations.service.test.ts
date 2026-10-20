@@ -37,6 +37,10 @@ describe('readAnnotations', () => {
       columns: COLUMNS,
     });
 
-    await expect(readAnnotations({ client, ...range })).rejects.toThrow();
+    await expect(readAnnotations({ client, ...range })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'kind'] })],
+      }),
+    );
   });
 });

@@ -21,6 +21,8 @@ describe('assertSafeIdentifier', () => {
     'foo.bar',
     '*',
   ])('rejects an unsafe identifier: %s', (identifier) => {
-    expect(() => assertSafeIdentifier(identifier)).toThrow();
+    expect(() => assertSafeIdentifier(identifier)).toThrow(
+      `Unsafe identifier: "${identifier}"`,
+    );
   });
 });

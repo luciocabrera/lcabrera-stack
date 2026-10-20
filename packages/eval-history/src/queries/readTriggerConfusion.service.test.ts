@@ -42,6 +42,10 @@ describe('readTriggerConfusion', () => {
 
     await expect(
       readTriggerConfusion({ client, runIds: [RUN] }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'taskKind'] })],
+      }),
+    );
   });
 });

@@ -33,7 +33,11 @@ describe('readSchemaColumns', () => {
   it('rejects a row without a data type', async () => {
     const { client } = recordingClient([{ ...rows[0], dataType: undefined }]);
 
-    await expect(readSchemaColumns({ client })).rejects.toThrow();
+    await expect(readSchemaColumns({ client })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'dataType'] })],
+      }),
+    );
   });
 });
 

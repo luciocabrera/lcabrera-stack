@@ -56,6 +56,10 @@ describe('readRunComparison', () => {
 
     await expect(
       readRunComparison({ a: RUN_A, b: RUN_B, client }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'outcomesB', 0] })],
+      }),
+    );
   });
 });

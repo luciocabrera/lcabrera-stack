@@ -74,9 +74,7 @@ it('treats an empty customer_rating as absent (not zero)', () => {
   });
 
   expect(result.success).toBe(true);
-  if (result.success) {
-    expect(result.data.customer_rating).toBeUndefined();
-  }
+  expect(result.data?.customer_rating).toBeUndefined();
 });
 
 it('required: rejects an empty customer_name', () => {
@@ -86,11 +84,9 @@ it('required: rejects an empty customer_name', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.customer_name?.[0]).toBe(
-      'Customer name is required.',
-    );
-  }
+  expect(result.error?.flatten().fieldErrors.customer_name?.[0]).toBe(
+    'Customer name is required.',
+  );
 });
 
 it('maxLength: rejects a customer_name over 200 characters', () => {
@@ -100,11 +96,9 @@ it('maxLength: rejects a customer_name over 200 characters', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.customer_name?.[0]).toBe(
-      'Customer name must be 200 characters or fewer.',
-    );
-  }
+  expect(result.error?.flatten().fieldErrors.customer_name?.[0]).toBe(
+    'Customer name must be 200 characters or fewer.',
+  );
 });
 
 it('min: rejects a quantity below 1', () => {
@@ -114,11 +108,9 @@ it('min: rejects a quantity below 1', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.quantity?.[0]).toBe(
-      'Quantity must be at least 1.',
-    );
-  }
+  expect(result.error?.flatten().fieldErrors.quantity?.[0]).toBe(
+    'Quantity must be at least 1.',
+  );
 });
 
 it('max: rejects a discount above 100', () => {
@@ -128,11 +120,9 @@ it('max: rejects a discount above 100', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.discount_percentage?.[0]).toBe(
-      'Discount cannot exceed 100%.',
-    );
-  }
+  expect(result.error?.flatten().fieldErrors.discount_percentage?.[0]).toBe(
+    'Discount cannot exceed 100%.',
+  );
 });
 
 it('min/max: rejects a customer_rating outside 1..5', () => {
@@ -142,11 +132,9 @@ it('min/max: rejects a customer_rating outside 1..5', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.customer_rating?.[0]).toBe(
-      'Rating must be between 1 and 5.',
-    );
-  }
+  expect(result.error?.flatten().fieldErrors.customer_rating?.[0]).toBe(
+    'Rating must be between 1 and 5.',
+  );
 });
 
 it('regex: rejects a malformed email', () => {
@@ -156,11 +144,9 @@ it('regex: rejects a malformed email', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.customer_email?.[0]).toBe(
-      'Enter a valid email address.',
-    );
-  }
+  expect(result.error?.flatten().fieldErrors.customer_email?.[0]).toBe(
+    'Enter a valid email address.',
+  );
 });
 
 it('regex: rejects a malformed phone number', () => {
@@ -170,11 +156,9 @@ it('regex: rejects a malformed phone number', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.customer_phone?.[0]).toBe(
-      'Enter a valid phone number.',
-    );
-  }
+  expect(result.error?.flatten().fieldErrors.customer_phone?.[0]).toBe(
+    'Enter a valid phone number.',
+  );
 });
 
 it('regex: rejects a malformed postal code', () => {
@@ -184,11 +168,9 @@ it('regex: rejects a malformed postal code', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.shipping_postal_code?.[0]).toBe(
-      'Enter a valid postal code.',
-    );
-  }
+  expect(result.error?.flatten().fieldErrors.shipping_postal_code?.[0]).toBe(
+    'Enter a valid postal code.',
+  );
 });
 
 it('type: rejects an unknown enum value', () => {
@@ -198,11 +180,9 @@ it('type: rejects an unknown enum value', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.order_status?.[0]).toBe(
-      'Select a valid order status.',
-    );
-  }
+  expect(result.error?.flatten().fieldErrors.order_status?.[0]).toBe(
+    'Select a valid order status.',
+  );
 });
 
 it('type: rejects a non-numeric quantity', () => {
@@ -212,7 +192,5 @@ it('type: rejects a non-numeric quantity', () => {
   });
 
   expect(result.success).toBe(false);
-  if (!result.success) {
-    expect(result.error.flatten().fieldErrors.quantity).toBeDefined();
-  }
+  expect(result.error?.flatten().fieldErrors.quantity).toBeDefined();
 });

@@ -38,8 +38,10 @@ describe('readRunJudgeScores', () => {
       columns: COLUMNS,
     });
 
-    await expect(
-      readRunJudgeScores({ client, runId: RUN_ID }),
-    ).rejects.toThrow();
+    await expect(readRunJudgeScores({ client, runId: RUN_ID })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'score'] })],
+      }),
+    );
   });
 });

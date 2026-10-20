@@ -131,7 +131,7 @@ describe('runGitOrThrow and readGit', () => {
         args: ['rev-parse', '--verify', 'no-such-ref'],
         cwd: '/',
       }),
-    ).toThrow();
+    ).toThrow('rev-parse --verify no-such-ref');
   });
 
   test('readGit answers with the empty string instead, which is what an unset key means', () => {

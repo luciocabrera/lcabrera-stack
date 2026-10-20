@@ -278,7 +278,7 @@ values ($1, 'skills/1', jsonb_build_object(
     }
   };
 
-  const refusedToReader = async ({ client, text }: NamesArgs) => {
+  const expectRefusedToReader = async ({ client, text }: NamesArgs) => {
     await client.query('savepoint probe');
     await client.query(`set local role "${reader.name}"`);
 
@@ -391,7 +391,7 @@ values ($1, 'skills/1', jsonb_build_object(
     async ({ sql }) => {
       await inProbe({
         check: (client) =>
-          refusedToReader({
+          expectRefusedToReader({
             client,
             text: 'select * from evals.v_subject_trend',
           }),
@@ -405,7 +405,7 @@ values ($1, 'skills/1', jsonb_build_object(
     async ({ setup, sql }) => {
       await inProbe({
         check: (client) =>
-          refusedToReader({
+          expectRefusedToReader({
             client,
             text: 'select * from evals.v_subject_trend',
           }),
@@ -456,7 +456,7 @@ values ($1, 'skills/1', jsonb_build_object(
     async ({ sql }) => {
       await inProbe({
         check: (client) =>
-          refusedToReader({
+          expectRefusedToReader({
             client,
             text: 'select * from evals.flaky_tasks(10)',
           }),

@@ -47,7 +47,7 @@ describe('buildCountQuery', () => {
         schema: 'reporting',
         table: 't; DROP TABLE reporting.users',
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "t; DROP TABLE reporting.users"');
   });
 
   it('rejects an unsafe count column', () => {
@@ -57,7 +57,7 @@ describe('buildCountQuery', () => {
         schema: 'reporting',
         table: 'v_order_totals',
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "id); DROP TABLE reporting.users --"');
   });
 
   it('rejects a count column outside allowedColumns', () => {
@@ -68,6 +68,8 @@ describe('buildCountQuery', () => {
         schema: 'reporting',
         table: 'v_order_totals',
       }),
-    ).toThrow();
+    ).toThrow(
+      'Column "password_hash" is not in the allowed list for this query.',
+    );
   });
 });

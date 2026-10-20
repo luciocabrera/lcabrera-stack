@@ -287,10 +287,13 @@ select trial_id, dimension, 3, 'placeholder' from evals.eval_judge_score`,
       roles: [writer, reader],
     });
 
-    expect(migrated.granted.map(({ name }) => name)).toEqual([
-      writer.name,
-      reader.name,
-    ]);
+    const granted = migrated.granted.map(({ name }) => name).join(', ');
+
+    if (granted !== `${writer.name}, ${reader.name}`) {
+      throw new Error(
+        `The migration granted [${granted}], not ${writer.name} and ${reader.name}.`,
+      );
+    }
 
     const writing = await connectAs(writer.name);
 
@@ -307,7 +310,9 @@ select trial_id, dimension, 3, 'placeholder' from evals.eval_judge_score`,
       quietUnreachable: false,
     });
 
-    expect(ingested.exitCode, ingested.stderr.join('\n')).toBe(0);
+    if (ingested.exitCode !== 0) {
+      throw new Error(ingested.stderr.join('\n'));
+    }
 
     const { rows } = await writing.query(`select
   run.run_id::text as "runId", task.task_key as "taskKey", trial.id::text as "trialId",
