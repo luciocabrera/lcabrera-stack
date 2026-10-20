@@ -138,6 +138,7 @@ commands and their output are in the pull request for #1422.
 | `require-suppression-reason` | the same comment, with no reason, above a new unused export appended to `apps/showcase/src/constants/app.constants.ts` (the rule was `off`)                                                   | 0           | 1               |
 | `deprecated-exports-in-use`  | a `@deprecated` export appended to `is-object.util.ts` and imported by `packages/utils/src/strings/empty-to-undefined.util.ts` (the rule was `off`)                                           | 0           | 1               |
 | `unused-catalog-entries`     | `left-pad: ^1.3.0` added to the `backend` catalog in `pnpm-workspace.yaml`                                                                                                                    | 0           | 1               |
+| `empty-catalog-groups`       | `probe: {}` added under `catalogs` in `pnpm-workspace.yaml`                                                                                                                                   | 0           | 1               |
 
 `duplicate-prop-shape` is reported and not enforced. The pinned fallow lists
 the three findings with `effective_severity: "error"`, yet its
