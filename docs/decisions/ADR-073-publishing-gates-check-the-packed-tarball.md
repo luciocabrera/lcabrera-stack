@@ -115,6 +115,21 @@ AGENTS.md §4 already allows, alongside `pnpm clean`.
   tarballs out as `node_modules` by hand. Rejected: it needs a registry, which
   makes a network outage look like a publishing defect.
 
+## Amendments
+
+**2026-10-20 — publint reads each packed tarball (#1425).** `tarball:verify`,
+the packed-artifact gate for the packages that ship `.mjs` and do not build,
+now runs publint at error level over each tarball it packs, before installing
+them. Its own check reads an `exports` target one condition deep; publint
+resolves every condition at any depth, so a nested target the tarball does not
+hold now fails there too. It reads the tarball rather than the directory, which
+keeps the check on the artifact this ADR is about. The same run lints a planted
+tarball whose only export points at a missing file, and fails if publint
+reports nothing for it, so a clean result is never a check that did not run.
+publint runs inside the verifier, not through `vp pack`'s `pack.publint`
+option: these packages are not built by `vp pack`, and `attw:verify` stays the
+types gate for the ones that are.
+
 ## References
 
 - Issue [#715](https://github.com/luciocabrera/lcabrera-stack/issues/715) —
