@@ -74,7 +74,7 @@ The `command` pointer was checked the way this register requires rather than
 assumed: bypassing `withAggregateColumnOrder` in
 `getPinnedDerivedColumnsState` fails the two ordering cases with the reported
 symptom (`Count` painting first), and dropping the layout lock from
-`PinLeftButton` fails the two menu cases. Both were restored; the runs are in
+`PinLeftButton` (since folded into `ColumnPinningButton`) fails the two menu cases. Both were restored; the runs are in
 [#1049](https://github.com/luciocabrera/lcabrera-stack/pull/1049).
 
 The contiguity rule is a constraint, not a preference: `resolveHeaderBands`
