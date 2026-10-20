@@ -6,7 +6,10 @@ Unused exports, vestigial devDependencies, orphan artifacts.
 
 - `vp run fallow:dead-code` (scope with `-w`), `vp run fallow:full`,
   `vp run fallow:health --file-scores --hotspots`.
-- `vp run fallow:audit --base main` mirrors what CI gates (`--gate new-only`).
+- `vp run fallow:audit --base main` mirrors what CI gates (`--gate new-only`),
+  and `vp run fallow:dead-code:verify` is the whole-tree dead-code gate CI
+  runs beside it — an error-severity finding there is a gate failure, not
+  inherited debt.
 - `vp run docs:verify` and `vp run commands:verify` surface orphan references.
 
 `reports/fallow/` is produced on demand; only `reports/fallow/baselines/` is

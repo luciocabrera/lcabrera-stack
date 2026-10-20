@@ -28,10 +28,10 @@ const WORKFLOW_EXTENSIONS = ['.yaml', '.yml'];
 
 const AUTOMATIC_SECRETS = new Set(['GITHUB_TOKEN']);
 
-export const isWorkflowFile = (path) =>
+const isWorkflowFile = (path) =>
   WORKFLOW_EXTENSIONS.some((extension) => path.endsWith(extension));
 
-export const isAgentFile = ({ agentDirectory, path }) =>
+const isAgentFile = ({ agentDirectory, path }) =>
   agentDirectory !== undefined &&
   agentDirectory !== '' &&
   path.startsWith(`${agentDirectory.replace(/\/$/, '')}/`);

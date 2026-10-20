@@ -91,7 +91,7 @@ const KEEPS_ITS_LINES = new Set(['snippet']);
 
 const singleLine = (value) => String(value).replaceAll(/\s+/gu, ' ').trim();
 
-export const fromReviewBody = (fields) =>
+const fromReviewBody = (fields) =>
   Object.fromEntries(
     Object.entries(fields).map(([key, value]) => [
       key,
