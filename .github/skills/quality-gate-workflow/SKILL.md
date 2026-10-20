@@ -178,7 +178,7 @@ branch to conflict with
 - Do not skip a stage.
 - Fix failures before moving forward.
 - Re-run the full gate after non-trivial fixes.
-- Prefer `vp run test` (not `vp test`) in this project.
+- Run a workspace's tests with `vp run test`, which runs its `test` task (`vp test run` plus any arguments the task adds); stage 8 stays `vp run test:changed` from the root.
 - Never silence a finding to get a stage green (CLAUDE.md rule 11) — fix the code.
   This covers `// biome-ignore` exactly as it covers `// eslint-disable`.
 - Never trust a green Biome run on a rule you just enabled — a disabled rule and

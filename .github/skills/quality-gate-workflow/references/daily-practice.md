@@ -123,8 +123,9 @@ vp run test:changed
 vp check
 vp lint .
 
-# ❌ Using non-canonical test command for this project
-vp test
+# ❌ Running one workspace's tests as the gate's test stage — root
+#    scripts/ belongs to no workspace, so their tests never run
+cd packages/ui && vp run test
 ```
 
 ```bash
@@ -171,4 +172,4 @@ Use this in PR templates or review guides:
 
 ## Notes for This Repository Family
 
-In this workspace conventions set, `vp run test` is preferred over `vp test` to avoid known transform issues in certain TypeScript configurations.
+Every workspace `test` task runs `vp test run`, so `vp run test` and a bare `vp test run` in the same workspace run the same suite. Prefer `vp run test`: it picks up any arguments the task adds.

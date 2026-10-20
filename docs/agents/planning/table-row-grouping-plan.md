@@ -1281,7 +1281,7 @@ vp run lint:biome:check     # 4  from the ROOT
 vp run react-doctor:verify  # 5  from the ROOT
 vp check                    # 6  fmt + Oxlint + tsgolint
 vp run typecheck            # 7  real tsc — NOT the same pass as 6
-vp run test                 # 8  never `vp test`
+vp run test                 # 8  the workspace task
 ```
 
 From the root: `vp run typecheck:all` (the `GroupingState` conformance test lives in

@@ -23,9 +23,10 @@ this, and `packages/ui`'s `check:public-api` enforces it.
 - **`@vitest/coverage-v8`** in the root manifest — an optional peer of vitest,
   which pnpm resolves only while some manifest declares it. Removing it takes
   every `--coverage` run down (ADR-047).
-- **Workspace `vitest` deps** — the `test` tasks ultimately invoke Vitest's own
-  entry point from `node_modules` by path, so the dependency is load-bearing
-  even where no import references it.
+- **`vitest` in `apps/showcase`** — its `test:watch` invokes Vitest's own
+  entry point from `node_modules` by path, so that declaration is load-bearing
+  even though no import references it. The `test` tasks run `vp test`, which
+  resolves the Vitest vite-plus depends on before a workspace's own.
 - **`react-doctor`** — `packages/repo-standards/scripts/verify-react-doctor.mjs` spawns its binary by
   explicit path, invisible to an import-graph scanner, so fallow reports it
   unused on every run.

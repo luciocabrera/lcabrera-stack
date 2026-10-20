@@ -252,7 +252,7 @@ are the ones you would guess **wrong**:
 | -------------------- | -------------------------------------------------------------------------------------- |
 | Build for production | `vp run build` (runs `react-router build` and emits `build/server/index.js`)           |
 | Type check           | `vp run typecheck` (real tsc) — `vp check` runs tsgolint, which is a different pass    |
-| Run tests            | `vp run test` (never `vp test` — see the `quality-gate-workflow` skill)                |
+| Run tests            | `vp run test` — the workspace's `test` task, which runs `vp test run`                  |
 | Full validation      | The canonical quality gate — see [Post-Change Quality Gate](#post-change-quality-gate) |
 
 **The exception is a command `vp` does not wrap** — then reaching for pnpm (or
@@ -669,7 +669,8 @@ For multi-step exploration or investigation tasks, use the **`codebase-explorer`
 
 <!-- This file deliberately carries NO Vite+ managed block. Vite+ rewrites that
      region whenever it syncs agent instructions, which `vp install` does, and the
-     template it writes tells agents to run `vp test` — forbidden by §4. Without
+     template it writes is a review checklist this repo did not write, and its
+     `vp check` and `vp test` are not the quality gate in §7. Without
      the markers the sync is a documented no-op, so do not re-add them: an empty
      marker pair is not enough, it just gets refilled. `vp run viteplus:verify`
      enforces this, with `--write` to empty a region that came back. -->
