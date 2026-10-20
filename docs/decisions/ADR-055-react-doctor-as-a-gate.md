@@ -64,8 +64,9 @@ which is a bad property for the thing standing between a mistake and `main`.
 
 ### What is switched off, and why that is not a suppression policy hole
 
-Two entries are off repo-wide, both because the rule cannot be right here, and
-both carry their reasoning inline in `doctor.config.jsonc` and an argued entry in
+Three entries are off repo-wide (the third added by the 2026-10-19 amendment),
+each because acting on the rule would be wrong here, and each carries its reasoning inline
+in `doctor.config.jsonc` and an argued entry in
 [`public-package-suppressions.json`](../agents/public-package-suppressions.json):
 
 - **`react-doctor/no-barrel-import`** — the rule's own documentation names Vite
@@ -81,6 +82,12 @@ both carry their reasoning inline in `doctor.config.jsonc` and an argued entry i
   imports them; removing one breaks the ESLint pass. Same class as
   [ADR-047](ADR-047-declare-optional-peer-dependencies.md). Genuinely unused
   dependencies are still caught by fallow.
+- **`react-doctor/js-combine-iterations`** — shipped disabled, and pinned `off`
+  so a change of default cannot turn it on under the warning gate. Its
+  prescribed fix fuses a `.filter().map()` chain into one pass;
+  [ADR-054](ADR-054-array-operation-hierarchy.md) makes the chain the default,
+  treats fusing as a hot-path optimisation applied on evidence, and measured the
+  `flatMap` form as slower than the chain it replaces.
 
 ### The suppression register was extended in the same change
 
@@ -163,8 +170,7 @@ enforcing what its config said.
   `no-barrel-import`, so a change of default cannot make the warning gate block
   on a fix [ADR-054](ADR-054-array-operation-hierarchy.md) measured as no
   better than the chain it replaces. It carries an `acknowledged` entry in the
-  suppression register like the other two. The section above that says two
-  entries are off predates this amendment.
+  suppression register like the other two, and is listed in the section above.
 
 Corrections to the record as first written:
 

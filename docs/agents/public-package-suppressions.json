@@ -137,7 +137,7 @@
     {
       "key": "react-doctor doctor.config.jsonc rule react-doctor/js-combine-iterations",
       "count": 1,
-      "reason": "Pinned off at the rule's own shipped default, so a future default change cannot make the warning gate block on it. Its prescribed fix fuses a two-pass chain into one; ADR-054 measured the flatMap form as slower than the .filter().map() chain it replaces, and found the other forms not worth their readability cost at this repo's collection sizes. Off repo-wide, not for these packages.",
+      "reason": "Pinned off at the rule's own shipped default, so a future default change cannot make the warning gate block on it. Its prescribed fix fuses a two-pass chain into one; ADR-054 makes the .filter().map() chain the default, treats fusing as a hot-path optimisation applied on evidence, and measured the flatMap form as slower than the chain it replaces. Off repo-wide, not for these packages.",
       "ref": "ADR-055, ADR-054, #1418"
     }
   ],
