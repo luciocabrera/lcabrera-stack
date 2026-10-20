@@ -57,8 +57,8 @@ catalogs:
   test:
     '@testing-library/react': ^16.3.3
     jsdom: ^30.0.1
-    # Declared because every workspace invokes the binary by path, and pnpm only
-    # materialises `node_modules/vitest` for a direct dependency.
+    # Declared because the test scripts run its binary by name, and pnpm only
+    # links a binary for a direct dependency.
     vitest: 5.0.5
 
   types:

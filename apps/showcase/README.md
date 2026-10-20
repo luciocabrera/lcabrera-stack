@@ -54,8 +54,8 @@ vp run lint:eslint:check
 - Use `vp run build`, not `vp build`, for the production SSR bundle.
 - `vp run build` emits `build/server/index.js`.
 - `vp run start` serves `build/server/index.js` and rebuilds it if missing.
-- Use `vp run test`, not `vp test`, because this repo uses a custom Vitest
-  command to avoid the Vite+ built-in test-path issue in this setup.
+- `vp run test` runs the workspace's `test` task, which is `vp test run`.
+  `vp run test:watch` is the watch loop.
 
 ## Data Sources
 

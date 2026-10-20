@@ -43,9 +43,9 @@ setup is the one thing that cannot be delivered by being described.
 source directory, so a packed tarball's file modes never appear — which is how
 `devkit`'s shipped git hooks once arrived inert: `pnpm pack` writes every entry
 `0644`, and git skips a non-executable hook without failing. That is why
-`vp run tarball:verify` packs `devkit` and `repo-standards` and installs them
-into a scratch repo outside this tree; it is chained into `check:safe` and runs
-as its own CI step
+`vp run tarball:verify` packs the distributed packages, runs publint over each
+tarball and installs them into a scratch repo outside this tree; it is chained
+into `check:safe` and runs as its own CI step
 ([ADR-073](docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md)).
 
 **Which product does a change serve?** That is the first question for any new

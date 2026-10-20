@@ -256,5 +256,7 @@ export const suiteInputs = ({ graph, readSource, suiteDir, tracked }) => {
   const probes = candidates
     .filter((path) => trackedFiles.has(path) || directories.has(path))
     .map((path) => (directories.has(path) ? `${path}/` : path));
-  return [...new Set(probes)].sort((left, right) => left.localeCompare(right));
+  return [...new Set(probes)].toSorted((left, right) =>
+    left.localeCompare(right),
+  );
 };

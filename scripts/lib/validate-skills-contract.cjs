@@ -36,7 +36,7 @@ const validateSkills = (args = {}) => {
   const checkedSkills = [
     ...result.checked.skill,
     ...result.unreadableSkills,
-  ].sort((a, b) => a.localeCompare(b));
+  ].toSorted((a, b) => a.localeCompare(b));
 
   return {
     checkedSkillCount: checkedSkills.length,

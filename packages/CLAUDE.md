@@ -80,8 +80,8 @@ by inspection:
   as it is, so there is nothing for a build to fix. Having no `build` script puts
   them outside `publish:verify` and `attw:verify` by those gates' own filter —
   `vp run tarball:verify` is what answers for their packed artifact instead, and
-  it goes further than either, running `devkit init` out of the tarball in a
-  scratch repository. What still reaches them is the API-surface ratchet, and it
+  it goes further than either: it runs publint over each tarball at error level
+  and runs `devkit init` out of the tarball in a scratch repository. What still reaches them is the API-surface ratchet, and it
   only does because their generated tsconfig sets `allowJs`: ts-morph resolves
   the entry file through that config, and without the flag it loads no `.mjs`,
   snapshots an empty surface, and passes. Untyped JavaScript still yields a real
