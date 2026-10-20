@@ -84,6 +84,14 @@ gate until `unused-exports`, `unused-types`, `unused-dependencies` and
 `unused-dev-dependencies` were raised to `error` (#1095). New-only attribution
 keeps the inherited ones from failing.
 
+Dead code has a second, whole-tree gate: `vp run fallow:dead-code:verify` runs
+`fallow dead-code` with no base and exits 1 on any error-severity dead-code
+finding anywhere (#1419). It is what catches an export in an unchanged file
+that a change made unreachable, which the audit's changed-file scope cannot
+see. It holds only because the tree carries no such finding, so a new one fails
+it whether or not the diff touched the file. `check:push`, `check:safe` and
+the CI Fallow Audit job run it; the plant that proved it is in the table below.
+
 A clone group has no entry in `rules`, so on its own an introduced one is
 warn-severity: the audit counts it under `duplication_introduced`, gives
 verdict `warn` and exits 0. `duplicates.threshold` is what makes it fail. The
@@ -105,6 +113,7 @@ the config or the fallow version moves. Run the audit as CI does:
 | Analysis                  | Plant                                                                                                                                                    | Observed                                                                                                                                 |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
 | unused export             | `export const probeUnused = 1;` appended to `packages/repo-standards/scripts/affected-tests.mjs` and `packages/repo-standards/scripts/config-values.mjs` | `fallow dead-code` reports both; audit `fail`, exit 1                                                                                    |
+| unused export, whole tree | `export const plantedUnused = 1;` appended to `packages/repo-standards/scripts/doc-registers.mjs`, no audit run (#1419)                                  | `vp run fallow:dead-code:verify` exit 1; reverted, exit 0                                                                                |
 | unused file               | a new one-export module dropped into `scripts/lib/` and into `packages/repo-standards/scripts/`, imported by nothing                                     | `unused_files` for both; audit `fail`                                                                                                    |
 | unused dependency         | `probe-unused-dep` added to `devDependencies` in the root and `packages/repo-standards` manifests                                                        | `unused_dev_dependencies`; audit `fail`. Pass `--no-cache` when probing a manifest: the incremental cache once missed the workspace edit |
 | cycle                     | `affected-tests.mjs` and `ci-commands.mjs` import each other; same in `config-values.mjs` and `error-message.mjs`                                        | `circular_dependencies` for both pairs; audit `fail`                                                                                     |
@@ -150,13 +159,10 @@ is what the vitest plugin discovered, so it lists `packages/repo-standards/scrip
 as a gap although `affected-tests.test.mjs` imports it. The gated form of a
 coverage gap is the CRAP row above, which reads measured coverage.
 
-`vp run fallow:dead-code`, `fallow:health` and `fallow:dupes` scan the whole
-tree and exit 1 on the inherited findings the new-only gate attributes to the
-base. Run them before a PR anyway: a change that makes an export in an
-unchanged file unreachable is outside a changed-file audit's scope, and the
-full scan is the only thing that sees it. The findings the unblinded scan
-surfaces are listed in the pull request for #1095, not fixed there;
-`vp run fallow:dead-code` prints the current set.
+`vp run fallow:health` and `fallow:dupes` scan the whole tree and exit 1 on
+the inherited findings the new-only gate attributes to the base, so they stay
+on demand. Dead code left that list in #1419, which cleared the inherited
+findings and made the whole-tree scan the `fallow:dead-code:verify` gate above.
 
 ## Always feed the audit real coverage
 

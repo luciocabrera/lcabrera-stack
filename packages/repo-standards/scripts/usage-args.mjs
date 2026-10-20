@@ -88,7 +88,7 @@ export const utcInstant = (value, label) => {
   return text;
 };
 
-export const settingsFiles = ({ repoRoot, userHome }) => [
+const settingsFiles = ({ repoRoot, userHome }) => [
   join(repoRoot, '.claude', 'settings.local.json'),
   join(repoRoot, '.claude', 'settings.json'),
   join(userHome, '.claude', 'settings.json'),

@@ -1,5 +1,1 @@
-export {
-  hasHeaderBands,
-  resolveHeaderBands,
-  type TableHeaderBand,
-} from './resolveHeaderBands.util';
+export { hasHeaderBands, resolveHeaderBands } from './resolveHeaderBands.util';

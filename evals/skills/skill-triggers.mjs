@@ -233,9 +233,6 @@ export const coverageProblems = ({ catalog, declared, evals }) => {
   ];
 };
 
-export const withoutSeparator = (args) =>
-  args[0] === '--' ? args.slice(1) : args;
-
 export const sessionScope = ({ catalog, hidden, task }) => ({
   skills:
     hidden.length === 0

@@ -13,11 +13,22 @@ area:
   - packages/repo-standards/scripts/**
   - packages/devkit/scripts/**
   - packages/ui/src/**
-  - eslint-local-rules/**
+  - packages/eslint-local-rules/src/create-rule.ts
+  - packages/devkit/CLASSIFICATION.md
+  - apps/showcase/src/routes/wide-alltypes-150/config/index.ts
+  - evals/agent-sessions.test.mjs
+  - evals/skills/**
+  - AGENTS.md
+  - .claude/README.md
+  - .claude/rules/scripts.md
+  - .github/skills/fallow-code-checker/**
+  - .github/skills/health-swarm/charters/dead-code.md
+  - docs/tooling/fallow-summary.md
+  - .changeset/remove-unreachable-internal-exports.md
 started: 2026-10-20
 updated: 2026-10-20
 plan: (none)
-pr: (none)
+pr: '#1449'
 issue: #1419
 ---
 
