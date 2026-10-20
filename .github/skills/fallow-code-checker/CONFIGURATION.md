@@ -131,10 +131,11 @@ is a plant, run through the audit as CI runs it (the command above) once with
 the rule at its previous severity and once at `error`, then reverted. The
 commands and their output are in the pull request for #1422.
 
-| Rule                   | Plant                                                                                                                                                                                         | Exit before | Exit at `error` |
-| ---------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------- |
-| `duplicate-prop-shape` | two components in two new files beside `PinAndHideActions`, each taking `ColumnPinningButtonProps` and rendered by it, so three components share one prop-name set with `ColumnPinningButton` | 0           | 0               |
-| `stale-suppressions`   | `// fallow-ignore-next-line unused-export` above `isObject` in `packages/utils/src/guards/is-object.util.ts`, an export the package entry keeps in use                                        | 0           | 1               |
+| Rule                         | Plant                                                                                                                                                                                         | Exit before | Exit at `error` |
+| ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------- |
+| `duplicate-prop-shape`       | two components in two new files beside `PinAndHideActions`, each taking `ColumnPinningButtonProps` and rendered by it, so three components share one prop-name set with `ColumnPinningButton` | 0           | 0               |
+| `stale-suppressions`         | `// fallow-ignore-next-line unused-export` above `isObject` in `packages/utils/src/guards/is-object.util.ts`, an export the package entry keeps in use                                        | 0           | 1               |
+| `require-suppression-reason` | the same comment, with no reason, above a new unused export appended to `apps/showcase/src/constants/app.constants.ts` (the rule was `off`)                                                   | 0           | 1               |
 
 `duplicate-prop-shape` is reported and not enforced. The pinned fallow lists
 the three findings with `effective_severity: "error"`, yet its

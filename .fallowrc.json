@@ -132,7 +132,8 @@
     "prop-drilling": "error",
     "thin-wrapper": "error",
     "duplicate-prop-shape": "error",
-    "stale-suppressions": "error"
+    "stale-suppressions": "error",
+    "require-suppression-reason": "error"
   },
   "overrides": [
     // Route loaders return serializable state/promises consumed by shared
