@@ -178,6 +178,11 @@ export const THROWAWAY_LABEL = 'devkit.throwaway';
 const isGone = ({ isOnDisk, live, worktree }) =>
   worktree !== '' && !live.has(worktree) && !isOnDisk(worktree);
 
+const keptReason = ({ worktree }) =>
+  worktree === ''
+    ? 'running; its label names no worktree'
+    : `running for ${worktree}, which is still there`;
+
 /**
  * @param {{ containers: { id: string, name: string, running: boolean,
  *   worktree: string }[], isOnDisk: (path: string) => boolean,
@@ -194,7 +199,7 @@ export const classifyContainers = ({ containers, isOnDisk, live }) =>
           action: 'remove',
           reason: `orphaned: ${container.worktree} is gone`,
         }
-      : { ...container, action: 'keep', reason: 'running' };
+      : { ...container, action: 'keep', reason: keptReason(container) };
   });
 
 const hintLine = (count) =>

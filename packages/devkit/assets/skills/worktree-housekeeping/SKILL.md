@@ -26,16 +26,19 @@ gh pr list --state all --json number,headRefName,state --limit 400 | repo-housek
 
 If your task runner defines a `housekeeping:prune` task, it is this pipe; use
 it. Run the bin through your package manager's exec if it is not on PATH. The
-dry run changes nothing and prints four sections:
+dry run changes nothing and prints five sections:
 
 - **branches it would delete**: their pull request merged or closed, or they
   hold no commit the default branch lacks.
 - **worktrees it would remove**: clean, on a branch whose pull request merged or
   closed, or detached on a commit the default branch contains.
+- **stale worktree entries it would prune**: entries whose directory is gone.
+  `--apply` prunes them before it deletes any branch.
 - **throwaway containers it would remove**: stopped, or running for a worktree
   that is gone.
-- **KEEPING**: everything that might be work. A branch with unique commits and
-  no pull request, a dirty worktree, any stash.
+- **KEEPING**: everything that might be work or is still in use. A branch with
+  unique commits and no pull request, a dirty worktree, any stash, and a
+  running throwaway container whose worktree is still there.
 
 A dirty worktree's line splits its changed files into those that match the
 default branch's history, those that match the worktree's own history, those

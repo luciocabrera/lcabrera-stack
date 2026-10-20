@@ -136,7 +136,7 @@ describe('housekeeping:prune --apply', () => {
     expect(worktreePaths(tree.repo)).toContain(tree.superseded);
   });
 
-  it('removes a stopped or orphaned throwaway container and keeps a running one', () => {
+  it('removes a stopped or orphaned throwaway container, and lists a running one under KEEPING', () => {
     const tree = buildSortingRepository(make());
     const removed = [];
     const docker = {
@@ -157,6 +157,16 @@ describe('housekeeping:prune --apply', () => {
         return { ok: true };
       },
     };
+
+    const dry = prune({ docker, repo: tree.repo });
+    const keeping = dry.lines.slice(
+      dry.lines.findIndex((line) => line.includes('KEEPING')),
+    );
+    expect(keeping).toContain(
+      `  container live — running for ${tree.open}, which is still there`,
+    );
+    expect(keeping.join('\n')).not.toContain('container stopped');
+    expect(removed).toEqual([]);
 
     prune({ argv: ['--apply'], docker, repo: tree.repo });
 

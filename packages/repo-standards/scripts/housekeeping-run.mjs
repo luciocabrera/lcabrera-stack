@@ -224,6 +224,7 @@ const renderPlan = ({ apply, plan }) => {
       rows: [
         ...plan.reportBranches.map((b) => `branch ${b.name} — ${b.reason}`),
         ...plan.reportWorktrees.map((w) => `worktree ${w.path} — ${w.reason}`),
+        ...plan.keepContainers.map((c) => `container ${c.name} — ${c.reason}`),
         ...plan.stashes.map((s) => `stash ${s}`),
       ],
       title: 'KEEPING — review by hand, never auto-deleted:',

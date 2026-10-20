@@ -161,7 +161,8 @@ touches the main checkout or the checkout it runs from.
   are both zero. Nothing removes one with a change found in neither.
 - Containers labelled `devkit.throwaway` are listed; the label's value is the
   path of the worktree that started the container. `--apply` removes a stopped
-  one, and a running one whose worktree is gone. Without Docker it lists none
+  one, and a running one whose worktree is gone; a running one whose worktree
+  is still there is listed under KEEPING. Without Docker it lists none
   and says so.
 
 With nothing on stdin, because `gh` is missing or cannot sign in, every
