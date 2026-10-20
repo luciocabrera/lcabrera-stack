@@ -10,6 +10,7 @@ area:
   - doctor.config.jsonc
   - docs/decisions/ADR-055-*
   - docs/agents/react-doctor-triage.md
+  - docs/agents/react-doctor-facts.json
   - .changeset/*react-doctor*
   - docs/agents/public-package-suppressions.json
   - packages/repo-standards/README.md

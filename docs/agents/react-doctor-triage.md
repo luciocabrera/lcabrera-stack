@@ -27,9 +27,8 @@ packages (`vp run suppressions:packages`) each needs an argued entry in
 Rule 11 applies unchanged — prefer fixing the code, and record an accepted finding here
 rather than silencing it.
 
-Tool-level facts — the rule-family map, which families conflict with our own ADRs, the
-verified false positives, and what integrating react-doctor into the gate would require —
-are in [`react-doctor-facts.json`](react-doctor-facts.json). Read that before wiring the
+How the gate is wired, what it blocks and which rules are off is
+[ADR-055](../decisions/ADR-055-react-doctor-as-a-gate.md). Read that before wiring the
 tool into anything; this file stays the authority on per-finding reasoning.
 
 The chained-iteration verdicts this file used to carry were dropped once React Doctor
