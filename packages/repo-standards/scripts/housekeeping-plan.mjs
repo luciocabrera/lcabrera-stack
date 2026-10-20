@@ -234,7 +234,7 @@ export const buildPlan = ({
   }));
   const freed = new Set(
     worktreeVerdicts
-      .filter((entry) => entry.action === 'remove')
+      .filter((entry) => entry.action === 'remove' && !entry.force)
       .map((entry) => entry.branch),
   );
   const branchVerdicts = branches.map((name) => ({

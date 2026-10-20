@@ -54,9 +54,9 @@ user confirms this plan, in this session.
 
 ## 3. Apply it
 
-Run the same pipe with `--apply` after the bin. It removes the worktrees and
-deletes the branches the plan listed, runs `git worktree prune`, and removes the
-listed containers. If a step fails it says which one and exits 1. Run the dry
+Run the same pipe with `--apply` after the bin. It removes the worktrees the plan
+listed, prunes the stale entries, deletes the branches, and removes the listed
+containers. If a step fails it says which one and exits 1. Run the dry
 run again afterwards and show the user what is left.
 
 A dirty worktree whose every change already exists in history, with no untracked

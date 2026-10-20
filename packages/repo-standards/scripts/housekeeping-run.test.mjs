@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import {
   branchNames,
   buildSortingRepository,
-  configureIdentity,
+  cloneWithOrigin,
   gitIn,
   noContainers,
   PULL_REQUESTS,
@@ -196,11 +196,7 @@ describe('housekeeping:prune with no gh data and no Docker on the machine', () =
 
 const repositoryWithGoneBranches = ({ gone, live }) => {
   const root = make();
-  const origin = join(root, 'origin.git');
-  const repo = join(root, 'repo');
-  gitIn(root, 'init', '-q', '--bare', '-b', 'main', origin);
-  gitIn(root, 'clone', '-q', origin, repo);
-  configureIdentity(repo);
+  const repo = cloneWithOrigin(root);
   gitIn(repo, 'commit', '-q', '--allow-empty', '-m', 'root');
   gitIn(repo, 'push', '-q', '-u', 'origin', 'main');
   const names = [

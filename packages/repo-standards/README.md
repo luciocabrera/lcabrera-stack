@@ -139,8 +139,10 @@ one that cannot prevent anything.
 
 `repo-housekeeping-prune` reads `gh pr list --state all --json number,headRefName,state`
 on stdin and prints a plan. It changes nothing until `--apply`, which carries
-out that plan and then runs `git worktree prune`. It never touches the main
-checkout or the checkout it runs from.
+out that plan in order: it removes the planned worktrees, runs
+`git worktree prune` for entries whose directory is gone, and only then deletes
+branches, so a branch a stale entry still names can be deleted. It never
+touches the main checkout or the checkout it runs from.
 
 - A local branch is deleted when its pull request merged or closed, or when it
   holds no commit the default branch lacks. One with unique commits and no pull
@@ -148,6 +150,9 @@ checkout or the checkout it runs from.
 - A clean worktree is removed when its branch's pull request merged or closed,
   or when it is detached on a commit the default branch contains. A worktree
   removed this way no longer pins its branch, so the same run can delete it.
+  A worktree removed as superseded (below) keeps pinning its branch for that
+  run, so content that matched only the branch's history is never left only
+  in the reflog.
 - A dirty worktree is reported with a count of its changed files whose content
   matches a blob in the default branch's history, in its own history (HEAD and
   upstream), or in neither, plus its untracked files. Content rather than

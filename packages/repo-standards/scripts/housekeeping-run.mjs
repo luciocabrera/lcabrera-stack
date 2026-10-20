@@ -65,6 +65,10 @@ const upstreamOf = ({ branch, path }) =>
         cwd: path,
       }) ?? '');
 
+const isResolvable = ({ cwd, ref }) =>
+  ref !== '' &&
+  doesGitSucceed({ args: ['rev-parse', '--verify', '--quiet', ref], cwd });
+
 const contentOf = ({ base, status, worktree }) =>
   base === undefined
     ? undefined
@@ -73,7 +77,9 @@ const contentOf = ({ base, status, worktree }) =>
         changes: status.changes,
         cwd: worktree.path,
         git: runGitStatus,
-        own: [worktree.head, upstreamOf(worktree)].filter(Boolean),
+        own: [worktree.head, upstreamOf(worktree)].filter((ref) =>
+          isResolvable({ cwd: worktree.path, ref }),
+        ),
       });
 
 const withStatus = ({ base, worktree }) => {
@@ -207,6 +213,10 @@ const renderPlan = ({ apply, plan }) => {
       title: `${verb('Removing', 'Would remove')} worktrees:`,
     }),
     ...section({
+      rows: plan.prunable.map((path) => `${path} — its directory is gone`),
+      title: `${verb('Pruning', 'Would prune')} stale worktree entries (\`git worktree prune\`, before any branch is deleted):`,
+    }),
+    ...section({
       rows: plan.removeContainers.map((c) => `${c.name} — ${c.reason}`),
       title: `${verb('Removing', 'Would remove')} throwaway containers:`,
     }),
@@ -214,9 +224,6 @@ const renderPlan = ({ apply, plan }) => {
       rows: [
         ...plan.reportBranches.map((b) => `branch ${b.name} — ${b.reason}`),
         ...plan.reportWorktrees.map((w) => `worktree ${w.path} — ${w.reason}`),
-        ...plan.prunable.map(
-          (path) => `worktree ${path} — directory gone; pruned by --apply`,
-        ),
         ...plan.stashes.map((s) => `stash ${s}`),
       ],
       title: 'KEEPING — review by hand, never auto-deleted:',
@@ -242,6 +249,9 @@ const applyPlan = ({ docker, plan, root }) => [
   ...plan.removeWorktrees.flatMap((worktree) =>
     applyWorktree({ root, worktree }),
   ),
+  ...(runGit({ args: ['worktree', 'prune'], cwd: root }) === undefined
+    ? ['git worktree prune']
+    : []),
   ...plan.deleteBranches
     .filter(
       (branch) =>
@@ -249,9 +259,6 @@ const applyPlan = ({ docker, plan, root }) => [
         undefined,
     )
     .map((branch) => `branch ${branch.name}`),
-  ...(runGit({ args: ['worktree', 'prune'], cwd: root }) === undefined
-    ? ['git worktree prune']
-    : []),
   ...plan.removeContainers
     .filter((container) => !docker.remove(container.id).ok)
     .map((container) => `container ${container.name}`),

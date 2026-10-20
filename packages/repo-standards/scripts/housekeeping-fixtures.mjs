@@ -90,6 +90,17 @@ export const buildSortingRepository = (root) => {
   return { detached, merged, noPr, open, repo, superseded, unique };
 };
 
+/**
+ * @param {string} root
+ */
+export const cloneWithOrigin = (root) => {
+  const repo = join(root, 'repo');
+  gitIn(root, 'init', '-q', '--bare', '-b', 'main', join(root, 'origin.git'));
+  gitIn(root, 'clone', '-q', join(root, 'origin.git'), repo);
+  configureIdentity(repo);
+  return repo;
+};
+
 export const PULL_REQUESTS = [
   { headRefName: 'merged', number: 1, state: 'MERGED' },
   { headRefName: 'open', number: 2, state: 'OPEN' },
