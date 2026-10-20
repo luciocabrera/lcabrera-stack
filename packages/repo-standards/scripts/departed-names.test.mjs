@@ -3,7 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   departedPathReferences,
   departedReferences,
-  formatFinding,
+  formatDepartedName,
   formatPathFinding,
   isCheckedFile,
   parseRoster,
@@ -144,14 +144,14 @@ describe('isCheckedFile', () => {
   });
 });
 
-describe('formatFinding', () => {
+describe('formatDepartedName', () => {
   it('names the file, the line and what to do instead', () => {
-    expect(formatFinding({ line: 7, name: 'Oldprod', path: 'a.md' })).toContain(
-      'a.md:7',
-    );
-    expect(formatFinding({ line: 7, name: 'Oldprod', path: 'a.md' })).toContain(
-      'Oldprod',
-    );
+    expect(
+      formatDepartedName({ line: 7, name: 'Oldprod', path: 'a.md' }),
+    ).toContain('a.md:7');
+    expect(
+      formatDepartedName({ line: 7, name: 'Oldprod', path: 'a.md' }),
+    ).toContain('Oldprod');
   });
 });
 const entry = (mode, path) => `${mode} abc123 0\t${path}`;

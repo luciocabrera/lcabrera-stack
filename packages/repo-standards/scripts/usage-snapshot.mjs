@@ -17,7 +17,7 @@ import { dirname } from 'node:path';
 
 import { shiftDay, sumDays } from './usage-window.mjs';
 
-export const SNAPSHOT_VERSION = 1;
+const SNAPSHOT_VERSION = 1;
 
 export const emptySnapshot = () => ({
   days: { skills: {}, subagents: {} },

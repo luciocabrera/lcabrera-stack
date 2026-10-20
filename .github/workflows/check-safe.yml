@@ -629,6 +629,13 @@ jobs:
           awk 'found || /^[{[]/ {found=1; print}' fallow-audit.raw.txt > fallow-audit.json
           exit $STATUS
 
+      - name: Fallow dead code (whole tree)
+        # The audit above scores the diff's own files, so an export in an
+        # unchanged file that this change made unreachable is outside it. This
+        # scans the whole tree and fails on any error-severity dead-code finding.
+        if: ${{ !cancelled() }}
+        run: vp run fallow:dead-code:verify
+
       - name: Write fallow summary
         if: always()
         run: |
@@ -651,7 +658,7 @@ jobs:
               echo "| Duplication introduced | $(jq -r '.attribution.duplication_introduced // "n/a"' fallow-audit.json) |"
               echo "| Coverage source | $(jq -r '.complexity.summary.coverage_source_consistency // "n/a"' fallow-audit.json) |"
               echo ""
-              echo "> Gate \`new-only\`: only newly-introduced issues fail this job. Inherited findings are covered by \`reports/fallow/baselines/\`."
+              echo "> Gate \`new-only\`: the audit fails only on newly-introduced issues; inherited findings are covered by \`reports/fallow/baselines/\`. Dead code is also gated whole-tree by the \`fallow:dead-code:verify\` step."
               echo "> Coverage source \`mixed\` is expected: real Istanbul coverage is fed for the DB-free suites, and files with no tests at all still fall back to fallow's static estimate (which guesses 0% and inflates their CRAP)."
             else
               echo "❌ Audit did not produce JSON output — check the job log (exit 2 usually means an invalid base ref or config error)."

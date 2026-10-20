@@ -101,7 +101,7 @@ const execute = ({ args, binary, cwd }) =>
  * @param {{ args: string[], cwd: string }} args
  * @returns {string} stdout, trimmed; throws when git fails
  */
-export const runGit = ({ args, cwd }) =>
+export const runGitOrThrow = ({ args, cwd }) =>
   execute({ args, binary: requireGitBinary(gitBinary()), cwd });
 
 /**

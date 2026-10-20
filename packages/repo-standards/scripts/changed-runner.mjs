@@ -17,7 +17,7 @@ export const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 
-export const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
+const VP_BIN = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
 export const readChangedFiles = () =>
   readFileSync(0, 'utf8')

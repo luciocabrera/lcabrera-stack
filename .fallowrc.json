@@ -63,6 +63,10 @@
     {
       "file": "apps/showcase/src/features/showcase/ShowcasePage/SidePanelSection/SidePanelSection.stylex.ts",
       "exports": ["*"]
+    },
+    {
+      "file": "vite.config.ts",
+      "exports": ["WORKSPACE_RUNTIMES", "lintConfig"]
     }
   ],
   "health": {

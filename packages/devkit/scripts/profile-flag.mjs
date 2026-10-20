@@ -15,7 +15,7 @@
  * consume `--check` as a profile name and quietly turn the check off with it.
  */
 
-export const PROFILE_FLAG = '--profile';
+const PROFILE_FLAG = '--profile';
 
 export const PROFILE_FLAG_ERROR = `${PROFILE_FLAG} needs a profile name after it`;
 

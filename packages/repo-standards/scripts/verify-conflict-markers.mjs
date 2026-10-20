@@ -16,7 +16,7 @@ import { fileURLToPath } from 'node:url';
 
 import {
   conflictMarkerLines,
-  formatFinding,
+  formatConflictMarker,
   isBinaryContent,
 } from './conflict-markers.mjs';
 import { regularFiles } from './departed-names.mjs';
@@ -80,7 +80,7 @@ const reportFindings = (findings) => {
     'These tracked lines are merge-conflict markers left by an unfinished merge:\n\n',
   );
   for (const finding of findings) {
-    process.stderr.write(`  ${formatFinding(finding)}\n`);
+    process.stderr.write(`  ${formatConflictMarker(finding)}\n`);
   }
   process.stderr.write(
     '\nResolve the conflict in each file: keep the side you want, then delete\n' +

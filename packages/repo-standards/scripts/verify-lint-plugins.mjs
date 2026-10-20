@@ -201,8 +201,9 @@ const main = async () => {
   for (const probe of silent)
     process.stdout.write(
       `Oxlint did not report ${probeCode(probe)} for a deliberate violation.\n` +
-        `  The \`${probe.plugin}\` family is not loaded — add it to PLUGINS in\n` +
-        '  packages/vite-configs/src/vite.lint.shared.config.ts.\n',
+        `  Either the \`${probe.plugin}\` family is not loaded — add it to PLUGINS in\n` +
+        '  packages/vite-configs/src/vite.lint.shared.config.ts — or the root lint\n' +
+        `  config turns \`${probeCode(probe)}\` off, or Oxlint no longer reports it.\n`,
     );
   for (const line of rosters) process.stdout.write(line);
   for (const plugin of uncovered)
@@ -220,8 +221,9 @@ const main = async () => {
     return;
   }
   process.stdout.write(
-    `Lint config: ${PLUGIN_PROBES.length} of ${plugins.length} plugin families ` +
+    `Lint config: ${new Set(PLUGIN_PROBES.map((probe) => probe.plugin)).size} of ${plugins.length} plugin families ` +
       `proven live by a planted violation (the rest documented as unprobeable), ` +
+      `${PLUGIN_PROBES.length} probes in all, ` +
       `${workspaces.length} workspaces classified exactly once by the Oxlint and ` +
       'Biome rosters alike, no workspace config shadows the root.\n',
   );

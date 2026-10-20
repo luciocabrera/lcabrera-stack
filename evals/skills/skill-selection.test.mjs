@@ -6,7 +6,6 @@ import {
   PROMPT_SUFFIX,
   selectedSkills,
   selectionProblems,
-  withoutSeparator,
 } from './skill-triggers.mjs';
 
 describe('selectionProblems', () => {
@@ -51,17 +50,6 @@ describe('isPathScoped', () => {
       true,
     );
     expect(isPathScoped('---\nname: a\n---\npaths: in the body\n')).toBe(false);
-  });
-});
-
-describe('withoutSeparator', () => {
-  it('drops the -- that vp run passes through, and nothing else', () => {
-    expect(withoutSeparator(['--', '--check'])).toStrictEqual(['--check']);
-    expect(withoutSeparator(['epic', '--hide', 'epic'])).toStrictEqual([
-      'epic',
-      '--hide',
-      'epic',
-    ]);
   });
 });
 
