@@ -61,6 +61,11 @@ export default defineConfig({
 A workspace config sets `pack`, `run` and its Vite/Vitest config. `fmt`, `lint`
 and `staged` belong in the root config only.
 
+The `test` and `test:coverage` tasks from `./run` run `vp test run`. That runs
+the Vitest `vite-plus` depends on, not the project's own `vitest`, and
+`vp toolchain vitest` prints which version it is. `VITEST_COVERAGE_FLAGS` selects
+the v8 provider, so keep `@vitest/coverage-v8` at that same version.
+
 The config sets `denyWarnings`, so a rule at `warn` fails the run, and
 reports an `oxlint-disable` directive that silences nothing as an error. Oxlint
 does not read `eslint-disable` directives: those name ESLint rules, which Oxlint
