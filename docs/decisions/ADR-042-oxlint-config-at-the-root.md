@@ -205,7 +205,7 @@ mutates its receiver. `vp lint` reports a `.sort()` call planted in
 
 The `vitest` plugin held back under Consequences is adopted for five rules.
 The root `vite.config.ts` passes an override over `**/*.test.ts`,
-`**/*.test.tsx` and `**/*.test.mjs` with `plugins: ['vitest']` and these rules
+`**/*.test.tsx`, `**/*.test.mjs` and `**/*.test.cjs` with `plugins: ['vitest']` and these rules
 at `error`:
 
 - `vitest/expect-expect`, with `assertFunctionNames: ['expect*']`. A call to a
@@ -216,6 +216,15 @@ at `error`:
   argument reports every such call.
 - `vitest/no-conditional-expect`, `vitest/no-standalone-expect` and
   `vitest/require-to-throw-message`, with their defaults.
+
+The plugin knows a test by its `it`/`test` call: a global, or a name bound
+by an ES `import` from the test module. It does not follow a CommonJS binding.
+In a `.test.cjs` or `.test.mjs` file, `const { it } = require('vite-plus/test')`
+followed by a test with no assertion was not reported. The same test using the
+global `it` was, and with `**/*.test.cjs` dropped from `files` it was not.
+A `.cjs` file cannot use `import`, so a `.test.cjs` file is checked only when
+it calls the global test functions. A new test file is an ES module that
+imports them.
 
 `*.spec.ts` is left out. Those files are the Playwright specs, and Biome's
 `playwright` domain covers them (ADR-035).

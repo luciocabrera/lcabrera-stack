@@ -80,7 +80,12 @@ const sharedLintConfig = createLintConfig({
       },
     },
     {
-      files: ['**/*.test.ts', '**/*.test.tsx', '**/*.test.mjs'],
+      files: [
+        '**/*.test.ts',
+        '**/*.test.tsx',
+        '**/*.test.mjs',
+        '**/*.test.cjs',
+      ],
       plugins: ['vitest'],
       rules: {
         'vitest/expect-expect': ['error', { assertFunctionNames: ['expect*'] }],

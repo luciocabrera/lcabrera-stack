@@ -102,8 +102,8 @@ so a script sorts with `toSorted()`. The option matters: at its default the rule
 lets a bare `values.sort();` statement through, which is the in-place form the
 rule exists to stop.
 
-The second is the `vitest` plugin over `**/*.test.ts`, `**/*.test.tsx` and
-`**/*.test.mjs`, with five assertion rules at `error`: `expect-expect`,
+The second is the `vitest` plugin over `**/*.test.ts`, `**/*.test.tsx`,
+`**/*.test.mjs` and `**/*.test.cjs`, with five assertion rules at `error`: `expect-expect`,
 `valid-expect`, `no-conditional-expect`, `no-standalone-expect` and
 `require-to-throw-message`. Every other `vitest` rule the `correctness` category
 turns on is set to `off` by name. Two options matter.
@@ -111,7 +111,8 @@ turns on is set to `off` by name. Two options matter.
 an assertion. `maxArgs: 2` accepts Vitest's `expect(actual, message)`. Oxlint
 owns these checks and Biome's `useExpect` stays off
 ([ADR-042](../../../docs/decisions/ADR-042-oxlint-config-at-the-root.md),
-amendment "Oxlint owns assertion hygiene in test files"). `lint:plugins:verify`
+amendment "Oxlint owns assertion hygiene in test files"). The rules do not see a test function bound
+by `require`, only a global or an ES `import`. `lint:plugins:verify`
 does not probe this override, so a rule change in it needs a planted test with
 no assertion, run through `vp lint`.
 
