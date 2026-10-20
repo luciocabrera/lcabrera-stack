@@ -112,7 +112,7 @@ describe('the default advice', () => {
 
     const result = runInShell({ command, cwd: repo });
 
-    expect(command).toBe('npx --no repo-housekeeping-prune');
+    expect(command).toBe('npx --no -- repo-housekeeping-prune');
     expect(result.status).toBe(0);
     expect(result.stdout).toContain('housekeeping:prune — dry run');
   });
@@ -122,7 +122,7 @@ describe('the default advice', () => {
     writeFileSync(join(repo, 'package.json'), '{}');
 
     expect(
-      runInShell({ command: 'npx --no repo-housekeeping-prune', cwd: repo })
+      runInShell({ command: 'npx --no -- repo-housekeeping-prune', cwd: repo })
         .status,
     ).not.toBe(0);
   });

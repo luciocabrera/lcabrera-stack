@@ -203,7 +203,7 @@ export const classifyContainers = ({ containers, isOnDisk, live }) =>
   });
 
 export const PLAN_COMMAND =
-  'gh pr list --state all --json number,headRefName,state --limit 400 | npx --no repo-housekeeping-prune';
+  'gh pr list --state all --json number,headRefName,state --limit 400 | npx --no -- repo-housekeeping-prune';
 
 const DEFAULT_ADVICE = `print the plan with: ${PLAN_COMMAND}`;
 

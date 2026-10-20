@@ -339,6 +339,17 @@ export const runHint = ({ argv, root }) => {
 };
 
 /**
+ * @param {string} variable
+ */
+export const dockerOff = (variable) => ({
+  list: () => ({
+    containers: [],
+    error: `container checks are off because ${variable} is set`,
+  }),
+  remove: () => ({ ok: false, reason: `${variable} is set` }),
+});
+
+/**
  * @param {string[]} [directories]
  */
 export const dockerHost = (directories) => {

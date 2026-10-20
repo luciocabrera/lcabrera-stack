@@ -163,7 +163,8 @@ touches the main checkout or the checkout it runs from.
   path of the worktree that started the container. `--apply` removes a stopped
   one, and a running one whose worktree is gone; a running one whose worktree
   is still there is listed under KEEPING. Without Docker it lists none
-  and says so.
+  and says so, and setting `REPO_STANDARDS_NO_DOCKER` turns the container
+  checks off even where Docker is installed.
 
 With nothing on stdin, because `gh` is missing or cannot sign in, every
 worktree whose verdict needs a pull request state is kept and listed, and a
@@ -176,7 +177,7 @@ from local refs: clean and detached on a commit the default branch contains, or
 clean on a branch whose upstream is gone after a pruning fetch. The line names
 the count and ends with the advice. Without `--advice` the advice is the pipe
 that prints the full plan in a repository that installed this package:
-`gh pr list --state all --json number,headRefName,state --limit 400 | npx --no repo-housekeeping-prune`.
+`gh pr list --state all --json number,headRefName,state --limit 400 | npx --no -- repo-housekeeping-prune`.
 Pass `--advice` to point the reader somewhere else, such as a skill your
 repository has. It removes nothing, so a session-start hook can run it. For
 Claude Code:

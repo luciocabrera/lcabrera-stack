@@ -22,7 +22,8 @@
  *     # local refs only, no stdin; the advice ends the line
  *
  * Exit code is 0 unless --apply hits an error, --threshold is not a number,
- * or --advice has no text.
+ * or --advice has no text. Setting REPO_STANDARDS_NO_DOCKER turns the container
+ * checks off, so a run never reaches the machine's Docker.
  */
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -30,11 +31,13 @@ import { fileURLToPath } from 'node:url';
 import { readStdin } from './cli-input.mjs';
 import { parsePullRequests } from './gh-exec.mjs';
 import { resolveHostRoot } from './host-root.mjs';
-import { runHint, runPrune } from './housekeeping-run.mjs';
+import { dockerOff, runHint, runPrune } from './housekeeping-run.mjs';
 
 const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
+
+const NO_DOCKER_ENV = 'REPO_STANDARDS_NO_DOCKER';
 
 const report = ({ code, errors, lines }) => {
   for (const line of lines) process.stdout.write(`${line}\n`);
@@ -52,7 +55,9 @@ const main = async () => {
     warning:
       '  ⚠ could not parse `gh pr list` JSON — using commit counts only.\n',
   });
-  report(runPrune({ argv, pullRequests, root: REPO_ROOT }));
+  const isDockerOff = (process.env.REPO_STANDARDS_NO_DOCKER ?? '') !== '';
+  const docker = isDockerOff ? dockerOff(NO_DOCKER_ENV) : undefined;
+  report(runPrune({ argv, docker, pullRequests, root: REPO_ROOT }));
 };
 
 await main();

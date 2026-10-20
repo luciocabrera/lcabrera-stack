@@ -21,10 +21,11 @@ shell or a session is sitting inside it.
 The bin reads the pull request list on stdin:
 
 ```bash
-gh pr list --state all --json number,headRefName,state --limit 400 | npx --no repo-housekeeping-prune
+gh pr list --state all --json number,headRefName,state --limit 400 | npx --no -- repo-housekeeping-prune
 ```
 
-`npx --no` runs the bin the gate runtime installed and never downloads one. If
+`npx --no` runs the bin the gate runtime installed and never downloads one, and
+the `--` hands every flag after it to the bin rather than to npm. If
 your task runner defines a `housekeeping:prune` task, it is this pipe; use it.
 The dry run changes nothing and prints five sections:
 
@@ -57,7 +58,13 @@ user confirms this plan, in this session.
 
 ## 3. Apply it
 
-Run the same pipe with `--apply` after the bin. It removes the worktrees the plan
+Run the same pipe with `--apply` after the bin:
+
+```bash
+gh pr list --state all --json number,headRefName,state --limit 400 | npx --no -- repo-housekeeping-prune --apply
+```
+
+It removes the worktrees the plan
 listed, prunes the stale entries, deletes the branches, and removes the listed
 containers. If a step fails it says which one and exits 1. Run the dry
 run again afterwards and show the user what is left.
