@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { createFixtureRoots, writeIn } from './repo-fixtures.mjs';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
-export const GATE = resolve(HERE, 'verify-adrs.mjs');
+const GATE = resolve(HERE, 'verify-adrs.mjs');
 
 export const HOME = 'docs/decisions';
 export const BASELINE = 'scripts/adr-content-baseline.json';

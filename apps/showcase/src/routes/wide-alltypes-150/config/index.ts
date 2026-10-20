@@ -11,8 +11,4 @@ export {
   WIDE_ALLTYPES_SORTABLE_COLUMNS,
   WIDE_ALLTYPES_TABLE,
 } from './wideAlltypes150.constants';
-export type {
-  WideAlltypes150GroupRow,
-  WideAlltypes150TableResponse,
-  WideAlltypes150TableRow,
-} from './wideAlltypes150.types';
+export type { WideAlltypes150TableResponse } from './wideAlltypes150.types';

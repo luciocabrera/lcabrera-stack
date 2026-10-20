@@ -12,7 +12,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { runCreate } from './command-create.mjs';
-import { runGit } from './git-exec.mjs';
+import { runGitOrThrow } from './git-exec.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 
 export const scratchDirectories = (prefix) => {
@@ -33,7 +33,7 @@ export const scratchDirectories = (prefix) => {
   };
 };
 
-export const git = (args, cwd) => runGit({ args, cwd });
+export const git = (args, cwd) => runGitOrThrow({ args, cwd });
 
 export const quietlyWith = (vi, run) => {
   const { error, log, restore } = silencedConsole(vi);

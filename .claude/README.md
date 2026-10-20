@@ -172,12 +172,12 @@ work.
 Know what that gave up, because the tool hooks are **not** a superset: the `Stop`
 hook was the only thing that ran **tests** locally. What still covers the rest:
 
-| Layer                                    | Covers                                                                                                                                     |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `PostToolUse` (per file)                 | Oxfmt, Oxlint `--fix` — formatting and lint, continuously (no Biome; see the hook table above)                                             |
-| pre-commit (`vp staged`)                 | fmt + Oxlint + tsgolint on staged files, plus a Biome check                                                                                |
-| pre-push (`check:push` + `test:changed`) | the CI Quality Gate: fmt, Oxlint, **ESLint**, full type-check — plus the tests `test:changed` selects, **root `scripts/` suites included** |
-| CI                                       | the full test suite, fallow audit, Sonar, secret scan                                                                                      |
+| Layer                                    | Covers                                                                                                                                                                  |
+| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PostToolUse` (per file)                 | Oxfmt, Oxlint `--fix` — formatting and lint, continuously (no Biome; see the hook table above)                                                                          |
+| pre-commit (`vp staged`)                 | fmt + Oxlint + tsgolint on staged files, plus a Biome check                                                                                                             |
+| pre-push (`check:push` + `test:changed`) | the CI Quality Gate: fmt, Oxlint, **ESLint**, full type-check, whole-tree fallow dead code — plus the tests `test:changed` selects, **root `scripts/` suites included** |
+| CI                                       | the full test suite, fallow audit, Sonar, secret scan                                                                                                                   |
 
 So types are still caught before a commit, and ESLint plus the affected tests
 before a push. `test:changed` selects on the diff rather than running
@@ -190,7 +190,8 @@ it selects, and what forces the full suite instead, is stated once in
 it.
 
 The fallow audit stays CI-only on purpose: it is a new-only gate scored against
-the merge base, so it needs full history and a coverage merge.
+the merge base, so it needs full history and a coverage merge. The whole-tree
+dead-code check needs neither, so `check:push` runs it.
 
 **Adding a hook:** edit the `hooks` block in `.claude/settings.json`. For automated behaviours ("always run X after Y"), hooks are the right mechanism — not memory or preferences.
 

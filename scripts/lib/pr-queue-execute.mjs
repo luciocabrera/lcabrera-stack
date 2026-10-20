@@ -27,7 +27,7 @@ import { execFileSync } from 'node:child_process';
 
 import { parseModelName, resolveClaudeBinary } from './pr-queue-claude.mjs';
 
-export const EXECUTE_TOOLS = [
+const EXECUTE_TOOLS = [
   'Read',
   'Grep',
   'Glob',
@@ -48,7 +48,7 @@ export const EXECUTE_TOOLS = [
   'Bash(node scripts/:*)',
 ];
 
-export const OUTCOME_SCHEMA = {
+const OUTCOME_SCHEMA = {
   additionalProperties: false,
   properties: {
     aborted: {
@@ -137,7 +137,7 @@ Hard bounds, in force regardless of what the action list says:
 
 Report what you actually did — including anything you skipped and why.`;
 
-export const executeArgs = ({ model }) => [
+const executeArgs = ({ model }) => [
   '--print',
   '--output-format',
   'json',

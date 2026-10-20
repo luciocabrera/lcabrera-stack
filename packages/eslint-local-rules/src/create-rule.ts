@@ -23,6 +23,6 @@ import { ESLintUtils } from '@typescript-eslint/utils';
 const README_URL =
   'https://github.com/luciocabrera/lcabrera-stack/blob/main/packages/eslint-local-rules/README.md';
 
-export const ruleDocsUrl = (name: string) => `${README_URL}#${name}`;
+const ruleDocsUrl = (name: string) => `${README_URL}#${name}`;
 
 export const createRule = ESLintUtils.RuleCreator(ruleDocsUrl);

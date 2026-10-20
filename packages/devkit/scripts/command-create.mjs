@@ -55,7 +55,7 @@ import {
 import {
   gitBinary,
   readGit,
-  runGit,
+  runGitOrThrow,
   TRUSTED_GIT_DIRECTORIES,
 } from './git-exec.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
@@ -151,7 +151,7 @@ const gitFailureDetail = (error) => {
 
 const gitStep = ({ args, cwd, step, target }) => {
   try {
-    runGit({ args, cwd });
+    runGitOrThrow({ args, cwd });
     return;
   } catch (error) {
     return gitStepFailure({

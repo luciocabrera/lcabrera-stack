@@ -12,7 +12,7 @@ import { dirname, join } from 'node:path';
 import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 
-import { GIT_REPOSITORY_VARIABLES, runGit } from './git-exec.mjs';
+import { GIT_REPOSITORY_VARIABLES, runGitOrThrow } from './git-exec.mjs';
 import { HOOKS_PATH_SCRIPT } from './workspace.mjs';
 
 export const PACKAGE_ROOT = dirname(dirname(fileURLToPath(import.meta.url)));
@@ -35,7 +35,7 @@ export const CLEAN_ENV = Object.fromEntries(
  * @param {string} cwd
  * @returns {string}
  */
-export const gitIn = (args, cwd) => runGit({ args, cwd });
+export const gitIn = (args, cwd) => runGitOrThrow({ args, cwd });
 
 /**
  * @param {string} cwd

@@ -150,6 +150,6 @@ export const formatPathFinding = ({ name, path }) =>
   `${path} — its PATH names \`${name}\`, which left this repository. Rename the ` +
   `file or directory; its contents alone are not the whole reference.`;
 
-export const formatFinding = ({ line, name, path }) =>
+export const formatDepartedName = ({ line, name, path }) =>
   `${path}:${line} — names \`${name}\`, which left this repository. Describe ` +
   `the property or constraint, not the thing that used to supply it.`;

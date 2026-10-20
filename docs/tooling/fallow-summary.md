@@ -131,5 +131,5 @@ CI notes: branch on `verdict == "fail"` or the exit code; base auto-detection us
 
 - Root [.fallowrc.json](../../.fallowrc.json) — single config for the whole monorepo (workspaces auto-detected from `pnpm-workspace.yaml`).
 - Root scripts: `vp run fallow:full | fallow:dead-code | fallow:health | fallow:dupes | fallow:audit`.
-- CI: `fallow audit --gate new-only` runs as a blocking job in [check-safe.yml](../../.github/workflows/check-safe.yml) on PRs.
+- CI: `fallow audit --gate new-only` runs as a blocking job in [check-safe.yml](../../.github/workflows/check-safe.yml) on PRs, and the same job runs `vp run fallow:dead-code:verify`, the whole-tree dead-code scan that fails on any error-severity finding. `check:push` and `check:safe` chain that scan too.
 - Output convention: [reports/fallow/](../../reports/fallow/) is the single canonical location for every fallow artifact — latest snapshots (`*-latest.json`), `complexity-threshold-analysis.md`, `baselines/`, and gitignored per-run artifacts under `reports/fallow/runs/<timestamp>/` (produced by the `fallow-code-checker` skill / `fallow-scan` agent).

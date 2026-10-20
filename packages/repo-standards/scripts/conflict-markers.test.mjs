@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   conflictMarkerLines,
-  formatFinding,
+  formatConflictMarker,
   isBinaryContent,
   markerKind,
 } from './conflict-markers.mjs';
@@ -224,10 +224,10 @@ describe('isBinaryContent', () => {
   });
 });
 
-describe('formatFinding', () => {
+describe('formatConflictMarker', () => {
   it('prints path, line and the marker text', () => {
     expect(
-      formatFinding({ line: 3, path: 'doc.md', text: `  ${OPEN} HEAD` }),
+      formatConflictMarker({ line: 3, path: 'doc.md', text: `  ${OPEN} HEAD` }),
     ).toBe(`doc.md:3: ${OPEN} HEAD`);
   });
 });

@@ -150,3 +150,41 @@ chain for a run started in that package. That observation holds only before
 [#1430](https://github.com/luciocabrera/lcabrera-stack/pull/1430) removed the
 one such block: afterwards every workspace directory stops with no `staged`
 config found, and #1430 records the probe run by run.
+
+## Amendment 2026-10-19 — Oxlint owns the effect-dependency check
+
+The Decision above removed the ESLint rules that Oxlint was running a second
+time through `jsPlugins`. One overlap of the same kind was left, and this time
+ESLint held the extra copy. Oxlint's `react` plugin carries
+`react-hooks/exhaustive-deps` in the `correctness` category, which
+`createLintConfig` sets to `error`. The React ESLint config from
+`createCustomRulesLintConfig` turned on two more copies:
+`react-hooks/exhaustive-deps` from `eslint-plugin-react-hooks`'s recommended
+config, and `react-x/exhaustive-deps` from `eslint-plugin-react-x`'s. One
+missing dependency was therefore reported by both engines, and twice by ESLint
+alone.
+
+Three cases were planted in a React package, one file each, and both engines
+were run on each file. Oxlint reported all three as errors: a hook that reads a
+prop missing from its dependency array, a `useCallback` closing over a prop it
+does not list, and a ref's `.current` read in an effect cleanup. ESLint
+reported the same three under both rule names, as warnings. Oxlint caught every
+case ESLint caught, so the ESLint config now sets both rules to `off` and
+Oxlint is the only engine that reports a missing dependency.
+
+The other `react-hooks` rules stay in ESLint. In the same analysis Oxlint
+missed a conditional `useState` and a mutated prop, so `rules-of-hooks` and the
+compiler rules have no complete Oxlint equivalent and turning them off would
+lose coverage.
+
+A project that uses `./eslint-custom-rules` without `./lint` no longer gets an
+effect-dependency check from this package. The package README says so.
+
+With one engine left, an Oxlint upgrade that stopped reporting the rule would
+pass every gate silently. The `react` probe in `vp run lint:plugins:verify`
+uses `no-children-prop`, so it proves only that the family loads. The gate now
+carries a second `react` probe: a `.tsx` component whose effect reads a prop
+and passes an empty dependency array. It requires
+`react-hooks(exhaustive-deps)`, and its `scope` field names that prefix because
+it differs from the family name. Turning the rule off in the root lint config
+makes the gate fail on that probe alone.
