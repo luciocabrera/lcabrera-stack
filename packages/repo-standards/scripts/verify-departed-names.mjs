@@ -15,7 +15,7 @@ import { readGates } from './config.mjs';
 import {
   departedPathReferences,
   departedReferences,
-  formatFinding,
+  formatDepartedName,
   formatPathFinding,
   isCheckedFile,
   parseRoster,
@@ -89,7 +89,7 @@ const main = () => {
   if (findings.length > 0) {
     console.error('These name something that left this repository:\n');
     for (const finding of findings) {
-      console.error(`  - ${formatFinding(finding)}`);
+      console.error(`  - ${formatDepartedName(finding)}`);
     }
     console.error(
       '\nRewrite the line, or — if the name genuinely must appear — add the file ' +

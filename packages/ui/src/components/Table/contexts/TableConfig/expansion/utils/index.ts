@@ -1,4 +1,3 @@
-export { collectFoldableGroupPaths } from './collectFoldableGroupPaths.util';
 export { collectGroupLevelFoldPaths } from './collectGroupLevelFoldPaths.util';
 export { countCollapsedGroups } from './countCollapsedGroups.util';
 export { isGroupCollapsed } from './isGroupCollapsed.util';

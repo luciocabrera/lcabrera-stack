@@ -479,32 +479,33 @@ Every row is **parameterise** and **hard**: the body names this repository's
 runner, its analysers, its workspaces or its compose file, and a line naming a
 tool nobody installed is a step nobody defined.
 
-| Task               | Profile    | Update | Verdict          | Dependency | Reason                                                                                               |
-| ------------------ | ---------- | ------ | ---------------- | ---------- | ---------------------------------------------------------------------------------------------------- |
-| `prepare`          | `repo`     | seed   | **parameterise** | **hard**   | The runner's own install hook.                                                                       |
-| `format:all`       | `repo`     | seed   | **parameterise** | **hard**   | One formatter invocation.                                                                            |
-| `lint:all`         | `repo`     | seed   | **parameterise** | **hard**   | A chain of the consumer's lint tasks.                                                                |
-| `lint:biome`       | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation; which analysers a consumer runs is theirs.                                  |
-| `lint:biome:check` | `repo`     | seed   | **parameterise** | **hard**   | The same analyser without `--write` — the form a gate runs.                                          |
-| `test:scripts`     | `repo`     | seed   | **parameterise** | **hard**   | Runs the suites that live in no workspace.                                                           |
-| `deps:peers`       | `repo`     | seed   | **parameterise** | **hard**   | One package-manager invocation; it exits non-zero on an unmet peer.                                  |
-| `fallow:full`      | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation, configured by a seeded config file.                                         |
-| `fallow:audit`     | `repo`     | seed   | **parameterise** | **hard**   | Its `audit` subcommand.                                                                              |
-| `fallow:dead-code` | `repo`     | seed   | **parameterise** | **hard**   | Its `dead-code` subcommand.                                                                          |
-| `fallow:dupes`     | `repo`     | seed   | **parameterise** | **hard**   | Its `dupes` subcommand.                                                                              |
-| `fallow:health`    | `repo`     | seed   | **parameterise** | **hard**   | Its `health` subcommand, plus the flags to print with it — the line is the artifact.                 |
-| `build:all`        | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out in dependency order.                                                                         |
-| `typecheck:all`    | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                             |
-| `typegen:all`      | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                             |
-| `test:all`         | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out plus the root script suites.                                                                 |
-| `test:ci`          | `monorepo` | seed   | **parameterise** | **hard**   | The same fan-out ordered so the coverage summary is the fresh one. The ordering is the consumer's.   |
-| `packages:build`   | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out over the package workspaces.                                                                 |
-| `dev:showcase`     | `full`     | seed   | **parameterise** | **hard**   | Starts the example application. The line ships; the application's name is the consumer's.            |
-| `start:showcase`   | `full`     | seed   | **parameterise** | **hard**   | Runs that application in production mode.                                                            |
-| `db:up`            | `full`     | seed   | **parameterise** | **hard**   | The database lane. Image, ports and env file are the consumer's.                                     |
-| `db:down`          | `full`     | seed   | **parameterise** | **hard**   | Stops it, through the same compose file.                                                             |
-| `db:status`        | `full`     | seed   | **parameterise** | **hard**   | Reports what that compose file has running.                                                          |
-| `db:seed`          | `full`     | seed   | **parameterise** | **hard**   | Starts the database, then runs the application's own seed. The application's name is the consumer's. |
+| Task                      | Profile    | Update | Verdict          | Dependency | Reason                                                                                                                     |
+| ------------------------- | ---------- | ------ | ---------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `prepare`                 | `repo`     | seed   | **parameterise** | **hard**   | The runner's own install hook.                                                                                             |
+| `format:all`              | `repo`     | seed   | **parameterise** | **hard**   | One formatter invocation.                                                                                                  |
+| `lint:all`                | `repo`     | seed   | **parameterise** | **hard**   | A chain of the consumer's lint tasks.                                                                                      |
+| `lint:biome`              | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation; which analysers a consumer runs is theirs.                                                        |
+| `lint:biome:check`        | `repo`     | seed   | **parameterise** | **hard**   | The same analyser without `--write` — the form a gate runs.                                                                |
+| `test:scripts`            | `repo`     | seed   | **parameterise** | **hard**   | Runs the suites that live in no workspace.                                                                                 |
+| `deps:peers`              | `repo`     | seed   | **parameterise** | **hard**   | One package-manager invocation; it exits non-zero on an unmet peer.                                                        |
+| `fallow:full`             | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation, configured by a seeded config file.                                                               |
+| `fallow:audit`            | `repo`     | seed   | **parameterise** | **hard**   | Its `audit` subcommand.                                                                                                    |
+| `fallow:dead-code`        | `repo`     | seed   | **parameterise** | **hard**   | Its `dead-code` subcommand.                                                                                                |
+| `fallow:dead-code:verify` | `repo`     | seed   | **parameterise** | **hard**   | The same subcommand over the whole tree, quiet — the form a gate runs, so it exits non-zero on any error-severity finding. |
+| `fallow:dupes`            | `repo`     | seed   | **parameterise** | **hard**   | Its `dupes` subcommand.                                                                                                    |
+| `fallow:health`           | `repo`     | seed   | **parameterise** | **hard**   | Its `health` subcommand, plus the flags to print with it — the line is the artifact.                                       |
+| `build:all`               | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out in dependency order.                                                                                               |
+| `typecheck:all`           | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                                                   |
+| `typegen:all`             | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out.                                                                                                                   |
+| `test:all`                | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out plus the root script suites.                                                                                       |
+| `test:ci`                 | `monorepo` | seed   | **parameterise** | **hard**   | The same fan-out ordered so the coverage summary is the fresh one. The ordering is the consumer's.                         |
+| `packages:build`          | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out over the package workspaces.                                                                                       |
+| `dev:showcase`            | `full`     | seed   | **parameterise** | **hard**   | Starts the example application. The line ships; the application's name is the consumer's.                                  |
+| `start:showcase`          | `full`     | seed   | **parameterise** | **hard**   | Runs that application in production mode.                                                                                  |
+| `db:up`                   | `full`     | seed   | **parameterise** | **hard**   | The database lane. Image, ports and env file are the consumer's.                                                           |
+| `db:down`                 | `full`     | seed   | **parameterise** | **hard**   | Stops it, through the same compose file.                                                                                   |
+| `db:status`               | `full`     | seed   | **parameterise** | **hard**   | Reports what that compose file has running.                                                                                |
+| `db:seed`                 | `full`     | seed   | **parameterise** | **hard**   | Starts the database, then runs the application's own seed. The application's name is the consumer's.                       |
 
 ### Root scripts that do not ship
 

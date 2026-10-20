@@ -85,7 +85,7 @@ export const summarizeQueue = (node) => {
   };
 };
 
-export const summarizeFiles = (nodes) =>
+const summarizeFiles = (nodes) =>
   (nodes ?? []).map((file) => ({
     additions: file.additions ?? 0,
     deletions: file.deletions ?? 0,

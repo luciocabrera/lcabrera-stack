@@ -87,8 +87,8 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 `devkit:closure -- --shipped`, `docs:verify`,
 `registers:verify`, `package-refs:verify`, `departed:verify`,
 `renames:verify`, `route-names:verify`,
-`inventory:verify`, `adr:verify`, `viteplus:verify`, `configs:verify` and
-`conflict-markers:verify`, mirroring the
+`inventory:verify`, `adr:verify`, `viteplus:verify`, `configs:verify`,
+`conflict-markers:verify` and `fallow:dead-code:verify`, mirroring the
 "Quality Gate (Format · Lint · Types)" job in
 `check-safe.yml`) — then `vp run test:changed`, and finally
 `vp run fallow:preflight`. This closes the gap the pre-commit hook leaves: `vp
@@ -138,7 +138,7 @@ project-specific belongs in that project's own `package.json`.
 | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                                                                                                                  |
 | `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                                                                                                                      |
-| `vp run check:push`                   | the DB-free CI Quality Gate (no tests/fallow) — the `pre-push` hook runs this, `test:changed`, then `fallow:preflight`                                                                         |
+| `vp run check:push`                   | the DB-free CI Quality Gate (no tests; of fallow, only the whole-tree dead-code check) — the `pre-push` hook runs this, `test:changed`, then `fallow:preflight`                                |
 | `vp run typecheck:all`                | real tsc in all 14 workspaces, dependency order                                                                                                                                                |
 | `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                                                                                                              |
 | `vp run typegen:all`                  | route types for both React Router apps                                                                                                                                                         |
@@ -379,16 +379,17 @@ workspace. Scope any of these with `-w`, e.g. `-w 'apps/showcase'`. Full
 policy — entry rules, the CRAP/coverage trap, output conventions — is in
 [AGENTS.md → Fallow Static Analysis](AGENTS.md#fallow-static-analysis-run-from-repo-root).
 
-| Command                        | Does                                                                                                                                                             |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vp run fallow:full`           | full scan                                                                                                                                                        |
-| `vp run fallow:dead-code`      | dead code only                                                                                                                                                   |
-| `vp run fallow:health`         | complexity / health                                                                                                                                              |
-| `vp run fallow:dupes`          | duplication                                                                                                                                                      |
-| `vp run fallow:audit`          | PR-style gate (`--base main`)                                                                                                                                    |
-| `vp run fallow:refresh-report` | regenerate the complexity threshold report                                                                                                                       |
-| `vp run fallow:report`         | full scan + `fallow.raw.json` in a timestamped run dir; echoes the dir                                                                                           |
-| `vp run fallow:preflight`      | the audit exactly as CI runs it: `coverage:merge -- --changed`, then the gate against `TEST_CHANGED_BASE` (default `origin/main`). The `pre-push` hook runs this |
+| Command                          | Does                                                                                                                                                             |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run fallow:full`             | full scan                                                                                                                                                        |
+| `vp run fallow:dead-code`        | dead code only                                                                                                                                                   |
+| `vp run fallow:dead-code:verify` | the whole-tree dead-code gate: exits 1 on any error-severity dead-code finding, inherited or new. `check:push`, `check:safe` and the Fallow Audit job chain it   |
+| `vp run fallow:health`           | complexity / health                                                                                                                                              |
+| `vp run fallow:dupes`            | duplication                                                                                                                                                      |
+| `vp run fallow:audit`            | PR-style gate (`--base main`)                                                                                                                                    |
+| `vp run fallow:refresh-report`   | regenerate the complexity threshold report                                                                                                                       |
+| `vp run fallow:report`           | full scan + `fallow.raw.json` in a timestamped run dir; echoes the dir                                                                                           |
+| `vp run fallow:preflight`        | the audit exactly as CI runs it: `coverage:merge -- --changed`, then the gate against `TEST_CHANGED_BASE` (default `origin/main`). The `pre-push` hook runs this |
 
 Always feed the audit real coverage:
 `vp run fallow:audit --base main --coverage reports/fallow/coverage/coverage-final.json`
@@ -1056,11 +1057,11 @@ Notes on the non-obvious ones:
 
 [`.github/workflows/check-safe.yml`](.github/workflows/check-safe.yml) — three jobs:
 
-| Job              | Steps                                                                                                                |
-| ---------------- | -------------------------------------------------------------------------------------------------------------------- |
-| **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check`      |
-| **Fallow Audit** | `typegen:all` → `coverage:merge -- --changed` → `fallow:audit --base $DIFF_BASE --coverage …` (anywhere with a base) |
-| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR             |
+| Job              | Steps                                                                                                                                            |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check`                                  |
+| **Fallow Audit** | `typegen:all` → `coverage:merge -- --changed` → `fallow:audit --base $DIFF_BASE --coverage …` → `fallow:dead-code:verify` (anywhere with a base) |
+| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR                                         |
 
 Each pass is a **separate step on purpose** so a failure names itself instead of
 hiding behind a neighbour. `vp check` does not run the eslint pass, it does not run

@@ -14,7 +14,7 @@ import { createFixtureRoots, writeIn } from './repo-fixtures.mjs';
 export const REQUIREMENT_DIR = 'docs/product/requirements';
 export const PLANNING_DIR = 'docs/agents/planning';
 
-export const REQUIREMENT = `---
+const REQUIREMENT = `---
 id: render-a-table
 lines:
   - application
@@ -44,7 +44,7 @@ I have rows and columns and want a table on the page.
 - The package's entry map resolves a component taking both.
 `;
 
-export const MET_REQUIREMENT = `---
+const MET_REQUIREMENT = `---
 id: sql-is-safe
 lines:
   - application
@@ -70,7 +70,7 @@ I compose a query and cannot express an injection.
 - \`vp run test:ci\` covers the identifier quoting.
 `;
 
-export const PLAN = `---
+const PLAN = `---
 kind: plan
 status: live
 recorded: 2026-08-11
@@ -83,7 +83,7 @@ packages: [ui, server]
 Its reasoning.
 `;
 
-export const DRAFT = `# A proposed decision
+const DRAFT = `# A proposed decision
 
 Holding no number until it is adopted.
 `;
