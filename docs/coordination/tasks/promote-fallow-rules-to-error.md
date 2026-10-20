@@ -9,11 +9,14 @@ area:
   - packages/ui/src/components/Table/TableHeaderCell/TableHeaderActionsMenu/PinAndHideActions/**
   - .github/skills/fallow-code-checker/**
   - docs/tooling/fallow-summary.md
-  - .changeset/**
+  - .changeset/*fallow*
+  - packages/ui/src/components/Table/TableHeaderCell/ARCHITECTURE.md
+  - packages/ui/src/components/Table/commands/ARCHITECTURE.md
+  - docs/product/requirements/a-grouped-grid-reads-as-the-report-i-arranged.md
 started: 2026-10-20
 updated: 2026-10-20
 plan: (none)
-pr: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1456
 issue: #1422
 ---
 

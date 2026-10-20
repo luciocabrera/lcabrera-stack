@@ -31,9 +31,7 @@ TableHeaderCell/
 │   │   └── ClearSortingButton/             → Always shown, disabled until sorted; owns useSetColumnSorting
 │   ├── PinAndHideActions/                   → Thin shell composing the pin/hide delegates (forwards columnKey/onClose/pinSide)
 │   │   ├── PinAndHideActions.component.tsx
-│   │   ├── PinLeftButton/                   → Toggles left pin + highlights; owns useSetColumnPinning
-│   │   ├── PinRightButton/                  → Toggles right pin + highlights; owns useSetColumnPinning
-│   │   ├── ClearPinningButton/             → Always shown, disabled until pinned; owns useSetColumnPinning
+│   │   ├── ColumnPinningButton/             → Rendered once per target: left/right toggle + highlight, clear is disabled until pinned; owns useSetColumnPinning
 │   │   └── HideColumnButton/                → Hides the column, below a separator; owns useSetColumnVisibility
 │   ├── ManageColumnAction/                  → Manage Column item (single self-connected button); owns the drawer-open meta actions
 │   └── index.ts
@@ -183,15 +181,19 @@ edge, leaving 8px above it and nothing below, and adding `paddingTop` to
 compensate would have let the ghost-button hover background paint up to the rule.
 A `border-bottom` on each section's _last_ item is worse still: its identity
 shifts as options toggle. A separate element sidesteps both, and it also let the
-`hasSectionAbove` prop that threaded the old conditional through `PinLeftButton`,
+`hasSectionAbove` prop that threaded the old conditional through the Pin Left button,
 `ManageColumnAction` and the `PinAndHideActions` shell disappear entirely.
 
 The tree is two levels of private delegates (direct file imports, no barrels —
 ADR-007). `SortActions` and `PinAndHideActions` are **thin shells** that only
-forward props; each individual item ("Ascending", "Pin Left", …) is its own
-`*Button` delegate that owns its store-action hook (`useSetColumnSorting` /
+forward props; each individual item ("Ascending", "Pin Left", …) is rendered by
+a `*Button` delegate that owns its store-action hook (`useSetColumnSorting` /
 `useSetColumnPinning` / `useSetColumnVisibility`) and click handler, keeping
-every file short and independently testable. `ManageColumnAction` is already a
+every file short and independently testable. The three pinning items are one
+delegate, `ColumnPinningButton`, rendered with a `target` of `left`, `right` or
+`clear`: they took the same props and differed only in the command and the side
+they write, and fallow's `duplicate-prop-shape` rule fails three components
+sharing one prop-name set. `ManageColumnAction` is already a
 single self-connected button, so it stays a leaf without a shell.
 `TableHeaderActionsMenu` itself only gates which sections render and forwards
 the popover's render-prop `closeMenu` down to each button's `onClose`, so every
