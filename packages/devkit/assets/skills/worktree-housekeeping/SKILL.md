@@ -21,12 +21,12 @@ shell or a session is sitting inside it.
 The bin reads the pull request list on stdin:
 
 ```bash
-gh pr list --state all --json number,headRefName,state --limit 400 | repo-housekeeping-prune
+gh pr list --state all --json number,headRefName,state --limit 400 | npx --no repo-housekeeping-prune
 ```
 
-If your task runner defines a `housekeeping:prune` task, it is this pipe; use
-it. Run the bin through your package manager's exec if it is not on PATH. The
-dry run changes nothing and prints five sections:
+`npx --no` runs the bin the gate runtime installed and never downloads one. If
+your task runner defines a `housekeeping:prune` task, it is this pipe; use it.
+The dry run changes nothing and prints five sections:
 
 - **branches it would delete**: their pull request merged or closed, or they
   hold no commit the default branch lacks.
@@ -101,6 +101,7 @@ look removable, and nothing otherwise; `--threshold <n>` changes the number. It
 reads no stdin and local refs only. A clean worktree counts when it is detached
 on a commit the default branch contains, or when its branch's upstream is gone
 after a fetch that pruned. It makes no network call and removes nothing, so it
-is safe to run from a session-start hook. The line names the count and the
-pipe in step 1; when it appears, start at step 1. Its count is an estimate, and
-the plan is what decides.
+is safe to run from a session-start hook. The line names the count and ends
+with the hook's `--advice` text, or with the pipe in step 1 when the hook passes
+none; when it appears, start at step 1. Its count is an estimate, and the plan
+is what decides.

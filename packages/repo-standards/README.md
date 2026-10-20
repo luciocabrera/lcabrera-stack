@@ -169,12 +169,17 @@ With nothing on stdin, because `gh` is missing or cannot sign in, every
 worktree whose verdict needs a pull request state is kept and listed, and a
 `note:` line says why.
 
-`--hint [--threshold <n>]` reads no stdin and calls neither `gh` nor Docker. It
+`--hint [--threshold <n>] [--advice "<text>"]` reads no stdin and calls neither
+`gh` nor Docker. It
 prints one line when more than `n` worktrees (ten by default) look removable
 from local refs: clean and detached on a commit the default branch contains, or
 clean on a branch whose upstream is gone after a pruning fetch. The line names
-the count and the `gh pr list … | repo-housekeeping-prune` pipe that prints the
-full plan. It removes nothing, so a session-start hook can run it. For Claude Code:
+the count and ends with the advice. Without `--advice` the advice is the pipe
+that prints the full plan in a repository that installed this package:
+`gh pr list --state all --json number,headRefName,state --limit 400 | npx --no repo-housekeeping-prune`.
+Pass `--advice` to point the reader somewhere else, such as a skill your
+repository has. It removes nothing, so a session-start hook can run it. For
+Claude Code:
 
 ```json
 {
@@ -184,7 +189,7 @@ full plan. It removes nothing, so a session-start hook can run it. For Claude Co
         "hooks": [
           {
             "type": "command",
-            "command": "\"$CLAUDE_PROJECT_DIR\"/node_modules/.bin/repo-housekeeping-prune --hint"
+            "command": "\"$CLAUDE_PROJECT_DIR\"/node_modules/.bin/repo-housekeeping-prune --hint --advice \"run the housekeeping plan before starting\""
           }
         ]
       }

@@ -101,6 +101,29 @@ export const cloneWithOrigin = (root) => {
   return repo;
 };
 
+/**
+ * @param {{ gone: number, live: number, root: string }} args
+ */
+export const repositoryWithGoneBranches = ({ gone, live, root }) => {
+  const repo = cloneWithOrigin(root);
+  gitIn(repo, 'commit', '-q', '--allow-empty', '-m', 'root');
+  gitIn(repo, 'push', '-q', '-u', 'origin', 'main');
+  const names = [
+    ...Array.from({ length: gone }, (_, index) => `gone-${index}`),
+    ...Array.from({ length: live }, (_, index) => `live-${index}`),
+  ];
+  for (const name of names) {
+    gitIn(repo, 'worktree', 'add', '-q', '-b', name, join(root, name), 'main');
+    gitIn(repo, 'push', '-q', '-u', 'origin', name);
+  }
+  const goneNames = names.filter((name) => name.startsWith('gone-'));
+  for (const name of goneNames) {
+    gitIn(repo, 'push', '-q', 'origin', '--delete', name);
+  }
+  gitIn(repo, 'fetch', '-q', '--prune');
+  return repo;
+};
+
 export const PULL_REQUESTS = [
   { headRefName: 'merged', number: 1, state: 'MERGED' },
   { headRefName: 'open', number: 2, state: 'OPEN' },

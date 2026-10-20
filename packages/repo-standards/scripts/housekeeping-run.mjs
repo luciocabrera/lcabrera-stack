@@ -307,6 +307,15 @@ const thresholdOf = (raw) => {
   return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : undefined;
 };
 
+const adviceOf = (argv) => {
+  const index = argv.indexOf('--advice');
+  const text = argv[index + 1] ?? '';
+  return {
+    isGiven: index !== -1,
+    text: text.startsWith('--') ? '' : text.trim(),
+  };
+};
+
 /**
  * @param {{ argv: string[], root: string }} args
  * @returns {{ code: number, lines: string[], errors: string[] }}
@@ -317,7 +326,15 @@ export const runHint = ({ argv, root }) => {
   if (threshold === undefined) {
     return { code: 1, errors: ['--threshold needs a whole number'], lines: [] };
   }
-  const line = renderHint({ count: countRemovableHint(root), threshold });
+  const advice = adviceOf(argv);
+  if (advice.isGiven && advice.text === '') {
+    return { code: 1, errors: ['--advice needs a text after it'], lines: [] };
+  }
+  const line = renderHint({
+    ...(advice.isGiven && { advice: advice.text }),
+    count: countRemovableHint(root),
+    threshold,
+  });
   return { code: 0, errors: [], lines: line === undefined ? [] : [line] };
 };
 

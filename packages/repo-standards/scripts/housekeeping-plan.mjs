@@ -202,17 +202,19 @@ export const classifyContainers = ({ containers, isOnDisk, live }) =>
       : { ...container, action: 'keep', reason: keptReason(container) };
   });
 
-const PLAN_COMMAND =
-  'gh pr list --state all --json number,headRefName,state --limit 400 | repo-housekeeping-prune';
+export const PLAN_COMMAND =
+  'gh pr list --state all --json number,headRefName,state --limit 400 | npx --no repo-housekeeping-prune';
 
-const hintLine = (count) =>
-  `${count} ${count === 1 ? 'git worktree looks' : 'git worktrees look'} removable — print the plan with: ${PLAN_COMMAND}`;
+const DEFAULT_ADVICE = `print the plan with: ${PLAN_COMMAND}`;
+
+const hintLine = ({ advice, count }) =>
+  `${count} ${count === 1 ? 'git worktree looks' : 'git worktrees look'} removable — ${advice}`;
 
 /**
- * @param {{ count: number, threshold: number }} args
+ * @param {{ advice?: string, count: number, threshold: number }} args
  */
-export const renderHint = ({ count, threshold }) =>
-  count > threshold ? hintLine(count) : undefined;
+export const renderHint = ({ advice = DEFAULT_ADVICE, count, threshold }) =>
+  count > threshold ? hintLine({ advice, count }) : undefined;
 
 export const buildPlan = ({
   branches,

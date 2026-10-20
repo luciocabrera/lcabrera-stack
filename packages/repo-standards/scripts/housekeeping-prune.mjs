@@ -18,9 +18,11 @@
  *   vp run housekeeping:prune                    # dry run — print the plan
  *   vp run housekeeping:prune -- --apply         # perform it
  *   vp run housekeeping:prune -- --apply --include-superseded
- *   repo-housekeeping-prune --hint [--threshold <n>]   # local refs only, no stdin
+ *   repo-housekeeping-prune --hint [--threshold <n>] [--advice "<text>"]
+ *     # local refs only, no stdin; the advice ends the line
  *
- * Exit code is 0 unless --apply hits an error or --threshold is not a number.
+ * Exit code is 0 unless --apply hits an error, --threshold is not a number,
+ * or --advice has no text.
  */
 import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';

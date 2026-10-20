@@ -30,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "node \"$CLAUDE_PROJECT_DIR/packages/repo-standards/scripts/housekeeping-prune.mjs\" --hint --threshold 10",
+            "command": "node \"$CLAUDE_PROJECT_DIR/packages/repo-standards/scripts/housekeeping-prune.mjs\" --hint --threshold 10 --advice \"run /worktree-housekeeping to review and remove them.\"",
             "timeout": 30
           }
         ]

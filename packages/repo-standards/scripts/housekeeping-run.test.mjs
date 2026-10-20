@@ -5,14 +5,12 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import {
   branchNames,
   buildSortingRepository,
-  cloneWithOrigin,
-  gitIn,
   noContainers,
   PULL_REQUESTS,
   scratchRoots,
   worktreePaths,
 } from './housekeeping-fixtures.mjs';
-import { dockerHost, runHint, runPrune } from './housekeeping-run.mjs';
+import { dockerHost, runPrune } from './housekeeping-run.mjs';
 
 const { drain, make } = scratchRoots();
 
@@ -201,81 +199,5 @@ describe('housekeeping:prune with no gh data and no Docker on the machine', () =
       (path) => !worktreePaths(tree.repo).includes(path),
     );
     expect(removed).toEqual([tree.detached]);
-  });
-});
-
-const repositoryWithGoneBranches = ({ gone, live }) => {
-  const root = make();
-  const repo = cloneWithOrigin(root);
-  gitIn(repo, 'commit', '-q', '--allow-empty', '-m', 'root');
-  gitIn(repo, 'push', '-q', '-u', 'origin', 'main');
-  const names = [
-    ...Array.from({ length: gone }, (_, index) => `gone-${index}`),
-    ...Array.from({ length: live }, (_, index) => `live-${index}`),
-  ];
-  for (const name of names) {
-    gitIn(repo, 'worktree', 'add', '-q', '-b', name, join(root, name), 'main');
-    gitIn(repo, 'push', '-q', '-u', 'origin', name);
-  }
-  const goneNames = names.filter((name) => name.startsWith('gone-'));
-  for (const name of goneNames) {
-    gitIn(repo, 'push', '-q', 'origin', '--delete', name);
-  }
-  gitIn(repo, 'fetch', '-q', '--prune');
-  return repo;
-};
-
-describe('repo-housekeeping-prune --hint', () => {
-  it('prints one line naming the count and the skill above the threshold', () => {
-    const repo = repositoryWithGoneBranches({ gone: 3, live: 1 });
-
-    const { code, lines } = runHint({
-      argv: ['--hint', '--threshold', '2'],
-      root: repo,
-    });
-
-    expect(code).toBe(0);
-    expect(lines).toHaveLength(1);
-    expect(lines[0]).toContain('3 git worktrees look removable');
-    expect(lines[0]).toContain(
-      'print the plan with: gh pr list --state all --json number,headRefName,state --limit 400 | repo-housekeeping-prune',
-    );
-    expect(lines[0]).not.toContain('/worktree-housekeeping');
-  });
-
-  it('prints nothing at or below the threshold, which defaults to ten', () => {
-    const repo = repositoryWithGoneBranches({ gone: 3, live: 1 });
-
-    expect(
-      runHint({ argv: ['--hint', '--threshold', '3'], root: repo }).lines,
-    ).toEqual([]);
-    expect(runHint({ argv: ['--hint'], root: repo }).lines).toEqual([]);
-  });
-
-  it('deletes nothing', () => {
-    const repo = repositoryWithGoneBranches({ gone: 3, live: 1 });
-    const before = worktreePaths(repo);
-
-    runHint({ argv: ['--hint', '--threshold', '0'], root: repo });
-
-    expect(worktreePaths(repo)).toEqual(before);
-  });
-
-  it('does not count a worktree holding uncommitted work', () => {
-    const repo = repositoryWithGoneBranches({ gone: 2, live: 0 });
-    writeFileSync(join(repo, '..', 'gone-1', 'draft.txt'), 'not committed\n');
-
-    expect(
-      runHint({ argv: ['--hint', '--threshold', '0'], root: repo }).lines[0],
-    ).toContain('1 git worktree looks removable');
-  });
-
-  it('stays silent outside a git repository, and refuses a threshold that is not a number', () => {
-    expect(
-      runHint({ argv: ['--hint', '--threshold', '0'], root: make() }).lines,
-    ).toEqual([]);
-    expect(
-      runHint({ argv: ['--hint', '--threshold', 'many'], root: make() }).code,
-    ).toBe(1);
   });
 });
