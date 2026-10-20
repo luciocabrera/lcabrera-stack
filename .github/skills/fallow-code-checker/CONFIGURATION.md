@@ -131,18 +131,18 @@ is a plant, run through the audit as CI runs it (the command above) once with
 the rule at its previous severity and once at `error`, then reverted. The
 commands and their output are in the pull request for #1422.
 
-| Rule                           | Plant                                                                                                                                                  | Exit before | Exit at `error` |
-| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- | --------------- |
-| `stale-suppressions`           | `// fallow-ignore-next-line unused-export` above `isObject` in `packages/utils/src/guards/is-object.util.ts`, an export the package entry keeps in use | 0           | 1               |
-| `require-suppression-reason`   | the same comment, with no reason, above a new unused export appended to `apps/showcase/src/constants/app.constants.ts` (the rule was `off`)            | 0           | 1               |
-| `deprecated-exports-in-use`    | a `@deprecated` export appended to `is-object.util.ts` and imported by `packages/utils/src/strings/empty-to-undefined.util.ts` (the rule was `off`)    | 0           | 1               |
-| `unused-catalog-entries`       | `left-pad: ^1.3.0` added to the `backend` catalog in `pnpm-workspace.yaml`                                                                             | 0           | 1               |
-| `empty-catalog-groups`         | `probe: {}` added under `catalogs` in `pnpm-workspace.yaml`                                                                                            | 0           | 1               |
-| `unused-dependency-overrides`  | `left-pad: 1.3.0` added under `overrides` in `pnpm-workspace.yaml`                                                                                     | 0           | 1               |
-| `test-only-dependencies`       | the root manifest's `jsdom` moved from `devDependencies` to `dependencies`; only test files import it                                                  | 0           | 1               |
-| `unused-optional-dependencies` | `probe-unused-optional` added to `optionalDependencies` in `packages/repo-standards/package.json`                                                      | 0           | 1               |
-| `re-export-cycle`              | a barrel in `apps/showcase/src/constants/` that re-exports itself, imported by `app.constants.ts`                                                      | 0           | 1               |
-| `package-cycle`                | a type-only relative import from `packages/utils/src` into `packages/ui/src`, which already imports `@lcabrera/utils`                                  | 0           | 1               |
+| Rule                           | Plant                                                                                                                                                                                | Exit before | Exit at `error` |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- | --------------- |
+| `stale-suppressions`           | `// fallow-ignore-next-line unused-export -- kept for the package entry` above `isObject` in `packages/utils/src/guards/is-object.util.ts`, an export the package entry keeps in use | 0           | 1               |
+| `require-suppression-reason`   | `// fallow-ignore-next-line unused-export`, with no reason, above a new unused export appended to `apps/showcase/src/constants/app.constants.ts` (the rule was `off`)                | 0           | 1               |
+| `deprecated-exports-in-use`    | a `@deprecated` export appended to `is-object.util.ts` and imported by `packages/utils/src/strings/empty-to-undefined.util.ts` (the rule was `off`)                                  | 0           | 1               |
+| `unused-catalog-entries`       | `left-pad: ^1.3.0` added to the `backend` catalog in `pnpm-workspace.yaml`                                                                                                           | 0           | 1               |
+| `empty-catalog-groups`         | `probe: {}` added under `catalogs` in `pnpm-workspace.yaml`                                                                                                                          | 0           | 1               |
+| `unused-dependency-overrides`  | `left-pad: 1.3.0` added under `overrides` in `pnpm-workspace.yaml`                                                                                                                   | 0           | 1               |
+| `test-only-dependencies`       | the root manifest's `jsdom` moved from `devDependencies` to `dependencies`; only test files import it                                                                                | 0           | 1               |
+| `unused-optional-dependencies` | `probe-unused-optional` added to `optionalDependencies` in `packages/repo-standards/package.json`                                                                                    | 0           | 1               |
+| `re-export-cycle`              | a barrel in `apps/showcase/src/constants/` that re-exports itself, imported by `app.constants.ts`                                                                                    | 0           | 1               |
+| `package-cycle`                | a type-only relative import from `packages/utils/src` into `packages/ui/src`, which already imports `@lcabrera/utils`                                                                | 0           | 1               |
 
 `test-only-dependencies` fired only on the root manifest. The same shape in a
 workspace manifest (`@testing-library/react` in `apps/showcase`, a test-only
