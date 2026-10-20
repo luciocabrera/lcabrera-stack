@@ -35,7 +35,7 @@ once.
 ## Consumers
 
 - Header menu (live commit-context): `TableHeaderCell/TableHeaderActionsMenu/` —
-  `PinAndHideActions` (PinLeft/PinRight/ClearPinning), `SortActions`
+  `PinAndHideActions` (ColumnPinningButton, once per pin target), `SortActions`
   (SortAscending/SortDescending/ClearSorting) and `GroupActions`
   (GroupByColumn/ClearGrouping/ExpandAllGroups/CollapseAllGroups, the
   `GroupLevelActions` block, plus the aggregation-mode block).
