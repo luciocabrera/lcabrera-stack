@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { selectOrdersPage } from './.server/enterpriseOrders.service';
 import { loader } from './enterprise-orders.loader';
@@ -61,10 +61,6 @@ const sortKeys = (value: object) =>
 
 const groupingSearch = (param: string) =>
   `?grouping=${encodeURIComponent(param)}`;
-
-beforeEach(() => {
-  vi.mocked(selectOrdersPage).mockClear();
-});
 
 describe('enterprise-orders loader', () => {
   it('returns fully serializable columnsState (columns included) and metaState', async () => {

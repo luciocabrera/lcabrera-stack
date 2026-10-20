@@ -433,7 +433,6 @@ describe('readTableLoaderStateFromRequest', () => {
         columnSizing: { amount: 180 },
         columnVisibility: new Set(['amount']),
       });
-      vi.mocked(readPersistedStateFromCookie).mockClear();
 
       const state = readTableLoaderStateFromRequest<TestRow>({
         columns: testColumns,

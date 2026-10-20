@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
 import { renderHook } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 const mockNavigate = vi.fn();
 
@@ -13,10 +13,6 @@ vi.mock('react-router', async (importOriginal) => {
 const { useBackNavigate } = await import('./useBackNavigate.hook');
 
 describe('useBackNavigate', () => {
-  afterEach(() => {
-    mockNavigate.mockClear();
-  });
-
   it('navigates back when the current history entry has an earlier in-app entry', () => {
     globalThis.history.replaceState({ idx: 2 }, '');
 

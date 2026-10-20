@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { firePrefetch } from '#ui/utils/prefetch/firePrefetch.util';
 
@@ -28,10 +28,6 @@ const baseArgs = {
 };
 
 describe('maybePrefetchNextPage', () => {
-  beforeEach(() => {
-    firePrefetchMock.mockClear();
-  });
-
   it('calls firePrefetch with correct args when enabled and hasMore', () => {
     maybePrefetchNextPage(baseArgs);
 

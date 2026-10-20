@@ -61,7 +61,6 @@ const renderCell = (
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
 });
 
 describe('TableHeaderCell', () => {

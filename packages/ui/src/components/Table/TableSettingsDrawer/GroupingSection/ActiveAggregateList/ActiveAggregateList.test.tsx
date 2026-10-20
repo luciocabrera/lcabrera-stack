@@ -85,7 +85,6 @@ beforeEach(() => {
 
 afterEach(() => {
   cleanup();
-  vi.clearAllMocks();
 });
 
 describe('ActiveAggregateList', () => {

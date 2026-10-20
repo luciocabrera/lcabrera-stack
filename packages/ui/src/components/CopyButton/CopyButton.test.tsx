@@ -25,7 +25,6 @@ describe('CopyButton', () => {
 
   beforeEach(() => {
     vi.useFakeTimers();
-    writeTextMock.mockClear();
     Object.assign(navigator, {
       clipboard: { writeText: writeTextMock },
     });

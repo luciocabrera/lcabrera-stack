@@ -74,8 +74,6 @@ describe('useResetColumnFilter', () => {
   beforeEach(() => {
     setColumnState(undefined);
     setTableColumnsState(undefined);
-    columnStore.set.mockClear();
-    loggerWarn.mockClear();
   });
 
   it('restores the filter the table currently holds for the column', () => {

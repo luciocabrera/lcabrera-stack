@@ -30,7 +30,6 @@ vi.mock('../../../TableDrawerContext/selectors', () => ({
 describe('GroupingModeSection', () => {
   afterEach(() => {
     cleanup();
-    setGroupingModeMock.mockClear();
     useGetGroupingModeMock.mockReturnValue('flat');
     useGetTableIsGroupingLockedMock.mockReturnValue(false);
   });

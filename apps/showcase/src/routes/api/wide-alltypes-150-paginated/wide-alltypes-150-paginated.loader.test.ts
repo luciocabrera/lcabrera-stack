@@ -1,6 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { selectWideAlltypes150Page } from '@/routes/wide-alltypes-150/.server/wideAlltypes150.service';
 
@@ -20,10 +20,6 @@ const invokeLoader = (query: string) =>
       `http://localhost/_api/wide-alltypes-150/paginated?${query}`,
     ),
   } as LoaderFunctionArgs);
-
-beforeEach(() => {
-  vi.mocked(selectWideAlltypes150Page).mockClear();
-});
 
 describe('wide-alltypes-150 paginated resource route', () => {
   it("turns the search params into the service's window and sort", async () => {

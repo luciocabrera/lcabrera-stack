@@ -29,7 +29,6 @@ const groupingWithAxis: TableGroupingState = {
 describe('useClearColumnAggregates', () => {
   it('keeps the staged column axis while clearing measures', () => {
     groupingStore.get.mockReturnValue(groupingWithAxis);
-    groupingStore.set.mockClear();
 
     const { result } = renderHook(() => useClearColumnAggregates());
 

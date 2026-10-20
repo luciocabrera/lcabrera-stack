@@ -23,7 +23,6 @@ vi.mock('../useColumnOrderSectionContextValue.hook', () => ({
 }));
 
 beforeEach(() => {
-  modalsStore.set.mockClear();
   setModalsState(undefined);
 });
 

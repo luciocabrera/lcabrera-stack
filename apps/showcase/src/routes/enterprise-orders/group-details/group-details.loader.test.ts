@@ -2,7 +2,7 @@ import type { LoaderFunctionArgs } from 'react-router';
 
 import { encodeDrillGroup } from '@lcabrera/api/olap/encode-drill-group.util';
 import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { APP_ID } from '@/constants/app.constants';
 
@@ -59,10 +59,6 @@ const invoke = async ({ cookie, group = groupToken }: InvokeArgs = {}) =>
   } as LoaderFunctionArgs);
 
 describe('group-details loader', () => {
-  beforeEach(() => {
-    vi.mocked(selectOrdersPage).mockClear();
-  });
-
   describe('column layout', () => {
     const persistedLayout = [
       persistedOrderCookie(),

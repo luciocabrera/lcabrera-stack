@@ -26,7 +26,6 @@ const createMenuElement = (isOpen: boolean) => {
 
 afterEach(() => {
   document.body.replaceChildren();
-  vi.clearAllMocks();
 });
 
 describe('resolveOpenMenuReposition', () => {

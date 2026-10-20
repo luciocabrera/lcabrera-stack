@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type {
   ColumnFiltersState,
@@ -102,10 +102,6 @@ vi.mock(
 );
 
 describe('resolveBatchColumnSettingsUpdate', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it('combines per-column resolvers into the next table config slices', () => {
     const columnsState: Partial<
       TableColumnsState<{

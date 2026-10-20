@@ -37,6 +37,11 @@ Useful flags: `-r` (recursive, dependency order), `--filter <name>` (one
 workspace, by **package name** not directory), `--parallel`. Note `--filter` and
 `-r` **cannot be combined**.
 
+A `--filter` that matches no package prints a warning and exits 0, so a
+mistyped name runs nothing and passes. Every `vp run --filter` in a root script
+or a workflow therefore also passes `--fail-if-no-match`, which turns that into
+an error; a new one carries it too.
+
 ---
 
 ## 2. Daily commands

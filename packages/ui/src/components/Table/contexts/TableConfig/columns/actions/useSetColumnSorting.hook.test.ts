@@ -119,8 +119,6 @@ describe('useSetColumnSorting', () => {
     });
     setAggregates({ keys: [], nextAggregates: [] });
     setDrawersSyncNonce(0);
-    mockColumnsStore.set.mockClear();
-    mockMetaStore.set.mockClear();
     mockPersistTableState.mockReset();
     mockPersistTableState.mockReturnValue(true);
   });

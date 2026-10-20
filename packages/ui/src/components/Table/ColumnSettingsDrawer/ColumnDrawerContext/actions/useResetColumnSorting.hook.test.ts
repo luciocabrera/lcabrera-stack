@@ -61,8 +61,6 @@ vi.mock('#ui/utils/logger', () => ({
 beforeEach(() => {
   setColumnState(undefined);
   setTableColumnsState(undefined);
-  columnStore.set.mockClear();
-  loggerWarn.mockClear();
 });
 
 describe('useResetColumnSorting', () => {

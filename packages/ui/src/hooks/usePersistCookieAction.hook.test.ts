@@ -22,7 +22,6 @@ vi.mock('react-router', () => ({
 describe('usePersistCookieAction', () => {
   beforeEach(() => {
     submitMock.mockReset();
-    mockUseFetcher.mockClear();
   });
 
   it('submits the entries as JSON with the current URL to the persist-cookie action', () => {

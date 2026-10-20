@@ -45,9 +45,6 @@ it('assigns the id, derives totals and redirects to the new order view', async (
 });
 
 it('returns field errors and does not persist for an invalid submission', async () => {
-  vi.mocked(insertOrder).mockClear();
-  vi.mocked(getNextOrderId).mockClear();
-
   const result = await run({
     ...buildValidOrderFormFields(),
     customer_email: 'nope',

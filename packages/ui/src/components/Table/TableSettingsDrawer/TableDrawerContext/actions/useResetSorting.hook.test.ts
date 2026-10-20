@@ -33,7 +33,6 @@ vi.mock('../useTableDrawerContextValue.hook', () => ({
 }));
 
 beforeEach(() => {
-  drawerColumnsStore.set.mockClear();
   setConfigState(undefined);
 });
 

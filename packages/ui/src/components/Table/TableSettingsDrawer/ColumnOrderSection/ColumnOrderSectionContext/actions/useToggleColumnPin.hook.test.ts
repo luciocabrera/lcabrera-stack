@@ -109,8 +109,6 @@ describe('useToggleColumnPin', () => {
       navigation: {},
       pinning: {},
     });
-    mockAcceptPinSide.mockClear();
-    mockAcceptUnpinConflict.mockClear();
   });
 
   it('does nothing when column is static (ignored-static)', () => {

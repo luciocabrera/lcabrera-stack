@@ -1,13 +1,6 @@
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { fetchCarSalesPage } from '@/services';
 
@@ -40,12 +33,6 @@ vi.mock('@/services', () => ({
     total: 0,
   })),
 }));
-
-beforeEach(() => {
-  vi.mocked(selectRows).mockClear();
-  vi.mocked(getRowsCount).mockClear();
-  vi.mocked(fetchCarSalesPage).mockClear();
-});
 
 afterEach(() => {
   vi.unstubAllEnvs();

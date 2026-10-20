@@ -2,14 +2,7 @@ import { getColumnGroupingCapabilities } from '@lcabrera/server/db/get-column-gr
 import { getRowsCount } from '@lcabrera/server/db/get-rows-count.util';
 import { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import { selectRows } from '@lcabrera/server/db/select-rows.util';
-import {
-  afterEach,
-  beforeEach,
-  describe,
-  expect,
-  it,
-  vi,
-} from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { fetchWideAlltypes150Page } from '@/services';
 
@@ -68,14 +61,6 @@ vi.mock('@/services', () => ({
 }));
 
 const requestedSort = () => vi.mocked(selectRows).mock.calls.at(0)?.at(0)?.sort;
-
-beforeEach(() => {
-  vi.mocked(selectRows).mockClear();
-  vi.mocked(getRowsCount).mockClear();
-  vi.mocked(fetchWideAlltypes150Page).mockClear();
-  vi.mocked(selectGroupedRows).mockClear();
-  vi.mocked(getColumnGroupingCapabilities).mockClear();
-});
 
 afterEach(() => {
   vi.unstubAllEnvs();

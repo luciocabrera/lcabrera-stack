@@ -20,7 +20,6 @@ const READ = {
 
 beforeEach(() => {
   resolvePageRead.mockReset();
-  selectPage.mockClear();
 });
 
 it('resolves the read from the request URL and returns the page as JSON', async () => {
