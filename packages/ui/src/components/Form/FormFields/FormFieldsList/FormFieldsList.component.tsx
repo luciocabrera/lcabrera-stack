@@ -3,6 +3,7 @@ import { use } from 'react';
 
 import { FormField } from '#ui/components/Form/FormField/FormField.component';
 
+import type { RenderFieldsFn } from '../contexts/FormFieldsRendererContext/FormFieldsRendererContext.types';
 import type { FormFieldsListProps } from './FormFieldsList.types';
 
 import { FormFieldsRendererContext } from '../contexts/FormFieldsRendererContext/FormFieldsRendererContext.context';
@@ -13,6 +14,10 @@ import { getFieldKey } from '../utils/getFieldKey.util';
 import { hasScrollOwningChild } from '../utils/hasScrollOwningChild.util';
 import { styles } from './FormFieldsList.stylex';
 
+const renderNestedFields: RenderFieldsFn = (nested) => (
+  <FormFieldsList fields={nested} />
+);
+
 export const FormFieldsList = <TValues extends Record<string, unknown>>({
   fields,
 }: FormFieldsListProps<TValues>) => {
@@ -20,9 +25,7 @@ export const FormFieldsList = <TValues extends Record<string, unknown>>({
   const isRoot = !isNested;
 
   return (
-    <FormFieldsRendererContext
-      value={(nested) => <FormFieldsList fields={nested} />}
-    >
+    <FormFieldsRendererContext value={renderNestedFields}>
       <div
         {...stylex.props(
           styles.stack,

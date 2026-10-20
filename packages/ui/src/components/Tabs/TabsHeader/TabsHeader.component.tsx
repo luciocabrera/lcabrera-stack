@@ -28,18 +28,20 @@ export const TabsHeader = ({
     listRef,
     scrollByDirection,
     viewportRef,
-  } = useTabsHeaderScroll({ tabCount: tabs.length });
+  } = useTabsHeaderScroll();
 
   const setTabRef = ({ element, tabKey }: SetTabRefArgs) => {
     tabRefs.current.set(tabKey, element);
   };
 
   useEffect(() => {
+    if (activeIndex === -1) return;
+
     scrollTabIntoView({
       tab: tabRefs.current.get(activeTab),
       viewport: viewportRef.current,
     });
-  }, [activeTab, tabs.length, viewportRef]);
+  }, [activeIndex, activeTab, viewportRef]);
 
   const handleKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     if (isBusy || tabs.length === 0) return;

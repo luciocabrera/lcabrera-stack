@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useEffectEvent } from 'react';
 
 import type {
   TableColumnsState,
@@ -23,6 +23,7 @@ import {
   getInitialGroupingState,
   getInitialMetaState,
 } from './utils';
+import { syncColumnsStoreFromProps } from './utils/syncColumnsStoreFromProps.util';
 
 export const TableConfigProvider = <TData extends Record<string, unknown>>({
   children,
@@ -59,11 +60,22 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
     }),
   );
 
+  const resyncColumns = useEffectEvent(() => {
+    syncColumnsStoreFromProps({
+      columnAxisEmitted,
+      columnsState,
+      columnsStore,
+      groupingStore,
+      metaStore,
+    });
+  });
+
   useEffect(() => {
     syncStoreFromProps({
       next: getInitialGroupingState({ ...groupingState }),
       store: groupingStore,
     });
+    resyncColumns();
   }, [groupingState, groupingStore]);
 
   useEffect(() => {
@@ -71,50 +83,18 @@ export const TableConfigProvider = <TData extends Record<string, unknown>>({
       next: getInitialMetaState({ ...metaStore.get(), ...metaState }),
       store: metaStore,
     });
+    resyncColumns();
   }, [metaState, metaStore]);
 
   useEffect(() => {
-    const grouping = groupingStore.get();
-    const currentColumns = columnsStore.get();
-    const meta = metaStore.get();
-    const isLayoutTransient = meta.isColumnLayoutTransient === true;
-    const { columnAxisEmitted: storedEmitted, ...currentColumnsRest } =
-      currentColumns;
-    const nextEmitted =
-      grouping.columnAxis === undefined
-        ? columnAxisEmitted
-        : (columnAxisEmitted ?? storedEmitted);
-    const next = getInitialColumnsState<TData>({
-      ...currentColumnsRest,
-      ...columnsState,
-      ...(isLayoutTransient && {
-        columnOrder: currentColumns.columnOrder,
-        columnPinning: currentColumns.columnPinning,
-        columnSizing: currentColumns.columnSizing,
-        columnVisibility: currentColumns.columnVisibility,
-      }),
-      aggregates: grouping.aggregates,
-      crud: meta.crud,
-      groupingKeys: grouping.keys,
-      ...(grouping.columnAxis !== undefined && {
-        columnAxis: grouping.columnAxis,
-      }),
-      ...(nextEmitted !== undefined && { columnAxisEmitted: nextEmitted }),
+    syncColumnsStoreFromProps({
+      columnAxisEmitted,
+      columnsState,
+      columnsStore,
+      groupingStore,
+      metaStore,
     });
-
-    syncStoreFromProps({
-      next,
-      store: columnsStore,
-    });
-  }, [
-    columnAxisEmitted,
-    columnsState,
-    columnsStore,
-    groupingState,
-    groupingStore,
-    metaState,
-    metaStore,
-  ]);
+  }, [columnAxisEmitted, columnsState, columnsStore, groupingStore, metaStore]);
 
   useEffect(() => {
     if (metaState?.defaultGroupFold === undefined) return;

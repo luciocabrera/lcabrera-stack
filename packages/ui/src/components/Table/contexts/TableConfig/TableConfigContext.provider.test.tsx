@@ -358,4 +358,36 @@ describe('TableConfigProvider', () => {
     expect(mounts.config).toBe(1);
     expect(readProbe('grouping')).toBe('customer');
   });
+
+  it('re-derives the columns from a later meta snapshot without a new columns snapshot', () => {
+    const { rerender } = render(<Harness revalidation={1} />);
+
+    expect(readProbe('effective-columns')).toBe('id');
+
+    rerender(
+      <Harness
+        metaState={{ ...META_STATE, crud: { read: true } }}
+        revalidation={1}
+      />,
+    );
+
+    expect(readProbe('effective-columns')).toBe('id,actions');
+  });
+
+  it('re-derives the columns from a later grouping snapshot without a new columns snapshot', () => {
+    const { rerender } = render(
+      <Harness columnsState={WIDER_COLUMNS_STATE} revalidation={1} />,
+    );
+    const ungrouped = readProbe('effective-columns');
+
+    rerender(
+      <Harness
+        columnsState={WIDER_COLUMNS_STATE}
+        groupingState={{ keys: ['name'] }}
+        revalidation={1}
+      />,
+    );
+
+    expect(readProbe('effective-columns')).not.toBe(ungrouped);
+  });
 });
