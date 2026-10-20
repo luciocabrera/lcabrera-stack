@@ -35,7 +35,7 @@ describe('buildMaxValueQuery', () => {
         schema: 'public',
         table: 'widgets',
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "id; DROP TABLE users"');
   });
 
   it('rejects a column not present in an optional allowedColumns list', () => {
@@ -46,6 +46,6 @@ describe('buildMaxValueQuery', () => {
         schema: 'inventory',
         table: 'widgets',
       }),
-    ).toThrow();
+    ).toThrow('Column "secret" is not in the allowed list for this query.');
   });
 });

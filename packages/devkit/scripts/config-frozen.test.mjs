@@ -48,11 +48,7 @@ describe('an exported value a guard or a default trusts', () => {
   test('a mutation of KIT_GROUPS cannot weaken the asset-set refusal', () => {
     const [first] = KIT_GROUPS;
     const onlyFirst = [{ content: '', path: `${first}/kept.md` }];
-    try {
-      KIT_GROUPS.splice(1);
-    } catch {
-      expect(Object.isFrozen(KIT_GROUPS)).toBe(true);
-    }
+    expect(() => KIT_GROUPS.splice(1)).toThrow(TypeError);
 
     expect(retirementRefusal({ assets: onlyFirst })).toContain(
       'Retired nothing',

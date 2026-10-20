@@ -200,3 +200,61 @@ entry sets `unicorn/no-array-sort` to `error`, with
 Without that option the rule accepts a bare `.sort()` statement, which still
 mutates its receiver. `vp lint` reports a `.sort()` call planted in
 `scripts/lib/` under that rule (#1423).
+
+## Amendment 2026-10-20 — Oxlint owns assertion hygiene in test files
+
+The `vitest` plugin held back under Consequences is adopted for five rules.
+The root `vite.config.ts` passes an override over `**/*.test.ts`,
+`**/*.test.tsx` and `**/*.test.mjs` with `plugins: ['vitest']` and these rules
+at `error`:
+
+- `vitest/expect-expect`, with `assertFunctionNames: ['expect*']`. A call to a
+  helper whose name starts with `expect` counts as an assertion. Helpers that
+  assert are named that way.
+- `vitest/valid-expect`, with `maxArgs: 2`. Vitest's `expect(actual, message)`
+  takes a failure message as its second argument. The rule's default of one
+  argument reports every such call.
+- `vitest/no-conditional-expect`, `vitest/no-standalone-expect` and
+  `vitest/require-to-throw-message`, with their defaults.
+
+`*.spec.ts` is left out. Those files are the Playwright specs, and Biome's
+`playwright` domain covers them (ADR-035).
+
+The `correctness` category is at `error`, so naming the plugin also turns on
+every other `vitest` rule in that category. The override sets each of them to
+`off` by name: `hoisted-apis-on-top`, `no-conditional-tests`,
+`no-disabled-tests`, `no-focused-tests`, `prefer-snapshot-hint`,
+`require-awaited-expect-poll`,
+`require-local-test-context-for-concurrent-snapshots`,
+`require-mock-type-parameters`, `valid-describe-callback`,
+`valid-expect-in-promise`, `valid-title` and `warn-todo`. Turning any of them
+on is a separate decision.
+
+The plugins an override names are added to the base list for the files it
+matches. They do not replace it. A `.test.ts` and a `.test.tsx` file holding
+the `lint:plugins:verify` probe code still reported `eslint`, `oxc`,
+`typescript`, `unicorn`, `promise` and `react` findings with the override in
+place.
+
+**Biome does not arbitrate these rules.** Its counterpart, `useExpect`, is a
+nursery rule. The `test` domain preset enables no nursery rule and
+`biome.jsonc` does not name it, so on this config it is not loaded and reports
+nothing. With the rule named in the test-file override, it still differs from
+Oxlint in three ways. It has no option for assertion helpers, so a test that
+asserts only through `expectSomething()` is reported. It did not report an
+`it.each` test with no assertion. And the override's `includes` do not cover
+`*.test.mjs`, which holds most of the repository's script tests. Oxlint owns
+all five rules, and `useExpect` stays off.
+
+Two kinds of fix are worth knowing before writing a test. A check in
+`beforeAll` that the fixture was set up is a precondition, not an assertion.
+`no-standalone-expect` reports an `expect` there, so it throws an `Error`
+naming what went wrong. And `.toThrow()` takes an argument: the message, the
+error class, or `expect.objectContaining(...)` with the field that identifies
+the refusal, such as a schema error's `issues` paths.
+
+`vp run lint:plugins:verify` does not prove this override live. It reads the
+top-level `plugins` list, and its probes ship in `@lcabrera/repo-standards` to
+repositories that may not configure the override. A planted test with no
+assertion fails `vp lint` today. An Oxlint upgrade that stopped reporting one
+of these rules would pass every gate.

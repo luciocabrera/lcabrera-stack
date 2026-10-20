@@ -25,6 +25,10 @@ describe('readFlakyTasks', () => {
   it('rejects a row without a task key', async () => {
     const { client } = recordingClient([{ ...row, taskKey: 7 }]);
 
-    await expect(readFlakyTasks({ client, ...args })).rejects.toThrow();
+    await expect(readFlakyTasks({ client, ...args })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'taskKey'] })],
+      }),
+    );
   });
 });

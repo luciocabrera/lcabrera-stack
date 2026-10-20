@@ -134,7 +134,13 @@ describe.skipIf(!DATABASE_URL)('baselines against Postgres', () => {
       roles: [writer],
     });
 
-    expect(result.granted.map(({ name }) => name)).toEqual([writer.name]);
+    const granted = result.granted.map(({ name }) => name).join(', ');
+
+    if (granted !== writer.name) {
+      throw new Error(
+        `The migration granted [${granted}], not ${writer.name}.`,
+      );
+    }
   });
 
   afterAll(() =>

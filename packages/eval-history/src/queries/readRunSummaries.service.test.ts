@@ -91,6 +91,10 @@ describe('readRunSummaries', () => {
 
     await expect(
       readRunSummaries({ client, scope: { kind: 'run', runId: row.runId } }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'suite'] })],
+      }),
+    );
   });
 });

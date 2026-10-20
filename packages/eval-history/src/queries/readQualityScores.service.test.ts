@@ -44,6 +44,10 @@ describe('readQualityScores', () => {
 
     await expect(
       readQualityScores({ client, runIds: [ROW.runId] }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'mean'] })],
+      }),
+    );
   });
 });

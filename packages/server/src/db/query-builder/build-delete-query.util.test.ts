@@ -32,7 +32,9 @@ describe('buildDeleteQuery', () => {
   it('refuses to build an unfiltered DELETE', () => {
     expect(() =>
       buildDeleteQuery({ filters: [], schema: 'inventory', table: 'widgets' }),
-    ).toThrow();
+    ).toThrow(
+      'buildDeleteQuery requires at least one filter; refusing to build an unfiltered DELETE.',
+    );
   });
 
   it('rejects an unsafe table name', () => {
@@ -42,7 +44,7 @@ describe('buildDeleteQuery', () => {
         schema: 'inventory',
         table: 'widgets; DROP TABLE users',
       }),
-    ).toThrow();
+    ).toThrow('Unsafe identifier: "widgets; DROP TABLE users"');
   });
 
   it('rejects a filter column not present in an optional allowedColumns list', () => {
@@ -53,6 +55,6 @@ describe('buildDeleteQuery', () => {
         schema: 'inventory',
         table: 'widgets',
       }),
-    ).toThrow();
+    ).toThrow('Column "secret" is not in the allowed list for this query.');
   });
 });

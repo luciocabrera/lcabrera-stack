@@ -36,6 +36,6 @@ describe('parseJsonc', () => {
   });
 
   it('throws on a malformed document rather than returning a default', () => {
-    expect(() => parseJsonc('{ "x": }')).toThrow();
+    expect(() => parseJsonc('{ "x": }')).toThrow(SyntaxError);
   });
 });

@@ -62,13 +62,11 @@ describe('assertGroupDepth', () => {
   });
 
   it('refuses an over-deep cube as `too-many-keys`, not a new reason', () => {
-    try {
-      assertGroupDepth({ grouping: 'cube', keys: ['a', 'b', 'c', 'd'] });
-
-      expect.unreachable('a depth-4 cube must be refused');
-    } catch (error) {
-      expect(error).toBeInstanceOf(GroupingRefusedError);
-      expect((error as GroupingRefusedError).reason).toBe('too-many-keys');
-    }
+    expect(() =>
+      assertGroupDepth({ grouping: 'cube', keys: ['a', 'b', 'c', 'd'] }),
+    ).toThrow(GroupingRefusedError);
+    expect(() =>
+      assertGroupDepth({ grouping: 'cube', keys: ['a', 'b', 'c', 'd'] }),
+    ).toThrow(expect.objectContaining({ reason: 'too-many-keys' }));
   });
 });

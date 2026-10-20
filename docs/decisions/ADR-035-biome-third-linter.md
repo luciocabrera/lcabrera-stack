@@ -170,7 +170,12 @@ removed rather than fought into place:
 - `noMisplacedAssertion` — flags `expect()` outside an `it`/`test` body, but cannot
   see through a helper. This repo uses the custom-assertion-helper pattern
   (`expectLoginRedirect`, controller helpers) which is good test hygiene, so the
-  rule false-positives on a pattern worth keeping.
+  rule false-positives on a pattern worth keeping. The nursery `useExpect` stays
+  off for the same reason: it has no option naming assertion helpers. Oxlint's
+  `vitest` plugin owns both checks in test files, with `expect*` helpers
+  counted as assertions
+  ([ADR-042](ADR-042-oxlint-config-at-the-root.md), amendment "Oxlint owns
+  assertion hygiene in test files").
 - `useNumberNamespace` — wants `Number.POSITIVE_INFINITY` / `Number.NaN`, which
   **directly conflicts** with the repo's ESLint `unicorn/prefer-global-number-constants`
   (wants the globals `Infinity` / `NaN` — also the repo's own convention, and its

@@ -87,6 +87,10 @@ describe('readRunCosts', () => {
       columns: COLUMNS,
     });
 
-    await expect(readRunCosts({ client, perSuite: 30 })).rejects.toThrow();
+    await expect(readRunCosts({ client, perSuite: 30 })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'suite'] })],
+      }),
+    );
   });
 });

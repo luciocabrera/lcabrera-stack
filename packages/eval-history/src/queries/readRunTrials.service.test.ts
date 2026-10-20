@@ -91,6 +91,10 @@ describe('readRunTrials', () => {
       columns: COLUMNS,
     });
 
-    await expect(readRunTrials({ client, ...args })).rejects.toThrow();
+    await expect(readRunTrials({ client, ...args })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'outcome'] })],
+      }),
+    );
   });
 });
