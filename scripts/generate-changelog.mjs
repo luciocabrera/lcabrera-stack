@@ -96,8 +96,8 @@ const byScope = (a, b) =>
 
 const renderTypeSection = (type, commits, slug) => {
   const heading = SECTION_TITLE.get(type) ?? `🔖 ${type}`;
-  const entries = [...commits]
-    .sort(byScope)
+  const entries = commits
+    .toSorted(byScope)
     .map((commit) => formatEntry(commit, slug));
   return [`### ${heading}`, '', ...entries, ''];
 };
@@ -124,7 +124,7 @@ const renderVersion = ({ version, commits }, slug) => {
       commit,
     ]);
   }
-  for (const type of [...byType.keys()].sort(bySectionRank)) {
+  for (const type of [...byType.keys()].toSorted(bySectionRank)) {
     lines.push(...renderTypeSection(type, byType.get(type), slug));
   }
   return lines.join('\n');

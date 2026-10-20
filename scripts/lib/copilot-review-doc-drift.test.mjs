@@ -19,7 +19,7 @@ const loginsInTable = (markdown) => {
   return rows.length === 0 ? undefined : rows.map((row) => row[1]);
 };
 
-const expected = () => [...ACCEPTED_REVIEWER_LOGINS].sort(byName);
+const expected = () => ACCEPTED_REVIEWER_LOGINS.toSorted(byName);
 
 describe('the doc’s copies of the accepted-reviewer set', () => {
   it('both copies are still shaped the way the extractors expect', () => {
@@ -32,13 +32,13 @@ describe('the doc’s copies of the accepted-reviewer set', () => {
     const filters = diagnosticFilters(readRepoFile(DOC));
     expect(filters.length).toBeGreaterThan(0);
     for (const filter of filters) {
-      expect(loginsIn(filter).sort(byName)).toEqual(expected());
+      expect(loginsIn(filter).toSorted(byName)).toEqual(expected());
     }
   });
 
   it('the reviewer table names exactly the reviewers the gate accepts', () => {
     const logins = loginsInTable(readRepoFile(DOC));
     expect(logins).toBeDefined();
-    expect([...logins].sort(byName)).toEqual(expected());
+    expect([...logins].toSorted(byName)).toEqual(expected());
   });
 });

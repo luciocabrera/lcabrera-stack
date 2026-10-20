@@ -150,3 +150,15 @@ chain for a run started in that package. That observation holds only before
 [#1430](https://github.com/luciocabrera/lcabrera-stack/pull/1430) removed the
 one such block: afterwards every workspace directory stops with no `staged`
 config found, and #1430 records the probe run by run.
+
+## Amendment 2026-10-20 — a repo-only rule is a root override
+
+A rule that applies to this repository's paths alone is passed to
+`createLintConfig` as an `overrides` entry from the root `vite.config.ts`. The
+factory in `@lcabrera/vite-config/lint` does not carry it, because the globs are
+this repository's directory layout and a consumer's differs. The first such
+entry sets `unicorn/no-array-sort` to `error`, with
+`allowExpressionStatement: false`, on `scripts/**` and `packages/*/scripts/**`.
+Without that option the rule accepts a bare `.sort()` statement, which still
+mutates its receiver. `vp lint` reports a `.sort()` call planted in
+`scripts/lib/` under that rule (#1423).
