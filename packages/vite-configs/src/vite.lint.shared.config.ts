@@ -66,7 +66,13 @@ export const createLintConfig = ({
   categories: { correctness: 'error' },
   env: { builtin: true, es2026: true },
   ignorePatterns: ['.react-router/', 'build/', 'dist/', 'out/', 'coverage/'],
-  options: { typeAware: true, typeCheck: true },
+  options: {
+    denyWarnings: true,
+    reportUnusedDisableDirectives: 'error',
+    respectEslintDisableDirectives: false,
+    typeAware: true,
+    typeCheck: true,
+  },
   overrides: [
     ...runtimeOverrides(workspaceRuntimes),
     NODE_TOOLING_OVERRIDE,
@@ -74,6 +80,9 @@ export const createLintConfig = ({
   ],
   plugins: [...PLUGINS],
   rules: {
+    'promise/always-return': 'error',
     'promise/no-callback-in-promise': ['error', { exceptions: ['next'] }],
+    'react/exhaustive-effect-dependencies': 'error',
+    'react/no-unstable-nested-components': 'error',
   },
 });
