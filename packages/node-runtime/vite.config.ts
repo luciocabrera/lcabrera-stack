@@ -1,12 +1,8 @@
-import { createFmtConfig } from '@lcabrera/vite-config/fmt';
 import { createPackConfig } from '@lcabrera/vite-config/pack';
 import { VITEST_COVERAGE_FLAGS } from '@lcabrera/vite-config/run';
 import { defineConfig } from 'vite-plus';
 
-const fmtConfig = createFmtConfig();
-
 export default defineConfig({
-  fmt: fmtConfig,
   pack: createPackConfig(),
   run: {
     tasks: {

@@ -58,8 +58,8 @@ export default defineConfig({
 });
 ```
 
-A workspace config sets `fmt`, `pack`, `run` and its Vite/Vitest config — never
-`lint`.
+A workspace config sets `pack`, `run` and its Vite/Vitest config. `fmt`, `lint`
+and `staged` belong in the root config only.
 
 ## ESLint
 

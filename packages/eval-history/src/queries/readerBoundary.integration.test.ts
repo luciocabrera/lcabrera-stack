@@ -20,8 +20,12 @@ import { readJudgeAgreement } from '../grades/readJudgeAgreement.service.ts';
 import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
 import { inSequence } from '../ingest/inSequence.service.ts';
 import { grantStatements } from '../migrate/grantStatements.util.ts';
-import { EVALS_READER_ROLE } from '../migrate/migrate.constants.ts';
+import {
+  EVALS_READER_ROLE,
+  USER_SCHEMA_PREDICATE,
+} from '../migrate/migrate.constants.ts';
 import { migrateEvals } from '../migrate/migrateEvals.service.ts';
+import { ownerPrivilegeObjects } from '../migrate/ownerPrivilegeObjects.service.ts';
 import { readMigrations } from '../migrate/readMigrations.service.ts';
 import { resolveGrants } from '../migrate/resolveGrants.service.ts';
 import { revokeStatements } from '../migrate/revokeStatements.util.ts';
@@ -51,37 +55,13 @@ import { readTriggerConfusion } from './readTriggerConfusion.service.ts';
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
 
-const USER_SCHEMA = String.raw`n.nspname not in ('pg_catalog', 'information_schema')
-  and n.nspname not like 'pg\_toast%'
-  and n.nspname not like 'pg\_temp%'`;
-
 const READABLE_COLUMNS_SQL = `select n.nspname || '.' || c.relname || '.' || a.attname as name
 from pg_class c
 join pg_namespace n on n.oid = c.relnamespace
 join pg_attribute a on a.attrelid = c.oid and a.attnum > 0 and not a.attisdropped
-where ${USER_SCHEMA}
+where ${USER_SCHEMA_PREDICATE}
   and c.relkind in ('r', 'p', 'v', 'm', 'f')
   and has_column_privilege($1, c.oid, a.attnum, 'select')`;
-
-const DEFINER_VIEWS_SQL = `select n.nspname || '.' || c.relname as name
-from pg_class c
-join pg_namespace n on n.oid = c.relnamespace
-where ${USER_SCHEMA}
-  and c.relkind = 'v'
-  and has_table_privilege($1, c.oid, 'select')
-  and not coalesce(
-    (
-      select reloption.option_value::boolean
-      from pg_options_to_table(c.reloptions) reloption
-      where reloption.option_name = 'security_invoker'
-    ),
-    false
-  )`;
-
-const DEFINER_FUNCTIONS_SQL = `select n.nspname || '.' || p.proname as name
-from pg_proc p
-join pg_namespace n on n.oid = p.pronamespace
-where p.prosecdef and has_function_privilege($1, p.oid, 'execute')`;
 
 const VIEW_COLUMNS_SQL = `select 'evals.' || c.relname || '.' || a.attname as name
 from pg_class c
@@ -268,8 +248,7 @@ values ($1, 'skills/1', jsonb_build_object(
     const readable = await names({ client, text: READABLE_COLUMNS_SQL });
 
     return {
-      definerFunctions: await names({ client, text: DEFINER_FUNCTIONS_SQL }),
-      definerViews: await names({ client, text: DEFINER_VIEWS_SQL }),
+      ...(await ownerPrivilegeObjects({ client, role: reader.name })),
       unexpectedColumns: readable.filter((name) => !expected.has(name)),
     };
   };
@@ -460,7 +439,7 @@ values ($1, 'skills/1', jsonb_build_object(
       check: async (client) => {
         const { definerFunctions } = await boundaryProblems(client);
 
-        expect(definerFunctions).toEqual(['public.flaky_tasks']);
+        expect(definerFunctions).toEqual(['public.flaky_tasks(integer)']);
       },
       statements: [
         PUBLIC_FLAKY_TASKS.replace('stable as', 'stable security definer as'),
@@ -493,7 +472,7 @@ values ($1, 'skills/1', jsonb_build_object(
         check: async (client) => {
           const { definerFunctions } = await boundaryProblems(client);
 
-          expect(definerFunctions).toEqual(['evals.flaky_tasks']);
+          expect(definerFunctions).toEqual(['evals.flaky_tasks(integer)']);
         },
         statements: [
           `create or replace function ${FLAKY_SIGNATURE}\n${sql.replace(' stable as', ' stable security definer as')}`,

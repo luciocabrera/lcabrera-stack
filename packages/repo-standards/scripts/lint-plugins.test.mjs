@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
-  configsDeclaringLint,
+  configsDeclaringKeys,
   multiplyClassifiedWorkspaces,
   PLUGIN_PROBES,
   pluginsWithoutCoverage,
@@ -54,53 +54,70 @@ describe('silentProbes', () => {
   });
 });
 
-describe('configsDeclaringLint', () => {
-  it('flags a workspace config that declares lint', () => {
-    const files = [
-      {
-        path: 'packages/ui/vite.config.ts',
-        text: 'export default {\n  lint: x,\n};',
-      },
-    ];
-    expect(configsDeclaringLint(files)).toEqual(['packages/ui/vite.config.ts']);
+describe('configsDeclaringKeys', () => {
+  const KEYS = ['lint', 'fmt', 'staged'];
+
+  describe.each(KEYS)('the %s key', (key) => {
+    it('flags a workspace config that declares it', () => {
+      const files = [
+        {
+          path: 'packages/ui/vite.config.ts',
+          text: `export default {\n  ${key}: x,\n};`,
+        },
+      ];
+      expect(configsDeclaringKeys(files, KEYS)).toEqual([
+        { key, path: 'packages/ui/vite.config.ts' },
+      ]);
+    });
+
+    it('exempts the root config, which is the one Vite+ reads', () => {
+      const files = [{ path: 'vite.config.ts', text: `  ${key}: rootConfig,` }];
+      expect(configsDeclaringKeys(files, KEYS)).toEqual([]);
+    });
+
+    it('ignores the key when it is commented out', () => {
+      const files = [
+        {
+          path: 'packages/ui/vite.config.ts',
+          text: `  // ${key}: old,\n  test: t,`,
+        },
+        {
+          path: 'apps/docs-site/vite.config.ts',
+          text: `  /*\n  ${key}: old,\n  */\n  test: t,`,
+        },
+      ];
+      expect(configsDeclaringKeys(files, KEYS)).toEqual([]);
+    });
+
+    it('does not confuse a task name for the block', () => {
+      const files = [
+        {
+          path: 'packages/ui/vite.config.ts',
+          text: `  run: { tasks: { '${key}:check': { command: 'x' } } },`,
+        },
+      ];
+      expect(configsDeclaringKeys(files, KEYS)).toEqual([]);
+    });
   });
 
-  it('exempts the root config, which is the one Vite+ reads', () => {
+  it('reports every key a config declares, in the order asked', () => {
     const files = [
-      { path: 'vite.config.ts', text: '  lint: lintSharedConfig,' },
-    ];
-    expect(configsDeclaringLint(files)).toEqual([]);
-  });
-
-  it('ignores a lint key that is commented out', () => {
-    const files = [
-      {
-        path: 'packages/ui/vite.config.ts',
-        text: '  // lint: old,\n  fmt: f,',
-      },
       {
         path: 'apps/docs-site/vite.config.ts',
-        text: '  /* lint: old, */\n  fmt: f,',
+        text: '  staged: s,\n  fmt: f,\n  test: t,',
       },
     ];
-    expect(configsDeclaringLint(files)).toEqual([]);
+    expect(configsDeclaringKeys(files, KEYS)).toEqual([
+      { key: 'fmt', path: 'apps/docs-site/vite.config.ts' },
+      { key: 'staged', path: 'apps/docs-site/vite.config.ts' },
+    ]);
   });
 
-  it('does not confuse a lint:* task name for a lint block', () => {
-    const files = [
-      {
-        path: 'packages/ui/vite.config.ts',
-        text: "  run: { tasks: { 'lint:eslint': { command: 'eslint .' } } },",
-      },
-    ];
-    expect(configsDeclaringLint(files)).toEqual([]);
-  });
-
-  it('leaves a config with no lint key alone', () => {
+  it('checks only the keys it is given', () => {
     const files = [
       { path: 'apps/docs-site/vite.config.ts', text: '  fmt: fmtConfig,' },
     ];
-    expect(configsDeclaringLint(files)).toEqual([]);
+    expect(configsDeclaringKeys(files, ['lint'])).toEqual([]);
   });
 });
 

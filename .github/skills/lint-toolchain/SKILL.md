@@ -33,10 +33,11 @@ root, `vp lint`, `vp fmt` and `vp check` apply that config and do not apply a
 nested one. From a package directory, `vp lint` and `vp fmt` still use the
 root settings unless that package defines its own `lint` or `fmt` block,
 which Vite+ does not recommend; `vp check` always uses the root blocks. This
-repo rejects a `lint` key in a workspace config (`vp run lint:plugins:verify`),
-so the root block and its `overrides` stay the only place a rule is set, with
-globs resolved from the root (`packages/ui/**`). A package's own
-`vite.config.ts` is for its Vite/Vitest/framework config. See
+repo rejects a `lint`, `fmt` or `staged` key in a workspace config
+(`vp run lint:plugins:verify`), so the root blocks stay the only place a rule,
+a format setting or a staged command is set, with globs resolved from the root
+(`packages/ui/**`). A package's own `vite.config.ts` is for its
+Vite/Vitest/framework config. See
 `node_modules/vite-plus/docs/guide/monorepo.md`, including its "Composing
 Configuration Files" section, which is the supported way to keep the rule sets in
 separate files and merge them into overrides.
@@ -49,8 +50,8 @@ The repo ran the other way round for a long time, with a `lint` block in every
 workspace built from a `*-lint` factory. On Vite+ 0.3 none of it loaded, and
 that layer is gone. Vite+ 1.3 would load such a block when `vp lint` runs from
 the package directory, which is why the gate still rejects the key.
-`vp run lint:plugins:verify` fails on a `lint` key in any workspace config, so
-it cannot come back.
+`vp run lint:plugins:verify` fails on a `lint`, `fmt` or `staged` key in any
+workspace config, so none of them can come back.
 
 **Oxlint runs no ESLint-plugin rules.** The `jsPlugins` bridge is gone: the
 eslint pass already loads `react-x`, `react-dom`, `@stylexjs`, `local-rules`,

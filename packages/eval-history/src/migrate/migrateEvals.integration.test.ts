@@ -16,6 +16,7 @@ import { fileURLToPath } from 'node:url';
 import pg from 'pg';
 import {
   afterAll,
+  afterEach,
   beforeEach,
   describe,
   expect,
@@ -28,6 +29,7 @@ import { readFileSet } from '../hashing/readFileSet.service.ts';
 import { readModelPrices } from '../prices/readModelPrices.service.ts';
 import { applyMigrations } from './applyMigrations.service.ts';
 import {
+  EVALS_READER_ROLE,
   EVALS_WRITER_ROLE,
   MIGRATIONS_DIRECTORY,
 } from './migrate.constants.ts';
@@ -35,6 +37,7 @@ import { migrateEvals } from './migrateEvals.service.ts';
 import { migrateReport } from './migrateReport.util.ts';
 import { parseMigrationFiles } from './parseMigrationFiles.util.ts';
 import { readMigrations } from './readMigrations.service.ts';
+import { toMigration } from './toMigration.util.ts';
 
 const DATABASE_URL = process.env.EVALS_TEST_DATABASE_URL;
 const IS_CI = !['', '0', 'false'].includes(process.env.CI ?? '');
@@ -140,6 +143,10 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     await client.query('drop schema if exists evals cascade');
   });
 
+  afterEach(async () => {
+    await Promise.all(clients.splice(0).map((client) => client.end()));
+  });
+
   const scratchRoles: string[] = [];
 
   const scratchRole = () => {
@@ -148,6 +155,42 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
     scratchRoles.push(name);
 
     return { ...EVALS_WRITER_ROLE, name };
+  };
+
+  const migrateWithReader = async (planted: (viewBody: string) => string) => {
+    const reader = {
+      ...EVALS_READER_ROLE,
+      name: `evals_reader_test_${randomUUID().replaceAll('-', '')}`,
+    };
+    const admin = await connect();
+
+    scratchRoles.push(reader.name);
+    await admin.query(`create role "${reader.name}" nologin`);
+    const migrations = await readMigrations();
+    const prices = await readModelPrices();
+    const before = await migrateEvals({
+      client: admin,
+      migrations,
+      prices,
+      roles: [reader],
+    });
+    const { rows } = await admin.query<{ readonly body: string }>(
+      "select pg_get_viewdef('evals.v_subject_trend'::regclass) as body",
+    );
+    const nextVersion =
+      Math.max(...migrations.map(({ version }) => version)) + 1;
+    const probe = toMigration({
+      bytes: planted(rows[0]?.body ?? ''),
+      path: `${String(nextVersion).padStart(4, '0')}-probe.sql`,
+    });
+    const after = await migrateEvals({
+      client: admin,
+      migrations: [...migrations, probe],
+      prices,
+      roles: [reader],
+    });
+
+    return { after, before, probe, reader };
   };
 
   const storedPrices = async () => {
@@ -543,10 +586,13 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
       `grant usage, create on schema evals to "${nonOwner.name}"`,
     );
     const [database] = await column('select current_database() as value');
-    const grantOnDatabase = (verb: 'grant' | 'revoke') =>
-      admin.query(
+    const grantOnDatabase = async (verb: 'grant' | 'revoke') => {
+      const client = await connect();
+
+      return client.query(
         `${verb} create on database "${String(database)}" ${verb === 'grant' ? 'to' : 'from'} "${nonOwner.name}"`,
       );
+    };
 
     await grantOnDatabase('grant');
     onTestFinished(async () => {
@@ -580,5 +626,57 @@ describe.skipIf(!DATABASE_URL)('applyMigrations against Postgres', () => {
       `evals:migrate: role ${granted.name} still lacks these privileges after the grant`,
     );
     expect(report).toContain('  insert on table evals.eval_run');
+  });
+
+  it('names a reporting view a migration recreates without security_invoker, and keeps the migration applied', async () => {
+    const { after, before, probe, reader } = await migrateWithReader(
+      (body) => `create or replace view evals.v_subject_trend as ${body}`,
+    );
+    const report = migrateReport(after);
+
+    expect(before.exposed).toEqual([]);
+    expect(before.granted.map(({ name }) => name)).toEqual([reader.name]);
+    expect(after.applied.map(({ name }) => name)).toEqual([probe.name]);
+    expect(after.exposed).toEqual([
+      {
+        definerFunctions: [],
+        definerViews: ['evals.v_subject_trend'],
+        role: reader,
+      },
+    ]);
+    expect(after.granted).toEqual([]);
+    expect(report).not.toContain(`granted ${reader.name}`);
+    expect(report).toContain(
+      '  view evals.v_subject_trend without security_invoker',
+    );
+    expect(report).toContain(
+      'The migrations above are applied and stay recorded',
+    );
+    const ledger = await recorded();
+
+    expect(ledger.map(({ name }) => name)).toContain(probe.name);
+  });
+
+  it('names each overload of a security definer function the reader can execute', async () => {
+    const { after, reader } = await migrateWithReader(() =>
+      [
+        'create function evals.probe_definer() returns integer language sql security definer as $$ select 1 $$;',
+        'create function evals.probe_definer(integer) returns integer language sql security definer as $$ select $1 $$;',
+      ].join('\n'),
+    );
+
+    expect(after.exposed).toEqual([
+      {
+        definerFunctions: [
+          'evals.probe_definer()',
+          'evals.probe_definer(integer)',
+        ],
+        definerViews: [],
+        role: reader,
+      },
+    ]);
+    expect(migrateReport(after)).toContain(
+      '  function evals.probe_definer(integer) is security definer',
+    );
   });
 });
