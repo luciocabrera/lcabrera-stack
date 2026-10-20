@@ -1,6 +1,6 @@
 # ADR-055: React Doctor as a gate, via the CLI
 
-**Status:** Accepted
+**Status:** Accepted, amended 2026-10-19 (see [Amendment](#amendment-2026-10-19--the-gate-reads-blocking-and-fails-on-warnings))
 
 ## Context
 
@@ -26,7 +26,8 @@ Three integration shapes were considered.
 ## Decision
 
 **Run the standalone CLI as its own gate, configured by a root
-`doctor.config.jsonc`, failing on error severity at full scope.**
+`doctor.config.jsonc`, failing at full scope on the severity its `blocking`
+key names** (warning and above here, since the 2026-10-19 amendment).
 
 ### Why the CLI rather than the lint-plugin builds
 
@@ -50,23 +51,22 @@ almost entirely disjoint from the other three; where it overlaps, the engines
 agree independently, which AGENTS.md §4 already treats as a safety net rather
 than duplication.
 
-### Severity, not a baseline, separates inherited from new
+### What blocks, and at what scope
 
-React Doctor has **no suppression-baseline file** — no equivalent of ESLint bulk
-suppressions or `reports/fallow/baselines/`. (Its internal `baseline*` machinery
-is the git base ref for `--scope changed`, a different thing.) So the only dial
-that distinguishes inherited debt from a new regression is severity.
+**Amended 2026-10-19.** The gate now fails on whatever severity the config's
+`blocking` key names, and this repository sets it to `warning`; see the
+amendment below, which also records what the original paragraph said and
+why it was withdrawn.
 
-The gate therefore runs at **full scope** and fails on **error** severity.
-Warnings stay visible — in local runs and in the report the same scan writes —
-without blocking. `--scope changed` was rejected as the primary gate: it needs a
-valid base ref, and it silently degrades (see Consequences), which is a bad
-property for the thing standing between a mistake and `main`.
+The gate runs at **full scope**. `--scope changed` was rejected as the primary
+gate: it needs a valid base ref, and it silently degrades (see Consequences),
+which is a bad property for the thing standing between a mistake and `main`.
 
 ### What is switched off, and why that is not a suppression policy hole
 
-Two entries are off repo-wide, both because the rule cannot be right here, and
-both carry their reasoning inline in `doctor.config.jsonc` and an argued entry in
+Three entries are off repo-wide (the third added by the 2026-10-19 amendment),
+each because acting on the rule would be wrong here, and each carries its reasoning inline
+in `doctor.config.jsonc` and an argued entry in
 [`public-package-suppressions.json`](../agents/public-package-suppressions.json):
 
 - **`react-doctor/no-barrel-import`** — the rule's own documentation names Vite
@@ -82,10 +82,12 @@ both carry their reasoning inline in `doctor.config.jsonc` and an argued entry i
   imports them; removing one breaks the ESLint pass. Same class as
   [ADR-047](ADR-047-declare-optional-peer-dependencies.md). Genuinely unused
   dependencies are still caught by fallow.
-
-One file-scoped override exists, for a confirmed false positive in
-`useRunStatusSocket.hook.ts`, where the rule cannot see through a closure that
-reassigns the socket.
+- **`react-doctor/js-combine-iterations`** — shipped disabled, and pinned `off`
+  so a change of default cannot turn it on under the warning gate. Its
+  prescribed fix fuses a `.filter().map()` chain into one pass;
+  [ADR-054](ADR-054-array-operation-hierarchy.md) makes the chain the default,
+  treats fusing as a hot-path optimisation applied on evidence, and measured the
+  `flatMap` form as slower than the chain it replaces.
 
 ### The suppression register was extended in the same change
 
@@ -104,9 +106,10 @@ the Biome detector uses.
 ## Consequences
 
 - A React-specific regression fails the build instead of reaching `main`.
-- Warnings accumulate silently until someone reads the report. That is the price
-  of adopting without a baseline; the triage record is what stops them being
-  re-derived from scratch each time.
+- A warning fails the build the same way an error does (amended 2026-10-19), so
+  every warning-severity rule the tool enables is a ratchet at zero rather than
+  a list that grows until someone reads the report. The triage record is what
+  stops an accepted finding being re-derived each time.
 - **Three silent-pass modes had to be guarded**, and each would have produced a
   gate that reports success while checking nothing:
   1. Without a `doctor` script in `package.json` the CLI decides it "is not
@@ -140,3 +143,45 @@ the Biome detector uses.
   connectivity and no code metadata leaves the machine.
 - Only the three React workspaces are scanned. The Node-only workspaces have no
   React, and nothing else in the repo changes.
+
+## Amendment 2026-10-19 — the gate reads `blocking` and fails on warnings
+
+Issue #1418. Three things above were no longer true, and the gate was not
+enforcing what its config said.
+
+- **`blocking` did nothing.** `verify-react-doctor.mjs` ran the CLI with
+  `--blocking none` and failed only on `error` findings, whatever the config
+  named. It now maps the key itself — `error` blocks errors, `warning` blocks
+  errors and warnings, and an absent key falls back to
+  the deprecated `failOn` and then to `error`, as the CLI resolves it. It
+  keeps `--blocking none` on the CLI call, so the script still refuses a
+  report whose `ok` is not `true` before it counts anything.
+  An unknown value fails the gate rather than falling back. `none` fails it
+  too: honoured, it would switch the gate off with a config edit that the
+  suppression register does not read. `--report` is the advisory run.
+- **This repository fails on warnings.** `doctor.config.jsonc` sets
+  `"blocking": "warning"`. The maintainer chose that over `--baseline`: the
+  tree is at zero warnings, so a warning is new debt the day it lands and needs
+  no stored report to tell it apart from inherited debt.
+- **A shadowing config fails the gate.** The loader prefers
+  `doctor.config.{ts,mts,cts,js,mjs,cjs,json}` over `.jsonc`, so one of those
+  beside it would replace the rules the gate believes it reads. When the
+  `.jsonc` exists and one of those does too, the gate now fails before scanning
+  and names the file.
+- **A third rule is pinned off.** `react-doctor/js-combine-iterations` ships
+  disabled, and `doctor.config.jsonc` sets it `off` explicitly, as it does
+  `no-barrel-import`, so a change of default cannot make the warning gate block
+  on a fix [ADR-054](ADR-054-array-operation-hierarchy.md) measured as no
+  better than the chain it replaces. It carries an `acknowledged` entry in the
+  suppression register like the other two, and is listed in the section above.
+
+Corrections to the record as first written:
+
+- It said React Doctor has no suppression-baseline file. The catalog's version
+  has `--baseline <report.json>`, which reports only issues absent from a saved
+  report. The gate does not use it, for the reason in the second bullet.
+- It named a file-scoped override for a hook that is not in
+  `doctor.config.jsonc` and whose file no longer exists in this repository. That
+  sentence is removed.
+- It accepted that warnings would accumulate until someone read the report.
+  That consequence is replaced above.
