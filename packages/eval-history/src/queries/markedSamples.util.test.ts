@@ -28,6 +28,10 @@ describe('markedSamples', () => {
         schema: z.object({ note: z.string().regex(/^Note: .*$/u) }),
         seedPaths: ['note'],
       }),
-    ).toThrow();
+    ).toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: ['note'] })],
+      }),
+    );
   });
 });

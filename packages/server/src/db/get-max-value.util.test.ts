@@ -55,7 +55,7 @@ describe('getMaxValue', () => {
         schema: 'public',
         table: 'widgets',
       }),
-    ).rejects.toThrow();
+    ).rejects.toThrow('Unsafe identifier: "id; DROP TABLE users"');
 
     expect(query).not.toHaveBeenCalled();
   });

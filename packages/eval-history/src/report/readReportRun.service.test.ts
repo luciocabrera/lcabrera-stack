@@ -108,7 +108,11 @@ describe('readReportRun', () => {
       ]),
     );
 
-    await expect(readReportRun({ client, runId: RUN_ID })).rejects.toThrow();
+    await expect(readReportRun({ client, runId: RUN_ID })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'set'] })],
+      }),
+    );
   });
 
   it('rejects an outcome the schema does not name', async () => {
@@ -119,6 +123,10 @@ describe('readReportRun', () => {
       ]),
     );
 
-    await expect(readReportRun({ client, runId: RUN_ID })).rejects.toThrow();
+    await expect(readReportRun({ client, runId: RUN_ID })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'outcomes', 0] })],
+      }),
+    );
   });
 });

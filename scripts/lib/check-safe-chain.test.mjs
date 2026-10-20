@@ -65,22 +65,38 @@ describe('check:safe — every chained task has a home the classification names'
     expect(ROWS.has(task)).toBe(true);
   });
 
-  it.each(tasks)(
-    '%s resolves to a bin, a consumer-owned line, or a repo-specific script that exists',
+  const isRepoSpecific = (task) => ROWS.get(task)?.verdict === 'repo-specific';
+  const repoSpecificTasks = tasks.filter((task) => isRepoSpecific(task));
+  const sharedTasks = tasks.filter((task) => !isRepoSpecific(task));
+
+  it.each(repoSpecificTasks)(
+    '%s names only repo-specific scripts that exist',
     (task) => {
-      const body = ROOT_SCRIPTS[task];
-      const row = ROWS.get(task);
-      const paths = rootScriptPaths(body);
-      if (row.verdict === 'repo-specific') {
-        for (const path of paths) {
-          expect(existsSync(join(REPO_ROOT, path))).toBe(true);
-        }
-        return;
-      }
-      expect(paths.filter((path) => !path.endsWith('.sh'))).toEqual([]);
-      if (row.update === 'package') {
-        expect(words(body).some((word) => BINS.has(word))).toBe(true);
-      }
+      expect(
+        rootScriptPaths(ROOT_SCRIPTS[task]).filter(
+          (path) => !existsSync(join(REPO_ROOT, path)),
+        ),
+      ).toEqual([]);
+    },
+  );
+
+  it.each(sharedTasks)(
+    '%s resolves to a bin or a consumer-owned line, not a loose script',
+    (task) => {
+      expect(
+        rootScriptPaths(ROOT_SCRIPTS[task]).filter(
+          (path) => !path.endsWith('.sh'),
+        ),
+      ).toEqual([]);
+    },
+  );
+
+  it.each(sharedTasks.filter((task) => ROWS.get(task)?.update === 'package'))(
+    '%s runs a package bin',
+    (task) => {
+      expect(words(ROOT_SCRIPTS[task]).some((word) => BINS.has(word))).toBe(
+        true,
+      );
     },
   );
 });

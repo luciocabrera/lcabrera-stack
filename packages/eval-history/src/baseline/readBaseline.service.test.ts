@@ -45,6 +45,10 @@ describe('readBaseline', () => {
 
     await expect(
       readBaseline({ client, modelId: 'model-a', suite: 'skills' }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'metric'] })],
+      }),
+    );
   });
 });

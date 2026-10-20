@@ -28,6 +28,10 @@ describe('recordAnnotation', () => {
   it('refuses a reply that is not exactly the one stored row', async () => {
     const { client } = recordingClient([]);
 
-    await expect(recordAnnotation({ annotation, client })).rejects.toThrow();
+    await expect(recordAnnotation({ annotation, client })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [] })],
+      }),
+    );
   });
 });

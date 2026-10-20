@@ -51,6 +51,10 @@ describe('ownerPrivilegeObjects', () => {
 
     await expect(
       ownerPrivilegeObjects({ client, role: 'reader' }),
-    ).rejects.toThrow();
+    ).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'name'] })],
+      }),
+    );
   });
 });
