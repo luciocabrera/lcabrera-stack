@@ -159,7 +159,7 @@ const buildTopFindings = (findings, limit) => {
       (finding) =>
         finding.severity === 'critical' || finding.severity === 'high',
     )
-    .sort((a, b) => {
+    .toSorted((a, b) => {
       const severityDelta =
         (severityRank[a.severity] ?? 99) - (severityRank[b.severity] ?? 99);
 

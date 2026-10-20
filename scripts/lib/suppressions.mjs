@@ -179,7 +179,7 @@ export const tally = (found) => {
       scope: finding.scope ?? 'targeted',
     });
   }
-  return [...counts.values()].sort((left, right) =>
+  return [...counts.values()].toSorted((left, right) =>
     left.key.localeCompare(right.key),
   );
 };

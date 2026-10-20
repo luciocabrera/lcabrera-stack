@@ -120,10 +120,12 @@ const generateEslintReport = async () => {
   };
 
   await Promise.all(Array.from({ length: ESLINT_CONCURRENCY }, () => worker()));
-  results.sort((left, right) => left.filePath.localeCompare(right.filePath));
-  await writeReport('eslint', results);
+  const sorted = results.toSorted((left, right) =>
+    left.filePath.localeCompare(right.filePath),
+  );
+  await writeReport('eslint', sorted);
 
-  const totals = results.reduce(
+  const totals = sorted.reduce(
     (accumulator, entry) => ({
       errors: accumulator.errors + entry.errorCount,
       suppressed: accumulator.suppressed + entry.suppressedMessages.length,
@@ -132,7 +134,7 @@ const generateEslintReport = async () => {
     { errors: 0, suppressed: 0, warnings: 0 },
   );
   console.log(
-    `eslint: ${workspaces.length} workspaces, ${results.length} files → ${REPORTS_DIR}/eslint/full-latest.json ` +
+    `eslint: ${workspaces.length} workspaces, ${sorted.length} files → ${REPORTS_DIR}/eslint/full-latest.json ` +
       `(${totals.errors} errors, ${totals.warnings} warnings, ${totals.suppressed} suppressed)`,
   );
 };

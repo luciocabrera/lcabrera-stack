@@ -56,7 +56,7 @@ describe('this repository publishes what it develops against', () => {
   it('declares the same roster the never-baseline rule is resolved from', () => {
     const declared = [...publicPackageDirs]
       .map((directory) => `${packagesDir}/${directory}`)
-      .sort((left, right) => left.localeCompare(right));
+      .toSorted((left, right) => left.localeCompare(right));
     expect(declared.length).toBeGreaterThan(0);
     expect(
       declared,

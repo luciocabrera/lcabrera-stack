@@ -91,6 +91,14 @@ One override semantic to know before writing one: **an override's `plugins` list
 replaces the base list** for matched files, so it must name every plugin that
 group needs.
 
+**A path-scoped rule is a repo fact, so it goes in the root's
+`createLintConfig({ overrides })` call, not in the published factory.** The root
+passes one today: `unicorn/no-array-sort` at `error` with
+`allowExpressionStatement: false` over `scripts/**` and `packages/*/scripts/**`,
+so a script sorts with `toSorted()`. The option matters: at its default the rule
+lets a bare `values.sort();` statement through, which is the in-place form the
+rule exists to stop.
+
 The other categories are **not** free; measure one before enabling it
 (`vp lint . --format=json`).
 
