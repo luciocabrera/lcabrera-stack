@@ -7,17 +7,13 @@ type TabsHeaderOverflow = {
   readonly hasStart: boolean;
 };
 
-type UseTabsHeaderScrollArgs = {
-  readonly tabCount: number;
-};
-
 const NO_OVERFLOW: TabsHeaderOverflow = { hasEnd: false, hasStart: false };
 
 const OVERFLOW_EPSILON = 1;
 
 const SCROLL_STEP_RATIO = 0.8;
 
-export const useTabsHeaderScroll = ({ tabCount }: UseTabsHeaderScrollArgs) => {
+export const useTabsHeaderScroll = () => {
   const listRef = useRef<HTMLDivElement>(null);
   const viewportRef = useRef<HTMLDivElement>(null);
   const [overflow, setOverflow] = useState<TabsHeaderOverflow>(NO_OVERFLOW);
@@ -75,7 +71,7 @@ export const useTabsHeaderScroll = ({ tabCount }: UseTabsHeaderScrollArgs) => {
       viewport.removeEventListener('scroll', scheduleMeasure);
       observer?.disconnect();
     };
-  }, [tabCount]);
+  }, []);
 
   const scrollByDirection = (direction: TabsScrollDirection) => {
     const viewport = viewportRef.current;

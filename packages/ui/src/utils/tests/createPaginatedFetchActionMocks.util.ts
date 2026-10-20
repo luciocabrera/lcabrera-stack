@@ -94,15 +94,17 @@ export const createPaginatedFetchActionMocks = <TDataState, TResponse>({
       onLoadMore,
       prefetchRef,
     }: FirePrefetchArgs<TResponse>) => {
-      void onLoadMore({ lastRow, limit, skip: nextSkip })
-        .then((response: TResponse) => {
-          prefetchRef.current = {
-            data: response,
-            promise: undefined,
-            skip: nextSkip,
-          };
-        })
-        .catch((): undefined => undefined);
+      const storeResponse = async () => {
+        const response = await onLoadMore({ lastRow, limit, skip: nextSkip });
+
+        prefetchRef.current = {
+          data: response,
+          promise: undefined,
+          skip: nextSkip,
+        };
+      };
+
+      void storeResponse().catch((): undefined => undefined);
     },
   ) as CallableMock<[FirePrefetchArgs<TResponse>], void>;
 
