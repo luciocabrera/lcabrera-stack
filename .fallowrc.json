@@ -134,7 +134,8 @@
     "duplicate-prop-shape": "error",
     "stale-suppressions": "error",
     "require-suppression-reason": "error",
-    "deprecated-exports-in-use": "error"
+    "deprecated-exports-in-use": "error",
+    "unused-catalog-entries": "error"
   },
   "overrides": [
     // Route loaders return serializable state/promises consumed by shared
