@@ -103,6 +103,7 @@ The factories' full option set — `include`, `exclude`, `rootDirs`, `paths`,
 | `generate.ts`              | The runner: hands `configs` to `writeTsConfigs` from `@lcabrera/tsconfig/generate`        |
 | `tsconfig.entries.test.ts` | Asserts the invariants that live in the entry table, not in the factories                 |
 | `tsconfig.app.json`        | Generated — this workspace's own config, and a **Node** one: its source runs under `node` |
+| `vite.config.ts`           | Empty: the test task fails from the repository root without a config in this workspace    |
 
 The entries live apart from the runner so the whole set can be asserted without
 running the generator — importing `generate.ts` rewrites every config in the repo

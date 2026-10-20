@@ -161,7 +161,9 @@ describe('descendants — §1 escalation propagation', () => {
       { from: 1, rule: 'O2', to: 2 },
       { from: 2, rule: 'O2', to: 1 },
     ];
-    expect([...descendants(edges, [1])].sort((a, b) => a - b)).toEqual([1, 2]);
+    expect([...descendants(edges, [1])].toSorted((a, b) => a - b)).toEqual([
+      1, 2,
+    ]);
   });
 });
 

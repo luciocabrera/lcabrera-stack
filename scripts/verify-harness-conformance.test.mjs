@@ -39,24 +39,24 @@ describe('harness conformance — the roster comes from disk', () => {
       readdirSync(join(REPO_ROOT, relative))
         .filter((name) => name.endsWith('.md'))
         .map((name) => name.replace(/\.md$/, ''))
-        .sort((a, b) => a.localeCompare(b));
+        .toSorted((a, b) => a.localeCompare(b));
 
     expect(result.checked.skill).toEqual(
       skillDirectories
         .filter((name) =>
           existsSync(join(REPO_ROOT, '.github/skills', name, 'SKILL.md')),
         )
-        .sort((a, b) => a.localeCompare(b)),
+        .toSorted((a, b) => a.localeCompare(b)),
     );
     expect(result.checked.rule).toEqual(stems('.claude/rules'));
     expect(result.checked.subagent).toEqual(stems('.claude/agents'));
     const alphabetical = (a, b) => a.localeCompare(b);
 
     expect(
-      [...result.checked.skill, ...result.skippedDirectories].sort(
+      [...result.checked.skill, ...result.skippedDirectories].toSorted(
         alphabetical,
       ),
-    ).toEqual([...skillDirectories].sort(alphabetical));
+    ).toEqual(skillDirectories.toSorted(alphabetical));
   });
 
   it('passes on the tree as it stands', () => {

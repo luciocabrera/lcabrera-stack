@@ -72,6 +72,14 @@ const fmtConfig = createFmtConfig({
 });
 
 const sharedLintConfig = createLintConfig({
+  overrides: [
+    {
+      files: ['scripts/**', 'packages/*/scripts/**'],
+      rules: {
+        'unicorn/no-array-sort': ['error', { allowExpressionStatement: false }],
+      },
+    },
+  ],
   workspaceRuntimes: WORKSPACE_RUNTIMES,
 });
 

@@ -426,7 +426,8 @@ jobs:
         # Vite+ rewrites the region between its markers in AGENTS.md whenever it
         # syncs agent instructions, and `vp install` triggers that — so every
         # fresh worktree gets the upstream template back, whose Review Checklist
-        # tells agents to run `vp test`, forbidden by §4. Nothing caught it; the
+        # names `vp check` and `vp test` as the review — not this repo's quality
+        # gate, which the skill owns. Nothing caught it; the
         # block's comment asked a human to notice. Repair: `vp run
         # viteplus:verify -- --write`.
         run: vp run viteplus:verify
@@ -556,7 +557,7 @@ jobs:
           echo "| Lint (Oxlint) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (ESLint custom rules) | $ESLINT_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| Lint (Biome · react domain) | $BIOME_STATUS |" >> "$GITHUB_STEP_SUMMARY"
-          echo "| React Doctor (errors block) | $REACT_DOCTOR_STATUS |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| React Doctor (blocks at the configured level) | $REACT_DOCTOR_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsgolint via vp check) | $CHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| TypeScript (tsc · every workspace) | $TYPECHECK_STATUS |" >> "$GITHUB_STEP_SUMMARY"
           echo "| COMMANDS.md accuracy | $COMMANDS_STATUS |" >> "$GITHUB_STEP_SUMMARY"

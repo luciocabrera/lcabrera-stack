@@ -13,7 +13,8 @@
  * `node_modules` and root config and reports a success it has not earned.
  *
  * The deciding half is `./lib/devkit-tarball.mjs` (pure); this file is the
- * packing, the installing, the executing and the exit code.
+ * packing, the installing, the executing and the exit code. publint reads each
+ * tarball at error level through `./lib/devkit-tarball-publint.mjs`.
  *
  * The size gate's planted file is sized from the ceiling the scratch consumer
  * resolves, not from a constant: a fixed plant stops being oversized the moment
@@ -46,6 +47,7 @@ import {
   survivingPlaceholders,
 } from './lib/devkit-tarball-produced.mjs';
 import { packedFileReader, packOne, run } from './lib/devkit-pack.mjs';
+import { publintGate } from './lib/devkit-tarball-publint.mjs';
 import { shimFindings } from './lib/devkit-tarball-shim.mjs';
 import {
   binsWithoutNodeFloor,
@@ -233,7 +235,7 @@ const report = (findings) => {
   );
 };
 
-const main = () => {
+const main = async () => {
   const staging = mkdtempSync(join(tmpdir(), 'devkit-pack-'));
   const consumer = scratchConsumer();
 
@@ -253,6 +255,12 @@ const main = () => {
       }),
       ...binsWithoutNodeFloor(manifest),
     ]);
+
+    const publinted = await publintGate({
+      into: staging,
+      tarballs: packed.map(({ tarball }) => tarball),
+    });
+    process.stdout.write(publinted.lines.join(''));
 
     run(
       'npm',
@@ -304,7 +312,12 @@ const main = () => {
       ...gateBinFailures(consumer),
     ];
 
-    const findings = [...contents, ...bins, ...materialised];
+    const findings = [
+      ...contents,
+      ...publinted.findings,
+      ...bins,
+      ...materialised,
+    ];
     if (findings.length > 0) {
       process.stderr.write(
         `\nPacked-tarball gate — ${findings.length} finding(s):\n\n`,
@@ -324,7 +337,7 @@ const main = () => {
     ).length;
 
     process.stdout.write(
-      `Packed-tarball gate passed: ${packed.length} package(s) packed, installed into a scratch repository, ${ran} declared bin(s) ran, \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, none of them naming a workspace sibling, ${tasks} runnable task(s) wired, ${GATE_PLANTS.length} gate bin(s) proven against a planted violation — and the \`create-lcabrera-stack\` initializer made a committed repository from an empty directory.\n`,
+      `Packed-tarball gate passed: ${packed.length} package(s) packed, linted by publint with no error and a planted missing export caught, installed into a scratch repository, ${ran} declared bin(s) ran, \`devkit init\` set up a repository holding none of this — ${placed} file(s) placed, none of them naming a workspace sibling, ${tasks} runnable task(s) wired, ${GATE_PLANTS.length} gate bin(s) proven against a planted violation — and the \`create-lcabrera-stack\` initializer made a committed repository from an empty directory.\n`,
     );
   } finally {
     rmSync(staging, { force: true, recursive: true });
@@ -333,7 +346,7 @@ const main = () => {
 };
 
 try {
-  main();
+  await main();
 } catch (error) {
   process.stderr.write(`${error.message}\n`);
   process.exitCode = 1;

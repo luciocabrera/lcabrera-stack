@@ -20,9 +20,9 @@ publishes TypeScript source just as `devkit` publishes `.mjs`.
 **What no in-repo run can validate is the delivery.** A `workspace:*` link
 resolves the source directory, so a packed tarball's file modes never appear —
 which is how `devkit`'s shipped git hooks once arrived inert. That is the reason
-`vp run tarball:verify` exists: it packs both distributed packages and installs
-them into a scratch repo outside this tree. It is chained into `check:safe` and
-runs as its own CI step
+`vp run tarball:verify` exists: it packs the distributed packages, runs publint
+over each tarball and installs them into a scratch repo outside this tree. It is
+chained into `check:safe` and runs as its own CI step
 ([ADR-073](docs/decisions/ADR-073-publishing-gates-check-the-packed-tarball.md)).
 
 **The `apps/` exist to exercise the packages, and that is the tie-breaker.** When
@@ -252,7 +252,7 @@ are the ones you would guess **wrong**:
 | -------------------- | -------------------------------------------------------------------------------------- |
 | Build for production | `vp run build` (runs `react-router build` and emits `build/server/index.js`)           |
 | Type check           | `vp run typecheck` (real tsc) — `vp check` runs tsgolint, which is a different pass    |
-| Run tests            | `vp run test` (never `vp test` — see the `quality-gate-workflow` skill)                |
+| Run tests            | `vp run test` — the workspace's `test` task, which runs `vp test run`                  |
 | Full validation      | The canonical quality gate — see [Post-Change Quality Gate](#post-change-quality-gate) |
 
 **The exception is a command `vp` does not wrap** — then reaching for pnpm (or
@@ -276,7 +276,7 @@ policy that governs them:
 
 There is deliberately **no `start:all`/`dev:all`**. One app is runnable, so `dev:showcase` and `start:showcase` are the commands and an "all" alias would just be a second name for one of them. Add one when a second app arrives, and say what it buys.
 
-**`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every workspace now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
+**`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every workspace now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there). A workspace with tests also gets its own `vite.config.ts`, even an empty one: without it, `vp run --filter <workspace> test` launched from the repo root fails with Vitest's "failed to find the current suite" before any test runs.
 
 **tsconfigs are generated — never hand-edit them.** `packages/ts-configs/tsconfig.entries.ts` (this repo's per-workspace entries) + `packages/tsconfig/src/tsconfig.shared.ts` (the published factories) are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either, then `vp fmt .`. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@lcabrera/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
 
@@ -669,7 +669,8 @@ For multi-step exploration or investigation tasks, use the **`codebase-explorer`
 
 <!-- This file deliberately carries NO Vite+ managed block. Vite+ rewrites that
      region whenever it syncs agent instructions, which `vp install` does, and the
-     template it writes tells agents to run `vp test` — forbidden by §4. Without
+     template it writes is a review checklist this repo did not write, and its
+     `vp check` and `vp test` are not the quality gate in §7. Without
      the markers the sync is a documented no-op, so do not re-add them: an empty
      marker pair is not enough, it just gets refilled. `vp run viteplus:verify`
      enforces this, with `--write` to empty a region that came back. -->

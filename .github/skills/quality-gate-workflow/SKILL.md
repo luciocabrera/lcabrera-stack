@@ -65,11 +65,12 @@ staged files via the `staged` block in the root `vite.config.ts`.
 
 **Stage 5 is a gate no linter in this list contains, and it blocks.** React Doctor
 is the only pass checking effect cleanup, server/client boundaries and render-path
-cost, so nothing in stages 2–4 or 6 will surface what it finds; its errors block
-the gate ([ADR-055](../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md)). Like
+cost, so nothing in stages 2–4 or 6 will surface what it finds; its findings
+block the gate at the severity `doctor.config.jsonc` names in `blocking`
+([ADR-055](../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md)). Like
 Biome it is **root-only and repo-wide** — there is no per-workspace variant, so
 `cd` to the root for this stage. It writes `reports/react-doctor/full-latest.json`
-as it goes, which means the warnings behind a passing run are readable without
+as it goes, which means the findings behind a failing run are readable without
 paying for a second scan.
 
 When stage 5 fails, read
@@ -178,7 +179,7 @@ branch to conflict with
 - Do not skip a stage.
 - Fix failures before moving forward.
 - Re-run the full gate after non-trivial fixes.
-- Prefer `vp run test` (not `vp test`) in this project.
+- Run a workspace's tests with `vp run test`, which runs its `test` task (`vp test run` plus any arguments the task adds); stage 8 stays `vp run test:changed` from the root.
 - Never silence a finding to get a stage green (CLAUDE.md rule 11) — fix the code.
   This covers `// biome-ignore` exactly as it covers `// eslint-disable`.
 - Never trust a green Biome run on a rule you just enabled — a disabled rule and

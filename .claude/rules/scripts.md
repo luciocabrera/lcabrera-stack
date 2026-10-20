@@ -91,15 +91,15 @@ The eslint fan-out is per-workspace and **root `scripts/` is not a workspace**, 
 a file there is still covered only by the repo-wide passes plus one dedicated
 gate; a file under a workspace's own `scripts/` is covered by the eslint pass too:
 
-| Layer                         | Covers                                                              |
-| ----------------------------- | ------------------------------------------------------------------- |
-| **Oxlint** (`vp lint`)        | correctness, repo-wide — includes `scripts/` and skill scripts      |
-| **eslint** (per-workspace)    | the custom-rules pass, in a workspace's own `scripts/` — not root's |
-| **Biome** (root)              | correctness / react-domain, repo-wide                               |
-| **fallow** (`fallow audit`)   | per-function complexity, CRAP, dead exports, dupes — new-only gate  |
-| **`fallow:dead-code:verify`** | dead exports, files and dependencies, whole tree, repo-wide         |
-| **`scripts:verify`**          | per-file size ceiling, repo-wide, baselined                         |
-| **`scripts:exits:verify`**    | `process.exit()` calls, repo-wide, parsed not grepped               |
+| Layer                         | Covers                                                                                                                          |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
+| **Oxlint** (`vp lint`)        | correctness, repo-wide — includes `scripts/` and skill scripts; `unicorn/no-array-sort` in `scripts/` and `packages/*/scripts/` |
+| **eslint** (per-workspace)    | the custom-rules pass, in a workspace's own `scripts/` — not root's                                                             |
+| **Biome** (root)              | correctness / react-domain, repo-wide                                                                                           |
+| **fallow** (`fallow audit`)   | per-function complexity, CRAP, dead exports, dupes — new-only gate                                                              |
+| **`fallow:dead-code:verify`** | dead exports, files and dependencies, whole tree, repo-wide                                                                     |
+| **`scripts:verify`**          | per-file size ceiling, repo-wide, baselined                                                                                     |
+| **`scripts:exits:verify`**    | `process.exit()` calls, repo-wide, parsed not grepped                                                                           |
 
 fallow's `maxUnitSize`/complexity limits apply to root `scripts/` but are
 **relaxed for `packages/eslint-local-rules/**`** in
