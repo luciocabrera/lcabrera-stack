@@ -5,7 +5,7 @@
 **Amended:** 2026-07-18 — §7 adds the phased rule-hardening beyond the `recommended` preset.
 **Amended:** 2026-09-08 — §4 reverses the check-only decision: Biome writes in the pre-commit hook, under the one glob every fixer shares, with a format-only pass last.
 **Amended:** 2026-10-19 — §7 adds Phase 5, the opt-in rules the tree was already clean on.
-**Amended:** 2026-10-19 — [ADR-138](ADR-138-oxfmt-sorts-imports-in-place-of-perfectionist.md) decides that §4's closing format-only pass will also sort imports, which moves from `perfectionist/sort-imports` to Oxfmt's `sortImports` once that decision is implemented. The one glob and the order of the chain do not change.
+**Amended:** 2026-10-19 — [ADR-138](ADR-138-oxfmt-sorts-imports-in-place-of-perfectionist.md) moves import ordering from eslint's `perfectionist` (§3) into §4's closing format-only pass, as Oxfmt's `sortImports`; until that is implemented, §3's ownership sentence describes the tree.
 
 ## Context
 
