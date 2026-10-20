@@ -3,14 +3,17 @@
  * findings block, which config files would shadow `doctor.config.jsonc`, and
  * how one blocking finding prints.
  *
- * `blocking` takes the CLI's own values and its default, `error`, and is read
- * only by the gate: report mode never fails on it. The loader
- * prefers every name in `SHADOWING_CONFIGS` over the `.jsonc`, so one present
- * means the scan ran on rules the gate never read.
+ * `blocking` takes the CLI's own values, its deprecated `failOn` alias and its
+ * default, `error`, and is read only by the gate: report mode never fails on
+ * it. The loader prefers every name in `SHADOWING_CONFIGS` over the `.jsonc`,
+ * so one present beside it means the scan ran on rules the gate never read.
+ * Without the `.jsonc` there is nothing to shadow, and reading it fails.
  *
  * A finding's `id` may be a string, `null` or missing; only a string names the
  * repository path, otherwise the normalized file path stands in.
  */
+
+export const GATED_CONFIG = 'doctor.config.jsonc';
 
 const BLOCKING_SEVERITIES = new Map([
   ['error', new Set(['error'])],
@@ -29,7 +32,7 @@ export const SHADOWING_CONFIGS = [
 ];
 
 export const blockingSeverities = (config) => {
-  const level = config?.blocking ?? 'error';
+  const level = config?.blocking ?? config?.failOn ?? 'error';
   const severities = BLOCKING_SEVERITIES.get(level);
   if (severities === undefined)
     throw new Error(
@@ -49,7 +52,7 @@ export const judgeReport = ({ config, diagnostics, reportOnly }) => {
 };
 
 export const findShadowingConfigs = (exists) =>
-  SHADOWING_CONFIGS.filter((name) => exists(name));
+  exists(GATED_CONFIG) ? SHADOWING_CONFIGS.filter((name) => exists(name)) : [];
 
 export const renderFinding = ({
   id,

@@ -14,6 +14,8 @@ area:
   - docs/agents/public-package-suppressions.json
   - packages/repo-standards/README.md
   - COMMANDS.md
+  - .github/workflows/check-safe.yml
+  - packages/devkit/CLASSIFICATION.md
   - .github/skills/quality-gate-workflow/SKILL.md
   - .github/skills/quality-gate-workflow/references/daily-practice.md
 started: 2026-10-19

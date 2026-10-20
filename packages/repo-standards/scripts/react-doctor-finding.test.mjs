@@ -68,6 +68,13 @@ describe('blockingSeverities', () => {
     },
   );
 
+  it('falls back to the deprecated failOn alias, as the CLI does', () => {
+    expect(blockingSeverities({ failOn: 'warning' }).level).toBe('warning');
+    expect(
+      blockingSeverities({ blocking: 'none', failOn: 'warning' }).level,
+    ).toBe('none');
+  });
+
   it('reports the level it resolved, defaulting to error', () => {
     expect(blockingSeverities({}).level).toBe('error');
     expect(blockingSeverities({ blocking: 'warning' }).level).toBe('warning');
@@ -84,6 +91,12 @@ describe('blockingSeverities', () => {
 });
 
 describe('findShadowingConfigs', () => {
+  it('reports no shadowing when only doctor.config.ts exists and the jsonc does not', () => {
+    expect(findShadowingConfigs((name) => name === 'doctor.config.ts')).toEqual(
+      [],
+    );
+  });
+
   it('finds nothing when only the jsonc exists', () => {
     expect(
       findShadowingConfigs((name) => name === 'doctor.config.jsonc'),
@@ -91,7 +104,11 @@ describe('findShadowingConfigs', () => {
   });
 
   it('names every config the loader would prefer over the jsonc', () => {
-    const present = new Set(['doctor.config.json', 'doctor.config.ts']);
+    const present = new Set([
+      'doctor.config.json',
+      'doctor.config.jsonc',
+      'doctor.config.ts',
+    ]);
     expect(findShadowingConfigs((name) => present.has(name))).toEqual([
       'doctor.config.ts',
       'doctor.config.json',

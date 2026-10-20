@@ -43,6 +43,7 @@ import { resolveHostRoot } from './host-root.mjs';
 import { parseJsonc } from './jsonc.mjs';
 import {
   findShadowingConfigs,
+  GATED_CONFIG,
   judgeReport,
   renderFinding,
 } from './react-doctor-finding.mjs';
@@ -51,7 +52,7 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 const REPORT = readGates(REPO_ROOT).reactDoctor.reportFile;
-const CONFIG = 'doctor.config.jsonc';
+const CONFIG = GATED_CONFIG;
 
 const entryPoint = () =>
   realpathSync(

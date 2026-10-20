@@ -152,9 +152,10 @@ enforcing what its config said.
 - **`blocking` did nothing.** `verify-react-doctor.mjs` ran the CLI with
   `--blocking none` and failed only on `error` findings, whatever the config
   named. It now maps the key itself — `error` blocks errors, `warning` blocks
-  errors and warnings, `none` blocks nothing, and an absent key means `error`,
-  the CLI's default. It keeps `--blocking none` on the CLI call, so the script
-  still refuses a report whose `ok` is not `true` before it counts anything.
+  errors and warnings, `none` blocks nothing, and an absent key falls back to
+  the deprecated `failOn` and then to `error`, as the CLI resolves it. It
+  keeps `--blocking none` on the CLI call, so the script still refuses a
+  report whose `ok` is not `true` before it counts anything.
   An unknown value fails the gate rather than falling back.
 - **This repository fails on warnings.** `doctor.config.jsonc` sets
   `"blocking": "warning"`. The maintainer chose that over `--baseline`: the
@@ -162,9 +163,9 @@ enforcing what its config said.
   no stored report to tell it apart from inherited debt.
 - **A shadowing config fails the gate.** The loader prefers
   `doctor.config.{ts,mts,cts,js,mjs,cjs,json}` over `.jsonc`, so one of those
-  beside it would replace the rules the gate believes it reads. The gate now
-  fails before scanning and names the file.
-
+  beside it would replace the rules the gate believes it reads. When the
+  `.jsonc` exists and one of those does too, the gate now fails before scanning
+  and names the file.
 - **A third rule is pinned off.** `react-doctor/js-combine-iterations` ships
   disabled, and `doctor.config.jsonc` sets it `off` explicitly, as it does
   `no-barrel-import`, so a change of default cannot make the warning gate block
