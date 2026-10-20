@@ -5,6 +5,7 @@
  * switch reaches the stand-in and never the real binary.
  */
 import { spawnSync } from 'node:child_process';
+import { chmodSync, existsSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
@@ -16,9 +17,12 @@ import {
 } from './housekeeping-containers.mjs';
 import {
   buildSortingRepository,
+  gitIn,
   recordingDocker,
   scratchRoots,
+  worktreePaths,
 } from './housekeeping-fixtures.mjs';
+import { runPrune } from './housekeeping-run.mjs';
 
 const { drain, make } = scratchRoots();
 
@@ -114,5 +118,58 @@ describe('dockerFor', () => {
     expect(
       dockerFor({ [DOCKER_ENV]: '/nonexistent/docker' }).list().error,
     ).toBe('docker is not installed');
+  });
+});
+
+const listingDocker = ({ root, worktree }) => {
+  const path = join(root, 'listing-docker');
+  const marker = join(root, 'docker-rm-called');
+  const current = JSON.stringify({
+    id: 'c1',
+    label: worktree,
+    name: 'pg',
+    state: 'running',
+  });
+  const whole = JSON.stringify({
+    ID: 'c1',
+    Labels: `keep=a,b,devkit.throwaway=${worktree}`,
+    Names: 'pg',
+    State: 'running',
+  });
+  writeFileSync(
+    path,
+    [
+      '#!/bin/sh',
+      'case "$1" in',
+      `  ps) case "$*" in *'{{json .}}'*) echo '${whole}' ;; *) echo '${current}' ;; esac ;;`,
+      `  rm) echo "$@" >> '${marker}' ;;`,
+      'esac',
+      '',
+    ].join('\n'),
+  );
+  chmodSync(path, 0o755);
+  return { path, wasRemoved: () => existsSync(marker) };
+};
+
+describe('a throwaway container whose label holds a comma and an equals sign', () => {
+  it('is matched to its live worktree and kept', () => {
+    const root = make();
+    const tree = buildSortingRepository(root);
+    const worktree = join(root, 'wt,odd=1');
+    gitIn(tree.repo, 'worktree', 'add', '-q', '-b', 'odd', worktree, 'main');
+    const docker = listingDocker({ root, worktree });
+
+    const { lines } = runPrune({
+      argv: ['--apply'],
+      docker: dockerFor({ [DOCKER_ENV]: docker.path }),
+      pullRequests: [{ headRefName: 'odd', number: 4, state: 'OPEN' }],
+      root: tree.repo,
+    });
+
+    expect(lines).toContain(
+      `  container pg — running for ${worktree}, which is still there`,
+    );
+    expect(docker.wasRemoved()).toBe(false);
+    expect(worktreePaths(tree.repo)).toContain(worktree);
   });
 });

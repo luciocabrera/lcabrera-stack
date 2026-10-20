@@ -32,11 +32,31 @@ const parseJson = (line) => {
   }
 };
 
-const labelValue = (labels = '') =>
-  String(labels)
-    .split(',')
-    .map((pair) => pair.split('='))
-    .find(([key]) => key === THROWAWAY_LABEL)?.[1] ?? '';
+const CONTAINER_FORMAT = `{"id":{{json .ID}},"name":{{json .Names}},"state":{{json .State}},"label":{{json (.Label "${THROWAWAY_LABEL}")}}}`;
+
+const unreadable = (line) => ({
+  id: '',
+  isLabelRead: false,
+  name: line,
+  running: false,
+  worktree: '',
+});
+
+const containerFrom = (line) => {
+  const entry = parseJson(line);
+  if (entry === null || typeof entry !== 'object') return unreadable(line);
+  const { id, label, name, state } = entry;
+  if (typeof label !== 'string' || typeof id !== 'string' || id === '') {
+    return unreadable(line);
+  }
+  return {
+    id,
+    isLabelRead: true,
+    name: typeof name === 'string' && name !== '' ? name : id,
+    running: String(state).toLowerCase() === 'running',
+    worktree: label,
+  };
+};
 
 /**
  * @param {string} output
@@ -44,14 +64,9 @@ const labelValue = (labels = '') =>
 export const parseContainers = (output) =>
   output
     .split('\n')
-    .map((line) => parseJson(line.trim()))
-    .filter((entry) => entry !== null && typeof entry === 'object')
-    .map((entry) => ({
-      id: String(entry.ID ?? ''),
-      name: String(entry.Names ?? entry.ID ?? ''),
-      running: String(entry.State ?? '').toLowerCase() === 'running',
-      worktree: labelValue(entry.Labels),
-    }));
+    .map((line) => line.trim())
+    .filter((line) => line !== '')
+    .map((line) => containerFrom(line));
 
 const firstLine = (text = '') =>
   String(text)
@@ -88,7 +103,7 @@ const listThrowawayContainers = (binary) => {
       '--filter',
       `label=${THROWAWAY_LABEL}`,
       '--format',
-      '{{json .}}',
+      CONTAINER_FORMAT,
     ],
     binary,
   });

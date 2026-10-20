@@ -67,19 +67,19 @@ const isResolvable = ({ cwd, ref }) =>
 
 const SHARED_REF_NAMESPACES = ['refs/heads/', 'refs/tags/', 'refs/remotes/'];
 
-const isReferenced = ({ head, path }) =>
-  head !== '' &&
-  (runGit({
-    args: [
-      'for-each-ref',
-      '--count=1',
-      '--format=%(refname)',
-      '--contains',
-      head,
-      ...SHARED_REF_NAMESPACES,
-    ],
-    cwd: path,
-  }) ?? '') !== '';
+const refsContaining = ({ head, path }) =>
+  head === ''
+    ? []
+    : gitLines({
+        args: [
+          'for-each-ref',
+          '--format=%(refname)',
+          '--contains',
+          head,
+          ...SHARED_REF_NAMESPACES,
+        ],
+        cwd: path,
+      });
 
 const contentOf = ({ base, status, worktree }) =>
   base === undefined
@@ -102,12 +102,14 @@ const withStatus = ({ base, worktree }) => {
     }) ?? '',
   );
   const isDirty = status.changes.length > 0 || status.untracked > 0;
+  const headRefs =
+    isDirty && worktree.branch === undefined ? refsContaining(worktree) : [];
   return {
     ...worktree,
     counts: isDirty ? contentOf({ base, status, worktree }) : undefined,
     dirty: isDirty,
-    isHeadReferenced:
-      isDirty && worktree.branch === undefined && isReferenced(worktree),
+    headRefs,
+    isHeadReferenced: headRefs.length > 0,
     onBase: isOnBase({ base, ...worktree }),
     untracked: status.untracked,
   };

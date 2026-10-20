@@ -129,3 +129,30 @@ describe('a dirty detached worktree whose every change is in history', () => {
     expect(worktreePaths(repo)).not.toContain(work);
   });
 });
+
+describe('a superseded detached worktree held only by a branch this run deletes', () => {
+  it('is kept, so the run never leaves its commit unreferenced', () => {
+    const root = make();
+    const repo = baseRepository(root);
+    gitIn(repo, 'branch', 'closed', 'main');
+    const holder = join(root, 'holder');
+    gitIn(repo, 'worktree', 'add', '-q', holder, 'closed');
+    writeFileSync(join(holder, 'c.txt'), 'only on the closed branch\n');
+    const head = commitAll(holder, 'only on closed');
+    gitIn(repo, 'worktree', 'remove', holder);
+    const work = dirtyDetached({ at: head, repo, root });
+
+    const { lines } = runPrune({
+      argv: ['--apply', '--include-superseded'],
+      docker: noContainers,
+      pullRequests: [{ headRefName: 'closed', number: 9, state: 'CLOSED' }],
+      root: repo,
+    });
+
+    expect(lineFor(lines, work)).toContain(
+      'only branches this run deletes contain its commit',
+    );
+    expect(worktreePaths(repo)).toContain(work);
+    expect(gitIn(repo, 'cat-file', '-t', head)).toBe('commit');
+  });
+});

@@ -161,12 +161,16 @@ touches the main checkout or the checkout it runs from.
   are both zero. Nothing removes one with a change found in neither. An
   uncommitted deletion matches a history only when that history once held the
   path and its tip no longer does. A detached worktree is removed as superseded
-  only when a branch, tag or remote contains its commit, so its HEAD is never
-  the only thing holding that commit.
+  only when a branch, tag or remote-tracking ref contains its commit, and one
+  this run does not delete, so its HEAD is never the only thing holding that
+  commit.
 - Containers labelled `devkit.throwaway` are listed; the label's value is the
   path of the worktree that started the container. `--apply` removes a stopped
-  one, and a running one whose worktree is gone; a running one whose worktree
-  is still there is listed under KEEPING. Without Docker it lists none
+  one, a running one whose worktree is gone, and a running one whose worktree
+  the same plan removes (after that worktree). A running one whose worktree is
+  still there is listed under KEEPING. The label is read whole, through
+  `docker ps --format` with `.Label`, so a path holding `,` or `=` is matched
+  as written. A container whose label cannot be read is kept. Without Docker it lists none
   and says so. Docker is looked up in the fixed install directories, never on
   `PATH`; `REPO_STANDARDS_DOCKER` names the executable by absolute path
   instead. `REPO_STANDARDS_NO_DOCKER` set to any non-empty value, `0`

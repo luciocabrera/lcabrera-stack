@@ -1,3 +1,9 @@
+/**
+ * `housekeeping:prune` end to end against scratch repositories: what the dry
+ * run lists, that `--apply` carries out exactly that, and how it degrades
+ * without pull request data or Docker. Container hosts are stand-ins, so no
+ * case reaches the machine's Docker.
+ */
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
@@ -149,6 +155,7 @@ describe('housekeeping:prune --apply', () => {
             worktree: join(tree.repo, '..', 'gone'),
           },
           { id: 'c', name: 'live', running: true, worktree: tree.open },
+          { id: 'd', name: 'leaving', running: true, worktree: tree.merged },
         ],
       }),
       remove: (id) => {
@@ -165,11 +172,14 @@ describe('housekeeping:prune --apply', () => {
       `  container live — running for ${tree.open}, which is still there`,
     );
     expect(keeping.join('\n')).not.toContain('container stopped');
+    expect(dry.lines).toContain(
+      `  leaving — its worktree ${tree.merged} is removed by this plan`,
+    );
     expect(removed).toEqual([]);
 
     prune({ argv: ['--apply'], docker, repo: tree.repo });
 
-    expect(removed.toSorted(byText)).toEqual(['a', 'b']);
+    expect(removed.toSorted(byText)).toEqual(['a', 'b', 'd']);
   });
 });
 

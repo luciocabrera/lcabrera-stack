@@ -181,31 +181,51 @@ export const parseWorktrees = (porcelain) => {
 
 export const THROWAWAY_LABEL = 'devkit.throwaway';
 
-const isGone = ({ isOnDisk, live, worktree }) =>
-  worktree !== '' && !live.has(worktree) && !isOnDisk(worktree);
+const goneReason = ({ isOnDisk, live, removing, worktree }) => {
+  if (worktree === '') return '';
+  if (removing.has(worktree)) {
+    return `its worktree ${worktree} is removed by this plan`;
+  }
+  return live.has(worktree) || isOnDisk(worktree)
+    ? ''
+    : `orphaned: ${worktree} is gone`;
+};
 
-const keptReason = ({ worktree }) =>
-  worktree === ''
+const keptReason = ({ isLabelRead, worktree }) => {
+  if (isLabelRead === false) return 'its label could not be read';
+  return worktree === ''
     ? 'running; its label names no worktree'
     : `running for ${worktree}, which is still there`;
+};
 
 /**
  * @param {{ containers: { id: string, name: string, running: boolean,
- *   worktree: string }[], isOnDisk: (path: string) => boolean,
- *   live: Set<string> }} args
+ *   worktree: string, isLabelRead?: boolean }[],
+ *   isOnDisk: (path: string) => boolean, live: Set<string>,
+ *   removing?: Set<string> }} args
  */
-export const classifyContainers = ({ containers, isOnDisk, live }) =>
+export const classifyContainers = ({
+  containers,
+  isOnDisk,
+  live,
+  removing = new Set(),
+}) =>
   containers.map((container) => {
+    if (container.isLabelRead === false) {
+      return { ...container, action: 'keep', reason: keptReason(container) };
+    }
     if (!container.running) {
       return { ...container, action: 'remove', reason: 'stopped' };
     }
-    return isGone({ isOnDisk, live, worktree: container.worktree })
-      ? {
-          ...container,
-          action: 'remove',
-          reason: `orphaned: ${container.worktree} is gone`,
-        }
-      : { ...container, action: 'keep', reason: keptReason(container) };
+    const reason = goneReason({
+      isOnDisk,
+      live,
+      removing,
+      worktree: container.worktree,
+    });
+    return reason === ''
+      ? { ...container, action: 'keep', reason: keptReason(container) }
+      : { ...container, action: 'remove', reason };
   });
 
 export const PLAN_COMMAND =
@@ -221,6 +241,23 @@ const hintLine = ({ advice, count }) =>
  */
 export const renderHint = ({ advice = DEFAULT_ADVICE, count, threshold }) =>
   count > threshold ? hintLine({ advice, count }) : undefined;
+
+const isHeldOnlyByDeleted = ({ deleted, entry }) =>
+  entry.branch === undefined &&
+  entry.force === true &&
+  Array.isArray(entry.headRefs) &&
+  entry.headRefs.every((ref) => deleted.has(ref));
+
+const keepHeldOnlyByDeletedBranches = ({ deleted, entry }) =>
+  isHeldOnlyByDeleted({ deleted, entry })
+    ? {
+        ...entry,
+        action: 'report',
+        force: false,
+        reason:
+          'every change already in history, but only branches this run deletes contain its commit — kept so that commit is not lost',
+      }
+    : entry;
 
 export const buildPlan = ({
   branches,
@@ -264,10 +301,28 @@ export const buildPlan = ({
       uniqueCount: uniqueByBranch.get(name),
     }),
   }));
+  const deleted = new Set(
+    branchVerdicts
+      .filter((entry) => entry.action === 'delete')
+      .map((entry) => `refs/heads/${entry.name}`),
+  );
+  const finalWorktrees = worktreeVerdicts.map((entry) =>
+    keepHeldOnlyByDeletedBranches({ deleted, entry }),
+  );
+  const removing = new Set(
+    finalWorktrees
+      .filter((entry) => entry.action === 'remove')
+      .map((entry) => entry.path),
+  );
   const containerVerdicts = classifyContainers({
     containers,
     isOnDisk,
-    live: new Set(worktrees.map((worktree) => worktree.path)),
+    live: new Set(
+      worktrees
+        .map((worktree) => worktree.path)
+        .filter((path) => !removing.has(path)),
+    ),
+    removing,
   });
   return {
     deleteBranches: branchVerdicts.filter((entry) => entry.action === 'delete'),
@@ -277,11 +332,11 @@ export const buildPlan = ({
     removeContainers: containerVerdicts.filter(
       (entry) => entry.action === 'remove',
     ),
-    removeWorktrees: worktreeVerdicts.filter(
+    removeWorktrees: finalWorktrees.filter(
       (entry) => entry.action === 'remove',
     ),
     reportBranches: branchVerdicts.filter((entry) => entry.action === 'report'),
-    reportWorktrees: worktreeVerdicts.filter(
+    reportWorktrees: finalWorktrees.filter(
       (entry) => entry.action === 'report',
     ),
     stashes,

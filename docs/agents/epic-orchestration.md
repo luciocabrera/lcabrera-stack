@@ -245,10 +245,14 @@ Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
   `git worktree remove <path>` and delete its branch with
   `git branch -D <branch>`. A reviewer's checkout is detached on the PR's head,
   which a squash-merge leaves off `main`, so the plan reports it rather than
-  removing it. Remove it with `git worktree remove <path>` once
-  `gh pr view <n> --json state` reads `MERGED` and `git status --porcelain` in
-  it is empty. Do not run `-- --apply` mid-wave: it acts on every worktree and
-  branch in the plan, including other developers' in this wave. A builder path
+  removing it. Remove it with `git worktree remove <path>` only when all three
+  hold: `gh pr view <n> --json state` reads `MERGED`, `git status --porcelain`
+  in it is empty, and
+  `git -C <path> log --oneline HEAD --not --remotes --branches --tags` prints
+  nothing. That last check means no commit exists only in that checkout. If
+  any of the three fails, leave it and report it to the human. Do not run
+  `-- --apply` mid-wave: it acts on every worktree and branch in the plan,
+  including other developers' in this wave. A builder path
   under KEEPING is the evidence that something there is not merged. Report it
   to the human, and never `--force` it.
 - confirm the claim closed (the `coordination-close.yml` workflow deletes the task

@@ -1,8 +1,12 @@
+/**
+ * The parsers behind the content check and the container listing, fed the
+ * exact shapes git and docker print, so a change in how either is read shows
+ * here before it reaches a repository.
+ */
 import { describe, expect, it } from 'vite-plus/test';
 
 import { dockerBinary, parseContainers } from './housekeeping-containers.mjs';
 import { parseRawBlobs, parseStatusV2 } from './housekeeping-content.mjs';
-import { THROWAWAY_LABEL } from './housekeeping-plan.mjs';
 
 const ZERO = '0'.repeat(40);
 const ONE = '1'.repeat(40);
@@ -75,25 +79,50 @@ describe('parseRawBlobs', () => {
 });
 
 describe('parseContainers', () => {
-  it('reads each line and the worktree its label names', () => {
+  it('keeps a label value whole, commas and equals signs included', () => {
     const output = [
       JSON.stringify({
-        ID: 'a1',
-        Labels: `x=y,${THROWAWAY_LABEL}=/work/one`,
-        Names: 'pg-one',
-        State: 'running',
+        id: 'a1',
+        label: '/work/a,b=c',
+        name: 'pg-one',
+        state: 'running',
       }),
-      JSON.stringify({
-        ID: 'b2',
-        Labels: '',
-        Names: 'pg-two',
-        State: 'exited',
-      }),
-      'not json',
+      JSON.stringify({ id: 'b2', label: '', name: 'pg-two', state: 'exited' }),
     ].join('\n');
     expect(parseContainers(output)).toEqual([
-      { id: 'a1', name: 'pg-one', running: true, worktree: '/work/one' },
-      { id: 'b2', name: 'pg-two', running: false, worktree: '' },
+      {
+        id: 'a1',
+        isLabelRead: true,
+        name: 'pg-one',
+        running: true,
+        worktree: '/work/a,b=c',
+      },
+      {
+        id: 'b2',
+        isLabelRead: true,
+        name: 'pg-two',
+        running: false,
+        worktree: '',
+      },
+    ]);
+  });
+
+  it('marks a line whose label cannot be read, so the plan keeps it', () => {
+    expect(parseContainers('not json\n{"id":"c3","state":"exited"}')).toEqual([
+      {
+        id: '',
+        isLabelRead: false,
+        name: 'not json',
+        running: false,
+        worktree: '',
+      },
+      {
+        id: '',
+        isLabelRead: false,
+        name: '{"id":"c3","state":"exited"}',
+        running: false,
+        worktree: '',
+      },
     ]);
   });
 });
