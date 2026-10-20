@@ -131,7 +131,8 @@
     "unused-dev-dependencies": "error",
     "prop-drilling": "error",
     "thin-wrapper": "error",
-    "duplicate-prop-shape": "error"
+    "duplicate-prop-shape": "error",
+    "stale-suppressions": "error"
   },
   "overrides": [
     // Route loaders return serializable state/promises consumed by shared
