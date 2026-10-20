@@ -29,12 +29,12 @@ Return exactly this structure:
 | Step | Status | Notes |
 |------|--------|-------|
 | 1. Format (`vp fmt .`)                | ✅ pass / ❌ fail / ⏭️ not reached | errors if any |
-| 2. Oxlint (`vp lint .`)               | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
-| 3. ESLint (`lint:eslint:check`)       | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
-| 4. Biome (`lint:biome:check`, root)   | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
-| 5. React Doctor (`react-doctor:verify`, root) | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
-| 6. tsgolint (`vp check`)              | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
-| 7. tsc (`vp run typecheck`)           | ✅ pass / ❌ fail / ⏭️ not reached | error count + first 3 messages |
+| 2. Oxlint (`vp lint .`)               | ✅ pass / ❌ fail / ⏭️ not reached | blocking-finding count + first 3 messages |
+| 3. ESLint (`lint:eslint:check`)       | ✅ pass / ❌ fail / ⏭️ not reached | blocking-finding count + first 3 messages |
+| 4. Biome (`lint:biome:check`, root)   | ✅ pass / ❌ fail / ⏭️ not reached | blocking-finding count + first 3 messages |
+| 5. React Doctor (`react-doctor:verify`, root) | ✅ pass / ❌ fail / ⏭️ not reached | blocking-finding count + first 3 messages |
+| 6. tsgolint (`vp check`)              | ✅ pass / ❌ fail / ⏭️ not reached | blocking-finding count + first 3 messages |
+| 7. tsc (`vp run typecheck`)           | ✅ pass / ❌ fail / ⏭️ not reached | blocking-finding count + first 3 messages |
 | 8. Tests (`vp run test:changed`, root) | ✅ pass / ❌ fail / ⏭️ not reached | pass/fail counts + first 3 failures; name the groups it selected |
 
 **Report a row for every stage in the skill's Canonical Gate Order, every time.**
