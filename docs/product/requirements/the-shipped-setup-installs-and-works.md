@@ -40,6 +40,9 @@ install it, rather than by a syntax error the first time a hook fires.
 - Each distributed package is packed and installed into a scratch repository
   holding none of this repository's files, and exercised there:
   `vp run tarball:verify`, which CI runs as its own step.
+- Each packed manifest passes publint at error level, so an export target the
+  tarball does not hold fails at any condition depth: `vp run tarball:verify`
+  prints one publint result per package.
 - A shipped git hook is executable **in the installed package**, not merely in
   the source tree — checked on the unpacked file's mode, since a `workspace:*`
   link resolves the source directory and never shows a mode at all.
