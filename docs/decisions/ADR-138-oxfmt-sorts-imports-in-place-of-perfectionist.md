@@ -25,7 +25,7 @@ any tooling directory at the root that is not a workspace.
 The package also ships `./fmt`, whose `createFmtConfig` returns the Oxfmt
 config. Oxfmt runs from the root over every file it is not told to ignore. It
 runs inside `vp check`, and it is the last step of the `staged` chain that
-ADR-035 §4 orders. Oxfmt 0.73 has a `sortImports` option modelled on
+ADR-035 §4 orders. Oxfmt has a `sortImports` option modelled on
 perfectionist's `sort-imports`. Turned on, it orders imports in every file the
 formatter already reaches, with no per-workspace config needed.
 
@@ -37,7 +37,7 @@ is recorded here instead of in a cleanup PR.
 Oxfmt owns import order. `createFmtConfig` sets this option:
 
 ```json
-"sortImports": { "partitionByComment": true, "internalPattern": ["@/","~/"],
+"sortImports": { "order": "asc", "partitionByComment": true, "internalPattern": ["@/","~/"],
   "groups": [["type-builtin","type-external"],["value-builtin","value-external"],
              ["type-internal","type-subpath"],["value-internal","value-subpath"],
              ["type-parent","type-sibling","type-index"],["value-parent","value-sibling","value-index"],"unknown"] }
@@ -51,31 +51,33 @@ still run.
 
 Both changes ship in the same `@lcabrera/vite-config` release.
 
+### How the option maps the perfectionist rule
+
+The rule it replaces is configured as
+`{ order: 'asc', partitionByComment: { block: true }, type: 'natural' }`.
+
+- `order: 'asc'` carries over as `"order": "asc"`.
+- `type: 'natural'` has no option to map to. Oxfmt's `sortImports` has no
+  comparison-type setting, and its comparison is already natural, so `foo9`
+  sorts before `foo10` exactly as under perfectionist.
+- `partitionByComment: { block: true }` has no equivalent. Oxfmt's
+  `partitionByComment` is a boolean, and `true` makes **every** comment a
+  partition. So a line comment between two imports now stops sorting across it,
+  where perfectionist sorted through it. A block comment partitions under both.
+  The effect is a looser check, never a reordering. Imports perfectionist
+  already accepted stay where they are, but two imports split by a line comment
+  can sit out of order without being reported. `false` was rejected because it
+  goes wrong in the other direction: it sorts across a block comment and moves
+  imports out of a partition someone wrote on purpose.
+
 ### Evidence
 
-Measured on 2026-10-20 against `main` at `ed8313e34`, with `oxfmt` 0.73.0
-through `vite-plus` 1.3.0.
-
-To reproduce, pass the option through the root `vite.config.ts`'s existing
-`createFmtConfig` call as `overrides: { sortImports: … }`, then run:
-
-```bash
-vp fmt --check . 2>&1 | grep -E ' \([0-9]+ms\)$'
-```
-
-That prints one line per file the option would rewrite. Without the override the
-same command prints nothing, because the tree is clean.
-
-| Config                         | Non-markdown files under `packages/*/src` and `apps/*/src` | Non-markdown files repo-wide                                 | Markdown files (fenced code) |
-| ------------------------------ | ---------------------------------------------------------- | ------------------------------------------------------------ | ---------------------------- |
-| The groups above               | 0                                                          | 57: 56 under root `scripts/`, plus the root `vite.config.ts` | 20                           |
-| `sortImports: true` (defaults) | 1210                                                       | not counted                                                  | not counted                  |
-
-The first row is what the decision rests on. With the groups above, Oxfmt
-produces the same order perfectionist already enforces in every file ESLint
-reaches, so every change it makes is in a file ESLint never reached. The second
-row shows that the groups have to be tuned: Oxfmt's default groups disagree with
-perfectionist's order in most source files.
+With these groups, Oxfmt reproduces the order perfectionist already enforces in
+every file ESLint reaches. Every file it changes is one ESLint never read. Oxfmt's
+default groups do not reproduce that order. The measurement, the versions it
+ran on, the command that reproduces it, and the probes behind the mapping above
+are in [the evidence comment on #1414](https://github.com/luciocabrera/lcabrera-stack/issues/1414#issuecomment-6299104842)
+and in [#1435](https://github.com/luciocabrera/lcabrera-stack/pull/1435).
 
 ## Consequences
 
@@ -83,8 +85,8 @@ perfectionist's order in most source files.
   files no ESLint config covers. That includes root config files, tooling
   scripts outside a workspace, and fenced code in markdown. A file that already
   passed `perfectionist/sort-imports` should not move, because the groups were
-  tuned to the same order. The evidence shows that for this repository's tree,
-  not for every possible import. A consumer who wants the old behaviour can pass
+  tuned to the same order. The evidence was measured on this repository's tree,
+  not on every possible import. A consumer who wants the old behaviour can pass
   `sortImports: false` in `overrides`.
 - **Consumers of the ESLint factories.** `perfectionist/sort-imports` stops
   reporting. A consumer who uses an ESLint factory but formats with a config
@@ -96,8 +98,8 @@ perfectionist's order in most source files.
   `vp fmt --check` and `vp check` fail on a misordered import the way they fail
   on any formatting difference. They do not name a rule.
 - **Markdown is in scope.** `embeddedLanguageFormatting` defaults to `"auto"`,
-  so fenced code blocks are sorted too. In the measurement, one of the 20
-  markdown files is a Changesets-generated `CHANGELOG.md`, and the README of a
+  so fenced code blocks are sorted too. That reaches a Changesets-generated
+  `CHANGELOG.md`, and the README of a
   published package ships in its tarball. The implementation issue decides how
   generated files are handled. This ADR does not.
 - **A config the formatter owns.** The groups are written against Oxfmt's
@@ -114,8 +116,8 @@ perfectionist's order in most source files.
   file would go unchecked until someone noticed. A rule in the formatter covers
   those files because the formatter already reads them.
 - **Turn on `sortImports` with Oxfmt's default groups.** Rejected on the
-  evidence above: it reorders 1210 source files that perfectionist already
-  orders, which churns every consumer's tree and gains nothing.
+  evidence above: it reorders source files that perfectionist already orders,
+  which churns every consumer's tree and gains nothing.
 - **Run both sorters.** Rejected. Two engines would arbitrate one rule, and any
   difference between them is a fix loop. ADR-035 already refuses that for Biome's
   `useExhaustiveDependencies`, which another engine owns.
@@ -126,6 +128,9 @@ perfectionist's order in most source files.
   format-only pass last.
 - [ADR-136](ADR-136-lint-evals-from-a-root-eslint-config.md) — the last time a
   root directory needed its own ESLint pass.
+- The measurement and the comparison probes:
+  [#1414 evidence comment](https://github.com/luciocabrera/lcabrera-stack/issues/1414#issuecomment-6299104842),
+  [#1435](https://github.com/luciocabrera/lcabrera-stack/pull/1435).
 - Parent issue [#1410](https://github.com/luciocabrera/lcabrera-stack/issues/1410).
   The implementation is [#1426](https://github.com/luciocabrera/lcabrera-stack/issues/1426),
   blocked by this decision.
