@@ -61,6 +61,12 @@ export default defineConfig({
 A workspace config sets `pack`, `run` and its Vite/Vitest config. `fmt`, `lint`
 and `staged` belong in the root config only.
 
+The config sets `denyWarnings`, so a rule at `warn` fails the run, and
+reports an `oxlint-disable` directive that silences nothing as an error. Oxlint
+does not read `eslint-disable` directives: those name ESLint rules, which Oxlint
+would report as unused, and they stay in force for the ESLint pass. So an
+Oxlint finding cannot be silenced with an `eslint-disable` comment.
+
 ## ESLint
 
 Both factories return a flat-config array. The React one is `async`: it resolves
@@ -76,6 +82,18 @@ export default createBaseCustomRulesLintConfig({
   tsconfigRootDir: import.meta.dirname,
 });
 ```
+
+### The effect-dependency check runs in Oxlint, not here
+
+`createCustomRulesLintConfig` turns off `react-hooks/exhaustive-deps` and
+`react-x/exhaustive-deps`, so ESLint does not report a missing hook dependency.
+The Oxlint config from `./lint` reports it as an error under its `correctness`
+category, and it caught every case the two ESLint rules caught. An
+`eslint-disable` comment naming either rule is now an unused directive, which
+this config reports as an error: delete it, or replace it with an
+`oxlint-disable` comment if Oxlint reports that line. If you use `./eslint-custom-rules` without `./lint`,
+nothing from this package checks hook dependency arrays, so turn one of them
+back on in your own config.
 
 ### Import boundaries are tables you pass in
 

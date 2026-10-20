@@ -70,7 +70,7 @@ ${bullet(
 const countBy = (entries, verdict) =>
   entries.filter((entry) => entry.decision.verdict === verdict).length;
 
-export const renderSummary = (entries) =>
+const renderSummary = (entries) =>
   [
     '| # | PR | Verdict | Rules | Next action |',
     '| --- | --- | --- | --- | --- |',

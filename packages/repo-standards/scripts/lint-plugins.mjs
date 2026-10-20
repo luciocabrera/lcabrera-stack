@@ -10,7 +10,8 @@
  * and the gate fails when that stops being true. `ext` is per-probe because a
  * react rule needs `.tsx`: the same source saved as `.ts` reports only parse
  * errors, so one hardcoded extension would make a probe pass for the wrong
- * reason.
+ * reason. A second probe may share a family when it proves one rule that no
+ * other engine reports; `scope` is then the prefix Oxlint prints for it.
  */
 
 export const PLUGIN_PROBES = [
@@ -51,6 +52,13 @@ export const PLUGIN_PROBES = [
     plugin: 'react',
     rule: 'no-children-prop',
   },
+  {
+    code: "import { useEffect } from 'react';\n\nexport const A = ({ n }: { readonly n: number }) => {\n  useEffect(() => {\n    document.title = String(n);\n  }, []);\n  return null;\n};\n",
+    ext: 'tsx',
+    plugin: 'react',
+    rule: 'exhaustive-deps',
+    scope: 'react-hooks',
+  },
 ];
 
 export const UNPROBED_PLUGINS = {
@@ -59,8 +67,8 @@ export const UNPROBED_PLUGINS = {
     'TypeScript error first, so a probe passes whether or not the plugin loaded',
 };
 
-export const probeFilename = ({ ext = 'ts', plugin }) =>
-  `${plugin}.probe.${ext}`;
+export const probeFilename = ({ ext = 'ts', plugin, scope = plugin }) =>
+  `${scope}.probe.${ext}`;
 
 export const pluginsWithoutCoverage = (plugins) => {
   const covered = new Set([
@@ -70,7 +78,8 @@ export const pluginsWithoutCoverage = (plugins) => {
   return plugins.filter((plugin) => !covered.has(plugin));
 };
 
-export const probeCode = ({ plugin, rule }) => `${plugin}(${rule})`;
+export const probeCode = ({ plugin, rule, scope = plugin }) =>
+  `${scope}(${rule})`;
 
 export const silentProbes = ({ probes, reportedCodes }) => {
   const reported = new Set(reportedCodes);

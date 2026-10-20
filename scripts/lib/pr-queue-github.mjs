@@ -120,10 +120,3 @@ export const checkConformance = (pr, workspaces) => ({
   body: validatePrBody(pr.body).errors,
   title: validatePrTitle(pr.title, { workspaces }).errors,
 });
-
-const CLOSING_KEYWORD =
-  /\b(?:close[sd]?|fix(?:e[sd])?|resolve[sd]?)\s+#(\d+)/gi;
-
-export const linkedIssues = (pr) => [
-  ...new Set([...pr.body.matchAll(CLOSING_KEYWORD)].map((m) => Number(m[1]))),
-];

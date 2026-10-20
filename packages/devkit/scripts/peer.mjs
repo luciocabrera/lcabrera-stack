@@ -26,9 +26,9 @@ import { satisfies } from 'semver';
 
 import { requiredPeers } from './frontmatter.mjs';
 
-export const PEER_OK = 'ok';
-export const PEER_OUT_OF_RANGE = 'out-of-range';
-export const PEER_NOT_INSTALLED = 'not-installed';
+const PEER_OK = 'ok';
+const PEER_OUT_OF_RANGE = 'out-of-range';
+const PEER_NOT_INSTALLED = 'not-installed';
 
 const requirePeerManifest = ({ from, packageName }) =>
   createRequire(from)(`${packageName}/package.json`);
