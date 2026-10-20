@@ -131,36 +131,38 @@ is a plant, run through the audit as CI runs it (the command above) once with
 the rule at its previous severity and once at `error`, then reverted. The
 commands and their output are in the pull request for #1422.
 
-| Rule                           | Plant                                                                                                                                                                                         | Exit before | Exit at `error` |
-| ------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------- | --------------- |
-| `duplicate-prop-shape`         | two components in two new files beside `PinAndHideActions`, each taking `ColumnPinningButtonProps` and rendered by it, so three components share one prop-name set with `ColumnPinningButton` | 0           | 0               |
-| `stale-suppressions`           | `// fallow-ignore-next-line unused-export` above `isObject` in `packages/utils/src/guards/is-object.util.ts`, an export the package entry keeps in use                                        | 0           | 1               |
-| `require-suppression-reason`   | the same comment, with no reason, above a new unused export appended to `apps/showcase/src/constants/app.constants.ts` (the rule was `off`)                                                   | 0           | 1               |
-| `deprecated-exports-in-use`    | a `@deprecated` export appended to `is-object.util.ts` and imported by `packages/utils/src/strings/empty-to-undefined.util.ts` (the rule was `off`)                                           | 0           | 1               |
-| `unused-catalog-entries`       | `left-pad: ^1.3.0` added to the `backend` catalog in `pnpm-workspace.yaml`                                                                                                                    | 0           | 1               |
-| `empty-catalog-groups`         | `probe: {}` added under `catalogs` in `pnpm-workspace.yaml`                                                                                                                                   | 0           | 1               |
-| `unused-dependency-overrides`  | `left-pad: 1.3.0` added under `overrides` in `pnpm-workspace.yaml`                                                                                                                            | 0           | 1               |
-| `test-only-dependencies`       | the root manifest's `jsdom` moved from `devDependencies` to `dependencies`; only test files import it                                                                                         | 0           | 1               |
-| `unused-optional-dependencies` | `probe-unused-optional` added to `optionalDependencies` in `packages/repo-standards/package.json`                                                                                             | 0           | 1               |
-| `re-export-cycle`              | a barrel in `apps/showcase/src/constants/` that re-exports itself, imported by `app.constants.ts`                                                                                             | 0           | 1               |
-| `package-cycle`                | a type-only relative import from `packages/utils/src` into `packages/ui/src`, which already imports `@lcabrera/utils`                                                                         | 0           | 1               |
-
-`duplicate-prop-shape` is reported and not enforced. The pinned fallow lists
-the three findings with `effective_severity: "error"`, yet its
-`error-severity-findings` gate counts none of them, so the audit's verdict is
-`pass` and `fallow dead-code` exits 0. The rule stays at `error` so it gates the
-day fallow counts it; until then a new group of three passes the gate. Its
-three findings were cleared by folding Pin Left, Pin Right and Clear Pinning into
-one `ColumnPinningButton`.
+| Rule                           | Plant                                                                                                                                                  | Exit before | Exit at `error` |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------- | --------------- |
+| `stale-suppressions`           | `// fallow-ignore-next-line unused-export` above `isObject` in `packages/utils/src/guards/is-object.util.ts`, an export the package entry keeps in use | 0           | 1               |
+| `require-suppression-reason`   | the same comment, with no reason, above a new unused export appended to `apps/showcase/src/constants/app.constants.ts` (the rule was `off`)            | 0           | 1               |
+| `deprecated-exports-in-use`    | a `@deprecated` export appended to `is-object.util.ts` and imported by `packages/utils/src/strings/empty-to-undefined.util.ts` (the rule was `off`)    | 0           | 1               |
+| `unused-catalog-entries`       | `left-pad: ^1.3.0` added to the `backend` catalog in `pnpm-workspace.yaml`                                                                             | 0           | 1               |
+| `empty-catalog-groups`         | `probe: {}` added under `catalogs` in `pnpm-workspace.yaml`                                                                                            | 0           | 1               |
+| `unused-dependency-overrides`  | `left-pad: 1.3.0` added under `overrides` in `pnpm-workspace.yaml`                                                                                     | 0           | 1               |
+| `test-only-dependencies`       | the root manifest's `jsdom` moved from `devDependencies` to `dependencies`; only test files import it                                                  | 0           | 1               |
+| `unused-optional-dependencies` | `probe-unused-optional` added to `optionalDependencies` in `packages/repo-standards/package.json`                                                      | 0           | 1               |
+| `re-export-cycle`              | a barrel in `apps/showcase/src/constants/` that re-exports itself, imported by `app.constants.ts`                                                      | 0           | 1               |
+| `package-cycle`                | a type-only relative import from `packages/utils/src` into `packages/ui/src`, which already imports `@lcabrera/utils`                                  | 0           | 1               |
 
 `test-only-dependencies` fired only on the root manifest. The same shape in a
 workspace manifest (`@testing-library/react` in `apps/showcase`, a test-only
 `isbot` in `packages/ui`, a test-only `zod` in `packages/server`) produced no
 finding, so at `error` it guards the root `dependencies` and nothing else.
 
-Five rules that also report nothing were left at their default, because no
-plant made them fire in this repository's gate:
+Six rules that also report nothing were left below `error`, because no plant
+made them fail this repository's gate:
 
+- `duplicate-prop-shape` — stays `warn`. Fallow 3.33.1 reports it at `error`
+  but leaves it out of the exit gate: two components beside
+  `PinAndHideActions` taking `ColumnPinningButtonProps`, with
+  `ColumnPinningButton` a group of three, are listed with
+  `effective_severity: "error"`, yet `error-severity-findings` observes none,
+  the audit's verdict is `pass` and `fallow dead-code` exits 0. At `error` it
+  would read as enforced when it is not. It moves to `error` once a fallow
+  release enforces it
+  ([#1457](https://github.com/luciocabrera/lcabrera-stack/issues/1457)). The
+  tree carries none of its findings: Pin Left, Pin Right and Clear Pinning
+  were folded into one `ColumnPinningButton`.
 - `type-only-dependencies` — fallow computes it only under `--production`. A
   root dependency imported through `import type` alone is reported there and
   by neither the audit nor `fallow dead-code`, and this repository runs

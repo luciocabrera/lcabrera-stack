@@ -131,7 +131,7 @@
     "unused-dev-dependencies": "error",
     "prop-drilling": "error",
     "thin-wrapper": "error",
-    "duplicate-prop-shape": "error",
+    "duplicate-prop-shape": "warn",
     "stale-suppressions": "error",
     "require-suppression-reason": "error",
     "deprecated-exports-in-use": "error",
