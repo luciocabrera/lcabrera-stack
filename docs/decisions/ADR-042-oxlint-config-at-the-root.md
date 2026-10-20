@@ -161,7 +161,8 @@ ESLint held the extra copy. Oxlint's `react` plugin carries
 `createCustomRulesLintConfig` turned on two more copies:
 `react-hooks/exhaustive-deps` from `eslint-plugin-react-hooks`'s recommended
 config, and `react-x/exhaustive-deps` from `eslint-plugin-react-x`'s. One
-missing dependency was therefore reported three times, by two engines.
+missing dependency was therefore reported by both engines, and twice by ESLint
+alone.
 
 Three cases were planted in a React package, one file each, and both engines
 were run on each file. Oxlint reported all three as errors: a hook that reads a

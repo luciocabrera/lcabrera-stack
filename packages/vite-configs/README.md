@@ -86,10 +86,12 @@ export default createBaseCustomRulesLintConfig({
 ### The effect-dependency check runs in Oxlint, not here
 
 `createCustomRulesLintConfig` turns off `react-hooks/exhaustive-deps` and
-`react-x/exhaustive-deps`. The Oxlint config from `./lint` already reports a
-missing hook dependency as an error under its `correctness` category, and it
-caught every case the two ESLint rules caught, so leaving them on reported one
-defect up to three times. If you use `./eslint-custom-rules` without `./lint`,
+`react-x/exhaustive-deps`, so ESLint does not report a missing hook dependency.
+The Oxlint config from `./lint` reports it as an error under its `correctness`
+category, and it caught every case the two ESLint rules caught. An
+`eslint-disable` comment naming either rule is now an unused directive, which
+this config reports as an error: delete it, or replace it with an
+`oxlint-disable` comment if Oxlint reports that line. If you use `./eslint-custom-rules` without `./lint`,
 nothing from this package checks hook dependency arrays, so turn one of them
 back on in your own config.
 
