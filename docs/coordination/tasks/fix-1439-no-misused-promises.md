@@ -2,7 +2,7 @@
 id: fix-1439-no-misused-promises
 title: fix(ui): clear the two noMisusedPromises findings and raise the rule to error
 owner: agent:claude
-status: active
+status: review
 branch: fix/1439-fix-1439-no-misused-promises
 area:
   - packages/ui/src/utils/prefetch/**
@@ -13,7 +13,7 @@ area:
 started: 2026-10-21
 updated: 2026-10-21
 plan: (none)
-pr: (none)
+pr: "#1470"
 issue: #1439
 ---
 
@@ -23,6 +23,6 @@ fix(ui): clear the two noMisusedPromises findings and raise the rule to error
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR ready for review
 - Blockers: none
-- Next:
+- Next: merge
