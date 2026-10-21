@@ -10,6 +10,7 @@ import {
   openColumnMenu,
   openGrid,
   openSettings,
+  reloadGrid,
   selectTab,
 } from './grid';
 import { readOrderSample } from './oracle';
@@ -45,7 +46,9 @@ it('grouping by status opens the group from its details link', async ({
 
   await page.getByTestId('table-group-details-link').first().click();
   await expect(page).toHaveURL(/\/enterprise-orders\/group/);
-  await expect(grid(page)).toBeVisible();
+  const groupGrid = page.getByRole('dialog').getByTestId('table');
+  await expect(groupGrid).toBeVisible();
+  await expect(groupGrid).not.toHaveAttribute('aria-rowcount', '-1');
 });
 
 it('a second group key and a sum both land on the group rows', async ({
@@ -118,7 +121,7 @@ it('a reload keeps the group and a grouped column cannot be pinned or hidden', a
 }) => {
   await openGrid(page);
   await groupByStatus(page);
-  await page.reload();
+  await reloadGrid(page);
   await expect(grid(page)).toHaveAttribute('role', 'treegrid', {
     timeout: 90_000,
   });

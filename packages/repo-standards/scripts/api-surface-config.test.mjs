@@ -1,12 +1,16 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { readPublicPackages, snapshotPathFor } from './api-surface-config.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
+
+const roots = createFixtureRoots('api-surface-config-');
+
+afterEach(roots.removeAll);
 
 const scaffold = ({ manifests = {}, publishing }) => {
-  const root = mkdtempSync(join(tmpdir(), 'api-surface-config-'));
+  const root = roots.make();
   writeFileSync(
     join(root, 'devkit.config.json'),
     JSON.stringify({ publishing }),

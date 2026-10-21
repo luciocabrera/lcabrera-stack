@@ -8,11 +8,11 @@
  * loses invocations; a root resolved to an ancestor gains every repository under
  * it, and nothing in the report would say the scope was wrong.
  */
-import { mkdirSync, mkdtempSync, realpathSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { createFixtureRoots } from './repo-fixtures.mjs';
 import {
   gitdirPointer,
   isWithinAny,
@@ -21,7 +21,10 @@ import {
   transcriptDirectoryFor,
 } from './usage-scope.mjs';
 
-const scratch = () => realpathSync(mkdtempSync(join(tmpdir(), 'usage-scope-')));
+const scratches = createFixtureRoots('usage-scope-');
+const scratch = scratches.make;
+
+afterEach(scratches.removeAll);
 
 const treeWithGitFile = (pointer) => {
   const root = join(scratch(), 'checkout');

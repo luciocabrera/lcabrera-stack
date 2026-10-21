@@ -1,4 +1,5 @@
 import { RATE_LIMIT_ERROR_CLASS } from '@repo/eval-history/envelope/envelope.constants';
+import { existsSync } from 'node:fs';
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -6,6 +7,7 @@ import {
   costLine,
   drain,
   errorText,
+  inScratchDirectory,
   runBatches,
   sessionMetrics,
   sessionProblem,
@@ -19,6 +21,30 @@ describe('chunk', () => {
   it('splits into batches of at most the given size', () => {
     expect(chunk([1, 2, 3, 4, 5], 2)).toStrictEqual([[1, 2], [3, 4], [5]]);
     expect(chunk([], 2)).toStrictEqual([]);
+  });
+});
+
+describe('inScratchDirectory', () => {
+  it('hands the run a directory and removes it once the run resolves', async () => {
+    const seen = [];
+    const result = await inScratchDirectory('agent-sessions-', (directory) => {
+      seen.push(existsSync(directory));
+      return directory;
+    });
+    expect(seen).toStrictEqual([true]);
+    expect(existsSync(result)).toBe(false);
+  });
+
+  it('removes the directory when the run throws, and rethrows', async () => {
+    const made = [];
+    await expect(
+      inScratchDirectory('agent-sessions-', (directory) => {
+        made.push(directory);
+        throw new Error('session failed');
+      }),
+    ).rejects.toThrow('session failed');
+    expect(made).toHaveLength(1);
+    expect(existsSync(made[0])).toBe(false);
   });
 });
 

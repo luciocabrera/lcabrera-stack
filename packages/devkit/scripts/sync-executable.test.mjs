@@ -10,19 +10,19 @@
 
 import {
   chmodSync,
+  existsSync,
   mkdirSync,
-  mkdtempSync,
   rmSync,
   statSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, test, vi } from 'vite-plus/test';
+import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 
 import { runDoctor, runSync } from './command-sync.mjs';
 import { DEFAULT_CONFIG } from './config.mjs';
+import { scratchDirectories } from './create-fixtures.mjs';
 import { readFilesUnder } from './files.mjs';
 import { hashContent } from './manifest.mjs';
 import { applySync, planSync } from './sync.mjs';
@@ -35,7 +35,10 @@ const ASSETS_DIR = join(
   'assets',
 );
 
-const scratch = () => mkdtempSync(join(tmpdir(), 'devkit-exec-'));
+const scratches = scratchDirectories('devkit-exec-');
+const scratch = scratches.make;
+
+afterEach(scratches.drain);
 
 const REPO_COMMANDS = {
   check: 'true',
@@ -62,6 +65,21 @@ const plan = (assets, { manifest = { files: {} }, onDiskHash } = {}) =>
     manifest,
     onDiskHash: onDiskHash ?? (() => undefined),
   });
+
+describe('a scratch directory', () => {
+  const made = [];
+
+  test.fails('is made and then the test throws', () => {
+    made.push(scratch());
+    expect(existsSync(made[0])).toBe(true);
+    throw new Error('the test failed after making its scratch directory');
+  });
+
+  test('is gone once that test has finished', () => {
+    expect(made).toHaveLength(1);
+    expect(existsSync(made[0])).toBe(false);
+  });
+});
 
 describe('planSync carries the asset mode', () => {
   test('an executable asset plans an executable entry', () => {

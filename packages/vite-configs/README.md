@@ -177,6 +177,10 @@ export const runConfig = createReactRouterRunConfig({
 });
 ```
 
+`start` runs uncached, as `test` and `test:coverage` do. It serves until it is
+stopped, so it has no finished run to replay, and Vite Task tracks a cached
+task through files in the OS temp dir that a signal stop leaves behind.
+
 ## Peer dependencies
 
 The peer list is long on purpose: this package composes other people's ESLint

@@ -1,7 +1,6 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   CONFIG_FILE_NAME,
@@ -14,6 +13,11 @@ import {
   resolvePublishing,
   resolveRegisters,
 } from './config.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
+
+const roots = createFixtureRoots('repo-standards-config-');
+
+afterEach(roots.removeAll);
 
 describe('resolveConventions', () => {
   it('an absent config is the documented default, not an error', () => {
@@ -131,7 +135,7 @@ describe('resolveRegisters', () => {
 const publishing = (block) => resolvePublishing(JSON.stringify(block));
 
 const withConfig = (config) => {
-  const root = mkdtempSync(join(tmpdir(), 'repo-standards-config-'));
+  const root = roots.make();
   if (config !== undefined) {
     writeFileSync(join(root, CONFIG_FILE_NAME), JSON.stringify(config));
   }

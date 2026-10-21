@@ -100,6 +100,10 @@ describe('createReactRouterRunConfig start task', () => {
     expect(command).toContain('react-router-serve ./build/server/index.js');
   });
 
+  it('runs uncached, so a server stopped by a signal leaves no task-tracking files', () => {
+    expect(createReactRouterRunConfig().tasks.start.cache).toBe(false);
+  });
+
   it('falls back to the app-local .env when no env files are given', () => {
     const { command } = createReactRouterRunConfig().tasks.start;
 

@@ -1,11 +1,14 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { resolveGitDir } from './git-dir.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
 
-const fixture = () => mkdtempSync(join(tmpdir(), 'git-dir-'));
+const roots = createFixtureRoots('git-dir-');
+const fixture = roots.make;
+
+afterEach(roots.removeAll);
 
 describe('resolveGitDir', () => {
   it('returns the directory when .git is a real directory', () => {
