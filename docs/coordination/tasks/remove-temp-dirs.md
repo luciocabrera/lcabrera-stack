@@ -9,6 +9,8 @@ area:
   - packages/*/scripts/**
   - evals/**
   - .changeset/**
+  - .claude/rules/testing.md
+  - .github/skills/fallow-code-checker/CONFIGURATION.md
 started: 2026-10-21
 updated: 2026-10-21
 plan: (none)
@@ -22,6 +24,6 @@ Remove the temp directories tests and gates create
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: every temp-dir creator traced and cleaned; gate and PR
 - Blockers: none
 - Next:

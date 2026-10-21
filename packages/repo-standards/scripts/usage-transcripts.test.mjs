@@ -19,11 +19,11 @@
  * days than the store holds, whatever day the horizon names, so it is reported
  * back rather than left for the caller to re-derive from the flag it passed.
  */
-import { chmodSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { chmodSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { createFixtureRoots } from './repo-fixtures.mjs';
 import {
   namesADirectoryUnderAny,
   transcriptDirectoryFor,
@@ -34,6 +34,14 @@ import {
   tallyByDay,
   transcriptRead,
 } from './usage-transcripts.mjs';
+
+const trees = createFixtureRoots('usage-tree-');
+const transcriptRoots = createFixtureRoots('usage-transcripts-');
+
+afterEach(() => {
+  trees.removeAll();
+  transcriptRoots.removeAll();
+});
 
 const ROOTS = ['/home/dev/repo', '/home/dev/worktree'];
 
@@ -167,9 +175,18 @@ describe('tallyByDay', () => {
   });
 });
 
+const whileUnlistable = (directory, read) => {
+  chmodSync(directory, 0o000);
+  try {
+    return read();
+  } finally {
+    chmodSync(directory, 0o700);
+  }
+};
+
 const transcriptRootWith = ({ entries, launchedIn }) => {
-  const tree = mkdtempSync(join(tmpdir(), 'usage-tree-'));
-  const root = mkdtempSync(join(tmpdir(), 'usage-transcripts-'));
+  const tree = trees.make();
+  const root = transcriptRoots.make();
   const cwd = launchedIn === undefined ? tree : join(tree, launchedIn);
   const directory = join(root, transcriptDirectoryFor(cwd));
   mkdirSync(directory);
@@ -187,6 +204,30 @@ const skillEntryOn = (timestamp) => ({
   timestamp,
 });
 
+const readTree = ({ root, tree }) =>
+  readTranscriptUsage({ root, workingTrees: [tree] });
+
+const oneSkillCall = () =>
+  transcriptRootWith({ entries: [skillEntryOn('2026-09-04T09:00:00.000Z')] });
+
+const callsInJuneAndSeptember = () =>
+  transcriptRootWith({
+    entries: [
+      skillEntryOn('2026-06-10T09:00:00.000Z'),
+      skillEntryOn('2026-09-04T09:00:00.000Z'),
+    ],
+  });
+
+const expectAnIncompleteRead = (result) => {
+  expect(result.available).toBe(true);
+  expect(result.complete).toBe(false);
+};
+
+const expectTheCallCountedInAnIncompleteRead = (result) => {
+  expectAnIncompleteRead(result);
+  expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+};
+
 describe('readTranscriptUsage', () => {
   it('reports that it could not read, rather than an empty tally', () => {
     const result = readTranscriptUsage({
@@ -201,14 +242,9 @@ describe('readTranscriptUsage', () => {
   });
 
   it('counts an invocation older than the retention default when no horizon is given', () => {
-    const { root, tree } = transcriptRootWith({
-      entries: [
-        skillEntryOn('2026-06-10T09:00:00.000Z'),
-        skillEntryOn('2026-09-04T09:00:00.000Z'),
-      ],
-    });
+    const { root, tree } = callsInJuneAndSeptember();
 
-    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+    const result = readTree({ root, tree });
 
     expect(result.tally.skills.unslop).toEqual({
       '2026-06-10': 1,
@@ -222,7 +258,7 @@ describe('readTranscriptUsage', () => {
       launchedIn: join('apps', 'showcase'),
     });
 
-    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+    const result = readTree({ root, tree });
 
     expect(result.available).toBe(true);
     expect(result.complete).toBe(true);
@@ -230,16 +266,12 @@ describe('readTranscriptUsage', () => {
   });
 
   it('reports a transcript it could not read rather than abandoning the run', () => {
-    const { root, tree } = transcriptRootWith({
-      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
-    });
+    const { root, tree } = oneSkillCall();
     mkdirSync(join(root, transcriptDirectoryFor(tree), 'vanished.jsonl'));
 
-    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+    const result = readTree({ root, tree });
 
-    expect(result.available).toBe(true);
-    expect(result.complete).toBe(false);
-    expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+    expectTheCallCountedInAnIncompleteRead(result);
     expect(result.unreadable).toHaveLength(1);
     expect(result.unreadable[0].path).toContain('vanished.jsonl');
   });
@@ -247,28 +279,20 @@ describe('readTranscriptUsage', () => {
   it.skipIf(process.getuid?.() === 0)(
     'reports a transcript directory it could not list rather than abandoning the run',
     () => {
-      const { root, tree } = transcriptRootWith({
-        entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
-      });
+      const { root, tree } = oneSkillCall();
       const sealed = join(root, transcriptDirectoryFor(join(tree, 'apps')));
       mkdirSync(sealed);
-      chmodSync(sealed, 0o000);
 
-      const result = readTranscriptUsage({ root, workingTrees: [tree] });
-      chmodSync(sealed, 0o700);
+      const result = whileUnlistable(sealed, () => readTree({ root, tree }));
 
-      expect(result.available).toBe(true);
-      expect(result.complete).toBe(false);
-      expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+      expectTheCallCountedInAnIncompleteRead(result);
       expect(result.unreadable).toHaveLength(1);
       expect(result.unreadable[0].path).toBe(sealed);
     },
   );
 
   it("ignores a sibling repository whose path shares this one's encoded prefix", () => {
-    const { root, tree } = transcriptRootWith({
-      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
-    });
+    const { root, tree } = oneSkillCall();
     const sibling = `${tree}-docs`;
     const siblingDirectory = join(root, transcriptDirectoryFor(sibling));
     mkdirSync(siblingDirectory);
@@ -282,7 +306,7 @@ describe('readTranscriptUsage', () => {
       ].join('\n'),
     );
 
-    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+    const result = readTree({ root, tree });
 
     expect(
       namesADirectoryUnderAny({
@@ -295,8 +319,8 @@ describe('readTranscriptUsage', () => {
   });
 
   it('reports not read when only a prefix sibling has transcripts', () => {
-    const root = mkdtempSync(join(tmpdir(), 'usage-transcripts-'));
-    const tree = mkdtempSync(join(tmpdir(), 'usage-tree-'));
+    const root = transcriptRoots.make();
+    const tree = trees.make();
     const sibling = `${tree}-docs`;
     const siblingDirectory = join(root, transcriptDirectoryFor(sibling));
     mkdirSync(siblingDirectory);
@@ -308,17 +332,15 @@ describe('readTranscriptUsage', () => {
       }),
     );
 
-    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+    const result = readTree({ root, tree });
 
     expect(result.available).toBe(false);
     expect(result.reason).toContain('records a working tree');
   });
 
   it('reads no transcript filed for another repository', () => {
-    const { root } = transcriptRootWith({
-      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
-    });
-    const elsewhere = mkdtempSync(join(tmpdir(), 'usage-other-tree-'));
+    const { root } = oneSkillCall();
+    const elsewhere = trees.make();
 
     const result = readTranscriptUsage({
       root,
@@ -330,9 +352,7 @@ describe('readTranscriptUsage', () => {
   });
 
   it('vouches for no day when a record naming a tool call will not parse', () => {
-    const { root, tree } = transcriptRootWith({
-      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
-    });
+    const { root, tree } = oneSkillCall();
     writeFileSync(
       join(root, transcriptDirectoryFor(tree), 'session.jsonl'),
       [
@@ -344,34 +364,27 @@ describe('readTranscriptUsage', () => {
       ].join('\n'),
     );
 
-    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+    const result = readTree({ root, tree });
 
-    expect(result.available).toBe(true);
-    expect(result.complete).toBe(false);
-    expect(result.tally.skills.unslop).toEqual({ '2026-09-04': 1 });
+    expectTheCallCountedInAnIncompleteRead(result);
     expect(result.unreadable[0].reason).toContain('could not be parsed');
   });
 
   it('vouches for no day when a transcript records a tool call it names no directory for', () => {
-    const { root, tree } = transcriptRootWith({
-      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
-    });
+    const { root, tree } = oneSkillCall();
     writeFileSync(
       join(root, transcriptDirectoryFor(tree), 'headless.jsonl'),
       `${JSON.stringify(skillEntryOn('2026-09-04T09:30:00.000Z'))}\n`,
     );
 
-    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+    const result = readTree({ root, tree });
 
-    expect(result.available).toBe(true);
-    expect(result.complete).toBe(false);
+    expectAnIncompleteRead(result);
     expect(result.unreadable[0].path).toContain('headless.jsonl');
   });
 
   it('counts a transcript holding no tool call as nothing skipped, whatever else it lacks', () => {
-    const { root, tree } = transcriptRootWith({
-      entries: [skillEntryOn('2026-09-04T09:00:00.000Z')],
-    });
+    const { root, tree } = oneSkillCall();
     const directory = join(root, transcriptDirectoryFor(tree));
     writeFileSync(join(directory, 'empty.jsonl'), '');
     writeFileSync(
@@ -379,19 +392,14 @@ describe('readTranscriptUsage', () => {
       `${JSON.stringify({ messageCount: 0, type: 'teleported-from' })}\n`,
     );
 
-    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+    const result = readTree({ root, tree });
 
     expect(result.complete).toBe(true);
     expect(result.unreadable).toEqual([]);
   });
 
   it('drops what falls before a simulated horizon', () => {
-    const { root, tree } = transcriptRootWith({
-      entries: [
-        skillEntryOn('2026-06-10T09:00:00.000Z'),
-        skillEntryOn('2026-09-04T09:00:00.000Z'),
-      ],
-    });
+    const { root, tree } = callsInJuneAndSeptember();
 
     const result = readTranscriptUsage({
       root,
@@ -404,14 +412,9 @@ describe('readTranscriptUsage', () => {
   });
 
   it('reads every day on disk and reports no horizon when it was given none', () => {
-    const { root, tree } = transcriptRootWith({
-      entries: [
-        skillEntryOn('2026-06-10T09:00:00.000Z'),
-        skillEntryOn('2026-09-04T09:00:00.000Z'),
-      ],
-    });
+    const { root, tree } = callsInJuneAndSeptember();
 
-    const result = readTranscriptUsage({ root, workingTrees: [tree] });
+    const result = readTree({ root, tree });
 
     expect(result.readFrom).toBeUndefined();
     expect(result.tally.skills.unslop).toEqual({
