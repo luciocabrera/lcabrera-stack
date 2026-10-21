@@ -1,0 +1,5 @@
+---
+'@lcabrera/repo-standards': patch
+---
+
+`repo-verify-lint-plugins` now parses each workspace `vite.config.ts` to find a `fmt`, `lint` or `staged` key, instead of matching one at the start of a line. A shorthand property (`{ fmt }`), an inline object (`defineConfig({ fmt: f })`), a quoted key, a local constant passed to `defineConfig`, the object a config function returns and a spread of a local object now all fail the gate, where before the shorthand and inline forms passed. A key on a nested object, such as `test.fmt`, is still not flagged. A spread of an imported object is not followed, so a key reached only that way still passes. A repository whose workspace config declared one of these keys in a form the line match missed fails the gate until it moves the block to the root config.

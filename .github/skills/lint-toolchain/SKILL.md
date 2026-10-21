@@ -54,7 +54,9 @@ workspace built from a `*-lint` factory. On Vite+ 0.3 none of it loaded, and
 that layer is gone. Vite+ 1.3 would load such a block when `vp lint` runs from
 the package directory, which is why the gate still rejects the key.
 `vp run lint:plugins:verify` fails on a `lint`, `fmt` or `staged` key in any
-workspace config, so none of them can come back.
+workspace config, so none of them can come back. It parses the config rather
+than matching lines, so a shorthand `fmt`, an inline `{ fmt: x }` and a spread
+of a local object all fail it; a spread of an imported object is not followed.
 
 **Oxlint runs no ESLint-plugin rules.** The `jsPlugins` bridge is gone: the
 eslint pass already loads `react-x`, `react-dom`, `@stylexjs`, `local-rules`,

@@ -13,6 +13,7 @@
  * reason. A second probe may share a family when it proves one rule that no
  * other engine reports; `scope` is then the prefix Oxlint prints for it.
  */
+import { ts } from 'ts-morph';
 
 export const PLUGIN_PROBES = [
   {
@@ -86,18 +87,106 @@ export const silentProbes = ({ probes, reportedCodes }) => {
   return probes.filter((probe) => !reported.has(probeCode(probe)));
 };
 
-const hasKey = (text, key) =>
-  new RegExp(String.raw`^\s{0,4}${key}\s*:`, 'mu').test(stripComments(text));
+const unwrap = (node) =>
+  ts.isParenthesizedExpression(node) ||
+  ts.isAsExpression(node) ||
+  ts.isSatisfiesExpression(node)
+    ? unwrap(node.expression)
+    : node;
+
+const returnedExpressions = (fn) =>
+  ts.isBlock(fn.body)
+    ? fn.body.statements
+        .filter((statement) => ts.isReturnStatement(statement))
+        .filter((statement) => statement.expression !== undefined)
+        .map((statement) => statement.expression)
+    : [fn.body];
+
+const localInitializers = (sourceFile) =>
+  new Map(
+    sourceFile.statements
+      .filter((statement) => ts.isVariableStatement(statement))
+      .flatMap((statement) => statement.declarationList.declarations)
+      .filter(
+        (declaration) =>
+          ts.isIdentifier(declaration.name) &&
+          declaration.initializer !== undefined,
+      )
+      .map((declaration) => [declaration.name.text, declaration.initializer]),
+  );
+
+const objectLiterals = (node, locals, seen) => {
+  const expression = unwrap(node);
+  if (ts.isObjectLiteralExpression(expression)) return [expression];
+  if (ts.isArrowFunction(expression) || ts.isFunctionExpression(expression))
+    return returnedExpressions(expression).flatMap((returned) =>
+      objectLiterals(returned, locals, seen),
+    );
+  if (!ts.isIdentifier(expression) || seen.has(expression.text)) return [];
+  const initializer = locals.get(expression.text);
+  return initializer === undefined
+    ? []
+    : objectLiterals(initializer, locals, new Set([...seen, expression.text]));
+};
+
+const propertyName = (name) =>
+  ts.isComputedPropertyName(name)
+    ? propertyName(unwrap(name.expression))
+    : ts.isIdentifier(name) ||
+        ts.isStringLiteral(name) ||
+        ts.isNoSubstitutionTemplateLiteral(name)
+      ? name.text
+      : undefined;
+
+const topLevelKeys = (object, locals, visited) =>
+  object.properties.flatMap((property) =>
+    ts.isSpreadAssignment(property)
+      ? objectLiterals(property.expression, locals, new Set())
+          .filter((spread) => !visited.has(spread))
+          .flatMap((spread) =>
+            topLevelKeys(spread, locals, new Set([...visited, spread])),
+          )
+      : [propertyName(property.name)],
+  );
+
+const isDefineConfigCall = (node) =>
+  ts.isCallExpression(node) &&
+  ts.isIdentifier(node.expression) &&
+  node.expression.text === 'defineConfig';
+
+const configRoots = (node) => [
+  ...(isDefineConfigCall(node) ? node.arguments.slice(0, 1) : []),
+  ...(ts.isExportAssignment(node) && !node.isExportEquals
+    ? [node.expression]
+    : []),
+  ...node.getChildren().flatMap((child) => configRoots(child)),
+];
+
+const declaredConfigKeys = (path, text) => {
+  const sourceFile = ts.createSourceFile(
+    path,
+    text,
+    ts.ScriptTarget.Latest,
+    true,
+    ts.ScriptKind.TS,
+  );
+  const locals = localInitializers(sourceFile);
+  return new Set(
+    configRoots(sourceFile)
+      .flatMap((root) => objectLiterals(root, locals, new Set()))
+      .flatMap((object) => topLevelKeys(object, locals, new Set([object]))),
+  );
+};
 
 export const configsDeclaringKeys = (files, keys) =>
   files
     .filter(({ path }) => path !== 'vite.config.ts')
-    .flatMap(({ path, text }) =>
-      keys.filter((key) => hasKey(text, key)).map((key) => ({ key, path })),
-    );
-
-const stripComments = (text) =>
-  text.replaceAll(/\/\*[\s\S]*?\*\//gu, '').replaceAll(/\/\/[^\n]*/gu, '');
+    .flatMap(({ path, text }) => {
+      const declared = declaredConfigKeys(path, text);
+      return keys
+        .filter((key) => declared.has(key))
+        .map((key) => ({ key, path }));
+    });
 
 const globWorkspace = (glob) => glob.replace(/\/\*\*$/u, '');
 

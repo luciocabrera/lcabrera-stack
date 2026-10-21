@@ -151,6 +151,13 @@ chain for a run started in that package. That observation holds only before
 one such block: afterwards every workspace directory stops with no `staged`
 config found, and #1430 records the probe run by run.
 
+The gate parses each workspace config instead of matching a key at the start of
+a line, because that pattern passed a shorthand `fmt` and an inline
+`{ fmt: x }` (#1441). It reads the top-level keys of the object passed to
+`defineConfig` or exported as default, following a local constant, a config
+function's returned object and a spread of a local object. A key on a nested
+object is not flagged, and a spread of an imported object is not followed.
+
 ## Amendment 2026-10-19 — Oxlint owns the effect-dependency check
 
 The Decision above removed the ESLint rules that Oxlint was running a second
