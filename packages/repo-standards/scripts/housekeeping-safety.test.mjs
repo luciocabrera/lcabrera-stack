@@ -232,26 +232,82 @@ describe('a dirty worktree whose every change is in history, on an open pull req
   });
 });
 
-describe('two worktrees on one merged branch, one clean and one superseded', () => {
-  it('keeps the branch the forced removal relied on', () => {
-    const root = make();
-    const repo = baseRepository(root);
-    const clean = worktreeOnBranch({ name: 'shared', repo, root });
-    const dirty = join(root, 'shared-dirty');
-    gitIn(repo, 'worktree', 'add', '-q', '-f', dirty, 'shared');
-    writeFileSync(join(dirty, 'a.txt'), 'one\n');
+const SHARED_MERGED = [{ headRefName: 'shared', number: 4, state: 'MERGED' }];
 
-    runPrune({
+const twoOnShared = ({ dirtySecond }) => {
+  const root = make();
+  const repo = baseRepository(root);
+  const first = worktreeOnBranch({ name: 'shared', repo, root });
+  const second = join(root, 'shared-second');
+  gitIn(repo, 'worktree', 'add', '-q', '-f', second, 'shared');
+  if (dirtySecond) writeFileSync(join(second, 'a.txt'), 'one\n');
+  return { first, repo, second };
+};
+
+const branchesOf = (repo) =>
+  gitIn(repo, 'branch', '--format=%(refname:short)').split('\n');
+
+const deletionSection = (lines) => {
+  const start = lines.findIndex((line) => line.includes('branches'));
+  const end = lines.findIndex(
+    (line, index) => index > start && line.startsWith('\n'),
+  );
+  return lines.slice(start + 1, end);
+};
+
+describe('two worktrees on one merged branch, one clean and one dirty', () => {
+  it('under plain --apply, plans no deletion of the branch, applies cleanly and keeps it', () => {
+    const { first, repo, second } = twoOnShared({ dirtySecond: true });
+    const run = (argv) =>
+      runPrune({
+        argv,
+        docker: noContainers,
+        pullRequests: SHARED_MERGED,
+        root: repo,
+      });
+
+    const dry = run([]);
+    const applied = run(['--apply']);
+
+    expect(deletionSection(dry.lines).join('\n')).not.toContain('shared');
+    expect(applied.errors).toEqual([]);
+    expect(applied.code).toBe(0);
+    expect(worktreePaths(repo)).not.toContain(first);
+    expect(worktreePaths(repo)).toContain(second);
+    expect(branchesOf(repo)).toContain('shared');
+  });
+
+  it('under --apply --include-superseded, removes both and keeps the branch', () => {
+    const { first, repo, second } = twoOnShared({ dirtySecond: true });
+
+    const applied = runPrune({
       argv: ['--apply', '--include-superseded'],
       docker: noContainers,
-      pullRequests: [{ headRefName: 'shared', number: 4, state: 'MERGED' }],
+      pullRequests: SHARED_MERGED,
       root: repo,
     });
 
-    expect(worktreePaths(repo)).not.toContain(clean);
-    expect(worktreePaths(repo)).not.toContain(dirty);
-    expect(
-      gitIn(repo, 'branch', '--format=%(refname:short)').split('\n'),
-    ).toContain('shared');
+    expect(applied.code).toBe(0);
+    expect(worktreePaths(repo)).not.toContain(first);
+    expect(worktreePaths(repo)).not.toContain(second);
+    expect(branchesOf(repo)).toContain('shared');
+  });
+});
+
+describe('two clean worktrees on one merged branch', () => {
+  it('removes both and deletes the branch', () => {
+    const { first, repo, second } = twoOnShared({ dirtySecond: false });
+
+    const applied = runPrune({
+      argv: ['--apply'],
+      docker: noContainers,
+      pullRequests: SHARED_MERGED,
+      root: repo,
+    });
+
+    expect(applied.errors).toEqual([]);
+    expect(worktreePaths(repo)).not.toContain(first);
+    expect(worktreePaths(repo)).not.toContain(second);
+    expect(branchesOf(repo)).not.toContain('shared');
   });
 });

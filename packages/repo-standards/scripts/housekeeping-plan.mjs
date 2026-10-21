@@ -280,6 +280,21 @@ const keepHeldOnlyByDeletedBranches = ({ deleted, entry }) =>
       }
     : entry;
 
+const isCleanRemoval = (entry) =>
+  entry.action === 'remove' && entry.force !== true;
+
+const freedBranches = (verdicts) =>
+  new Set(
+    [
+      ...Map.groupBy(
+        verdicts.filter((entry) => entry.branch !== undefined),
+        (entry) => entry.branch,
+      ),
+    ]
+      .filter(([, holders]) => holders.every((entry) => isCleanRemoval(entry)))
+      .map(([branch]) => branch),
+  );
+
 export const buildPlan = ({
   branches,
   checkedOutBranches,
@@ -306,17 +321,7 @@ export const buildPlan = ({
           : prByHead.get(worktree.branch),
     }),
   }));
-  const forced = new Set(
-    worktreeVerdicts
-      .filter((entry) => entry.action === 'remove' && entry.force === true)
-      .map((entry) => entry.branch),
-  );
-  const freed = new Set(
-    worktreeVerdicts
-      .filter((entry) => entry.action === 'remove' && entry.force !== true)
-      .map((entry) => entry.branch)
-      .filter((branch) => !forced.has(branch)),
-  );
+  const freed = freedBranches(worktreeVerdicts);
   const branchVerdicts = branches.map((name) => ({
     name,
     ...classifyBranch({

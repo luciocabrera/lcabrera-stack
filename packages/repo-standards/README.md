@@ -148,11 +148,12 @@ touches the main checkout or the checkout it runs from.
   holds no commit the default branch lacks. One with unique commits and no pull
   request is reported.
 - A clean worktree is removed when its branch's pull request merged or closed,
-  or when it is detached on a commit the default branch contains. A worktree
-  removed this way no longer pins its branch, so the same run can delete it.
-  A worktree removed as superseded (below) keeps pinning its branch for that
-  run, so content that matched only the branch's history is never left only
-  in the reflog.
+  or when it is detached on a commit the default branch contains. A branch
+  is freed for deletion in the same run only when every worktree on it is
+  removed this way. A worktree kept on it, or removed as superseded (below),
+  keeps the branch, so `git branch -D` is never planned against a branch a
+  worktree still holds, and content that matched only the branch's history is
+  never left only in the reflog.
 - A worktree whose status, HEAD or history lookup cannot be read is kept
   under every flag, and its line names the read that failed.
 - A dirty worktree is reported with a count of its changed files whose content
@@ -162,8 +163,7 @@ touches the main checkout or the checkout it runs from.
   branch. `--include-superseded` removes it only when "neither" and "untracked"
   are both zero. Nothing removes one with a change found in neither. A
   dirty worktree on a branch whose pull request is open, or with no pull
-  request data, is kept even when every change is in history. A branch any
-  forced removal touches is not deleted in the same run. A
+  request data, is kept even when every change is in history. A
   change to a file's mode, staged or not, matches neither history. An
   uncommitted deletion matches a history only when that history once held the
   path and its tip no longer does. A detached worktree is removed as superseded
