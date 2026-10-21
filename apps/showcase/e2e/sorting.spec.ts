@@ -10,6 +10,7 @@ import {
   openColumnMenu,
   openGrid,
   openSettings,
+  reloadGrid,
   selectTab,
 } from './grid';
 import { readOrderSample } from './oracle';
@@ -161,7 +162,7 @@ it('a reload keeps the accepted sort', async ({ page }) => {
   await openColumnMenu(page, 'Quantity');
   await clickMenuAction(page, 'Descending');
   await expectFirstOrder(page, sample.orderNumber);
-  await page.reload();
+  await reloadGrid(page);
   await expect(columnHeader(page, 'Quantity')).toHaveAttribute(
     'aria-sort',
     'descending',
