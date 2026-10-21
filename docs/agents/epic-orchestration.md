@@ -240,21 +240,25 @@ Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
   ordinary, one caused by this PR is not.
 - once merged, **remove that PR's builder worktree and every reviewer worktree
   that checked it out, and delete the merged local branch.** Run
-  `vp run housekeeping:prune` from the main checkout. The builder's worktree
-  must be under the worktrees it would remove; then remove it with
-  `git worktree remove <path>` and delete its branch with
-  `git branch -D <branch>`. A reviewer's checkout is detached on the PR's head,
-  which a squash-merge leaves off `main`, so the plan reports it rather than
-  removing it. Remove it with `git worktree remove <path>` only when all three
-  hold: `gh pr view <n> --json state` reads `MERGED`, `git status --porcelain`
-  in it is empty, and
-  `git -C <path> log --oneline HEAD --not --remotes --branches --tags` prints
-  nothing. That last check means no commit exists only in that checkout. If
-  any of the three fails, leave it and report it to the human. Do not run
-  `-- --apply` mid-wave: it acts on every worktree and branch in the plan,
-  including other developers' in this wave. A builder path
-  under KEEPING is the evidence that something there is not merged. Report it
-  to the human, and never `--force` it.
+  `vp run housekeeping:prune` from the main checkout.
+  - The builder's worktree must be under the worktrees it would remove; then
+    remove it with `git worktree remove <path>` and delete its branch with
+    `git branch -D <branch>`. A builder path under KEEPING is the evidence
+    that something there is not merged. Report it to the human, and never
+    `--force` it.
+  - A reviewer's checkout is detached on the PR's head, which a squash-merge
+    leaves off `main`, so the plan reports it rather than removing it. Remove
+    it with `git worktree remove <path>` only when all three hold:
+    `gh pr view <n> --json state` reads `MERGED`; `git status --porcelain` in
+    it is empty; and
+    `git -C <path> log --oneline HEAD --not --remotes --tags --exclude=<branch> --branches`
+    prints nothing, where `<branch>` is the builder branch this step deletes.
+    The last check passes only when a ref this step does not delete (a
+    remote-tracking ref, a tag, or a branch it keeps) contains every commit of
+    that checkout, so removing it never leaves a commit only in the reflog. If
+    any of the three fails, leave the checkout and report it to the human.
+  - Do not run `-- --apply` mid-wave: it acts on every worktree and branch in
+    the plan, including other developers' in this wave.
 - confirm the claim closed (the `coordination-close.yml` workflow deletes the task
   file) and `vp run coordination:verify` reports it gone
 - **`isMergeQueueEnabled: false` → rebase every remaining open PR in the wave**,

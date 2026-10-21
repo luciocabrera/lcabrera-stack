@@ -160,3 +160,19 @@ describe('--advice', () => {
     ).toBe(1);
   });
 });
+
+describe('--threshold', () => {
+  it.each([
+    [['--hint', '--threshold']],
+    [['--hint', '--threshold', '--advice', 'x']],
+    [['--hint', '--threshold', 'many']],
+    [['--hint', '--threshold', '-1']],
+    [['--hint', '--threshold', '']],
+  ])('refuses %j with a message and a non-zero exit', (argv) => {
+    const result = runHint({ argv, root: make() });
+
+    expect(result.code).toBe(1);
+    expect(result.errors).toEqual(['--threshold needs a whole number']);
+    expect(result.lines).toEqual([]);
+  });
+});

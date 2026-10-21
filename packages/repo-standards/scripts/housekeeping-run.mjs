@@ -287,11 +287,7 @@ const countRemovableHint = (root) => {
     .filter((worktree) => isClean(worktree.path)).length;
 };
 
-const thresholdOf = (raw) => {
-  if (raw === undefined) return DEFAULT_THRESHOLD;
-  const parsed = Number(raw);
-  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : undefined;
-};
+const thresholdOf = (raw) => (/^\d{1,9}$/u.test(raw) ? Number(raw) : undefined);
 
 const adviceOf = (argv) => {
   const index = argv.indexOf('--advice');
@@ -308,7 +304,8 @@ const adviceOf = (argv) => {
  */
 export const runHint = ({ argv, root }) => {
   const index = argv.indexOf('--threshold');
-  const threshold = thresholdOf(index === -1 ? undefined : argv[index + 1]);
+  const threshold =
+    index === -1 ? DEFAULT_THRESHOLD : thresholdOf(argv[index + 1] ?? '');
   if (threshold === undefined) {
     return { code: 1, errors: ['--threshold needs a whole number'], lines: [] };
   }

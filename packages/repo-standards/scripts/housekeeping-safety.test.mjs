@@ -3,7 +3,7 @@
  * change deletes a file the default branch never had, and one detached on a
  * commit no ref contains, whose HEAD would go with it.
  */
-import { rmSync, writeFileSync } from 'node:fs';
+import { chmodSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -47,6 +47,18 @@ const baseRepository = (root) => {
 const prune = ({ argv, repo }) =>
   runPrune({ argv, docker: noContainers, pullRequests: [], root: repo });
 
+const dryRunThenEveryFlag = (repo) => {
+  const { lines } = prune({ argv: [], repo });
+  for (const argv of ALL_FLAGS) prune({ argv, repo });
+  return lines;
+};
+
+const worktreeOnBranch = ({ name, repo, root }) => {
+  const work = join(root, name);
+  gitIn(repo, 'worktree', 'add', '-q', '-b', name, work, 'main');
+  return work;
+};
+
 const lineFor = (lines, path) =>
   lines.find((line) => line.includes(`${path} `)) ?? '';
 
@@ -54,14 +66,12 @@ describe('an uncommitted deletion of a file only its own branch has', () => {
   it('matches neither history and survives every flag', () => {
     const root = make();
     const repo = baseRepository(root);
-    const work = join(root, 'feat');
-    gitIn(repo, 'worktree', 'add', '-q', '-b', 'feat', work, 'main');
+    const work = worktreeOnBranch({ name: 'feat', repo, root });
     writeFileSync(join(work, 'new.ts'), 'export const value = 1;\n');
     commitAll(work, 'add new.ts');
     rmSync(join(work, 'new.ts'));
 
-    const { lines } = prune({ argv: [], repo });
-    for (const argv of ALL_FLAGS) prune({ argv, repo });
+    const lines = dryRunThenEveryFlag(repo);
 
     expect(lineFor(lines, work)).toContain(
       '0 match the default branch, 0 match its own history, 1 match neither',
@@ -184,4 +194,24 @@ describe('a worktree whose status cannot be read', () => {
       gitIn(repo, 'branch', '--format=%(refname:short)').split('\n'),
     ).toContain('unreadable');
   });
+});
+
+describe('a worktree whose only change is a file mode', () => {
+  it.each([
+    ['in the worktree', (work) => chmodSync(join(work, 'a.txt'), 0o755)],
+    ['staged', (work) => gitIn(work, 'update-index', '--chmod=+x', 'a.txt')],
+  ])(
+    'counts the change %s as matching neither history, and survives every flag',
+    (_, change) => {
+      const root = make();
+      const repo = baseRepository(root);
+      const work = worktreeOnBranch({ name: 'mode', repo, root });
+      change(work);
+
+      const lines = dryRunThenEveryFlag(repo);
+
+      expect(lineFor(lines, work)).toContain('1 match neither');
+      expect(worktreePaths(repo)).toContain(work);
+    },
+  );
 });

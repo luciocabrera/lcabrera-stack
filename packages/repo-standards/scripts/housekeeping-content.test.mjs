@@ -32,6 +32,7 @@ describe('parseStatusV2', () => {
         {
           index: '.',
           indexBlob: ONE,
+          isModeChanged: false,
           path: 'a file.txt',
           unmerged: false,
           worktree: 'M',
@@ -39,6 +40,7 @@ describe('parseStatusV2', () => {
         {
           index: 'R',
           indexBlob: TWO,
+          isModeChanged: false,
           path: 'new.txt',
           unmerged: false,
           worktree: '.',
@@ -46,6 +48,7 @@ describe('parseStatusV2', () => {
         {
           index: 'D',
           indexBlob: '',
+          isModeChanged: false,
           path: 'old.txt',
           unmerged: false,
           worktree: '.',
@@ -53,6 +56,7 @@ describe('parseStatusV2', () => {
         {
           index: 'U',
           indexBlob: ONE,
+          isModeChanged: false,
           path: 'both.txt',
           unmerged: true,
           worktree: 'U',
@@ -60,6 +64,20 @@ describe('parseStatusV2', () => {
       ],
       untracked: 1,
     });
+  });
+
+  it('flags a change whose mode differs from HEAD, and not an added file', () => {
+    const output = [
+      `1 .M N... 100644 100644 100755 ${ONE} ${ONE} run.sh`,
+      `1 M. N... 100644 100755 100755 ${ONE} ${ONE} staged.sh`,
+      `1 A. N... 000000 100644 100644 ${ZERO} ${TWO} added.txt`,
+      `1 .D N... 100644 100644 000000 ${ONE} ${ONE} gone.txt`,
+      '',
+    ].join('\0');
+
+    expect(
+      parseStatusV2(output).changes.map((change) => change.isModeChanged),
+    ).toEqual([true, true, false, false]);
   });
 
   it('reads an empty status as clean', () => {

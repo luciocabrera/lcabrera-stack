@@ -160,7 +160,8 @@ touches the main checkout or the checkout it runs from.
   upstream), or in neither, plus its untracked files. Content rather than
   ancestry, because a squash-merge leaves a branch's commits off the default
   branch. `--include-superseded` removes it only when "neither" and "untracked"
-  are both zero. Nothing removes one with a change found in neither. An
+  are both zero. Nothing removes one with a change found in neither. A
+  change to a file's mode, staged or not, matches neither history. An
   uncommitted deletion matches a history only when that history once held the
   path and its tip no longer does. A detached worktree is removed as superseded
   only when a branch, tag or remote-tracking ref contains its commit, and one

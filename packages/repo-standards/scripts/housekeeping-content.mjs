@@ -19,12 +19,24 @@ const UNMATCHABLE = 'unreadable';
 const ORDINARY_FIELDS = 8;
 const RENAME_FIELDS = 9;
 
+const ABSENT_MODE = '000000';
+
+const isModeChanged = (fields) => {
+  const [head = ABSENT_MODE, index = ABSENT_MODE, tree = ABSENT_MODE] =
+    fields.slice(3, 6);
+  return (
+    head !== ABSENT_MODE &&
+    [index, tree].some((mode) => mode !== ABSENT_MODE && mode !== head)
+  );
+};
+
 const changeFrom = (record, fieldCount) => {
   const fields = record.split(' ');
   const code = fields[1] ?? '..';
   return {
     index: code[0] ?? '.',
     indexBlob: fields[7] ?? '',
+    isModeChanged: isModeChanged(fields),
     path: fields.slice(fieldCount).join(' '),
     unmerged: false,
     worktree: code[1] ?? '.',
@@ -40,6 +52,7 @@ const readRecord = (records, index) => {
     const origin = {
       index: 'D',
       indexBlob: '',
+      isModeChanged: false,
       path: records[index + 1] ?? '',
       unmerged: false,
       worktree: '.',
@@ -144,6 +157,7 @@ const matches = ({ blobs, change, cwd, git, history, isOwnHead, tip }) =>
     : blobs.every((blob) => history.get(change.path)?.has(blob) === true);
 
 const bucketOf = ({ base, change, cwd, git, histories, own }) => {
+  if (change.isModeChanged === true) return 'neither';
   const shared = { blobs: blobsOf({ change, cwd, git }), change, cwd, git };
   if (
     matches({ ...shared, history: histories.base, isOwnHead: false, tip: base })
