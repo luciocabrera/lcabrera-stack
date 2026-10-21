@@ -2,7 +2,7 @@
 id: remove-temp-dirs
 title: Remove the temp directories tests and gates create
 owner: agent:claude
-status: active
+status: review
 branch: test/1440-remove-temp-dirs
 area:
   - scripts/**
@@ -17,7 +17,7 @@ area:
 started: 2026-10-21
 updated: 2026-10-21
 plan: (none)
-pr: (none)
+pr: '#1466'
 issue: #1440
 ---
 
@@ -27,6 +27,6 @@ Remove the temp directories tests and gates create
 
 ## Status / next
 
-- Current step: every temp-dir creator traced and cleaned; gate and PR
+- Current step: gate green, PR ready for review
 - Blockers: none
 - Next:
