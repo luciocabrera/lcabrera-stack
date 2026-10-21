@@ -91,6 +91,7 @@ Auto-invocation is driven by the `description` field (Claude matches it against 
 | `refactor-verified`           | One issue: builder subagent + blind verifier subagent      | description (implementing an issue with criteria)  |
 | `epic`                        | A whole epic: waves of builders, a blind reviewer per PR   | description, or `/epic <n>`                        |
 | `health-swarm`                | Six parallel scouts auditing repo-wide rot                 | description (periodic audit / "what has rotted")   |
+| `worktree-housekeeping`       | Merged worktrees, branches and throwaway containers        | description, or `/worktree-housekeeping`           |
 | `lint-toolchain`              | Configure or debug Oxlint / eslint / Biome / Sonar         | description + `paths`                              |
 | `releasing`                   | Changesets release, changelog, PR label taxonomy           | description (cutting a release)                    |
 | `product-requirement`         | The `docs/product/` register of what a consumer can do     | description (building against a published package) |
