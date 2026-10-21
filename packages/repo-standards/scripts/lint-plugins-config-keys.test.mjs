@@ -49,6 +49,18 @@ describe('configsDeclaringKeys', () => {
         `export default defineConfig(someHelper({ ${key}: x }));`,
       ],
       [
+        'in the object of a default-exported merging call',
+        `export default mergeConfig(base, { ${key}: f });`,
+      ],
+      [
+        'through an aliased defineConfig',
+        `import { defineConfig as define } from 'vite-plus';\nconst ${key} = {};\nexport default define({ ${key} });`,
+      ],
+      [
+        'through a namespace-qualified defineConfig',
+        `import * as vp from 'vite-plus';\nconst ${key} = {};\nexport default vp.defineConfig({ ${key} });`,
+      ],
+      [
         'in a later argument of a merging call',
         `export default defineConfig(mergeConfig(base, { ${key}: x }));`,
       ],

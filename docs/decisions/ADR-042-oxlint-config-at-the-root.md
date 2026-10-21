@@ -151,14 +151,6 @@ chain for a run started in that package. That observation holds only before
 one such block: afterwards every workspace directory stops with no `staged`
 config found, and #1430 records the probe run by run.
 
-The gate parses each workspace config instead of matching a key at the start of
-a line, because that pattern passed a shorthand `fmt` and an inline
-`{ fmt: x }` (#1441). It reads the top-level keys of every object the default
-export or a `defineConfig` call resolves to, following the arguments of any
-call, a local constant, a config function's returned object and a spread of a
-local object. A key on a nested
-object is not flagged, and a spread of an imported object is not followed.
-
 ## Amendment 2026-10-19 — Oxlint owns the effect-dependency check
 
 The Decision above removed the ESLint rules that Oxlint was running a second
@@ -275,3 +267,13 @@ top-level `plugins` list, and its probes ship in `@lcabrera/repo-standards` to
 repositories that may not configure the override. A planted test with no
 assertion fails `vp lint` today. An Oxlint upgrade that stopped reporting one
 of these rules would pass every gate.
+
+## Amendment 2026-10-21 — the gate parses workspace configs
+
+The `fmt`, `lint` and `staged` check now parses each workspace config instead of
+matching a key at the start of a line. The line match passed a shorthand `fmt`
+and an inline `{ fmt: x }` (#1441). The gate reads the top-level keys of every
+object that the default export, or a `defineConfig` call, resolves to. To find
+those objects it follows the arguments of any call, local constants, the object
+a config function returns and spreads of local objects. A key on a nested
+object is not flagged, and a spread of an imported object is not followed.

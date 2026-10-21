@@ -141,14 +141,16 @@ const objectLiterals = (node, locals, seen) => {
   );
 };
 
-const propertyName = (name) =>
-  ts.isComputedPropertyName(name)
-    ? propertyName(unwrap(name.expression))
-    : ts.isIdentifier(name) ||
-        ts.isStringLiteral(name) ||
-        ts.isNoSubstitutionTemplateLiteral(name)
-      ? name.text
-      : undefined;
+const isLiteralName = (name) =>
+  ts.isIdentifier(name) ||
+  ts.isStringLiteral(name) ||
+  ts.isNoSubstitutionTemplateLiteral(name);
+
+const propertyName = (name) => {
+  if (ts.isComputedPropertyName(name))
+    return propertyName(unwrap(name.expression));
+  return isLiteralName(name) ? name.text : undefined;
+};
 
 const topLevelKeys = (object, locals, visited) =>
   object.properties.flatMap((property) =>
