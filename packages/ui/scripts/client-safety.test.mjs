@@ -1,5 +1,6 @@
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   buildWorkspaceDirectoryIndex,
@@ -11,9 +12,27 @@ import {
 } from './client-safety.mjs';
 import {
   CLEAN_SOURCE,
+  removeScaffolds,
   scaffold,
   SERVER_ONLY_SOURCE,
 } from './lib/client-safety-fixtures.mjs';
+
+afterEach(removeScaffolds);
+
+describe('scaffold', () => {
+  const made = [];
+
+  it.fails('makes a workspace and then throws', () => {
+    made.push(scaffold([]));
+    expect(existsSync(made[0])).toBe(true);
+    throw new Error('the test failed after scaffolding');
+  });
+
+  it('finds the failed test workspace removed', () => {
+    expect(made).toHaveLength(1);
+    expect(existsSync(made[0])).toBe(false);
+  });
+});
 
 describe('buildWorkspaceDirectoryIndex', () => {
   it('places a package by the name it publishes, not by the name of its directory', () => {

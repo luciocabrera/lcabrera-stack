@@ -1,7 +1,6 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   findRepositoryRoot,
@@ -9,6 +8,11 @@ import {
   resolveHostRoot,
   rootFromInstallPath,
 } from './host-root.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
+
+const roots = createFixtureRoots('host-root-');
+
+afterEach(roots.removeAll);
 
 describe('rootFromInstallPath', () => {
   it('returns the consumer above the FIRST node_modules segment', () => {
@@ -35,7 +39,7 @@ describe('rootFromInstallPath', () => {
 
 describe('findRepositoryRoot', () => {
   it('walks up to the nearest directory holding a .git entry', () => {
-    const root = mkdtempSync(join(tmpdir(), 'host-root-'));
+    const root = roots.make();
     writeFileSync(join(root, '.git'), 'gitdir: elsewhere');
     const deep = join(root, 'packages', 'x', 'scripts');
     mkdirSync(deep, { recursive: true });
@@ -43,7 +47,7 @@ describe('findRepositoryRoot', () => {
   });
 
   it('is undefined when no ancestor has one', () => {
-    const root = mkdtempSync(join(tmpdir(), 'host-root-'));
+    const root = roots.make();
     expect(findRepositoryRoot(root)).toBeUndefined();
   });
 });

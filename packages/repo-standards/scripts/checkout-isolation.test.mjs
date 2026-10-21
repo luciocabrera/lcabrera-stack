@@ -1,5 +1,4 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 /**
  * The failure this guards is a feature branch checked out in the SHARED clone,
@@ -12,13 +11,18 @@ import { join } from 'node:path';
  * failure, because this check runs inside `check:push` and would otherwise leave
  * someone with uncommitted work they cannot push and no safe way out.
  */
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   checkoutIsolationFinding,
   readCheckoutFacts,
 } from './checkout-isolation.mjs';
 import { runGit } from './git-exec.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
+
+const roots = createFixtureRoots('checkout-facts-');
+
+afterEach(roots.removeAll);
 
 const facts = (overrides) => ({
   branch: 'feat/123-something',
@@ -96,7 +100,7 @@ describe('checkoutIsolationFinding', () => {
   });
 });
 const repository = () => {
-  const repositoryRoot = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
+  const repositoryRoot = roots.make();
   runGit({
     args: ['init', '--initial-branch=main', '.'],
     cwd: repositoryRoot,
@@ -134,7 +138,7 @@ describe('readCheckoutFacts', () => {
   });
 
   it('treats an unreadable git answer as dirty, the conservative direction', () => {
-    const empty = mkdtempSync(join(tmpdir(), 'checkout-facts-'));
+    const empty = roots.make();
     const result = readCheckoutFacts(empty);
     expect(result.isDirty).toBe(true);
     expect(result.isPrimary).toBe(false);

@@ -24,11 +24,11 @@
  * force asks for a reach the store cannot supply, and neither the requested
  * number nor a read taken under it may reach the span.
  */
-import { existsSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { createFixtureRoots } from './repo-fixtures.mjs';
 import {
   countsFor,
   earliestDay,
@@ -340,8 +340,11 @@ describe('observationFor', () => {
   });
 });
 
-const snapshotPath = () =>
-  join(mkdtempSync(join(tmpdir(), 'usage-')), 'snapshot.json');
+const roots = createFixtureRoots('usage-');
+
+afterEach(roots.removeAll);
+
+const snapshotPath = () => join(roots.make(), 'snapshot.json');
 
 const OBSERVED_AT = '2026-09-04T10:00:00.000Z';
 

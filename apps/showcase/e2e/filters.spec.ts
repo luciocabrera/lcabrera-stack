@@ -10,6 +10,7 @@ import {
   openGrid,
   openSettings,
   readRowCount,
+  reloadGrid,
   selectTab,
 } from './grid';
 import { readOrderSample } from './oracle';
@@ -220,7 +221,7 @@ it('a reload keeps the accepted filter and a new context does not', async ({
   await draftDelivered(page);
   await apply(page, delivered.count);
 
-  await page.reload();
+  await reloadGrid(page);
   await expectDatasetCount(page, delivered.count);
 
   const context = await browser.newContext();

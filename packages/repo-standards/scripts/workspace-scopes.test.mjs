@@ -1,16 +1,20 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { createFixtureRoots } from './repo-fixtures.mjs';
 import {
   deriveWorkspaces,
   deriveWorkspaceScopes,
   workspacesForFiles,
 } from './workspace-scopes.mjs';
 
+const roots = createFixtureRoots('workspace-scopes-');
+
+afterEach(roots.removeAll);
+
 const scaffold = (yaml, workspaceDirs) => {
-  const root = mkdtempSync(join(tmpdir(), 'workspace-scopes-'));
+  const root = roots.make();
   writeFileSync(join(root, 'pnpm-workspace.yaml'), yaml);
   for (const dir of workspaceDirs) {
     mkdirSync(join(root, dir), { recursive: true });
@@ -43,7 +47,7 @@ describe('deriveWorkspaces', () => {
   });
 
   it('is empty when the roster file is absent, rather than throwing', () => {
-    const root = mkdtempSync(join(tmpdir(), 'workspace-scopes-'));
+    const root = roots.make();
     expect(deriveWorkspaces(root)).toEqual([]);
     expect(deriveWorkspaceScopes(root).size).toBe(0);
   });
