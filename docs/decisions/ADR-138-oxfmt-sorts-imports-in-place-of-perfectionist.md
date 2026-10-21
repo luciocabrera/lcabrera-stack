@@ -80,7 +80,8 @@ The rule it would replace is configured as
   check, and it moves the file-level header that
   [ADR-136](ADR-136-lint-evals-from-a-root-eslint-config.md) set the block
   partition to protect. A blank line between the header and the first import
-  keeps the header in place under Oxfmt.
+  detaches it, but that repairs only the headers already written. Nothing keeps
+  the next file written that way, which is why ADR-136 rejected that remedy.
 
 ### Evidence
 
@@ -101,16 +102,18 @@ it is deferred.
   scripts outside a workspace, and fenced code in markdown. A file that already
   passed `perfectionist/sort-imports` keeps its import order, because the groups
   were tuned to the same order. That was measured on this repository's tree, not
-  on every possible import. The exception is a header comment written with no
-  blank line before the first import, which can move as described above. A
-  consumer who wants the old behaviour can pass `sortImports: false` in
-  `overrides`.
-- **Headers have to be protected before the option is turned on.** In this
+  on every possible import. The exception is a header comment written directly
+  on the first import, which can move as described above. A consumer who wants
+  the old behaviour can pass `sortImports: false` in `overrides`.
+- **Nothing protects a header under the proposed config.** In this
   repository's root scripts, some files have a header directly on their first
-  import, and the proposed config moves those headers. The implementation would
-  have to leave every header in place, for example by separating each one from
-  its imports with a blank line. Otherwise the first comment block stops being
-  the file's header.
+  import, and the proposed config moves those headers. Inserting a blank line
+  after each header would repair the files in the tree today, but not the next
+  one written the same way. So adopting the proposal needs one of two things:
+  an Oxfmt that partitions on block comments and keeps a leading comment block
+  in place, or a new check that fails when a header comment sits directly on the
+  first import. Without one of them, the first comment block of a new file can
+  stop being its header on the next format.
 - **Line comments no longer travel with their import.** A line comment between
   imports becomes a divider that stays put. The `@lcabrera/vite-config` README
   and ADR-136's Consequences describe the perfectionist behaviour, so the
@@ -121,12 +124,21 @@ it is deferred.
   plants an out-of-order import in each probe workspace and expects the rule to
   report it. With the rule off, every probe is `silent`, and
   `lint:eslint:verify` fails in `check:push`, `check:safe` and CI, with advice
-  that points at the shared ESLint configs. The implementation would have to choose a replacement
-  rule from a factory that still loads it. As the probe's header requires, the
-  replacement must be confirmed to report a planted violation before the gate
-  relies on it. It should also still drive the plugin code path that #472
-  broke. That change ships with the factory change, so no repository runs the gate
-  against a rule that is turned off.
+  that points at the shared ESLint configs. The implementation would have to
+  choose a replacement rule from a factory that still loads it. As the probe's
+  header requires, the replacement must be confirmed to report a planted
+  violation before the gate relies on it. It should also still drive the plugin
+  code path that #472 broke. Shipping it in the same pull request as the factory
+  change protects only this repository.
+- **The two packages would have to move in step.** `@lcabrera/vite-config` and
+  `@lcabrera/repo-standards` version independently, and `repo-standards` has
+  `vite-config` only as a devDependency. A consumer can therefore take the
+  factory release that turns `perfectionist/sort-imports` off while keeping a
+  `repo-standards` that still probes it, or the reverse, and the gate fails
+  either way. The implementation would declare `@lcabrera/vite-config` as a peer
+  dependency of `@lcabrera/repo-standards`, with a range that starts at the
+  factory release making the change, so the package manager flags a mismatched
+  pair at install time and does not leave it for the gate to discover.
 - **Consumers of the ESLint factories.** `perfectionist/sort-imports` stops
   reporting. A consumer who uses an ESLint factory but formats with a config
   other than `createFmtConfig` loses import-order checking and has to turn the
@@ -153,7 +165,7 @@ of the proposed config found three costs:
 
 - **The header moves.** Oxfmt treats a comment block that sits directly on the
   first import as part of that import, so a file's header is carried into the
-  import list when another import sorts ahead of it.
+  import list when another import sorts ahead of it, and nothing in the proposal stops the next file being written that way.
 - **No block-only partition.** Oxfmt's `partitionByComment` is a boolean, so it
   cannot partition on block comments alone as perfectionist's
   `{ block: true }` does, and a line comment stops imports being sorted across it.
@@ -171,7 +183,13 @@ Re-check it with the header, line-comment and block-comment probes recorded in
 [the addendum on #1414](https://github.com/luciocabrera/lcabrera-stack/issues/1414#issuecomment-6299229360)
 and [the first evidence comment](https://github.com/luciocabrera/lcabrera-stack/issues/1414#issuecomment-6299104842).
 When they match perfectionist, reopen #1426 and move this ADR to Accepted. The
-probe-rule replacement is still the implementation's to do.
+probe-rule replacement and the peer range that couples the two packages are
+still the implementation's to do.
+
+That is the route this deferral waits for. The other route, a check that fails
+when a header comment sits directly on the first import, would be a new
+decision recorded here, and it would change the status line above. A blank line
+after the headers already in the tree satisfies neither route.
 
 ## Alternatives considered
 
