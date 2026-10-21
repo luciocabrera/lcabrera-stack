@@ -188,10 +188,11 @@ describe('PLUGIN_PROBES', () => {
     expect(new Set(codes).size).toBe(PLUGIN_PROBES.length);
   });
 
-  it('proves the effect-dependency rule fires, not only that react loads', () => {
-    expect(PLUGIN_PROBES.map((probe) => probeCode(probe))).toContain(
-      'react-hooks(exhaustive-deps)',
-    );
+  it.each([
+    'react-hooks(exhaustive-deps)',
+    'react(exhaustive-effect-dependencies)',
+  ])('proves %s fires, not only that react loads', (code) => {
+    expect(PLUGIN_PROBES.map((probe) => probeCode(probe))).toContain(code);
   });
 
   it('gives every probe code to violate', () => {
@@ -214,19 +215,26 @@ describe('the react probe', () => {
 
 describe('probeFilename', () => {
   it('defaults to .ts when a probe declares no extension', () => {
-    expect(probeFilename({ plugin: 'eslint' })).toBe('eslint.probe.ts');
+    expect(probeFilename({ plugin: 'eslint', rule: 'no-debugger' })).toBe(
+      'eslint.no-debugger.probe.ts',
+    );
   });
 
   it('names the file after the scope when a probe has one', () => {
     expect(
-      probeFilename({ ext: 'tsx', plugin: 'react', scope: 'react-hooks' }),
-    ).toBe('react-hooks.probe.tsx');
+      probeFilename({
+        ext: 'tsx',
+        plugin: 'react',
+        rule: 'exhaustive-deps',
+        scope: 'react-hooks',
+      }),
+    ).toBe('react-hooks.exhaustive-deps.probe.tsx');
   });
 
   it('honours an explicit extension', () => {
-    expect(probeFilename({ ext: 'tsx', plugin: 'react' })).toBe(
-      'react.probe.tsx',
-    );
+    expect(
+      probeFilename({ ext: 'tsx', plugin: 'react', rule: 'no-children-prop' }),
+    ).toBe('react.no-children-prop.probe.tsx');
   });
 });
 
