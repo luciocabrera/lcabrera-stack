@@ -5,7 +5,7 @@
  * switch reaches the stand-in and never the real binary.
  */
 import { spawnSync } from 'node:child_process';
-import { chmodSync, existsSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
@@ -14,6 +14,7 @@ import {
   DOCKER_ENV,
   dockerFor,
   NO_DOCKER_ENV,
+  parseContainers,
 } from './housekeeping-containers.mjs';
 import {
   buildSortingRepository,
@@ -22,6 +23,7 @@ import {
   scratchRoots,
   worktreePaths,
 } from './housekeeping-fixtures.mjs';
+import { classifyContainers, THROWAWAY_LABEL } from './housekeeping-plan.mjs';
 import { runPrune } from './housekeeping-run.mjs';
 
 const { drain, make } = scratchRoots();
@@ -124,15 +126,16 @@ describe('dockerFor', () => {
 const listingDocker = ({ root, worktree }) => {
   const path = join(root, 'listing-docker');
   const marker = join(root, 'docker-rm-called');
-  const current = JSON.stringify({
+  const requests = join(root, 'docker-ps-requests');
+  const labelOnly = JSON.stringify({
     id: 'c1',
     label: worktree,
     name: 'pg',
     state: 'running',
   });
-  const whole = JSON.stringify({
+  const wholeLabels = JSON.stringify({
     ID: 'c1',
-    Labels: `keep=a,b,devkit.throwaway=${worktree}`,
+    Labels: `keep=a,b,${THROWAWAY_LABEL}=${worktree}`,
     Names: 'pg',
     State: 'running',
   });
@@ -141,23 +144,33 @@ const listingDocker = ({ root, worktree }) => {
     [
       '#!/bin/sh',
       'case "$1" in',
-      `  ps) case "$*" in *'{{json .}}'*) echo '${whole}' ;; *) echo '${current}' ;; esac ;;`,
+      `  ps) echo "$*" >> '${requests}'`,
+      `      case "$*" in *'.Label "${THROWAWAY_LABEL}"'*) echo '${labelOnly}' ;; *) echo '${wholeLabels}' ;; esac ;;`,
       `  rm) echo "$@" >> '${marker}' ;;`,
       'esac',
       '',
     ].join('\n'),
   );
   chmodSync(path, 0o755);
-  return { path, wasRemoved: () => existsSync(marker) };
+  return {
+    path,
+    requests: () =>
+      existsSync(requests) ? readFileSync(requests, 'utf8') : '',
+    wasRemoved: () => existsSync(marker),
+  };
+};
+
+const odd = () => {
+  const root = make();
+  const tree = buildSortingRepository(root);
+  const worktree = join(root, 'wt,odd=1');
+  gitIn(tree.repo, 'worktree', 'add', '-q', '-b', 'odd', worktree, 'main');
+  return { docker: listingDocker({ root, worktree }), tree, worktree };
 };
 
 describe('a throwaway container whose label holds a comma and an equals sign', () => {
-  it('is matched to its live worktree and kept', () => {
-    const root = make();
-    const tree = buildSortingRepository(root);
-    const worktree = join(root, 'wt,odd=1');
-    gitIn(tree.repo, 'worktree', 'add', '-q', '-b', 'odd', worktree, 'main');
-    const docker = listingDocker({ root, worktree });
+  it('is read through .Label, matched to its live worktree and kept', () => {
+    const { docker, tree, worktree } = odd();
 
     const { lines } = runPrune({
       argv: ['--apply'],
@@ -166,10 +179,34 @@ describe('a throwaway container whose label holds a comma and an equals sign', (
       root: tree.repo,
     });
 
+    expect(docker.requests()).toContain(`.Label "${THROWAWAY_LABEL}"`);
     expect(lines).toContain(
       `  container pg — running for ${worktree}, which is still there`,
     );
     expect(docker.wasRemoved()).toBe(false);
     expect(worktreePaths(tree.repo)).toContain(worktree);
+  });
+
+  it('is kept as unreadable if docker answers with the whole Labels string instead', () => {
+    const { docker } = odd();
+
+    const answer = spawnSync(
+      docker.path,
+      ['ps', '-a', '--format', '{{json .}}'],
+      {
+        encoding: 'utf8',
+      },
+    ).stdout;
+    const [container] = parseContainers(answer);
+
+    expect(answer).toContain(`keep=a,b,${THROWAWAY_LABEL}=`);
+    expect(container).toMatchObject({ id: '', isLabelRead: false });
+    expect(
+      classifyContainers({
+        containers: [container],
+        isOnDisk: () => false,
+        live: new Set(),
+      })[0].action,
+    ).toBe('keep');
   });
 });

@@ -161,6 +161,9 @@ touches the main checkout or the checkout it runs from.
   ancestry, because a squash-merge leaves a branch's commits off the default
   branch. `--include-superseded` removes it only when "neither" and "untracked"
   are both zero. Nothing removes one with a change found in neither. A
+  dirty worktree on a branch whose pull request is open, or with no pull
+  request data, is kept even when every change is in history. A branch any
+  forced removal touches is not deleted in the same run. A
   change to a file's mode, staged or not, matches neither history. An
   uncommitted deletion matches a history only when that history once held the
   path and its tip no longer does. A detached worktree is removed as superseded

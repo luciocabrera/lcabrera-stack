@@ -44,12 +44,12 @@ const baseRepository = (root) => {
   return repo;
 };
 
-const prune = ({ argv, repo }) =>
-  runPrune({ argv, docker: noContainers, pullRequests: [], root: repo });
+const prune = ({ argv, pullRequests = [], repo }) =>
+  runPrune({ argv, docker: noContainers, pullRequests, root: repo });
 
-const dryRunThenEveryFlag = (repo) => {
-  const { lines } = prune({ argv: [], repo });
-  for (const argv of ALL_FLAGS) prune({ argv, repo });
+const dryRunThenEveryFlag = (repo, pullRequests = []) => {
+  const { lines } = prune({ argv: [], pullRequests, repo });
+  for (const argv of ALL_FLAGS) prune({ argv, pullRequests, repo });
   return lines;
 };
 
@@ -214,4 +214,44 @@ describe('a worktree whose only change is a file mode', () => {
       expect(worktreePaths(repo)).toContain(work);
     },
   );
+});
+
+describe('a dirty worktree whose every change is in history, on an open pull request', () => {
+  it('is kept under every flag', () => {
+    const root = make();
+    const repo = baseRepository(root);
+    const work = worktreeOnBranch({ name: 'open', repo, root });
+    writeFileSync(join(work, 'a.txt'), 'one\n');
+
+    const lines = dryRunThenEveryFlag(repo, [
+      { headRefName: 'open', number: 3, state: 'OPEN' },
+    ]);
+
+    expect(lineFor(lines, work)).toContain('PR #3 is open — kept');
+    expect(worktreePaths(repo)).toContain(work);
+  });
+});
+
+describe('two worktrees on one merged branch, one clean and one superseded', () => {
+  it('keeps the branch the forced removal relied on', () => {
+    const root = make();
+    const repo = baseRepository(root);
+    const clean = worktreeOnBranch({ name: 'shared', repo, root });
+    const dirty = join(root, 'shared-dirty');
+    gitIn(repo, 'worktree', 'add', '-q', '-f', dirty, 'shared');
+    writeFileSync(join(dirty, 'a.txt'), 'one\n');
+
+    runPrune({
+      argv: ['--apply', '--include-superseded'],
+      docker: noContainers,
+      pullRequests: [{ headRefName: 'shared', number: 4, state: 'MERGED' }],
+      root: repo,
+    });
+
+    expect(worktreePaths(repo)).not.toContain(clean);
+    expect(worktreePaths(repo)).not.toContain(dirty);
+    expect(
+      gitIn(repo, 'branch', '--format=%(refname:short)').split('\n'),
+    ).toContain('shared');
+  });
 });

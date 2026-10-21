@@ -79,6 +79,14 @@ const contentSummary = ({ counts, untracked }) =>
 const isSuperseded = ({ counts, untracked }) =>
   counts !== undefined && counts.neither === 0 && untracked === 0;
 
+const branchHoldReason = ({ branch, hasPrData, pr }) => {
+  if (branch === undefined) return '';
+  if (pr !== undefined && !MERGED_OR_CLOSED.has(pr.state)) {
+    return `PR #${pr.number} is open`;
+  }
+  return pr === undefined && hasPrData === false ? 'no pull request data' : '';
+};
+
 const classifyDirty = (worktree) => {
   if (worktree.counts === undefined) {
     return {
@@ -89,6 +97,13 @@ const classifyDirty = (worktree) => {
   const summary = contentSummary(worktree);
   if (!isSuperseded(worktree)) {
     return { action: 'report', reason: `uncommitted changes: ${summary}` };
+  }
+  const branchHold = branchHoldReason(worktree);
+  if (branchHold !== '') {
+    return {
+      action: 'report',
+      reason: `every change already in history (${summary}), but ${branchHold} — kept`,
+    };
   }
   if (worktree.branch === undefined && worktree.isHeadReferenced !== true) {
     return {
@@ -291,10 +306,16 @@ export const buildPlan = ({
           : prByHead.get(worktree.branch),
     }),
   }));
+  const forced = new Set(
+    worktreeVerdicts
+      .filter((entry) => entry.action === 'remove' && entry.force === true)
+      .map((entry) => entry.branch),
+  );
   const freed = new Set(
     worktreeVerdicts
-      .filter((entry) => entry.action === 'remove' && !entry.force)
-      .map((entry) => entry.branch),
+      .filter((entry) => entry.action === 'remove' && entry.force !== true)
+      .map((entry) => entry.branch)
+      .filter((branch) => !forced.has(branch)),
   );
   const branchVerdicts = branches.map((name) => ({
     name,
