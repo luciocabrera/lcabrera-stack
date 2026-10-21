@@ -26,8 +26,8 @@ npm install react react-dom react-router @stylexjs/stylex
 
 | Peer                 | Range     | Notes                                                  |
 | -------------------- | --------- | ------------------------------------------------------ |
-| `react`              | `^19.0.0` | Uses `use()`, Actions, and the React Compiler          |
-| `react-dom`          | `^19.0.0` |                                                        |
+| `react`              | `^19.2.0` | Uses `use()`, `<Activity>` and `useEffectEvent`        |
+| `react-dom`          | `^19.2.0` |                                                        |
 | `react-router`       | `^8.0.0`  | Framework mode — loaders, actions, `useLoaderData`     |
 | `@stylexjs/stylex`   | `^0.19.0` |                                                        |
 | `@react-router/node` | `^8.0.0`  | **Optional** — only the `./entry/*` SSR helpers use it |

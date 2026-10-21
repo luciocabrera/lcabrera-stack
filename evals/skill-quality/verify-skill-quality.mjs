@@ -17,20 +17,14 @@
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { readFileSet } from '@repo/eval-history/hashing/readFileSet.service';
 import { skillHashes } from '@repo/eval-history/hashing/skillHashes.util';
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readdirSync,
-  readFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 
 import {
   chunk,
   finalResult,
+  inScratchDirectory,
   runBatches,
   sessionMetrics,
   sessionProblem,
@@ -110,11 +104,11 @@ const recordJudgement = ({ model, queuedAt, record, result }) => {
   return result;
 };
 
-const judgeSkill = async ({ model, queuedAt, skill }) => {
+const judgeSkillIn = async ({ cwd, model, queuedAt, skill }) => {
   const open = () =>
     query({
       options: {
-        cwd: mkdtempSync(join(tmpdir(), 'skill-quality-')),
+        cwd,
         maxTurns: MAX_TURNS,
         mcpServers: {},
         model,
@@ -129,6 +123,9 @@ const judgeSkill = async ({ model, queuedAt, skill }) => {
     });
   return outcome({ ...(await timedDrain({ open, queuedAt })), skill });
 };
+
+const judgeSkill = (args) =>
+  inScratchDirectory('skill-quality-', (cwd) => judgeSkillIn({ ...args, cwd }));
 
 const readHistory = () =>
   existsSync(RUNS_DIR)

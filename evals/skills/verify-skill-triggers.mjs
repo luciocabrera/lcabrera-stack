@@ -25,14 +25,12 @@ import {
   cpSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readdirSync,
   readFileSync,
   renameSync,
   statSync,
   symlinkSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -40,6 +38,7 @@ import {
   chunk,
   costLine,
   errorText,
+  inScratchDirectory,
   runBatches,
   sessionMetrics,
   timedDrain,
@@ -128,13 +127,10 @@ const copyFixture = ({ cwd, skill, task }) => {
   });
 };
 
-const workspaceFor = ({ skill, task }) => {
-  const cwd = mkdtempSync(join(tmpdir(), 'skill-eval-'));
+const prepareWorkspace = ({ cwd, skill, task }) => {
   mkdirSync(join(cwd, '.claude'));
   symlinkSync(resolve(SKILLS_ROOT), join(cwd, '.claude', 'skills'));
-  const fixtureFiles =
-    task.fixture === undefined ? [] : copyFixture({ cwd, skill, task });
-  return { cwd, fixtureFiles };
+  return task.fixture === undefined ? [] : copyFixture({ cwd, skill, task });
 };
 
 const catalog = () =>
@@ -142,7 +138,8 @@ const catalog = () =>
     existsSync(join(SKILLS_ROOT, name, 'SKILL.md')),
   );
 
-const attemptTask = async ({
+const attemptTaskIn = async ({
+  cwd,
   hidden,
   model,
   queuedAt,
@@ -151,7 +148,7 @@ const attemptTask = async ({
   task,
   trial,
 }) => {
-  const { cwd, fixtureFiles } = workspaceFor({ skill, task });
+  const fixtureFiles = prepareWorkspace({ cwd, skill, task });
   const scope = sessionScope({ catalog: catalog(), hidden, task });
   const open = () =>
     query({
@@ -195,6 +192,9 @@ const attemptTask = async ({
     trial,
   };
 };
+
+const attemptTask = (args) =>
+  inScratchDirectory('skill-eval-', (cwd) => attemptTaskIn({ ...args, cwd }));
 
 const coverage = () =>
   coverageProblems({

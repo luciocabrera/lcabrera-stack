@@ -15,8 +15,7 @@
  * 75 = cut off by the session limit, 130/143 = interrupted.
  */
 import { query } from '@anthropic-ai/claude-agent-sdk';
-import { mkdirSync, mkdtempSync, readFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { parseArgs } from 'node:util';
 
@@ -24,6 +23,7 @@ import {
   chunk,
   costLine,
   finalResult,
+  inScratchDirectory,
   runBatches,
   sessionMetrics,
   sessionProblem,
@@ -65,11 +65,11 @@ const MAX_TURNS = 1;
 
 const read = (path) => readFileSync(new URL(path, import.meta.url), 'utf8');
 
-const runVerifier = async ({ dispatch, queuedAt, systemPrompt }) => {
+const runVerifierIn = async ({ cwd, dispatch, queuedAt, systemPrompt }) => {
   const open = () =>
     query({
       options: {
-        cwd: mkdtempSync(join(tmpdir(), 'verifier-eval-')),
+        cwd,
         maxTurns: MAX_TURNS,
         mcpServers: {},
         model: MODEL,
@@ -88,6 +88,11 @@ const runVerifier = async ({ dispatch, queuedAt, systemPrompt }) => {
     report: finalResult(messages)?.result ?? '',
   };
 };
+
+const runVerifier = (args) =>
+  inScratchDirectory('verifier-eval-', (cwd) =>
+    runVerifierIn({ ...args, cwd }),
+  );
 
 const CONCURRENCY = 4;
 

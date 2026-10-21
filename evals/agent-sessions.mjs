@@ -5,16 +5,29 @@
  * started, answered and finished, read its cost, tokens and timing, say why a
  * session failed (the subscription's session limit apart from other rate
  * limits) or held tools other than the ones it was given, check a --runs
- * count, and sum the cost a run's sessions reported.
+ * count, sum the cost a run's sessions reported, and give a session a scratch
+ * working directory that is removed when it settles, however it settles.
  * Usage: imported by `evals/skills/`, `evals/verifier-fixtures/` and
  * `evals/skill-quality/`.
  */
 import { SESSION_LIMIT_ERROR_CLASS } from '@repo/eval-history/envelope/envelope.constants';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 
 export const chunk = (items, size) =>
   Array.from({ length: Math.ceil(items.length / size) }, (_, index) =>
     items.slice(index * size, (index + 1) * size),
   );
+
+export const inScratchDirectory = async (prefix, run) => {
+  const directory = mkdtempSync(join(tmpdir(), prefix));
+  try {
+    return await run(directory);
+  } finally {
+    rmSync(directory, { force: true, recursive: true });
+  }
+};
 
 export const errorText = (error) =>
   error instanceof Error ? error.message : String(error);

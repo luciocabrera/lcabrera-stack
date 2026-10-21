@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   buildWorkspaceDirectoryIndex,
@@ -12,9 +12,12 @@ import {
 } from './client-safety.mjs';
 import {
   CLEAN_SOURCE,
+  removeScaffolds,
   scaffoldWithConsumer,
   SERVER_ONLY_SOURCE,
 } from './lib/client-safety-fixtures.mjs';
+
+afterEach(removeScaffolds);
 
 describe('collectClientSafetyReport', () => {
   it('names the packages it scanned when everything is client-safe', () => {

@@ -15,7 +15,7 @@ export const resolveFromCacheOrFetch = async <TResponse>({
     return cache.data;
   }
 
-  return cache?.skip === expectedSkip && cache.promise
+  return cache?.skip === expectedSkip && cache.promise !== undefined
     ? cache.promise
     : fetchFn();
 };

@@ -55,8 +55,8 @@ A skill name with no eval here, or a `--hide` name that is no skill, stops the
 run before any session starts, so a typo cannot pass as an empty green run.
 
 It needs a Claude login, or `CLAUDE_CODE_OAUTH_TOKEN`. Each task runs in a fresh
-temporary directory whose `.claude/skills` links to `.github/skills`, so the
-session sees the whole catalog, plus the skills Claude Code ships with, and
+temporary directory, removed when the task settles, whose `.claude/skills`
+links to `.github/skills`, so the session sees the whole catalog, plus the skills Claude Code ships with, and
 nothing else. It loads no CLAUDE.md, hooks or MCP servers, and has one tool:
 `Skill`, plus `Read` when the task copies in a fixture. A task fails unless the session's
 own `init` message lists exactly those tools, so an option the SDK ignored cannot

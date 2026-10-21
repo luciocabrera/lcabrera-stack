@@ -31,25 +31,23 @@
  * keeps a taken name would separate the two copies either way.
  */
 import { spawnSync } from 'node:child_process';
-import {
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  readFileSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { createFixtureRoots } from '../packages/repo-standards/scripts/repo-fixtures.mjs';
 import { resolveRetention } from '../packages/repo-standards/scripts/usage-args.mjs';
 import { transcriptDirectoryFor } from '../packages/repo-standards/scripts/usage-scope.mjs';
 import {
   dayOf,
   shiftDay,
 } from '../packages/repo-standards/scripts/usage-window.mjs';
+
+const workspaces = createFixtureRoots('usage-report-');
+
+afterEach(workspaces.removeAll);
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const SCRIPT = join(
@@ -74,7 +72,7 @@ const transcriptLine = () =>
   });
 
 const workspace = () => {
-  const root = mkdtempSync(join(tmpdir(), 'usage-report-'));
+  const root = workspaces.make();
   const home = join(root, 'home');
   const projects = join(
     home,
