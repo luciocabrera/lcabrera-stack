@@ -46,6 +46,7 @@ export const createReactRouterRunConfig = ({
       command: 'NODE_ENV=production react-router build',
     },
     start: {
+      cache: false,
       command: `${createLoadLocalEnv(envFiles)} if [ ! -f ./build/server/index.js ]; then react-router build; fi && exec react-router-serve ./build/server/index.js`,
     },
     test: {

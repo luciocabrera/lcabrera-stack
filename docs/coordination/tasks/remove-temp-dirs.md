@@ -11,6 +11,9 @@ area:
   - .changeset/**
   - .claude/rules/testing.md
   - .github/skills/fallow-code-checker/CONFIGURATION.md
+  - packages/vite-configs/src/vite.run.shared.config*.ts
+  - packages/vite-configs/README.md
+  - reports/api-surface/vite-config.txt
 started: 2026-10-21
 updated: 2026-10-21
 plan: (none)
