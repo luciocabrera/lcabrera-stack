@@ -4,13 +4,11 @@ governs:
   - repo-standards
 ---
 
-# ADR-138 — Oxfmt sorts imports, and perfectionist/sort-imports is turned off
+# ADR-138 — Proposal: Oxfmt sorts imports, and perfectionist/sort-imports is turned off
 
-**Status:** Accepted
+**Status:** Proposed — deferred until Oxfmt keeps a header comment block in place (block-only comment partitions); see [Status, 2026-10-21](#status-2026-10-21)
 
 **Issue:** [#1414](https://github.com/luciocabrera/lcabrera-stack/issues/1414)
-**Amends:** [ADR-035](ADR-035-biome-third-linter.md) §4 — the format-only pass
-that closes the pre-commit chain now also orders imports.
 
 ## Context
 
@@ -35,7 +33,12 @@ is recorded here instead of in a cleanup PR.
 
 ## Decision
 
-Oxfmt owns import order. `createFmtConfig` sets this option:
+This section is the proposal, and it is not in effect. `perfectionist/sort-imports`
+still sorts imports in both ESLint factories, and `createFmtConfig` sets no
+`sortImports`. [Status, 2026-10-21](#status-2026-10-21) says why it is deferred
+and what reopens it.
+
+Proposed: Oxfmt owns import order, and `createFmtConfig` sets this option:
 
 ```json
 "sortImports": { "order": "asc", "partitionByComment": true, "internalPattern": ["@/","~/"],
@@ -54,7 +57,7 @@ Both changes ship in the same `@lcabrera/vite-config` release.
 
 ### How the option maps the perfectionist rule
 
-The rule it replaces is configured as
+The rule it would replace is configured as
 `{ order: 'asc', partitionByComment: { block: true }, type: 'natural' }`.
 
 - `order: 'asc'` carries over as `"order": "asc"`.
@@ -90,6 +93,9 @@ and in [#1435](https://github.com/luciocabrera/lcabrera-stack/pull/1435).
 
 ## Consequences
 
+These are the consequences of adopting the proposal. None of them applies while
+it is deferred.
+
 - **Consumers of `./fmt`.** `vp fmt` and `vp check --fix` reorder imports in
   files no ESLint config covers. That includes root config files, tooling
   scripts outside a workspace, and fenced code in markdown. A file that already
@@ -101,20 +107,21 @@ and in [#1435](https://github.com/luciocabrera/lcabrera-stack/pull/1435).
   `overrides`.
 - **Headers have to be protected before the option is turned on.** In this
   repository's root scripts, some files have a header directly on their first
-  import, and the decided config moves those headers. The implementation (#1426)
-  has to leave every header in place, for example by separating each one from
+  import, and the proposed config moves those headers. The implementation would
+  have to leave every header in place, for example by separating each one from
   its imports with a blank line. Otherwise the first comment block stops being
   the file's header.
 - **Line comments no longer travel with their import.** A line comment between
   imports becomes a divider that stays put. The `@lcabrera/vite-config` README
-  and ADR-136's Consequences describe the perfectionist behaviour, so #1426
-  updates the README, and ADR-136 is read with this ADR.
+  and ADR-136's Consequences describe the perfectionist behaviour, so the
+  implementation would update the README, and ADR-136 would be read with this
+  ADR.
 - **The ESLint-pass gate loses its probe rule.** `@lcabrera/repo-standards`'
   `eslint-pass-probe.mjs` sets `PROBE_RULE = 'perfectionist/sort-imports'`. It
   plants an out-of-order import in each probe workspace and expects the rule to
   report it. With the rule off, every probe is `silent`, and
   `lint:eslint:verify` fails in `check:push`, `check:safe` and CI, with advice
-  that points at the shared ESLint configs. #1426 has to choose a replacement
+  that points at the shared ESLint configs. The implementation would have to choose a replacement
   rule from a factory that still loads it. As the probe's header requires, the
   replacement must be confirmed to report a planted violation before the gate
   relies on it. It should also still drive the plugin code path that #472
@@ -138,6 +145,33 @@ and in [#1435](https://github.com/luciocabrera/lcabrera-stack/pull/1435).
   selector vocabulary. An Oxfmt upgrade that changes how a selector classifies a
   specifier changes the order everywhere at once, and `vp fmt --check` is what
   reports it.
+
+## Status, 2026-10-21
+
+The direction was accepted on 2026-10-20 and deferred on 2026-10-21. A review
+of the proposed config found three costs:
+
+- **The header moves.** Oxfmt treats a comment block that sits directly on the
+  first import as part of that import, so a file's header is carried into the
+  import list when another import sorts ahead of it.
+- **No block-only partition.** Oxfmt's `partitionByComment` is a boolean, so it
+  cannot partition on block comments alone as perfectionist's
+  `{ block: true }` does, and a line comment stops imports being sorted across it.
+- **The ESLint-pass gate loses its probe rule.** `lint:eslint:verify` probes
+  `perfectionist/sort-imports`, so turning that rule off fails the gate until a
+  confirmed replacement rule is chosen.
+
+Until this is reopened, `perfectionist/sort-imports` stays the import sorter,
+and files outside every workspace's ESLint config stay unchecked for import
+order.
+
+**Reopen condition.** An Oxfmt release whose `sortImports` keeps a leading
+comment block at the top of the file and partitions on block comments only.
+Re-check it with the header, line-comment and block-comment probes recorded in
+[the addendum on #1414](https://github.com/luciocabrera/lcabrera-stack/issues/1414#issuecomment-6299229360)
+and [the first evidence comment](https://github.com/luciocabrera/lcabrera-stack/issues/1414#issuecomment-6299104842).
+When they match perfectionist, reopen #1426 and move this ADR to Accepted. The
+probe-rule replacement is still the implementation's to do.
 
 ## Alternatives considered
 
@@ -165,5 +199,8 @@ and in [#1435](https://github.com/luciocabrera/lcabrera-stack/pull/1435).
   [#1414 header and line-comment addendum](https://github.com/luciocabrera/lcabrera-stack/issues/1414#issuecomment-6299229360),
   [#1435](https://github.com/luciocabrera/lcabrera-stack/pull/1435).
 - Parent issue [#1410](https://github.com/luciocabrera/lcabrera-stack/issues/1410).
-  The implementation is [#1426](https://github.com/luciocabrera/lcabrera-stack/issues/1426),
-  blocked by this decision.
+  The implementation, [#1426](https://github.com/luciocabrera/lcabrera-stack/issues/1426),
+  is closed as deferred and reopens when the condition in
+  [Status, 2026-10-21](#status-2026-10-21) is met.
+- The maintainer's deferral is recorded on
+  [#1435](https://github.com/luciocabrera/lcabrera-stack/pull/1435).

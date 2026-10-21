@@ -6,9 +6,8 @@ status: review
 branch: docs/1414-oxfmt-sort-imports-adr
 area:
   - docs/decisions/ADR-138-*
-  - docs/decisions/ADR-035-biome-third-linter.md
 started: 2026-10-19
-updated: 2026-10-19
+updated: 2026-10-21
 plan: (none)
 pr: '#1435'
 issue: #1414
@@ -20,6 +19,6 @@ ADR for import sorting in Oxfmt
 
 ## Status / next
 
-- Current step: ADR-138 written, gate green, PR ready for the maintainer
+- Current step: ADR-138 recorded as Proposed, deferred by the maintainer on 2026-10-21
 - Blockers: none
 - Next: maintainer approval; merging is the decision
