@@ -122,11 +122,16 @@ it is deferred.
 - **The ESLint-pass gate loses its probe rule.** `@lcabrera/repo-standards`'
   `eslint-pass-probe.mjs` sets `PROBE_RULE = 'perfectionist/sort-imports'`. It
   plants an out-of-order import in each probe workspace and expects the rule to
-  report it. With the rule off, every probe is `silent`, and
-  `lint:eslint:verify` fails in `check:push`, `check:safe` and CI, with advice
-  that points at the shared ESLint configs. The implementation would have to
-  choose a replacement rule from a factory that still loads it. As the probe's
-  header requires, the replacement must be confirmed to report a planted
+  report it. With the rule off, `lint:eslint:verify` fails in `check:push`,
+  `check:safe` and CI, and neither hint says the rule was turned off on
+  purpose. Each probe workspace
+  comes back `silent`, whose hint points at the shared ESLint configs in
+  `@lcabrera/vite-config`. The root pass, where `gates.eslintPass.rootPassDir`
+  is set, comes back `unreported`, whose hint points at the root
+  `lint:eslint:check` script and the root config. It comes back `blocked`
+  instead when the fan-out fails for another reason. The implementation would
+  have to choose a replacement rule from a factory that still loads it. As the
+  probe's header requires, the replacement must be confirmed to report a planted
   violation before the gate relies on it. It should also still drive the plugin
   code path that #472 broke. Shipping it in the same pull request as the factory
   change protects only this repository.
