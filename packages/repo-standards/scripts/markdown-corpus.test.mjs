@@ -1,12 +1,16 @@
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { documentedFiles, isIgnoredDoc } from './markdown-corpus.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
+
+const roots = createFixtureRoots('corpus-');
+
+afterEach(roots.removeAll);
 
 const treeWith = (files) => {
-  const root = mkdtempSync(join(tmpdir(), 'corpus-'));
+  const root = roots.make();
   for (const [path, contents] of Object.entries(files)) {
     const full = join(root, path);
     mkdirSync(join(full, '..'), { recursive: true });

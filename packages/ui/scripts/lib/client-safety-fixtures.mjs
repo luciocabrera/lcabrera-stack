@@ -3,17 +3,29 @@
  * tests: the guard answers "which package is where, and what does it publish"
  * by reading real manifests and real directories, so a fixture that is not a
  * directory tree tests something else. Shared by the guard's test files, so
- * neither grows a second copy of it.
+ * neither grows a second copy of it; each drains `removeScaffolds` in its
+ * `afterEach`.
  */
 
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
 import { buildWorkspaceDirectoryIndex } from '../client-safety.mjs';
 
+const scaffolded = [];
+
+export const removeScaffolds = () => {
+  const drained = [...scaffolded];
+  scaffolded.length = 0;
+  for (const root of drained) {
+    rmSync(root, { force: true, recursive: true });
+  }
+};
+
 export const scaffold = (packages) => {
   const root = mkdtempSync(join(tmpdir(), 'ui-client-safety-'));
+  scaffolded.push(root);
   writeFileSync(
     join(root, 'pnpm-workspace.yaml'),
     'packages:\n  - packages/*\n',

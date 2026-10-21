@@ -5,11 +5,11 @@
  * narrows the transcript read when no expiry is being simulated, and a default
  * reported as though a settings file had declared it.
  */
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { createFixtureRoots } from './repo-fixtures.mjs';
 import {
   DOCUMENTED_CLEANUP_DEFAULT,
   parseArgs,
@@ -17,6 +17,14 @@ import {
   resolveRetention,
   transcriptHorizon,
 } from './usage-args.mjs';
+
+const repos = createFixtureRoots('usage-args-');
+const homes = createFixtureRoots('usage-home-');
+
+afterEach(() => {
+  repos.removeAll();
+  homes.removeAll();
+});
 
 const WINDOW = { days: 90, end: '2026-09-04', start: '2026-06-07' };
 
@@ -27,12 +35,12 @@ const claudeDirIn = (root) => {
 };
 
 const repoWith = (settings) => {
-  const root = mkdtempSync(join(tmpdir(), 'usage-args-'));
+  const root = repos.make();
   writeFileSync(join(claudeDirIn(root), 'settings.json'), settings);
   return root;
 };
 
-const emptyHome = () => mkdtempSync(join(tmpdir(), 'usage-home-'));
+const emptyHome = homes.make;
 
 const homeWith = (settings) => {
   const root = emptyHome();
