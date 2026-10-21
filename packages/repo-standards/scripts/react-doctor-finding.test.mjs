@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   blockingFindings,
   blockingSeverities,
+  ciFailureFindings,
   findShadowingConfigs,
   judgeReport,
   renderFinding,
@@ -173,5 +174,109 @@ describe('judgeReport', () => {
         reportOnly: false,
       }),
     ).toEqual({ blocking: diagnostics, level: 'warning' });
+  });
+});
+
+const plain = {
+  category: 'Correctness',
+  plugin: 'react-doctor',
+  rule: 'no-array-index-as-key',
+  severity: 'warning',
+  tags: [],
+};
+const design = {
+  category: 'Maintainability',
+  plugin: 'react-doctor',
+  rule: 'no-z-index-9999',
+  severity: 'warning',
+  tags: ['design', 'test-noise'],
+};
+const inTest = { ...plain, fileContext: 'test', rule: 'in-test' };
+const inStory = { ...plain, fileContext: 'story', rule: 'in-story' };
+
+const gateRules = (config, findings) =>
+  judgeReport({
+    config,
+    diagnostics: findings,
+    reportOnly: false,
+  }).blocking.map(({ rule }) => rule);
+
+describe('judgeReport applies the CLI ciFailure surface', () => {
+  it('lets a design-tagged warning through at "blocking": "warning" and blocks a plain one', () => {
+    expect(gateRules({ blocking: 'warning' }, [design])).toEqual([]);
+    expect(gateRules({ blocking: 'warning' }, [plain])).toEqual([
+      'no-array-index-as-key',
+    ]);
+  });
+
+  it('lets a design-tagged error through at "blocking": "error"', () => {
+    expect(gateRules({}, [{ ...design, severity: 'error' }])).toEqual([]);
+  });
+
+  it('lets findings in test and story files through by default', () => {
+    expect(gateRules({ blocking: 'warning' }, [inTest, inStory])).toEqual([]);
+  });
+});
+
+describe('ciFailureFindings honours surfaces.ciFailure', () => {
+  const all = [plain, design, inTest, inStory];
+  const kept = (ciFailure) =>
+    ciFailureFindings(all, { surfaces: { ciFailure } }).map(({ rule }) => rule);
+
+  it('keeps plain findings when the config has no surfaces', () => {
+    expect(ciFailureFindings(all, {}).map(({ rule }) => rule)).toEqual([
+      'no-array-index-as-key',
+    ]);
+  });
+
+  it('promotes the design tag back with includeTags', () => {
+    expect(kept({ includeTags: ['design'] })).toEqual([
+      'no-array-index-as-key',
+      'no-z-index-9999',
+    ]);
+  });
+
+  it('promotes a file context with includeFileContexts', () => {
+    expect(kept({ includeFileContexts: ['test'] })).toEqual([
+      'no-array-index-as-key',
+      'in-test',
+    ]);
+  });
+
+  it('lets an included rule, category or tag win over the file context', () => {
+    expect(kept({ includeRules: ['react-doctor/in-story'] })).toEqual([
+      'no-array-index-as-key',
+      'in-story',
+    ]);
+    expect(kept({ includeCategories: ['Maintainability'] })).toEqual([
+      'no-array-index-as-key',
+      'no-z-index-9999',
+    ]);
+  });
+
+  it('drops findings by excluded rule, category or tag', () => {
+    expect(
+      kept({ excludeRules: ['react-doctor/no-array-index-as-key'] }),
+    ).toEqual([]);
+    expect(kept({ excludeCategories: ['Correctness'] })).toEqual([]);
+    expect(
+      ciFailureFindings([{ ...plain, tags: ['perf'] }], {
+        surfaces: { ciFailure: { excludeTags: ['perf'] } },
+      }),
+    ).toEqual([]);
+  });
+
+  it('reads only the ciFailure surface and ignores malformed controls', () => {
+    expect(
+      ciFailureFindings(all, {
+        surfaces: { score: { includeTags: ['design'] } },
+      }).map(({ rule }) => rule),
+    ).toEqual(['no-array-index-as-key']);
+    expect(kept({ includeTags: 'design' })).toEqual(['no-array-index-as-key']);
+    expect(
+      ciFailureFindings(all, { surfaces: { ciFailure: ['design'] } }).map(
+        ({ rule }) => rule,
+      ),
+    ).toEqual(['no-array-index-as-key']);
   });
 });

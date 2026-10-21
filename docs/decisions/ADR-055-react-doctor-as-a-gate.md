@@ -1,6 +1,6 @@
 # ADR-055: React Doctor as a gate, via the CLI
 
-**Status:** Accepted, amended 2026-10-19 (see [Amendment](#amendment-2026-10-19--the-gate-reads-blocking-and-fails-on-warnings))
+**Status:** Accepted, amended 2026-10-19 (see [Amendment](#amendment-2026-10-19--the-gate-reads-blocking-and-fails-on-warnings)) and 2026-10-21 (see [Amendment](#amendment-2026-10-21--the-gate-applies-the-clis-cifailure-filter))
 
 ## Context
 
@@ -27,7 +27,8 @@ Three integration shapes were considered.
 
 **Run the standalone CLI as its own gate, configured by a root
 `doctor.config.jsonc`, failing at full scope on the severity its `blocking`
-key names** (warning and above here, since the 2026-10-19 amendment).
+key names** (warning and above here, since the 2026-10-19 amendment), on the
+findings the CLI itself would gate on (since the 2026-10-21 amendment).
 
 ### Why the CLI rather than the lint-plugin builds
 
@@ -185,3 +186,28 @@ Corrections to the record as first written:
   sentence is removed.
 - It accepted that warnings would accumulate until someone read the report.
   That consequence is replaced above.
+
+## Amendment 2026-10-21 — the gate applies the CLI's `ciFailure` filter
+
+Issue #1446. The CLI does not gate on every finding in its report. Before it
+applies `--blocking`, it filters the findings through its `ciFailure` surface.
+By default that surface drops findings tagged `design` and findings in a test or
+story file (`fileContext`), and `surfaces.ciFailure` in the config can promote
+or exclude findings by rule, category, tag or file context. The gate runs the
+CLI at `--blocking none` and judged the whole report, so it blocked findings
+that `react-doctor --blocking <level>` lets through. At `"blocking": "warning"`
+a `design`-tagged warning failed the gate and passed the CLI.
+
+`judgeReport` now applies the same filter before it checks severity, in the
+CLI's order: an included rule, category or tag keeps the finding; otherwise a
+file context not listed in `includeFileContexts` drops it; otherwise an excluded
+rule, category or tag drops it. The report's `tags`, `category` and
+`fileContext` carry everything the filter reads. The gate still runs at
+`--blocking none` and still asserts `ok`, so the reasons in the first amendment
+for not trusting the CLI's exit code still hold. Taking the exit code was
+rejected for the same reason: the gate has to name the findings that blocked,
+and the exit code names none.
+
+The filter is a copy of the CLI's rule, so a change to the CLI's defaults
+needs a matching change here. The report keeps every finding, so `--report`
+and `react-doctor:report` show what the gate let through.
