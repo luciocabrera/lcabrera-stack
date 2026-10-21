@@ -9,13 +9,26 @@ export const grid = (page: Page) => page.getByTestId(GRID);
 export const scrollContainer = (page: Page) =>
   page.getByTestId('table-scroll-container');
 
+const awaitStreamedTables = async (page: Page) => {
+  await page.waitForFunction(
+    (selector) => document.querySelector(`[hidden] ${selector}`) === null,
+    `[data-testid="${GRID}"]`,
+  );
+};
+
 export const openGrid = async (page: Page, path = '/enterprise-orders') => {
   await page.goto(path);
   await expect(page).not.toHaveURL(/\/login/);
+  await awaitStreamedTables(page);
   const table = grid(page);
   await expect(table).toBeVisible();
   await expect(table).not.toHaveAttribute('aria-rowcount', '-1');
   return table;
+};
+
+export const reloadGrid = async (page: Page) => {
+  await page.reload();
+  await awaitStreamedTables(page);
 };
 
 export const expectDatasetCount = async (page: Page, count: number) => {

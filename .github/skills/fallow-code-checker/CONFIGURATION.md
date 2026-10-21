@@ -78,6 +78,15 @@ snapshot fallow builds from `--base`. The tracked baselines in
 `reports/fallow/baselines/` are a second filter, not the first: the dead-code
 baseline records no findings and a clean tree still passes.
 
+That base snapshot is a git worktree fallow keeps in the OS temp dir as
+`fallow-audit-base-cache-<hash>-root-<hash>`, one per checkout, and reuses on
+every later audit from the same checkout. It is a cache, not a leak, and this
+repo leaves it alone (#1440): the next audit from any checkout reclaims entries
+whose checkout no longer exists, and an entry idle longer than
+`audit.cacheMaxAgeDays` (Fallow's default when unset). `fallow audit-cache
+prune` applies that policy at once; `fallow audit-cache remove --root <path>`
+drops one checkout's entry.
+
 The verdict fails (exit 1) only for a rule at `error` severity. A `warn` rule
 yields verdict `warn` and exit 0, which is how a new unused export passed the
 gate until `unused-exports`, `unused-types`, `unused-dependencies` and
