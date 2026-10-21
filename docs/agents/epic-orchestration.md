@@ -242,10 +242,13 @@ Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
   that checked it out, and delete the merged local branch.** Run
   `vp run housekeeping:prune` from the main checkout.
   - The builder's worktree must be under the worktrees it would remove; then
-    remove it with `git worktree remove <path>` and delete its branch with
-    `git branch -D <branch>`. A builder path under KEEPING is the evidence
-    that something there is not merged. Report it to the human, and never
-    `--force` it.
+    remove it with `git worktree remove <path>`. Delete its branch with
+    `git branch -D <branch>` only when `git diff --stat <branch> origin/main`
+    prints nothing, or `git log --oneline <branch> --not --remotes` prints
+    nothing (every commit on it is on a remote ref). Otherwise leave the
+    branch and report it to the human. A builder path under KEEPING is the
+    evidence that something there is not merged. Report it to the human, and
+    never `--force` it.
   - A reviewer's checkout is detached on the PR's head, which a squash-merge
     leaves off `main`, so the plan reports it rather than removing it. Remove
     it with `git worktree remove <path>` only when all three hold:

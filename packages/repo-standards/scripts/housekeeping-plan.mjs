@@ -225,6 +225,13 @@ const keptReason = ({ isLabelRead, worktree }) => {
  *   isOnDisk: (path: string) => boolean, live: Set<string>,
  *   removing?: Set<string> }} args
  */
+const STOPPED_STATES = new Set(['created', 'dead', 'exited']);
+
+const stateOf = ({ running, state }) => {
+  if (typeof state === 'string' && state !== '') return state;
+  return running ? 'running' : 'exited';
+};
+
 export const classifyContainers = ({
   containers,
   isOnDisk,
@@ -235,18 +242,24 @@ export const classifyContainers = ({
     if (container.isLabelRead === false) {
       return { ...container, action: 'keep', reason: keptReason(container) };
     }
-    if (!container.running) {
-      return { ...container, action: 'remove', reason: 'stopped' };
-    }
     const reason = goneReason({
       isOnDisk,
       live,
       removing,
       worktree: container.worktree,
     });
-    return reason === ''
+    if (reason !== '') return { ...container, action: 'remove', reason };
+    const state = stateOf(container);
+    if (STOPPED_STATES.has(state)) {
+      return { ...container, action: 'remove', reason: `stopped (${state})` };
+    }
+    return state === 'running'
       ? { ...container, action: 'keep', reason: keptReason(container) }
-      : { ...container, action: 'remove', reason };
+      : {
+          ...container,
+          action: 'keep',
+          reason: `${state}; only an exited, dead or created container is removed`,
+        };
   });
 
 export const PLAN_COMMAND =

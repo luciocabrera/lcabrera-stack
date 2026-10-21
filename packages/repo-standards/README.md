@@ -171,13 +171,14 @@ touches the main checkout or the checkout it runs from.
   this run does not delete, so its HEAD is never the only thing holding that
   commit.
 - Containers labelled `devkit.throwaway` are listed; the label's value is the
-  path of the worktree that started the container. `--apply` removes a stopped
-  one, a running one whose worktree is gone, and a running one whose worktree
-  the same plan removes (after that worktree). A running one whose worktree is
-  still there is listed under KEEPING. The label is read whole, through
-  `docker ps --format` with `.Label`, so a path holding `,` or `=` is matched
-  as written. A container whose label cannot be read is kept. Without Docker it lists none
-  and says so. Docker is looked up in the fixed install directories, never on
+  path of the worktree that started the container. `--apply` removes one that
+  is exited, dead or created, and one in any state whose worktree is gone or
+  is removed by the same plan (after that worktree). A running one whose
+  worktree is still there is listed under KEEPING, and so is one that is
+  restarting, paused or removing, naming its state. The label is read whole,
+  through `docker ps --format` with `.Label`, so a path holding `,` or `=` is
+  matched as written. A container whose label cannot be read is kept. Without
+  Docker it lists none and says so. Docker is looked up in the fixed install directories, never on
   `PATH`; `REPO_STANDARDS_DOCKER` names the executable by absolute path
   instead. `REPO_STANDARDS_NO_DOCKER` set to any non-empty value, `0`
   included, turns the container checks off even where Docker is installed, so

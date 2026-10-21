@@ -54,6 +54,7 @@ const containerFrom = (line) => {
     isLabelRead: true,
     name: typeof name === 'string' && name !== '' ? name : id,
     running: String(state).toLowerCase() === 'running',
+    state: String(state).toLowerCase(),
     worktree: label,
   };
 };

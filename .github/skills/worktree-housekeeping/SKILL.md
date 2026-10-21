@@ -13,8 +13,10 @@ the gate runtime package, sorts them along with the local branches and the
 throwaway test containers. This skill runs it, shows the user the plan, and
 applies it only after they say yes.
 
-Run every command from the main checkout. A worktree cannot be removed while a
-shell or a session is sitting inside it.
+Run every command from the main checkout. The command never plans to remove
+the checkout it runs from, so a worktree you start it in stays out of the plan
+entirely; run it from the main checkout to have every linked worktree
+considered.
 
 ## 1. Read the plan
 
@@ -35,8 +37,9 @@ The dry run changes nothing and prints five sections:
   closed, or detached on a commit the default branch contains.
 - **stale worktree entries it would prune**: entries whose directory is gone.
   `--apply` prunes them before it deletes any branch.
-- **throwaway containers it would remove**: stopped, or running for a worktree
-  that is gone.
+- **throwaway containers it would remove**: exited, dead or created, or
+  started for a worktree that is gone or that this plan removes. A
+  restarting, paused or removing one is kept, naming its state.
 - **KEEPING**: everything that might be work or is still in use. A branch with
   unique commits and no pull request, a dirty worktree, any stash, and a
   running throwaway container whose worktree is still there.

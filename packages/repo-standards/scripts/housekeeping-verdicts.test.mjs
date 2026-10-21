@@ -176,3 +176,62 @@ describe('classifyWorktree — a read that failed', () => {
     ).toEqual({ action: 'report', reason: 'kept: could not read git status' });
   });
 });
+
+describe('classifyContainers — by state', () => {
+  const live = new Set(['/work/live']);
+
+  it.each(['restarting', 'paused', 'removing'])(
+    'keeps a %s container whose worktree is still there, naming the state',
+    (state) => {
+      const [verdict] = classifyContainers({
+        containers: [
+          {
+            id: '1',
+            name: 'pg',
+            running: false,
+            state,
+            worktree: '/work/live',
+          },
+        ],
+        isOnDisk,
+        live,
+      });
+
+      expect(verdict).toMatchObject({ action: 'keep' });
+      expect(verdict.reason).toContain(state);
+    },
+  );
+
+  it.each(['exited', 'dead', 'created'])('removes a %s container', (state) => {
+    const [verdict] = classifyContainers({
+      containers: [
+        { id: '1', name: 'pg', running: false, state, worktree: '/work/live' },
+      ],
+      isOnDisk,
+      live,
+    });
+
+    expect(verdict).toMatchObject({
+      action: 'remove',
+      reason: `stopped (${state})`,
+    });
+  });
+
+  it('removes a paused container whose worktree is gone', () => {
+    const [verdict] = classifyContainers({
+      containers: [
+        {
+          id: '1',
+          name: 'pg',
+          running: false,
+          state: 'paused',
+          worktree: '/work/gone',
+        },
+      ],
+      isOnDisk,
+      live,
+    });
+
+    expect(verdict.action).toBe('remove');
+  });
+});

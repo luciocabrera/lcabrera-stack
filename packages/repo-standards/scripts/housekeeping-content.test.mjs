@@ -117,6 +117,7 @@ describe('parseContainers', () => {
         isLabelRead: true,
         name: 'pg-one',
         running: true,
+        state: 'running',
         worktree: '/work/a,b=c',
       },
       {
@@ -124,6 +125,7 @@ describe('parseContainers', () => {
         isLabelRead: true,
         name: 'pg-two',
         running: false,
+        state: 'exited',
         worktree: '',
       },
     ]);
