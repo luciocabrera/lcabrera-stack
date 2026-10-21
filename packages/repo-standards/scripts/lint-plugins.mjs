@@ -115,18 +115,30 @@ const localInitializers = (sourceFile) =>
       .map((declaration) => [declaration.name.text, declaration.initializer]),
   );
 
+const nestedExpressions = (expression) => {
+  if (ts.isCallExpression(expression)) return [...expression.arguments];
+  return ts.isArrowFunction(expression) || ts.isFunctionExpression(expression)
+    ? returnedExpressions(expression)
+    : [];
+};
+
+const localObjectLiterals = (identifier, locals, seen) => {
+  const initializer = seen.has(identifier.text)
+    ? undefined
+    : locals.get(identifier.text);
+  return initializer === undefined
+    ? []
+    : objectLiterals(initializer, locals, new Set([...seen, identifier.text]));
+};
+
 const objectLiterals = (node, locals, seen) => {
   const expression = unwrap(node);
   if (ts.isObjectLiteralExpression(expression)) return [expression];
-  if (ts.isArrowFunction(expression) || ts.isFunctionExpression(expression))
-    return returnedExpressions(expression).flatMap((returned) =>
-      objectLiterals(returned, locals, seen),
-    );
-  if (!ts.isIdentifier(expression) || seen.has(expression.text)) return [];
-  const initializer = locals.get(expression.text);
-  return initializer === undefined
-    ? []
-    : objectLiterals(initializer, locals, new Set([...seen, expression.text]));
+  if (ts.isIdentifier(expression))
+    return localObjectLiterals(expression, locals, seen);
+  return nestedExpressions(expression).flatMap((nested) =>
+    objectLiterals(nested, locals, seen),
+  );
 };
 
 const propertyName = (name) =>
