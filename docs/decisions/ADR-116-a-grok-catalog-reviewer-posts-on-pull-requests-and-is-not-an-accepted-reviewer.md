@@ -76,6 +76,13 @@ to a consumer who has nothing working — the same reason `claude-review.yml` st
   every non-draft pull request. It is not required, so merges still go through
   Claude. A red check that reviewed nothing is visible; a skipped job that looks
   like a clean pass is not.
+- A non-empty `XAI_API_KEY` can still be rejected. The pinned CLI's headless
+  review prints `Not signed in` and exits 1. `grok models` on that same binary
+  prints `You are using XAI_API_KEY` for any non-empty value, so the models
+  banner is not evidence the review path will accept the key. When the review
+  step sees `Not signed in`, it exits 0 and the mint and submit steps do not
+  run. No placeholder review is posted. An empty secret still fails the job.
+  That remains the fork case.
 - Creating the GitHub App, installing it, and adding the three secrets is
   operator work this repository cannot do in a pull request. The intended App
   slug is `grok-clean-code-reviewer`, so the login the exclusion test names is
