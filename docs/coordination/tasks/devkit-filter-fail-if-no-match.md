@@ -12,11 +12,19 @@ area:
   - packages/repo-standards/scripts/ci-commands*
   - packages/repo-standards/scripts/commands-doc*
   - packages/repo-standards/scripts/verify-commands-doc*
+  - packages/repo-standards/scripts/doc-register-read.mjs
+  - packages/repo-standards/README.md
+  - packages/repo-standards/ARCHITECTURE.md
+  - packages/devkit/assets/root/COMMANDS.md
+  - packages/devkit/assets/full/COMMANDS.md
+  - COMMANDS.md
+  - AGENTS.md
+  - docs/README.md
   - .changeset/devkit-filter-fail-if-no-match*
 started: 2026-10-22
 updated: 2026-10-22
 plan: (none)
-pr: (none)
+pr: '#1483'
 issue: #1463
 ---
 
@@ -26,6 +34,6 @@ fix(devkit): make generated and published vp run --filter calls fail on no match
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implementing
 - Blockers: none
 - Next:

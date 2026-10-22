@@ -5,6 +5,7 @@ import {
   documentedTasks,
   requiresRunnerTaskList,
   undocumentedScripts,
+  unguardedFilters,
   unresolvedDocumented,
 } from './commands-doc.mjs';
 
@@ -123,5 +124,73 @@ describe('a document carrying a longer runner name that ends in ours', () => {
         tasks: new Set(['lint:check']),
       }),
     ).toEqual([]);
+  });
+});
+
+const unguardedIn = (source, runPrefix) =>
+  unguardedFilters({
+    commands: [{ source, where: 'root script `x`' }],
+    runPrefix,
+  }).length;
+
+describe('unguardedFilters', () => {
+  test('reports a filtered run that passes when its filter matches nothing', () => {
+    expect(
+      unguardedFilters({
+        commands: [
+          { source: 'vp run --filter web dev', where: 'root script `dev`' },
+        ],
+      }),
+    ).toEqual([
+      'root script `dev` runs `vp run --filter web dev` without `--fail-if-no-match` — a filter that matches no package then passes having run nothing. Add the flag before the task name.',
+    ]);
+  });
+
+  test('reads every spelling of a filter', () => {
+    expect(unguardedIn('vp run -F web dev')).toBe(1);
+    expect(unguardedIn('vp run --filter=web dev')).toBe(1);
+    expect(unguardedIn("vp run --filter '@scope/*' build")).toBe(1);
+  });
+
+  test('accepts the flag on either side of the filter', () => {
+    expect(unguardedIn('vp run --fail-if-no-match --filter web dev')).toBe(0);
+    expect(unguardedIn('vp run --filter web --fail-if-no-match dev')).toBe(0);
+    expect(unguardedIn('vp run -F web --fail-if-no-match dev')).toBe(0);
+  });
+
+  test('does not count a flag the task receives rather than the runner', () => {
+    expect(unguardedIn('vp run --filter web dev --fail-if-no-match')).toBe(1);
+    expect(unguardedIn('vp run --filter web dev -- --fail-if-no-match')).toBe(
+      1,
+    );
+  });
+
+  test('ignores a filter the task receives', () => {
+    expect(unguardedIn('vp run lint -- --filter web')).toBe(0);
+    expect(unguardedIn('vp run fallow:dead-code --filter web')).toBe(0);
+  });
+
+  test('judges each command of a chain on its own', () => {
+    expect(
+      unguardedIn(
+        'vp run --fail-if-no-match --filter a test && SMOKE=1 vp run --filter b test; vp run -r test | tee log',
+      ),
+    ).toBe(1);
+    expect(unguardedIn('vp run db:up\nvp run --filter web seed')).toBe(1);
+  });
+
+  test('skips the value of a valued option before the task', () => {
+    expect(unguardedIn('vp run --log labeled --filter web dev')).toBe(1);
+    expect(unguardedIn('vp run --concurrency-limit 2 dev')).toBe(0);
+  });
+
+  test('ignores a run with no filter, and another runner entirely', () => {
+    expect(unguardedIn('vp run -r test')).toBe(0);
+    expect(unguardedIn('pnpm run --filter web dev', 'pnpm run')).toBe(0);
+    expect(unguardedIn('npm run build', 'npm run')).toBe(0);
+  });
+
+  test('does not read a longer command name ending in the prefix', () => {
+    expect(unguardedIn('xvp run --filter web dev')).toBe(0);
   });
 });

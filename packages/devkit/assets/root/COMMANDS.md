@@ -185,7 +185,10 @@ From the `monorepo` profile up:
 task in `package.json` is documented nowhere here, and when a task documented
 here is not one this repository has. It takes the spelling from the `run` key in
 §4, so it holds this file to the way **you** run a task rather than to any one
-toolchain's.
+toolchain's. Where that spelling is Vite+, it also fails a filtered run, in
+`package.json` or a workflow step, that does not pass `--fail-if-no-match`:
+without that flag a filter matching no package warns and exits 0, having run
+nothing.
 
 It is wired only where the blueprint below is, because the section below is part
 of what it reads: a repository that took the gates and not the blueprint has none

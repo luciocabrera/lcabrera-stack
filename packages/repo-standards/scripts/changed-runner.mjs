@@ -5,6 +5,11 @@
  * absolute vp path. Kept in one module so each runner stays a thin shell over
  * `affected-tests.mjs` and the two don't copy-paste the spawn/report code. See
  * `.claude/rules/scripts.md`.
+ *
+ * `filteredRunArgs` is also how the coverage runners spell a filtered run. Every
+ * filter it writes names a workspace read from the graph or the config, so one
+ * that matches nothing is drift, and `--fail-if-no-match` makes it an error
+ * instead of a warning and a run of nothing.
  */
 import { spawn } from 'node:child_process';
 import { readFileSync } from 'node:fs';
@@ -25,8 +30,9 @@ export const readChangedFiles = () =>
     .map((line) => line.trim())
     .filter(Boolean);
 
-const vpArgsFor = ({ packages, task }) => [
+export const filteredRunArgs = ({ packages, task }) => [
   'run',
+  ...(packages.length > 0 ? ['--fail-if-no-match'] : []),
   ...packages.flatMap((pkg) => ['--filter', pkg]),
   task,
 ];
@@ -81,16 +87,16 @@ export const runInSequence = (groups, runGroup) =>
   }, Promise.resolve(0));
 
 const spawnGroup = (group) => {
-  process.stdout.write(`\n▶ vp ${vpArgsFor(group).join(' ')}\n`);
+  process.stdout.write(`\n▶ vp ${filteredRunArgs(group).join(' ')}\n`);
   return exitStatusOf(
-    spawn(VP_BIN, vpArgsFor(group), { cwd: REPO_ROOT, stdio: 'inherit' }),
+    spawn(VP_BIN, filteredRunArgs(group), { cwd: REPO_ROOT, stdio: 'inherit' }),
   );
 };
 
 const runGroups = async (groups, { dryRun = false } = {}) => {
   if (dryRun) {
     for (const group of groups) {
-      process.stdout.write(`vp ${vpArgsFor(group).join(' ')}\n`);
+      process.stdout.write(`vp ${filteredRunArgs(group).join(' ')}\n`);
     }
     return 0;
   }
