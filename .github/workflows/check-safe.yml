@@ -486,6 +486,15 @@ jobs:
         # The build is what gives it something real to check.
         run: vp run publish:verify
 
+      - name: publint reads every public package's packed tarball
+        id: publint_gate
+        # tarball:verify packs only devkit, repo-standards and
+        # create-lcabrera-stack, so no built package's tarball was linted. This
+        # packs every public package with pnpm after the build step, so publint
+        # reads the `dist` targets publishConfig.exports names and fails one the
+        # tarball does not hold (#1453, ADR-073).
+        run: vp run publint:verify
+
       - name: Public package API surface is unbroken
         id: api_surface_gate
         # The harness compiles every in-repo consumer, but the real consumers of
