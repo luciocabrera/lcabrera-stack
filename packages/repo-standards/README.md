@@ -166,8 +166,10 @@ These are not flagged:
 - A key on a nested object, such as `test.fmt`, which is not a root block.
 - An object a nested function returns, unless that function's result is
   itself followed, as in `return helper()`.
-- A binding destructured from another object. Its own name counts as a
-  shorthand key, but it is not traced back to the object it came from.
+- A key inside an object that a destructured binding was taken from, as in
+  `const { base } = { base: { fmt } }` spread as `...base`. The binding is not
+  traced back to that object, though its own name still counts as a shorthand
+  key, so `const { fmt } = shared` passed as `{ fmt }` is flagged.
 - A key added by mutating an object after it is built, as in
   `config.fmt = x`.
 - A default re-exported from another module (`export { x as default } from`).

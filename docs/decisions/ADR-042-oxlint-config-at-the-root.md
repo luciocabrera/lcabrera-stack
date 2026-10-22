@@ -327,7 +327,10 @@ the name of the identifier inside the brackets.
 The gate does not flag:
 
 - a key on a nested object
-- a binding destructured from another object, traced back to its source
+- a key inside an object that a destructured binding was taken from, as in
+  `const { base } = { base: { fmt } }` spread as `...base`. The binding is not
+  traced back to that object, though its own name still counts as a shorthand
+  key, so `const { fmt } = shared` passed as `{ fmt }` is flagged
 - a key added by mutating an object after it is built
 - a default re-exported from another module
 - a computed key whose value is not a string literal type

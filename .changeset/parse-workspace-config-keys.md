@@ -15,7 +15,7 @@ Identifiers are resolved with the TypeScript checker in whatever scope declares 
 These are still not flagged:
 
 - a key on a nested object, such as `test.fmt`
-- a binding destructured from another object, traced back to its source
+- a key inside an object that a destructured binding was taken from, as in `const { base } = { base: { fmt } }` spread as `...base`. The binding is not traced back to that object, though its own name still counts as a shorthand key, so `const { fmt } = shared` passed as `{ fmt }` is flagged
 - a key added by mutating an object after it is built (`config.fmt = x`)
 - a default re-exported from another module
 - a computed key whose value is not a string literal type, such as one held in a `let`
