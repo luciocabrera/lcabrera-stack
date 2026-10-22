@@ -1,0 +1,16 @@
+id: trigger-dirty-leftovers
+name: Sorting out dirty leftover checkouts
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "Two old agent worktrees still show hundreds of changed files and I can't tell whether that work is already on main. Work out which of my stale worktrees are safe to delete. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-worktree-housekeeping
+    config:
+      mode: any_order
+      required_skills:
+        - worktree-housekeeping

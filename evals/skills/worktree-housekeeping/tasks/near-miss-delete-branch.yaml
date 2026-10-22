@@ -1,0 +1,15 @@
+id: near-miss-delete-branch
+name: Deleting one remote branch
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What is the git command to delete the remote branch feature-x on origin? Just the command. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-worktree-housekeeping-alone
+    config:
+      forbidden_skills:
+        - worktree-housekeeping

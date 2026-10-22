@@ -1,0 +1,16 @@
+id: trigger-after-merge
+name: Tidying up after a merge
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "PR 812 just merged. Remove the builder and reviewer worktrees it left behind and the local branch, without losing anything that isn't merged. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-worktree-housekeeping
+    config:
+      mode: any_order
+      required_skills:
+        - worktree-housekeeping
