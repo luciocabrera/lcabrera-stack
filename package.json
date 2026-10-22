@@ -57,7 +57,7 @@
     "evals:verifier:tooled": "node evals/verifier-fixtures/verify-verifier-tooled.mjs",
     "fallow:audit": "fallow audit",
     "fallow:dead-code": "fallow dead-code",
-    "fallow:dead-code:verify": "fallow dead-code --quiet",
+    "fallow:dead-code:verify": "fallow dead-code --quiet --no-cache",
     "fallow:dupes": "fallow dupes",
     "fallow:full": "fallow",
     "fallow:health": "fallow health --file-scores --hotspots --targets --score",
