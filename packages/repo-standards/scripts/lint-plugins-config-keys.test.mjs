@@ -185,6 +185,14 @@ describe('configsDeclaringKeys', () => {
       ).toEqual([]);
     });
 
+    it('resolves a binding the config function shadows to its own declaration', () => {
+      expect(
+        declared(
+          `const config = { ${key}: x };\nexport default defineConfig(() => {\n  const config = { test: t };\n  return config;\n});`,
+        ),
+      ).toEqual([]);
+    });
+
     it('does not follow a binding destructured from another object to its source', () => {
       expect(
         declared(
