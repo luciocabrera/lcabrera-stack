@@ -34,6 +34,6 @@ fix(devkit): make generated and published vp run --filter calls fail on no match
 
 ## Status / next
 
-- Current step: implementing
+- Current step: gate green, PR ready for review
 - Blockers: none
 - Next:

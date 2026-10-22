@@ -23,8 +23,8 @@
  *                                        # stdin touches; a new-only audit
  *                                        # never consults the others
  *
- * Exit codes: 0 = merged report written, 1 = a suite failed, produced no
- * coverage, or names a workspace no package matches (a partial merge is worse
+ * Exit codes: 0 = merged report written, 1 = a suite failed or produced no
+ * coverage, or a roster entry matches no package (a partial merge is worse
  * than none — it would silently score uncovered files as 0% and fail the gate
  * on phantom complexity).
  */
