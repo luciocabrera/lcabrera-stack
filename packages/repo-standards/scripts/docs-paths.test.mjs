@@ -142,10 +142,22 @@ describe('extractCandidates', () => {
     ).toEqual(['../coordination/README.md', '.claude/rules/typescript.md']);
   });
 
-  it('ignores link targets that are neither anchored nor markdown', () => {
+  it('ignores link targets that carry a scheme or are only an anchor', () => {
     const markdown =
-      '[site](https://example.com) [anchor](#heading) [img](logo.png)';
+      '[site](https://example.com) [anchor](#heading) [tel](tel:+3100000) [mail](mailto:a@example.com)';
     expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([]);
+  });
+
+  it('enforces a bare relative link to a non-markdown file', () => {
+    expect(
+      extractCandidates('[gone](does-not-exist.json)', REPO_ROOTS),
+    ).toEqual(['does-not-exist.json']);
+    expect(extractCandidates('![logo](logo.png)', REPO_ROOTS)).toEqual([
+      'logo.png',
+    ]);
+    expect(extractCandidates('[dir](sibling-dir/)', REPO_ROOTS)).toEqual([
+      'sibling-dir/',
+    ]);
   });
 
   it('strips heading anchors and trailing sentence punctuation', () => {

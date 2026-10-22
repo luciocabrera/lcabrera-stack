@@ -24,10 +24,11 @@ reports exactly the same clean pass as code that is correct.** Always confirm a
 lint change with a deliberate violation. That is also why `vp run
 lint:plugins:verify` lints a planted violation per plugin family rather than
 reading the config — reading the config is exactly what cannot tell a loaded
-family from a missing one. It also plants one rule-level probe,
-`react-hooks(exhaustive-deps)`, because Oxlint is the only engine left
-reporting a missing hook dependency and a loaded family does not prove that one
-rule still fires.
+family from a missing one. It also plants two rule-level probes,
+`react-hooks(exhaustive-deps)` and `react(exhaustive-effect-dependencies)`,
+because Oxlint is the only engine left checking hook dependency arrays, each
+rule catches cases the other does not (ADR-042, amendment 2026-10-21), and a
+loaded family does not prove that one rule still fires.
 
 ## Oxlint
 
