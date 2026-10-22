@@ -136,14 +136,20 @@ already on the registry — the only one that can see a hand-publish, and the on
 one that cannot prevent anything.
 
 `repo-verify-lint-plugins` parses each workspace `vite.config.ts` and reads the
-top-level keys of every object the default export or a `defineConfig` call
-resolves to: an object literal, any argument of a call (so
-`makeConfig({ fmt })` and `defineConfig(merge({ fmt }))` count), a function's
-returned object, a local constant or a spread of a local object. A `fmt`, `lint`
-or `staged` key fails it whether it is written `fmt: x`, as the shorthand `fmt`
-or quoted. A key on a nested object, such as
-`test.fmt`, is not flagged. It does not follow a spread of an imported object:
-that object's keys live in another module, so a key reached only that way passes.
+top-level keys of every object the default export resolves to, and of every
+object passed to `defineConfig`, including an aliased or namespace-qualified
+one. To get there it follows any call's arguments (so `makeConfig({ fmt })` and
+`defineConfig(merge({ fmt }))` count), every `return` of a config function,
+including one inside an `if`, both branches of a conditional, both sides of
+`??` and `||`, a local constant, a local function declaration and a spread of
+a local object. A `fmt`, `lint` or `staged` key fails it whether it is written
+`fmt: x`, as the shorthand `fmt` or quoted.
+
+Three things are not flagged. A key on a nested object, such as `test.fmt`,
+is not a root block. A `return` inside a function nested within the config
+function is not the config's. And nothing reached only through an imported
+binding is read, whether spread, called or passed along: that object's keys
+live in another module, so a key reached only that way passes.
 
 ## Configuration
 

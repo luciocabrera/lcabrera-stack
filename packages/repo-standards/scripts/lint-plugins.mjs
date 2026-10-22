@@ -13,7 +13,7 @@
  * reason. A second probe may share a family when it proves one rule that no
  * other engine reports; `scope` is then the prefix Oxlint prints for it.
  */
-import { ts } from 'ts-morph';
+export { configsDeclaringKeys } from './lint-plugins-config-keys.mjs';
 
 export const PLUGIN_PROBES = [
   {
@@ -86,121 +86,6 @@ export const silentProbes = ({ probes, reportedCodes }) => {
   const reported = new Set(reportedCodes);
   return probes.filter((probe) => !reported.has(probeCode(probe)));
 };
-
-const unwrap = (node) =>
-  ts.isParenthesizedExpression(node) ||
-  ts.isAsExpression(node) ||
-  ts.isSatisfiesExpression(node)
-    ? unwrap(node.expression)
-    : node;
-
-const returnedExpressions = (fn) =>
-  ts.isBlock(fn.body)
-    ? fn.body.statements
-        .filter((statement) => ts.isReturnStatement(statement))
-        .filter((statement) => statement.expression !== undefined)
-        .map((statement) => statement.expression)
-    : [fn.body];
-
-const localInitializers = (sourceFile) =>
-  new Map(
-    sourceFile.statements
-      .filter((statement) => ts.isVariableStatement(statement))
-      .flatMap((statement) => statement.declarationList.declarations)
-      .filter(
-        (declaration) =>
-          ts.isIdentifier(declaration.name) &&
-          declaration.initializer !== undefined,
-      )
-      .map((declaration) => [declaration.name.text, declaration.initializer]),
-  );
-
-const nestedExpressions = (expression) => {
-  if (ts.isCallExpression(expression)) return [...expression.arguments];
-  return ts.isArrowFunction(expression) || ts.isFunctionExpression(expression)
-    ? returnedExpressions(expression)
-    : [];
-};
-
-const localObjectLiterals = (identifier, locals, seen) => {
-  const initializer = seen.has(identifier.text)
-    ? undefined
-    : locals.get(identifier.text);
-  return initializer === undefined
-    ? []
-    : objectLiterals(initializer, locals, new Set([...seen, identifier.text]));
-};
-
-const objectLiterals = (node, locals, seen) => {
-  const expression = unwrap(node);
-  if (ts.isObjectLiteralExpression(expression)) return [expression];
-  if (ts.isIdentifier(expression))
-    return localObjectLiterals(expression, locals, seen);
-  return nestedExpressions(expression).flatMap((nested) =>
-    objectLiterals(nested, locals, seen),
-  );
-};
-
-const isLiteralName = (name) =>
-  ts.isIdentifier(name) ||
-  ts.isStringLiteral(name) ||
-  ts.isNoSubstitutionTemplateLiteral(name);
-
-const propertyName = (name) => {
-  if (ts.isComputedPropertyName(name))
-    return propertyName(unwrap(name.expression));
-  return isLiteralName(name) ? name.text : undefined;
-};
-
-const topLevelKeys = (object, locals, visited) =>
-  object.properties.flatMap((property) =>
-    ts.isSpreadAssignment(property)
-      ? objectLiterals(property.expression, locals, new Set())
-          .filter((spread) => !visited.has(spread))
-          .flatMap((spread) =>
-            topLevelKeys(spread, locals, new Set([...visited, spread])),
-          )
-      : [propertyName(property.name)],
-  );
-
-const isDefineConfigCall = (node) =>
-  ts.isCallExpression(node) &&
-  ts.isIdentifier(node.expression) &&
-  node.expression.text === 'defineConfig';
-
-const configRoots = (node) => [
-  ...(isDefineConfigCall(node) ? node.arguments.slice(0, 1) : []),
-  ...(ts.isExportAssignment(node) && !node.isExportEquals
-    ? [node.expression]
-    : []),
-  ...node.getChildren().flatMap((child) => configRoots(child)),
-];
-
-const declaredConfigKeys = (path, text) => {
-  const sourceFile = ts.createSourceFile(
-    path,
-    text,
-    ts.ScriptTarget.Latest,
-    true,
-    ts.ScriptKind.TS,
-  );
-  const locals = localInitializers(sourceFile);
-  return new Set(
-    configRoots(sourceFile)
-      .flatMap((root) => objectLiterals(root, locals, new Set()))
-      .flatMap((object) => topLevelKeys(object, locals, new Set([object]))),
-  );
-};
-
-export const configsDeclaringKeys = (files, keys) =>
-  files
-    .filter(({ path }) => path !== 'vite.config.ts')
-    .flatMap(({ path, text }) => {
-      const declared = declaredConfigKeys(path, text);
-      return keys
-        .filter((key) => declared.has(key))
-        .map((key) => ({ key, path }));
-    });
 
 const globWorkspace = (glob) => glob.replace(/\/\*\*$/u, '');
 

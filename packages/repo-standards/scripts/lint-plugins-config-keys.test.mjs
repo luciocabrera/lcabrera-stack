@@ -53,12 +53,36 @@ describe('configsDeclaringKeys', () => {
         `export default mergeConfig(base, { ${key}: f });`,
       ],
       [
-        'through an aliased defineConfig',
+        'as a default-exported call to an aliased defineConfig',
         `import { defineConfig as define } from 'vite-plus';\nconst ${key} = {};\nexport default define({ ${key} });`,
       ],
       [
-        'through a namespace-qualified defineConfig',
-        `import * as vp from 'vite-plus';\nconst ${key} = {};\nexport default vp.defineConfig({ ${key} });`,
+        'in a call to an aliased defineConfig that is not the default export',
+        `import { defineConfig as define } from 'vite-plus';\nconst ${key} = {};\nexport const config = define({ ${key} });`,
+      ],
+      [
+        'in a call to a namespace-qualified defineConfig that is not the default export',
+        `import * as vp from 'vite-plus';\nexport const config = vp.defineConfig({ ${key}: x });`,
+      ],
+      [
+        'in a return nested inside another statement',
+        `export default defineConfig(({ command }) => {\n  if (command === 'serve') return { ${key}: f };\n  return base;\n});`,
+      ],
+      [
+        'in either branch of a returned conditional',
+        `export default defineConfig(({ mode }) => {\n  return mode === 'test' ? base : { ${key}: f };\n});`,
+      ],
+      [
+        'in the fallback of a nullish default',
+        `export default defineConfig(override ?? { ${key}: f });`,
+      ],
+      [
+        'in the object a local function declaration returns',
+        `function makeConfig() {\n  return { ${key}: x };\n}\nexport default defineConfig(makeConfig);`,
+      ],
+      [
+        'in the object a default-exported function returns',
+        `export default function config() {\n  return { ${key}: x };\n}`,
       ],
       [
         'in a later argument of a merging call',
@@ -103,6 +127,20 @@ describe('configsDeclaringKeys', () => {
       expect(
         declared(
           `export default defineConfig({ run: { tasks: { '${key}:check': { command: 'x' } } } });`,
+        ),
+      ).toEqual([]);
+    });
+
+    it('does not read an object passed to a call that is neither defineConfig nor the default export', () => {
+      expect(
+        declared(`export const config = makeConfig({ ${key}: x });`),
+      ).toEqual([]);
+    });
+
+    it('does not read a return inside a function nested in the config function', () => {
+      expect(
+        declared(
+          `export default defineConfig(() => {\n  const helper = () => ({ ${key}: x });\n  return { test: helper() };\n});`,
         ),
       ).toEqual([]);
     });

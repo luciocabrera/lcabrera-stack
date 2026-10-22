@@ -57,7 +57,8 @@ the package directory, which is why the gate still rejects the key.
 workspace config, so none of them can come back. It parses the config rather
 than matching lines, so a shorthand `fmt`, an inline `{ fmt: x }` and a spread
 of a local object all fail it, including inside the arguments of any call the
-default export makes; a spread of an imported object is not followed.
+default export makes, an aliased `defineConfig` and a `return` nested in an
+`if`; nothing reached only through an imported binding is followed.
 
 **Oxlint runs no ESLint-plugin rules.** The `jsPlugins` bridge is gone: the
 eslint pass already loads `react-x`, `react-dom`, `@stylexjs`, `local-rules`,
