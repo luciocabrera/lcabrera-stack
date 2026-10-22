@@ -1,9 +1,9 @@
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
+
+import { createFixtureRoots, writeIn } from './repo-fixtures.mjs';
 
 const BIN = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -12,23 +12,15 @@ const BIN = join(
 
 const DOC = 'docs/agents/triage.md';
 
-const roots = [];
+const fixtures = createFixtureRoots('repo-docs-paths-');
+
+afterEach(fixtures.removeAll);
 
 const makeRoot = (markdown) => {
-  const root = mkdtempSync(join(tmpdir(), 'repo-docs-paths-'));
-  mkdirSync(join(root, 'docs', 'agents'), { recursive: true });
-  writeFileSync(join(root, DOC), markdown);
-  roots.push(root);
+  const root = fixtures.make();
+  writeIn(root)(DOC, markdown);
   return root;
 };
-
-afterEach(() => {
-  const drained = [...roots];
-  roots.length = 0;
-  for (const root of drained) {
-    rmSync(root, { force: true, recursive: true });
-  }
-});
 
 const run = (root) =>
   spawnSync(process.execPath, [BIN], {
@@ -46,7 +38,7 @@ describe('repo-verify-docs-paths', () => {
 
   it('passes the same link once its target exists beside the doc', () => {
     const root = makeRoot('[facts](facts.json)\n');
-    writeFileSync(join(root, 'docs', 'agents', 'facts.json'), '{}\n');
+    writeIn(root)('docs/agents/facts.json', '{}\n');
 
     const result = run(root);
 
