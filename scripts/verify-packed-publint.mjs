@@ -20,6 +20,8 @@ import { packedPublint } from './lib/packed-publint.mjs';
 
 const REPO_ROOT = process.cwd();
 
+const bullet = (finding) => `  • ${finding}\n`;
+
 const main = async () => {
   const into = mkdtempSync(join(tmpdir(), 'packed-publint-'));
   try {
@@ -32,7 +34,7 @@ const main = async () => {
     process.stdout.write(lines.join(''));
     if (findings.length > 0) {
       process.stderr.write(
-        `\npublint over the packed public packages — ${findings.length} finding(s):\n\n${findings.map((finding) => `  • ${finding}\n`).join('')}`,
+        `\npublint over the packed public packages — ${findings.length} finding(s):\n\n${findings.map(bullet).join('')}`,
       );
       process.exitCode = 1;
       return;
