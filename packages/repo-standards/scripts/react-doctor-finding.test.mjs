@@ -354,3 +354,23 @@ describe('ciFailureFindings matches the CLI on report-shaped findings', () => {
     ).toEqual([]);
   });
 });
+
+describe('ciFailureFindings names the file contexts it exempts', () => {
+  it('keeps a finding whose fileContext is null', () => {
+    expect(
+      ciFailureFindings([{ ...plain, fileContext: null }], {}).map(
+        ({ id }) => id,
+      ),
+    ).toEqual([plain.id]);
+  });
+
+  it('fails on a fileContext it does not know instead of exempting it', () => {
+    expect(() =>
+      judgeReport({
+        config: { blocking: 'warning' },
+        diagnostics: [{ ...plain, fileContext: 'generated' }],
+        reportOnly: false,
+      }),
+    ).toThrow(/"fileContext": "generated", which is not one of story, test/);
+  });
+});

@@ -116,7 +116,7 @@ const judge = (args) => {
   try {
     return judgeReport(args);
   } catch (error) {
-    return fail(`${CONFIG}: ${error.message}`);
+    return fail(error.message);
   }
 };
 

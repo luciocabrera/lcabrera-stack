@@ -208,9 +208,13 @@ unqualified `rule` beside `plugin`, which is how the CLI's
 same function. `fileContext` is stamped only on a file that the CLI's
 `classifyFileContext` puts somewhere other than `production`, and that function
 returns only `test` or `story`. The report schema (`JsonReportDiagnosticV3`)
-admits only those two values. So the CLI's rule, which is to drop any finding
-with a `fileContext` that `includeFileContexts` does not name, means test and
-story files. The gate copies that rule as written. The CLI's config loader also
+admits only those two values. The CLI's rule drops any finding with a
+`fileContext` that `includeFileContexts` does not name, and today that means
+test and story files only. The gate names those two values instead of copying
+the open-ended test. A finding with no `fileContext`, or one set to `null`, is
+judged like production code. A finding with any other value fails the gate and
+names the value. If a later CLI starts stamping a new context, the gate fails
+loudly instead of silently exempting those findings. The CLI's config loader also
 discards any `includeCategories` or `excludeCategories` entry outside its five
 category buckets (`filterKnownCategories`). A finding can still carry a category
 outside them, such as `Correctness`, so the gate discards those entries too. The
