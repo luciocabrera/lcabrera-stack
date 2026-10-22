@@ -100,6 +100,12 @@ this config reports as an error: delete it, or replace it with an
 nothing from this package checks hook dependency arrays, so turn one of them
 back on in your own config.
 
+`./lint` also enables `react/exhaustive-effect-dependencies`. It reports three
+cases the `correctness` rule does not: a dependency an effect lists but never
+reads, a missing `useInsertionEffect` dependency, and a missing local function
+whose body only calls a state setter. A prop an effect reads and leaves out of
+its array is reported by both rules, and one fix clears both.
+
 ### Import boundaries are tables you pass in
 
 `createCustomRulesLintConfig` takes your boundaries rather than switching ours
