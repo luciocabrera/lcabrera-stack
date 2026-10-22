@@ -135,6 +135,50 @@ the surface changed without a changeset, and `repo-audit-release` asks what is
 already on the registry — the only one that can see a hand-publish, and the only
 one that cannot prevent anything.
 
+`repo-verify-lint-plugins` parses each workspace `vite.config.ts` and reads the
+top-level keys of every object the default export resolves to (written
+`export default`, `export default function` or `export { config as default }`),
+and of every
+object passed to `defineConfig`, including an aliased or namespace-qualified
+one. To get there it follows:
+
+- a call's arguments and its callee, so `makeConfig({ fmt })`,
+  `defineConfig(merge({ fmt }))` and an immediately invoked function count
+- every `return` of a function it reaches, sync or async, including one
+  inside an `if`
+- both branches of a conditional, both sides of `??` and `||`, and the right
+  side of `&&`, so `...(ci && { fmt })` counts
+- `satisfies`, `as`, `!` and `await` wrappers
+- a spread of an object it can resolve
+
+Every identifier is resolved with the TypeScript checker, in whatever scope it
+is declared, the module or a config function's body. The checker supplies the
+binding's initializer, every later `=` assignment to it (so a `let` or `var`
+reassigned before use counts) and the body of a function declaration. A
+`fmt`, `lint` or `staged` key fails the gate whether it is written `fmt: x`, as
+the shorthand `fmt` (including `const { fmt } = shared` passed on as
+`{ fmt }`), quoted, or computed. A computed key is read by its value, so
+`{ [name]: x }` counts when `name` is a constant holding `'fmt'`, and not when
+the variable is merely called `fmt`.
+
+These are not flagged:
+
+- A key on a nested object, such as `test.fmt`, which is not a root block.
+- An object a nested function returns, unless that function's result is
+  itself followed, as in `return helper()`.
+- A key inside an object that a destructured binding was taken from, as in
+  `const { base } = { base: { fmt } }` spread as `...base`. The binding is not
+  traced back to that object, though its own name still counts as a shorthand
+  key, so `const { fmt } = shared` passed as `{ fmt }` is flagged.
+- A key added by mutating an object after it is built, as in
+  `config.fmt = x`.
+- A default re-exported from another module (`export { x as default } from`).
+- A computed key whose value is not a string literal type, such as one held
+  in a `let`.
+- Anything reached only through an imported binding, whether spread, called
+  or passed along. That object's keys live in another module, so a key reached
+  only that way passes.
+
 ## Housekeeping
 
 `repo-housekeeping-prune` reads `gh pr list --state all --json number,headRefName,state`
