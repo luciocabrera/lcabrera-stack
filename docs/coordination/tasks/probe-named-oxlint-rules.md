@@ -2,7 +2,7 @@
 id: probe-named-oxlint-rules
 title: Probe each individually enabled Oxlint rule in lint:plugins:verify
 owner: agent:claude
-status: active
+status: review
 branch: feat/1448-probe-named-oxlint-rules
 area:
   - packages/repo-standards/scripts/lint-plugins*
@@ -29,6 +29,6 @@ Probe each individually enabled Oxlint rule in lint:plugins:verify
 
 ## Status / next
 
-- Current step: implemented, gate running
+- Current step: implemented, check:safe green, PR ready for review
 - Blockers: none
-- Next: ready the PR once the gate is green
+- Next: review and merge
