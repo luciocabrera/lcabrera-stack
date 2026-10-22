@@ -130,6 +130,16 @@ publint runs inside the verifier, not through `vp pack`'s `pack.publint`
 option: these packages are not built by `vp pack`, and `attw:verify` stays the
 types gate for the ones that are.
 
+**2026-10-22 — publint reads every public package's tarball (#1453).**
+`tarball:verify` runs before `packages:build`, so the packages that build to
+`dist` were never linted, and their `exports`/`publishConfig.exports` split is
+where a wrong target is most likely. `publint:verify` runs after the build,
+packs each package `vp run suppressions:packages` lists with pnpm, so
+`publishConfig.exports` is substituted as it is at release, and lints each
+tarball through the same module, planted control included. The source-shipping
+packages are linted by both gates; `tarball:verify` is unchanged, because it
+must still pass where nothing has been built.
+
 ## References
 
 - Issue [#715](https://github.com/luciocabrera/lcabrera-stack/issues/715) —
