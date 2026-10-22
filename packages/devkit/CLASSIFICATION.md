@@ -491,7 +491,7 @@ tool nobody installed is a step nobody defined.
 | `fallow:full`             | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation, configured by a seeded config file.                                                               |
 | `fallow:audit`            | `repo`     | seed   | **parameterise** | **hard**   | Its `audit` subcommand.                                                                                                    |
 | `fallow:dead-code`        | `repo`     | seed   | **parameterise** | **hard**   | Its `dead-code` subcommand.                                                                                                |
-| `fallow:dead-code:verify` | `repo`     | seed   | **parameterise** | **hard**   | The same subcommand over the whole tree, quiet — the form a gate runs, so it exits non-zero on any error-severity finding. |
+| `fallow:dead-code:verify` | `repo`     | seed   | **parameterise** | **hard**   | The same subcommand over the whole tree, quiet and uncached — the form a gate runs, failing on any error-severity finding. |
 | `fallow:dupes`            | `repo`     | seed   | **parameterise** | **hard**   | Its `dupes` subcommand.                                                                                                    |
 | `fallow:health`           | `repo`     | seed   | **parameterise** | **hard**   | Its `health` subcommand, plus the flags to print with it — the line is the artifact.                                       |
 | `build:all`               | `monorepo` | seed   | **parameterise** | **hard**   | Fan-out in dependency order.                                                                                               |

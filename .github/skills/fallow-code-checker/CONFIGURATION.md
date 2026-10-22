@@ -102,6 +102,9 @@ that a change made unreachable, which the audit's changed-file scope cannot
 see. It holds only because the tree carries no such finding, so a new one fails
 it whether or not the diff touched the file. `check:push`, `check:safe` and
 the CI Fallow Audit job run it; the plant that proved it is in the table below.
+It passes `--no-cache`: fallow's incremental cache keeps an import it recorded
+as unresolved, so a scan run before `typegen:all` would otherwise fail the gate
+on generated `+types` imports that now resolve (#1454).
 
 A clone group has no entry in `rules`, so on its own an introduced one is
 warn-severity: the audit counts it under `duplication_introduced`, gives

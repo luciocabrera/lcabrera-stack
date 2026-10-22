@@ -401,6 +401,11 @@ Always feed the audit real coverage:
 (produce it with `vp run coverage:merge`). Without it fallow _estimates_ coverage
 and reports trivially simple code as `critical`.
 
+`fallow:dead-code:verify` runs with `--no-cache`. Fallow's incremental cache
+keeps an import it recorded as unresolved, so a scan that ran before
+`typegen:all` generated the route types would otherwise fail the gate on
+`+types` imports that resolve in the tree.
+
 ### Micro-benchmarks
 
 | Command                  | Does                                                                                 |
