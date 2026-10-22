@@ -76,48 +76,48 @@ until you acknowledge it.
 
 ## Commands
 
-| Bin                                                                 | Checks                                                                                                                                                  |
-| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `repo-verify-commit <file>`                                         | a commit message against the Conventional Commit spec                                                                                                   |
-| `repo-verify-branch [name]`                                         | a branch name against the same type vocabulary                                                                                                          |
-| `repo-verify-pr --title <t> --body-file <f>`                        | a pull request's title and every required section                                                                                                       |
-| `repo-verify-issue --body-file <f>`                                 | an issue body's required sections                                                                                                                       |
-| `repo-verify-claims`                                                | the coordination register's integrity, overlap and staleness                                                                                            |
-| `repo-verify-adrs`                                                  | every ADR home, and every record's block and sections (`--adopt` once on an existing home)                                                              |
-| `repo-verify-publish`                                               | the tarball each built package would publish, by packing it                                                                                             |
-| `repo-verify-api-surface`                                           | each published package's exported surface against a snapshot                                                                                            |
-| `repo-verify-types`                                                 | that a built package's published types resolve for a consumer                                                                                           |
-| `repo-verify-shipped-docs`                                          | that every document in the packed tarball reads with only that package on disk                                                                          |
-| `repo-audit-release`                                                | every version already on the registry, after the fact                                                                                                   |
-| `repo-plan-release`                                                 | which packages have a version the registry does not have                                                                                                |
-| `repo-adr "<title>"`                                                | — scaffolds an ADR in the home you name                                                                                                                 |
-| `repo-claim-board`                                                  | — renders the live claims, including ones on other branches                                                                                             |
-| `repo-close-claim --pr <n>`                                         | — deletes the task file a merged pull request closes                                                                                                    |
-| `repo-verify-commands`                                              | the command document against what the runner lists, and its links and counts                                                                            |
-| `repo-verify-deps-audit --minimum <level>`                          | the audit report on stdin against the allowance register, refusing one that walked nothing                                                              |
-| `repo-verify-departed-names`                                        | that nothing names a product or workspace on the departed roster                                                                                        |
-| `repo-verify-renamed-mentions [--base <ref>]`                       | that no document names a file the diff renamed away                                                                                                     |
-| `repo-verify-doc-registers`                                         | the requirement and planning registers' entries, pointers, cycles and `met` claims                                                                      |
-| `repo-verify-script-exits`                                          | that no script calls `process.exit()`                                                                                                                   |
-| `repo-verify-eslint-pass`                                           | that the eslint pass reports a planted violation, so a crashed rule cannot read as clean                                                                |
-| `repo-verify-viteplus-block`                                        | that the runner's managed region in the agent document renders nothing (`--write` repairs)                                                              |
-| `repo-verify-conflict-markers`                                      | that no tracked file carries a merge-conflict marker, raw or reshaped by a Markdown formatter                                                           |
-| `repo-verify-inventory [--write]`                                   | that every util export is named in its tree's inventory, with a baseline                                                                                |
-| `repo-verify-lint-plugins`                                          | that plugins fire on a planted violation, two rules on hook dependencies among them, each workspace is classified once, none sets `fmt`/`lint`/`staged` |
-| `repo-verify-package-refs`                                          | that no published package's shipped text names an application directory                                                                                 |
-| `repo-verify-react-doctor [--report]`                               | React Doctor's findings at the config's `blocking` severity (`none` refused), asserting the run completed                                               |
-| `repo-verify-route-artifacts`                                       | that a route folder's shared modules are named for an artifact the folder holds                                                                         |
-| `repo-verify-harness`                                               | every skill, path rule and subagent: frontmatter, resolving paths, a description that says when                                                         |
-| `repo-verify-review-threads --pr <n>`                               | — publishes how many review threads still hold a pull request, as a commit status                                                                       |
-| `repo-pr-threads [--pr <n>] [--resolve <id>]`                       | — lists the unresolved review threads, or resolves one                                                                                                  |
-| `repo-test-changed`, `repo-run-changed <task>`                      | — run a task only for the workspaces the diff on stdin touched, plus their dependents                                                                   |
-| `repo-merge-coverage`, `repo-coverage-report`                       | — merge the coverage lanes into one report, and summarise them per workspace                                                                            |
-| `repo-lint-report`                                                  | — writes the analysers' JSON reports on demand                                                                                                          |
-| `repo-usage-report`                                                 | — reports how the harness is used, from stores that already retain it                                                                                   |
-| `repo-product-distance`, `repo-docs-for-package <dir>`              | — read the requirement register: distance from intent, and the documents one workspace owes                                                             |
-| `repo-housekeeping-prune [--apply] [--include-superseded] [--hint]` | — deletes merged branches, clean worktrees and stale throwaway containers, reporting anything that might be work; see [Housekeeping](#housekeeping)     |
-| `repo-worktree-env`                                                 | — links the primary checkout's gitignored env files into a linked worktree                                                                              |
-| `repo-eslint-staged [--check] [--] <file>…`                         | — lints the files named with the flat config that governs each, fixing unless `--check`                                                                 |
+| Bin                                                                 | Checks                                                                                                                                                            |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `repo-verify-commit <file>`                                         | a commit message against the Conventional Commit spec                                                                                                             |
+| `repo-verify-branch [name]`                                         | a branch name against the same type vocabulary                                                                                                                    |
+| `repo-verify-pr --title <t> --body-file <f>`                        | a pull request's title and every required section                                                                                                                 |
+| `repo-verify-issue --body-file <f>`                                 | an issue body's required sections                                                                                                                                 |
+| `repo-verify-claims`                                                | the coordination register's integrity, overlap and staleness                                                                                                      |
+| `repo-verify-adrs`                                                  | every ADR home, and every record's block and sections (`--adopt` once on an existing home)                                                                        |
+| `repo-verify-publish`                                               | the tarball each built package would publish, by packing it                                                                                                       |
+| `repo-verify-api-surface`                                           | each published package's exported surface against a snapshot                                                                                                      |
+| `repo-verify-types`                                                 | that a built package's published types resolve for a consumer                                                                                                     |
+| `repo-verify-shipped-docs`                                          | that every document in the packed tarball reads with only that package on disk                                                                                    |
+| `repo-audit-release`                                                | every version already on the registry, after the fact                                                                                                             |
+| `repo-plan-release`                                                 | which packages have a version the registry does not have                                                                                                          |
+| `repo-adr "<title>"`                                                | — scaffolds an ADR in the home you name                                                                                                                           |
+| `repo-claim-board`                                                  | — renders the live claims, including ones on other branches                                                                                                       |
+| `repo-close-claim --pr <n>`                                         | — deletes the task file a merged pull request closes                                                                                                              |
+| `repo-verify-commands`                                              | the command document against what the runner lists, and its links and counts                                                                                      |
+| `repo-verify-deps-audit --minimum <level>`                          | the audit report on stdin against the allowance register, refusing one that walked nothing                                                                        |
+| `repo-verify-departed-names`                                        | that nothing names a product or workspace on the departed roster                                                                                                  |
+| `repo-verify-renamed-mentions [--base <ref>]`                       | that no document names a file the diff renamed away                                                                                                               |
+| `repo-verify-doc-registers`                                         | the requirement and planning registers' entries, pointers, cycles and `met` claims                                                                                |
+| `repo-verify-script-exits`                                          | that no script calls `process.exit()`                                                                                                                             |
+| `repo-verify-eslint-pass`                                           | that the eslint pass reports a planted violation, so a crashed rule cannot read as clean                                                                          |
+| `repo-verify-viteplus-block`                                        | that the runner's managed region in the agent document renders nothing (`--write` repairs)                                                                        |
+| `repo-verify-conflict-markers`                                      | that no tracked file carries a merge-conflict marker, raw or reshaped by a Markdown formatter                                                                     |
+| `repo-verify-inventory [--write]`                                   | that every util export is named in its tree's inventory, with a baseline                                                                                          |
+| `repo-verify-lint-plugins`                                          | that each plugin family and each rule the config turns on by name fire on a planted violation, each workspace is classified once, none sets `fmt`/`lint`/`staged` |
+| `repo-verify-package-refs`                                          | that no published package's shipped text names an application directory                                                                                           |
+| `repo-verify-react-doctor [--report]`                               | React Doctor's findings at the config's `blocking` severity (`none` refused), asserting the run completed                                                         |
+| `repo-verify-route-artifacts`                                       | that a route folder's shared modules are named for an artifact the folder holds                                                                                   |
+| `repo-verify-harness`                                               | every skill, path rule and subagent: frontmatter, resolving paths, a description that says when                                                                   |
+| `repo-verify-review-threads --pr <n>`                               | — publishes how many review threads still hold a pull request, as a commit status                                                                                 |
+| `repo-pr-threads [--pr <n>] [--resolve <id>]`                       | — lists the unresolved review threads, or resolves one                                                                                                            |
+| `repo-test-changed`, `repo-run-changed <task>`                      | — run a task only for the workspaces the diff on stdin touched, plus their dependents                                                                             |
+| `repo-merge-coverage`, `repo-coverage-report`                       | — merge the coverage lanes into one report, and summarise them per workspace                                                                                      |
+| `repo-lint-report`                                                  | — writes the analysers' JSON reports on demand                                                                                                                    |
+| `repo-usage-report`                                                 | — reports how the harness is used, from stores that already retain it                                                                                             |
+| `repo-product-distance`, `repo-docs-for-package <dir>`              | — read the requirement register: distance from intent, and the documents one workspace owes                                                                       |
+| `repo-housekeeping-prune [--apply] [--include-superseded] [--hint]` | — deletes merged branches, clean worktrees and stale throwaway containers, reporting anything that might be work; see [Housekeeping](#housekeeping)               |
+| `repo-worktree-env`                                                 | — links the primary checkout's gitignored env files into a linked worktree                                                                                        |
+| `repo-eslint-staged [--check] [--] <file>…`                         | — lints the files named with the flat config that governs each, fixing unless `--check`                                                                           |
 
 In the repository this is published from they are the root `vp run` tasks of the
 same name — `commit:verify`, `pr:verify`, `coordination:verify`,
@@ -178,6 +178,33 @@ These are not flagged:
 - Anything reached only through an imported binding, whether spread, called
   or passed along. That object's keys live in another module, so a key reached
   only that way passes.
+
+`repo-verify-lint-plugins` also reads `lintConfig` from the root
+`vite.config.ts` and collects every rule it turns on by name: each `rules` key
+not set to `off`, `allow` or `0`, at the top level and in each `overrides`
+entry. Each needs a probe, matched by `<plugin>/<rule>` or by the prefix Oxlint
+prints, as in `react-hooks/exhaustive-deps`. A rule with no probe fails the
+gate, so a rule added to the config, or a rule id renamed in it, cannot pass
+unproven. The package ships probes for the rules `@lcabrera/vite-config/lint`
+names, and for `unicorn/no-array-sort` and five `vitest` assertion rules. For
+any other rule, the root config exports `LINT_RULE_PROBES`, an array of
+`{ code, plugin, rule }` with optional `ext` (`ts` by default) and `scope` (the
+prefix Oxlint prints, when it differs from `plugin`). Each probe's code must be
+something its rule reports.
+
+A top-level rule's probe is written to the probe directory at the root. An
+override rule's probe is written to a path one of that override's `files` globs
+matches, inside a directory the gate creates and removes. The gate fills a `*`
+or `**` directory segment with that directory and the one `*` in the file name
+with the probe's name, and the name must end in the probe's extension. A glob
+with braces, a character class, a partial wildcard in a directory, a `..` or
+absolute path, or a file name without exactly one `*` cannot be filled, and an override with no glob the
+gate can fill fails it. The gate then fails unless Oxlint reports each probe's
+rule in that probe's own file. That catches an override that names a rule
+without loading its plugin, a later entry that turns the rule off for that
+path, and an upgrade after which the rule no longer reports the planted case.
+When Oxlint refuses the config outright, as it does for a rule id it does not
+know, the gate prints Oxlint's message and fails.
 
 ## Housekeeping
 

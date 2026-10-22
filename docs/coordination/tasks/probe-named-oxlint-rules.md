@@ -11,10 +11,15 @@ area:
   - packages/repo-standards/ARCHITECTURE.md
   - .changeset/probe-named-oxlint-rules.md
   - docs/decisions/ADR-042-oxlint-config-at-the-root.md
+  - COMMANDS.md
+  - vite.config.ts
+  - packages/devkit/CLASSIFICATION.md
+  - .github/skills/lint-toolchain/SKILL.md
+  - .github/skills/health-swarm/charters/lint-coherence.md
 started: 2026-10-22
 updated: 2026-10-22
 plan: (none)
-pr: (none)
+pr: '#1482'
 issue: #1448
 ---
 
@@ -24,6 +29,6 @@ Probe each individually enabled Oxlint rule in lint:plugins:verify
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented, gate running
 - Blockers: none
-- Next:
+- Next: ready the PR once the gate is green
