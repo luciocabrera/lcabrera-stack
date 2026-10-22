@@ -17,8 +17,9 @@
  *      directory (`apps/`, `packages/`, `scripts/`, …). This is the shape that
  *      actually caused the damage: AGENTS.md listed ten `apps/*` directories of
  *      which six did not exist.
- *   2. **Relative markdown links** — `[text](../foo/bar.md)`, an explicit
- *      pointer whose target either resolves or is a dead link.
+ *   2. **Relative link targets** — `[text](../foo/bar.md)`, `[data](facts.json)`:
+ *      any link target with no URL scheme is an explicit pointer whose target
+ *      either resolves or is a dead link, whatever its extension.
  *
  * Everything else is left to review. Widening this is safe to do later; the
  * baseline exists so a widening can land without a cleanup blocking it.
@@ -27,13 +28,15 @@
  * map — was claimed here and unreachable; making it real is #864.
  */
 
+const hasScheme = (token) => /^[a-z][\d+.a-z-]*:/i.test(token);
+
 const isDisqualified = (token) =>
   token === '' ||
   /\s/.test(token) ||
   /[*?{}[\]<>\\|]/.test(token) ||
   token.startsWith('/') ||
   token.startsWith('#') ||
-  /^[a-z]+:\/\//i.test(token);
+  hasScheme(token);
 
 export const isRootAnchored = (token, repoRoots) => {
   return (
@@ -42,8 +45,6 @@ export const isRootAnchored = (token, repoRoots) => {
     repoRoots.includes(token.split('/', 1)[0])
   );
 };
-
-const isExplicitlyRelative = (token) => /^\.\.?\//.test(token);
 
 const TRAILING_PUNCTUATION = new Set([')', ',', '.', ':', ';']);
 
@@ -71,13 +72,7 @@ export const extractCandidates = (markdown, repoRoots) => {
   const linked = prose
     .matchAll(/\]\(([^)\s]{1,512})\)/g)
     .map((match) => normaliseToken(match[1]))
-    .filter(
-      (token) =>
-        !isDisqualified(token) &&
-        (isRootAnchored(token, repoRoots) ||
-          isExplicitlyRelative(token) ||
-          token.endsWith('.md')),
-    )
+    .filter((token) => !isDisqualified(token))
     .toArray();
 
   return [...new Set([...backticked, ...linked])];

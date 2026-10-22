@@ -307,3 +307,31 @@ does not read, which no other Oxlint rule reports, so turning the rule off in
 the root config fails the gate on that probe alone. Probe files are now named
 after their rule as well as their family: this probe and the `no-children-prop`
 one share both the family and the prefix, and would otherwise write one file.
+
+## Amendment 2026-10-21 — the gate parses workspace configs
+
+The `fmt`, `lint` and `staged` check now parses each workspace config instead of
+matching a key at the start of a line. The line match passed a shorthand `fmt`
+and an inline `{ fmt: x }` (#1441). The gate reads the top-level keys of every
+object that the default export (in any of its three spellings), or a
+`defineConfig` call (aliased or
+namespace-qualified too), resolves to. To find those objects it follows the
+callee and the arguments of any call, every `return` of a function it reaches,
+both branches of a conditional, both sides of `??` and `||`, the right side of
+`&&`, and spreads. It
+resolves each identifier with the TypeScript checker in whatever scope declares
+it, reading the initializer, every later `=` assignment and a function
+declaration's body. A computed key is read by its string literal type, not by
+the name of the identifier inside the brackets.
+
+The gate does not flag:
+
+- a key on a nested object
+- a key inside an object that a destructured binding was taken from, as in
+  `const { base } = { base: { fmt } }` spread as `...base`. The binding is not
+  traced back to that object, though its own name still counts as a shorthand
+  key, so `const { fmt } = shared` passed as `{ fmt }` is flagged
+- a key added by mutating an object after it is built
+- a default re-exported from another module
+- a computed key whose value is not a string literal type
+- anything reached only through an imported binding

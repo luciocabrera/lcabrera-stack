@@ -1,0 +1,15 @@
+id: near-miss
+name: Creating a worktree
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "What is the git command to create a new worktree at ../feature-x on a new branch called feature-x? Just the command. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-worktree-housekeeping-alone
+    config:
+      forbidden_skills:
+        - worktree-housekeeping
