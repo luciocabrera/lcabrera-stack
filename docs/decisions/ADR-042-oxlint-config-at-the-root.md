@@ -267,3 +267,43 @@ top-level `plugins` list, and its probes ship in `@lcabrera/repo-standards` to
 repositories that may not configure the override. A planted test with no
 assertion fails `vp lint` today. An Oxlint upgrade that stopped reporting one
 of these rules would pass every gate.
+
+## Amendment 2026-10-21 — two Oxlint rules check effect dependencies
+
+`createLintConfig` runs two Oxlint rules over a hook's dependency array:
+`react-hooks/exhaustive-deps` through the `correctness` category, and
+`react/exhaustive-effect-dependencies`, which it sets to `error` by name. A
+prop that an effect reads and its dependency array leaves out is reported by
+both. That is the duplicate the 2026-10-19 amendment removed across engines,
+so the two rules were compared before one was turned off
+([#1451](https://github.com/luciocabrera/lcabrera-stack/issues/1451)).
+
+Neither rule's findings contain the other's, so both stay on.
+
+- **Only `exhaustive-deps`:** `useCallback`, `useMemo` and
+  `useImperativeHandle`, which the effect rule does not read. An effect whose
+  callback is a named function rather than an inline one. An object created
+  during render and listed as a dependency. A ref's `.current` read in an
+  effect cleanup. An `async` effect callback. A dependency list that is not an
+  array literal.
+- **Only `exhaustive-effect-dependencies`:** a dependency the effect never
+  reads, which `exhaustive-deps` reports for a callback but not for an effect.
+  A `useInsertionEffect` dependency. A missing local function whose body only
+  calls a state setter, which `exhaustive-deps` treats as stable even though a
+  new copy is created on every render.
+- **Both:** a missing prop, state value, member path or local function in
+  `useEffect`, `useLayoutEffect` or a custom hook's effect, and a
+  module-scope value listed as a dependency.
+
+The cost of keeping both is two diagnostics for each case in the last group,
+one fix clearing both. The alternative loses a whole class: turning off the
+effect rule loses every extra effect dependency, and turning off
+`exhaustive-deps` loses every `useCallback` and `useMemo`. Neither rule takes
+an option that narrows it to the cases the other one misses.
+
+`vp run lint:plugins:verify` now probes both rules. The
+`exhaustive-effect-dependencies` probe plants an effect that lists a prop it
+does not read, which no other Oxlint rule reports, so turning the rule off in
+the root config fails the gate on that probe alone. Probe files are now named
+after their rule as well as their family: this probe and the `no-children-prop`
+one share both the family and the prefix, and would otherwise write one file.
