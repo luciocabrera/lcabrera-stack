@@ -73,8 +73,10 @@ containers. If a step fails it says which one and exits 1. Run the dry
 run again afterwards and show the user what is left.
 
 A dirty worktree whose every change already exists in history, with no untracked
-file, is removed only with `--apply --include-superseded`, and only after the
-user agrees to it by name.
+file, is removed only with `--apply --include-superseded`. The flag cannot pick
+one worktree: it removes every worktree the dry run lists under it. Pass it only
+after the user has agreed to each worktree in that list. If they want to keep
+one, do not pass the flag.
 
 Nothing removes a worktree with a change that matches neither history. No flag
 does, and you must not do it by hand either.
