@@ -112,6 +112,8 @@ const VALUED_OPTIONS = new Set([
 
 const COMMAND_SEPARATOR = /&&|\|\||[\n;|]/;
 
+const LINE_CONTINUATION = /\\\n/g;
+
 const isFilter = (option) =>
   FILTER_OPTIONS.has(option) || option.startsWith('--filter=');
 
@@ -148,6 +150,7 @@ export const unguardedFilters = ({
   );
   return commands.flatMap(({ source, where }) =>
     source
+      .replaceAll(LINE_CONTINUATION, ' ')
       .split(COMMAND_SEPARATOR)
       .flatMap((segment) => segment.split(invocation).slice(1))
       .filter((rest) => isUnguarded(runnerOptions(rest)))

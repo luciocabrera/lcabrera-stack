@@ -177,6 +177,10 @@ describe('unguardedFilters', () => {
       ),
     ).toBe(1);
     expect(unguardedIn('vp run db:up\nvp run --filter web seed')).toBe(1);
+    expect(unguardedIn('vp run \\\n  --filter web \\\n  seed')).toBe(1);
+    expect(
+      unguardedIn('vp run --fail-if-no-match \\\n  --filter web seed'),
+    ).toBe(0);
   });
 
   test('skips the value of a valued option before the task', () => {

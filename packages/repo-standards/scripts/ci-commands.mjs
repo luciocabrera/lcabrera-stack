@@ -97,14 +97,21 @@ export const runStepBodies = (source) => {
     }
     const rest = step[2].trim();
     if (rest.startsWith('|') || rest.startsWith('>')) {
-      block = { indent: step[1].length, text: [] };
-      bodies.push(block.text);
+      block = {
+        folded: rest.startsWith('>'),
+        indent: step[1].length,
+        text: [],
+      };
+      bodies.push(block);
       continue;
     }
-    bodies.push([rest]);
+    bodies.push({ folded: false, text: [rest] });
   }
-  return bodies.map((text) =>
-    text.filter((line) => !line.startsWith('#')).join('\n'),
+  return bodies.map(({ folded, text }) =>
+    text
+      .filter((line) => !line.startsWith('#'))
+      .join(folded ? ' ' : '\n')
+      .trimEnd(),
   );
 };
 
