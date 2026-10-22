@@ -138,18 +138,36 @@ one that cannot prevent anything.
 `repo-verify-lint-plugins` parses each workspace `vite.config.ts` and reads the
 top-level keys of every object the default export resolves to, and of every
 object passed to `defineConfig`, including an aliased or namespace-qualified
-one. To get there it follows any call's arguments (so `makeConfig({ fmt })` and
-`defineConfig(merge({ fmt }))` count), every `return` of a config function,
-including one inside an `if`, both branches of a conditional, both sides of
-`??` and `||`, a local constant, a local function declaration and a spread of
-a local object. A `fmt`, `lint` or `staged` key fails it whether it is written
-`fmt: x`, as the shorthand `fmt` or quoted.
+one. To get there it follows:
 
-Three things are not flagged. A key on a nested object, such as `test.fmt`,
-is not a root block. A `return` inside a function nested within the config
-function is not the config's. And nothing reached only through an imported
-binding is read, whether spread, called or passed along: that object's keys
-live in another module, so a key reached only that way passes.
+- a call's arguments and its callee, so `makeConfig({ fmt })`,
+  `defineConfig(merge({ fmt }))` and an immediately invoked function count
+- every `return` of a function it reaches, sync or async, including one
+  inside an `if`
+- both branches of a conditional, and both sides of `??` and `||`
+- `satisfies`, `as`, `!` and `await` wrappers
+- a spread of an object it can resolve
+
+Every identifier is resolved with the TypeScript checker, in whatever scope it
+is declared, the module or a config function's body. The checker supplies the
+binding's initializer, every later `=` assignment to it (so a `let` or `var`
+reassigned before use counts) and the body of a function declaration. A
+`fmt`, `lint` or `staged` key fails the gate whether it is written `fmt: x`, as
+the shorthand `fmt` (including `const { fmt } = shared` passed on as
+`{ fmt }`), or quoted.
+
+These are not flagged:
+
+- A key on a nested object, such as `test.fmt`, which is not a root block.
+- An object a nested function returns, unless that function's result is
+  itself followed, as in `return helper()`.
+- A binding destructured from another object. Its own name counts as a
+  shorthand key, but it is not traced back to the object it came from.
+- A key added by mutating an object after it is built, as in
+  `config.fmt = x`.
+- Anything reached only through an imported binding, whether spread, called
+  or passed along. That object's keys live in another module, so a key reached
+  only that way passes.
 
 ## Configuration
 

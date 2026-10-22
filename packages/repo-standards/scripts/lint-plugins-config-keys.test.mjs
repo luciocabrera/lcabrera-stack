@@ -81,6 +81,46 @@ describe('configsDeclaringKeys', () => {
         `function makeConfig() {\n  return { ${key}: x };\n}\nexport default defineConfig(makeConfig);`,
       ],
       [
+        'in a constant declared inside the config function',
+        `export default defineConfig(() => {\n  const config = { ${key}: createConfig() };\n  return config;\n});`,
+      ],
+      [
+        'through a spread of an object declared inside the config function',
+        `export default defineConfig(() => {\n  const base = { ${key}: x };\n  return { ...base };\n});`,
+      ],
+      [
+        'in an object assigned to a let after its declaration',
+        `let config = {};\nconfig = { ${key}: x };\nexport default defineConfig(config);`,
+      ],
+      [
+        'in an object assigned to an uninitialised var',
+        `var config;\nconfig = { ${key}: x };\nexport default defineConfig(config);`,
+      ],
+      [
+        'as a shorthand of a destructured binding',
+        `const { ${key} } = shared;\nexport default defineConfig({ ${key} });`,
+      ],
+      [
+        'in the object an immediately invoked function returns',
+        `export default defineConfig((() => ({ ${key}: x }))());`,
+      ],
+      [
+        'in the object an async config function returns',
+        `export default defineConfig(async ({ mode }) => {\n  const loaded = await load(mode);\n  return { ${key}: loaded };\n});`,
+      ],
+      [
+        'in the object a nested helper returns when the config returns its result',
+        `export default defineConfig(() => {\n  const helper = () => ({ ${key}: x });\n  return helper();\n});`,
+      ],
+      [
+        'in the object of a mutation call that is itself the config',
+        `const base = {};\nexport default defineConfig(Object.assign(base, { ${key}: x }));`,
+      ],
+      [
+        'in an object checked with satisfies',
+        `export default { ${key}: x } satisfies UserConfig;`,
+      ],
+      [
         'in the object a default-exported function returns',
         `export default function config() {\n  return { ${key}: x };\n}`,
       ],
@@ -141,6 +181,14 @@ describe('configsDeclaringKeys', () => {
       expect(
         declared(
           `export default defineConfig(() => {\n  const helper = () => ({ ${key}: x });\n  return { test: helper() };\n});`,
+        ),
+      ).toEqual([]);
+    });
+
+    it('does not follow a binding destructured from another object to its source', () => {
+      expect(
+        declared(
+          `const { base } = { base: { ${key}: x } };\nexport default defineConfig({ ...base });`,
         ),
       ).toEqual([]);
     });

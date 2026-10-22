@@ -33,7 +33,8 @@ const isFallbackOperator = (token) =>
   token.kind === ts.SyntaxKind.QuestionQuestionToken;
 
 const nestedExpressions = (expression) => {
-  if (ts.isCallExpression(expression)) return [...expression.arguments];
+  if (ts.isCallExpression(expression))
+    return [expression.expression, ...expression.arguments];
   if (ts.isConditionalExpression(expression))
     return [expression.whenTrue, expression.whenFalse];
   if (ts.isBinaryExpression(expression))
@@ -43,41 +44,55 @@ const nestedExpressions = (expression) => {
   return ts.isFunctionLike(expression) ? returnedExpressions(expression) : [];
 };
 
-const localDeclarations = (sourceFile) =>
-  new Map([
-    ...sourceFile.statements
-      .filter((statement) => ts.isVariableStatement(statement))
-      .flatMap((statement) => statement.declarationList.declarations)
-      .filter(
-        (declaration) =>
-          ts.isIdentifier(declaration.name) &&
-          declaration.initializer !== undefined,
-      )
-      .map((declaration) => [declaration.name.text, declaration.initializer]),
-    ...sourceFile.statements
-      .filter(
-        (statement) =>
-          ts.isFunctionDeclaration(statement) && statement.name !== undefined,
-      )
-      .map((statement) => [statement.name.text, statement]),
-  ]);
+const descendants = (node) =>
+  node.getChildren().flatMap((child) => [child, ...descendants(child)]);
 
-const localObjectLiterals = (identifier, locals, seen) => {
-  const declaration = seen.has(identifier.text)
-    ? undefined
-    : locals.get(identifier.text);
-  return declaration === undefined
-    ? []
-    : objectLiterals(declaration, locals, new Set([...seen, identifier.text]));
+const isAssignmentToIdentifier = (node) =>
+  ts.isBinaryExpression(node) &&
+  node.operatorToken.kind === ts.SyntaxKind.EqualsToken &&
+  ts.isIdentifier(unwrap(node.left));
+
+const assignedValues = (sourceFile, checker) =>
+  descendants(sourceFile)
+    .filter((node) => isAssignmentToIdentifier(node))
+    .reduce((values, node) => {
+      const symbol = checker.getSymbolAtLocation(unwrap(node.left));
+      if (symbol !== undefined)
+        values.set(symbol, [...(values.get(symbol) ?? []), node.right]);
+      return values;
+    }, new Map());
+
+const declaredValue = (declaration) => {
+  if (ts.isFunctionDeclaration(declaration)) return [declaration];
+  return ts.isVariableDeclaration(declaration) &&
+    declaration.initializer !== undefined
+    ? [declaration.initializer]
+    : [];
 };
 
-const objectLiterals = (node, locals, seen) => {
+const boundValues = (symbol, scope) => [
+  ...(symbol.declarations ?? []).flatMap((declaration) =>
+    declaredValue(declaration),
+  ),
+  ...(scope.assigned.get(symbol) ?? []),
+];
+
+const resolvedObjectLiterals = (identifier, scope, seen) => {
+  const symbol = scope.checker.getSymbolAtLocation(identifier);
+  if (symbol === undefined || seen.has(symbol)) return [];
+  const next = new Set([...seen, symbol]);
+  return boundValues(symbol, scope).flatMap((value) =>
+    objectLiterals(value, scope, next),
+  );
+};
+
+const objectLiterals = (node, scope, seen) => {
   const expression = unwrap(node);
   if (ts.isObjectLiteralExpression(expression)) return [expression];
   if (ts.isIdentifier(expression))
-    return localObjectLiterals(expression, locals, seen);
+    return resolvedObjectLiterals(expression, scope, seen);
   return nestedExpressions(expression).flatMap((nested) =>
-    objectLiterals(nested, locals, seen),
+    objectLiterals(nested, scope, seen),
   );
 };
 
@@ -92,13 +107,13 @@ const propertyName = (name) => {
   return isLiteralName(name) ? name.text : undefined;
 };
 
-const topLevelKeys = (object, locals, visited) =>
+const topLevelKeys = (object, scope, visited) =>
   object.properties.flatMap((property) =>
     ts.isSpreadAssignment(property)
-      ? objectLiterals(property.expression, locals, new Set())
+      ? objectLiterals(property.expression, scope, new Set())
           .filter((spread) => !visited.has(spread))
           .flatMap((spread) =>
-            topLevelKeys(spread, locals, new Set([...visited, spread])),
+            topLevelKeys(spread, scope, new Set([...visited, spread])),
           )
       : [propertyName(property.name)],
   );
@@ -144,10 +159,25 @@ const ownRoots = (node, names) => {
   return isDefaultExportedFunction(node) ? [node] : [];
 };
 
-const configRoots = (node, names) => [
-  ...ownRoots(node, names),
-  ...node.getChildren().flatMap((child) => configRoots(child, names)),
-];
+const configRoots = (sourceFile, names) =>
+  [sourceFile, ...descendants(sourceFile)].flatMap((node) =>
+    ownRoots(node, names),
+  );
+
+const COMPILER_OPTIONS = { noLib: true, noResolve: true, types: [] };
+
+const checkerFor = (sourceFile) => {
+  const host = {
+    ...ts.createCompilerHost(COMPILER_OPTIONS),
+    fileExists: (name) => name === sourceFile.fileName,
+    getSourceFile: (name) =>
+      name === sourceFile.fileName ? sourceFile : undefined,
+    readFile: () => undefined,
+  };
+  return ts
+    .createProgram([sourceFile.fileName], COMPILER_OPTIONS, host)
+    .getTypeChecker();
+};
 
 const declaredConfigKeys = (path, text) => {
   const sourceFile = ts.createSourceFile(
@@ -157,11 +187,12 @@ const declaredConfigKeys = (path, text) => {
     true,
     ts.ScriptKind.TS,
   );
-  const locals = localDeclarations(sourceFile);
+  const checker = checkerFor(sourceFile);
+  const scope = { assigned: assignedValues(sourceFile, checker), checker };
   return new Set(
     configRoots(sourceFile, defineConfigNames(sourceFile))
-      .flatMap((root) => objectLiterals(root, locals, new Set()))
-      .flatMap((object) => topLevelKeys(object, locals, new Set([object]))),
+      .flatMap((root) => objectLiterals(root, scope, new Set()))
+      .flatMap((object) => topLevelKeys(object, scope, new Set([object]))),
   );
 };
 
