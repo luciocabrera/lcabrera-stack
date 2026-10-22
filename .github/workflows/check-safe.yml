@@ -242,9 +242,9 @@ jobs:
 
       - name: Build the public packages
         id: packages_build
-        # Every later step that packs a package or reads its `dist` then checks
-        # this build of the checked-out source, never a `dist` some earlier
-        # step happened to leave behind.
+        # Every later step that reads a built package's `dist`, directly or
+        # through its packed tarball, then checks this build of the
+        # checked-out source, never a `dist` some earlier step left behind.
         run: vp run packages:build
 
       - name: A packed tarball is one a consumer could install

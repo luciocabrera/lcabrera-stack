@@ -457,12 +457,14 @@ roster-wide total would hide losing it behind its neighbours. The tarballs it
 reads carry `dist/`, so whether a link into the built output resolves depends on
 the build that preceded it.
 
-Run `packages:build` **before** any step that packs a package or reads its
-`dist/`: `publish:verify`, `api-surface:verify`, `attw:verify`,
-`tarball:verify`, `workspace:verify` and `shipped-docs:verify`. `check:safe`
-builds once ahead of all six, and CI's Quality Gate runs the build as its own
-step ahead of the first of them, so each one checks the current source rather
-than an earlier build's `dist/`. With no `dist/` there is no artifact to check,
+Run `packages:build` **before** any step that reads a built package's
+`dist/`, directly or through its packed tarball: `publish:verify`,
+`api-surface:verify`, `attw:verify` and `shipped-docs:verify`.
+`workspace:verify` packs built packages too, and runs `packages:build` itself
+first. `tarball:verify` does not depend on the build: the packages it packs
+ship source. `check:safe` builds once ahead of all of them, and CI's Quality
+Gate runs the build as its own step ahead of the first, so each one checks the
+current source rather than an earlier build's `dist/`. With no `dist/` there is no artifact to check,
 and `publish:verify`, `api-surface:verify` and `attw:verify` **fail** rather
 than reporting a pass they did not earn (ADR-073).
 `publish:verify` also needs pnpm on PATH, which running it through `vp` provides.
