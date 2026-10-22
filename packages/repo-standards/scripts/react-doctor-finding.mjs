@@ -13,7 +13,9 @@
  * A finding blocks only if the CLI's own `ciFailure` surface keeps it: the
  * CLI drops `design`-tagged findings and those in a test or story file before
  * it applies `blocking`, and `surfaces.ciFailure` moves either line. The gate
- * runs the CLI at `--blocking none`, so it re-applies that filter here.
+ * runs the CLI at `--blocking none`, so it re-applies that filter here. Like
+ * the CLI's config loader, it ignores a `surfaces.ciFailure` category outside
+ * `CATEGORY_BUCKETS`.
  *
  * A finding's `id` may be a string, `null` or missing; only a string names the
  * repository path, otherwise the normalized file path stands in.
@@ -50,6 +52,14 @@ export const blockingSeverities = (config) => {
 
 const CI_FAILURE_EXCLUDED_TAGS = ['design'];
 
+const CATEGORY_BUCKETS = new Set([
+  'Accessibility',
+  'Bugs',
+  'Maintainability',
+  'Performance',
+  'Security',
+]);
+
 const isRecord = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -60,21 +70,25 @@ const stringSet = (values) =>
       : [],
   );
 
+const knownCategorySet = (values) =>
+  new Set(
+    [...stringSet(values)].filter((category) => CATEGORY_BUCKETS.has(category)),
+  );
+
 const ciFailureControls = (config) => {
   const surfaces = isRecord(config?.surfaces) ? config.surfaces : {};
   const controls = isRecord(surfaces.ciFailure) ? surfaces.ciFailure : {};
-  const includeTags = stringSet(controls.includeTags);
   return {
-    excludeCategories: stringSet(controls.excludeCategories),
+    excludeCategories: knownCategorySet(controls.excludeCategories),
     excludeRules: stringSet(controls.excludeRules),
     excludeTags: new Set([
-      ...CI_FAILURE_EXCLUDED_TAGS.filter((tag) => !includeTags.has(tag)),
+      ...CI_FAILURE_EXCLUDED_TAGS,
       ...stringSet(controls.excludeTags),
     ]),
-    includeCategories: stringSet(controls.includeCategories),
+    includeCategories: knownCategorySet(controls.includeCategories),
     includeFileContexts: stringSet(controls.includeFileContexts),
     includeRules: stringSet(controls.includeRules),
-    includeTags,
+    includeTags: stringSet(controls.includeTags),
   };
 };
 

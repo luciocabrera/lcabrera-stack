@@ -201,13 +201,27 @@ a `design`-tagged warning failed the gate and passed the CLI.
 `judgeReport` now applies the same filter before it checks severity, in the
 CLI's order: an included rule, category or tag keeps the finding; otherwise a
 file context not listed in `includeFileContexts` drops it; otherwise an excluded
-rule, category or tag drops it. The report's `tags`, `category` and
-`fileContext` carry everything the filter reads. The gate still runs at
+rule, category or tag drops it. The report carries everything the filter
+reads. A rule matches as `<plugin>/<rule>`, because the report keeps the
+unqualified `rule` beside `plugin`, which is how the CLI's
+`getDiagnosticRuleIdentity` builds the key. `tags` and `category` come from the
+same function. `fileContext` is stamped only on a file that the CLI's
+`classifyFileContext` puts somewhere other than `production`, and that function
+returns only `test` or `story`. The report schema (`JsonReportDiagnosticV3`)
+admits only those two values. So the CLI's rule, which is to drop any finding
+with a `fileContext` that `includeFileContexts` does not name, means test and
+story files. The gate copies that rule as written. The CLI's config loader also
+discards any `includeCategories` or `excludeCategories` entry outside its five
+category buckets (`filterKnownCategories`). A finding can still carry a category
+outside them, such as `Correctness`, so the gate discards those entries too. The
+gate still runs at
 `--blocking none` and still asserts `ok`, so the reasons in the first amendment
 for not trusting the CLI's exit code still hold. Taking the exit code was
 rejected for the same reason: the gate has to name the findings that blocked,
 and the exit code names none.
 
 The filter is a copy of the CLI's rule, so a change to the CLI's defaults
-needs a matching change here. The report keeps every finding, so `--report`
+needs a matching change here. One difference remains. The CLI gates each
+project on that project's config merged over the root one, while the gate
+reads only the root `doctor.config.jsonc`. The report keeps every finding, so `--report`
 and `react-doctor:report` show what the gate let through.
