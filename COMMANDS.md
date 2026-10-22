@@ -475,8 +475,9 @@ and `publish:verify`, `api-surface:verify` and `attw:verify` **fail** rather
 than reporting a pass they did not earn (ADR-073).
 `publish:verify` and `publint:verify` also need pnpm on PATH, which running
 them through `vp` provides. `publint:verify` has no unbuilt refusal of its own:
-with no `dist/`, every published export names a file the tarball does not hold,
-and publint reports each one.
+with no `dist/`, every `publishConfig.exports` target of a package that builds
+names a file the tarball does not hold, and publint reports each one. The
+packages that ship source lint the same either way.
 `ui` ships source, so its surface is always checked. The API-surface snapshot and
 its `ui`-vs-built split are
 [ADR-046](docs/decisions/ADR-046-public-api-surface-snapshot.md).

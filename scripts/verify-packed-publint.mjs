@@ -2,8 +2,8 @@
  * Runs publint over the packed tarball of every public package, after
  * `packages:build`, so an `exports` or `publishConfig.exports` target the
  * tarball does not hold fails before a version is published. `tarball:verify`
- * runs before the build and packs only the packages that ship source; this
- * gate covers the roster `vp run suppressions:packages` prints (ADR-073).
+ * packs only the `.mjs` packages it installs; this gate covers the roster
+ * `vp run suppressions:packages` prints (ADR-073).
  *
  * Usage: node scripts/verify-packed-publint.mjs   (after `vp run packages:build`)
  * Exit codes: 0 = every tarball linted clean and the planted fault was caught,

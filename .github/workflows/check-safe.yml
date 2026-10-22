@@ -488,10 +488,11 @@ jobs:
 
       - name: publint reads every public package's packed tarball
         id: publint_gate
-        # tarball:verify lints only the packages that ship source, and runs
-        # before the build. This packs every public package with pnpm after it,
-        # so publint reads the `dist` targets publishConfig.exports names and
-        # fails one the tarball does not hold (#1453, ADR-073).
+        # tarball:verify packs only devkit, repo-standards and
+        # create-lcabrera-stack, so no built package's tarball was linted. This
+        # packs every public package with pnpm after the build step, so publint
+        # reads the `dist` targets publishConfig.exports names and fails one the
+        # tarball does not hold (#1453, ADR-073).
         run: vp run publint:verify
 
       - name: Public package API surface is unbroken
