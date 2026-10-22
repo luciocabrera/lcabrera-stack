@@ -240,6 +240,13 @@ jobs:
         # is always red is read exactly like one that is always green.
         run: vp run devkit:check
 
+      - name: Build the public packages
+        id: packages_build
+        # Every later step that reads a built package's `dist`, directly or
+        # through its packed tarball, then checks this build of the
+        # checked-out source, never a `dist` some earlier step left behind.
+        run: vp run packages:build
+
       - name: A packed tarball is one a consumer could install
         id: devkit_tarball_gate
         # Every workspace here consumes these packages as `workspace:*`, which
@@ -470,14 +477,14 @@ jobs:
 
       - name: Published package surface resolves
         id: publish_gate
-        # Builds first on purpose. `exports` points at `src` so this repo never
-        # needs a build, while consumers install `dist` via publishConfig.exports
-        # — a map nothing here exercises. The gate packs each package with pnpm
-        # and reads the tarball a consumer would install, so with no build there
-        # is no artifact and it fails, rather than reporting the structural half
-        # as a pass the way it used to (ADR-073). The build is what gives it
-        # something real to check.
-        run: vp run packages:build && vp run publish:verify
+        # Runs after the build step on purpose. `exports` points at `src` so
+        # this repo never needs a build, while consumers install `dist` via
+        # publishConfig.exports — a map nothing here exercises. The gate packs
+        # each package with pnpm and reads the tarball a consumer would install,
+        # so with no build there is no artifact and it fails, rather than
+        # reporting the structural half as a pass the way it used to (ADR-073).
+        # The build is what gives it something real to check.
+        run: vp run publish:verify
 
       - name: Public package API surface is unbroken
         id: api_surface_gate
@@ -488,7 +495,7 @@ jobs:
         # (publish:verify checks subpath parity, never the type surface). This
         # diffs each package's exported surface against its tracked snapshot and,
         # against the base ref, requires a changeset for a breaking change. Runs
-        # after packages:build — it snapshots the built dist a consumer installs.
+        # after the build step — it snapshots the built dist a consumer installs.
         # See docs/decisions/ADR-046 and issue #359.
         env:
           API_SURFACE_BASE: ${{ env.DIFF_BASE }}

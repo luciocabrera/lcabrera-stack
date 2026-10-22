@@ -453,12 +453,20 @@ line. Which directories count as this repository's is
 It refuses an empty package roster, and any single package that ships no
 readable document, rather than reporting a pass over nothing — asked per
 package, because `@lcabrera/ui`'s whole shipped corpus is its root README and a
-roster-wide total would hide losing it behind its neighbours. It needs no `dist/` — markdown is not built — so
-it runs beside `tarball:verify` rather than after `packages:build`.
+roster-wide total would hide losing it behind its neighbours. The tarballs it
+reads carry `dist/`, so whether a link into the built output resolves depends on
+the build that preceded it.
 
-Run `packages:build` **before** `publish:verify`, `api-surface:verify` and
-`attw:verify`: with no `dist/` there is no artifact to check, and all three
-**fail** rather than reporting a pass they did not earn (ADR-073).
+Run `packages:build` **before** any step that reads a built package's
+`dist/`, directly or through its packed tarball: `publish:verify`,
+`api-surface:verify`, `attw:verify` and `shipped-docs:verify`.
+`workspace:verify` packs built packages too, and runs `packages:build` itself
+first. `tarball:verify` does not depend on the build: the packages it packs
+ship source. `check:safe` builds once ahead of all of them, and CI's Quality
+Gate runs the build as its own step ahead of the first, so each one checks the
+current source rather than an earlier build's `dist/`. With no `dist/` there is no artifact to check,
+and `publish:verify`, `api-surface:verify` and `attw:verify` **fail** rather
+than reporting a pass they did not earn (ADR-073).
 `publish:verify` also needs pnpm on PATH, which running it through `vp` provides.
 `ui` ships source, so its surface is always checked. The API-surface snapshot and
 its `ui`-vs-built split are
