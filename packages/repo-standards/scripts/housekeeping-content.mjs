@@ -158,6 +158,9 @@ const matches = ({ blobs, change, cwd, git, history, isOwnHead, tip }) =>
 
 const bucketOf = ({ base, change, cwd, git, histories, own }) => {
   if (change.isModeChanged === true) return 'neither';
+  if (change.worktree === 'D' && stagedBlob(change).length > 0) {
+    return 'neither';
+  }
   const shared = { blobs: blobsOf({ change, cwd, git }), change, cwd, git };
   if (
     matches({ ...shared, history: histories.base, isOwnHead: false, tip: base })

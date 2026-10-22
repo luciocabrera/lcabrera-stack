@@ -20,13 +20,13 @@ import {
   buildSortingRepository,
   gitIn,
   recordingDocker,
-  scratchRoots,
   worktreePaths,
 } from './housekeeping-fixtures.mjs';
 import { classifyContainers, THROWAWAY_LABEL } from './housekeeping-plan.mjs';
 import { runPrune } from './housekeeping-run.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
 
-const { drain, make } = scratchRoots();
+const { make, removeAll: drain } = createFixtureRoots('repo-housekeeping-');
 
 afterEach(drain);
 

@@ -219,12 +219,6 @@ const keptReason = ({ isLabelRead, worktree }) => {
     : `running for ${worktree}, which is still there`;
 };
 
-/**
- * @param {{ containers: { id: string, name: string, running: boolean,
- *   worktree: string, isLabelRead?: boolean }[],
- *   isOnDisk: (path: string) => boolean, live: Set<string>,
- *   removing?: Set<string> }} args
- */
 const STOPPED_STATES = new Set(['created', 'dead', 'exited']);
 
 const stateOf = ({ running, state }) => {
@@ -232,6 +226,12 @@ const stateOf = ({ running, state }) => {
   return running ? 'running' : 'exited';
 };
 
+/**
+ * @param {{ containers: { id: string, name: string, running: boolean,
+ *   state?: string, worktree: string, isLabelRead?: boolean }[],
+ *   isOnDisk: (path: string) => boolean, live: Set<string>,
+ *   removing?: Set<string> }} args
+ */
 export const classifyContainers = ({
   containers,
   isOnDisk,

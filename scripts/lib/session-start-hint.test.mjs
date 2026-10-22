@@ -12,14 +12,12 @@ import { fileURLToPath } from 'node:url';
 
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
-import {
-  repositoryWithGoneBranches,
-  scratchRoots,
-} from '../../packages/repo-standards/scripts/housekeeping-fixtures.mjs';
+import { repositoryWithGoneBranches } from '../../packages/repo-standards/scripts/housekeeping-fixtures.mjs';
+import { createFixtureRoots } from '../../packages/repo-standards/scripts/repo-fixtures.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
-const { drain, make } = scratchRoots();
+const { make, removeAll: drain } = createFixtureRoots('repo-housekeeping-');
 
 afterEach(drain);
 

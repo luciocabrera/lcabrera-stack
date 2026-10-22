@@ -14,12 +14,12 @@ import {
   buildSortingRepository,
   noContainers,
   PULL_REQUESTS,
-  scratchRoots,
   worktreePaths,
 } from './housekeeping-fixtures.mjs';
 import { runPrune } from './housekeeping-run.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
 
-const { drain, make } = scratchRoots();
+const { make, removeAll: drain } = createFixtureRoots('repo-housekeeping-');
 
 afterEach(drain);
 

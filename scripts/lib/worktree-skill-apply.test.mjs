@@ -23,9 +23,9 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import {
   buildSortingRepository,
   recordingDocker,
-  scratchRoots,
   worktreePaths,
 } from '../../packages/repo-standards/scripts/housekeeping-fixtures.mjs';
+import { createFixtureRoots } from '../../packages/repo-standards/scripts/repo-fixtures.mjs';
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
@@ -45,7 +45,7 @@ const BIN = join(
   'housekeeping-prune.mjs',
 );
 
-const { drain, make } = scratchRoots();
+const { make, removeAll: drain } = createFixtureRoots('repo-housekeeping-');
 
 afterEach(drain);
 

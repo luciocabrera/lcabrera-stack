@@ -11,12 +11,12 @@ import {
   configureIdentity,
   gitIn,
   noContainers,
-  scratchRoots,
   worktreePaths,
 } from './housekeeping-fixtures.mjs';
 import { runPrune } from './housekeeping-run.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
 
-const { drain, make } = scratchRoots();
+const { make, removeAll: drain } = createFixtureRoots('repo-housekeeping-');
 
 afterEach(drain);
 
@@ -309,5 +309,22 @@ describe('two clean worktrees on one merged branch', () => {
     expect(worktreePaths(repo)).not.toContain(first);
     expect(worktreePaths(repo)).not.toContain(second);
     expect(branchesOf(repo)).not.toContain('shared');
+  });
+});
+
+describe('a staged modification then deleted in the worktree (MD)', () => {
+  it('counts as matching neither history, and survives every flag', () => {
+    const root = make();
+    const repo = baseRepository(root);
+    const work = worktreeOnBranch({ name: 'staged-then-deleted', repo, root });
+    writeFileSync(join(work, 'a.txt'), 'one\n');
+    gitIn(work, 'add', 'a.txt');
+    rmSync(join(work, 'a.txt'));
+
+    const lines = dryRunThenEveryFlag(repo);
+
+    expect(gitIn(work, 'status', '--porcelain')).toBe('MD a.txt');
+    expect(lineFor(lines, work)).toContain('1 match neither');
+    expect(worktreePaths(repo)).toContain(work);
   });
 });

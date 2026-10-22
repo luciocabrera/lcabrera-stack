@@ -3,15 +3,7 @@
  * each kind the plan sorts, built with real git so the readers run as they
  * would in a consumer's repository.
  */
-import {
-  chmodSync,
-  existsSync,
-  mkdirSync,
-  mkdtempSync,
-  rmSync,
-  writeFileSync,
-} from 'node:fs';
-import { tmpdir } from 'node:os';
+import { chmodSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { runGitStatus } from './git-exec.mjs';
@@ -35,22 +27,6 @@ export const configureIdentity = (repo) => {
   gitIn(repo, 'config', 'user.name', 'Fixture');
   gitIn(repo, 'config', 'commit.gpgsign', 'false');
   gitIn(repo, 'config', 'core.hooksPath', '.no-hooks');
-};
-
-export const scratchRoots = () => {
-  const made = [];
-  return {
-    drain: () => {
-      for (const path of made.splice(0)) {
-        rmSync(path, { force: true, recursive: true });
-      }
-    },
-    make: () => {
-      const root = mkdtempSync(join(tmpdir(), 'repo-housekeeping-'));
-      made.push(root);
-      return root;
-    },
-  };
 };
 
 const addWorktree = ({ from, name, repo, root }) => {

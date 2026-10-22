@@ -12,13 +12,13 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   repositoryWithGoneBranches,
-  scratchRoots,
   worktreePaths,
 } from './housekeeping-fixtures.mjs';
 import { PLAN_COMMAND } from './housekeeping-plan.mjs';
 import { runHint } from './housekeeping-run.mjs';
+import { createFixtureRoots } from './repo-fixtures.mjs';
 
-const { drain, make } = scratchRoots();
+const { make, removeAll: drain } = createFixtureRoots('repo-housekeeping-');
 
 afterEach(drain);
 
