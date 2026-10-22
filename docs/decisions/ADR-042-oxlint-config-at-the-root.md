@@ -313,17 +313,22 @@ one share both the family and the prefix, and would otherwise write one file.
 The `fmt`, `lint` and `staged` check now parses each workspace config instead of
 matching a key at the start of a line. The line match passed a shorthand `fmt`
 and an inline `{ fmt: x }` (#1441). The gate reads the top-level keys of every
-object that the default export, or a `defineConfig` call (aliased or
+object that the default export (in any of its three spellings), or a
+`defineConfig` call (aliased or
 namespace-qualified too), resolves to. To find those objects it follows the
 callee and the arguments of any call, every `return` of a function it reaches,
-both branches of a conditional, both sides of `??` and `||`, and spreads. It
+both branches of a conditional, both sides of `??` and `||`, the right side of
+`&&`, and spreads. It
 resolves each identifier with the TypeScript checker in whatever scope declares
 it, reading the initializer, every later `=` assignment and a function
-declaration's body.
+declaration's body. A computed key is read by its string literal type, not by
+the name of the identifier inside the brackets.
 
 The gate does not flag:
 
 - a key on a nested object
 - a binding destructured from another object, traced back to its source
 - a key added by mutating an object after it is built
+- a default re-exported from another module
+- a computed key whose value is not a string literal type
 - anything reached only through an imported binding

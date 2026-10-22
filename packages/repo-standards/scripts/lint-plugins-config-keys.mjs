@@ -28,19 +28,21 @@ const returnedExpressions = (fn) => {
   return ts.isBlock(fn.body) ? returnStatements(fn.body) : [fn.body];
 };
 
-const isFallbackOperator = (token) =>
-  token.kind === ts.SyntaxKind.BarBarToken ||
-  token.kind === ts.SyntaxKind.QuestionQuestionToken;
+const OPERAND_RESULTS = new Map([
+  [ts.SyntaxKind.AmpersandAmpersandToken, ({ right }) => [right]],
+  [ts.SyntaxKind.BarBarToken, ({ left, right }) => [left, right]],
+  [ts.SyntaxKind.QuestionQuestionToken, ({ left, right }) => [left, right]],
+]);
+
+const binaryResults = (expression) =>
+  OPERAND_RESULTS.get(expression.operatorToken.kind)?.(expression) ?? [];
 
 const nestedExpressions = (expression) => {
   if (ts.isCallExpression(expression))
     return [expression.expression, ...expression.arguments];
   if (ts.isConditionalExpression(expression))
     return [expression.whenTrue, expression.whenFalse];
-  if (ts.isBinaryExpression(expression))
-    return isFallbackOperator(expression.operatorToken)
-      ? [expression.left, expression.right]
-      : [];
+  if (ts.isBinaryExpression(expression)) return binaryResults(expression);
   return ts.isFunctionLike(expression) ? returnedExpressions(expression) : [];
 };
 
@@ -101,10 +103,17 @@ const isLiteralName = (name) =>
   ts.isStringLiteral(name) ||
   ts.isNoSubstitutionTemplateLiteral(name);
 
-const propertyName = (name) => {
+const stringLiteralValues = (type) =>
+  (type.isUnion() ? type.types : [type])
+    .filter((member) => member.isStringLiteral())
+    .map((member) => member.value);
+
+const propertyNames = (name, scope) => {
   if (ts.isComputedPropertyName(name))
-    return propertyName(unwrap(name.expression));
-  return isLiteralName(name) ? name.text : undefined;
+    return stringLiteralValues(
+      scope.checker.getTypeAtLocation(name.expression),
+    );
+  return isLiteralName(name) ? [name.text] : [];
 };
 
 const topLevelKeys = (object, scope, visited) =>
@@ -115,7 +124,7 @@ const topLevelKeys = (object, scope, visited) =>
           .flatMap((spread) =>
             topLevelKeys(spread, scope, new Set([...visited, spread])),
           )
-      : [propertyName(property.name)],
+      : propertyNames(property.name, scope),
   );
 
 const namedImports = (statement) => {
@@ -152,10 +161,17 @@ const isDefaultExportedFunction = (node) =>
   (ts.getCombinedModifierFlags(node) & ts.ModifierFlags.ExportDefault) ===
     ts.ModifierFlags.ExportDefault;
 
+const isLocalDefaultExportSpecifier = (node) =>
+  ts.isExportSpecifier(node) &&
+  node.name.text === 'default' &&
+  node.propertyName !== undefined &&
+  node.parent.parent.moduleSpecifier === undefined;
+
 const ownRoots = (node, names) => {
   if (isDefineConfigCall(node, names)) return [...node.arguments];
   if (ts.isExportAssignment(node))
     return node.isExportEquals ? [] : [node.expression];
+  if (isLocalDefaultExportSpecifier(node)) return [node.propertyName];
   return isDefaultExportedFunction(node) ? [node] : [];
 };
 

@@ -117,6 +117,30 @@ describe('configsDeclaringKeys', () => {
         `const base = {};\nexport default defineConfig(Object.assign(base, { ${key}: x }));`,
       ],
       [
+        'in a local object exported under the name default',
+        `const config = {\n  ${key}: x,\n};\nexport { config as default };`,
+      ],
+      [
+        'as a computed key held in a constant',
+        `const name = '${key}';\nexport default defineConfig({ [name]: x });`,
+      ],
+      [
+        'as a computed string key',
+        `export default defineConfig({ ['${key}']: x });`,
+      ],
+      [
+        'in either branch of a computed conditional key',
+        `export default defineConfig({ [ci ? '${key}' : 'test']: x });`,
+      ],
+      [
+        'through a spread guarded by &&',
+        `export default defineConfig({ ...(ci && { ${key}: x }) });`,
+      ],
+      [
+        'on the right of && as the whole config',
+        `export default defineConfig(enabled && { ${key}: x });`,
+      ],
+      [
         'in an object checked with satisfies',
         `export default { ${key}: x } satisfies UserConfig;`,
       ],
@@ -189,6 +213,30 @@ describe('configsDeclaringKeys', () => {
       expect(
         declared(
           `const config = { ${key}: x };\nexport default defineConfig(() => {\n  const config = { test: t };\n  return config;\n});`,
+        ),
+      ).toEqual([]);
+    });
+
+    it('does not read a default re-exported from another module', () => {
+      expect(
+        declared(
+          `const config = { ${key}: x };\nexport { config as default } from './other.ts';`,
+        ),
+      ).toEqual([]);
+    });
+
+    it('reads a computed key by its value, not by the name of the identifier holding it', () => {
+      expect(
+        declared(
+          `const ${key} = 'plugins';\nexport default defineConfig({ [${key}]: x });`,
+        ),
+      ).toEqual([]);
+    });
+
+    it('does not read a computed key whose value is not a string literal type', () => {
+      expect(
+        declared(
+          `let name = '${key}';\nexport default defineConfig({ [name]: x });`,
         ),
       ).toEqual([]);
     });
