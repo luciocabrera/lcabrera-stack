@@ -1,0 +1,15 @@
+id: near-miss-stash
+name: Saving uncommitted work
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "I have uncommitted edits in my current checkout and need to switch branches. Should I stash or commit them? A short answer. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-worktree-housekeeping-alone
+    config:
+      forbidden_skills:
+        - worktree-housekeeping
