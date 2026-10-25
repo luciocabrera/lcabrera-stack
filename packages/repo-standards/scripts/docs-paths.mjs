@@ -17,9 +17,10 @@
  *      directory (`apps/`, `packages/`, `scripts/`, …). This is the shape that
  *      actually caused the damage: AGENTS.md listed ten `apps/*` directories of
  *      which six did not exist.
- *   2. **Relative link targets** — `[text](../foo/bar.md)`, `[data](facts.json)`:
- *      any link target with no URL scheme is an explicit pointer whose target
- *      either resolves or is a dead link, whatever its extension.
+ *   2. **Relative link targets** — `[text](../foo/bar.md)`, `[data](facts.json)`,
+ *      and the reference-style definition `[label]: ../foo/bar.md`: any link
+ *      target with no URL scheme is an explicit pointer whose target either
+ *      resolves or is a dead link, whatever its extension.
  *
  * Everything else is left to review. Widening this is safe to do later; the
  * baseline exists so a widening can land without a cleanup blocking it.
@@ -59,11 +60,48 @@ export const normaliseToken = (token) =>
 export const inlineCodeTokens = (text) =>
   text.split('`').filter((_, index) => index % 2 === 1);
 
+const FENCE_OPENER = /^ {0,3}(`{3,}|~{3,})/;
+
+const FENCE_CLOSER = /^ {0,3}(`{3,}|~{3,})[\t ]*$/;
+
+const closesFence = (line, opener) => {
+  const fence = FENCE_CLOSER.exec(line)?.[1];
+  return (
+    fence !== undefined &&
+    fence[0] === opener[0] &&
+    fence.length >= opener.length
+  );
+};
+
+const proseOutsideFences = (markdown) =>
+  markdown.split('\n').reduce(
+    (state, line) => {
+      if (state.opener !== undefined) {
+        return closesFence(line, state.opener)
+          ? { ...state, opener: undefined }
+          : state;
+      }
+      const opener = FENCE_OPENER.exec(line)?.[1];
+      if (opener !== undefined) {
+        return { ...state, opener };
+      }
+      state.lines.push(line);
+      return state;
+    },
+    { lines: [], opener: undefined },
+  ).lines;
+
+const REFERENCE_DEFINITION =
+  /^ {0,3}(?:> ?)*\[(?!\^)(?:[^\n[\\\]]|\\.){1,999}\]:[\t ]*\n?[\t ]*(?:<([^\n<>]*)>|([^\s<]\S*))(?:[\t ]+(?:"[^\n"]*"|'[^\n']*'|\([^\n()]*\)))?[\t ]*$/gm;
+
+const referenceDefinitionTargets = (prose) =>
+  prose
+    .matchAll(REFERENCE_DEFINITION)
+    .map((match) => match[1] ?? match[2])
+    .toArray();
+
 export const extractCandidates = (markdown, repoRoots) => {
-  const prose = markdown
-    .split('```')
-    .filter((_, index) => index % 2 === 0)
-    .join('\n');
+  const prose = proseOutsideFences(markdown).join('\n');
 
   const backticked = inlineCodeTokens(prose)
     .map((token) => normaliseToken(token))
@@ -75,7 +113,11 @@ export const extractCandidates = (markdown, repoRoots) => {
     .filter((token) => !isDisqualified(token))
     .toArray();
 
-  return [...new Set([...backticked, ...linked])];
+  const defined = referenceDefinitionTargets(prose)
+    .map((target) => normaliseToken(target))
+    .filter((token) => !isDisqualified(token));
+
+  return [...new Set([...backticked, ...linked, ...defined])];
 };
 
 export const isDatedRecord = (docPath) => docPath.includes('/decisions/');

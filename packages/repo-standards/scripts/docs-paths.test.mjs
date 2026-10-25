@@ -160,6 +160,86 @@ describe('extractCandidates', () => {
     ]);
   });
 
+  it('enforces the target of a reference-style link definition', () => {
+    const markdown = 'See [the facts][gone].\n\n[gone]: does-not-exist.json\n';
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([
+      'does-not-exist.json',
+    ]);
+  });
+
+  it('reads a definition target past its title, angle brackets and anchor', () => {
+    const markdown = [
+      '[a]: ../a/b.md "A title"',
+      "[b]: ./c.json 'Single'",
+      '[c]: d/e.md (Parenthesised)',
+      '[d]: <f/g.md>',
+      '  [e]: h.md#section',
+      '> [f]: quoted.md',
+      '[g]:',
+      '  next-line.md',
+    ].join('\n');
+
+    expect(
+      extractCandidates(markdown, REPO_ROOTS).toSorted((left, right) =>
+        left.localeCompare(right),
+      ),
+    ).toEqual([
+      '../a/b.md',
+      './c.json',
+      'd/e.md',
+      'f/g.md',
+      'h.md',
+      'next-line.md',
+      'quoted.md',
+    ]);
+  });
+
+  it('skips definitions with a scheme, an anchor, a footnote or code indentation', () => {
+    const markdown = [
+      '[site]: https://example.com/x.md',
+      '[mail]: mailto:a@example.com',
+      '[top]: #heading',
+      '[^note]: Footnote prose, not a target.',
+      '    [indented]: code-block.md',
+      'prose [inline]: not-at-line-start.md',
+      '`[code]: in-a-span.md`',
+      '[WIP]: prose that only looks like a definition.',
+    ].join('\n');
+
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([]);
+  });
+
+  it('ignores a definition inside a backtick or tilde fence', () => {
+    const markdown = [
+      '```markdown',
+      '[gone]: in-backticks.md',
+      '```',
+      '~~~',
+      '[gone]: in-tildes.md',
+      '~~~',
+      '````text',
+      '```',
+      '[gone]: in-a-longer-fence.md',
+      '```',
+      '````',
+      '[kept]: after-the-fences.md',
+    ].join('\n');
+
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([
+      'after-the-fences.md',
+    ]);
+  });
+
+  it('does not treat an inline triple backtick as a fence', () => {
+    const markdown = [
+      'An info string such as ` ```jsonc ` is not a fence.',
+      'See [the contract](contract.md).',
+      'Another ` ``` ` mention.',
+    ].join('\n');
+
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual(['contract.md']);
+  });
+
   it('strips heading anchors and trailing sentence punctuation', () => {
     const markdown =
       'Read `docs/README.md`, then `scripts/lib/labels.mjs`. Also [x](../a/b.md#why).';

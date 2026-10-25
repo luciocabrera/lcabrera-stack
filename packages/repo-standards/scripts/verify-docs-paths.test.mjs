@@ -36,6 +36,25 @@ describe('repo-verify-docs-paths', () => {
     expect(result.stderr).toContain(`${DOC}: \`does-not-exist.json\``);
   });
 
+  it('fails on a reference-style definition to a missing file', () => {
+    const result = run(
+      makeRoot('See [the facts][gone].\n\n[gone]: does-not-exist.json\n'),
+    );
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(`${DOC}: \`does-not-exist.json\``);
+  });
+
+  it('passes a reference-style definition once its target exists', () => {
+    const root = makeRoot('See [the facts][facts].\n\n[facts]: facts.json\n');
+    writeIn(root)('docs/agents/facts.json', '{}\n');
+
+    const result = run(root);
+
+    expect(result.status).toBe(0);
+    expect(result.stdout).toContain('Documented-path gate passed');
+  });
+
   it('passes the same link once its target exists beside the doc', () => {
     const root = makeRoot('[facts](facts.json)\n');
     writeIn(root)('docs/agents/facts.json', '{}\n');
