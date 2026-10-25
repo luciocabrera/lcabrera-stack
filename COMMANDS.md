@@ -79,7 +79,7 @@ disagree about the stages, the skill is right and this table is the bug.
 | 2   | `vp lint .`                   | Oxlint                                                                    |
 | 3   | `vp run -r lint:eslint:check` | eslint custom rules, every workspace and `evals/` — **not** in `vp check` |
 | 4   | `vp run lint:biome:check`     | Biome — **not** in `vp check` (run from root)                             |
-| 5   | `vp run react-doctor:verify`  | React Doctor — root-only, blocks at the configured `blocking` level       |
+| 5   | `vp run react-doctor:verify`  | React Doctor — root-only, blocks where `react-doctor --blocking` would    |
 | 6   | `vp check`                    | fmt + Oxlint + **tsgolint** type pass                                     |
 | 7   | `vp run typecheck`            | real **tsc** — **not** the same as step 6                                 |
 | 8   | `vp run test:changed`         | vitest — root-only; reaches `scripts/` too                                |
@@ -155,7 +155,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                                                                                                                     |
 | `vp run lint:eslint:check`            | eslint over `evals/`, which is not a workspace: the root package carries the script, so `vp run -r lint:eslint:check` reaches it with the workspaces. `vp run lint:eslint` is the autofix form |
 | `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)                                                                                                       |
-| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails on the config's `blocking` severity; writes the report too                                                                                     |
+| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails where `react-doctor --blocking` would; writes the report too                                                                                   |
 | `vp run react-doctor:report`          | the same scan, never failing on findings — writes `reports/react-doctor/full-latest.json` (gitignored)                                                                                         |
 | `vp run mutation:report`              | mutation-test `packages/utils` (ADR-119) — writes `reports/mutation/full-latest.json` (gitignored — produced on demand); never fails                                                           |
 | `vp run format:all`                   | `vp fmt .` across the tree                                                                                                                                                                     |
@@ -403,6 +403,11 @@ Always feed the audit real coverage:
 (produce it with `vp run coverage:merge`). Without it fallow _estimates_ coverage
 and reports trivially simple code as `critical`.
 
+`fallow:dead-code:verify` runs with `--no-cache`. Fallow's incremental cache
+keeps an import it recorded as unresolved, so a scan that ran before
+`typegen:all` generated the route types would otherwise fail the gate on
+`+types` imports that resolve in the tree.
+
 ### Micro-benchmarks
 
 | Command                  | Does                                                                                 |
@@ -433,15 +438,16 @@ tarball and asserts the release path is still the pnpm one
 identity from the source path, so it ships source and the consumer's own plugin
 compiles it.
 
-| Command                                | Does                                                                                                                     |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `vp run packages:build`                | build the publishable packages (`vp pack` → `dist` with `.d.mts` and sourcemaps)                                         |
-| `vp run publish:verify`                | pack each one with pnpm and check the tarball — exports, files, and a real consumer import from outside the repo         |
-| `vp run publish:verify -- --write`     | regenerate `publishConfig.exports` from `exports`                                                                        |
-| `vp run api-surface:verify`            | diff each public package's exported type surface against its tracked snapshot; require a changeset for a breaking change |
-| `vp run api-surface:verify -- --write` | regenerate the surface snapshots under `reports/api-surface/`                                                            |
-| `vp run attw:verify`                   | run Are The Types Wrong? over the built public packages — do the published types resolve for a consumer?                 |
-| `vp run shipped-docs:verify`           | pack each one and read every document in the tarball — does it still read with only that package on disk?                |
+| Command                                | Does                                                                                                                                                                                                                                    |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run packages:build`                | build the publishable packages (`vp pack` → `dist` with `.d.mts` and sourcemaps)                                                                                                                                                        |
+| `vp run publish:verify`                | pack each one with pnpm and check the tarball — exports, files, and a real consumer import from outside the repo                                                                                                                        |
+| `vp run publish:verify -- --write`     | regenerate `publishConfig.exports` from `exports`                                                                                                                                                                                       |
+| `vp run publint:verify`                | pack every public package (the `suppressions:packages` roster) with pnpm and run publint over each tarball at error level — one result line per package; a planted export pointing at a missing file must be reported, or the run fails |
+| `vp run api-surface:verify`            | diff each public package's exported type surface against its tracked snapshot; require a changeset for a breaking change                                                                                                                |
+| `vp run api-surface:verify -- --write` | regenerate the surface snapshots under `reports/api-surface/`                                                                                                                                                                           |
+| `vp run attw:verify`                   | run Are The Types Wrong? over the built public packages — do the published types resolve for a consumer?                                                                                                                                |
+| `vp run shipped-docs:verify`           | pack each one and read every document in the tarball — does it still read with only that package on disk?                                                                                                                               |
 
 `shipped-docs:verify` is the same instrument aimed at the documentation. The
 in-repo doc gate asks whether a path resolves **here**, which is the inverted
@@ -461,7 +467,7 @@ the build that preceded it.
 
 Run `packages:build` **before** any step that reads a built package's
 `dist/`, directly or through its packed tarball: `publish:verify`,
-`api-surface:verify`, `attw:verify` and `shipped-docs:verify`.
+`publint:verify`, `api-surface:verify`, `attw:verify` and `shipped-docs:verify`.
 `workspace:verify` packs built packages too, and runs `packages:build` itself
 first. `tarball:verify` does not depend on the build: the packages it packs
 ship source. `check:safe` builds once ahead of all of them, and CI's Quality
@@ -469,7 +475,11 @@ Gate runs the build as its own step ahead of the first, so each one checks the
 current source rather than an earlier build's `dist/`. With no `dist/` there is no artifact to check,
 and `publish:verify`, `api-surface:verify` and `attw:verify` **fail** rather
 than reporting a pass they did not earn (ADR-073).
-`publish:verify` also needs pnpm on PATH, which running it through `vp` provides.
+`publish:verify` and `publint:verify` also need pnpm on PATH, which running
+them through `vp` provides. `publint:verify` has no unbuilt refusal of its own:
+with no `dist/`, every `publishConfig.exports` target of a package that builds
+names a file the tarball does not hold, and publint reports each one. The
+packages that ship source lint the same either way.
 `ui` ships source, so its surface is always checked. The API-surface snapshot and
 its `ui`-vs-built split are
 [ADR-046](docs/decisions/ADR-046-public-api-surface-snapshot.md).

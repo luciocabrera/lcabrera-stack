@@ -18,7 +18,8 @@
  *    Biome's silent config fallback dangerous (AGENTS.md §4).
  *
  * 3. The CLI is told `--blocking none` so its exit code never stands in for
- *    the report; this script applies `blocking` itself, after `ok` is known.
+ *    the report; this script applies `blocking` itself, after `ok` is known,
+ *    to the findings the CLI's `ciFailure` surface keeps.
  *    A `doctor.config.{ts,js,json,…}` beside the `.jsonc` would replace it, so
  *    one present fails the gate before anything is scanned.
  *
@@ -115,7 +116,7 @@ const judge = (args) => {
   try {
     return judgeReport(args);
   } catch (error) {
-    return fail(`${CONFIG}: ${error.message}`);
+    return fail(error.message);
   }
 };
 
