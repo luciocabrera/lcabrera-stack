@@ -24,6 +24,26 @@ non-private workspace, so a count here would be wrong the next time one is added
 
 Everything below is deliberate, and each one cost something to learn:
 
+- **`vp run changesets:verify` enforces the mechanical subset of that rule.**
+  It runs in the Quality Gate job on every pull request and merge group. A
+  changed file counts only when the tarball `pnpm pack` writes for its package
+  holds it, so a test, a fixture or a config outside `files` needs no changeset,
+  and a shipped `README.md` does. A deleted file is checked against the base's listing, since
+  the head no longer has it. Only a changeset this change adds or edits counts:
+  an older one queued for the same package describes some other change.
+  `changeset status` is not the gate because it counts every file under a
+  package directory, which made test-only PRs carry no-op changesets.
+- **A `catalog:` change reaches consumers without the gate seeing it.** pnpm
+  substitutes `catalog:` ranges into the packed manifest, so changing a range in
+  `pnpm-workspace.yaml` changes what every package that names it declares to a
+  consumer while no file under the package changes. The gate passes such a PR,
+  and the changeset it owes is the author's and the reviewer's to catch.
+- **The version PR passes that gate by moving versions.** It deletes the
+  changesets it consumes and adds none, so the gate accepts a package whose
+  `version` the change itself moves, and a package that was absent or `private`
+  at the base, whose first publish is the version it declares. A hand-edited
+  `version` passes too: it is a release, and review is what decides it.
+
 - **The version PR is opened by a human, not a bot.** Changesets' usual flow has
   its action open the "Version Packages" PR, and that PR **can never merge
   here**: a pull request opened with `GITHUB_TOKEN` does not trigger

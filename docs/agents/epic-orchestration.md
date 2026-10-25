@@ -315,7 +315,9 @@ All of it, every time. Any failure aborts the merge.
       system `ARCHITECTURE.md` only when wiring changed, as the
       [Documentation Update Rule](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule)
       requires ([ADR-088](../decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md))
-- [ ] A changeset exists if any `@lcabrera/*` package changed
+- [ ] A changeset names every `@lcabrera/*` package the change affects for a
+      consumer. `vp run changesets:verify` checks the shipped-file part; a
+      `catalog:` range change in `pnpm-workspace.yaml` is yours to check
 - [ ] [`merge-checklist.md`](merge-checklist.md)'s **[judgement]** items have been
       read by you, not ticked. Its **[auto]** items you confirm ran — you do not
       re-derive them
