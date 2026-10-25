@@ -250,8 +250,10 @@ the binary packages its toolchain pins at exact versions. Each of these is
 published a few minutes after the package that pins it. Without the patterns,
 an install in those minutes would take the day-old parent, install its younger
 binaries anyway, and append each one to `minimumReleaseAgeExclude`, leaving a
-fresh tree with a modified file. No other package loses the delay, and a
-parent still waits its day before any of its binaries are reached.
+fresh tree with a modified file. Reached through its parent's exact pin, a
+binary still installs only once that parent has waited its day. The one
+exception is a package the tree declares itself whose name a pattern matches:
+it installs the moment it is published.
 
 ## Setting up a repository
 

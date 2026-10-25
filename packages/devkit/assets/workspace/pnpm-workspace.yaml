@@ -20,8 +20,9 @@ blockExoticSubdeps: true
 # unless set). Each pattern below names the per-platform binaries a package pins
 # exactly and publishes minutes after itself. For those minutes the package is a
 # day old and its binaries are not, so pnpm installs them anyway and appends
-# each to this list, leaving the file modified. A binary is only reached through
-# the exact version of a package that has itself waited the day.
+# each to this list, leaving the file modified. Through its parent's exact pin a
+# binary still installs only once that parent has waited the day; a package this
+# tree declares itself and a pattern matches does not wait.
 minimumReleaseAgeExclude:
   - '@biomejs/cli-*'
   - '@oxfmt/binding-*'

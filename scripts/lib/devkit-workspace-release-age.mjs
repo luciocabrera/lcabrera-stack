@@ -80,10 +80,12 @@ export const uncoveredPinFindings = ({ excluded, pins }) => {
     ),
     ({ pinnedBy }) => pinnedBy,
   );
-  return [...uncovered].map(
-    ([pinnedBy, missed]) =>
-      `\`${pinnedBy}\` pins optional dependencies at exact versions that no \`minimumReleaseAgeExclude\` entry in the blueprint's \`${WORKSPACE_FILE}\` covers (${missed.map(({ name, version }) => `${name}@${version}`).join(', ')}). While one of them is younger than pnpm's release age and \`${pinnedBy}\` is not, an install adds it to that list and the fresh tree goes dirty`,
-  );
+  return [...uncovered].map(([pinnedBy, missed]) => {
+    const pinned = missed
+      .map(({ name, version }) => [name, version].join('@'))
+      .join(', ');
+    return `\`${pinnedBy}\` pins optional dependencies at exact versions that no \`minimumReleaseAgeExclude\` entry in the blueprint's \`${WORKSPACE_FILE}\` covers (${pinned}). While one of them is younger than pnpm's release age and \`${pinnedBy}\` is not, an install adds it to that list and the fresh tree goes dirty`;
+  });
 };
 
 const LISTED_KINDS = [
