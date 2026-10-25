@@ -53,14 +53,31 @@ their own TypeScript.
   peer as every workspace. That leaves one variant of `vite-plus`, vite-plus-core
   and `vitest`. `pnpm why vite-plus -r --depth 0` prints `Found 1 version of
   vite-plus`, and `tsgo` emits the declarations wherever the build starts.
-- `.pnpmfile.cjs` gives the ESLint toolchain TypeScript 6. For the packages it
-  names, its `readPackage` hook replaces the `typescript` peer with a dependency
-  on TypeScript 6. A peer resolves from the dependent, so the hook is the only
-  install-time switch that can split one importer's `typescript` this way.
-  `pnpm peers check` reports no issues.
+- `.pnpmfile.cjs` gives the ESLint toolchain TypeScript 6. Its `readPackage`
+  hook replaces the `typescript` peer with a TypeScript 6 dependency for an
+  installed package that matches either of two rules, which
+  `scripts/lib/eslint-typescript.cjs` holds:
+  - it peers on `eslint`, so it runs inside ESLint, beside a parser that needs
+    TypeScript 6;
+  - its own `typescript` peer range excludes the version the `build` catalog
+    names.
+
+  It keeps no list of packages, so a new ESLint plugin is covered the day it is
+  installed. Workspace projects are skipped, because they declare their own
+  `typescript`. A package that does neither keeps resolving the catalog's
+  TypeScript 7. A peer resolves from the dependent, so the hook is the only
+  install-time switch that can split one importer's `typescript` this way, and
+  a package below a rewritten one, such as `ts-api-utils`, resolves its peer
+  from it.
+
 - The `packageExtensions` entry that gave `eslint-plugin-perfectionist` a
-  `typescript` peer (#472) is gone. The plugin is in the hook's list, so it gets
+  `typescript` peer (#472) is gone. The plugin peers on `eslint`, so it gets
   TypeScript 6 as a dependency.
+- `scripts/eslint-typescript.test.mjs` reads the installed lockfile and fails if
+  any of three things happens: more than one `vite-plus` snapshot exists, a
+  package reachable from an `eslint`-peering package resolves a `typescript`
+  other than 6, or any package resolves `typescript` outside the peer range it
+  declares.
 
 No ESLint rule is turned off and no plugin is removed.
 `vp run lint:eslint:verify` still requires the pass to report a planted
@@ -75,21 +92,31 @@ violation.
 - `tsc` in every workspace is TypeScript 7. A TypeScript 6 behaviour that a
   workspace relied on would now show up as a `typecheck` failure, not as a
   difference nobody saw.
-- The hook names its packages one by one. A new ESLint plugin that loads the
-  compiler API through a `typescript` peer resolves TypeScript 7 and crashes the
-  pass until it is added. `lint:eslint:verify` reports that crash.
+- The `eslint` rule is wider than the set of packages that load the compiler
+  API. `eslint-plugin-unicorn` and `eslint-plugin-react-dom` declare a
+  `typescript` peer of `*` and import no API, but they get TypeScript 6 too.
+  This is deliberate: the ESLint process already loads TypeScript 6 for the
+  parser, and a `*` range cannot tell a plugin that works on TypeScript 7 from
+  `@eslint-react/core`, which also declares `*` and crashes on it through
+  `ts-api-utils`.
+- A package that loads the compiler API without peering on `eslint` or
+  declaring a `typescript` peer that excludes TypeScript 7 is not covered. The
+  lockfile test reports it once it resolves TypeScript 7 below an ESLint plugin.
 - The hook's TypeScript 6 range is a literal. `vp run deps:refresh` does not
   move it, because taze reads manifests and the catalog, not the hook.
 - The lockfile records a checksum of `.pnpmfile.cjs`, so any edit to the file,
   a reformat included, makes `vp install --frozen-lockfile` fail until
   `vp install` rewrites the checksum. That install re-resolves the whole graph.
-  Check the lockfile diff for packages the edit did not touch.
+  Check the lockfile diff for packages the edit did not touch. The checksum
+  does not cover `scripts/lib/eslint-typescript.cjs`, so after an edit there,
+  run `vp install` and the lockfile test.
 - What a consumer installs is unchanged. The scaffold `@lcabrera/devkit` writes
   ships its own catalog, still on TypeScript 6, and neither copies nor needs
   this hook.
 - **Remove the hook** once typescript-eslint supports TypeScript 7
   ([typescript-eslint#10940](https://github.com/typescript-eslint/typescript-eslint/issues/10940))
-  and the other plugins in its list load without the TypeScript 6 API.
+  and `ts-api-utils`, `@eslint-react/core` and `eslint-plugin-perfectionist`
+  load without the TypeScript 6 API.
   Removing it while one of them still needs that API crashes the ESLint pass,
   and `lint:eslint:verify` fails.
 

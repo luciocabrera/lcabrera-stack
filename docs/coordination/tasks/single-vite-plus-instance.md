@@ -10,6 +10,8 @@ area:
   - pnpm-workspace.yaml
   - .pnpmfile.cjs
   - .fallowrc.json
+  - scripts/lib/eslint-typescript.cjs
+  - scripts/eslint-typescript.test.mjs
   - packages/repo-standards/scripts/verify-eslint-pass.mjs
   - .changeset/eslint-pass-typescript-7-hint.md
   - docs/decisions/ADR-139-*.md
