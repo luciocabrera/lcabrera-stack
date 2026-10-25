@@ -285,9 +285,8 @@ These deliberately say "secret", not "password" or "token": passwords
 (`issueApiToken`, `verifyApiToken`) are the same problem, and a single pair of
 primitives keeps credential hashing to one shape and one audited
 implementation. Do **not** reintroduce domain-named wrappers around
-these — fallow's `thin-wrapper` rule is an error, and the duplicate
-`hashPassword`/`isPasswordValid`/`hashApiToken`/`isApiTokenValid` pairs they
-replaced were themselves a duplication finding.
+these: the `hashPassword`/`isPasswordValid`/`hashApiToken`/`isApiTokenValid`
+pairs they replaced were themselves a duplication finding.
 
 ---
 

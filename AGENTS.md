@@ -307,7 +307,7 @@ Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects e
 
 `reports/fallow/` is the **single canonical location** for every fallow artifact; only `reports/fallow/baselines/` is tracked. The split is a rule, not a habit: a gate compares against it → tracked; it reports what a tool found → produced on demand ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)). **So there is no snapshot to read — run the command and read what it writes.**
 
-Before a PR, run `vp run fallow:audit --base main`. CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails only on newly-introduced dead code, complexity, or duplication. Dead code is also gated **whole-tree**: `vp run fallow:dead-code:verify` exits non-zero on any error-severity dead-code finding anywhere, including an export in an unchanged file that the change made unreachable, which a changed-file audit cannot see. `check:push`, `check:safe` and the CI Fallow Audit job all run it.
+Before a PR, run `vp run fallow:audit --base main`. CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails on newly-introduced dead code, complexity, or duplication, and on an inherited complexity finding that grew (`audit.worsened: "error"` in `.fallowrc.json`). Dead code is also gated **whole-tree**: `vp run fallow:dead-code:verify` exits non-zero on any error-severity dead-code finding anywhere, including an export in an unchanged file that the change made unreachable, which a changed-file audit cannot see. `check:push`, `check:safe` and the CI Fallow Audit job all run it.
 
 **Always feed the audit real coverage** (`--coverage reports/fallow/coverage/coverage-final.json`, from `vp run coverage:merge`). Without it fallow _estimates_ coverage from whether a colocated test file exists, and at an estimated 0% every function with cyclomatic ≥ 5 breaches the CRAP threshold — an unfed audit reports trivially simple code as `critical`. Read a finding's **`exceeded`** field, not `severity`.
 
@@ -632,6 +632,12 @@ to the spec so they cannot drift. If the standard itself must change, change
 The `@lcabrera/*` packages are versioned with **Changesets**, independently. A
 change that affects consumers **carries a changeset in the same PR** — that is the
 part you must not forget; `vp run release:version` consumes them.
+`vp run changesets:verify` enforces the mechanical subset: it fails a PR that
+changes a file in a package's packed tarball (a shipped `README.md` counts, a test
+or a file outside `files` does not) with no changeset naming that package. It
+cannot see a `catalog:` range changed in `pnpm-workspace.yaml`, which pnpm writes
+into every published manifest at pack time while no file under the package
+changes, so that changeset stays a review responsibility.
 
 Two invariants worth knowing before you touch a manifest: **`private: true` is the
 only thing keeping a workspace out of the registry** (the public ones no

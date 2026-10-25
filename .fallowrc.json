@@ -130,7 +130,7 @@
     "unused-dependencies": "error",
     "unused-dev-dependencies": "error",
     "prop-drilling": "error",
-    "thin-wrapper": "error",
+    "thin-wrapper": "warn",
     "duplicate-prop-shape": "warn",
     "stale-suppressions": "error",
     "require-suppression-reason": "error",
@@ -175,6 +175,7 @@
   },
   "audit": {
     "gate": "new-only",
+    "worsened": "error",
     "deadCodeBaseline": "reports/fallow/baselines/dead-code.json",
     "healthBaseline": "reports/fallow/baselines/health.json",
     "dupesBaseline": "reports/fallow/baselines/dupes.json"

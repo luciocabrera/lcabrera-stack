@@ -394,6 +394,19 @@ jobs:
           TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: vp run renames:verify
 
+      - name: A changed published file carries a changeset
+        id: changesets_gate
+        # A merged version bump publishes on its own, so a change to what a
+        # package ships needs a changeset in the same PR. `changeset status`
+        # cannot be the gate: it counts every file under a package directory,
+        # tests included. This one counts a file only when `pnpm pack` lists it,
+        # and accepts a package whose version the PR itself moves, which is the
+        # version PR. Needs a base, so not on a push to `main` (#1472).
+        if: github.event_name != 'push'
+        env:
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
+        run: vp run changesets:verify
+
       - name: Route-folder types/constants name a real artifact
         id: route_names_gate
         # The other half of local-rules/domain-folder-filename. That rule
@@ -634,15 +647,17 @@ jobs:
       - name: Fallow audit vs base branch
         id: fallow_audit
         # Gate mode, severity mapping, and baselines come from .fallowrc.json
-        # (audit.gate: new-only) — only newly-introduced dead code, complexity,
-        # or duplication fails this step (exit 1). Exit 2 = runtime/config error.
+        # (audit.gate: new-only, audit.worsened: error) — newly-introduced dead
+        # code, complexity or duplication fails this step (exit 1), and so does
+        # an inherited complexity finding that grew. Exit 2 = runtime/config error.
         run: |
           set -o pipefail
           STATUS=0
           vp run fallow:audit --base "$DIFF_BASE" --coverage reports/fallow/coverage/coverage-final.json --format json --quiet | tee fallow-audit.raw.txt || STATUS=$?
           # vp run echoes a command banner before the JSON — keep everything
           # from the first JSON line onward so the summary step can parse it,
-          # then propagate fallow's exit code (1 = introduced issues, 2 = error).
+          # then propagate fallow's exit code (1 = an introduced or worsened finding,
+          # 2 = error).
           awk 'found || /^[{[]/ {found=1; print}' fallow-audit.raw.txt > fallow-audit.json
           exit $STATUS
 
@@ -672,10 +687,11 @@ jobs:
               echo "| Base | \`$DIFF_BASE\` |"
               echo "| Dead code introduced | $(jq -r '.attribution.dead_code_introduced // "n/a"' fallow-audit.json) |"
               echo "| Complexity introduced | $(jq -r '.attribution.complexity_introduced // "n/a"' fallow-audit.json) |"
+              echo "| Complexity worsened | $(jq -r '.attribution.complexity_worsened // "n/a"' fallow-audit.json) |"
               echo "| Duplication introduced | $(jq -r '.attribution.duplication_introduced // "n/a"' fallow-audit.json) |"
               echo "| Coverage source | $(jq -r '.complexity.summary.coverage_source_consistency // "n/a"' fallow-audit.json) |"
               echo ""
-              echo "> Gate \`new-only\`: the audit fails only on newly-introduced issues; inherited findings are covered by \`reports/fallow/baselines/\`. Dead code is also gated whole-tree by the \`fallow:dead-code:verify\` step."
+              echo "> Gate \`new-only\`: the audit fails on newly-introduced issues, and on an inherited complexity finding that grew (\`audit.worsened: error\`) unless \`reports/fallow/baselines/\` already counts it; those baselines cover the other inherited findings. Dead code is also gated whole-tree by the \`fallow:dead-code:verify\` step."
               echo "> Coverage source \`mixed\` is expected: real Istanbul coverage is fed for the DB-free suites, and files with no tests at all still fall back to fallow's static estimate (which guesses 0% and inflates their CRAP)."
             else
               echo "❌ Audit did not produce JSON output — check the job log (exit 2 usually means an invalid base ref or config error)."

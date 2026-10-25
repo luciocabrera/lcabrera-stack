@@ -73,8 +73,9 @@ The commands live in
 PR, run `vp run fallow:audit --base main`.
 
 CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`). It fails
-only on newly-introduced findings; inherited ones are attributed to the base
-snapshot fallow builds from `--base`. The tracked baselines in
+on newly-introduced findings, and on an inherited complexity finding that grew
+(`audit.worsened: "error"`, below); other inherited ones are attributed to the
+base snapshot fallow builds from `--base`. The tracked baselines in
 `reports/fallow/baselines/` are a second filter, not the first: the dead-code
 baseline records no findings and a clean tree still passes.
 
@@ -94,6 +95,10 @@ gate until `unused-exports`, `unused-types`, `unused-dependencies` and
 keeps the inherited ones from failing. #1422 raised every further rule that
 reported nothing across the tree and could be shown to fire. "Rules raised to
 error by #1422" below lists them, and the ones it left alone.
+
+A rule at `error` is still not a gate unless fallow counts its findings.
+"Rules at error that fallow does not count" below says how to check that, and
+which rules it applies to.
 
 Dead code has a second, whole-tree gate: `vp run fallow:dead-code:verify` runs
 `fallow dead-code` with no base and exits 1 on any error-severity dead-code
@@ -187,6 +192,44 @@ made them fail this repository's gate:
 - `invalid-client-export`, `mixed-client-server-barrel`, `misplaced-directive` —
   fallow runs these only in a project that declares `next`. A `'use client'`
   placed after the imports produced no finding.
+
+## Rules at error that fallow does not count
+
+Fallow can list a finding at `effective_severity: "error"` and still exit 0.
+Whether a rule's findings reach the exit gate is the `counts_in_total` field
+of its entry in `node_modules/fallow/capabilities.json`, keyed by
+`config_key`. Read it for every rule at `error` whenever the fallow version
+moves: a `false` there means the rule's findings are not counted under the
+rule's own name, and usually that they never fail the run. Fallow 3.33.1 had
+it `false` for `prop-drilling`, which sat at `error` here without gating
+anything (#1492).
+
+```sh
+node -e "for (const t of require('./node_modules/fallow/capabilities.json').issue_types) if (t.config_key && !t.counts_in_total) console.log(t.config_key)"
+```
+
+What #1492 found, and the plant behind each (commands and output are in its
+pull request):
+
+| Rule                         | Setting | Evidence                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| ---------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `prop-drilling`              | `error` | Counts since fallow 3.34.0. A prop forwarded unread through three components in a new folder under `apps/showcase/src/`, each with a different body, rendered from `App.tsx`: `vp run fallow:dead-code:verify` and the audit exit 1, reverted 0. Fallow 3.33.1 lists the same chain at `error` and exits 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `thin-wrapper`               | `warn`  | The command above lists it: `counts_in_total` is `false`. Plant: `PlantLeaf`, `PlantWrap` and `PlantTop` in a new folder under `apps/showcase/src/`, rendered from `App.tsx`, `PlantWrap` being `function PlantWrap(props) { return <PlantLeaf {...props} />; }`. With the rule at `error` and at `warn`, `vp run fallow:dead-code:verify` exits 0 and `fallow dead-code --no-cache --format json` has no `thin_wrappers` key; appending an unused export to `PlantWrap.tsx` exits 1, so the files are scanned. In a scratch project an arrow with an expression body, an arrow with a block body and a `({ ...rest })` spread produced nothing either. That is what was observed, not proof the rule cannot fire: these may not be the shape it looks for. It returns to `error` when a plant fails the gate ([#1495](https://github.com/luciocabrera/lcabrera-stack/issues/1495)) |
+| `require-suppression-reason` | `error` | `counts_in_total: false`, yet it gates: its findings have no counter of their own and land in `stale_suppressions`. With `stale-suppressions` at `warn` and this rule at `error`, a reasonless suppression exits 1 from `fallow dead-code` and the audit; with this rule at `warn`, 0                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `duplicate-prop-shape`       | `warn`  | `counts_in_total: false`; see the bullet above                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+
+So `counts_in_total: false` is a reason to plant, not a verdict: demote the rule
+when the plant exits 0, and keep it when the plant fails the gate through
+another counter.
+
+Fallow 3.35.0 changed the audit's complexity verdict too. A finding
+inherited from the base that grew is `worsened`, and by default it now gives
+verdict `warn` and exit 0, where earlier versions failed it as introduced.
+`.fallowrc.json` sets `audit.worsened: "error"` to keep the earlier gate: one
+more branch in an inherited over-threshold function exits 1 with it and 0
+without it. That probe ran with `healthBaseline` taken out of the config,
+because a finding the health baseline already counts in its file is absorbed
+by the baseline under either setting.
 
 ## Test files and duplication
 
