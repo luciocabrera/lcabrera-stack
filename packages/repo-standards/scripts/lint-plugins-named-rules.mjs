@@ -124,25 +124,25 @@ const overridePlacement = ({ dir, named, probe }) =>
     )
     .find((placed) => placed !== undefined);
 
-export const placeRuleProbes = ({ dir, probes, rules }) =>
-  rules.reduce(
-    (result, named) => {
-      const probe = probeForRule(probes, named.id);
-      if (probe === undefined)
-        return { ...result, missing: [...result.missing, named] };
-      const placed =
-        named.files === undefined
-          ? { path: `${dir}/${probeFilename(probe)}`, root: dir }
-          : overridePlacement({ dir, named, probe });
-      if (placed === undefined)
-        return { ...result, unplaceable: [...result.unplaceable, named] };
-      return {
-        ...result,
-        placed: [...result.placed, { ...placed, named, probe }],
-      };
-    },
-    { missing: [], placed: [], unplaceable: [] },
-  );
+const rulePlacement = ({ dir, named, probe }) =>
+  named.files === undefined
+    ? { path: `${dir}/${probeFilename(probe)}`, root: dir }
+    : overridePlacement({ dir, named, probe });
+
+export const placeRuleProbes = ({ dir, probes, rules }) => {
+  const missing = [];
+  const placed = [];
+  const unplaceable = [];
+  for (const named of rules) {
+    const probe = probeForRule(probes, named.id);
+    const placement =
+      probe === undefined ? undefined : rulePlacement({ dir, named, probe });
+    if (probe === undefined) missing.push(named);
+    else if (placement === undefined) unplaceable.push(named);
+    else placed.push({ ...placement, named, probe });
+  }
+  return { missing, placed, unplaceable };
+};
 
 export const malformedProbes = (probes) =>
   probes.filter(
