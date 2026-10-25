@@ -41,9 +41,9 @@ const DEPENDENCY_FIELDS = new Set([
 export const systemGit = (root) => (args) => {
   const { status, stderr, stdout } = runGitStatus({ args, cwd: root });
   if (status !== 0) {
-    const detail = stderr === '' ? '' : ': ' + stderr;
+    const reason = stderr === '' ? `status ${status}` : stderr;
     throw new Error(
-      `\`git ${args.join(' ')}\` failed${detail} — refusing to report a pass on data it could not read.`,
+      `\`git ${args.join(' ')}\` failed (${reason}) — refusing to report a pass on data it could not read.`,
     );
   }
   return stdout;

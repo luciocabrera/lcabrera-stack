@@ -218,7 +218,7 @@ describe('verify-changesets when git cannot answer', () => {
     const root = branchWith({});
 
     await expect(findMissing({ baseRef: 'no-such-ref', root })).rejects.toThrow(
-      /`git merge-base no-such-ref HEAD` failed: .*no-such-ref/u,
+      /`git merge-base no-such-ref HEAD` failed \(.*no-such-ref/u,
     );
   });
 
