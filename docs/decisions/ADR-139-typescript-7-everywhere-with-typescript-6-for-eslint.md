@@ -142,8 +142,9 @@ violation.
   installed. `vp run deps:lockfile` (`vp dedupe --check`) resolves again
   through the hook and exits non-zero on any difference, so it is the step that
   detects the drift: after an edit to the rules, run `vp dedupe`, then
-  `vp run deps:lockfile` and the lockfile test. CI's Quality Gate,
-  `check:push` and `check:safe` all run `deps:lockfile`
+  `vp run deps:lockfile` and the lockfile test. CI's Quality Gate
+  and `check:safe` run `deps:lockfile`. The `pre-push` hook does not, because
+  the check can need the registry and the hook must work offline
   ([#1496](https://github.com/luciocabrera/lcabrera-stack/issues/1496)).
 - What a consumer installs is unchanged. The scaffold `@lcabrera/devkit` writes
   ships its own catalog, still on TypeScript 6, and neither copies nor needs

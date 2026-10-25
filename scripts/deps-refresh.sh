@@ -313,7 +313,7 @@ log "Reinstalling with the refreshed versions (vp install)"
 "$vp_global" install
 
 # A resolve from no lockfile can keep an older version that a newer one in the
-# same lockfile satisfies, and `deps:lockfile` fails that in check:push and CI.
+# same lockfile satisfies, and `deps:lockfile` fails that in CI's Quality Gate.
 log "Collapsing what a fresh resolve left duplicated (vp dedupe)"
 "$vp_global" dedupe
 

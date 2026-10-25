@@ -95,8 +95,8 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 `registers:verify`, `package-refs:verify`, `departed:verify`,
 `renames:verify`, `changesets:verify`, `route-names:verify`,
 `inventory:verify`, `adr:verify`, `viteplus:verify`, `configs:verify`,
-`conflict-markers:verify`, `deps:lockfile` and `fallow:dead-code:verify`,
-mirroring the "Quality Gate (Format · Lint · Types)" job in
+`conflict-markers:verify` and `fallow:dead-code:verify`, mirroring the
+"Quality Gate (Format · Lint · Types)" job in
 `check-safe.yml`) — then `vp run test:changed`, and finally
 `vp run fallow:preflight`. This closes the gap the pre-commit hook leaves: `vp
 staged` fixes what it can on the staged files, but it cannot see a cross-file
@@ -309,8 +309,9 @@ Running `vp dedupe` writes the lockfile the check expects. The check also fails
 a lockfile that keeps an older version where a newer one already in the
 lockfile satisfies the range, and `vp dedupe` fixes that the same way. It runs
 with `--prefer-offline`, so it reaches the registry only for metadata missing
-from pnpm's cache, and runs in CI's Quality Gate, `check:push` and
-`check:safe`.
+from pnpm's cache, but with a cold cache it **needs the registry**. It runs in
+CI's Quality Gate and in `check:safe`, and deliberately not in the `pre-push`
+hook, which must work offline — the same reason `deps:audit` stays out of it.
 
 `deps:refresh` (`scripts/deps-refresh.sh`) bumps the pnpm catalog and every
 `package.json` to their latest in-range versions (TypeScript is held for a known
@@ -337,7 +338,7 @@ gate forced, rather than claiming the diff is manifests-only.
 
 **It ends the resolve with `vp dedupe`.** A lockfile regenerated from nothing
 can keep an older version where a newer one it also holds satisfies the range,
-and `deps:lockfile` fails that in `check:push` and CI. Deduplicating before the
+and `deps:lockfile` fails that in CI's Quality Gate. Deduplicating before the
 commit keeps the refresh PR's own gate from stopping on it.
 
 **A run can land with no version moved at all.** `pnpm clean --lockfile`
