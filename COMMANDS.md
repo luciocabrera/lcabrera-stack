@@ -5,8 +5,9 @@ here, it does not exist — and if you add one, add it here in the same commit.
 
 That is enforced, not a request: `vp run commands:verify` fails CI when a root
 script is undocumented, when this file names a command that no longer resolves,
-when a §5 per-workspace claim is wrong, when a link breaks, or when a workspace
-count is stale. Its ground truth is `vp run`'s own task list, so it sees all
+when a §5 per-workspace claim is wrong, when a link breaks, when a workspace
+count is stale, or when a root script or workflow runs a `--filter` without
+`--fail-if-no-match`. Its ground truth is `vp run`'s own task list, so it sees all
 three task sources (§1). It cannot check prose — rationale still rots the
 old-fashioned way.
 
@@ -40,7 +41,8 @@ workspace, by **package name** not directory), `--parallel`. Note `--filter` and
 A `--filter` that matches no package prints a warning and exits 0, so a
 mistyped name runs nothing and passes. Every `vp run --filter` in a root script
 or a workflow therefore also passes `--fail-if-no-match`, which turns that into
-an error; a new one carries it too.
+an error; a new one carries it too, and `vp run commands:verify` fails one that
+does not.
 
 ---
 

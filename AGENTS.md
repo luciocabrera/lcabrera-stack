@@ -204,8 +204,9 @@ Selection guideline:
 >
 > **`vp run commands:verify` enforces that** (CI step in `check-safe.yml`): a new
 > root script that is undocumented, a documented command that no longer resolves,
-> a wrong per-workspace claim, a broken link, or a stale workspace count all fail
-> the build. So do not re-list commands here — a copy in this file is a copy the
+> a wrong per-workspace claim, a broken link, a stale workspace count, or a
+> `vp run --filter` in a root script or workflow without `--fail-if-no-match` all
+> fail the build. So do not re-list commands here — a copy in this file is a copy the
 > checker does not police, which is exactly how the last set rotted.
 
 **The `.mjs`/`.cjs` scripts running these checks are themselves governed** — see
