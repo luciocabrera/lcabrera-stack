@@ -229,17 +229,29 @@ left: after it the hooks, the workflows and the gate tasks find their binaries,
 and `devkit init --upgrade` has no task left to add. `init` in a repository that
 already exists still decides by what is installed.
 
-**Within a day of a release, that install fails unless you lift pnpm's delay.**
-pnpm installs no version younger than its minimum release age, which defaults to
-a day, and every `@lcabrera/*` floor in the created tree is the version released
-with the kit that wrote it. Until that release is a day old, no version the
-floors admit is old enough to install. Lift the delay for the first install:
+**Within a day of a release, lift pnpm's delay for that install.** pnpm holds
+back any version younger than its minimum release age, a day by default, and
+every `@lcabrera/*` floor in the created tree is the version released with the
+kit that wrote it. Until that release is a day old, no version the floors admit
+is old enough. With the delay at its default, pnpm installs those versions
+anyway and appends each to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`,
+so the new tree starts with a modified file. Lift the delay for the first
+install:
 
 ```bash
 pnpm_config_minimum_release_age=0 pnpm install
 ```
 
 After the day has passed, a plain install works.
+
+**The per-platform binaries are excluded from that delay.** The blueprint's
+`pnpm-workspace.yaml` lists name patterns under `minimumReleaseAgeExclude` for
+the binary packages its toolchain pins at exact versions. Each of these is
+published a few minutes after the package that pins it. Without the patterns,
+an install in those minutes would take the day-old parent, install its younger
+binaries anyway, and append each one to `minimumReleaseAgeExclude`, leaving a
+fresh tree with a modified file. No other package loses the delay, and a
+parent still waits its day before any of its binaries are reached.
 
 ## Setting up a repository
 

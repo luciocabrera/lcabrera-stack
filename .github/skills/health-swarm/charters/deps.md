@@ -45,8 +45,9 @@ Handled: the hono ReDoS advisory, now pinned forward by an `overrides` entry
 with its removal condition recorded beside it.
 
 Still open (#516): no gate runs `pnpm audit` at all — the supply chain is the
-one thing this repo does not check; `minimumReleaseAge` is commented out while
-its exclude list has rotted; the in-range currency gap and the `vp` local/global
+one thing this repo does not check; the `minimumReleaseAgeExclude` list has
+rotted, and it is live, because pnpm applies its one-day `minimumReleaseAge`
+default with the setting unset; the in-range currency gap and the `vp` local/global
 version split; the unsatisfied `@babel/core` peer; the `jsdom` 30 major. (The undeclared
 `@babel/preset-typescript` listed here left with the workspaces that declared it —
 re-probe rather than assuming it is still open elsewhere.)
