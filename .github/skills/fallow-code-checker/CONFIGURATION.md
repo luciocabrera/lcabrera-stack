@@ -168,14 +168,16 @@ finding, so at `error` it guards the root `dependencies` and nothing else.
 Six rules that also report nothing were left below `error`, because no plant
 made them fail this repository's gate:
 
-- `duplicate-prop-shape` — stays `warn`. Fallow 3.33.1 reports it at `error`
-  but leaves it out of the exit gate: two components beside
-  `PinAndHideActions` taking `ColumnPinningButtonProps`, with
-  `ColumnPinningButton` a group of three, are listed with
+- `duplicate-prop-shape` — stays `warn`, because fallow does not count it in
+  its exit gate. At `error` it lists the findings with
   `effective_severity: "error"`, yet `error-severity-findings` observes none,
-  the audit's verdict is `pass` and `fallow dead-code` exits 0. At `error` it
-  would read as enforced when it is not. It moves to `error` once a fallow
-  release enforces it
+  the audit's verdict is `pass` and `fallow dead-code` exits 0, so `error`
+  would read as enforced when it is not. The plant was two components beside
+  `PinAndHideActions` taking `ColumnPinningButtonProps`, with different
+  bodies: identical bodies fail the audit as a clone group instead, which says
+  nothing about this rule. Gating it is requested upstream in
+  [fallow-rs/fallow#3867](https://github.com/fallow-rs/fallow/issues/3867);
+  it moves to `error` once a fallow release enforces it
   ([#1457](https://github.com/luciocabrera/lcabrera-stack/issues/1457)). The
   tree carries none of its findings: Pin Left, Pin Right and Clear Pinning
   were folded into one `ColumnPinningButton`.
