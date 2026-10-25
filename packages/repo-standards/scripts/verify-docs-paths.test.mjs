@@ -28,40 +28,32 @@ const run = (root) =>
     env: { ...process.env, REPO_STANDARDS_HOST_ROOT: root },
   });
 
+const LINK_FORMS = [
+  { form: 'an inline link', markdown: (target) => `[facts](${target})\n` },
+  {
+    form: 'a reference-style definition',
+    markdown: (target) => `See [the facts][facts].\n\n[facts]: ${target}\n`,
+  },
+];
+
 describe('repo-verify-docs-paths', () => {
-  it('fails on a bare relative link to a missing non-markdown file', () => {
-    const result = run(makeRoot('[gone](does-not-exist.json)\n'));
+  it.each(LINK_FORMS)('fails on $form to a missing file', ({ markdown }) => {
+    const result = run(makeRoot(markdown('does-not-exist.json')));
 
     expect(result.status).toBe(1);
     expect(result.stderr).toContain(`${DOC}: \`does-not-exist.json\``);
   });
 
-  it('fails on a reference-style definition to a missing file', () => {
-    const result = run(
-      makeRoot('See [the facts][gone].\n\n[gone]: does-not-exist.json\n'),
-    );
+  it.each(LINK_FORMS)(
+    'passes $form once its target exists beside the doc',
+    ({ markdown }) => {
+      const root = makeRoot(markdown('facts.json'));
+      writeIn(root)('docs/agents/facts.json', '{}\n');
 
-    expect(result.status).toBe(1);
-    expect(result.stderr).toContain(`${DOC}: \`does-not-exist.json\``);
-  });
+      const result = run(root);
 
-  it('passes a reference-style definition once its target exists', () => {
-    const root = makeRoot('See [the facts][facts].\n\n[facts]: facts.json\n');
-    writeIn(root)('docs/agents/facts.json', '{}\n');
-
-    const result = run(root);
-
-    expect(result.status).toBe(0);
-    expect(result.stdout).toContain('Documented-path gate passed');
-  });
-
-  it('passes the same link once its target exists beside the doc', () => {
-    const root = makeRoot('[facts](facts.json)\n');
-    writeIn(root)('docs/agents/facts.json', '{}\n');
-
-    const result = run(root);
-
-    expect(result.status).toBe(0);
-    expect(result.stdout).toContain('Documented-path gate passed');
-  });
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('Documented-path gate passed');
+    },
+  );
 });

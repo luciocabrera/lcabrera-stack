@@ -7,7 +7,7 @@ branch: fix/1478-docs-verify-reference-links
 area:
   - packages/repo-standards/scripts/docs-paths*
   - packages/repo-standards/scripts/verify-docs-paths.test.mjs
-  - .changeset/**
+  - .changeset/docs-paths-reference-definitions.md
 started: 2026-10-22
 updated: 2026-10-25
 plan: (none)
