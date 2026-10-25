@@ -270,12 +270,12 @@ falls back to the estimate that reports simple code as a CRAP breach.
 
 ### Dependencies
 
-| Command                | Runs                                                                                              |
-| ---------------------- | ------------------------------------------------------------------------------------------------- |
-| `vp run deps:audit`    | the advisory gate — `vp pm audit --json` piped into `repo-verify-deps-audit`                      |
-| `vp run deps:lockfile` | `vp dedupe --check` — fails when a fresh resolve would change `pnpm-lock.yaml`                    |
-| `vp run deps:peers`    | `pnpm peers check` — fails when any workspace has an unmet or out-of-range peer dependency        |
-| `vp run deps:refresh`  | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → open a build(deps) PR |
+| Command                | Runs                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `vp run deps:audit`    | the advisory gate — `vp pm audit --json` piped into `repo-verify-deps-audit`                                  |
+| `vp run deps:lockfile` | `vp dedupe --check` — fails when a fresh resolve would change `pnpm-lock.yaml`                                |
+| `vp run deps:peers`    | `pnpm peers check` — fails when any workspace has an unmet or out-of-range peer dependency                    |
+| `vp run deps:refresh`  | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → vp dedupe → open a build(deps) PR |
 
 `deps:audit` fails on a known vulnerability at `moderate` or above that has no
 live allowance in `docs/agents/dependency-advisories.json`, and also on an
@@ -334,6 +334,11 @@ then finish with `-- --open-pr`: it pushes (the gate runs again) and opens the P
 with the same generated description, recovering the moved-versions list from the
 commit the first run wrote. Its Impact Analysis reports any source commits the
 gate forced, rather than claiming the diff is manifests-only.
+
+**It ends the resolve with `vp dedupe`.** A lockfile regenerated from nothing
+can keep an older version where a newer one it also holds satisfies the range,
+and `deps:lockfile` fails that in `check:push` and CI. Deduplicating before the
+commit keeps the refresh PR's own gate from stopping on it.
 
 **A run can land with no version moved at all.** `pnpm clean --lockfile`
 regenerates the lockfile from nothing, so it drops resolutions no manifest reaches
