@@ -150,6 +150,7 @@
     "react-doctor": "catalog:lint",
     "semver": "catalog:tooling",
     "ts-morph": "catalog:tooling",
+    "typescript": "catalog:build",
     "vite": "catalog:build",
     "vite-plus": "catalog:build",
     "vitest": "catalog:test",

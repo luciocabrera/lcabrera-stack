@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "entry": [
+    ".pnpmfile.cjs",
     "scripts/build-review-payload.mjs",
     "scripts/claude-autofix.mjs",
     "scripts/claude-secrets-guard.mjs",
