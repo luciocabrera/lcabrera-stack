@@ -222,6 +222,14 @@ describe('verify-changesets when git cannot answer', () => {
     );
   });
 
+  it('refuses a base that git would read as an option', async () => {
+    const root = branchWith({});
+
+    await expect(
+      findMissing({ baseRef: '--output=/tmp/x', root }),
+    ).rejects.toThrow('is not a git ref or commit');
+  });
+
   it('reads a workspace directory the base never had as holding no package', async () => {
     const root = branchWith({
       edits: {

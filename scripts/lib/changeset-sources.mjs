@@ -58,14 +58,26 @@ export const systemGit = (root) => (args) => {
     });
   } catch (error) {
     const stderr = String(error.stderr ?? '').trim();
+    const detail = stderr === '' ? '' : ': ' + stderr;
     throw new Error(
-      `\`git ${args.join(' ')}\` failed${stderr === '' ? '' : `: ${stderr}`} — refusing to report a pass on data it could not read.`,
+      `\`git ${args.join(' ')}\` failed${detail} — refusing to report a pass on data it could not read.`,
     );
   }
 };
 
+const GIT_REF = /^[\w@{}^~][\w./@{}^~-]*$/u;
+
+const checkedRef = (baseRef) => {
+  if (!GIT_REF.test(baseRef)) {
+    throw new Error(
+      `the base ${JSON.stringify(baseRef)} is not a git ref or commit; it must start with a letter, digit or underscore and hold no spaces.`,
+    );
+  }
+  return baseRef;
+};
+
 const resolveMergeBase = ({ baseRef, git }) => {
-  const mergeBase = git(['merge-base', baseRef, 'HEAD']).trim();
+  const mergeBase = git(['merge-base', checkedRef(baseRef), 'HEAD']).trim();
   if (mergeBase === '') {
     throw new Error(`\`git merge-base ${baseRef} HEAD\` printed no commit.`);
   }
