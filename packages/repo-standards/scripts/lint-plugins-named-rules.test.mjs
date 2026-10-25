@@ -65,6 +65,7 @@ describe('probePath', () => {
     ['packages/*/scripts/**', 'packages/.p/scripts/.p/s.ts', 'packages/.p'],
     ['./src/**/*.ts', 'src/.p/s.ts', 'src/.p'],
     ['**', '.p/s.ts', '.p'],
+    ['*.test.ts', '.p/s.test.ts', '.p'],
   ])('fills %s as %s inside the fresh %s', (glob, path, root) => {
     expect(probePath({ ...args, glob })).toEqual({ path, root });
   });
@@ -73,7 +74,6 @@ describe('probePath', () => {
     ['**/*.{ts,tsx}', 'a brace'],
     ['**/*.test.tsx', 'another extension'],
     ['src/[ab]/**', 'a character class'],
-    ['*.test.ts', 'no directory to make fresh'],
     ['scripts/**/vite.config.ts', 'a file name without a wildcard'],
     ['**/a*b*.ts', 'two wildcards in the file name'],
     ['src/lib*/**', 'a partial wildcard in a directory'],
@@ -137,6 +137,38 @@ describe('placeRuleProbes', () => {
       ],
     });
     expect([missing.length, placed.length]).toEqual([0, 2]);
+  });
+
+  describe('a rule id written the way Oxlint resolves it', () => {
+    const resolvable = [
+      { code: 'x', plugin: 'eslint', rule: 'no-nested-ternary' },
+      { code: 'x', plugin: 'unicorn', rule: 'no-nested-ternary' },
+      { code: 'x', plugin: 'unicorn', rule: 'no-array-sort' },
+      { code: 'x', plugin: 'typescript', rule: 'no-explicit-any' },
+      { code: 'x', plugin: 'import', rule: 'no-cycle' },
+      { code: 'x', plugin: 'jsx-a11y', rule: 'alt-text' },
+    ];
+    const resolved = (id) =>
+      placeRuleProbes({
+        dir: '.p',
+        probes: resolvable,
+        rules: [{ entry: 'rules', id }],
+      }).placed.map(({ probe }) => `${probe.plugin}/${probe.rule}`);
+
+    it.each([
+      ['no-nested-ternary', 'eslint/no-nested-ternary'],
+      ['no-array-sort', 'unicorn/no-array-sort'],
+      ['@typescript-eslint/no-explicit-any', 'typescript/no-explicit-any'],
+      ['import-x/no-cycle', 'import/no-cycle'],
+      ['jsx-a11y-x/alt-text', 'jsx-a11y/alt-text'],
+      ['unicorn/no-nested-ternary', 'unicorn/no-nested-ternary'],
+    ])('finds the probe for %s as %s', (id, probe) => {
+      expect(resolved(id)).toEqual([probe]);
+    });
+
+    it('does not match a prefixed id to a probe of another plugin', () => {
+      expect(resolved('promise/no-array-sort')).toEqual([]);
+    });
   });
 
   it('reports a rule no probe covers, which is a renamed or new rule', () => {

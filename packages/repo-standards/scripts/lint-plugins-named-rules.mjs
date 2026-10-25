@@ -29,11 +29,39 @@ export const namedRules = ({ overrides = [], rules } = {}) => [
   ),
 ];
 
-const probeRuleIds = ({ plugin, rule, scope = plugin }) =>
-  new Set([`${plugin}/${rule}`, `${scope}/${rule}`]);
+const PLUGIN_ALIASES = new Map([
+  ['@typescript-eslint', 'typescript'],
+  ['import-x', 'import'],
+  ['jsx-a11y-x', 'jsx-a11y'],
+  ['react-hooks', 'react'],
+]);
 
-const probeForRule = (probes, id) =>
-  probes.find((probe) => probeRuleIds(probe).has(id));
+const canonicalPlugin = (plugin) => PLUGIN_ALIASES.get(plugin) ?? plugin;
+
+const splitRuleId = (id) => {
+  const slash = id.lastIndexOf('/');
+  return slash === -1
+    ? { rule: id }
+    : {
+        plugin: canonicalPlugin(id.slice(0, slash)),
+        rule: id.slice(slash + 1),
+      };
+};
+
+const isProbeFor = (probe, plugin, rule) =>
+  probe.rule === rule && canonicalPlugin(probe.plugin) === plugin;
+
+const probeForBareRule = (probes, rule) => {
+  const candidates = probes.filter((probe) => probe.rule === rule);
+  return candidates.find((probe) => probe.plugin === 'eslint') ?? candidates[0];
+};
+
+const probeForRule = (probes, id) => {
+  const { plugin, rule } = splitRuleId(id);
+  return plugin === undefined
+    ? probeForBareRule(probes, rule)
+    : probes.find((probe) => isProbeFor(probe, plugin, rule));
+};
 
 const GLOB_CHARACTERS = /[!*?[\]{}]/u;
 
@@ -54,8 +82,15 @@ const fileSegment = ({ ext, pattern, stem }) => {
   return name.endsWith(`.${ext}`) ? name : undefined;
 };
 
+const anchoredGlob = (glob) => {
+  const relative = glob.replace(/^\.\//u, '');
+  return relative === '**' || relative.includes('/')
+    ? relative
+    : `**/${relative}`;
+};
+
 export const probePath = ({ dir, ext, glob, stem }) => {
-  const segments = glob.replace(/^\.\//u, '').split('/');
+  const segments = anchoredGlob(glob).split('/');
   const last = segments.at(-1);
   const parents = segments.slice(0, -1);
   const directories = [...parents, ...(last === '**' ? ['**'] : [])].map(

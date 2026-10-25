@@ -17,7 +17,7 @@ area:
   - .github/skills/lint-toolchain/SKILL.md
   - .github/skills/health-swarm/charters/lint-coherence.md
 started: 2026-10-22
-updated: 2026-10-22
+updated: 2026-10-25
 plan: (none)
 pr: '#1482'
 issue: #1448

@@ -350,7 +350,13 @@ longer true
 
 The gate now reads `lintConfig` and collects every rule set to anything other
 than `off`, `allow` or `0`, at the top level and in each override. Each needs a
-probe, found by `<plugin>/<rule>` or by the prefix Oxlint prints. A named rule
+probe, found the way Oxlint resolves the id. Oxlint reads `@typescript-eslint`,
+`react-hooks`, `import-x` and `jsx-a11y-x` as `typescript`, `react`, `import`
+and `jsx-a11y`, and it resolves an id with no prefix to the `eslint` rule of
+that name, or to another plugin's when `eslint` has none: a bare
+`no-nested-ternary` reported as `eslint(no-nested-ternary)`, and a bare
+`no-array-sort` as `unicorn(no-array-sort)`. The gate matches in the same
+order, so a rule written either way finds its probe. A named rule
 with no probe fails the gate, so a new rule cannot arrive unproven. A top-level
 rule's probe goes in the probe directory. An override rule's probe goes at a
 path one of the override's `files` globs matches, inside a directory the gate
@@ -374,6 +380,8 @@ a later entry turning a rule off, or an upgrade after which a rule no longer
 reports the planted code.
 
 A probe is planted only where a glob can be filled: a `*` or `**` directory
-segment and a file name with one `*` that ends in the probe's extension. An
+segment and a file name with one `*` that ends in the probe's extension. A
+glob with no `/` matched files at any depth when tried, so `*.test.ts` is read
+as `**/*.test.ts`. An
 override whose every glob uses braces, a character class, a `..` or absolute
 path, or a fixed file name fails the gate rather than passing unprobed.

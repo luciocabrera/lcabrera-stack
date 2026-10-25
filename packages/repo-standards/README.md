@@ -182,8 +182,13 @@ These are not flagged:
 `repo-verify-lint-plugins` also reads `lintConfig` from the root
 `vite.config.ts` and collects every rule it turns on by name: each `rules` key
 not set to `off`, `allow` or `0`, at the top level and in each `overrides`
-entry. Each needs a probe, matched by `<plugin>/<rule>` or by the prefix Oxlint
-prints, as in `react-hooks/exhaustive-deps`. A rule with no probe fails the
+entry. Each needs a probe, matched the way Oxlint resolves the id. A
+`<plugin>/<rule>` id matches a probe of that plugin, with Oxlint's aliases read
+as the plugin they name: `@typescript-eslint` as `typescript`, `react-hooks` as
+`react`, `import-x` as `import` and `jsx-a11y-x` as `jsx-a11y`. An id with no
+prefix, such as `no-console`, matches the `eslint` probe of that name, or
+another plugin's when `eslint` has none, as `no-array-sort` resolves to
+`unicorn`. A rule with no probe fails the
 gate, so a rule added to the config, or a rule id renamed in it, cannot pass
 unproven. The package ships probes for the rules `@lcabrera/vite-config/lint`
 names, and for `unicorn/no-array-sort` and five `vitest` assertion rules. For
@@ -197,6 +202,8 @@ override rule's probe is written to a path one of that override's `files` globs
 matches, inside a directory the gate creates and removes. The gate fills a `*`
 or `**` directory segment with that directory and the one `*` in the file name
 with the probe's name, and the name must end in the probe's extension. A glob
+with no `/`, such as `*.test.ts`, matches at any depth, so it is read as
+`**/*.test.ts`. A glob
 with braces, a character class, a partial wildcard in a directory, a `..` or
 absolute path, or a file name without exactly one `*` cannot be filled, and an override with no glob the
 gate can fill fails it. The gate then fails unless Oxlint reports each probe's
