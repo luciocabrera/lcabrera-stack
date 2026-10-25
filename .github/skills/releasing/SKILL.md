@@ -17,12 +17,27 @@ to the spec.
 
 The public `@lcabrera/*` packages are versioned with **Changesets**,
 independently — each moves only when it changes, and a dependent gets a patch
-bump automatically (`updateInternalDependencies: "patch"`). A change that affects
-consumers carries a changeset in the same PR; `vp run release:version` consumes
+bump automatically (`updateInternalDependencies: "patch"`). A change to a file a
+package ships carries a changeset in the same PR; `vp run release:version` consumes
 them. `vp run release:plan` prints the current set; the roster is every
 non-private workspace, so a count here would be wrong the next time one is added.
 
 Everything below is deliberate, and each one cost something to learn:
+
+- **"Ships" is the tarball, and `vp run changesets:verify` holds it.** It runs
+  in the Quality Gate job on every pull request and merge group. A changed file
+  counts only when `pnpm pack --dry-run` lists it for its package, so a test,
+  a fixture or a config outside `files` needs no changeset, and a shipped
+  `README.md` does. A deleted file is checked against the base's listing, since
+  the head no longer has it. Only a changeset this change adds or edits counts:
+  an older one queued for the same package describes some other change.
+  `changeset status` is not the gate because it counts every file under a
+  package directory, which made test-only PRs carry no-op changesets.
+- **The version PR passes that gate by moving versions.** It deletes the
+  changesets it consumes and adds none, so the gate accepts a package whose
+  `version` the change itself moves, and a package with no published version at
+  the base, whose first publish is the version it declares. A hand-edited
+  `version` passes too: it is a release, and review is what decides it.
 
 - **The version PR is opened by a human, not a bot.** Changesets' usual flow has
   its action open the "Version Packages" PR, and that PR **can never merge
