@@ -106,7 +106,7 @@ catalogs:
     '@arethetypeswrong/core': ^0.18.5
     '@changesets/cli': ^3.0.3
     '@changesets/get-release-plan': ^5.0.2
-    fallow: ^3.33.1
+    fallow: ^3.35.0
     knip: ^6.41.0
     lighthouse: ^13.5.0
     publint: ^0.3.25
