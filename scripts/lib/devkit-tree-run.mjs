@@ -14,12 +14,12 @@ import process from 'node:process';
 import { run } from './devkit-pack.mjs';
 import {
   commandLabel,
-  modifiedTrackedFiles,
   nodeFindings,
   outputTail,
   taskFindings,
   TREE_TASKS,
 } from './devkit-workspace.mjs';
+import { modifiedTrackedFiles } from './devkit-workspace-tracked.mjs';
 
 export const TREE_NAME = 'made';
 
@@ -154,9 +154,15 @@ export const taskRunFindings = ({ tree }) =>
  * @returns {string[]}
  */
 export const trackedChangeFindings = ({ tree }) =>
-  modifiedTrackedFiles(
-    run('git', ['status', '--porcelain', '--untracked-files=no'], tree),
-  );
+  modifiedTrackedFiles({
+    diffOf: (path) =>
+      run('git', ['diff', '--no-color', 'HEAD', '--', path], tree),
+    porcelain: run(
+      'git',
+      ['status', '--porcelain', '--untracked-files=no'],
+      tree,
+    ),
+  });
 
 /**
  * @param {{ checks: ReadonlyArray<(context: Record<string, string>) =>
