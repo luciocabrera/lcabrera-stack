@@ -26,7 +26,7 @@ Everything below is deliberate, and each one cost something to learn:
 
 - **"Ships" is the tarball, and `vp run changesets:verify` holds it.** It runs
   in the Quality Gate job on every pull request and merge group. A changed file
-  counts only when `pnpm pack --dry-run` lists it for its package, so a test,
+  counts only when the tarball `pnpm pack` writes for its package holds it, so a test,
   a fixture or a config outside `files` needs no changeset, and a shipped
   `README.md` does. A deleted file is checked against the base's listing, since
   the head no longer has it. Only a changeset this change adds or edits counts:

@@ -1,8 +1,8 @@
 /**
  * The I/O behind verify-changesets.mjs: the change against the merge base, the
  * workspace manifests on both sides, each package's packed file list, and the
- * packages the change's own changesets name. A file list comes from
- * `pnpm pack --dry-run`, because the packer that publishes is the only
+ * packages the change's own changesets name. A file list is read out of the
+ * tarball `pnpm pack` writes, because the packer that publishes is the only
  * authority on what ships.
  */
 import { execFileSync } from 'node:child_process';
@@ -21,16 +21,19 @@ import { getReleasePlan } from '@changesets/get-release-plan';
 
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
 import { runGit } from '../../packages/repo-standards/scripts/git-exec.mjs';
+import { packAndRead } from '../../packages/repo-standards/scripts/publish-pack.mjs';
 import { parseNameStatus, untrackedChanges } from './changeset-required.mjs';
 
-const DEPENDENCY_FIELDS = [
+const DEPENDENCY_FIELDS = new Set([
   'bundleDependencies',
   'bundledDependencies',
   'dependencies',
   'devDependencies',
   'optionalDependencies',
   'peerDependencies',
-];
+]);
+
+const TAR = ['/usr/bin/tar', '/bin/tar'].find((path) => existsSync(path));
 
 const gitOrThrow = (args, cwd) => {
   const output = runGit({ args, cwd });
@@ -121,20 +124,19 @@ export const readManifests = ({ mergeBase, root }) => {
 };
 
 const packedFiles = (directory) => {
-  const stdout = execFileSync('pnpm', ['pack', '--dry-run', '--json'], {
-    cwd: directory,
-    encoding: 'utf8',
-    maxBuffer: 16 * 1024 * 1024,
-    stdio: ['ignore', 'pipe', 'pipe'],
-  });
-  return new Set(JSON.parse(stdout).files.map(({ path }) => path));
+  const destination = mkdtempSync(join(tmpdir(), 'changeset-pack-'));
+  try {
+    return new Set(packAndRead({ destination, directory }).files);
+  } finally {
+    rmSync(destination, { force: true, recursive: true });
+  }
 };
 
 const withoutDependencies = (manifestText) =>
   `${JSON.stringify(
     Object.fromEntries(
       Object.entries(JSON.parse(manifestText)).filter(
-        ([field]) => !DEPENDENCY_FIELDS.includes(field),
+        ([field]) => !DEPENDENCY_FIELDS.has(field),
       ),
     ),
     undefined,
@@ -149,7 +151,10 @@ const basePackedFiles = ({ dir, mergeBase, root }) => {
       ['archive', '--format=tar', '-o', archive, mergeBase, '--', dir],
       root,
     );
-    execFileSync('tar', ['-xf', archive, '-C', scratch], { stdio: 'ignore' });
+    if (TAR === undefined) {
+      throw new Error('no tar in /usr/bin or /bin to unpack the base package.');
+    }
+    execFileSync(TAR, ['-xf', archive, '-C', scratch], { stdio: 'ignore' });
     const manifestPath = join(scratch, dir, 'package.json');
     writeFileSync(
       manifestPath,
