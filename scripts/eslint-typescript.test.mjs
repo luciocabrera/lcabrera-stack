@@ -151,7 +151,7 @@ describe('pinTypeScript6', () => {
         peerDependenciesMeta: { typescript: { optional: true } },
       }),
     ).toStrictEqual({
-      dependencies: { a: '1', typescript: `npm:typescript@^${TYPESCRIPT_6}` },
+      dependencies: { a: '1', typescript: `npm:typescript@${TYPESCRIPT_6}` },
       name: 'plugin',
       peerDependencies: { eslint: '*' },
       peerDependenciesMeta: {},
@@ -197,9 +197,8 @@ describe('the installed lockfile', () => {
       .filter((snapshot) => snapshot.dependencies.typescript !== undefined)
       .filter(
         (snapshot) =>
-          !resolvedVersion(
-            String(snapshot.dependencies.typescript),
-          )?.startsWith('6.'),
+          resolvedVersion(String(snapshot.dependencies.typescript)) !==
+          TYPESCRIPT_6,
       )
       .map((snapshot) => snapshot.key);
     expect(roots.length).toBeGreaterThan(0);
@@ -303,7 +302,7 @@ describe('what the ESLint process resolves on disk', () => {
       }
     }
     const offenders = [...seen.entries()]
-      .filter(([, version]) => !version.startsWith('6.'))
+      .filter(([, version]) => version !== TYPESCRIPT_6)
       .map(
         ([directory, version]) =>
           `${directory.split(`${sep}.pnpm${sep}`).at(-1)}: ${version}`,

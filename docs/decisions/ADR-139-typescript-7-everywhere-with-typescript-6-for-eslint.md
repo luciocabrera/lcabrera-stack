@@ -76,7 +76,10 @@ their own TypeScript.
 - The hook stops the install with an error, naming the package, its version and
   its range, when a package it would rewrite declares a `typescript` peer that
   excludes the TypeScript 6 it substitutes. That version is one constant,
-  `TYPESCRIPT_6` in `scripts/lib/eslint-typescript.cjs`. It also stops the
+  `TYPESCRIPT_6` in `scripts/lib/eslint-typescript.cjs`. The hook installs
+  exactly that version, not a range, so the version it checks is the version
+  pnpm resolves. A package's upper bound, such as typescript-eslint's `<6.1.0`,
+  therefore cannot be crossed by a later TypeScript 6 release. It also stops the
   install on a `typescript` peer range it cannot read.
 - The hook reads ranges with `scripts/lib/semver-range.cjs`, a dependency-free
   subset of `semver.satisfies`, because pnpm loads the hook before anything is

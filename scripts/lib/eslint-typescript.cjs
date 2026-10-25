@@ -107,7 +107,7 @@ const pinTypeScript6 = (manifest) => {
     ...manifest,
     dependencies: {
       ...manifest.dependencies,
-      typescript: `npm:typescript@^${TYPESCRIPT_6}`,
+      typescript: `npm:typescript@${TYPESCRIPT_6}`,
     },
     peerDependencies: withoutKey(manifest.peerDependencies, 'typescript'),
     peerDependenciesMeta: withoutKey(
