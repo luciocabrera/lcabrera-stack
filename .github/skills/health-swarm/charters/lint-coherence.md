@@ -46,7 +46,9 @@ Enabling or disabling a plugin is a **decision**, not a chore — see #325 and
 
 Handled: the `react` family was configured but never probed —
 `lint:plugins:verify` now reports how many of the configured families it proved
-live, and fails when one is added with neither a probe nor a written exemption. The dead root configs are
+live, and fails when one is added with neither a probe nor a written exemption.
+It also fails on a rule the config turns on by name with no probe, or whose
+probe Oxlint does not report. The dead root configs are
 gated by `configs:verify`. `.claude/README.md`'s autofix description is
 corrected.
 
