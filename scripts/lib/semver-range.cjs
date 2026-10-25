@@ -12,14 +12,14 @@
 const IDENTIFIER = '[0-9A-Za-z-]+';
 const PART = String.raw`0|[1-9]\d*`;
 const X_PART = String.raw`0|[1-9]\d*|[xX*]`;
-const PRERELEASE = `(?:-(${IDENTIFIER}(?:\\.${IDENTIFIER})*))?`;
-const BUILD = `(?:\\+${IDENTIFIER}(?:\\.${IDENTIFIER})*)?`;
+const PRERELEASE = String.raw`(?:-(${IDENTIFIER}(?:\.${IDENTIFIER})*))?`;
+const BUILD = String.raw`(?:\+${IDENTIFIER}(?:\.${IDENTIFIER})*)?`;
 
 const FULL = new RegExp(
-  `^v?(${PART})\\.(${PART})\\.(${PART})${PRERELEASE}${BUILD}$`,
+  String.raw`^v?(${PART})\.(${PART})\.(${PART})${PRERELEASE}${BUILD}$`,
 );
 const PARTIAL = new RegExp(
-  `^v?(${X_PART})(?:\\.(${X_PART})(?:\\.(${X_PART})${PRERELEASE}${BUILD})?)?$`,
+  String.raw`^v?(${X_PART})(?:\.(${X_PART})(?:\.(${X_PART})${PRERELEASE}${BUILD})?)?$`,
 );
 
 const OPERATORS = ['>=', '<=', '>', '<', '='];
