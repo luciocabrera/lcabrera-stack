@@ -8,6 +8,9 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   exactOptionalPins,
   excludeCovers,
+  installedPackages,
+  listedPaths,
+  scanCoverageFindings,
   uncoveredPinFindings,
 } from './devkit-workspace-release-age.mjs';
 
@@ -117,5 +120,79 @@ describe('uncoveredPinFindings', () => {
     expect(findings[0]).toContain('`@biomejs/biome@2.6.3`');
     expect(findings[0]).toContain('@biomejs/cli-linux-x64@2.6.3');
     expect(findings[0]).not.toContain('cli-darwin-arm64');
+  });
+});
+
+describe('listedPaths', () => {
+  it('collects every path at any depth once', () => {
+    expect(
+      listedPaths([
+        {
+          devDependencies: {
+            a: {
+              dependencies: { b: { path: '/s/b' } },
+              optionalDependencies: { c: { path: '/s/c' } },
+              path: '/s/a',
+            },
+          },
+        },
+        { dependencies: { b: { path: '/s/b' } } },
+      ]),
+    ).toEqual(['/s/a', '/s/b', '/s/c']);
+  });
+});
+
+describe('installedPackages', () => {
+  const lockfile = [
+    '---',
+    'importers:',
+    '  .: {}',
+    'packages:',
+    "  '@pnpm/exe@12.14.0': {}",
+    '---',
+    'settings:',
+    '  autoInstallPeers: true',
+    'packages:',
+    "  '@biomejs/biome@2.6.3': {}",
+    "  '@biomejs/cli-win32-x64@2.6.3': {}",
+    '',
+  ].join('\n');
+
+  it('reads the resolved document and leaves out what the install skipped', () => {
+    expect(
+      installedPackages({
+        lockfile,
+        modules: '{ "skipped": ["@biomejs/cli-win32-x64@2.6.3"] }',
+      }),
+    ).toEqual(['@biomejs/biome@2.6.3']);
+  });
+
+  it('finds nothing in a lockfile it cannot read', () => {
+    expect(installedPackages({ lockfile: '', modules: '' })).toEqual([]);
+  });
+});
+
+describe('scanCoverageFindings', () => {
+  it('passes a scan that read every installed package', () => {
+    expect(
+      scanCoverageFindings({
+        installed: ['a@1.0.0'],
+        read: new Set(['a@1.0.0', 'workspace@0.0.0']),
+      }),
+    ).toEqual([]);
+  });
+
+  it('fails a scan that read no manifest', () => {
+    const [finding] = scanCoverageFindings({
+      installed: ['a@1.0.0', 'b@1.0.0'],
+      read: new Set(),
+    });
+    expect(finding).toContain('read no manifest for 2 of the 2 packages');
+  });
+
+  it('fails when the lockfile names nothing to hold the scan to', () => {
+    expect(
+      scanCoverageFindings({ installed: [], read: new Set(['a@1.0.0']) }),
+    ).toEqual([expect.stringContaining('names no installed package')]);
   });
 });

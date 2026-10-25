@@ -6,15 +6,22 @@
  * fresh tree go dirty on the day its family releases (#1490).
  */
 
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import semver from 'semver';
-import { parse } from 'yaml';
+import { parse, parseAllDocuments } from 'yaml';
 
 import { run } from './devkit-pack.mjs';
+import { readIfPresent } from './devkit-tree-run.mjs';
 
-const VIRTUAL_STORE = join('node_modules', '.pnpm');
+const LIST_ARGS = ['ls', '--recursive', '--json', '--depth', 'Infinity'];
+
+const LOCKFILE = 'pnpm-lock.yaml';
+
+const MODULES_STATE = join('node_modules', '.modules.yaml');
+
+const UNREAD_SHOWN = 5;
 
 const WORKSPACE_FILE = 'pnpm-workspace.yaml';
 
@@ -79,40 +86,84 @@ export const uncoveredPinFindings = ({ excluded, pins }) => {
   );
 };
 
-const packageNameOf = (directory) => {
-  const name = directory.slice(0, directory.indexOf('@', 1));
-  return name.startsWith('@') ? name.replace('+', '/') : name;
+const LISTED_KINDS = [
+  'dependencies',
+  'devDependencies',
+  'optionalDependencies',
+];
+
+const listedPathsUnder = (dependencies = {}) =>
+  Object.values(dependencies).flatMap((entry) => [
+    ...(entry.path === undefined ? [] : [entry.path]),
+    ...LISTED_KINDS.flatMap((kind) => listedPathsUnder(entry[kind])),
+  ]);
+
+/**
+ * @param {ReadonlyArray<Record<string, unknown>>} listing
+ * @returns {string[]}
+ */
+export const listedPaths = (listing) => [
+  ...new Set(
+    listing.flatMap((project) =>
+      LISTED_KINDS.flatMap((kind) => listedPathsUnder(project[kind])),
+    ),
+  ),
+];
+
+/**
+ * @param {{ lockfile: string, modules: string }} args
+ * @returns {string[]}
+ */
+export const installedPackages = ({ lockfile, modules }) => {
+  const resolved = parseAllDocuments(lockfile)
+    .map((document) => document.toJS())
+    .find((document) => document?.settings !== undefined);
+  const skipped = new Set(parse(modules)?.skipped ?? []);
+  return Object.keys(resolved?.packages ?? {}).filter(
+    (key) => !skipped.has(key),
+  );
 };
 
-const storedManifests = (store) =>
-  readdirSync(store)
-    .map((directory) =>
-      join(
-        store,
-        directory,
-        'node_modules',
-        packageNameOf(directory),
-        'package.json',
-      ),
-    )
-    .filter((path) => existsSync(path))
-    .map((path) => JSON.parse(readFileSync(path, 'utf8')));
+/**
+ * @param {{ installed: readonly string[], read: ReadonlySet<string> }} args
+ * @returns {string[]}
+ */
+export const scanCoverageFindings = ({ installed, read }) => {
+  if (installed.length === 0) {
+    return [
+      `the created tree's \`${LOCKFILE}\` names no installed package, so the exact-pin check has nothing to hold its scan to`,
+    ];
+  }
+  const unread = installed.filter((key) => !read.has(key));
+  return unread.length === 0
+    ? []
+    : [
+        `the exact-pin check read no manifest for ${unread.length} of the ${installed.length} packages the created tree's \`${LOCKFILE}\` installs (${unread.slice(0, UNREAD_SHOWN).join(', ')}), so it cannot tell whether they pin an optional dependency exactly`,
+      ];
+};
 
 /**
  * @param {{ tree: string }} args
  * @returns {string[]}
  */
 export const releaseAgeExcludeFindings = ({ tree }) => {
-  const store = join(tree, VIRTUAL_STORE);
-  if (!existsSync(store)) {
-    return [
-      `the created tree has no \`${VIRTUAL_STORE}\`, so nothing shows which optional dependencies its packages pin exactly`,
-    ];
-  }
-  return uncoveredPinFindings({
-    excluded:
-      parse(run('git', ['show', `HEAD:${WORKSPACE_FILE}`], tree))
-        ?.minimumReleaseAgeExclude ?? [],
-    pins: exactOptionalPins(storedManifests(store)),
+  const manifests = listedPaths(JSON.parse(run('pnpm', [...LIST_ARGS], tree)))
+    .map((path) => join(path, 'package.json'))
+    .filter((path) => existsSync(path))
+    .map((path) => JSON.parse(readFileSync(path, 'utf8')));
+  const coverage = scanCoverageFindings({
+    installed: installedPackages({
+      lockfile: readIfPresent(join(tree, LOCKFILE)) ?? '',
+      modules: readIfPresent(join(tree, MODULES_STATE)) ?? '',
+    }),
+    read: new Set(manifests.map(({ name, version }) => `${name}@${version}`)),
   });
+  return coverage.length > 0
+    ? coverage
+    : uncoveredPinFindings({
+        excluded:
+          parse(run('git', ['show', `HEAD:${WORKSPACE_FILE}`], tree))
+            ?.minimumReleaseAgeExclude ?? [],
+        pins: exactOptionalPins(manifests),
+      });
 };
