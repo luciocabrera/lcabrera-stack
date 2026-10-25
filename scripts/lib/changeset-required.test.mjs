@@ -109,7 +109,7 @@ describe('missingChangesets', () => {
     ).toEqual([]);
   });
 
-  it('asks nothing of a package with no published version at the base', () => {
+  it('asks nothing of a package absent at the base', () => {
     expect(
       missingChangesets({
         manifests: { base: [], head: [ALPHA] },

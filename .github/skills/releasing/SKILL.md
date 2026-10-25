@@ -35,8 +35,8 @@ Everything below is deliberate, and each one cost something to learn:
   package directory, which made test-only PRs carry no-op changesets.
 - **The version PR passes that gate by moving versions.** It deletes the
   changesets it consumes and adds none, so the gate accepts a package whose
-  `version` the change itself moves, and a package with no published version at
-  the base, whose first publish is the version it declares. A hand-edited
+  `version` the change itself moves, and a package that was absent or `private`
+  at the base, whose first publish is the version it declares. A hand-edited
   `version` passes too: it is a release, and review is what decides it.
 
 - **The version PR is opened by a human, not a bot.** Changesets' usual flow has

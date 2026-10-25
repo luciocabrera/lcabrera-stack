@@ -3,7 +3,7 @@
  * (verify-changesets.mjs). A changed file counts only when it is in its
  * package's packed tarball: the head listing for an added or modified file, the
  * base listing for a deleted one. A package whose version the change itself
- * moves, or that had no published version at the base, is being released by the
+ * moves, or that was absent or private at the base, is being released by the
  * change and needs no changeset. Pure, so the decision is testable without git.
  */
 
