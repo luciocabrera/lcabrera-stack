@@ -67,8 +67,21 @@ describe('runStepBodies', () => {
   it('collects a single-line step and a block step', () => {
     expect(runStepBodies(GATE_WORKFLOW)).toEqual([
       'vp run docs:verify',
-      'vp run typegen:all\nvp run test:ci\n',
+      'vp run typegen:all\nvp run test:ci',
     ]);
+  });
+
+  it('folds a folded block into the one command it is', () => {
+    const folded = [
+      'jobs:',
+      '  gate:',
+      '    steps:',
+      '      - run: >',
+      '          vp run --filter web',
+      '          build',
+      '',
+    ].join('\n');
+    expect(runStepBodies(folded)).toEqual(['vp run --filter web build']);
   });
 
   it('leaves a command that only appears in a comment out', () => {

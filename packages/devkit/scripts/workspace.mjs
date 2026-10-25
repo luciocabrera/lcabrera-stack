@@ -26,6 +26,10 @@
  *
  * Each task list names the rung it lands on, so the `full` rung's database
  * tasks reach only a tree that also holds the compose file they drive.
+ *
+ * Every filtered task passes `--fail-if-no-match`. Without it a filter that
+ * matches no workspace prints a warning and exits 0, so a renamed workspace
+ * would leave `build` passing having built nothing.
  */
 
 import { includesRung } from './config.mjs';
@@ -42,6 +46,9 @@ export const APP_WORKSPACE = 'web';
 export const GENERATED_TSCONFIGS = '**/tsconfig*.json';
 
 export const HOOKS_PATH_SCRIPT = 'scripts/hooks-path.mjs';
+
+const filteredRun = (workspace, task) =>
+  `vp run --fail-if-no-match --filter ${workspace} ${task}`;
 
 /**
  * The band an install may proceed in, derived from the exact pin.
@@ -84,9 +91,9 @@ export const WORKSPACE_DEPENDENCIES = {
  * @type {ReadonlyArray<{ command: string, name: string }>}
  */
 export const WORKSPACE_TASKS = [
-  { command: `vp run --filter ${APP_WORKSPACE} build`, name: 'build' },
+  { command: filteredRun(APP_WORKSPACE, 'build'), name: 'build' },
   { command: 'vp check', name: 'check' },
-  { command: `vp run --filter ${APP_WORKSPACE} dev`, name: 'dev' },
+  { command: filteredRun(APP_WORKSPACE, 'dev'), name: 'dev' },
   { command: 'vp fmt .', name: 'format:all' },
   { command: 'vp fmt --check .', name: 'format:check' },
   { command: 'vp lint . --fix && vp run lint:biome', name: 'lint:all' },
@@ -97,10 +104,10 @@ export const WORKSPACE_TASKS = [
     command: `node ${HOOKS_PATH_SCRIPT} && vp run tsconfig:generate`,
     name: 'prepare',
   },
-  { command: `vp run --filter ${APP_WORKSPACE} start`, name: 'start' },
+  { command: filteredRun(APP_WORKSPACE, 'start'), name: 'start' },
   { command: 'vp run -r test', name: 'test:all' },
   {
-    command: `vp run --filter ${TSCONFIG_WORKSPACE} generate && vp fmt '${GENERATED_TSCONFIGS}'`,
+    command: `${filteredRun(TSCONFIG_WORKSPACE, 'generate')} && vp fmt '${GENERATED_TSCONFIGS}'`,
     name: 'tsconfig:generate',
   },
   {
@@ -117,7 +124,7 @@ const COMPOSE_WITH_ENV = `${COMPOSE} --env-file docker/local/.env`;
 export const DATABASE_TASKS = [
   { command: `${COMPOSE_WITH_ENV} down`, name: 'db:down' },
   {
-    command: `vp run db:up && vp run --filter ${APP_WORKSPACE} seed`,
+    command: `vp run db:up && ${filteredRun(APP_WORKSPACE, 'seed')}`,
     name: 'db:seed',
   },
   { command: `${COMPOSE_WITH_ENV} ps`, name: 'db:status' },
