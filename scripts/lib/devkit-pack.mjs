@@ -9,6 +9,8 @@ import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import process from 'node:process';
 
+export const OUTPUT_LIMIT_BYTES = 64 * 1024 * 1024;
+
 /**
  * @param {string} command
  * @param {string[]} args
@@ -19,6 +21,7 @@ export const run = (command, args, cwd) =>
   execFileSync(command, args, {
     cwd,
     encoding: 'utf8',
+    maxBuffer: OUTPUT_LIMIT_BYTES,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 

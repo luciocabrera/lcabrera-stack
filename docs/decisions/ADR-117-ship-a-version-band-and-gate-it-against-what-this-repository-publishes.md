@@ -202,8 +202,11 @@ kit's manifest when `create` runs, so whatever release of the kit creates a
 repository is that repository's floor, whether or not the sync ran.
 
 The cost is the one the minimum release age exists for. Until a release is a day
-old, a repository it creates cannot install without lifting the delay, since no
-version the floors admit is old enough; the initializer's README says how. The
+old, no version the floors admit is old enough, so a repository it creates
+either lifts the delay for its first install or, with pnpm's default non-strict
+release age, installs them anyway and has each appended to
+`minimumReleaseAgeExclude` in its `pnpm-workspace.yaml` (#1490); the
+initializer's README says how to lift it. The
 registry gate lifts it for the same reason — it runs minutes after the publish
 it checks.
 
