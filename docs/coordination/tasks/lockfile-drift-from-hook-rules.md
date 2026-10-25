@@ -23,6 +23,6 @@ build(deps): detect a stale lockfile after an edit to the TypeScript 6 hook rule
 
 ## Status / next
 
-- Current step: `deps:lockfile` (`vp dedupe --check`) chained into CI, `check:push` and `check:safe`; ADR-139 corrected
+- Current step: `deps:lockfile` (`vp dedupe --check`) chained into CI's Quality Gate and `check:safe`, kept out of `check:push`; `deps:refresh` ends with `vp dedupe`; ADR-139 corrected
 - Blockers: none
 - Next: review
