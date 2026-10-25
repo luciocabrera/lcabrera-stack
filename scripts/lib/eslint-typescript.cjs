@@ -14,6 +14,8 @@ const VERSION = /^v?(\d+)(?:\.(\d+|x|\*))?(?:\.(\d+|x|\*))?(?:-[\w.]+)?$/;
 
 const WILDCARDS = new Set(['', '*', 'x', 'X', 'latest']);
 
+const OPERATORS = ['>=', '<=', '>', '<', '=', '^', '~'];
+
 const parsePartial = (text) => {
   const match = VERSION.exec(text);
   if (match === null) {
@@ -58,9 +60,9 @@ const comparatorAdmits = (token, version) => {
   if (WILDCARDS.has(token)) {
     return true;
   }
-  const [, operator = '', rest = ''] =
-    /^(>=|<=|>|<|=|\^|~)?\s*(.*)$/.exec(token) ?? [];
-  const bound = parsePartial(rest);
+  const operator =
+    OPERATORS.find((candidate) => token.startsWith(candidate)) ?? '';
+  const bound = parsePartial(token.slice(operator.length).trim());
   if (bound === null) {
     return null;
   }
@@ -94,10 +96,10 @@ const rangeAdmits = (range, version) => {
   if (exact === null) {
     return true;
   }
-  const verdicts = range
-    .split('||')
-    .map((set) => comparatorSetAdmits(set.trim(), exact));
-  return verdicts.includes(true) || verdicts.includes(null);
+  const verdicts = new Set(
+    range.split('||').map((set) => comparatorSetAdmits(set.trim(), exact)),
+  );
+  return verdicts.has(true) || verdicts.has(null);
 };
 
 const blockLines = (text, header, indent) => {
@@ -122,9 +124,15 @@ const blockLines = (text, header, indent) => {
  */
 const catalogTypeScript = (workspaceYaml) => {
   const build = blockLines(workspaceYaml, '  build:', '    ');
-  const line = build.find((entry) => /^ {4}typescript:/.test(entry));
-  const floor = /(\d+\.\d+\.\d+)/.exec(line ?? '');
-  return floor === null ? null : floor[1];
+  const line = build.find((entry) => entry.startsWith('    typescript:'));
+  if (line === undefined) {
+    return null;
+  }
+  const floor = line
+    .slice(line.indexOf(':') + 1)
+    .trim()
+    .replace(/^[\^~>=v]+/, '');
+  return parsePartial(floor)?.every((part) => part !== null) ? floor : null;
 };
 
 /**
@@ -133,9 +141,9 @@ const catalogTypeScript = (workspaceYaml) => {
  */
 const workspaceGlobs = (workspaceYaml) =>
   blockLines(workspaceYaml, 'packages:', '  ')
-    .map((line) => /^\s+-\s+['"]?([^'"#]+?)['"]?\s*$/.exec(line))
-    .filter((match) => match !== null)
-    .map((match) => match[1]);
+    .map((line) => line.trim())
+    .filter((line) => line.startsWith('- '))
+    .map((line) => line.slice(2).split('#')[0].trim().replaceAll(/['"]/g, ''));
 
 /**
  * @param {{ name: string, peerDependencies?: Record<string, string> }} manifest
