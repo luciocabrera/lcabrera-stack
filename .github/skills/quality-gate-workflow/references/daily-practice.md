@@ -50,7 +50,7 @@ gate. `vp run lint:all` chains those three with autofix and stops there — it d
 
 **Stage 5 is not a linter, and no other stage substitutes for it.** React Doctor
 is the only pass checking effect cleanup, server/client boundaries and render-path
-cost; it blocks at the `blocking` level `doctor.config.jsonc` names ([ADR-055](../../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md)).
+cost; it blocks where `react-doctor --blocking` would at the level `doctor.config.jsonc` names, `surfaces.ciFailure` included ([ADR-055](../../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md)).
 Root-only and repo-wide like Biome. When it fails, read
 [`react-doctor-triage.md`](../../../../docs/agents/react-doctor-triage.md) before
 reaching for any suppression.

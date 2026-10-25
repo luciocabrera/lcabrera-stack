@@ -7,7 +7,9 @@ still not one of the three linters in [AGENTS.md](../../AGENTS.md) §4 — it is
 CLI with its own config and report.
 
 **The configured level decides what blocks.** The gate reads `blocking` from
-`doctor.config.jsonc` itself (ADR-055, amended 2026-10-19). An accepted finding below at
+`doctor.config.jsonc` itself (ADR-055, amended 2026-10-19), after dropping what the
+CLI's `ciFailure` surface drops: `design`-tagged findings and those in test or story files,
+unless `surfaces.ciFailure` promotes them (amended 2026-10-21). An accepted finding below at
 or above that level cannot simply stay in the report: it has to be fixed, or carried by
 an argued config entry. This file is the record of what has already been argued, so the next
 agent spends one read instead of re-deriving the same judgements. Current findings are

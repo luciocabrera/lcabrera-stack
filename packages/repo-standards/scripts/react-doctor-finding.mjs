@@ -10,6 +10,15 @@
  * present beside it means the scan ran on rules the gate never read.
  * Without the `.jsonc` there is nothing to shadow, and reading it fails.
  *
+ * A finding blocks only if the CLI's own `ciFailure` surface keeps it: the
+ * CLI drops `design`-tagged findings and those in a test or story file before
+ * it applies `blocking`, and `surfaces.ciFailure` moves either line. The gate
+ * runs the CLI at `--blocking none`, so it re-applies that filter here. A
+ * `fileContext` outside `FILE_CONTEXTS` fails the gate rather than being
+ * exempted, so a new value the CLI starts emitting cannot pass silently. Like
+ * the CLI's config loader, it ignores a `surfaces.ciFailure` category outside
+ * `CATEGORY_BUCKETS`.
+ *
  * A finding's `id` may be a string, `null` or missing; only a string names the
  * repository path, otherwise the normalized file path stands in.
  */
@@ -37,10 +46,102 @@ export const blockingSeverities = (config) => {
   const severities = BLOCKING_SEVERITIES.get(level);
   if (severities === undefined)
     throw new Error(
-      `"blocking": ${JSON.stringify(level)} is not one of ` +
+      `${GATED_CONFIG}: "blocking": ${JSON.stringify(level)} is not one of ` +
         `${BLOCKING_SEVERITIES.keys().toArray().join(', ')}.`,
     );
   return { level, severities };
+};
+
+const CI_FAILURE_EXCLUDED_TAGS = ['design'];
+
+const FILE_CONTEXTS = new Set(['story', 'test']);
+
+const CATEGORY_BUCKETS = new Set([
+  'Accessibility',
+  'Bugs',
+  'Maintainability',
+  'Performance',
+  'Security',
+]);
+
+const isRecord = (value) =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+const stringSet = (values) =>
+  new Set(
+    Array.isArray(values)
+      ? values.filter((value) => typeof value === 'string' && value !== '')
+      : [],
+  );
+
+const knownCategorySet = (values) =>
+  new Set(
+    [...stringSet(values)].filter((category) => CATEGORY_BUCKETS.has(category)),
+  );
+
+const ciFailureControls = (config) => {
+  const surfaces = isRecord(config?.surfaces) ? config.surfaces : {};
+  const controls = isRecord(surfaces.ciFailure) ? surfaces.ciFailure : {};
+  return {
+    excludeCategories: knownCategorySet(controls.excludeCategories),
+    excludeRules: stringSet(controls.excludeRules),
+    excludeTags: new Set([
+      ...CI_FAILURE_EXCLUDED_TAGS,
+      ...stringSet(controls.excludeTags),
+    ]),
+    includeCategories: knownCategorySet(controls.includeCategories),
+    includeFileContexts: stringSet(controls.includeFileContexts),
+    includeRules: stringSet(controls.includeRules),
+    includeTags: stringSet(controls.includeTags),
+  };
+};
+
+const hasAny = (values, candidates) =>
+  values.some((value) => candidates.has(value));
+
+const matchesAny = (finding, rules, categories, tags) =>
+  rules.has(`${finding.plugin}/${finding.rule}`) ||
+  categories.has(finding.category) ||
+  hasAny(finding.tags ?? [], tags);
+
+const isIncluded = (finding, controls) =>
+  matchesAny(
+    finding,
+    controls.includeRules,
+    controls.includeCategories,
+    controls.includeTags,
+  );
+
+const isExcluded = (finding, controls) =>
+  (FILE_CONTEXTS.has(finding.fileContext) &&
+    !controls.includeFileContexts.has(finding.fileContext)) ||
+  matchesAny(
+    finding,
+    controls.excludeRules,
+    controls.excludeCategories,
+    controls.excludeTags,
+  );
+
+const isOnCiFailureSurface = (finding, controls) =>
+  isIncluded(finding, controls) || !isExcluded(finding, controls);
+
+const isUnknownFileContext = ({ fileContext }) =>
+  fileContext !== undefined &&
+  fileContext !== null &&
+  !FILE_CONTEXTS.has(fileContext);
+
+export const ciFailureFindings = (diagnostics, config) => {
+  const unknown = diagnostics.find((finding) => isUnknownFileContext(finding));
+  if (unknown !== undefined)
+    throw new Error(
+      `the report has a finding with "fileContext": ${JSON.stringify(unknown.fileContext)}, ` +
+        `which is not one of ${[...FILE_CONTEXTS].join(', ')}; ` +
+        'React Doctor may have changed which files its CI filter exempts.',
+    );
+  const controls = ciFailureControls(config);
+  return diagnostics.filter((finding) =>
+    isOnCiFailureSurface(finding, controls),
+  );
 };
 
 export const blockingFindings = (diagnostics, severities) =>
@@ -51,9 +152,15 @@ export const judgeReport = ({ config, diagnostics, reportOnly }) => {
   const { level, severities } = blockingSeverities(config);
   if (level === 'none')
     throw new Error(
-      'the gate cannot run at "blocking": "none"; use --report for an advisory run.',
+      `${GATED_CONFIG}: the gate cannot run at "blocking": "none"; use --report for an advisory run.`,
     );
-  return { blocking: blockingFindings(diagnostics, severities), level };
+  return {
+    blocking: blockingFindings(
+      ciFailureFindings(diagnostics, config),
+      severities,
+    ),
+    level,
+  };
 };
 
 export const findShadowingConfigs = (exists) =>
