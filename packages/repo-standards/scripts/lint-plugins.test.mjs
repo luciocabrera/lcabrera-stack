@@ -1,12 +1,15 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  familyPlacements,
+  mergePlacements,
   multiplyClassifiedWorkspaces,
   PLUGIN_PROBES,
   pluginsWithoutCoverage,
   probeCode,
   probeFilename,
-  silentProbes,
+  RULE_PROBES,
+  silentPlacements,
   staleRuntimeGlobs,
   unclassifiedWorkspaces,
   UNPROBED_PLUGINS,
@@ -33,35 +36,71 @@ describe('probeCode with a scope', () => {
   });
 });
 
-describe('silentProbes', () => {
-  const probes = [
-    { code: '', plugin: 'oxc', rule: 'erasing-op' },
-    { code: '', plugin: 'unicorn', rule: 'no-null' },
+describe('silentPlacements', () => {
+  const placements = [
+    {
+      path: 'p/oxc.erasing-op.probe.ts',
+      probe: { plugin: 'oxc', rule: 'erasing-op' },
+    },
+    {
+      path: 'scripts/p/unicorn.no-null.override-0.probe.ts',
+      probe: { plugin: 'unicorn', rule: 'no-null' },
+    },
+  ];
+  const fired = [
+    { code: 'oxc(erasing-op)', filename: 'p/oxc.erasing-op.probe.ts' },
+    {
+      code: 'unicorn(no-null)',
+      filename: './scripts/p/unicorn.no-null.override-0.probe.ts',
+    },
   ];
 
-  it('reports nothing when every probe fired', () => {
-    const reportedCodes = ['oxc(erasing-op)', 'unicorn(no-null)'];
-    expect(silentProbes({ probes, reportedCodes })).toEqual([]);
+  it('reports nothing when every probe fired in its own file', () => {
+    expect(silentPlacements({ diagnostics: fired, placements })).toEqual([]);
   });
 
-  it('reports the family whose rule did not fire', () => {
-    const silent = silentProbes({
-      probes,
-      reportedCodes: ['oxc(erasing-op)'],
+  it('reports the probe whose rule did not fire', () => {
+    const silent = silentPlacements({
+      diagnostics: fired.slice(0, 1),
+      placements,
     });
-    expect(silent.map(({ plugin }) => plugin)).toEqual(['unicorn']);
+    expect(silent.map(({ probe }) => probe.rule)).toEqual(['no-null']);
   });
 
-  it('reports every family when Oxlint reported nothing', () => {
-    expect(silentProbes({ probes, reportedCodes: [] })).toHaveLength(2);
-  });
-
-  it('ignores unrelated codes', () => {
-    const silent = silentProbes({
-      probes,
-      reportedCodes: ['eslint(no-debugger)'],
+  it('does not count the code when another file reported it', () => {
+    const silent = silentPlacements({
+      diagnostics: [
+        { code: 'unicorn(no-null)', filename: 'p/oxc.erasing-op.probe.ts' },
+        fired[0],
+      ],
+      placements,
     });
-    expect(silent).toHaveLength(2);
+    expect(silent).toHaveLength(1);
+  });
+
+  it('reports every probe when Oxlint reported nothing', () => {
+    expect(silentPlacements({ diagnostics: [], placements })).toHaveLength(2);
+  });
+});
+
+describe('familyPlacements', () => {
+  it('puts every family probe in the probe directory under its own name', () => {
+    expect(familyPlacements('d').map(({ path }) => path)).toEqual(
+      PLUGIN_PROBES.map((probe) => `d/${probeFilename(probe)}`),
+    );
+  });
+});
+
+describe('mergePlacements', () => {
+  it('keeps one placement per path and the rule that named it', () => {
+    const probe = { plugin: 'promise', rule: 'no-callback-in-promise' };
+    const named = { entry: 'rules', id: 'promise/no-callback-in-promise' };
+    expect(
+      mergePlacements([
+        { path: 'd/a.ts', probe, root: 'd' },
+        { named, path: 'd/a.ts', probe, root: 'd' },
+      ]),
+    ).toEqual([{ named, path: 'd/a.ts', probe, root: 'd' }]);
   });
 });
 
@@ -114,10 +153,11 @@ describe('staleRuntimeGlobs', () => {
 
 describe('PLUGIN_PROBES', () => {
   it('gives every probe its own file and its own diagnostic code', () => {
-    const files = PLUGIN_PROBES.map((probe) => probeFilename(probe));
-    const codes = PLUGIN_PROBES.map((probe) => probeCode(probe));
-    expect(new Set(files).size).toBe(PLUGIN_PROBES.length);
-    expect(new Set(codes).size).toBe(PLUGIN_PROBES.length);
+    const all = [...PLUGIN_PROBES, ...RULE_PROBES];
+    const files = all.map((probe) => probeFilename(probe));
+    const codes = all.map((probe) => probeCode(probe));
+    expect(new Set(files).size).toBe(all.length);
+    expect(new Set(codes).size).toBe(all.length);
   });
 
   it.each([
@@ -128,7 +168,7 @@ describe('PLUGIN_PROBES', () => {
   });
 
   it('gives every probe code to violate', () => {
-    for (const probe of PLUGIN_PROBES)
+    for (const probe of [...PLUGIN_PROBES, ...RULE_PROBES])
       expect(probe.code.length).toBeGreaterThan(0);
   });
 });
