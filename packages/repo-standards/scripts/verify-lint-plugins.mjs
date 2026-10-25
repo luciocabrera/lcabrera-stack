@@ -1,41 +1,48 @@
 #!/usr/bin/env node
 /**
  * Gate: the root lint configs are wired the way they claim — every Oxlint
- * plugin family loaded, no workspace config declaring a `lint`, `fmt` or
- * `staged` block, and both the Oxlint and Biome rosters classifying every
- * workspace exactly once.
+ * plugin family loaded, every rule the config turns on by name still reported,
+ * no workspace config declaring a `lint`, `fmt` or `staged` block, and both the
+ * Oxlint and Biome rosters classifying every workspace exactly once.
  *
- * Two mechanisms, because the failures differ. A plugin family is proven by
- * planting a violation — loaded-and-clean looks identical to not-loaded. A
- * roster is proven by reading the config against the workspaces on disk, since
- * no planted code can flag a glob that matches nothing.
+ * Two mechanisms, because the failures differ. A plugin family or a named rule
+ * is proven by planting a violation — loaded-and-clean looks identical to
+ * not-loaded. A roster is proven by reading the config against the workspaces
+ * on disk, since no planted code can flag a glob that matches nothing.
  * See `docs/decisions/ADR-042-oxlint-config-at-the-root.md`.
  *
  * Effects live here; the rules are pure in `./lint-plugins.mjs`.
  *
  * Usage: repo-verify-lint-plugins
+ * Exit codes: 0 when every check passes, 1 on any failure or an unreadable config.
  */
 import { execFileSync } from 'node:child_process';
 import {
   existsSync,
+  mkdirSync,
   mkdtempSync,
   readdirSync,
   readFileSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { join, relative } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import process from 'node:process';
 
 import { parseJsonc } from './jsonc.mjs';
 import {
   configsDeclaringKeys,
+  familyPlacements,
+  malformedProbes,
+  mergePlacements,
   multiplyClassifiedWorkspaces,
+  namedRules,
+  placeRuleProbes,
   PLUGIN_PROBES,
   pluginsWithoutCoverage,
   probeCode,
-  probeFilename,
-  silentProbes,
+  RULE_PROBES,
+  silentPlacements,
   staleRuntimeGlobs,
   unclassifiedWorkspaces,
   workspaceRosters,
@@ -47,30 +54,46 @@ const VP = join(REPO_ROOT, 'node_modules', '.bin', 'vp');
 
 const withProbeDir = (run) => {
   const dir = mkdtempSync(join(REPO_ROOT, '.oxlint-probe-'));
+  const created = [dir];
   try {
-    return run(dir);
+    return run(basename(dir), created);
   } finally {
-    rmSync(dir, { force: true, recursive: true });
+    for (const path of created) rmSync(path, { force: true, recursive: true });
   }
 };
 
-const lintCodes = (dir) => {
+const plantProbes = (placements, created) => {
+  const roots = new Set(placements.map(({ root }) => root));
+  roots.delete(basename(created[0]));
+  for (const root of roots) {
+    const absolute = join(REPO_ROOT, root);
+    if (existsSync(absolute))
+      throw new Error(`Lint-plugin gate: ${root} already exists.`);
+    created.push(mkdirSync(absolute, { recursive: true }));
+  }
+  for (const { path, probe } of placements) {
+    mkdirSync(dirname(join(REPO_ROOT, path)), { recursive: true });
+    writeFileSync(join(REPO_ROOT, path), probe.code);
+  }
+};
+
+const lintDiagnostics = (paths) => {
   const options = {
     cwd: REPO_ROOT,
     encoding: 'utf8',
     stdio: ['ignore', 'pipe', 'ignore'],
   };
-  const args = ['lint', '--format=json', relative(REPO_ROOT, dir)];
   let raw;
   try {
-    raw = execFileSync(VP, args, options);
+    raw = execFileSync(VP, ['lint', '--format=json', ...paths], options);
   } catch (error) {
     raw = error.stdout ?? '';
   }
-  const start = raw.indexOf('{');
-  return start === -1
-    ? []
-    : JSON.parse(raw.slice(start)).diagnostics.map(({ code }) => code);
+  try {
+    return { diagnostics: JSON.parse(raw.slice(raw.indexOf('{'))).diagnostics };
+  } catch {
+    return { refused: raw.trim() || 'Oxlint printed no report.' };
+  }
 };
 
 const workspaceDirs = (group) => {
@@ -108,9 +131,17 @@ const biomeRosters = () =>
       .overrides ?? [],
   );
 
-const configuredPlugins = async () => {
+const configuredLint = async () => {
   const module = await lintConfigModule();
-  return module.lintConfig.plugins;
+  const extra = module.LINT_RULE_PROBES ?? [];
+  if (!Array.isArray(extra) || malformedProbes(extra).length > 0)
+    throw new Error(
+      `Lint-plugin gate: LINT_RULE_PROBES in ${LINT_CONFIG} must be an array of { code, plugin, rule } strings.`,
+    );
+  return {
+    config: module.lintConfig,
+    probes: [...PLUGIN_PROBES, ...RULE_PROBES, ...extra],
+  };
 };
 
 const workspaceConfigs = () =>
@@ -171,40 +202,88 @@ const rosterFailures = ({ sources, workspaces }) =>
     ),
   ]);
 
+const silentMessage = ({ named, path, probe }) =>
+  `Oxlint did not report ${probeCode(probe)} for the deliberate violation in ${path}.\n` +
+  (named === undefined
+    ? `  Either the \`${probe.plugin}\` family is not loaded — add it to PLUGINS in\n` +
+      '  packages/vite-configs/src/vite.lint.shared.config.ts — or the root lint\n' +
+      `  config turns \`${probeCode(probe)}\` off, or Oxlint no longer reports it.\n`
+    : `  The root lint config turns \`${named.id}\` on in \`${named.entry}\`. Either the\n` +
+      `  \`${probe.plugin}\` plugin is not loaded for that path, or a later entry turns\n` +
+      '  the rule off there, or Oxlint no longer reports this case under that id.\n');
+
+const missingMessage = ({ entry, id }) =>
+  `\`${id}\` is turned on by name in \`${entry}\` of the root lint config, and no\n` +
+  '  probe proves Oxlint reports it. A named rule can stop reporting while the\n' +
+  '  config still loads, and only a planted violation shows it. Add a RULE_PROBES\n' +
+  '  entry in lint-plugins.mjs of @lcabrera/repo-standards, or a LINT_RULE_PROBES\n' +
+  `  export in the root ${LINT_CONFIG}.\n`;
+
+const unplaceableMessage = ({ entry, files, id }) =>
+  `\`${id}\` is turned on in \`${entry}\`, and no glob in its files (${files.join(', ')})\n` +
+  '  gives a path the gate can plant its probe at. It fills a `*` or `**` path\n' +
+  '  segment and one `*` in the file name, and the name must end in the probe\n' +
+  '  extension; braces, classes, `..`, an absolute path and a name without\n' +
+  '  `*` cannot be filled.\n';
+
+const probeRules = ({ config, probes }) =>
+  withProbeDir((dir, created) => {
+    const rules = placeRuleProbes({
+      dir,
+      probes,
+      rules: namedRules(config),
+    });
+    const placements = mergePlacements([
+      ...familyPlacements(dir),
+      ...rules.placed,
+    ]);
+    plantProbes(placements, created);
+    const { diagnostics, refused } = lintDiagnostics(
+      placements.map(({ path }) => path),
+    );
+    return {
+      missing: rules.missing,
+      named: rules.placed.length,
+      refused: refused === undefined ? [] : [refused],
+      silent:
+        refused === undefined
+          ? silentPlacements({ diagnostics, placements })
+          : [],
+      unplaceable: rules.unplaceable,
+    };
+  });
+
 const main = async () => {
   const workspaces = [...workspaceDirs('apps'), ...workspaceDirs('packages')];
   const rosters = rosterFailures({
     sources: await rosterSources(),
     workspaces,
   });
-  const plugins = await configuredPlugins();
+  const lint = await configuredLint();
+  const { plugins } = lint.config;
   const uncovered = pluginsWithoutCoverage(plugins);
 
   const stray = configsDeclaringKeys(
     workspaceConfigs(),
     Object.keys(ROOT_ONLY_KEYS),
   );
-  const silent = withProbeDir((dir) => {
-    for (const probe of PLUGIN_PROBES)
-      writeFileSync(join(dir, probeFilename(probe)), probe.code);
-    return silentProbes({
-      probes: PLUGIN_PROBES,
-      reportedCodes: lintCodes(dir),
-    });
-  });
+  const { missing, named, refused, silent, unplaceable } = probeRules(lint);
 
   for (const { key, path } of stray)
     process.stdout.write(
       `${path} declares \`${key}\`. This repo keeps that block in the root config.\n` +
         ROOT_ONLY_KEYS[key],
     );
-  for (const probe of silent)
+  for (const output of refused)
     process.stdout.write(
-      `Oxlint did not report ${probeCode(probe)} for a deliberate violation.\n` +
-        `  Either the \`${probe.plugin}\` family is not loaded — add it to PLUGINS in\n` +
-        '  packages/vite-configs/src/vite.lint.shared.config.ts — or the root lint\n' +
-        `  config turns \`${probeCode(probe)}\` off, or Oxlint no longer reports it.\n`,
+      'Oxlint refused the lint config, so no probe could run:\n' +
+        `${output.replaceAll(/^(?=.)/gmu, '  ')}\n`,
     );
+  for (const placement of silent)
+    process.stdout.write(silentMessage(placement));
+  for (const rule of missing) process.stdout.write(missingMessage(rule));
+  for (const rule of unplaceable)
+    process.stdout.write(unplaceableMessage(rule));
   for (const line of rosters) process.stdout.write(line);
   for (const plugin of uncovered)
     process.stdout.write(
@@ -215,7 +294,13 @@ const main = async () => {
     );
 
   const failures =
-    stray.length + silent.length + rosters.length + uncovered.length;
+    stray.length +
+    refused.length +
+    silent.length +
+    missing.length +
+    unplaceable.length +
+    rosters.length +
+    uncovered.length;
   if (failures > 0) {
     process.exitCode = 1;
     return;
@@ -223,7 +308,7 @@ const main = async () => {
   process.stdout.write(
     `Lint config: ${new Set(PLUGIN_PROBES.map((probe) => probe.plugin)).size} of ${plugins.length} plugin families ` +
       `proven live by a planted violation (the rest documented as unprobeable), ` +
-      `${PLUGIN_PROBES.length} probes in all, ` +
+      `${PLUGIN_PROBES.length} family probes and ${named} probes for rules the config turns on by name, ` +
       `${workspaces.length} workspaces classified exactly once by the Oxlint and ` +
       'Biome rosters alike, no workspace config shadows the root.\n',
   );

@@ -160,6 +160,96 @@ describe('extractCandidates', () => {
     ]);
   });
 
+  it('enforces the target of a reference-style link definition', () => {
+    const markdown = 'See [the facts][gone].\n\n[gone]: does-not-exist.json\n';
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([
+      'does-not-exist.json',
+    ]);
+  });
+
+  it('reads a definition target past its title, angle brackets and anchor', () => {
+    const markdown = [
+      '[a]: ../a/b.md "A title"',
+      "[b]: ./c.json 'Single'",
+      '[c]: d/e.md (Parenthesised)',
+      '[d]: <f/g.md>',
+      '  [e]: h.md#section',
+      '> [f]: quoted.md',
+      '[g]:',
+      '  next-line.md',
+    ].join('\n');
+
+    expect(
+      extractCandidates(markdown, REPO_ROOTS).toSorted((left, right) =>
+        left.localeCompare(right),
+      ),
+    ).toEqual([
+      '../a/b.md',
+      './c.json',
+      'd/e.md',
+      'f/g.md',
+      'h.md',
+      'next-line.md',
+      'quoted.md',
+    ]);
+  });
+
+  it('skips definitions with a scheme, an anchor, a footnote or code indentation', () => {
+    const markdown = [
+      '[site]: https://example.com/x.md',
+      '[mail]: mailto:a@example.com',
+      '[top]: #heading',
+      '[^note]: Footnote prose, not a target.',
+      '    [indented]: code-block.md',
+      'prose [inline]: not-at-line-start.md',
+      '`[code]: in-a-span.md`',
+      '[WIP]: prose that only looks like a definition.',
+    ].join('\n');
+
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([]);
+  });
+
+  it.each([
+    {
+      fence: 'a top-level fence',
+      lines: ['```markdown', 'BODY', '```'],
+    },
+    {
+      fence: 'a fence nested in a list item',
+      lines: ['10. Write the example:', '', '    ```md', '    BODY', '    ```'],
+    },
+    {
+      fence: 'a fence inside a blockquote',
+      lines: ['> ```md', '> BODY', '> ```'],
+    },
+  ])('ignores links and definitions inside $fence', ({ lines }) => {
+    const body = [
+      'See [the example](inline-in-fence.md).',
+      '[gone]: defined-in-fence.md',
+    ];
+    const markdown = [
+      ...lines.flatMap((line) =>
+        line.endsWith('BODY')
+          ? body.map((entry) => `${line.slice(0, -'BODY'.length)}${entry}`)
+          : [line],
+      ),
+      '',
+      '[kept]: after-the-fence.md',
+    ].join('\n');
+
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([
+      'after-the-fence.md',
+    ]);
+  });
+
+  it('parses a long whitespace run after a label in bounded time', () => {
+    const markdown = `[a]:${' '.repeat(100_000)}<`;
+    const started = performance.now();
+
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([]);
+    expect(performance.now() - started).toBeLessThan(1000);
+  });
+
   it('strips heading anchors and trailing sentence punctuation', () => {
     const markdown =
       'Read `docs/README.md`, then `scripts/lib/labels.mjs`. Also [x](../a/b.md#why).';
