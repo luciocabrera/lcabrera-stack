@@ -25,13 +25,12 @@ import {
   describeMissing,
   missingChangesets,
   packageTouches,
-  packsNeeded,
 } from './lib/changeset-required.mjs';
 import {
+  packerFor,
   readChanges,
   readManifests,
   readNamedPackages,
-  readShipped,
   resolveMergeBase,
 } from './lib/changeset-sources.mjs';
 
@@ -55,17 +54,16 @@ const findMissing = async ({ baseRef, root }) => {
   const mergeBase = resolveMergeBase({ baseRef, root });
   const changes = readChanges({ mergeBase, root });
   const manifests = readManifests({ mergeBase, root });
-  const touches = packageTouches({ changes, manifests });
-  const shipped = readShipped({
-    mergeBase,
-    packs: packsNeeded(touches),
-    root,
-  });
   const namedPackages = await readNamedPackages({
     changesetIds: changedChangesetIds(changes),
     root,
   });
-  return missingChangesets({ manifests, namedPackages, shipped, touches });
+  return missingChangesets({
+    manifests,
+    namedPackages,
+    pack: packerFor({ mergeBase, root }),
+    touches: packageTouches({ changes, manifests }),
+  });
 };
 
 const report = ({ baseRef, missing }) => {

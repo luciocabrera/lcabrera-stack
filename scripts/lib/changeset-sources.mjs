@@ -5,7 +5,6 @@
  * tarball `pnpm pack` writes, because the packer that publishes is the only
  * authority on what ships.
  */
-import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   mkdtempSync,
@@ -32,8 +31,6 @@ const DEPENDENCY_FIELDS = new Set([
   'optionalDependencies',
   'peerDependencies',
 ]);
-
-const TAR = ['/usr/bin/tar', '/bin/tar'].find((path) => existsSync(path));
 
 const gitOrThrow = (args, cwd) => {
   const output = runGit({ args, cwd });
@@ -146,15 +143,17 @@ const withoutDependencies = (manifestText) =>
 const basePackedFiles = ({ dir, mergeBase, root }) => {
   const scratch = mkdtempSync(join(tmpdir(), 'changeset-gate-'));
   try {
-    const archive = join(scratch, 'base.tar');
     gitOrThrow(
-      ['archive', '--format=tar', '-o', archive, mergeBase, '--', dir],
+      [
+        `--work-tree=${scratch}`,
+        'restore',
+        `--source=${mergeBase}`,
+        '--worktree',
+        '--',
+        dir,
+      ],
       root,
     );
-    if (TAR === undefined) {
-      throw new Error('no tar in /usr/bin or /bin to unpack the base package.');
-    }
-    execFileSync(TAR, ['-xf', archive, '-C', scratch], { stdio: 'ignore' });
     const manifestPath = join(scratch, dir, 'package.json');
     writeFileSync(
       manifestPath,
@@ -166,15 +165,12 @@ const basePackedFiles = ({ dir, mergeBase, root }) => {
   }
 };
 
-export const readShipped = ({ mergeBase, packs, root }) =>
-  new Map(
-    packs.map(({ dir, side }) => [
-      `${side}:${dir}`,
-      side === 'head'
-        ? packedFiles(join(root, dir))
-        : basePackedFiles({ dir, mergeBase, root }),
-    ]),
-  );
+export const packerFor =
+  ({ mergeBase, root }) =>
+  ({ dir, side }) =>
+    side === 'head'
+      ? packedFiles(join(root, dir))
+      : basePackedFiles({ dir, mergeBase, root });
 
 export const readNamedPackages = async ({ changesetIds, root }) => {
   if (changesetIds.length === 0) {

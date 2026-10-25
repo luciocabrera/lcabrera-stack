@@ -630,10 +630,14 @@ to the spec so they cannot drift. If the standard itself must change, change
 ### Releasing, Changelog & Labels
 
 The `@lcabrera/*` packages are versioned with **Changesets**, independently. A
-change to a file a package ships **carries a changeset in the same PR** — that is
-the part you must not forget; `vp run release:version` consumes them. "Ships"
-means the packed tarball, so a test or a file outside `files` needs none, and a
-shipped `README.md` does. `vp run changesets:verify` fails a PR that misses one.
+change that affects consumers **carries a changeset in the same PR** — that is the
+part you must not forget; `vp run release:version` consumes them.
+`vp run changesets:verify` enforces the mechanical subset: it fails a PR that
+changes a file in a package's packed tarball (a shipped `README.md` counts, a test
+or a file outside `files` does not) with no changeset naming that package. It
+cannot see a `catalog:` range changed in `pnpm-workspace.yaml`, which pnpm writes
+into every published manifest at pack time while no file under the package
+changes, so that changeset stays a review responsibility.
 
 Two invariants worth knowing before you touch a manifest: **`private: true` is the
 only thing keeping a workspace out of the registry** (the public ones no

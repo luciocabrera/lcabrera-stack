@@ -4,7 +4,8 @@
  * package's packed tarball: the head listing for an added or modified file, the
  * base listing for a deleted one. A package whose version the change itself
  * moves, or that was absent or private at the base, is being released by the
- * change and needs no changeset. Pure, so the decision is testable without git.
+ * change and needs no changeset. Only the packages still open after those
+ * checks are packed, through the `pack` function the caller passes in.
  */
 
 const SINGLE_PATH = 1;
@@ -85,15 +86,6 @@ export const packageTouches = ({ changes, manifests }) =>
         ];
   });
 
-export const packsNeeded = (touches) => [
-  ...new Map(
-    touches.map(({ dir, side }) => [`${side}:${dir}`, { dir, side }]),
-  ).values(),
-];
-
-const isShipped = ({ dir, path, side }, shipped) =>
-  shipped.get(`${side}:${dir}`)?.has(path.slice(dir.length + 1)) === true;
-
 const publishedVersions = (manifests) =>
   new Map(
     manifests
@@ -101,22 +93,36 @@ const publishedVersions = (manifests) =>
       .map(({ name, version }) => [name, version]),
   );
 
+export const openTouches = ({ manifests, namedPackages, touches }) => {
+  const headVersions = publishedVersions(manifests.head);
+  const baseVersions = publishedVersions(manifests.base);
+  return touches
+    .filter(({ name }) => headVersions.has(name))
+    .filter(({ name }) => baseVersions.get(name) === headVersions.get(name))
+    .filter(({ name }) => !namedPackages.has(name));
+};
+
+const packKey = ({ dir, side }) => `${side}:${dir}`;
+
+const packEach = (touches, pack) =>
+  new Map(
+    [...new Map(touches.map((touch) => [packKey(touch), touch])).values()].map(
+      ({ dir, side }) => [packKey({ dir, side }), pack({ dir, side })],
+    ),
+  );
+
 export const missingChangesets = ({
   manifests,
   namedPackages,
-  shipped,
+  pack,
   touches,
 }) => {
-  const headVersions = publishedVersions(manifests.head);
-  const baseVersions = publishedVersions(manifests.base);
-  const releasedByChange = (name) =>
-    baseVersions.get(name) !== headVersions.get(name);
-
-  const shippedFiles = touches
-    .filter((touch) => isShipped(touch, shipped))
-    .filter(({ name }) => headVersions.has(name))
-    .filter(({ name }) => !releasedByChange(name))
-    .filter(({ name }) => !namedPackages.has(name))
+  const open = openTouches({ manifests, namedPackages, touches });
+  const shipped = packEach(open, pack);
+  const shippedFiles = open
+    .filter((touch) =>
+      shipped.get(packKey(touch)).has(touch.path.slice(touch.dir.length + 1)),
+    )
     .reduce((byName, { name, path }) => {
       byName.set(name, [...(byName.get(name) ?? []), path]);
       return byName;

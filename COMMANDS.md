@@ -505,9 +505,12 @@ Versions are chosen by people, bumped by one command, and published by CI.
 | `vp run release:status`    | show what would be released, versus `origin/main`                                                                                                                                                                                                                                                                                                                                                              |
 | `vp run release:version`   | consume the changesets: bump versions, write per-package changelogs, then raise every shipped range floor to the new versions; if that raised a floor and the changesets did not move `@lcabrera/devkit`, add a devkit patch changeset naming the floors and version again                                                                                                                                     |
 
-The loop: a change to a file a package ships carries a changeset in the same PR
-(`vp run release:add`), and `changesets:verify` fails the PR in CI when it does
-not. When you want to cut a release, run `vp run release:version` and open an ordinary PR with the result. Merging it
+The loop: a change that affects consumers carries a changeset in the same PR
+(`vp run release:add`). `changesets:verify` enforces the part that is a changed
+file in a package's tarball; a `catalog:` range changed in `pnpm-workspace.yaml`
+reaches every manifest that names it without changing such a file, so review
+still owns that case. When you want to cut a release, run
+`vp run release:version` and open an ordinary PR with the result. Merging it
 triggers [`release.yml`](.github/workflows/release.yml), which builds, publishes
 every package whose version is not yet on npm, and opens a GitHub Release for it.
 

@@ -88,46 +88,113 @@ describe('packageTouches', () => {
 });
 
 describe('missingChangesets', () => {
-  const touches = [
-    {
-      dir: 'packages/alpha',
-      name: '@s/alpha',
-      path: 'packages/alpha/README.md',
-      side: 'head',
-    },
-  ];
-  const shipped = new Map([['head:packages/alpha', new Set(['README.md'])]]);
+  const touchIn = (manifest, file) => ({
+    dir: manifest.dir,
+    name: manifest.name,
+    path: `${manifest.dir}/${file}`,
+    side: 'head',
+  });
+  const INTERNAL = {
+    dir: 'apps/site',
+    name: 'site',
+    private: true,
+    version: '0.0.0',
+  };
 
-  it('asks nothing of a package the change no longer publishes', () => {
-    expect(
-      missingChangesets({
-        manifests: { base: [ALPHA], head: [{ ...ALPHA, private: true }] },
-        namedPackages: new Set(),
-        shipped,
+  const recordingPack = (shipped) => {
+    const calls = [];
+    return {
+      calls,
+      pack: (target) => {
+        calls.push(`${target.side}:${target.dir}`);
+        return new Set(shipped);
+      },
+    };
+  };
+
+  const check = ({ manifests, namedPackages = new Set(), touches }) => {
+    const recorder = recordingPack(['README.md', 'src/index.ts']);
+    return {
+      calls: recorder.calls,
+      missing: missingChangesets({
+        manifests,
+        namedPackages,
+        pack: recorder.pack,
         touches,
       }),
-    ).toEqual([]);
-  });
+    };
+  };
 
-  it('asks nothing of a package absent at the base', () => {
+  it('names the package and its shipped file, packing it once', () => {
     expect(
-      missingChangesets({
-        manifests: { base: [], head: [ALPHA] },
-        namedPackages: new Set(),
-        shipped,
-        touches,
-      }),
-    ).toEqual([]);
-  });
-
-  it('names the package and its shipped file otherwise', () => {
-    expect(
-      missingChangesets({
+      check({
         manifests: { base: [ALPHA], head: [ALPHA] },
-        namedPackages: new Set(),
-        shipped,
-        touches,
+        touches: [
+          touchIn(ALPHA, 'README.md'),
+          touchIn(ALPHA, 'src/index.ts'),
+          touchIn(ALPHA, 'src/index.test.ts'),
+        ],
       }),
-    ).toEqual([{ files: ['packages/alpha/README.md'], name: '@s/alpha' }]);
+    ).toEqual({
+      calls: ['head:packages/alpha'],
+      missing: [
+        {
+          files: ['packages/alpha/README.md', 'packages/alpha/src/index.ts'],
+          name: '@s/alpha',
+        },
+      ],
+    });
+  });
+
+  it('packs nothing for a private workspace', () => {
+    expect(
+      check({
+        manifests: { base: [INTERNAL], head: [INTERNAL] },
+        touches: [touchIn(INTERNAL, 'README.md')],
+      }),
+    ).toEqual({ calls: [], missing: [] });
+  });
+
+  it('packs nothing for a package a changeset in the change already names', () => {
+    expect(
+      check({
+        manifests: { base: [ALPHA], head: [ALPHA] },
+        namedPackages: new Set(['@s/alpha']),
+        touches: [touchIn(ALPHA, 'README.md')],
+      }),
+    ).toEqual({ calls: [], missing: [] });
+  });
+
+  it('packs nothing for a package whose version the change moves', () => {
+    expect(
+      check({
+        manifests: { base: [ALPHA], head: [{ ...ALPHA, version: '0.2.0' }] },
+        touches: [touchIn(ALPHA, 'README.md')],
+      }),
+    ).toEqual({ calls: [], missing: [] });
+  });
+
+  it('packs nothing for a package absent or private at the base', () => {
+    expect(
+      check({
+        manifests: { base: [], head: [ALPHA] },
+        touches: [touchIn(ALPHA, 'README.md')],
+      }),
+    ).toEqual({ calls: [], missing: [] });
+    expect(
+      check({
+        manifests: { base: [{ ...ALPHA, private: true }], head: [ALPHA] },
+        touches: [touchIn(ALPHA, 'README.md')],
+      }),
+    ).toEqual({ calls: [], missing: [] });
+  });
+
+  it('packs nothing for a package the change makes private', () => {
+    expect(
+      check({
+        manifests: { base: [ALPHA], head: [{ ...ALPHA, private: true }] },
+        touches: [touchIn(ALPHA, 'README.md')],
+      }),
+    ).toEqual({ calls: [], missing: [] });
   });
 });
