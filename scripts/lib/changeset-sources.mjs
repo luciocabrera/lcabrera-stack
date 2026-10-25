@@ -5,6 +5,7 @@
  * tarball `pnpm pack` writes, because the packer that publishes is the only
  * authority on what ships.
  */
+import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   mkdtempSync,
@@ -15,13 +16,20 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import process from 'node:process';
 
 import { getReleasePlan } from '@changesets/get-release-plan';
 
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
-import { runGit } from '../../packages/repo-standards/scripts/git-exec.mjs';
+import { buildGitEnv } from '../../packages/repo-standards/scripts/git-exec.mjs';
 import { packAndRead } from '../../packages/repo-standards/scripts/publish-pack.mjs';
-import { parseNameStatus, untrackedChanges } from './changeset-required.mjs';
+import {
+  changedChangesetIds,
+  missingChangesets,
+  packageTouches,
+  parseNameStatus,
+  untrackedChanges,
+} from './changeset-required.mjs';
 
 const DEPENDENCY_FIELDS = new Set([
   'bundleDependencies',
@@ -32,37 +40,46 @@ const DEPENDENCY_FIELDS = new Set([
   'peerDependencies',
 ]);
 
-const gitOrThrow = (args, cwd) => {
-  const output = runGit({ args, cwd });
-  if (output === undefined) {
+const TRUSTED_GIT = ['/usr/local/bin/git', '/usr/bin/git', '/bin/git'].find(
+  (path) => existsSync(path),
+);
+
+export const systemGit = (root) => (args) => {
+  if (TRUSTED_GIT === undefined) {
+    throw new Error('no git in /usr/local/bin, /usr/bin or /bin.');
+  }
+  try {
+    return execFileSync(TRUSTED_GIT, args, {
+      cwd: root,
+      encoding: 'utf8',
+      env: buildGitEnv(process.env),
+      maxBuffer: 64 * 1024 * 1024,
+      stdio: ['ignore', 'pipe', 'pipe'],
+    });
+  } catch (error) {
+    const stderr = String(error.stderr ?? '').trim();
     throw new Error(
-      `\`git ${args.join(' ')}\` failed — refusing to report a pass on no data.`,
+      `\`git ${args.join(' ')}\` failed${stderr === '' ? '' : `: ${stderr}`} — refusing to report a pass on data it could not read.`,
     );
   }
-  return output;
 };
 
-export const resolveMergeBase = ({ baseRef, root }) => {
-  const mergeBase = runGit({
-    args: ['merge-base', baseRef, 'HEAD'],
-    cwd: root,
-  });
-  if (mergeBase === undefined || mergeBase === '') {
-    throw new Error(
-      `cannot resolve a merge base with '${baseRef}'. Fetch it (\`git fetch origin\`), or in CI check out with fetch-depth: 0.`,
-    );
+const resolveMergeBase = ({ baseRef, git }) => {
+  const mergeBase = git(['merge-base', baseRef, 'HEAD']).trim();
+  if (mergeBase === '') {
+    throw new Error(`\`git merge-base ${baseRef} HEAD\` printed no commit.`);
   }
   return mergeBase;
 };
 
-export const readChanges = ({ mergeBase, root }) => [
-  ...parseNameStatus(
-    gitOrThrow(['diff', '--name-status', '-z', '-M', mergeBase], root),
-  ),
+const readChanges = ({ git, mergeBase }) => [
+  ...parseNameStatus(git(['diff', '--name-status', '-z', '-M', mergeBase])),
   ...untrackedChanges(
-    gitOrThrow(['ls-files', '-z', '--others', '--exclude-standard'], root),
+    git(['ls-files', '-z', '--others', '--exclude-standard']),
   ),
 ];
+
+const nulList = (output) => output.split('\0').filter((entry) => entry !== '');
 
 const toManifest = (dir, text) => {
   const manifest = JSON.parse(text);
@@ -89,33 +106,45 @@ const headManifests = (root, workspaceDirs) =>
       toManifest(dir, readFileSync(join(root, dir, 'package.json'), 'utf8')),
     );
 
-const baseManifests = ({ mergeBase, root, workspaceDirs }) =>
-  workspaceDirs
-    .flatMap((workspaceDir) =>
-      (
-        runGit({
-          args: ['ls-tree', '--name-only', `${mergeBase}:${workspaceDir}`],
-          cwd: root,
-        }) ?? ''
-      )
-        .split('\n')
-        .filter((name) => name !== '')
-        .map((name) => `${workspaceDir}/${name}`),
-    )
-    .map((dir) => ({
-      dir,
-      text: runGit({
-        args: ['show', `${mergeBase}:${dir}/package.json`],
-        cwd: root,
-      }),
-    }))
-    .filter(({ text }) => text !== undefined)
-    .map(({ dir, text }) => toManifest(dir, text));
+const baseManifests = ({ git, mergeBase, workspaceDirs }) => {
+  const dirs = workspaceDirs.flatMap((workspaceDir) =>
+    nulList(
+      git([
+        'ls-tree',
+        '-z',
+        '-d',
+        '--name-only',
+        mergeBase,
+        '--',
+        `${workspaceDir}/`,
+      ]),
+    ),
+  );
+  if (dirs.length === 0) {
+    return [];
+  }
+  const manifestPaths = nulList(
+    git([
+      'ls-tree',
+      '-z',
+      '--name-only',
+      mergeBase,
+      '--',
+      ...dirs.map((dir) => `${dir}/package.json`),
+    ]),
+  );
+  return manifestPaths.map((path) =>
+    toManifest(
+      path.slice(0, -'/package.json'.length),
+      git(['show', `${mergeBase}:${path}`]),
+    ),
+  );
+};
 
-export const readManifests = ({ mergeBase, root }) => {
+const readManifests = ({ git, mergeBase, root }) => {
   const { workspaceDirs } = readPublishing(root);
   return {
-    base: baseManifests({ mergeBase, root, workspaceDirs }),
+    base: baseManifests({ git, mergeBase, workspaceDirs }),
     head: headManifests(root, workspaceDirs),
   };
 };
@@ -140,20 +169,17 @@ const withoutDependencies = (manifestText) =>
     2,
   )}\n`;
 
-const basePackedFiles = ({ dir, mergeBase, root }) => {
+const basePackedFiles = ({ dir, git, mergeBase }) => {
   const scratch = mkdtempSync(join(tmpdir(), 'changeset-gate-'));
   try {
-    gitOrThrow(
-      [
-        `--work-tree=${scratch}`,
-        'restore',
-        `--source=${mergeBase}`,
-        '--worktree',
-        '--',
-        dir,
-      ],
-      root,
-    );
+    git([
+      `--work-tree=${scratch}`,
+      'restore',
+      `--source=${mergeBase}`,
+      '--worktree',
+      '--',
+      dir,
+    ]);
     const manifestPath = join(scratch, dir, 'package.json');
     writeFileSync(
       manifestPath,
@@ -165,14 +191,14 @@ const basePackedFiles = ({ dir, mergeBase, root }) => {
   }
 };
 
-export const packerFor =
-  ({ mergeBase, root }) =>
+const packerFor =
+  ({ git, mergeBase, root }) =>
   ({ dir, side }) =>
     side === 'head'
       ? packedFiles(join(root, dir))
-      : basePackedFiles({ dir, mergeBase, root });
+      : basePackedFiles({ dir, git, mergeBase });
 
-export const readNamedPackages = async ({ changesetIds, root }) => {
+const readNamedPackages = async ({ changesetIds, root }) => {
   if (changesetIds.length === 0) {
     return new Set();
   }
@@ -182,4 +208,21 @@ export const readNamedPackages = async ({ changesetIds, root }) => {
       .filter(({ id }) => changesetIds.includes(id))
       .flatMap(({ releases }) => releases.map(({ name }) => name)),
   );
+};
+
+export const findMissing = async ({ baseRef, gitRunner, root }) => {
+  const git = gitRunner ?? systemGit(root);
+  const mergeBase = resolveMergeBase({ baseRef, git });
+  const changes = readChanges({ git, mergeBase });
+  const manifests = readManifests({ git, mergeBase, root });
+  const namedPackages = await readNamedPackages({
+    changesetIds: changedChangesetIds(changes),
+    root,
+  });
+  return missingChangesets({
+    manifests,
+    namedPackages,
+    pack: packerFor({ git, mergeBase, root }),
+    touches: packageTouches({ changes, manifests }),
+  });
 };

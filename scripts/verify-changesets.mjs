@@ -20,19 +20,8 @@ import { flagValue } from '../packages/repo-standards/scripts/cli-input.mjs';
 import { readConventions } from '../packages/repo-standards/scripts/config.mjs';
 import { errorMessage } from '../packages/repo-standards/scripts/error-message.mjs';
 import { runGit } from '../packages/repo-standards/scripts/git-exec.mjs';
-import {
-  changedChangesetIds,
-  describeMissing,
-  missingChangesets,
-  packageTouches,
-} from './lib/changeset-required.mjs';
-import {
-  packerFor,
-  readChanges,
-  readManifests,
-  readNamedPackages,
-  resolveMergeBase,
-} from './lib/changeset-sources.mjs';
+import { describeMissing } from './lib/changeset-required.mjs';
+import { findMissing } from './lib/changeset-sources.mjs';
 
 const repositoryRoot = () => {
   const root = runGit({
@@ -49,22 +38,6 @@ const baseRefFor = (root) =>
   flagValue('--base') ??
   process.env.TEST_CHANGED_BASE ??
   `origin/${readConventions(root).defaultBranch}`;
-
-const findMissing = async ({ baseRef, root }) => {
-  const mergeBase = resolveMergeBase({ baseRef, root });
-  const changes = readChanges({ mergeBase, root });
-  const manifests = readManifests({ mergeBase, root });
-  const namedPackages = await readNamedPackages({
-    changesetIds: changedChangesetIds(changes),
-    root,
-  });
-  return missingChangesets({
-    manifests,
-    namedPackages,
-    pack: packerFor({ mergeBase, root }),
-    touches: packageTouches({ changes, manifests }),
-  });
-};
 
 const report = ({ baseRef, missing }) => {
   if (missing.length === 0) {

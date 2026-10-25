@@ -9,6 +9,7 @@ import {
   createFixtureRoots,
   writeIn,
 } from '../../packages/repo-standards/scripts/repo-fixtures.mjs';
+import { findMissing, systemGit } from './changeset-sources.mjs';
 
 const CLI = join(
   dirname(fileURLToPath(import.meta.url)),
@@ -184,5 +185,50 @@ describe('verify-changesets against a scratch workspace', () => {
     );
 
     expect(result.status).toBe(0);
+  });
+});
+
+describe('verify-changesets when git cannot answer', () => {
+  const failingOn = (root, subcommand) => {
+    const realGit = systemGit(root);
+    return (args) => {
+      if (args.includes(subcommand)) {
+        throw new Error(`\`git ${args.join(' ')}\` failed: injected`);
+      }
+      return realGit(args);
+    };
+  };
+
+  it.each(['merge-base', 'diff', 'ls-files', 'ls-tree', 'show', 'restore'])(
+    'errors instead of passing when `git %s` fails',
+    async (subcommand) => {
+      const root = branchWith({ removals: ['packages/beta/src/index.mjs'] });
+
+      await expect(
+        findMissing({
+          baseRef: 'main',
+          gitRunner: failingOn(root, subcommand),
+          root,
+        }),
+      ).rejects.toThrow(subcommand);
+    },
+  );
+
+  it('names the command and its stderr when the base is not a commit', async () => {
+    const root = branchWith({});
+
+    await expect(findMissing({ baseRef: 'no-such-ref', root })).rejects.toThrow(
+      /`git merge-base no-such-ref HEAD` failed: .*no-such-ref/u,
+    );
+  });
+
+  it('reads a workspace directory the base never had as holding no package', async () => {
+    const root = branchWith({
+      edits: {
+        'apps/site/package.json': manifest({ name: 'site', version: '0.1.0' }),
+      },
+    });
+
+    await expect(findMissing({ baseRef: 'main', root })).resolves.toEqual([]);
   });
 });
