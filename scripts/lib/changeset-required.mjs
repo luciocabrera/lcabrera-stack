@@ -93,7 +93,7 @@ const publishedVersions = (manifests) =>
       .map(({ name, version }) => [name, version]),
   );
 
-export const openTouches = ({ manifests, namedPackages, touches }) => {
+const openTouches = ({ manifests, namedPackages, touches }) => {
   const headVersions = publishedVersions(manifests.head);
   const baseVersions = publishedVersions(manifests.base);
   return touches
