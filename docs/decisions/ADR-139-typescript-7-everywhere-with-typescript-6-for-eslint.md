@@ -83,7 +83,7 @@ their own TypeScript.
   install on a `typescript` peer range it cannot read.
 - The hook reads ranges with `scripts/lib/semver-range.cjs`, a dependency-free
   subset of `semver.satisfies`, because pnpm loads the hook before anything is
-  installed. `scripts/semver-range.test.mjs` compares it with `semver` across
+  installed. `scripts/lib/semver-range.test.mjs` compares it with `semver` across
   every operator, full and partial bounds, and prereleases. It also covers every
   `typescript` peer range the lockfile still records, plus the ranges the hook
   rewrites, which the lockfile no longer shows. It also checks that every range `semver` rejects

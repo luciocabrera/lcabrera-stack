@@ -1,9 +1,7 @@
 /**
  * The subset of `semver.satisfies` the `.pnpmfile.cjs` hook needs, with no
  * dependency, because pnpm loads the hook before anything is installed
- * (ADR-139). `scripts/eslint-typescript.test.mjs` checks it against `semver`.
- *
- * A range it cannot read throws instead of guessing.
+ * (ADR-139). `semver-range.test.mjs`, beside it, checks it against `semver`.
  *
  * Usage: required by `scripts/lib/eslint-typescript.cjs`. It runs no command;
  * it throws on a version or range it cannot read.

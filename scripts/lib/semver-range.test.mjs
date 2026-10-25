@@ -8,9 +8,9 @@ import { describe, expect, it } from 'vite-plus/test';
 import { parseAllDocuments } from 'yaml';
 
 const require = createRequire(import.meta.url);
-const { satisfies } = require('./lib/semver-range.cjs');
+const { satisfies } = require('./semver-range.cjs');
 
-const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
+const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 
 const OPERATORS = ['', '=', '>', '>=', '<', '<=', '~', '~>', '^'];
 
