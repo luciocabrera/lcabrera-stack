@@ -11,7 +11,7 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import process from 'node:process';
 
-import { run } from './devkit-pack.mjs';
+import { OUTPUT_LIMIT_BYTES, run } from './devkit-pack.mjs';
 import {
   commandLabel,
   nodeFindings,
@@ -24,8 +24,6 @@ import { modifiedTrackedFiles } from './devkit-workspace-tracked.mjs';
 export const TREE_NAME = 'made';
 
 const INSTALL_ARGS = ['install', '--no-frozen-lockfile'];
-
-const OUTPUT_LIMIT_BYTES = 64 * 1024 * 1024;
 
 /**
  * @param {string} path
