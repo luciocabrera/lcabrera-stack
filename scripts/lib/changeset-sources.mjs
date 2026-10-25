@@ -5,7 +5,6 @@
  * tarball `pnpm pack` writes, because the packer that publishes is the only
  * authority on what ships.
  */
-import { execFileSync } from 'node:child_process';
 import {
   existsSync,
   mkdtempSync,
@@ -16,12 +15,11 @@ import {
 } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import process from 'node:process';
 
 import { getReleasePlan } from '@changesets/get-release-plan';
 
 import { readPublishing } from '../../packages/repo-standards/scripts/config.mjs';
-import { buildGitEnv } from '../../packages/repo-standards/scripts/git-exec.mjs';
+import { runGitStatus } from '../../packages/repo-standards/scripts/git-exec.mjs';
 import { packAndRead } from '../../packages/repo-standards/scripts/publish-pack.mjs';
 import {
   changedChangesetIds,
@@ -40,29 +38,15 @@ const DEPENDENCY_FIELDS = new Set([
   'peerDependencies',
 ]);
 
-const TRUSTED_GIT = ['/usr/local/bin/git', '/usr/bin/git', '/bin/git'].find(
-  (path) => existsSync(path),
-);
-
 export const systemGit = (root) => (args) => {
-  if (TRUSTED_GIT === undefined) {
-    throw new Error('no git in /usr/local/bin, /usr/bin or /bin.');
-  }
-  try {
-    return execFileSync(TRUSTED_GIT, args, {
-      cwd: root,
-      encoding: 'utf8',
-      env: buildGitEnv(process.env),
-      maxBuffer: 64 * 1024 * 1024,
-      stdio: ['ignore', 'pipe', 'pipe'],
-    });
-  } catch (error) {
-    const stderr = String(error.stderr ?? '').trim();
+  const { status, stderr, stdout } = runGitStatus({ args, cwd: root });
+  if (status !== 0) {
     const detail = stderr === '' ? '' : ': ' + stderr;
     throw new Error(
       `\`git ${args.join(' ')}\` failed${detail} — refusing to report a pass on data it could not read.`,
     );
   }
+  return stdout;
 };
 
 const GIT_REF = /^[\w@{}^~][\w./@{}^~-]*$/u;
