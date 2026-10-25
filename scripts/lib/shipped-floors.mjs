@@ -209,6 +209,6 @@ export const floorChangeset = ({ packageName, raised }) =>
         `- \`${name}\` \`${to}\` (was \`${from}\`) in ${placeOf(kind)}`,
     ),
     '',
-    'Until this release is a day old, pnpm installs none of these versions, because its minimum release age holds them back. A repository created in that window needs `pnpm_config_minimum_release_age=0 pnpm install` for its first install.',
+    "Until this release is a day old, these versions are younger than pnpm's minimum release age and no older version satisfies the floor, so a plain install takes them anyway and appends each to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`. A repository created in that window keeps that file unchanged by running its first install as `pnpm_config_minimum_release_age=0 pnpm install`.",
     '',
   ].join('\n');

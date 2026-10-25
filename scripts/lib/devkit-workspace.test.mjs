@@ -11,7 +11,6 @@ import {
   hooksPathFindings,
   missingBlueprintFiles,
   missingToolchainBins,
-  modifiedTrackedFiles,
   nodeFindings,
   outputTail,
   serveFindings,
@@ -132,23 +131,6 @@ describe('taskFindings', () => {
     ).toEqual([
       expect.stringContaining('could not run (spawnSync vp ENOBUFS)'),
     ]);
-  });
-});
-
-describe('modifiedTrackedFiles', () => {
-  it('reports nothing for a clean tree', () => {
-    expect(modifiedTrackedFiles('')).toEqual([]);
-  });
-
-  it('names each committed file a step changed', () => {
-    const findings = modifiedTrackedFiles(
-      ' M vite.config.ts\n M apps/web/src/root.tsx\n',
-    );
-    expect(findings).toHaveLength(2);
-    expect(findings[0]).toContain(
-      '`vite.config.ts` changed while the gate ran',
-    );
-    expect(findings[1]).toContain('`apps/web/src/root.tsx`');
   });
 });
 

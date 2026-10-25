@@ -88,16 +88,6 @@ export const trackedPathsIn = (porcelain) =>
     .map((line) => line.slice(3));
 
 /**
- * @param {string} porcelain
- * @returns {string[]}
- */
-export const modifiedTrackedFiles = (porcelain) =>
-  trackedPathsIn(porcelain).map(
-    (path) =>
-      `\`${path}\` changed while the gate ran — a task rewrote a file the blueprint shipped, so a consumer's fresh tree goes dirty the first time they run it`,
-  );
-
-/**
  * @param {{ blueprint: readonly string[], placed: readonly string[],
  *           targetOf: (path: string) => string | undefined }} args
  * @returns {string[]}

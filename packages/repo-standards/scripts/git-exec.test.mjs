@@ -72,4 +72,12 @@ describe('runGitStatus', () => {
     });
     expect(bad.status).not.toBe(0);
   });
+
+  it('returns what git wrote to stderr, so a caller can say why it failed', () => {
+    const bad = runGitStatus({
+      args: ['not-a-git-command'],
+      cwd: process.cwd(),
+    });
+    expect(bad.stderr).toContain('not-a-git-command');
+  });
 });

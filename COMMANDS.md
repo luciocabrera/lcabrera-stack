@@ -93,7 +93,7 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 `scripts:verify`, `scripts:exits:verify`, `seeds:verify`, `shipped-ranges:verify`,
 `devkit:closure -- --shipped`, `docs:verify`,
 `registers:verify`, `package-refs:verify`, `departed:verify`,
-`renames:verify`, `route-names:verify`,
+`renames:verify`, `changesets:verify`, `route-names:verify`,
 `inventory:verify`, `adr:verify`, `viteplus:verify`, `configs:verify`,
 `conflict-markers:verify` and `fallow:dead-code:verify`, mirroring the
 "Quality Gate (Format · Lint · Types)" job in
@@ -496,16 +496,20 @@ empty one rather than passing over nothing.
 
 Versions are chosen by people, bumped by one command, and published by CI.
 
-| Command                  | Does                                                                                                                                                                                                                                                                       |
-| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vp run release:add`     | write a changeset — pick the packages and patch/minor/major, say what changed                                                                                                                                                                                              |
-| `vp run release:audit`   | read the manifests already on npm and check what a consumer would get                                                                                                                                                                                                      |
-| `vp run release:plan`    | per package: local version vs npm, and what CI would publish right now                                                                                                                                                                                                     |
-| `vp run release:status`  | show what would be released, versus `origin/main`                                                                                                                                                                                                                          |
-| `vp run release:version` | consume the changesets: bump versions, write per-package changelogs, then raise every shipped range floor to the new versions; if that raised a floor and the changesets did not move `@lcabrera/devkit`, add a devkit patch changeset naming the floors and version again |
+| Command                    | Does                                                                                                                                                                                                                                                                                                                                                                                                           |
+| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run changesets:verify` | fail when a file a published package ships changed since the base (`--base <ref>`, else `TEST_CHANGED_BASE`, else `origin/main`) with no changeset added or edited in this change naming that package — "ships" is what the tarball `pnpm pack` writes holds, so a test or a file outside `files` needs none; a package whose `version` the change itself moves needs none, which is how the version PR passes |
+| `vp run release:add`       | write a changeset — pick the packages and patch/minor/major, say what changed                                                                                                                                                                                                                                                                                                                                  |
+| `vp run release:audit`     | read the manifests already on npm and check what a consumer would get                                                                                                                                                                                                                                                                                                                                          |
+| `vp run release:plan`      | per package: local version vs npm, and what CI would publish right now                                                                                                                                                                                                                                                                                                                                         |
+| `vp run release:status`    | show what would be released, versus `origin/main`                                                                                                                                                                                                                                                                                                                                                              |
+| `vp run release:version`   | consume the changesets: bump versions, write per-package changelogs, then raise every shipped range floor to the new versions; if that raised a floor and the changesets did not move `@lcabrera/devkit`, add a devkit patch changeset naming the floors and version again                                                                                                                                     |
 
-The loop: a change that affects consumers ships with a changeset in the same PR
-(`vp run release:add`). When you want to cut a release, run
+The loop: a change that affects consumers carries a changeset in the same PR
+(`vp run release:add`). `changesets:verify` enforces the part that is a changed
+file in a package's tarball; a `catalog:` range changed in `pnpm-workspace.yaml`
+reaches every manifest that names it without changing such a file, so review
+still owns that case. When you want to cut a release, run
 `vp run release:version` and open an ordinary PR with the result. Merging it
 triggers [`release.yml`](.github/workflows/release.yml), which builds, publishes
 every package whose version is not yet on npm, and opens a GitHub Release for it.

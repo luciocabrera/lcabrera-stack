@@ -108,7 +108,7 @@ catalogs:
     '@arethetypeswrong/core': ^0.18.5
     '@changesets/cli': ^3.0.3
     '@changesets/get-release-plan': ^5.0.2
-    fallow: ^3.33.1
+    fallow: ^3.35.0
     knip: ^6.41.0
     lighthouse: ^13.5.0
     publint: ^0.3.25
@@ -131,10 +131,11 @@ cleanupUnusedCatalogs: true
 # FROM that field. Under any other manager (nvm, fnm, a distro package) an
 # install on an unsupported Node proceeded silently.
 engineStrict: true
-# minimumReleaseAge: 1440
-# Nothing reads this list while the line above is commented out, so a wrong entry
-# is invisible until someone re-enables the floor — which is why it is kept
-# accurate rather than left to rot. A scope pattern is durable; a `name@version`
+# pnpm installs no version younger than its `minimumReleaseAge`, 1440 minutes when
+# unset, and this list is read against that default: every entry here installs
+# the moment it is published. A resolving install that falls back to a younger
+# version than the age allows appends it here as `name@version`; one that only
+# reads `pnpm-lock.yaml` does not. A scope pattern is durable; a `name@version`
 # entry is one-shot and stops matching the moment that package moves, becoming
 # dead config that still reads as an active allowance. Prefer a pattern, and drop
 # a pinned entry once its version is out of the tree (check `pnpm-lock.yaml`).
