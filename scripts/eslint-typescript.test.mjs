@@ -1,6 +1,6 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, join } from 'node:path';
+import { dirname, join, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { describe, expect, it } from 'vite-plus/test';
@@ -8,6 +8,7 @@ import { parseAllDocuments } from 'yaml';
 
 const require = createRequire(import.meta.url);
 const {
+  TYPESCRIPT_6,
   catalogTypeScript,
   needsTypeScript6,
   pinTypeScript6,
@@ -140,21 +141,28 @@ describe('needsTypeScript6', () => {
 describe('pinTypeScript6', () => {
   it('moves the typescript peer to a dependency and keeps every other entry', () => {
     expect(
-      pinTypeScript6(
-        {
-          dependencies: { a: '1' },
-          name: 'plugin',
-          peerDependencies: { eslint: '*', typescript: '*' },
-          peerDependenciesMeta: { typescript: { optional: true } },
-        },
-        'npm:typescript@^6.0.3',
-      ),
+      pinTypeScript6({
+        dependencies: { a: '1' },
+        name: 'plugin',
+        peerDependencies: { eslint: '*', typescript: '*' },
+        peerDependenciesMeta: { typescript: { optional: true } },
+      }),
     ).toStrictEqual({
-      dependencies: { a: '1', typescript: 'npm:typescript@^6.0.3' },
+      dependencies: { a: '1', typescript: `npm:typescript@^${TYPESCRIPT_6}` },
       name: 'plugin',
       peerDependencies: { eslint: '*' },
       peerDependenciesMeta: {},
     });
+  });
+
+  it('refuses a package whose typescript peer excludes the TypeScript 6 it would install', () => {
+    expect(() =>
+      pinTypeScript6({
+        name: 'old-plugin',
+        peerDependencies: { eslint: '*', typescript: '>=3 <5' },
+        version: '1.2.3',
+      }),
+    ).toThrow(/old-plugin@1\.2\.3 .*">=3 <5"/);
   });
 });
 
@@ -179,6 +187,9 @@ describe('the installed lockfile', () => {
     const roots = snapshots.filter(
       (snapshot) => packages[snapshot.packageKey]?.peerDependencies?.eslint,
     );
+    const unpinned = roots
+      .filter((snapshot) => snapshot.dependencies.typescript === undefined)
+      .map((snapshot) => snapshot.key);
     const offenders = reachableFrom(roots, snapshots)
       .filter((snapshot) => snapshot.dependencies.typescript !== undefined)
       .filter(
@@ -189,6 +200,7 @@ describe('the installed lockfile', () => {
       )
       .map((snapshot) => snapshot.key);
     expect(roots.length).toBeGreaterThan(0);
+    expect(unpinned).toStrictEqual([]);
     expect(offenders).toStrictEqual([]);
   });
 
@@ -208,6 +220,92 @@ describe('the installed lockfile', () => {
         );
       })
       .map((snapshot) => snapshot.key);
+    expect(offenders).toStrictEqual([]);
+  });
+});
+
+const packageDirFrom = (name, fromDir) => {
+  const candidates = fromDir
+    .split(sep)
+    .map((_, index, parts) => parts.slice(0, parts.length - index).join(sep))
+    .filter(Boolean)
+    .map((ancestor) => join(ancestor, 'node_modules', name));
+  const found = candidates.find((candidate) =>
+    existsSync(join(candidate, 'package.json')),
+  );
+  return found === undefined ? undefined : realpathSync(found);
+};
+
+const containingNodeModules = (packageDir, name) =>
+  packageDir.slice(0, packageDir.length - name.length - 1);
+
+const manifestAt = (directory) =>
+  JSON.parse(readFileSync(join(directory, 'package.json'), 'utf8'));
+
+const eslintWorkspaces = () => {
+  const yaml = read('pnpm-workspace.yaml');
+  const directories = workspaceGlobs(yaml).flatMap((glob) => {
+    const parent = join(REPO_ROOT, glob.replace(/\/\*$/, ''));
+    return readdirSync(parent, { withFileTypes: true })
+      .filter((entry) => entry.isDirectory())
+      .map((entry) => join(parent, entry.name));
+  });
+  return [REPO_ROOT, ...directories].filter((directory) =>
+    existsSync(join(directory, 'eslint.config.mjs')),
+  );
+};
+
+describe('what the ESLint process resolves on disk', () => {
+  const { packages } = loadLockfile();
+  const eslintSide = new Set(
+    Object.entries(packages)
+      .filter(([, entry]) => entry?.peerDependencies?.eslint !== undefined)
+      .map(([key]) => baseName(key).replace(/@[^@]+$/, '')),
+  );
+
+  it('finds TypeScript 6 beside every ESLint plugin a workspace loads, not through the hoist', () => {
+    const seen = new Map();
+    const queue = eslintWorkspaces().flatMap((workspace) => {
+      const manifest = manifestAt(workspace);
+      return Object.keys({
+        ...manifest.dependencies,
+        ...manifest.devDependencies,
+      })
+        .filter((name) => eslintSide.has(name))
+        .map((name) => ({ from: workspace, name }));
+    });
+    while (queue.length > 0) {
+      const { from, name } = queue.pop();
+      const packageDir = packageDirFrom(name, from);
+      if (packageDir !== undefined && !seen.has(packageDir)) {
+        const typescriptDir = join(
+          containingNodeModules(packageDir, name),
+          'typescript',
+        );
+        seen.set(
+          packageDir,
+          existsSync(join(typescriptDir, 'package.json'))
+            ? manifestAt(typescriptDir).version
+            : 'none',
+        );
+        const manifest = manifestAt(packageDir);
+        queue.push(
+          ...Object.keys({
+            ...manifest.dependencies,
+            ...manifest.peerDependencies,
+          })
+            .filter((dependency) => eslintSide.has(dependency))
+            .map((dependency) => ({ from: packageDir, name: dependency })),
+        );
+      }
+    }
+    const offenders = [...seen.entries()]
+      .filter(([, version]) => !version.startsWith('6.'))
+      .map(
+        ([directory, version]) =>
+          `${directory.split(`${sep}.pnpm${sep}`).at(-1)}: ${version}`,
+      );
+    expect(seen.size).toBeGreaterThan(0);
     expect(offenders).toStrictEqual([]);
   });
 });

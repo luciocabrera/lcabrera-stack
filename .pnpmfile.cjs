@@ -22,8 +22,6 @@ const {
   workspaceGlobs,
 } = require('./scripts/lib/eslint-typescript.cjs');
 
-const TYPESCRIPT_6 = 'npm:typescript@^6.0.3';
-
 const readManifestName = (directory) => {
   try {
     return JSON.parse(
@@ -60,8 +58,6 @@ const context = {
 };
 
 const readPackage = (manifest) =>
-  needsTypeScript6(manifest, context)
-    ? pinTypeScript6(manifest, TYPESCRIPT_6)
-    : manifest;
+  needsTypeScript6(manifest, context) ? pinTypeScript6(manifest) : manifest;
 
 module.exports = { hooks: { readPackage } };

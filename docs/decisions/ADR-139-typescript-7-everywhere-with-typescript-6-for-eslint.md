@@ -73,11 +73,26 @@ their own TypeScript.
 - The `packageExtensions` entry that gave `eslint-plugin-perfectionist` a
   `typescript` peer (#472) is gone. The plugin peers on `eslint`, so it gets
   TypeScript 6 as a dependency.
-- `scripts/eslint-typescript.test.mjs` reads the installed lockfile and fails if
-  any of three things happens: more than one `vite-plus` snapshot exists, a
-  package reachable from an `eslint`-peering package resolves a `typescript`
-  other than 6, or any package resolves `typescript` outside the peer range it
-  declares.
+- The hook stops the install with an error, naming the package, its version and
+  its range, when a package it would rewrite declares a `typescript` peer that
+  excludes the TypeScript 6 it substitutes. That version is one constant,
+  `TYPESCRIPT_6` in `scripts/lib/eslint-typescript.cjs`.
+- `scripts/eslint-typescript.test.mjs` fails in these cases:
+  - the lockfile has more than one `vite-plus` snapshot;
+  - an `eslint`-peering package records no `typescript` dependency;
+  - a package reachable from one resolves a `typescript` other than 6;
+  - a package resolves `typescript` outside a peer range it still declares.
+    The hook removes the peer from what it rewrites, so this check covers
+    only packages the hook left alone. The throw above covers the rest.
+
+  It also walks the installed tree. For each workspace with an
+  `eslint.config.mjs`, it starts from every `eslint`-peering package the
+  workspace declares and follows the `eslint`-peering packages each one depends
+  on. Every package it reaches must find TypeScript 6 in the
+  `node_modules` directory pnpm installed it into, not through pnpm's hidden
+  hoist. A plugin that uses
+  TypeScript without declaring it, as `eslint-plugin-perfectionist` does, fails
+  this walk when the hook skips it.
 
 No ESLint rule is turned off and no plugin is removed.
 `vp run lint:eslint:verify` still requires the pass to report a planted
@@ -100,9 +115,10 @@ violation.
   `@eslint-react/core`, which also declares `*` and crashes on it through
   `ts-api-utils`.
 - A package that loads the compiler API without peering on `eslint` or
-  declaring a `typescript` peer that excludes TypeScript 7 is not covered. The
-  lockfile test reports it once it resolves TypeScript 7 below an ESLint plugin.
-- The hook's TypeScript 6 range is a literal. `vp run deps:refresh` does not
+  declaring a `typescript` peer that excludes TypeScript 7 is not covered. If
+  it sits below an ESLint plugin it resolves that plugin's TypeScript 6. If it
+  sits anywhere else, nothing here reports it.
+- The `TYPESCRIPT_6` constant is a literal. `vp run deps:refresh` does not
   move it, because taze reads manifests and the catalog, not the hook.
 - The lockfile records a checksum of `.pnpmfile.cjs`, so any edit to the file,
   a reformat included, makes `vp install --frozen-lockfile` fail until

@@ -170,20 +170,38 @@ const withoutKey = (record, key) =>
     Object.entries(record ?? {}).filter(([name]) => name !== key),
   );
 
+const TYPESCRIPT_6 = '6.0.3';
+
 /**
- * @template {{ dependencies?: Record<string, string>, peerDependencies?: Record<string, string>, peerDependenciesMeta?: Record<string, unknown> }} T
+ * @template {{ name: string, version?: string, dependencies?: Record<string, string>, peerDependencies?: Record<string, string>, peerDependenciesMeta?: Record<string, unknown> }} T
  * @param {T} manifest
- * @param {string} specifier the TypeScript 6 dependency to install in place of the peer
  * @returns {T}
  */
-const pinTypeScript6 = (manifest, specifier) => ({
-  ...manifest,
-  dependencies: { ...manifest.dependencies, typescript: specifier },
-  peerDependencies: withoutKey(manifest.peerDependencies, 'typescript'),
-  peerDependenciesMeta: withoutKey(manifest.peerDependenciesMeta, 'typescript'),
-});
+const pinTypeScript6 = (manifest) => {
+  const declared = manifest.peerDependencies?.typescript;
+  if (declared !== undefined && !rangeAdmits(declared, TYPESCRIPT_6)) {
+    throw new Error(
+      `.pnpmfile.cjs: ${manifest.name}@${manifest.version ?? '?'} declares the typescript peer ` +
+        `"${declared}", which excludes the TypeScript ${TYPESCRIPT_6} this hook installs in its place. ` +
+        'Give it a TypeScript its range admits before installing (ADR-139).',
+    );
+  }
+  return {
+    ...manifest,
+    dependencies: {
+      ...manifest.dependencies,
+      typescript: `npm:typescript@^${TYPESCRIPT_6}`,
+    },
+    peerDependencies: withoutKey(manifest.peerDependencies, 'typescript'),
+    peerDependenciesMeta: withoutKey(
+      manifest.peerDependenciesMeta,
+      'typescript',
+    ),
+  };
+};
 
 module.exports = {
+  TYPESCRIPT_6,
   catalogTypeScript,
   needsTypeScript6,
   pinTypeScript6,
