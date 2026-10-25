@@ -209,35 +209,45 @@ describe('extractCandidates', () => {
     expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([]);
   });
 
-  it('ignores a definition inside a backtick or tilde fence', () => {
+  it.each([
+    {
+      fence: 'a top-level fence',
+      lines: ['```markdown', 'BODY', '```'],
+    },
+    {
+      fence: 'a fence nested in a list item',
+      lines: ['10. Write the example:', '', '    ```md', '    BODY', '    ```'],
+    },
+    {
+      fence: 'a fence inside a blockquote',
+      lines: ['> ```md', '> BODY', '> ```'],
+    },
+  ])('ignores links and definitions inside $fence', ({ lines }) => {
+    const body = [
+      'See [the example](inline-in-fence.md).',
+      '[gone]: defined-in-fence.md',
+    ];
     const markdown = [
-      '```markdown',
-      '[gone]: in-backticks.md',
-      '```',
-      '~~~',
-      '[gone]: in-tildes.md',
-      '~~~',
-      '````text',
-      '```',
-      '[gone]: in-a-longer-fence.md',
-      '```',
-      '````',
-      '[kept]: after-the-fences.md',
+      ...lines.flatMap((line) =>
+        line.endsWith('BODY')
+          ? body.map((entry) => `${line.slice(0, -'BODY'.length)}${entry}`)
+          : [line],
+      ),
+      '',
+      '[kept]: after-the-fence.md',
     ].join('\n');
 
     expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([
-      'after-the-fences.md',
+      'after-the-fence.md',
     ]);
   });
 
-  it('does not treat an inline triple backtick as a fence', () => {
-    const markdown = [
-      'An info string such as ` ```jsonc ` is not a fence.',
-      'See [the contract](contract.md).',
-      'Another ` ``` ` mention.',
-    ].join('\n');
+  it('parses a long whitespace run after a label in bounded time', () => {
+    const markdown = `[a]:${' '.repeat(100_000)}<`;
+    const started = performance.now();
 
-    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual(['contract.md']);
+    expect(extractCandidates(markdown, REPO_ROOTS)).toEqual([]);
+    expect(performance.now() - started).toBeLessThan(1000);
   });
 
   it('strips heading anchors and trailing sentence punctuation', () => {

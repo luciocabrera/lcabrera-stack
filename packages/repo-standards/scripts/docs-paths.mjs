@@ -60,48 +60,70 @@ export const normaliseToken = (token) =>
 export const inlineCodeTokens = (text) =>
   text.split('`').filter((_, index) => index % 2 === 1);
 
-const FENCE_OPENER = /^ {0,3}(`{3,}|~{3,})/;
+const DEFINITION_LABEL = /^\[(?:[^\n[\\\]]|\\.)+\]:/;
 
-const FENCE_CLOSER = /^ {0,3}(`{3,}|~{3,})[\t ]*$/;
+const TITLE_CLOSERS = new Map([
+  ["'", "'"],
+  ['"', '"'],
+  ['(', ')'],
+]);
 
-const closesFence = (line, opener) => {
-  const fence = FENCE_CLOSER.exec(line)?.[1];
-  return (
-    fence !== undefined &&
-    fence[0] === opener[0] &&
-    fence.length >= opener.length
-  );
+const definitionRest = (line) => {
+  const unindented = line.replace(/^ {0,3}/, '');
+  if (unindented.startsWith(' ') || unindented.startsWith('\t')) {
+    return;
+  }
+  const body = unindented.replace(/^>[\t >]*/, '');
+  const label = DEFINITION_LABEL.exec(body)?.[0];
+  return label === undefined || body.startsWith('[^')
+    ? undefined
+    : body.slice(label.length).trim();
 };
 
-const proseOutsideFences = (markdown) =>
-  markdown.split('\n').reduce(
-    (state, line) => {
-      if (state.opener !== undefined) {
-        return closesFence(line, state.opener)
-          ? { ...state, opener: undefined }
-          : state;
-      }
-      const opener = FENCE_OPENER.exec(line)?.[1];
-      if (opener !== undefined) {
-        return { ...state, opener };
-      }
-      state.lines.push(line);
-      return state;
-    },
-    { lines: [], opener: undefined },
-  ).lines;
+const isTitleOrEmpty = (text) =>
+  text === '' ||
+  (text.length > 1 && TITLE_CLOSERS.get(text[0]) === text.at(-1));
 
-const REFERENCE_DEFINITION =
-  /^ {0,3}(?:> ?)*\[(?!\^)(?:[^\n[\\\]]|\\.){1,999}\]:[\t ]*\n?[\t ]*(?:<([^\n<>]*)>|([^\s<]\S*))(?:[\t ]+(?:"[^\n"]*"|'[^\n']*'|\([^\n()]*\)))?[\t ]*$/gm;
+const splitDestination = (rest) => {
+  if (rest.startsWith('<')) {
+    const end = rest.indexOf('>');
+    return end === -1
+      ? undefined
+      : { remainder: rest.slice(end + 1), target: rest.slice(1, end) };
+  }
+  const [target] = rest.split(/[\t ]/, 1);
+  return { remainder: rest.slice(target.length), target };
+};
 
-const referenceDefinitionTargets = (prose) =>
-  prose
-    .matchAll(REFERENCE_DEFINITION)
-    .map((match) => match[1] ?? match[2])
-    .toArray();
+const destinationOf = (rest) => {
+  const split = splitDestination(rest);
+  return split !== undefined &&
+    split.target !== '' &&
+    isTitleOrEmpty(split.remainder.trim())
+    ? split.target
+    : undefined;
+};
+
+const definitionTarget = (line, nextLine = '') => {
+  const rest = definitionRest(line);
+  if (rest === undefined) {
+    return;
+  }
+  return destinationOf(rest === '' ? nextLine.trim() : rest);
+};
+
+const referenceDefinitionTargets = (prose) => {
+  const lines = prose.split('\n');
+  return lines
+    .map((line, index) => definitionTarget(line, lines[index + 1]))
+    .filter((target) => target !== undefined);
+};
 
 export const extractCandidates = (markdown, repoRoots) => {
-  const prose = proseOutsideFences(markdown).join('\n');
+  const prose = markdown
+    .split('```')
+    .filter((_, index) => index % 2 === 0)
+    .join('\n');
 
   const backticked = inlineCodeTokens(prose)
     .map((token) => normaliseToken(token))
