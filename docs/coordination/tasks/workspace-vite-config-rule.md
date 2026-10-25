@@ -2,7 +2,7 @@
 id: workspace-vite-config-rule
 title: docs(agents): state what a workspace without vite.config.ts does now
 owner: agent:claude
-status: active
+status: review
 branch: docs/1460-workspace-vite-config-rule
 area:
   - AGENTS.md
@@ -22,6 +22,6 @@ docs(agents): state what a workspace without vite.config.ts does now
 
 ## Status / next
 
-- Current step: rule and its empty config removed; gate
+- Current step: PR #1498 ready for review
 - Blockers: none
 - Next:
