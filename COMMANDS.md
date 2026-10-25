@@ -77,7 +77,7 @@ disagree about the stages, the skill is right and this table is the bug.
 | 2   | `vp lint .`                   | Oxlint                                                                    |
 | 3   | `vp run -r lint:eslint:check` | eslint custom rules, every workspace and `evals/` — **not** in `vp check` |
 | 4   | `vp run lint:biome:check`     | Biome — **not** in `vp check` (run from root)                             |
-| 5   | `vp run react-doctor:verify`  | React Doctor — root-only, blocks at the configured `blocking` level       |
+| 5   | `vp run react-doctor:verify`  | React Doctor — root-only, blocks where `react-doctor --blocking` would    |
 | 6   | `vp check`                    | fmt + Oxlint + **tsgolint** type pass                                     |
 | 7   | `vp run typecheck`            | real **tsc** — **not** the same as step 6                                 |
 | 8   | `vp run test:changed`         | vitest — root-only; reaches `scripts/` too                                |
@@ -153,7 +153,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                                                                                                                     |
 | `vp run lint:eslint:check`            | eslint over `evals/`, which is not a workspace: the root package carries the script, so `vp run -r lint:eslint:check` reaches it with the workspaces. `vp run lint:eslint` is the autofix form |
 | `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)                                                                                                       |
-| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails on the config's `blocking` severity; writes the report too                                                                                     |
+| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails where `react-doctor --blocking` would; writes the report too                                                                                   |
 | `vp run react-doctor:report`          | the same scan, never failing on findings — writes `reports/react-doctor/full-latest.json` (gitignored)                                                                                         |
 | `vp run mutation:report`              | mutation-test `packages/utils` (ADR-119) — writes `reports/mutation/full-latest.json` (gitignored — produced on demand); never fails                                                           |
 | `vp run format:all`                   | `vp fmt .` across the tree                                                                                                                                                                     |
@@ -400,6 +400,11 @@ Always feed the audit real coverage:
 `vp run fallow:audit --base main --coverage reports/fallow/coverage/coverage-final.json`
 (produce it with `vp run coverage:merge`). Without it fallow _estimates_ coverage
 and reports trivially simple code as `critical`.
+
+`fallow:dead-code:verify` runs with `--no-cache`. Fallow's incremental cache
+keeps an import it recorded as unresolved, so a scan that ran before
+`typegen:all` generated the route types would otherwise fail the gate on
+`+types` imports that resolve in the tree.
 
 ### Micro-benchmarks
 
