@@ -95,8 +95,8 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 `registers:verify`, `package-refs:verify`, `departed:verify`,
 `renames:verify`, `changesets:verify`, `route-names:verify`,
 `inventory:verify`, `adr:verify`, `viteplus:verify`, `configs:verify`,
-`conflict-markers:verify` and `fallow:dead-code:verify`, mirroring the
-"Quality Gate (Format · Lint · Types)" job in
+`conflict-markers:verify`, `deps:lockfile` and `fallow:dead-code:verify`,
+mirroring the "Quality Gate (Format · Lint · Types)" job in
 `check-safe.yml`) — then `vp run test:changed`, and finally
 `vp run fallow:preflight`. This closes the gap the pre-commit hook leaves: `vp
 staged` fixes what it can on the staged files, but it cannot see a cross-file
@@ -270,11 +270,12 @@ falls back to the estimate that reports simple code as a CRAP breach.
 
 ### Dependencies
 
-| Command               | Runs                                                                                              |
-| --------------------- | ------------------------------------------------------------------------------------------------- |
-| `vp run deps:audit`   | the advisory gate — `vp pm audit --json` piped into `repo-verify-deps-audit`                      |
-| `vp run deps:peers`   | `pnpm peers check` — fails when any workspace has an unmet or out-of-range peer dependency        |
-| `vp run deps:refresh` | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → open a build(deps) PR |
+| Command                | Runs                                                                                              |
+| ---------------------- | ------------------------------------------------------------------------------------------------- |
+| `vp run deps:audit`    | the advisory gate — `vp pm audit --json` piped into `repo-verify-deps-audit`                      |
+| `vp run deps:lockfile` | `vp dedupe --check` — fails when a fresh resolve would change `pnpm-lock.yaml`                    |
+| `vp run deps:peers`    | `pnpm peers check` — fails when any workspace has an unmet or out-of-range peer dependency        |
+| `vp run deps:refresh`  | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → open a build(deps) PR |
 
 `deps:audit` fails on a known vulnerability at `moderate` or above that has no
 live allowance in `docs/agents/dependency-advisories.json`, and also on an
@@ -296,6 +297,19 @@ run against whatever version was installed — so a hand-moved major can leave a
 plugin outside the range it was built for while every other gate stays green.
 `vp` does not wrap `pnpm peers`, so the task calls pnpm directly. It reads the
 installed tree and needs no registry, and runs in CI's Quality Gate and in
+`check:safe`.
+
+`deps:lockfile` exits non-zero when resolving the manifests again, through the
+pnpmfile hook, would write a different lockfile, and prints the difference. A
+`--frozen-lockfile` install cannot see that drift: it trusts the lockfile while
+the `pnpmfileChecksum` matches, and that checksum covers `.pnpmfile.cjs` alone,
+not the modules it requires
+([ADR-139](docs/decisions/ADR-139-typescript-7-everywhere-with-typescript-6-for-eslint.md)).
+Running `vp dedupe` writes the lockfile the check expects. The check also fails
+a lockfile that keeps an older version where a newer one already in the
+lockfile satisfies the range, and `vp dedupe` fixes that the same way. It runs
+with `--prefer-offline`, so it reaches the registry only for metadata missing
+from pnpm's cache, and runs in CI's Quality Gate, `check:push` and
 `check:safe`.
 
 `deps:refresh` (`scripts/deps-refresh.sh`) bumps the pnpm catalog and every

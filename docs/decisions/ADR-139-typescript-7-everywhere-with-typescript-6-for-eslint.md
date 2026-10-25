@@ -134,9 +134,17 @@ violation.
 - The lockfile records a checksum of `.pnpmfile.cjs`, so any edit to the file,
   a reformat included, makes `vp install --frozen-lockfile` fail until
   `vp install` rewrites the checksum. That install re-resolves the whole graph.
-  Check the lockfile diff for packages the edit did not touch. The checksum
-  does not cover `scripts/lib/eslint-typescript.cjs`, so after an edit there,
-  run `vp install` and the lockfile test.
+  Check the lockfile diff for packages the edit did not touch.
+- The checksum does not cover the modules the hook requires,
+  `scripts/lib/eslint-typescript.cjs` and `scripts/lib/semver-range.cjs`. After
+  an edit to either, `vp install` prints "Already up to date", and the lockfile
+  test passes, because it reads the stale lockfile and the tree that lockfile
+  installed. `vp run deps:lockfile` (`vp dedupe --check`) resolves again
+  through the hook and exits non-zero on any difference, so it is the step that
+  detects the drift: after an edit to the rules, run `vp dedupe`, then
+  `vp run deps:lockfile` and the lockfile test. CI's Quality Gate,
+  `check:push` and `check:safe` all run `deps:lockfile`
+  ([#1496](https://github.com/luciocabrera/lcabrera-stack/issues/1496)).
 - What a consumer installs is unchanged. The scaffold `@lcabrera/devkit` writes
   ships its own catalog, still on TypeScript 6, and neither copies nor needs
   this hook.
@@ -166,6 +174,15 @@ violation.
   but `tsc`'s API becomes the declaration emitter everywhere. The published
   `.d.mts` of `@lcabrera/server` and `@lcabrera/vite-config` change shape, and
   the API-surface gate classifies the server change as breaking.
+- **Keep the rules inside `.pnpmfile.cjs`**, so its checksum covers them.
+  Rejected: it holds only while nobody adds a `require` to the hook, and the
+  next one would reopen the gap with nothing to report it. The two modules also
+  have tests of their own. A resolve-and-compare covers whatever the hook
+  reads.
+- **`vp install --fix-lockfile --lockfile-only` followed by a git diff.** It
+  re-resolves and removes the stale entry, but it writes the lockfile, so a
+  check built on it rewrites the working tree and cannot tell its own write from
+  an uncommitted edit. `vp dedupe --check` reports without writing.
 - **Turn off the ESLint plugins that need TypeScript 6.** Rejected: that removes
   typescript-eslint's parser and rules, the React rule sets and import ordering
   from every workspace. The hook keeps all of them.
@@ -173,5 +190,6 @@ violation.
 ## References
 
 - [#1452](https://github.com/luciocabrera/lcabrera-stack/issues/1452): the `.pnpm` listing, `pnpm why`, the probes and the per-tool results
+- [#1496](https://github.com/luciocabrera/lcabrera-stack/issues/1496): the stale-lockfile reproduction
 - [#472](https://github.com/luciocabrera/lcabrera-stack/issues/472): the perfectionist crash on TypeScript 7
 - [Announcing TypeScript 7.0, "Running Side-by-Side with TypeScript 6.0"](https://devblogs.microsoft.com/typescript/announcing-typescript-7-0/#running-side-by-side-with-typescript-6.0)

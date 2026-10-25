@@ -2,20 +2,18 @@
 id: lockfile-drift-from-hook-rules
 title: build(deps): detect a stale lockfile after an edit to the TypeScript 6 hook rules
 owner: agent:claude
-status: active
+status: review
 branch: build/1496-lockfile-drift-from-hook-rules
 area:
-  - .pnpmfile.cjs
-  - scripts/lib/eslint-typescript.cjs
-  - scripts/eslint-typescript.test.mjs
   - docs/decisions/ADR-139-*
   - package.json
   - .github/workflows/check-safe.yml
-  - pnpm-lock.yaml
+  - COMMANDS.md
+  - packages/devkit/CLASSIFICATION.md
 started: 2026-10-25
 updated: 2026-10-25
 plan: (none)
-pr: (none)
+pr: '#1497'
 issue: #1496
 ---
 
@@ -25,6 +23,6 @@ build(deps): detect a stale lockfile after an edit to the TypeScript 6 hook rule
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: `deps:lockfile` (`vp dedupe --check`) chained into CI, `check:push` and `check:safe`; ADR-139 corrected
 - Blockers: none
-- Next:
+- Next: review
