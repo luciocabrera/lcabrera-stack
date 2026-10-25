@@ -5,8 +5,9 @@ here, it does not exist — and if you add one, add it here in the same commit.
 
 That is enforced, not a request: `vp run commands:verify` fails CI when a root
 script is undocumented, when this file names a command that no longer resolves,
-when a §5 per-workspace claim is wrong, when a link breaks, or when a workspace
-count is stale. Its ground truth is `vp run`'s own task list, so it sees all
+when a §5 per-workspace claim is wrong, when a link breaks, when a workspace
+count is stale, or when a root script or workflow runs a `--filter` without
+`--fail-if-no-match`. Its ground truth is `vp run`'s own task list, so it sees all
 three task sources (§1). It cannot check prose — rationale still rots the
 old-fashioned way.
 
@@ -40,7 +41,8 @@ workspace, by **package name** not directory), `--parallel`. Note `--filter` and
 A `--filter` that matches no package prints a warning and exits 0, so a
 mistyped name runs nothing and passes. Every `vp run --filter` in a root script
 or a workflow therefore also passes `--fail-if-no-match`, which turns that into
-an error; a new one carries it too.
+an error; a new one carries it too, and `vp run commands:verify` fails one that
+does not.
 
 ---
 
@@ -436,15 +438,16 @@ tarball and asserts the release path is still the pnpm one
 identity from the source path, so it ships source and the consumer's own plugin
 compiles it.
 
-| Command                                | Does                                                                                                                     |
-| -------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
-| `vp run packages:build`                | build the publishable packages (`vp pack` → `dist` with `.d.mts` and sourcemaps)                                         |
-| `vp run publish:verify`                | pack each one with pnpm and check the tarball — exports, files, and a real consumer import from outside the repo         |
-| `vp run publish:verify -- --write`     | regenerate `publishConfig.exports` from `exports`                                                                        |
-| `vp run api-surface:verify`            | diff each public package's exported type surface against its tracked snapshot; require a changeset for a breaking change |
-| `vp run api-surface:verify -- --write` | regenerate the surface snapshots under `reports/api-surface/`                                                            |
-| `vp run attw:verify`                   | run Are The Types Wrong? over the built public packages — do the published types resolve for a consumer?                 |
-| `vp run shipped-docs:verify`           | pack each one and read every document in the tarball — does it still read with only that package on disk?                |
+| Command                                | Does                                                                                                                                                                                                                                    |
+| -------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run packages:build`                | build the publishable packages (`vp pack` → `dist` with `.d.mts` and sourcemaps)                                                                                                                                                        |
+| `vp run publish:verify`                | pack each one with pnpm and check the tarball — exports, files, and a real consumer import from outside the repo                                                                                                                        |
+| `vp run publish:verify -- --write`     | regenerate `publishConfig.exports` from `exports`                                                                                                                                                                                       |
+| `vp run publint:verify`                | pack every public package (the `suppressions:packages` roster) with pnpm and run publint over each tarball at error level — one result line per package; a planted export pointing at a missing file must be reported, or the run fails |
+| `vp run api-surface:verify`            | diff each public package's exported type surface against its tracked snapshot; require a changeset for a breaking change                                                                                                                |
+| `vp run api-surface:verify -- --write` | regenerate the surface snapshots under `reports/api-surface/`                                                                                                                                                                           |
+| `vp run attw:verify`                   | run Are The Types Wrong? over the built public packages — do the published types resolve for a consumer?                                                                                                                                |
+| `vp run shipped-docs:verify`           | pack each one and read every document in the tarball — does it still read with only that package on disk?                                                                                                                               |
 
 `shipped-docs:verify` is the same instrument aimed at the documentation. The
 in-repo doc gate asks whether a path resolves **here**, which is the inverted
@@ -464,7 +467,7 @@ the build that preceded it.
 
 Run `packages:build` **before** any step that reads a built package's
 `dist/`, directly or through its packed tarball: `publish:verify`,
-`api-surface:verify`, `attw:verify` and `shipped-docs:verify`.
+`publint:verify`, `api-surface:verify`, `attw:verify` and `shipped-docs:verify`.
 `workspace:verify` packs built packages too, and runs `packages:build` itself
 first. `tarball:verify` does not depend on the build: the packages it packs
 ship source. `check:safe` builds once ahead of all of them, and CI's Quality
@@ -472,7 +475,11 @@ Gate runs the build as its own step ahead of the first, so each one checks the
 current source rather than an earlier build's `dist/`. With no `dist/` there is no artifact to check,
 and `publish:verify`, `api-surface:verify` and `attw:verify` **fail** rather
 than reporting a pass they did not earn (ADR-073).
-`publish:verify` also needs pnpm on PATH, which running it through `vp` provides.
+`publish:verify` and `publint:verify` also need pnpm on PATH, which running
+them through `vp` provides. `publint:verify` has no unbuilt refusal of its own:
+with no `dist/`, every `publishConfig.exports` target of a package that builds
+names a file the tarball does not hold, and publint reports each one. The
+packages that ship source lint the same either way.
 `ui` ships source, so its surface is always checked. The API-surface snapshot and
 its `ui`-vs-built split are
 [ADR-046](docs/decisions/ADR-046-public-api-surface-snapshot.md).

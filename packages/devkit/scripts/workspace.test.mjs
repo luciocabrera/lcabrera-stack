@@ -123,7 +123,7 @@ describe('the tasks name what the blueprint holds', () => {
     expect(manifest.name).toBe(APP_WORKSPACE);
     for (const name of ['build', 'dev', 'start']) {
       expect(WORKSPACE_SCRIPTS[name]).toBe(
-        `vp run --filter ${APP_WORKSPACE} ${name}`,
+        `vp run --fail-if-no-match --filter ${APP_WORKSPACE} ${name}`,
       );
     }
   });
@@ -222,7 +222,7 @@ describe('the database tasks', () => {
       readFileSync(join(fullAssets, 'apps/web/package.json'), 'utf8'),
     );
     expect(scripts['db:seed']).toBe(
-      `vp run db:up && vp run --filter ${app.name} seed`,
+      `vp run db:up && vp run --fail-if-no-match --filter ${app.name} seed`,
     );
     expect(app.scripts.seed).toContain('scripts/seed-db.mjs');
   });
@@ -280,6 +280,18 @@ describe('initialManifest', () => {
         initialManifest({ name: 'demo', profile: 'monorepo' }).scripts,
       ).filter((name) => databaseTasks.includes(name)),
     ).toEqual([]);
+  });
+
+  test('every filtered run in a created manifest fails when its filter matches nothing', () => {
+    const filtered = ['monorepo', 'full'].flatMap((profile) =>
+      Object.values(initialManifest({ name: 'demo', profile }).scripts)
+        .flatMap((command) => command.split('&&'))
+        .filter((run) => run.includes('--filter')),
+    );
+    expect(filtered.length).toBeGreaterThan(0);
+    for (const run of filtered) {
+      expect(run).toContain('--fail-if-no-match');
+    }
   });
 
   test('a profile nobody passed places nothing, rather than everything', () => {
