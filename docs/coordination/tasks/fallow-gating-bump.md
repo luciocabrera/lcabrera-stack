@@ -10,6 +10,8 @@ area:
   - .fallowrc.json
   - .github/skills/fallow-code-checker/**
   - packages/server/src/INVENTORY.md
+  - .github/workflows/check-safe.yml
+  - AGENTS.md
 started: 2026-10-25
 updated: 2026-10-25
 plan: (none)

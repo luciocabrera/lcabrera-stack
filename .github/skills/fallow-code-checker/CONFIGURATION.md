@@ -73,8 +73,9 @@ The commands live in
 PR, run `vp run fallow:audit --base main`.
 
 CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`). It fails
-only on newly-introduced findings; inherited ones are attributed to the base
-snapshot fallow builds from `--base`. The tracked baselines in
+on newly-introduced findings, and on an inherited complexity finding that grew
+(`audit.worsened: "error"`, below); other inherited ones are attributed to the
+base snapshot fallow builds from `--base`. The tracked baselines in
 `reports/fallow/baselines/` are a second filter, not the first: the dead-code
 baseline records no findings and a clean tree still passes.
 
