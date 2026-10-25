@@ -122,7 +122,7 @@ owns these checks and Biome's `useExpect` stays off
 ([ADR-042](../../../docs/decisions/ADR-042-oxlint-config-at-the-root.md),
 amendment "Oxlint owns assertion hygiene in test files"). The rules do not see a test function bound
 by `require`, only a global or an ES `import`. `lint:plugins:verify`
-plants a test file for each of the five rules at a path the override's `files`
+plants a test file for each rule the override turns on, at a path the override's `files`
 match, and fails when Oxlint does not report one. A rule added to either
 override needs a probe in `RULE_PROBES` of `@lcabrera/repo-standards`, or the
 gate fails naming it.

@@ -339,11 +339,11 @@ The gate does not flag:
 
 ## Amendment 2026-10-22 — the gate probes every rule the config names
 
-The probes above prove that a plugin family loads and that the two hook
-dependency rules fire. Two of the rules `createLintConfig` turns on by name,
-`promise/always-return` and `react/no-unstable-nested-components`, had no
-probe, and neither had the root's `unicorn/no-array-sort` and five `vitest`
-rules. The 2026-10-20 statement that
+The probes above prove that a plugin family loads and that the hook
+dependency rules fire. `promise/always-return` and
+`react/no-unstable-nested-components`, which `createLintConfig` turns on by
+name, had no probe, and neither had the root's `unicorn/no-array-sort` or the
+`vitest` rules of the test-file override. The 2026-10-20 statement that
 `vp run lint:plugins:verify` does not prove the test-file override live is no
 longer true
 ([#1448](https://github.com/luciocabrera/lcabrera-stack/issues/1448)).
@@ -374,7 +374,7 @@ config that names a rule id it does not know, so renaming a rule in the config
 fails `vp lint` before any probe runs. The gate prints Oxlint's message in that
 case. It does not refuse an override that names a rule whose plugin the override
 does not load: dropping `plugins: ['vitest']` from the test-file override left
-the config loading and every other probe firing, and only the five `vitest`
+the config loading and every other probe firing, and only the `vitest`
 probes went silent. Only a planted probe shows that case, and the same holds for
 a later entry turning a rule off, or an upgrade after which a rule no longer
 reports the planted code.

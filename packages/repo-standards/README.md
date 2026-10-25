@@ -191,7 +191,8 @@ another plugin's when `eslint` has none, as `no-array-sort` resolves to
 `unicorn`. A rule with no probe fails the
 gate, so a rule added to the config, or a rule id renamed in it, cannot pass
 unproven. The package ships probes for the rules `@lcabrera/vite-config/lint`
-names, and for `unicorn/no-array-sort` and five `vitest` assertion rules. For
+names, and for `unicorn/no-array-sort` and the `vitest` assertion rules; the
+`RULE_PROBES` export of `lint-plugins.mjs` is the list. For
 any other rule, the root config exports `LINT_RULE_PROBES`, an array of
 `{ code, plugin, rule }` with optional `ext` (`ts` by default) and `scope` (the
 prefix Oxlint prints, when it differs from `plugin`). Each probe's code must be
