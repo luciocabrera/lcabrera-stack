@@ -13,6 +13,11 @@
  * The prefix is matched from its left edge, because one runner's name ends
  * another's: unanchored, the shorter spelling matches inside the longer one, and
  * both checks below then answer for a command the document does not carry.
+ *
+ * The filter check reads Vite+ commands only. Its `--filter` warns and exits 0
+ * when it matches no package, `--fail-if-no-match` is what makes that an error,
+ * and only the options before the task name reach the runner; another runner
+ * spells its filter elsewhere, so the check does not guess at it.
  */
 
 export const DEFAULT_RUN_PREFIX = 'vp run';
@@ -94,3 +99,64 @@ export const unresolvedDocumented = ({
       (task) =>
         `${docName} documents \`${runPrefix} ${task}\`, which is not a task in any workspace — it was renamed or removed.`,
     );
+
+const FAIL_IF_NO_MATCH = '--fail-if-no-match';
+
+const FILTER_OPTIONS = new Set(['--filter', '-F']);
+
+const VALUED_OPTIONS = new Set([
+  ...FILTER_OPTIONS,
+  '--concurrency-limit',
+  '--log',
+]);
+
+const COMMAND_SEPARATOR = /&&|\|\||[\n;|]/;
+
+const LINE_CONTINUATION = /\\\n/g;
+
+const isFilter = (option) =>
+  FILTER_OPTIONS.has(option) || option.startsWith('--filter=');
+
+const runnerOptions = (invocation) => {
+  const tokens = invocation.trim().split(/\s+/);
+  const options = [];
+  for (let index = 0; index < tokens.length; index += 1) {
+    const token = tokens[index];
+    if (token === '--' || !token.startsWith('-')) break;
+    options.push(token);
+    if (VALUED_OPTIONS.has(token)) index += 1;
+  }
+  return options;
+};
+
+const isUnguarded = (options) =>
+  options.some((option) => isFilter(option)) &&
+  !options.includes(FAIL_IF_NO_MATCH);
+
+/**
+ * @param {{ commands: Array<{ source: string, where: string }>,
+ *           runPrefix?: string }} args
+ * @returns {string[]} one problem per filtered run that passes when its filter
+ *   matches no package
+ */
+export const unguardedFilters = ({
+  commands,
+  runPrefix = DEFAULT_RUN_PREFIX,
+}) => {
+  if (!requiresRunnerTaskList(runPrefix)) return [];
+  const word = runPrefix.trim();
+  const invocation = new RegExp(
+    String.raw`${LEFT_EDGE}${matchedLiterally(word)}(?=\s)`,
+  );
+  return commands.flatMap(({ source, where }) =>
+    source
+      .replaceAll(LINE_CONTINUATION, ' ')
+      .split(COMMAND_SEPARATOR)
+      .flatMap((segment) => segment.split(invocation).slice(1))
+      .filter((rest) => isUnguarded(runnerOptions(rest)))
+      .map(
+        (rest) =>
+          `${where} runs \`${word} ${rest.trim()}\` without \`${FAIL_IF_NO_MATCH}\` — a filter that matches no package then passes having run nothing. Add the flag before the task name.`,
+      ),
+  );
+};

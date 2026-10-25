@@ -24,8 +24,9 @@
  *                                        # never consults the others
  *
  * Exit codes: 0 = merged report written, 1 = a suite failed or produced no
- * coverage (a partial merge is worse than none — it would silently score
- * uncovered files as 0% and fail the gate on phantom complexity).
+ * coverage, or a roster entry matches no package (a partial merge is worse
+ * than none — it would silently score uncovered files as 0% and fail the gate
+ * on phantom complexity).
  */
 import { execFile } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
@@ -35,6 +36,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 import { readWorkspaceGraph, resolveAffected } from './affected-tests.mjs';
+import { filteredRunArgs } from './changed-runner.mjs';
 import { readGates } from './config.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
@@ -79,13 +81,17 @@ const targetWorkspaces = () => {
 const runCoverage = async ({ dir, name }) => {
   process.stdout.write(`• ${name} — running test:coverage…\n`);
   try {
-    await execFileAsync(VP_BIN, ['run', '--filter', name, 'test:coverage'], {
-      cwd: REPO_ROOT,
-      maxBuffer: 64 * 1024 * 1024,
-    });
+    await execFileAsync(
+      VP_BIN,
+      filteredRunArgs({ packages: [name], task: 'test:coverage' }),
+      {
+        cwd: REPO_ROOT,
+        maxBuffer: 64 * 1024 * 1024,
+      },
+    );
   } catch (error) {
     throw new Error(
-      `${name}: test:coverage failed — the merged report would be incomplete.\n${error.stdout ?? ''}${error.stderr ?? ''}`,
+      `${name}: test:coverage failed, or no workspace is named ${name} — the merged report would be incomplete.\n${error.stdout ?? ''}${error.stderr ?? ''}`,
       { cause: error },
     );
   }

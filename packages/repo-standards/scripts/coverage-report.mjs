@@ -24,9 +24,10 @@
  *   repo-coverage-report --no-run        # aggregate existing summaries, run nothing
  *   … | repo-coverage-report --changed   # only the workspaces the diff on stdin affects
  *
- * Best-effort by design: a workspace whose coverage is missing or whose suite
- * fails is warned about and skipped, because the test task is the real gate and
- * a partial report is more useful than none. Exit codes: 0 = a report was
+ * Best-effort by design: a suite that fails, or a roster name no package
+ * matches, is warned about rather than fatal, and a workspace with no summary
+ * is skipped, because the test task is the real gate and a partial report is
+ * more useful than none. Exit codes: 0 = a report was
  * written, or there was nothing to report; 1 = the roster is empty, or no
  * summary could be read at all.
  */
@@ -38,6 +39,7 @@ import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
 import { readWorkspaceGraph, resolveAffected } from './affected-tests.mjs';
+import { filteredRunArgs } from './changed-runner.mjs';
 import { readGates } from './config.mjs';
 import { normaliseMetric, percentageOf } from './coverage-metrics.mjs';
 import { resolveHostRoot } from './host-root.mjs';
@@ -87,13 +89,17 @@ const summaryPathFor = ({ dir }) =>
 const runCoverage = async ({ name }) => {
   process.stdout.write(`• ${name} — running test:coverage…\n`);
   try {
-    await execFileAsync(VP_BIN, ['run', '--filter', name, 'test:coverage'], {
-      cwd: REPO_ROOT,
-      maxBuffer: 64 * 1024 * 1024,
-    });
+    await execFileAsync(
+      VP_BIN,
+      filteredRunArgs({ packages: [name], task: 'test:coverage' }),
+      {
+        cwd: REPO_ROOT,
+        maxBuffer: 64 * 1024 * 1024,
+      },
+    );
   } catch {
     process.stderr.write(
-      `  ⚠ ${name}: test:coverage failed — its coverage may be missing from the report.\n`,
+      `  ⚠ ${name}: test:coverage failed, or no workspace is named ${name} — its coverage may be missing from the report.\n`,
     );
   }
 };
