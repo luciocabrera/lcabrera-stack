@@ -1,7 +1,13 @@
 import { spawn } from 'node:child_process';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vite-plus/test';
 
-import { exitStatusOf, runInSequence } from './changed-runner.mjs';
+import {
+  exitStatusOf,
+  filteredRunArgs,
+  REPO_ROOT,
+  runInSequence,
+} from './changed-runner.mjs';
 
 const recordingRunner = (events) => (group) => {
   events.push(`start ${group.name}`);
@@ -67,5 +73,45 @@ describe('exitStatusOf', () => {
     await expect(
       exitStatusOf(spawn('/nonexistent/binary', [], { stdio: 'ignore' })),
     ).resolves.toBe(1);
+  });
+});
+
+const runVp = (args) =>
+  exitStatusOf(
+    spawn(join(REPO_ROOT, 'node_modules', '.bin', 'vp'), args, {
+      cwd: REPO_ROOT,
+      stdio: 'ignore',
+    }),
+  );
+
+describe('filteredRunArgs', () => {
+  it('makes a filtered run fail when a filter matches no workspace', () => {
+    expect(filteredRunArgs({ packages: ['a', 'b'], task: 'test' })).toEqual([
+      'run',
+      '--fail-if-no-match',
+      '--filter',
+      'a',
+      '--filter',
+      'b',
+      'test',
+    ]);
+  });
+
+  it('runs a root task with no filter as it is', () => {
+    expect(filteredRunArgs({ packages: [], task: 'test:scripts' })).toEqual([
+      'run',
+      'test:scripts',
+    ]);
+  });
+
+  it('is refused by the runner when a filter matches nothing, where the bare filter passes', async () => {
+    const args = filteredRunArgs({
+      packages: ['@repo-standards-probe/no-such-workspace'],
+      task: 'test',
+    });
+    const bare = args.filter((arg) => arg !== '--fail-if-no-match');
+
+    await expect(runVp(bare)).resolves.toBe(0);
+    await expect(runVp(args)).resolves.not.toBe(0);
   });
 });

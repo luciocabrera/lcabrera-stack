@@ -180,8 +180,9 @@ repo docs above, not left in these:
 - **Update the canonical doc in the same commit as the change that moves it.**
   COMMANDS.md says this at the top; it applies to every doc here.
 - **`COMMANDS.md` is machine-checked.** `vp run commands:verify` (CI, via
-  `check:safe`) fails the build if a documented command doesn't resolve or a real
-  script is undocumented. It cannot check prose — so prose still needs care.
+  `check:safe`) fails the build if a documented command doesn't resolve, a real
+  script is undocumented, or a filtered run would pass on a filter that matches
+  nothing. It cannot check prose — so prose still needs care.
 - **A new decision gets an ADR** in the right home (`vp run adr:new`).
 - **A new artifact** gets a one-sentence `INVENTORY.md` row; a **new
   convention**, a `PATTERNS.md` entry; a **new system** (wiring not visible

@@ -27,6 +27,9 @@
  *   3. Every per-workspace task claimed in the §5 table exists for that package.
  *   4. Every relative link and in-file anchor in COMMANDS.md resolves.
  *   5. Every "<N> workspaces" claim matches the real workspace count.
+ *   6. Every filtered Vite+ run in a root script or a workflow step passes
+ *      `--fail-if-no-match`, so a filter that matches nothing fails instead of
+ *      passing having run nothing.
  *
  * What it deliberately does NOT check: prose and rationale. Those cannot be
  * mechanically verified — they rot slower, and a wrong rationale misleads
@@ -44,13 +47,16 @@ import { dirname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 
+import { runStepBodies } from './ci-commands.mjs';
 import {
   documentedTasks,
   requiresRunnerTaskList,
   undocumentedScripts,
+  unguardedFilters,
   unresolvedDocumented,
 } from './commands-doc.mjs';
 import { readCommands, readGates, readPublishing } from './config.mjs';
+import { readWorkflows } from './doc-register-read.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 
 const execFileAsync = promisify(execFile);
@@ -118,11 +124,11 @@ const readTaskInventory = async () =>
 const readWorkspaceNames = () =>
   workspaceManifests().map((manifest) => manifest.name);
 
-const readRootScripts = () =>
-  Object.keys(
-    JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')).scripts ??
-      {},
-  );
+const readRootScriptBlock = () =>
+  JSON.parse(readFileSync(join(REPO_ROOT, 'package.json'), 'utf8')).scripts ??
+  {};
+
+const readRootScripts = () => Object.keys(readRootScriptBlock());
 
 const findWorkspaceTaskClaims = (doc) => {
   const section = doc
@@ -240,6 +246,21 @@ const checkWorkspaceCount = (doc, expected, problems) => {
   }
 };
 
+const checkFiltersFailOnNoMatch = (problems) => {
+  const scripts = Object.entries(readRootScriptBlock()).map(
+    ([name, source]) => ({ source, where: `root script \`${name}\`` }),
+  );
+  const steps = readWorkflows(REPO_ROOT).flatMap(({ file, source }) =>
+    runStepBodies(source).map((body) => ({ source: body, where: file })),
+  );
+  problems.push(
+    ...unguardedFilters({
+      commands: [...scripts, ...steps],
+      runPrefix: RUN_PREFIX,
+    }),
+  );
+};
+
 const main = async () => {
   const doc = readFileSync(join(REPO_ROOT, COMMANDS_DOC), 'utf8');
   const inventory = await readTaskInventory();
@@ -251,9 +272,12 @@ const main = async () => {
   checkWorkspaceClaims(doc, inventory, problems);
   checkLinks(doc, problems);
   checkWorkspaceCount(doc, readWorkspaceNames().length, problems);
+  checkFiltersFailOnNoMatch(problems);
 
   if (problems.length > 0) {
-    console.error(`${COMMANDS_DOC} is out of date:\n`);
+    console.error(
+      `${COMMANDS_DOC} is out of date, or a command breaks a rule it states:\n`,
+    );
     for (const problem of problems) {
       console.error(`  - ${problem}`);
     }
@@ -266,7 +290,7 @@ const main = async () => {
 
   console.log(
     `${COMMANDS_DOC} is accurate: ${readRootScripts().length} root scripts documented as \`${RUN_PREFIX} <task>\`, ` +
-      `${documented.size} documented commands resolve, ${readWorkspaceNames().length} workspaces.`,
+      `${documented.size} documented commands resolve, ${readWorkspaceNames().length} workspaces, no filtered run passes on no match.`,
   );
 };
 

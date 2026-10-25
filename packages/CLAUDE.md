@@ -129,7 +129,10 @@ by inspection:
   reads the tarball back and imports the result from outside this repo, so it
   answers for the artifact rather than for the manifest. CI runs
   `packages:build` first, and with no `dist/` the gate **fails** — there is no
-  artifact, so there is nothing it could have verified.
+  artifact, so there is nothing it could have verified. `vp run publint:verify`
+  runs after the same build and lints every public package's packed tarball
+  with publint, so an export target the tarball does not hold fails at any
+  condition depth.
 - **The `publishConfig` swap is a pnpm extension, and the release path is what
   makes it real.** `npm pack` ignores field overrides entirely and produces a
   tarball whose `exports` still point at `./src/*.ts`, which a consumer cannot
