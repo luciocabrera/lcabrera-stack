@@ -8,10 +8,11 @@ area:
   - AGENTS.md
   - .claude/rules/testing.md
   - packages/ts-configs/vite.config.ts
+  - packages/ts-configs/README.md
 started: 2026-10-25
 updated: 2026-10-25
 plan: (none)
-pr: (none)
+pr: '#1498'
 issue: #1460
 ---
 
@@ -21,6 +22,6 @@ docs(agents): state what a workspace without vite.config.ts does now
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: rule and its empty config removed; gate
 - Blockers: none
 - Next:
