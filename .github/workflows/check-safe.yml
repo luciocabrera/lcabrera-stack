@@ -488,6 +488,16 @@ jobs:
         # peer, and the exit code is the signal, not the listing.
         run: vp run deps:peers
 
+      - name: The lockfile matches a fresh resolve
+        id: deps_lockfile_gate
+        # The install step above runs `--frozen-lockfile`, which trusts the
+        # lockfile while the pnpmfile checksum matches. That checksum covers
+        # `.pnpmfile.cjs` alone, so an edit to a module it requires changes
+        # what a resolve produces and every install still passes (#1496,
+        # ADR-139). `vp dedupe --check` resolves again and exits non-zero on
+        # any difference.
+        run: vp run deps:lockfile
+
       - name: Published package surface resolves
         id: publish_gate
         # Runs after the build step on purpose. `exports` points at `src` so

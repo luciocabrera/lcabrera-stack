@@ -487,6 +487,7 @@ tool nobody installed is a step nobody defined.
 | `lint:biome`              | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation; which analysers a consumer runs is theirs.                                                        |
 | `lint:biome:check`        | `repo`     | seed   | **parameterise** | **hard**   | The same analyser without `--write` — the form a gate runs.                                                                |
 | `test:scripts`            | `repo`     | seed   | **parameterise** | **hard**   | Runs the suites that live in no workspace.                                                                                 |
+| `deps:lockfile`           | `repo`     | seed   | **parameterise** | **hard**   | One package-manager invocation; it exits non-zero when a fresh resolve would change the lockfile.                          |
 | `deps:peers`              | `repo`     | seed   | **parameterise** | **hard**   | One package-manager invocation; it exits non-zero on an unmet peer.                                                        |
 | `fallow:full`             | `repo`     | seed   | **parameterise** | **hard**   | One analyser invocation, configured by a seeded config file.                                                               |
 | `fallow:audit`            | `repo`     | seed   | **parameterise** | **hard**   | Its `audit` subcommand.                                                                                                    |

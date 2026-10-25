@@ -270,11 +270,12 @@ falls back to the estimate that reports simple code as a CRAP breach.
 
 ### Dependencies
 
-| Command               | Runs                                                                                              |
-| --------------------- | ------------------------------------------------------------------------------------------------- |
-| `vp run deps:audit`   | the advisory gate — `vp pm audit --json` piped into `repo-verify-deps-audit`                      |
-| `vp run deps:peers`   | `pnpm peers check` — fails when any workspace has an unmet or out-of-range peer dependency        |
-| `vp run deps:refresh` | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → open a build(deps) PR |
+| Command                | Runs                                                                                                          |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `vp run deps:audit`    | the advisory gate — `vp pm audit --json` piped into `repo-verify-deps-audit`                                  |
+| `vp run deps:lockfile` | `vp dedupe --check` — fails when a fresh resolve would change `pnpm-lock.yaml`                                |
+| `vp run deps:peers`    | `pnpm peers check` — fails when any workspace has an unmet or out-of-range peer dependency                    |
+| `vp run deps:refresh`  | one-command dependency refresh — pnpm clean → taze (catalog) → vp install → vp dedupe → open a build(deps) PR |
 
 `deps:audit` fails on a known vulnerability at `moderate` or above that has no
 live allowance in `docs/agents/dependency-advisories.json`, and also on an
@@ -298,6 +299,20 @@ plugin outside the range it was built for while every other gate stays green.
 installed tree and needs no registry, and runs in CI's Quality Gate and in
 `check:safe`.
 
+`deps:lockfile` exits non-zero when resolving the manifests again, through the
+pnpmfile hook, would write a different lockfile, and prints the difference. A
+`--frozen-lockfile` install cannot see that drift: it trusts the lockfile while
+the `pnpmfileChecksum` matches, and that checksum covers `.pnpmfile.cjs` alone,
+not the modules it requires
+([ADR-139](docs/decisions/ADR-139-typescript-7-everywhere-with-typescript-6-for-eslint.md)).
+Running `vp dedupe` writes the lockfile the check expects. The check also fails
+a lockfile that keeps an older version where a newer one already in the
+lockfile satisfies the range, and `vp dedupe` fixes that the same way. It runs
+with `--prefer-offline`, so it reaches the registry only for metadata missing
+from pnpm's cache, but with a cold cache it **needs the registry**. It runs in
+CI's Quality Gate and in `check:safe`, and deliberately not in the `pre-push`
+hook, which must work offline — the same reason `deps:audit` stays out of it.
+
 `deps:refresh` (`scripts/deps-refresh.sh`) bumps the pnpm catalog and every
 `package.json` to their latest in-range versions (TypeScript is held for a known
 compatibility issue), then opens the issue, branch and PR. It reaches for `pnpm
@@ -320,6 +335,11 @@ then finish with `-- --open-pr`: it pushes (the gate runs again) and opens the P
 with the same generated description, recovering the moved-versions list from the
 commit the first run wrote. Its Impact Analysis reports any source commits the
 gate forced, rather than claiming the diff is manifests-only.
+
+**It ends the resolve with `vp dedupe`.** A lockfile regenerated from nothing
+can keep an older version where a newer one it also holds satisfies the range,
+and `deps:lockfile` fails that in CI's Quality Gate. Deduplicating before the
+commit keeps the refresh PR's own gate from stopping on it.
 
 **A run can land with no version moved at all.** `pnpm clean --lockfile`
 regenerates the lockfile from nothing, so it drops resolutions no manifest reaches
