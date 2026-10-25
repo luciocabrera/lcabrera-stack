@@ -85,9 +85,12 @@ describe('rangeAdmits', () => {
     ['>=4.8.4', true],
     ['^5.1.0 || ^6.0.0 || ^7.0.0', true],
     ['~7.0.0', true],
-    ['not a range', true],
   ])('reads %s against 7.0.2 as %s', (range, admits) => {
     expect(rangeAdmits(range, '7.0.2')).toBe(admits);
+  });
+
+  it('throws on a range it cannot read, so the install fails', () => {
+    expect(() => rangeAdmits('not a range', '7.0.2')).toThrow(/cannot read/);
   });
 });
 

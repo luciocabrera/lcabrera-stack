@@ -9,7 +9,8 @@
  * `typescript` peer range excludes the catalog's version. The rules are in
  * `scripts/lib/eslint-typescript.cjs`.
  *
- * Usage: read by pnpm on every install. It runs no command and sets no exit code.
+ * Usage: read by pnpm on every install. It throws, failing the install, when a
+ * package's typescript peer is unreadable or excludes the TypeScript 6 it pins.
  */
 
 const { readdirSync, readFileSync } = require('node:fs');
