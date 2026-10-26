@@ -111,8 +111,17 @@ takes. No new builder and no new entry point are added.
   another source under the same name.
 - A projected joined column is aliased `"<alias>.<column>"`. A safe identifier
   cannot contain a dot, so this alias cannot collide with a base column or
-  with another join's column. Two tables that both have an `id` column both
-  come back.
+  with another join's column, provided Postgres keeps the whole alias. It does
+  not always: Postgres truncates any identifier longer than 63 bytes
+  (`NAMEDATALEN - 1`), and two aliases that share their first 63 bytes would
+  then come back under one name. So the builder **refuses** a join whose
+  projected alias for any selected column is longer than 63 bytes, before it
+  builds any SQL, and the error names the alias and the column. A safe
+  identifier is ASCII, so its byte length is its character length and the
+  check needs no encoding. The builder does not shorten the alias itself,
+  because a shortened name would no longer be the `<alias>.<column>` a caller
+  reads the row by. A caller that hits the limit picks a shorter join alias.
+  Within the limit, two tables that both have an `id` column both come back.
 - A grouped read over a join takes a `capabilities` entry per source.
   Capabilities and their distinct estimates are resolved per table. Because the
   join is many-to-one, a joined column's own distinct count is still an upper
@@ -159,6 +168,9 @@ any join other than the ones above. The write builders are not affected.
   `filters`, `sort` and the grouped fields. The published type surface widens,
   and every function that reads a column name has to handle both forms. It is
   a minor bump while the package is `0.x`.
+- A join alias and a column name that are each legal can still be refused
+  together, because their projected alias exceeds 63 bytes. The caller learns
+  this from an error at build time, not from a missing column at read time.
 - A one-to-many question stays inexpressible as a join. Some readers will expect
   "each parent with its children" to be a join. Inverting it into a grouped read on
   the many side is something the caller has to know to do.
@@ -180,7 +192,12 @@ any join other than the ones above. The write builders are not affected.
   table allowlist: a source with no list cannot be read from.
 - **A dotted string (`'alias.column'`) as the joined column reference.**
   Rejected. It changes what `assertSafeIdentifier` accepts, and the dot is the
-  character that makes the projected alias collision-free.
+  character that keeps the projected alias apart from every base column.
+- **Derive a bounded alias when `<alias>.<column>` is too long**, for example
+  by truncating it and appending a hash. Rejected. The row would come back
+  under a name the caller cannot predict without calling the same function,
+  and a truncated hash can still collide. Refusing the read keeps the alias
+  equal to what the caller wrote.
 - **Apply `HAVING` to every grouping set and document the subtotals.**
   Rejected for the reason given under the group filter: the result is wrong and
   raises no error.
