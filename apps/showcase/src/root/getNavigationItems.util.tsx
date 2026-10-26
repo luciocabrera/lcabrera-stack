@@ -7,9 +7,15 @@ import {
   SettingsIcon,
 } from '@lcabrera/ui/components/Icons';
 
-export const getNavigationItems = (
-  iconSize: number,
-): readonly NavbarItemConfig[] => [
+type GetNavigationItemsArgs = {
+  readonly iconSize: number;
+  readonly isEvalsDashboardEnabled: boolean;
+};
+
+export const getNavigationItems = ({
+  iconSize,
+  isEvalsDashboardEnabled,
+}: GetNavigationItemsArgs): readonly NavbarItemConfig[] => [
   {
     end: true,
     icon: <HomeIcon size={iconSize} />,
@@ -42,6 +48,16 @@ export const getNavigationItems = (
     to: '/skill-scores',
     type: 'link',
   },
+  ...(isEvalsDashboardEnabled
+    ? [
+        {
+          icon: <BarChartIcon size={iconSize} />,
+          label: 'Evals',
+          to: '/evals',
+          type: 'link',
+        } satisfies NavbarItemConfig,
+      ]
+    : []),
   {
     icon: <FileTextIcon size={iconSize} />,
     label: 'Enterprise Orders',
