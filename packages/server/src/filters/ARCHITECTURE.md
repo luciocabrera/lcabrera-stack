@@ -23,8 +23,11 @@ includes the Postgres driver and `node:crypto`
 So the shapes are **restated** on each side rather than shared, exactly as
 `sort/` restates the request-sort shape
 ([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)):
-`filters.types.ts` here declares what `toQueryFilters` accepts, and
-`packages/ui/src/types/filterOperators.types.ts` declares the Table's own set,
+`filters.types.ts` here re-exports what `toQueryFilters` accepts from
+`@lcabrera/api/filters/filters.types`, where the shapes are declared once for
+both ends of a request's `filter` param
+([ADR-141](../../../../docs/decisions/ADR-141-declare-the-column-filter-wire-shape-in-the-api-package.md)),
+and `packages/ui/src/types/filterOperators.types.ts` declares the Table's own set,
 plus the operator aliases and the `{ label, value }` option type that only the
 filter UI has any use for. Neither file imports or re-exports the other, and
 `@lcabrera/ui` does not list this package as a dependency. Structural typing is
@@ -58,6 +61,11 @@ Any consumer of both should carry one; this repository's does.
 - **The runtime half** asserts the `QueryFilter[]` that one filter of each
   variant of the union maps to — variants, not every operator — and that a
   number filter left `undefined` mid-edit maps to no clause at all.
+- **The serialised half** builds a request from the same UI-typed filters with
+  `buildPaginatedQueryParams` and reads it back with `parseColumnFilters`, the
+  parse `parseTablePageParams` runs. A variant the UI sends that the parse
+  refuses fails there at run time, and a refused payload reaches the endpoint
+  as a refusal, not as an unfiltered read.
 
 The direction checked is UI → query layer, which is the direction filters
 travel. Nothing asserts the reverse, so a variant added _here_ and unused by the
@@ -66,15 +74,15 @@ honour them.
 
 ## Files
 
-| File                                    | Role                                                                                                                                                 |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `filters.types.ts`                      | The discriminated filter shapes: `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, and their `ColumnFilter` union         |
-| `to-query-filters.util.ts`              | **Entry point.** `Record<column, ColumnFilter>` → flat `QueryFilter[]`; dispatches each column to its per-type mapper                                |
-| `to-date-query-filters.util.ts`         | Date filter → `gt`/`lt`/`eq`; `between` → `gte` + `lte` (falls back to `eq` with no upper bound)                                                     |
-| `to-number-query-filters.util.ts`       | Number/currency filter → comparison ops; `between` → `gte` + `lte`; a drafting (undefined) value → nothing                                           |
-| `to-text-query-filters.util.ts`         | Text filter → `ilike` patterns (`contains`/`startsWith`/`endsWith`), `notIlike` (`notContains`), `eq`/`neq`                                          |
-| `to-select-query-filters.util.ts`       | Select/multi-select → `in`/`eq`/`neq`; a multi-value `notEquals` expands to an AND of `neq` (NOT IN)                                                 |
-| `resolve-filter-options-source.util.ts` | **Entry point.** A filter-options request + the caller's source registry → the source's `allowedColumns` and the column's `ColumnType`, or a refusal |
+| File                                    | Role                                                                                                                                                             |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `filters.types.ts`                      | Re-exports the discriminated filter shapes `@lcabrera/api` declares: `BooleanFilter`, `DateFilter`, `NumberFilter`, `SelectFilter`, `TextFilter`, `ColumnFilter` |
+| `to-query-filters.util.ts`              | **Entry point.** `Record<column, ColumnFilter>` → flat `QueryFilter[]`; dispatches each column to its per-type mapper                                            |
+| `to-date-query-filters.util.ts`         | Date filter → `gt`/`lt`/`eq`; `between` → `gte` + `lte` (falls back to `eq` with no upper bound)                                                                 |
+| `to-number-query-filters.util.ts`       | Number/currency filter → comparison ops; `between` → `gte` + `lte`; a drafting (undefined) value → nothing                                                       |
+| `to-text-query-filters.util.ts`         | Text filter → `ilike` patterns (`contains`/`startsWith`/`endsWith`), `notIlike` (`notContains`), `eq`/`neq`                                                      |
+| `to-select-query-filters.util.ts`       | Select/multi-select → `in`/`eq`/`neq`; a multi-value `notEquals` expands to an AND of `neq` (NOT IN)                                                             |
+| `resolve-filter-options-source.util.ts` | **Entry point.** A filter-options request + the caller's source registry → the source's `allowedColumns` and the column's `ColumnType`, or a refusal             |
 
 ## Contract notes
 

@@ -24,6 +24,21 @@ isDistinctValuesResponse [const] (value: unknown) => value is DistinctValuesResp
 ## ./distinct/parse-filter-options-params.util
 parseFilterOptionsParams [const] ({ defaultPageSize, searchParams }: ParseFilterOptionsParamsArgs) => FilterOptionsParams | undefined
 
+## ./filters/filters.types
+BooleanFilter [type] { readonly type: 'boolean'; readonly value: boolean; }
+ColumnFilter [type] BooleanFilter | DateFilter | EmptyFilter | NumberFilter | SelectFilter | TextFilter
+ColumnFilters [type] Readonly<Record<string, ColumnFilter>>
+ColumnFiltersParse [type] ColumnFiltersRefusal | { readonly filters: ColumnFilters; readonly kind: 'parsed'; }
+ColumnFiltersRefusal [type] { readonly column: string; readonly kind: 'refused'; readonly reason: 'invalid-filter'; } | { readonly kind: 'refused'; readonly reason: 'unreadable'; }
+DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'; readonly type: 'date'; /** ISO date string. */ readonly value: string; readonly value2?: string; }
+EmptyFilter [type] { readonly operator: 'isEmpty' | 'isNotEmpty'; readonly type: 'empty'; }
+NumberFilter [type] { readonly operator: 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; /** Absent from the serialised form while the value is still being typed. */ readonly value: number | undefined; readonly value2?: number; }
+SelectFilter [type] { /** Defaults to `'equals'`. */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for `'select'`. */ readonly value?: string; /** Multiple values for `'multiSelect'`. */ readonly values?: readonly string[]; }
+TextFilter [type] { readonly operator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
+
+## ./filters/parse-column-filters.util
+parseColumnFilters [const] (params: URLSearchParams) => ColumnFiltersParse
+
 ## ./http/build-paginated-query-params.util
 buildPaginatedQueryParams [const] ({ cursor, filter, limit, skip, sorting }: PaginatedQuery) => URLSearchParams
 
@@ -35,7 +50,7 @@ fetchAndValidate [const] <T>({ isValid, shapeErrorMessage, signal, timeoutMs, ur
 
 ## ./http/http.types
 PaginatedFetchArgs [type] PaginatedQuery & { /** A drill-down group token; scopes the page to that group's rows. */ readonly group?: string; /** SSR only; omit in the browser, where the origin comes from the document. */ readonly requestUrl?: string; readonly signal?: AbortSignal; readonly timeoutMs?: number; }
-PaginatedQuery [type] { /** Sort-key tuple of the last row loaded, in `sorting` order, for an endpoint that can seek past it. */ readonly cursor?: readonly unknown[]; readonly filter?: unknown; readonly limit: number; /** Rows already loaded — not an offset past `cursor`, which is sent alongside it and may be ignored. */ readonly skip: number; readonly sorting?: readonly PaginatedSort[]; }
+PaginatedQuery [type] { /** Sort-key tuple of the last row loaded, in `sorting` order, for an endpoint that can seek past it. */ readonly cursor?: readonly unknown[]; readonly filter?: ColumnFilters; readonly limit: number; /** Rows already loaded — not an offset past `cursor`, which is sent alongside it and may be ignored. */ readonly skip: number; readonly sorting?: readonly PaginatedSort[]; }
 PaginatedSort [type] { readonly columnKey: PropertyKey; readonly direction?: 'asc' | 'desc'; }
 
 ## ./olap/encode-drill-group.util

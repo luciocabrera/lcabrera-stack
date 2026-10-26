@@ -2,13 +2,15 @@
 id: api-filter-wire-shape
 title: Give the filter wire shape a type
 owner: agent:claude
-status: active
+status: review
 branch: fix/999-api-filter-wire-shape
 area:
   - packages/api/src/filters/**
   - packages/api/src/http/**
   - packages/api/package.json
   - packages/api/ARCHITECTURE.md
+  - packages/api/README.md
+  - packages/server/README.md
   - packages/server/src/filters/filters.types.ts
   - packages/server/src/filters/ARCHITECTURE.md
   - packages/server/src/table-page/**
@@ -16,12 +18,13 @@ area:
   - reports/api-surface/api.txt
   - reports/api-surface/server.txt
   - apps/showcase/src/routes/enterprise-orders/filterContract.test.ts
+  - apps/showcase/src/routes/enterprise-orders/fetchOrdersPage.service.test.ts
   - .changeset/api-filter-wire-shape.md
   - docs/decisions/ADR-*-filter-wire-*.md
 started: 2026-10-26
 updated: 2026-10-26
 plan: (none)
-pr: (none)
+pr: '#1512'
 issue: #999
 ---
 

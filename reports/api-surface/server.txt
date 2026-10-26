@@ -218,12 +218,12 @@ UniqueConstraintViolationError [class] UniqueConstraintViolationError
 
 ## ./filters/filters.types
 BooleanFilter [type] { readonly type: 'boolean'; readonly value: boolean; }
-ColumnFilter [type] BooleanFilter | DateFilter | EmptyFilter | NumberFilter | SelectFilter | TextFilter
+ColumnFilter [type] | BooleanFilter | DateFilter | EmptyFilter | NumberFilter | SelectFilter | TextFilter
 DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'; readonly type: 'date'; /** ISO date string. */ readonly value: string; readonly value2?: string; }
 EmptyFilter [type] { readonly operator: 'isEmpty' | 'isNotEmpty'; readonly type: 'empty'; }
-NumberFilter [type] { readonly operator: 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; readonly value: number | undefined; readonly value2?: number; }
+NumberFilter [type] { readonly operator: | 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; /** Absent from the serialised form while the value is still being typed. */ readonly value: number | undefined; readonly value2?: number; }
 SelectFilter [type] { /** Defaults to `'equals'`. */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for `'select'`. */ readonly value?: string; /** Multiple values for `'multiSelect'`. */ readonly values?: readonly string[]; }
-TextFilter [type] { readonly operator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
+TextFilter [type] { readonly operator: | 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
 
 ## ./filters/resolve-filter-options-source.util
 FilterOptionsSourceRefusal [type] 'unknown-column' | 'unknown-source'
@@ -284,14 +284,14 @@ TablePageLoader [type] (args: TablePageLoaderArgs) => Promise<Response>
 TablePageLoaderArgs [type] { readonly request: Request; }
 
 ## ./table-page/create-table-page-reader.util
-createTablePageReader [const] <TRow extends QueryResultRow, TKey extends keyof TRow & string>({ defaultLimit, fallbackSort, fields, groupMaxRows, ignoredSortColumns, maxLimit, maxSortRules, primaryKey, target }: CreateTablePageReaderArgs<TKey>) => { deleteRow: (id: TRow[TKey]) => Promise<void>; resolveGroupRead: (args: TablePageGroupReadArgs) => Promise<OlapGroupReadResolution>; resolveGroupRestriction: (args: TablePageGroupRestrictionArgs) => Promise<GroupRestrictionStatement | undefined>; resolvePageRead: (params: URLSearchParams) => Promise<OlapGroupReadResolution>; selectGroupingCapabilities: () => Promise<Readonly<Record<string, ColumnGroupingCapability>>>; selectGroupKeyTruncations: (periods: Readonly<Record<string, GroupKeyPeriod>> | undefined) => Promise<Readonly<Record<string, GroupKeyTruncation>>>; selectPage: ({ cursor, filters, grouping, includeTotal, limit, offset, sort, totalsPlacement }: TablePageRead) => Promise<TablePage<TRow>>; }
+createTablePageReader [const] <TRow extends QueryResultRow, TKey extends keyof TRow & string>({ defaultLimit, fallbackSort, fields, groupMaxRows, ignoredSortColumns, maxLimit, maxSortRules, primaryKey, target }: CreateTablePageReaderArgs<TKey>) => { deleteRow: (id: TRow[TKey]) => Promise<void>; resolveGroupRead: (args: TablePageGroupReadArgs) => Promise<OlapGroupReadResolution>; resolveGroupRestriction: (args: TablePageGroupRestrictionArgs) => Promise<GroupRestrictionStatement | undefined>; resolvePageRead: (params: URLSearchParams) => Promise<TablePageParamsRefusal | OlapGroupReadResolution>; selectGroupingCapabilities: () => Promise<Readonly<Record<string, ColumnGroupingCapability>>>; selectGroupKeyTruncations: (periods: Readonly<Record<string, GroupKeyPeriod>> | undefined) => Promise<Readonly<Record<string, GroupKeyTruncation>>>; selectPage: ({ cursor, filters, grouping, includeTotal, limit, offset, sort, totalsPlacement }: TablePageRead) => Promise<TablePage<TRow>>; }
 CreateTablePageReaderArgs [type] { /** Page size a request that names no `limit` gets. */ readonly defaultLimit: number; /** Order a request that sends no usable sort gets; must be non-empty. */ readonly fallbackSort: readonly ColumnSort[]; /** Columns a row read projects. Defaults to `target.allowedColumns`. */ readonly fields?: readonly string[]; /** Row ceiling of a grouped read, which is never paginated. */ readonly groupMaxRows: number; /** Sort keys that name no data column; dropped from every read this reader resolves. */ readonly ignoredSortColumns?: readonly string[]; /** Largest page a request can ask for; smaller pages pass through. */ readonly maxLimit: number; /** Longest ORDER BY a request can ask for. Defaults to the allowed column count. */ readonly maxSortRules?: number; /** Unique, non-null column that breaks sort ties and anchors keyset pages. */ readonly primaryKey: TKey; readonly target: TablePageTarget; }
 TablePageGroupReadArgs [type] Omit<Parameters<typeof resolveGroupRead>[0], 'maxLimit' | 'primaryKey' | 'selectTruncations'>
 TablePageGroupRestrictionArgs [type] Omit<Parameters<typeof resolveGroupRestriction>[0], 'selectTruncations'>
 TablePageReader [type] ReturnType<typeof createTablePageReader<TRow, TKey>>
 
 ## ./table-page/parse-table-page-params.util
-parseTablePageParams [const] ({ defaultLimit, fallbackSort, ignoredSortColumns, params }: ParseTablePageParamsArgs) => TablePageParams
+parseTablePageParams [const] ({ defaultLimit, fallbackSort, ignoredSortColumns, params }: ParseTablePageParamsArgs) => TablePageParamsResolution
 ParseTablePageParamsArgs [type] { /** Used when the request names no `limit`, or an unreadable one. */ readonly defaultLimit: number; /** Used when the request carries no usable sort rule; must be non-empty. */ readonly fallbackSort: readonly ColumnSort[]; /** Columns a client may send a sort for that are not data columns. */ readonly ignoredSortColumns?: readonly string[]; readonly params: URLSearchParams; }
 
 ## ./table-page/table-page.types
@@ -300,6 +300,8 @@ TablePageAggregate [type] { readonly columnKey: string; readonly fn: AggregateFn
 TablePageGrouping [type] { readonly aggregates: readonly TablePageAggregate[]; /** Distinct values of this column become measure columns. */ readonly columnAxis?: string; readonly keys: readonly string[]; readonly mode: GroupingMode; readonly periods: Readonly<Record<string, GroupKeyPeriod>>; }
 TablePageGroupRow [type] ReturnType<typeof toGroupRow>
 TablePageParams [type] { readonly cursor?: readonly unknown[]; readonly filters: readonly QueryFilter[]; readonly limit: number; readonly skip: number; readonly sort: readonly QuerySort[]; }
+TablePageParamsRefusal [type] { readonly kind: 'refused'; readonly message: string; readonly reason: ColumnFiltersRefusal['reason']; }
+TablePageParamsResolution [type] TablePageParamsRefusal | { readonly kind: 'parsed'; readonly params: TablePageParams; }
 TablePageRead [type] { /** One value per `sort` entry, from the last row of the previous page. */ readonly cursor?: readonly unknown[]; readonly filters: readonly QueryFilter[]; /** A read with no group keys returns rows, not groups. */ readonly grouping?: TablePageGrouping; readonly includeTotal: boolean; readonly limit: number; readonly offset: number; readonly sort: readonly QuerySort[]; /** Defaults to `'last'`. */ readonly totalsPlacement?: 'first' | 'last'; }
 TablePageSortRule [type] { readonly columnKey: string; /** A rule with no direction sorts nothing and is dropped. */ readonly direction?: ColumnSort['direction']; }
 TablePageTarget [type] { /** Every request-derived column is checked against this list. */ readonly allowedColumns: readonly string[]; readonly schema: string; readonly table: string; }

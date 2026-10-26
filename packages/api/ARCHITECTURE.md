@@ -48,6 +48,10 @@ half out removes that edge at the package boundary rather than papering over it.
 | `http/`       | `build-paginated-query-params.util.ts` | Builds the `limit`/`skip`/`sort`/`filter` query params shared by paginated fetchers                                                       |
 | `http/`       | `create-paginated-fetcher.util.ts`     | Factory: endpoint declaration (path, guard, base-URL strategy) in, validated page fetcher out                                             |
 | `http/`       | `http.types.ts`                        | `PaginatedSort`, `PaginatedQuery`, `PaginatedFetchArgs` — the shared paginated-read contract                                              |
+| `filters/`    | `filters.constants.ts`                 | `COLUMN_FILTERS_PARAM` — the search param both the builder and the parse use                                                              |
+| `filters/`    | `filters.types.ts`                     | `ColumnFilter` and its members, `ColumnFilters` (the `filter` param's value) and the `ColumnFiltersParse` result                          |
+| `filters/`    | `is-column-filter.util.ts`             | Internal guard: a value is one `ColumnFilter` variant, checked field by field against operator records keyed by each operator union       |
+| `filters/`    | `parse-column-filters.util.ts`         | A request's search params → the `filter` param's filters, or a refusal naming an unreadable payload or the column whose filter is invalid |
 | `distinct/`   | `distinct.types.ts`                    | `DistinctValuesResponse` — the wire contract a distinct-values endpoint returns                                                           |
 | `distinct/`   | `fetch-distinct-values.util.ts`        | Pages a distinct-values endpoint — the HTTP half of the ADR-009 descriptors                                                               |
 | `distinct/`   | `is-distinct-values-response.util.ts`  | Type guard for `DistinctValuesResponse`                                                                                                   |

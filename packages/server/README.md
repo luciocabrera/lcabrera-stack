@@ -78,7 +78,7 @@ The contract a table filter UI speaks, and the mappers that translate it into
 
 | Import                         | What it does                                                        |
 | ------------------------------ | ------------------------------------------------------------------- |
-| `filters.types`                | `ColumnFilter` and its boolean/date/number/select/text members      |
+| `filters.types`                | `ColumnFilter` and its members, re-exported from `@lcabrera/api`    |
 | `to-query-filters.util`        | Dispatches a `Record<column, ColumnFilter>` to the per-type mappers |
 | `to-date-query-filters.util`   | Date filter → `gt`/`lt`/`eq`, or `gte`+`lte` for `between`          |
 | `to-number-query-filters.util` | Number/currency filter → comparison operators                       |
