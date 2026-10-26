@@ -28,7 +28,10 @@ const REPO_ROOT = join(dirname(fileURLToPath(import.meta.url)), '..');
 
 describe('harness conformance — the roster comes from disk', () => {
   it('checks every skill, rule and subagent in this repository', () => {
-    const result = checkConformance({ repoRoot: REPO_ROOT });
+    const result = checkConformance({
+      additionalRoots: [],
+      repoRoot: REPO_ROOT,
+    });
 
     const skillDirectories = readdirSync(join(REPO_ROOT, '.github/skills'), {
       withFileTypes: true,
@@ -57,6 +60,22 @@ describe('harness conformance — the roster comes from disk', () => {
         alphabetical,
       ),
     ).toEqual(skillDirectories.toSorted(alphabetical));
+  });
+
+  it('also checks the skills and rules devkit ships', () => {
+    const shipped = (relative) =>
+      readdirSync(join(REPO_ROOT, relative)).toSorted((a, b) =>
+        a.localeCompare(b),
+      );
+    const result = checkConformance({ repoRoot: REPO_ROOT });
+    const own = checkConformance({ additionalRoots: [], repoRoot: REPO_ROOT });
+
+    expect(result.checked.skill.length - own.checked.skill.length).toBe(
+      shipped('packages/devkit/assets/skills').length,
+    );
+    expect(result.checked.rule.length - own.checked.rule.length).toBe(
+      shipped('packages/devkit/assets/rules').length,
+    );
   });
 
   it('passes on the tree as it stands', () => {

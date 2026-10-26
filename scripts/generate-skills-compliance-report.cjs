@@ -49,13 +49,13 @@ const createPlanIfMissing = () => {
   fs.writeFileSync(planOutputPath, initialPlan, 'utf8');
 };
 
-const createFindingsMarkdown = (errors) => {
-  if (errors.length === 0) {
+const createFindingsMarkdown = (findings) => {
+  if (findings.length === 0) {
     return 'No catalog findings on this audit.';
   }
 
-  return errors
-    .map((error, index) => {
+  return findings
+    .map((found, index) => {
       const findingId = `F-${String(index + 1).padStart(3, '0')}`;
       return [
         `### Finding ${findingId}`,
@@ -63,11 +63,11 @@ const createFindingsMarkdown = (errors) => {
         '- rule_id: CHK.SKILL.CONTRACT',
         '- severity: HIGH',
         '- confidence: high',
-        '- location_path: .github/skills/',
+        `- location_path: ${found.label}`,
         '- location_hint: frontmatter/links contract',
         '- evidence_excerpt:',
         '```text',
-        error,
+        found.message,
         '```',
         '- why: Skill contract violations break deterministic agent behavior in automation.',
         '- fix: Correct the reported skill contract field or link and re-run validation.',
@@ -103,7 +103,7 @@ const buildReport = (result) => {
     '- skill_name: code-smell-checker',
     '- repository: lcabrera-stack',
     '- scope_type: repo',
-    '- scope_value: .github/skills',
+    '- scope_value: .github/skills and gates.harness.additionalRoots',
     '- severity_scale: BLOCKER, HIGH, MEDIUM, LOW, NIT',
     '- classification: config',
     '- primary_lens: Mixed',
@@ -122,7 +122,7 @@ const buildReport = (result) => {
     '',
     '## Findings',
     '',
-    createFindingsMarkdown(result.errors),
+    createFindingsMarkdown(result.findings),
     '',
     '## Prioritized Execution Queue',
     result.errors.length === 0
