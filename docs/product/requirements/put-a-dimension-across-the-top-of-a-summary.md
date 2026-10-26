@@ -19,7 +19,7 @@ evidence:
   - type: test
     ref: packages/ui/src/components/Table/Table.columnAxis.test.tsx
   - type: test
-    ref: packages/server/src/db/group-query-builder/build-group-query.util.test.ts
+    ref: packages/server/src/db/group-query-builder/build-grouped-read.util.test.ts
   - type: code
     ref: packages/server/src/db/group-query-builder/expand-column-axis-aggregates.util.ts
   - type: doc
@@ -40,7 +40,7 @@ grouping I already use.
 
 - A grouped read can name a column axis and returns one measure column per
   distinct value of that axis. Decided by
-  `build-group-query.util.test.ts` → "a column axis".
+  `build-grouped-read.util.test.ts` → "a column axis".
 - The ceiling on those columns is supplied by the caller, not invented by the
   package. Decided by `columnAxis.maxDistinct` being required, and by
   `readPivotMaxDistinct` reading `DB_PIVOT_MAX_DISTINCT`.

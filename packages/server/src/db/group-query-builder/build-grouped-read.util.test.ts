@@ -10,7 +10,7 @@ import type {
   GroupQueryDescriptor,
 } from './group-query-builder.types.ts';
 
-import { buildGroupQuery } from './build-group-query.util.ts';
+import { buildGroupedRead } from './build-grouped-read.util.ts';
 
 const ALLOWED = [
   'order_status',
@@ -100,9 +100,9 @@ const SELECT_LIST =
   'count(*) AS "count_rows", sum("total_amount") AS "sum_total_amount" ' +
   'FROM "public"."enterprise_orders"';
 
-describe('buildGroupQuery', () => {
+describe('buildGroupedRead', () => {
   it('emits a flat grouping with no GROUPING terms in the ORDER BY', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         filters: [
           { column: 'order_date', operator: 'gte', value: '2026-01-01' },
@@ -123,7 +123,7 @@ describe('buildGroupQuery', () => {
   });
 
   it('emits a rollup as its explicit sets, led by the GROUPING terms', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         filters: [
           { column: 'order_date', operator: 'gte', value: '2026-01-01' },
@@ -145,7 +145,7 @@ describe('buildGroupQuery', () => {
   });
 
   it('emits a cube as every subset, in ascending mask order', () => {
-    const result = buildGroupQuery(descriptor({ grouping: 'cube' }));
+    const result = buildGroupedRead(descriptor({ grouping: 'cube' }));
 
     expect(result.text).toContain(
       'GROUP BY GROUPING SETS ' +
@@ -155,15 +155,15 @@ describe('buildGroupQuery', () => {
   });
 
   it('gives a cube the same ORDER BY shape a rollup gets', () => {
-    const cube = buildGroupQuery(descriptor({ grouping: 'cube' }));
-    const rollup = buildGroupQuery(descriptor({ grouping: 'rollup' }));
+    const cube = buildGroupedRead(descriptor({ grouping: 'cube' }));
+    const rollup = buildGroupedRead(descriptor({ grouping: 'rollup' }));
 
     expect(orderByOf(cube.text)).toBe(orderByOf(rollup.text));
   });
 
   it('emits the cross-cutting set a rollup never does', () => {
-    const cube = buildGroupQuery(descriptor({ grouping: 'cube' }));
-    const rollup = buildGroupQuery(descriptor({ grouping: 'rollup' }));
+    const cube = buildGroupedRead(descriptor({ grouping: 'cube' }));
+    const rollup = buildGroupedRead(descriptor({ grouping: 'rollup' }));
 
     expect(groupByOf(cube.text)).toContain('("shipping_country")');
     expect(groupByOf(rollup.text)).not.toContain('("shipping_country")');
@@ -173,15 +173,15 @@ describe('buildGroupQuery', () => {
     const keys = ['order_status', 'shipping_country', 'city', 'priority'];
 
     expect(() =>
-      buildGroupQuery(descriptor({ grouping: 'cube', keys })),
+      buildGroupedRead(descriptor({ grouping: 'cube', keys })),
     ).toThrow('A cube grouping takes at most 3 group keys; got 4.');
     expect(() =>
-      buildGroupQuery(descriptor({ grouping: 'rollup', keys })),
+      buildGroupedRead(descriptor({ grouping: 'rollup', keys })),
     ).not.toThrow();
   });
 
   it('ships the keys and masks the caller needs to decode the mask column', () => {
-    const result = buildGroupQuery(descriptor({ grouping: 'rollup' }));
+    const result = buildGroupedRead(descriptor({ grouping: 'rollup' }));
 
     expect(result.keys).toEqual(['order_status', 'shipping_country']);
     expect(result.maskAlias).toBe('group_mask');
@@ -196,7 +196,7 @@ describe('buildGroupQuery', () => {
       0,
       depth,
     );
-    const result = buildGroupQuery(descriptor({ keys }));
+    const result = buildGroupedRead(descriptor({ keys }));
     const quoted = keys.map((key) => `"${key}"`).join(', ');
 
     expect(result.text).toContain(`GROUP BY GROUPING SETS ((${quoted}))`);
@@ -219,7 +219,7 @@ describe('buildGroupQuery', () => {
     { fn: 'min', projection: 'min("total_amount") AS "min_total_amount"' },
     { fn: 'sum', projection: 'sum("total_amount") AS "sum_total_amount"' },
   ] as const)('projects $fn', ({ fn, projection }) => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({ aggregates: [{ column: 'total_amount', fn }] }),
     );
 
@@ -232,7 +232,7 @@ describe('buildGroupQuery', () => {
   ] as const)(
     'projects $fn on the boolean that supports it',
     ({ fn, projection }) => {
-      const result = buildGroupQuery(
+      const result = buildGroupedRead(
         descriptor({ aggregates: [{ column: 'is_gift', fn }] }),
       );
 
@@ -241,7 +241,7 @@ describe('buildGroupQuery', () => {
   );
 
   it('shifts the WHERE clause when a FILTER aggregate claims the leading parameters', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         aggregates: [
           { fn: 'count' },
@@ -269,23 +269,23 @@ describe('buildGroupQuery', () => {
   });
 
   it('quotes the schema and table', () => {
-    expect(buildGroupQuery(descriptor()).text).toContain(
+    expect(buildGroupedRead(descriptor()).text).toContain(
       'FROM "public"."enterprise_orders"',
     );
   });
 
   it('refuses an unsafe schema or table', () => {
     expect(() =>
-      buildGroupQuery(descriptor({ schema: 'public; DROP SCHEMA reporting' })),
+      buildGroupedRead(descriptor({ schema: 'public; DROP SCHEMA reporting' })),
     ).toThrow('Unsafe identifier');
-    expect(() => buildGroupQuery(descriptor({ table: 'Orders' }))).toThrow(
+    expect(() => buildGroupedRead(descriptor({ table: 'Orders' }))).toThrow(
       'Unsafe identifier',
     );
   });
 
   it('refuses more keys than the depth cap', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           keys: [
             'order_status',
@@ -301,7 +301,7 @@ describe('buildGroupQuery', () => {
 
   it('refuses a key outside the allowlist', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           capabilities: { ...CAPABILITIES, region: dimension('region') },
           keys: ['region'],
@@ -312,7 +312,7 @@ describe('buildGroupQuery', () => {
 
   it('refuses an uppercase key', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           allowedColumns: [...ALLOWED, 'Order_Status'],
           capabilities: {
@@ -327,24 +327,24 @@ describe('buildGroupQuery', () => {
 
   it('refuses a type-illegal aggregate', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({ aggregates: [{ column: 'doc', fn: 'min' }] }),
       ),
     ).toThrow('not legal for column "doc"');
   });
 
   it('refuses grouping by a column the catalogue turned down', () => {
-    expect(() => buildGroupQuery(descriptor({ keys: ['doc'] }))).toThrow(
+    expect(() => buildGroupedRead(descriptor({ keys: ['doc'] }))).toThrow(
       'not-a-dimension',
     );
-    expect(() => buildGroupQuery(descriptor({ keys: ['order_date'] }))).toThrow(
-      'unique-ish',
-    );
+    expect(() =>
+      buildGroupedRead(descriptor({ keys: ['order_date'] })),
+    ).toThrow('unique-ish');
   });
 
   it('refuses a fixed alias that collides with a real column', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({ allowedColumns: [...ALLOWED, 'group_mask'] }),
       ),
     ).toThrow('collides with a real column');
@@ -352,7 +352,7 @@ describe('buildGroupQuery', () => {
 
   it('refuses two aggregates that would land on the same alias', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           aggregates: [
             { column: 'total_amount', fn: 'sum' },
@@ -365,7 +365,7 @@ describe('buildGroupQuery', () => {
 
   it('refuses an alias past the identifier limit', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           aggregates: [
             { alias: 'a'.repeat(64), column: 'total_amount', fn: 'sum' },
@@ -376,7 +376,7 @@ describe('buildGroupQuery', () => {
   });
 
   it('places subtotals first when asked', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({ grouping: 'rollup', subtotalPlacement: 'first' }),
     );
 
@@ -384,7 +384,7 @@ describe('buildGroupQuery', () => {
   });
 
   it('sorts leaves by an aggregate without disturbing the tree', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         grouping: 'rollup',
         sort: [{ aggregateAlias: 'sum_total_amount', direction: 'desc' }],
@@ -398,7 +398,7 @@ describe('buildGroupQuery', () => {
 
   it('refuses an aggregate sort that would rank an ancestor', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           grouping: 'rollup',
           sort: [
@@ -411,7 +411,7 @@ describe('buildGroupQuery', () => {
   });
 
   it('carries the pre-flight bound it emitted the LIMIT from', () => {
-    const result = buildGroupQuery(descriptor());
+    const result = buildGroupedRead(descriptor());
 
     expect(result.guardRails).toEqual({
       estimate: { kind: 'known', rows: 144 },
@@ -420,7 +420,7 @@ describe('buildGroupQuery', () => {
   });
 
   it('caps the LIMIT at the backstop when a key has no statistics', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({ keys: ['is_gift'], maxRows: 20_000 }),
     );
 
@@ -442,7 +442,7 @@ describe('buildGroupQuery', () => {
     };
 
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           capabilities: { ...CAPABILITIES, city: wide },
           keys: ['order_status', 'city'],
@@ -458,7 +458,7 @@ describe('buildGroupQuery', () => {
     };
 
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           capabilities: { ...CAPABILITIES, city: wide },
           keys: ['order_date', 'city'],
@@ -470,7 +470,7 @@ describe('buildGroupQuery', () => {
 
 describe('a column axis', () => {
   it('emits one FILTER aggregate per axis value and leaves the row keys grouped', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         aggregates: [{ column: 'total_amount', fn: 'sum' }],
         columnAxis: {
@@ -513,7 +513,7 @@ describe('a column axis', () => {
   });
 
   it('uses IS NULL for a missing axis value', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         aggregates: [{ fn: 'count' }, { fn: 'count' }],
         columnAxis: {
@@ -532,7 +532,7 @@ describe('a column axis', () => {
   });
 
   it('exposes a driver SQL NULL as undefined on the public axis metadata', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         aggregates: [{ fn: 'count' }, { fn: 'count' }],
         columnAxis: {
@@ -549,7 +549,7 @@ describe('a column axis', () => {
   });
 
   it('emits no FILTER columns when the axis has no values', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         aggregates: [{ column: 'total_amount', fn: 'sum' }],
         columnAxis: {
@@ -577,7 +577,7 @@ describe('a column axis', () => {
 
   it('refuses a countDistinct that a column axis would emit more than once', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           aggregates: [{ column: 'shipping_country', fn: 'countDistinct' }],
           columnAxis: {
@@ -592,7 +592,7 @@ describe('a column axis', () => {
   });
 
   it('keeps a lone leading count(*) unexpanded when no measure is selected', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         aggregates: [{ fn: 'count' }],
         columnAxis: {
@@ -609,7 +609,7 @@ describe('a column axis', () => {
   });
 
   it('keeps the leading count(*) unexpanded so the group still has a size', () => {
-    const result = buildGroupQuery(
+    const result = buildGroupedRead(
       descriptor({
         aggregates: [{ fn: 'count' }, { column: 'total_amount', fn: 'sum' }],
         columnAxis: {
@@ -629,8 +629,8 @@ describe('a column axis', () => {
   });
 
   it('does not change a read that has no column axis', () => {
-    const withAxisFieldAbsent = buildGroupQuery(descriptor());
-    const withUndefined = buildGroupQuery(
+    const withAxisFieldAbsent = buildGroupedRead(descriptor());
+    const withUndefined = buildGroupedRead(
       descriptor({ columnAxis: undefined }),
     );
 
@@ -640,7 +640,7 @@ describe('a column axis', () => {
 
   it('refuses when the caller ceiling is exceeded', () => {
     expect(() =>
-      buildGroupQuery(
+      buildGroupedRead(
         descriptor({
           columnAxis: {
             key: 'order_status',
@@ -677,7 +677,7 @@ describe('a truncated group key in the SQL', () => {
     readonly keys: readonly string[];
     readonly periods: Record<string, 'day' | 'month' | 'quarter' | 'year'>;
   }) =>
-    buildGroupQuery({
+    buildGroupedRead({
       aggregates: [{ fn: 'count' }],
       allowedColumns: ['order_date', 'order_timestamp', 'status'],
       capabilities: {
@@ -728,7 +728,7 @@ describe('a truncated group key in the SQL', () => {
 
   it('leaves an untruncated key exactly as it was', () => {
     expect(built({ keys: ['status'], periods: {} }).text).toStrictEqual(
-      buildGroupQuery({
+      buildGroupedRead({
         aggregates: [{ fn: 'count' }],
         allowedColumns: ['status'],
         capabilities: { status: dimension('status') },
@@ -751,6 +751,19 @@ describe('a truncated group key in the SQL', () => {
 
     expect(text).toContain(
       `GROUP BY GROUPING SETS ((${expression}, "status"), (${expression}), ())`,
+    );
+  });
+
+  it('ignores a count or row field the descriptor also carries', () => {
+    const withForeign = {
+      ...descriptor(),
+      count: true,
+      fields: ['city'],
+      limit: 10,
+    };
+
+    expect(buildGroupedRead(withForeign)).toEqual(
+      buildGroupedRead(descriptor()),
     );
   });
 });
