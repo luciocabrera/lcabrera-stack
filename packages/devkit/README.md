@@ -105,6 +105,14 @@ their repository settings can supply, and a **requires** is a config key outside
 what `devkit.config.json` is for — so no consumer could set it, however reliably
 it resolves in the repository that wrote the file.
 
+A **missing** is a script that `node`, `bash` or `sh` is told to run, inline,
+in a fenced shell block or in a workflow step, when that path is neither in the
+shipped set nor anywhere in the repository running the check. A moved or deleted
+script leaves exactly that behind. A path that is only named, and not run, is
+not held to this: prose names files the consumer is expected to write, so its
+absence proves nothing. An operand holding `$`, `<`, `>`, `{`, `}` or `*` is a
+placeholder and is skipped.
+
 Reading a file is what makes those answers worth anything, and not every shipped
 file is markdown. A workflow's actions, step scripts and secret expressions, the
 executables a hook or a step invokes out of the install's bin directory, and the
