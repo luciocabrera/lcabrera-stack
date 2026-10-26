@@ -73,11 +73,11 @@ describe('the unchecked files', () => {
       ]),
     ).toBe(
       [
-        '✓ docker — no escapes in the 2 file(s) a resolver reads',
-        '    unchecked  docker/compose.yml  no resolver reads it',
+        '✓ docker — no escapes; 2 file(s) read by a resolver for their kind',
+        '    unchecked  docker/compose.yml  no resolver for its kind',
         '✗ db',
         '    db/README.md:2  needs x.md',
-        '    unchecked  db/setup.sql  no resolver reads it',
+        '    unchecked  db/setup.sql  no resolver for its kind',
       ].join('\n'),
     );
   });

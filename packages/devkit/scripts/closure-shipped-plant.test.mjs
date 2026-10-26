@@ -155,7 +155,7 @@ describe('a shipped file of a kind no resolver reads', () => {
       /✓ monorepo — \d+ shipped file\(s\), \d+ read, \d+ unchecked/,
     );
     expect(stdout).toContain(
-      'unchecked  scripts/planted.sql  no resolver reads it',
+      'unchecked  scripts/planted.sql  no resolver for its kind',
     );
   });
 });

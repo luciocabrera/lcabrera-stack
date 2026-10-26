@@ -77,7 +77,7 @@ export const describeEscape = (finding) =>
  * @returns {string[]}
  */
 export const describeUnchecked = ({ unchecked = [] }) =>
-  unchecked.map((path) => `    unchecked  ${path}  no resolver reads it`);
+  unchecked.map((path) => `    unchecked  ${path}  no resolver for its kind`);
 
 const readCount = ({ fileCount, unchecked = [] }) =>
   fileCount - unchecked.length;
@@ -90,7 +90,7 @@ export const renderClosureReport = (results) => {
       return [
         unchecked.length === 0
           ? `✓ ${result.directory} — self-contained`
-          : `✓ ${result.directory} — no escapes in the ${readCount(result)} file(s) a resolver reads`,
+          : `✓ ${result.directory} — no escapes; ${readCount(result)} file(s) read by a resolver for their kind`,
         ...unchecked,
       ];
     }

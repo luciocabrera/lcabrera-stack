@@ -124,12 +124,13 @@ markdown structure reports the same clean pass as one that is genuinely
 self-contained. A YAML file counts as a workflow when it has a top-level `jobs:`
 key; any other YAML file is configuration.
 
-A file no resolver reads is listed under its directory or profile as
-**unchecked** — a config file, a stylesheet, SQL, an env template. Those are
-not findings and do not fail the run, but they are not a pass either: closure
-looked at nothing in them, and the line tells you so instead of counting them
-as self-contained. The `--shipped` header gives the split, read and unchecked,
-for each profile.
+A file that no resolver for its kind reads is listed under its directory or
+profile as **unchecked** — a config file, a stylesheet, SQL, an env template.
+Those are not findings and do not fail the run, but they are not a pass either.
+The link, inline-command and bin scans still run over every file, so a link in
+one of them can still be reported; what nothing did is read it as the kind of
+file it is, and the line says so instead of counting it as self-contained. The
+`--shipped` header gives the split, read and unchecked, for each profile.
 
 Two of those answer themselves. An executable a gate task already names is
 placed by this kit, so it is not an escape; neither is a secret that something

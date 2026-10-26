@@ -35,8 +35,6 @@ const WORKFLOW_JOBS = /^jobs:/m;
 
 const SHELL_SHEBANG = /^#!\S*(?:\/|\s)(?:ba|da|z)?sh\b/;
 
-const SHELL_COMMENT = /(?:^|\s)#.*$/;
-
 const isWorkflowFile = ({ content, path }) =>
   WORKFLOW_EXTENSIONS.some((extension) => path.endsWith(extension)) &&
   WORKFLOW_JOBS.test(content);
@@ -127,10 +125,22 @@ const workflowEscapes = ({ allowed, containment, exists, file }) => {
   ];
 };
 
+const isCommentStart = ({ characters, index }) =>
+  characters[index] === '#' &&
+  (index === 0 || /\s/.test(characters[index - 1]));
+
+const withoutComment = (text) => {
+  const characters = [...text];
+  const start = characters.findIndex((_, index) =>
+    isCommentStart({ characters, index }),
+  );
+  return start === -1 ? text : characters.slice(0, start).join('');
+};
+
 const shellLines = (content) =>
   content.split('\n').map((text, index) => ({
     line: index + 1,
-    text: text.replace(SHELL_COMMENT, ''),
+    text: withoutComment(text),
   }));
 
 const shellEscapes = ({ allowed, containment, exists, file }) => {
