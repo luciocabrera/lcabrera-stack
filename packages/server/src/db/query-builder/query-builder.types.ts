@@ -37,9 +37,20 @@ export type CountQueryDescriptor = {
 
 export type CountReadQueryDescriptor = CountQueryDescriptor & {
   readonly aggregates?: never;
+  readonly capabilities?: never;
+  readonly columnAxis?: never;
   readonly count: true;
+  readonly cursor?: never;
+  readonly distinct?: never;
   readonly fields?: never;
   readonly grouping?: never;
+  readonly keys?: never;
+  readonly limit?: never;
+  readonly maxRows?: never;
+  readonly offset?: never;
+  readonly periods?: never;
+  readonly sort?: never;
+  readonly subtotalPlacement?: never;
 };
 
 export type DeleteQueryDescriptor = {
@@ -54,6 +65,7 @@ export type DeleteQueryDescriptor = {
 };
 
 export type GroupedReadQueryDescriptor = GroupQueryDescriptor & {
+  readonly column?: never;
   readonly count?: never;
   readonly cursor?: never;
   readonly distinct?: never;
@@ -110,8 +122,15 @@ export type ReadQueryDescriptor =
 
 export type RowsReadQueryDescriptor = SelectQueryDescriptor & {
   readonly aggregates?: never;
+  readonly capabilities?: never;
+  readonly column?: never;
+  readonly columnAxis?: never;
   readonly count?: never;
   readonly grouping?: never;
+  readonly keys?: never;
+  readonly maxRows?: never;
+  readonly periods?: never;
+  readonly subtotalPlacement?: never;
 };
 
 export type SelectQueryDescriptor = {

@@ -8,6 +8,7 @@ import type {
 import type {
   BuiltQuery,
   CountQueryDescriptor,
+  ReadQueryDescriptor,
   SelectQueryDescriptor,
 } from './query-builder.types.ts';
 
@@ -139,6 +140,32 @@ describe('buildReadQuery', () => {
     expectTypeOf(
       buildReadQuery({ ...COUNT, count: true }),
     ).toEqualTypeOf<BuiltQuery>();
+  });
+
+  it('refuses at the type level a field another shape owns', () => {
+    const count = { ...COUNT, count: true as const };
+
+    expectTypeOf(count).toExtend<ReadQueryDescriptor>();
+    expectTypeOf({ ...count, limit: 10 }).not.toExtend<ReadQueryDescriptor>();
+    expectTypeOf({
+      ...count,
+      sort: [{ column: 'id', direction: 'asc' as const }],
+    }).not.toExtend<ReadQueryDescriptor>();
+    expectTypeOf({
+      ...count,
+      keys: ['region'],
+    }).not.toExtend<ReadQueryDescriptor>();
+    expectTypeOf({
+      ...ROWS,
+      keys: ['region'],
+    }).not.toExtend<ReadQueryDescriptor>();
+    expectTypeOf({ ...ROWS, maxRows: 10 }).not.toExtend<ReadQueryDescriptor>();
+    expectTypeOf({ ...ROWS, column: 'id' }).not.toExtend<ReadQueryDescriptor>();
+    expectTypeOf({ ...GROUPED, limit: 10 }).not.toExtend<ReadQueryDescriptor>();
+    expectTypeOf({
+      ...GROUPED,
+      column: 'id',
+    }).not.toExtend<ReadQueryDescriptor>();
   });
 
   describe('safety gates', () => {
