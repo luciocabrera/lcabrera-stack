@@ -7,8 +7,9 @@
  * because they fail differently for a consumer — a `link` is a file they will
  * not have, a `command` a tool their shell may not resolve, an `import` a module
  * their install will not provide, a `bin` an executable their install will not
- * place, a `secret` a value only their repository settings can supply, and a
- * `requires` a config key no consumer could set.
+ * place, a `secret` a value only their repository settings can supply, a
+ * `requires` a config key no consumer could set, and a `missing` a script run
+ * by a command that exists nowhere at all.
  */
 
 import { artifactEscapes } from './closure-artifacts.mjs';
@@ -18,12 +19,14 @@ import {
   classifyPathToken,
   directoryOf,
   toCommandEscapes,
+  toMissingScripts,
 } from './closure-classify.mjs';
 import {
   extractCommands,
   extractImportSpecifiers,
   extractLinkTargets,
   extractPathTokens,
+  extractScriptOperands,
 } from './closure-extract.mjs';
 import { requiredConfigKeys, requiresDeclarationLine } from './frontmatter.mjs';
 
@@ -142,6 +145,19 @@ export const analyseClosure = ({
     }),
   );
 
+  const missingScripts = files.flatMap((file) =>
+    toMissingScripts({
+      containment: {
+        fromDirectory: directoryOf(file.path),
+        rootDirectory,
+        shipped,
+      },
+      exists,
+      file,
+      operands: extractScriptOperands(file.content),
+    }),
+  );
+
   const importEscapes = files
     .filter((file) => isSourceFile(file.path))
     .flatMap((file) =>
@@ -190,6 +206,7 @@ export const analyseClosure = ({
     escapes: dedupe([
       ...linkEscapes,
       ...commandEscapes,
+      ...missingScripts,
       ...importEscapes,
       ...requiresEscapes,
       ...otherEscapes,

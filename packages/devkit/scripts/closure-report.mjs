@@ -57,6 +57,7 @@ const ESCAPE_VERBS = {
   command: 'runs',
   import: 'imports',
   link: 'needs',
+  missing: 'runs nonexistent',
   requires: 'declares',
   secret: 'reads',
 };
