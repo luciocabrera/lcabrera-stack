@@ -1,11 +1,13 @@
 /**
  * Description quality, at the only tier a script can judge: is the description
- * long enough to carry a situation, does it name something concrete, and does
- * it say when the artifact applies rather than what it is.
+ * long enough to carry a situation, does it name something concrete, does it
+ * say when the artifact applies rather than what it is, and does it stop short
+ * of claiming every task.
  *
  * Why: an agent selects a skill or subagent from its description alone, so a
  * label like "code quality helper" never triggers and reads, in a usage report,
- * exactly like an artifact nobody needed. Judgement of a description that
+ * exactly like an artifact nobody needed, while one that claims any task
+ * crowds out every other artifact. Judgement of a description that
  * clears this floor is the model-in-the-loop tier, not this one.
  * Usage: `require('./conformance-triggers.cjs').descriptionFindings(...)`.
  */
@@ -22,6 +24,9 @@ const CONCRETE_TOKEN =
   /`[^`]+`|[\w@.-]\/[\w@.-]|\w\.[a-z]{2,5}\b|\b[A-Z]\w|\d|\w-\w/;
 
 const CONJUNCTION_SLASH = /\b(?:and\/or|or\/and)\b/gi;
+
+const UNIVERSAL_SCOPE =
+  /\b(?:(?:any|every|all)\s+(?:kinds?\s+of\s+|other\s+)?(?:tasks?|work|requests?|jobs?|situations?|questions?|prompts?|things?|changes?)\b|(?:any|every|all)\s+files?\b(?!\s+(?:under|within|matching|named)\b)|(?:anything|everything)\s+else\b|\bat\s+all\b|no\s+matter\s+what\b|whatever\s+(?:you|the\s+user)\b)/i;
 
 const SENTENCE_START = /(^|[.!?:;—]\s+)([A-Z])/g;
 
@@ -68,6 +73,7 @@ const descriptionFindings = (artifact) => {
   }
 
   const words = wordCount(description);
+  const universalScope = UNIVERSAL_SCOPE.exec(description)?.[0];
   const finding = (reason) => ({
     kind: artifact.kind,
     label: artifact.label,
@@ -94,6 +100,13 @@ const descriptionFindings = (artifact) => {
       : [
           finding(
             'names no situation that selects it — say when it applies, what it follows, or what dispatches it',
+          ),
+        ]),
+    ...(universalScope === undefined
+      ? []
+      : [
+          finding(
+            `"${universalScope}" would select it for every task — name the situation that sets it apart`,
           ),
         ]),
   ];

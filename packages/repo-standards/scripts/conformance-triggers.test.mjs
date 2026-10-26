@@ -58,6 +58,60 @@ describe('conformance triggers — planted vague descriptions', () => {
     ).toContain(message);
   });
 
+  it.each([
+    {
+      description:
+        'Use whenever you are doing any task at all, in any file such as README.md or anything else.',
+      phrase: 'any task',
+    },
+    {
+      description:
+        'Use for every request a user makes in this repo, whether it touches src/ or README.md files.',
+      phrase: 'every request',
+    },
+    {
+      description:
+        'Use when editing any file, from README.md to a script under scripts/ or a config at the root.',
+      phrase: 'any file',
+    },
+    {
+      description:
+        'Use when reviewing README.md, a script in scripts/, or anything else that the user has opened.',
+      phrase: 'anything else',
+    },
+    {
+      description:
+        'Use whenever the user asks about README.md or the scripts under scripts/ at all, in any wording.',
+      phrase: 'at all',
+    },
+  ])(
+    'reports a description claiming every task through "$phrase"',
+    ({ description, phrase }) => {
+      expect(
+        conformanceMessages({
+          '.github/skills/demo/SKILL.md': skillWith(description),
+        }),
+      ).toEqual([
+        vague(
+          `"${phrase}" would select it for every task — name the situation that sets it apart`,
+        ),
+      ]);
+    },
+  );
+
+  it.each([
+    'Use when finishing any code change, before a PR is opened from the branch it was made on.',
+    'Use when editing any file under docs/product/, or when writing acceptance criteria for a package.',
+    'Use before building anything new, after reading the INVENTORY.md of the workspace it lands in.',
+    'Use when editing anything under docs/product/ or planning a change to a package a consumer installs.',
+  ])('accepts a scoped quantifier: %s', (description) => {
+    expect(
+      conformanceMessages({
+        '.github/skills/demo/SKILL.md': skillWith(description),
+      }),
+    ).toEqual([]);
+  });
+
   it('takes a script path as something concrete', () => {
     expect(
       conformanceMessages({

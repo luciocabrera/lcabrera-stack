@@ -2,7 +2,7 @@
 id: broad-skill-descriptions
 title: Flag a skill description broad enough to match any task
 owner: agent:claude
-status: active
+status: review
 branch: feat/1509-broad-skill-descriptions
 area:
   - packages/repo-standards/scripts/conformance-triggers*
@@ -12,7 +12,7 @@ area:
 started: 2026-10-26
 updated: 2026-10-26
 plan: (none)
-pr: (none)
+pr: '#1515'
 issue: #1509
 ---
 
@@ -22,6 +22,6 @@ Flag a skill description broad enough to match any task
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: built, gate green, PR ready for review
 - Blockers: none
 - Next:

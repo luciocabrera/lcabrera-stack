@@ -1,0 +1,5 @@
+---
+'@lcabrera/repo-standards': minor
+---
+
+`repo-verify-harness` reports a skill or subagent description that claims every task as a "Vague description" finding. The finding quotes the phrase that triggered it. The phrases it looks for are a quantifier over a generic task noun ("any task", "every request", "all work"), "any file" with no location after it, "anything else", "everything else", "at all", "no matter what", and "whatever you" or "whatever the user". A quantifier over something specific still passes: "any code change", "any file under docs/", "anything new". Before this change, a description that met the word floor, named a concrete token and used a trigger word was accepted even when it applied to every task.
