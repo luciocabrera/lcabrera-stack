@@ -44,13 +44,17 @@ because it is never paginated.
 
 The implementations are private files that only the entry point imports:
 `build-rows-read.util.ts`, `build-count-read.util.ts` and
-`group-query-builder/build-grouped-read.util.ts`. The executors (`selectRows`,
-`getRowsCount`, `selectGroupedRows`, `selectColumnAxisValues`) build through
-`buildReadQuery` as well.
+`group-query-builder/build-grouped-read.util.ts`. `selectColumnAxisValues`
+builds through `buildReadQuery`. `selectRows`, `getRowsCount` and
+`selectGroupedRows` receive a caller's descriptor for one fixed shape, so each
+calls that shape's private builder directly.
 
 The four old builders keep their subpaths and their exports. Each is marked
-`@deprecated` and delegates to `buildReadQuery`, so its output and its refusals
-are the entry point's. Removing them is a separate decision.
+`@deprecated` and calls the private builder for the shape its parameter type
+names, which is the builder the entry point uses for that shape. None of them
+dispatches. A descriptor that also carries `count` or `grouping` (one an untyped
+caller can still pass) gets the same SQL it got before this change, and is not
+rerouted to another shape. Removing them is a separate decision.
 
 The write builders (`buildInsertQuery`, `buildUpdateQuery`, `buildDeleteQuery`,
 `buildMaxValueQuery`) are not reads and stay as they are.
@@ -70,8 +74,10 @@ The write builders (`buildInsertQuery`, `buildUpdateQuery`, `buildDeleteQuery`,
   although the parameter and return types are unchanged.
 - Biome's `noDeprecatedImports` rejects any import of a deprecated builder,
   including from a test. The deprecated subpaths therefore have no colocated
-  test of their own. Their behaviour is the entry point's, and the entry point
-  is tested.
+  test of their own. Each is one call to a private builder. That builder's own
+  tests, and the executor tests for `selectRows`, `getRowsCount` and
+  `selectGroupedRows`, check that a descriptor carrying another shape's field
+  still gets its own shape's SQL.
 - A grouped read still needs the `capabilities` map, which only a catalogue
   round trip answers. The entry point is pure, so it cannot fetch that map.
   `selectGroupedRows` remains the way to fetch it and run the read in one call.

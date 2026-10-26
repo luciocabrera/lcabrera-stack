@@ -12,12 +12,12 @@ import { assertColumnAxisKey } from './group-query-builder/assert-column-axis-ke
 import { assertGroupAggregates } from './group-query-builder/assert-group-aggregates.util.ts';
 import { assertGroupDepth } from './group-query-builder/assert-group-depth.util.ts';
 import { assertGroupRowBackstop } from './group-query-builder/assert-group-row-backstop.util.ts';
+import { buildGroupedRead } from './group-query-builder/build-grouped-read.util.ts';
 import { collectCapabilityColumns } from './group-query-builder/collect-capability-columns.util.ts';
 import { isUnexpandedLeadingCount } from './group-query-builder/is-unexpanded-leading-count.util.ts';
 import { toColumnAxisDiscoveryLimit } from './group-query-builder/to-column-axis-discovery-limit.util.ts';
 import { toExpandingMeasureCount } from './group-query-builder/to-expanding-measure-count.util.ts';
 import { toGroupKeyTruncations } from './olap/to-group-key-truncations.util.ts';
-import { buildReadQuery } from './query-builder/build-read-query.util.ts';
 import { runQuery } from './run-query.util.ts';
 import { selectColumnAxisValues } from './select-column-axis-values.util.ts';
 import { setStatementTimeout } from './set-statement-timeout.util.ts';
@@ -97,7 +97,7 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
             }),
           };
 
-    const built = buildReadQuery({
+    const built = buildGroupedRead({
       ...grouped,
       capabilities,
       ...(columnAxis !== undefined && { columnAxis }),

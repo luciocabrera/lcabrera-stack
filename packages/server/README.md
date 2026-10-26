@@ -65,7 +65,7 @@ const { text, values } = buildReadQuery({
 
 `build-select-query.util`, `build-distinct-query.util`, `build-count-query.util`
 and `group-query-builder/build-group-query.util` are deprecated. Each still
-exports its builder, which now delegates to `buildReadQuery`.
+exports its builder and returns the same SQL as before. Move to `buildReadQuery`.
 
 ### Executing — `@lcabrera/server/db/*`
 

@@ -72,4 +72,20 @@ describe('buildCountRead', () => {
       'Column "password_hash" is not in the allowed list for this query.',
     );
   });
+
+  it('ignores a row or grouping field the descriptor also carries', () => {
+    const descriptor = {
+      column: 'id',
+      grouping: 'rollup',
+      limit: 5,
+      schema: 'catalog',
+      sort: [{ column: 'id', direction: 'asc' }],
+      table: 'items',
+    } as const;
+
+    expect(buildCountRead(descriptor)).toEqual({
+      text: 'SELECT count("id") AS count FROM "catalog"."items"',
+      values: [],
+    });
+  });
 });

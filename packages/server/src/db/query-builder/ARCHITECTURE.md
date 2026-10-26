@@ -35,8 +35,9 @@ takes a round trip; resolve it with `getColumnGroupingCapabilities`, or let the
 
 `buildSelectQuery`, `buildDistinctQuery` and `buildCountQuery` here, and
 `buildGroupQuery` in `../group-query-builder/`, remain exported for existing
-callers. Each is `@deprecated` and delegates to `buildReadQuery`, so their output
-and their refusals are the entry point's.
+callers. Each is `@deprecated` and calls the private builder for its own shape
+directly, without dispatching. A descriptor carrying another shape's field is
+built as the old builder's shape, as it was before the entry point existed.
 
 ## Files
 
@@ -59,9 +60,9 @@ and their refusals are the entry point's.
 | `build-read-query.util.ts`               | **The query entry point.** One `ReadQueryDescriptor` → a row, count or grouped read                                                                                                                                                |
 | `build-rows-read.util.ts`                | Private. Composes the clauses above into one `SELECT [DISTINCT]`                                                                                                                                                                   |
 | `build-count-read.util.ts`               | Private. `count(<column>)` sharing `buildWhereClause`'s output, so a row read and its count cannot drift apart; `column` defaults to `*`                                                                                           |
-| `build-select-query.util.ts`             | Deprecated. `buildReadQuery` with a row descriptor                                                                                                                                                                                 |
-| `build-count-query.util.ts`              | Deprecated. `buildReadQuery` with `count: true`                                                                                                                                                                                    |
-| `build-distinct-query.util.ts`           | Deprecated. `buildReadQuery` with `distinct: true`                                                                                                                                                                                 |
+| `build-select-query.util.ts`             | Deprecated. Calls `buildRowsRead`                                                                                                                                                                                                  |
+| `build-count-query.util.ts`              | Deprecated. Calls `buildCountRead`                                                                                                                                                                                                 |
+| `build-distinct-query.util.ts`           | Deprecated. Calls `buildRowsRead` with `distinct: true`                                                                                                                                                                            |
 | `build-insert-query.util.ts`             | Write builder. `INSERT INTO … (cols) VALUES ($1, …) [RETURNING …]` from a `{ values }` map; keys quoted, values parameterized                                                                                                      |
 | `build-update-query.util.ts`             | Write builder. `UPDATE … SET col = $n WHERE … [RETURNING …]`; reuses `buildWhereClause` with an offset `startParamIndex`, requires ≥1 filter                                                                                       |
 | `build-delete-query.util.ts`             | Write builder. `DELETE FROM … WHERE … [RETURNING …]`; reuses `buildWhereClause`, requires ≥1 filter                                                                                                                                |

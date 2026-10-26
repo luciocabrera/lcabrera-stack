@@ -101,4 +101,22 @@ describe('selectRows', () => {
       'The database rejected the operation.',
     );
   });
+
+  it('builds a plain select when the descriptor also carries a count or grouping field', async () => {
+    query.mockResolvedValue({ rows: [] });
+    const descriptor = {
+      count: true,
+      fields: ['id'],
+      grouping: 'rollup',
+      schema: 'catalog',
+      table: 'items',
+    } as const;
+
+    await selectRows(descriptor);
+
+    expect(query).toHaveBeenCalledWith(
+      'SELECT "id" FROM "catalog"."items"',
+      [],
+    );
+  });
 });

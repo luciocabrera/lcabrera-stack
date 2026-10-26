@@ -129,7 +129,7 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 | `assert-group-sort.util.ts`               | Every rule a sort request clears first: the two name checks, and the refusal of an aggregate listed ahead of a group key                                                                  |
 | `build-group-order-by-clause.util.ts`     | `GROUPING(key) <placement>, key <user>` per key, aggregates spliced into the innermost level — and why no `NULLS` keyword appears                                                         |
 | `build-grouped-read.util.ts`              | Private. One `GroupQueryDescriptor` → the SQL, its values, and the keys and masks needed to decode the result; reached through `buildReadQuery`                                           |
-| `build-group-query.util.ts`               | Deprecated. `buildReadQuery` with a grouped descriptor                                                                                                                                    |
+| `build-group-query.util.ts`               | Deprecated. Calls `buildGroupedRead`                                                                                                                                                      |
 
 ## Four traps this folder already pays for
 

@@ -154,4 +154,20 @@ describe('buildRowsRead', () => {
       }),
     ).toThrow(/requires a sort/);
   });
+
+  it('ignores a count or grouping field the descriptor also carries', () => {
+    const descriptor = {
+      count: true,
+      fields: ['id'],
+      grouping: 'rollup',
+      keys: ['id'],
+      schema: 'catalog',
+      table: 'items',
+    } as const;
+
+    expect(buildRowsRead(descriptor)).toEqual({
+      text: 'SELECT "id" FROM "catalog"."items"',
+      values: [],
+    });
+  });
 });

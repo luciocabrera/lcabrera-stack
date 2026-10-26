@@ -51,7 +51,8 @@ read **and** write shapes.
   (`build-rows-read.util.ts`), `buildCountRead` (`build-count-read.util.ts`) and
   `buildGroupedRead` (`../group-query-builder/build-grouped-read.util.ts`).
   `buildSelectQuery`, `buildDistinctQuery`, `buildCountQuery` and
-  `buildGroupQuery` stay exported, `@deprecated`, delegating to it.
+  `buildGroupQuery` stay exported and `@deprecated`. Each calls the private builder
+  for its own shape, so it never dispatches on `count` or `grouping`.
 - **Writes:** `buildInsertQuery` (`build-insert-query.util.ts`), `buildUpdateQuery`
   (`build-update-query.util.ts`), `buildDeleteQuery` (`build-delete-query.util.ts` —
   update/delete require ≥1 filter, never build an unfiltered mutation), and

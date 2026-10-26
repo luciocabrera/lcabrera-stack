@@ -753,4 +753,17 @@ describe('a truncated group key in the SQL', () => {
       `GROUP BY GROUPING SETS ((${expression}, "status"), (${expression}), ())`,
     );
   });
+
+  it('ignores a count or row field the descriptor also carries', () => {
+    const withForeign = {
+      ...descriptor(),
+      count: true,
+      fields: ['city'],
+      limit: 10,
+    };
+
+    expect(buildGroupedRead(withForeign)).toEqual(
+      buildGroupedRead(descriptor()),
+    );
+  });
 });
