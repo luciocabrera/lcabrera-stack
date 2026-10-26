@@ -76,6 +76,16 @@ describe('conformance triggers — planted vague descriptions', () => {
     },
     {
       description:
+        'Use when editing any file. It covers README.md, the scripts under scripts/ and the root config.',
+      phrase: 'any file',
+    },
+    {
+      description:
+        'Use for all kinds of work in this repo, from README.md to the scripts under scripts/ at the root.',
+      phrase: 'all kinds of work',
+    },
+    {
+      description:
         'Use when reviewing README.md, a script in scripts/, or anything else that the user has opened.',
       phrase: 'anything else',
     },
@@ -102,6 +112,10 @@ describe('conformance triggers — planted vague descriptions', () => {
   it.each([
     'Use when finishing any code change, before a PR is opened from the branch it was made on.',
     'Use when editing any file under docs/product/, or when writing acceptance criteria for a package.',
+    'Use when editing any file in docs/product/, before the pull request for that change is opened.',
+    "Use when editing any file inside a workspace's scripts/lib directory, before the gate is run on it.",
+    'Use when editing any file beneath packages/ui, before a changeset is written for the package.',
+    'Use when changing any file that a workspace ships to npm, before `vp run tarball:verify` runs.',
     'Use before building anything new, after reading the INVENTORY.md of the workspace it lands in.',
     'Use when editing anything under docs/product/ or planning a change to a package a consumer installs.',
   ])('accepts a scoped quantifier: %s', (description) => {

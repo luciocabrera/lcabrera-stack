@@ -25,8 +25,59 @@ const CONCRETE_TOKEN =
 
 const CONJUNCTION_SLASH = /\b(?:and\/or|or\/and)\b/gi;
 
-const UNIVERSAL_SCOPE =
-  /\b(?:(?:any|every|all)\s+(?:kinds?\s+of\s+|other\s+)?(?:tasks?|work|requests?|jobs?|situations?|questions?|prompts?|things?|changes?)\b|(?:any|every|all)\s+files?\b(?!\s+(?:under|within|matching|named)\b)|(?:anything|everything)\s+else\b|\bat\s+all\b|no\s+matter\s+what\b|whatever\s+(?:you|the\s+user)\b)/i;
+const QUANTIFIERS = new Set(['all', 'any', 'every']);
+
+const TASK_NOUNS = new Set([
+  'change',
+  'changes',
+  'job',
+  'jobs',
+  'prompt',
+  'prompts',
+  'question',
+  'questions',
+  'request',
+  'requests',
+  'situation',
+  'situations',
+  'task',
+  'tasks',
+  'thing',
+  'things',
+  'work',
+]);
+
+const FILE_NOUNS = new Set(['file', 'files']);
+
+const KIND_WORDS = new Set(['kind', 'kinds']);
+
+const SCOPE_WORDS = new Set([
+  'at',
+  'below',
+  'beneath',
+  'from',
+  'in',
+  'inside',
+  'matching',
+  'named',
+  'of',
+  'that',
+  'under',
+  'which',
+  'whose',
+  'within',
+]);
+
+const OPEN_ENDED_PHRASES = [
+  'anything else',
+  'everything else',
+  'at all',
+  'no matter what',
+  'whatever you',
+  'whatever the user',
+].map((phrase) => phrase.split(' '));
+
+const TOKEN = /[a-z]+|[^\sa-z]/g;
 
 const SENTENCE_START = /(^|[.!?:;—]\s+)([A-Z])/g;
 
@@ -46,6 +97,60 @@ const withoutSentenceInitialCapitals = (description) =>
     SENTENCE_START,
     (_match, lead, letter) => `${lead}${letter.toLowerCase()}`,
   );
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
+ * @returns {number}
+ */
+const nounIndexAfter = (tokens, index) => {
+  if (tokens[index] === 'other') {
+    return index + 1;
+  }
+  return KIND_WORDS.has(tokens[index]) && tokens[index + 1] === 'of'
+    ? index + 2
+    : index;
+};
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
+ * @returns {string | undefined}
+ */
+const quantifiedPhrase = (tokens, index) => {
+  const nounIndex = nounIndexAfter(tokens, index + 1);
+  const noun = tokens[nounIndex] ?? '';
+  const isUnscopedFile =
+    FILE_NOUNS.has(noun) && !SCOPE_WORDS.has(tokens[nounIndex + 1] ?? '');
+  const isClaim =
+    QUANTIFIERS.has(tokens[index] ?? '') &&
+    (isUnscopedFile || TASK_NOUNS.has(noun));
+  return isClaim ? tokens.slice(index, nounIndex + 1).join(' ') : undefined;
+};
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
+ * @returns {string | undefined}
+ */
+const openEndedPhrase = (tokens, index) =>
+  OPEN_ENDED_PHRASES.find((phrase) =>
+    phrase.every((word, offset) => tokens[index + offset] === word),
+  )?.join(' ');
+
+/**
+ * @param {string} description
+ * @returns {string | undefined}
+ */
+const universalScope = (description) => {
+  const tokens = description.toLowerCase().match(TOKEN) ?? [];
+  return tokens
+    .map(
+      (_token, index) =>
+        quantifiedPhrase(tokens, index) ?? openEndedPhrase(tokens, index),
+    )
+    .find((phrase) => phrase !== undefined);
+};
 
 /**
  * @param {string} description
@@ -73,7 +178,7 @@ const descriptionFindings = (artifact) => {
   }
 
   const words = wordCount(description);
-  const universalScope = UNIVERSAL_SCOPE.exec(description)?.[0];
+  const claimedScope = universalScope(description);
   const finding = (reason) => ({
     kind: artifact.kind,
     label: artifact.label,
@@ -102,11 +207,11 @@ const descriptionFindings = (artifact) => {
             'names no situation that selects it — say when it applies, what it follows, or what dispatches it',
           ),
         ]),
-    ...(universalScope === undefined
+    ...(claimedScope === undefined
       ? []
       : [
           finding(
-            `"${universalScope}" would select it for every task — name the situation that sets it apart`,
+            `"${claimedScope}" would select it for every task — name the situation that sets it apart`,
           ),
         ]),
   ];
