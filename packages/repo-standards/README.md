@@ -107,7 +107,7 @@ until you acknowledge it.
 | `repo-verify-package-refs`                                          | that no published package's shipped text names an application directory                                                                                           |
 | `repo-verify-react-doctor [--report]`                               | React Doctor's findings at the config's `blocking` severity, after the CLI's `ciFailure` filter (`none` refused), asserting the run completed                     |
 | `repo-verify-route-artifacts`                                       | that a route folder's shared modules are named for an artifact the folder holds                                                                                   |
-| `repo-verify-harness`                                               | every skill, path rule and subagent: frontmatter, resolving paths, a description that says when                                                                   |
+| `repo-verify-harness`                                               | every skill, path rule and subagent, in the conventional roots and any `gates.harness` adds: frontmatter, resolving paths, a description that says when           |
 | `repo-verify-review-threads --pr <n>`                               | — publishes how many review threads still hold a pull request, as a commit status                                                                                 |
 | `repo-pr-threads [--pr <n>] [--resolve <id>]`                       | — lists the unresolved review threads, or resolves one                                                                                                            |
 | `repo-test-changed`, `repo-run-changed <task>`                      | — run a task only for the workspaces the diff on stdin touched, plus their dependents                                                                             |
@@ -444,6 +444,9 @@ hardcode:
       ]
     },
     "eslintPass": { "probeWorkspaces": ["packages/ui"], "rootPassDir": "" },
+    "harness": {
+      "additionalRoots": [{ "kind": "skill", "dir": "vendor/skills" }]
+    },
     "affectedTests": {
       "coverageTaskPackage": "",
       "globalPackages": ["@scope/tsconfig", "@scope/vite-config"],
@@ -477,6 +480,17 @@ root package's own `lint:eslint:check` lints. When it is set,
 the probe. That catches a root task that has left the fan-out as well as a root
 config that no longer loads the rule. An empty string, the default, and an
 absent key both mean the repository has no root pass to probe.
+
+`harness.additionalRoots` names more directories of agent-facing artifacts for
+`repo-verify-harness` to hold to the same checks as `.github/skills`,
+`.claude/rules` and `.claude/agents`, which it always reads. Each entry is a
+`kind` — `skill`, `rule` or `subagent` — and a `dir` laid out the way that
+kind's conventional root is: a directory per skill holding its `SKILL.md`, or
+flat markdown files. A copy of the harness kept for distribution belongs here,
+since a broken copy is installed by whoever receives it while the original
+stays green. An entry naming a directory that does not exist is a finding, not a
+skip, and an entry with an unknown `kind` or no `dir` is refused by name. It
+defaults to nothing.
 
 Besides `globalPackages`, `affectedTests` carries keys that are not rosters of
 workspaces to visit.

@@ -48,6 +48,7 @@ export const DEFAULT_TREE_GATES = {
   departedNames: { rosterFile: 'scripts/departed-names.json' },
   depsAudit: { allowanceFile: 'docs/agents/dependency-advisories.json' },
   eslintPass: { probeWorkspaces: [], rootPassDir: '' },
+  harness: { additionalRoots: [] },
   inventory: {
     baselineFile: 'scripts/inventory-drift-baseline.json',
     trees: [],
@@ -126,6 +127,27 @@ const suiteList = (value, fallback, key) =>
       }))
     : fallback;
 
+const HARNESS_KINDS = ['rule', 'skill', 'subagent'];
+
+const isHarnessRoot = (entry) =>
+  isPlainObject(entry) &&
+  HARNESS_KINDS.includes(entry.kind) &&
+  typeof entry.dir === 'string' &&
+  entry.dir.trim() !== '';
+
+const harnessRootList = (value, fallback, key) =>
+  Array.isArray(value)
+    ? rejectMalformed({
+        entries: value,
+        isValid: isHarnessRoot,
+        key,
+        requirement: `must name a \`kind\` (${HARNESS_KINDS.join(', ')}) and a \`dir\``,
+      }).map((entry) => ({
+        dir: repoRelative(entry.dir, entry.dir, `${key}[].dir`),
+        kind: entry.kind,
+      }))
+    : fallback;
+
 const pathList = (value, fallback, key) =>
   Array.isArray(value)
     ? rejectMalformed({
@@ -158,6 +180,7 @@ export const resolveTreeGates = (gates) => {
   const departedNames = blockOf(gates, 'departedNames');
   const depsAudit = blockOf(gates, 'depsAudit');
   const eslintPass = blockOf(gates, 'eslintPass');
+  const harness = blockOf(gates, 'harness');
   const inventory = blockOf(gates, 'inventory');
   const lintReport = blockOf(gates, 'lintReport');
   const reactDoctor = blockOf(gates, 'reactDoctor');
@@ -243,6 +266,13 @@ export const resolveTreeGates = (gates) => {
       rootPassDir: optionalPath(
         eslintPass.rootPassDir,
         'gates.eslintPass.rootPassDir',
+      ),
+    },
+    harness: {
+      additionalRoots: harnessRootList(
+        harness.additionalRoots,
+        defaults.harness.additionalRoots,
+        'gates.harness.additionalRoots',
       ),
     },
     inventory: {
