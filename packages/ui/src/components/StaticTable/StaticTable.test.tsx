@@ -43,4 +43,20 @@ describe('StaticTable', () => {
     expect(screen.getByText('Alpha')).toBeDefined();
     expect(screen.getByText('Beta')).toBeDefined();
   });
+
+  it('renders rows alone, with columns inferred from their keys', () => {
+    renderWithRouter(
+      <StaticTable
+        rows={[
+          { label: 'Gamma', orderTotal: 12.5, placedOn: '2026-01-02' },
+          { label: 'Delta', orderTotal: 3, placedOn: '2026-01-03' },
+        ]}
+      />,
+    );
+
+    expect(screen.getByText('Order Total')).toBeDefined();
+    expect(screen.getByText('Placed On')).toBeDefined();
+    expect(screen.getByText('Gamma')).toBeDefined();
+    expect(screen.getByText('Delta')).toBeDefined();
+  });
 });

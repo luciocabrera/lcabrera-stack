@@ -2,21 +2,21 @@
 id: ui-standalone-table
 title: Render a table from rows and columns alone
 owner: agent:claude
-status: active
+status: review
 branch: feat/994-ui-standalone-table
 area:
   - packages/ui/src/components/StaticTable/**
-  - packages/ui/src/components/Table/utils/inferTableColumnsFromJson*
   - packages/ui/src/public-api.ts
   - packages/ui/package.json
   - packages/ui/README.md
   - packages/ui/src/INVENTORY.md
-  - packages/ui/api-surface/**
-  - .changeset/**
+  - reports/api-surface/ui.txt
+  - docs/product/requirements/render-a-table-from-rows-alone.md
+  - .changeset/ui-standalone-static-table.md
 started: 2026-10-26
 updated: 2026-10-26
 plan: (none)
-pr: (none)
+pr: '#1502'
 issue: #994
 ---
 
@@ -26,6 +26,6 @@ Render a table from rows and columns alone
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR ready for review
 - Blockers: none
 - Next:

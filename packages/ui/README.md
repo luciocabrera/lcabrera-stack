@@ -110,7 +110,8 @@ section above.
 
 `AppDocument`, `AppProviders`, `AppShell`, `Button`, `Form`, `JsonExplorer`,
 `NavLink`, `RootErrorBoundary`, `RouteErrorBoundary`, `SectionCard`,
-`StatusBadge`, `TableLayout`, `Tabs`, `hydrateApp`, `useNotifyOnError`, plus the
+`StaticTable`, `StatusBadge`, `TableLayout`, `Tabs`, `hydrateApp`,
+`useNotifyOnError`, plus the
 `FieldNode`, `LayoutProps` and `Pagination` types.
 
 ### Subpaths
@@ -147,6 +148,49 @@ Anything reachable from the root barrel needs no subpath at all.
 | `@lcabrera/ui/server`          | `createHandleRequest` — the SSR request handler                           |
 
 ## Usage
+
+### A table from rows alone
+
+`StaticTable` takes the rows you already hold and renders them. Leave out
+`columns` and it infers one column per key: the label is the key split into
+words, the type is read from the values (number, boolean, ISO date, string), and
+an object or array value is shown as JSON. That is the zero-configuration path:
+no server, no loader, no column definition.
+
+```tsx
+import { AppProviders, StaticTable } from '@lcabrera/ui';
+
+const rows = [
+  { id: 1, placedOn: '2026-01-02', total: 12.5 },
+  { id: 2, placedOn: '2026-01-03', total: 3 },
+];
+
+export const Orders = () => (
+  <AppProviders>
+    <StaticTable rows={rows} />
+  </AppProviders>
+);
+```
+
+`Orders` has to render inside a React Router data router, which every route in
+framework mode already is. `AppProviders` normally sits once at your root, not
+around each table.
+
+Pass `columns` when you want to choose the labels, the order or a renderer. To
+start from the inferred set and adjust it, call the inference yourself:
+
+```ts
+import { inferTableColumnsFromJson } from '@lcabrera/ui/components/Table/utils/inferTableColumnsFromJson.util';
+
+const columns = inferTableColumnsFromJson({ rows });
+```
+
+The rows render in the order you pass them. Sorting and filtering are applied
+by a loader that reads the table's URL state, and every change to the table's
+state is posted to the persist-cookie action
+(`@lcabrera/ui/routing/actions/persist-cookie.action`). Without that route
+mounted at `/_action/persist-cookie`, such a change fails the route that renders
+the table. A table that sorts and filters is `TableLayout`, below.
 
 ### A full data table
 

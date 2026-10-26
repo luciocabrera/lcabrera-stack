@@ -11,6 +11,7 @@ export type { RootComponentProps } from './components/RootComponent/RootComponen
 export { RootErrorBoundary } from './components/RootErrorBoundary/RootErrorBoundary.component';
 export { RouteErrorBoundary } from './components/RouteErrorBoundary/RouteErrorBoundary.component';
 export { SectionCard } from './components/SectionCard/SectionCard.component';
+export { StaticTable } from './components/StaticTable/StaticTable.component';
 export { StatusBadge } from './components/StatusBadge/StatusBadge.component';
 export { TableLayout } from './components/Table/TableLayout/TableLayout.component';
 export { TableGroupDetailsView } from './components/TableGroupDetailsView/TableGroupDetailsView.component';

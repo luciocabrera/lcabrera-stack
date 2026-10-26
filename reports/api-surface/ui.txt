@@ -19,6 +19,7 @@ RootComponentProps [type] { readonly appId?: string; readonly defaultTheme?: The
 RootErrorBoundary [const] ({ error }: RootErrorBoundaryProps) => JSX.Element
 RouteErrorBoundary [const] ({ defaultMessage, error, icon, title, }: RouteErrorBoundaryProps) => JSX.Element
 SectionCard [const] ({ children, customStylex, description, title, }: SectionCardProps) => JSX.Element
+StaticTable [const] <TData extends Record<string, unknown>>({ actions, columns, rows, title, }: StaticTableProps<TData>) => JSX.Element
 StatusBadge [const] ({ label, tone }: StatusBadgeProps) => JSX.Element
 TableGroupDetailsView [const] <TData extends Record<string, unknown>, TResponse extends TablePageResponse<TData>>({ closePath, fallbackTitle, fetchPage, }: TableGroupDetailsViewProps<TData, TResponse>) => JSX.Element
 TableLayout [const] <TData extends Record<string, unknown>, TResponse = Record<string, unknown>>({ actions, cellPalette, cellRenderers, columnsState, dataErrorSelector, dataPromise, dataSelector, dataTotalSelector, groupingState, metaState, onLoadMore, }: TableLayoutProps<TData, TResponse>) => JSX.Element
@@ -183,6 +184,9 @@ SidePanelSectionMain [const] ({ children, ...props }: SidePanelSectionMainProps)
 SidePanelSectionOverlay [const] ({ children, isOpen, }: SidePanelSectionOverlayProps) => JSX.Element
 SidePanelSize [type] 'lg' | 'md' | 'rail' | 'sm' | 'xs' | 'xxs'
 SidePanelTitle [const] ({ children, icon, ...props }: SidePanelTitleProps) => JSX.Element
+
+## ./components/StaticTable
+StaticTable [const] <TData extends Record<string, unknown>>({ actions, columns, rows, title, }: StaticTableProps<TData>) => JSX.Element
 
 ## ./components/StatusBadge
 StatusBadge [const] ({ label, tone }: StatusBadgeProps) => JSX.Element

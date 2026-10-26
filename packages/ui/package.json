@@ -66,6 +66,7 @@
     "./components/Settings/Settings.component": "./src/components/Settings/Settings.component.tsx",
     "./components/Settings/settings.meta": "./src/components/Settings/settings.meta.ts",
     "./components/SidePanel": "./src/components/SidePanel/index.ts",
+    "./components/StaticTable": "./src/components/StaticTable/index.ts",
     "./components/StatusBadge": "./src/components/StatusBadge/index.ts",
     "./components/Table": "./src/components/Table/index.ts",
     "./components/Table/Table.constants": "./src/components/Table/Table.constants.ts",

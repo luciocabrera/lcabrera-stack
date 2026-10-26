@@ -8,7 +8,7 @@ packages:
   - ui
 requires: []
 issues:
-  - 994
+  - 995
 evidence:
   - type: code
     ref: packages/ui/src/public-api.ts
@@ -43,12 +43,12 @@ leads with.
 
 ## Notes
 
-`StaticTable` has this props shape today and is exported from neither the entry
-map nor the public surface, so the only documented route in is `TableLayout`,
-whose props are a columns-state object and a promise. Whether the answer is to
-export the one that exists or to build a different one is the issue's business,
-not this file's — the requirement is the shape a consumer needs, not the
-implementation that satisfies it.
+`StaticTable` is that export: it resolves from the entry map and the root
+barrel, infers its columns when none are passed, and leads the README's usage
+section. The requirement stays `unmet` because it still renders only inside a
+data router, and a sort or filter goes through the route-based persistence and a
+loader rather than applying to the rows in hand — #995 is the work that removes
+the router precondition.
 
 Re-examined against the application `devkit create --profile monorepo` now emits
 (#1076), which renders a table from rows the module holds and nothing else. It
