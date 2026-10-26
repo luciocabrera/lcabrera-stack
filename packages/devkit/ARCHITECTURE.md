@@ -5,29 +5,29 @@ can travel, and **moving** it into a consumer's tree.
 
 ## Modules
 
-| Module                              | Responsibility                                                                                                    |
-| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `closure-extract.mjs`               | Pull references out of a file: markdown links, prose and command-line paths, shell commands, module imports.      |
-| `closure-yaml.mjs`                  | Pull the actions, step scripts and secrets out of a workflow file. A narrow reader, not a parser. Pure.           |
-| `closure-bins.mjs`                  | Pull out the executables a file invokes from the install's bin directory, named or bound to a variable. Pure.     |
-| `closure-classify.mjs`              | The one containment rule every resolver shares: does this reference travel? Pure.                                 |
-| `closure-artifacts.mjs`             | The escapes of the kinds that are not markdown: workflows, invoked executables, subagent definitions. Pure.       |
-| `closure.mjs`                       | Decide whether each reference escapes the directory being shipped. Pure.                                          |
-| `closure-report.mjs`                | Walk a directory, run the analysis, render it.                                                                    |
-| `config.mjs`                        | Resolve `devkit.config.json`, map an asset onto its destination, and answer both questions about a key. Pure.     |
-| `ci-setup.mjs`                      | Render the consumer's extra CI steps into a shipped workflow, at the placeholder's own indentation. Pure.         |
-| `frontmatter.mjs`                   | Read a shipped file's `requires:` and `peer:` declarations, however they are spelled. Pure.                       |
-| `peer.mjs`                          | Resolve an installed peer's version, and decide whether it answers a declared range. Pure but for the resolution. |
-| `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                                |
-| `tasks.mjs`                         | Merge the task block a consumer's manifest carries, one key at a time. Pure.                                      |
-| `consumer-region.mjs`               | Split off, and put back, the part of a materialised file its consumer owns. Pure.                                 |
-| `accepted.mjs`                      | The record of which local edits the consumer said they meant, and what may go into it. Pure.                      |
-| `retirement.mjs`                    | Decide which recorded files a run may retire, and refuse when a record or the asset set cannot be trusted.        |
-| `sync.mjs`                          | Turn assets plus a manifest into a plan, layer acceptance over it, then apply it.                                 |
-| `init.mjs`                          | What `init` refuses, infers and wires, and when the run failed. Pure.                                             |
-| `command-materialise.mjs`           | The plan `sync`, `doctor` and `init` share, and the writer the latter two share.                                  |
-| `command-init.mjs`                  | `init`'s filesystem half: read the repository, write the config and the tasks, apply the plan.                    |
-| `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                                 |
+| Module                              | Responsibility                                                                                                                                                                   |
+| ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `closure-extract.mjs`               | Pull references out of a file: markdown links, prose and command-line paths, shell commands, module imports.                                                                     |
+| `closure-yaml.mjs`                  | Pull the actions, step scripts and secrets out of a workflow file. A narrow reader, not a parser. Pure.                                                                          |
+| `closure-bins.mjs`                  | Pull out the executables a file invokes from the install's bin directory, named or bound to a variable. Pure.                                                                    |
+| `closure-classify.mjs`              | The one containment rule every resolver shares: does this reference travel? Pure.                                                                                                |
+| `closure-artifacts.mjs`             | The escapes of the kinds that are not markdown — workflows, shell scripts and hooks, invoked executables, subagent definitions — and which of those resolvers read a file. Pure. |
+| `closure.mjs`                       | Decide whether each reference escapes the directory being shipped, and name the files no resolver reads. Pure.                                                                   |
+| `closure-report.mjs`                | Walk a directory, run the analysis, render it.                                                                                                                                   |
+| `config.mjs`                        | Resolve `devkit.config.json`, map an asset onto its destination, and answer both questions about a key. Pure.                                                                    |
+| `ci-setup.mjs`                      | Render the consumer's extra CI steps into a shipped workflow, at the placeholder's own indentation. Pure.                                                                        |
+| `frontmatter.mjs`                   | Read a shipped file's `requires:` and `peer:` declarations, however they are spelled. Pure.                                                                                      |
+| `peer.mjs`                          | Resolve an installed peer's version, and decide whether it answers a declared range. Pure but for the resolution.                                                                |
+| `manifest.mjs`                      | Hash files, and decide what happens to each on the next run. Pure.                                                                                                               |
+| `tasks.mjs`                         | Merge the task block a consumer's manifest carries, one key at a time. Pure.                                                                                                     |
+| `consumer-region.mjs`               | Split off, and put back, the part of a materialised file its consumer owns. Pure.                                                                                                |
+| `accepted.mjs`                      | The record of which local edits the consumer said they meant, and what may go into it. Pure.                                                                                     |
+| `retirement.mjs`                    | Decide which recorded files a run may retire, and refuse when a record or the asset set cannot be trusted.                                                                       |
+| `sync.mjs`                          | Turn assets plus a manifest into a plan, layer acceptance over it, then apply it.                                                                                                |
+| `init.mjs`                          | What `init` refuses, infers and wires, and when the run failed. Pure.                                                                                                            |
+| `command-materialise.mjs`           | The plan `sync`, `doctor` and `init` share, and the writer the latter two share.                                                                                                 |
+| `command-init.mjs`                  | `init`'s filesystem half: read the repository, write the config and the tasks, apply the plan.                                                                                   |
+| `command-closure.mjs`, `devkit.mjs` | The commands, and the dispatcher.                                                                                                                                                |
 
 ## Decisions worth not undoing
 

@@ -109,6 +109,57 @@ describe('a shipped script reference that resolves nowhere', () => {
   });
 });
 
+describe('a hook seed', () => {
+  test('running a script only the source repository has is an escape', () => {
+    const root = copyOfPackage();
+    replaceIn({
+      from: 'exec "$GATE" "$1"',
+      path: join(root, 'assets', 'hooks', 'commit-msg'),
+      to: 'node scripts/closure.mjs\nexec "$GATE" "$1"',
+    });
+    const { status, stderr, stdout } = shippedClosure(root, 'repo');
+
+    expect(status).toBe(1);
+    expect(`${stdout}${stderr}`).toMatch(
+      /\.githooks\/commit-msg:\d+ {2}needs scripts\/closure\.mjs/,
+    );
+  });
+
+  test('running a script that exists nowhere is reported missing', () => {
+    const root = copyOfPackage();
+    replaceIn({
+      from: 'exec "$GATE" "$1"',
+      path: join(root, 'assets', 'hooks', 'commit-msg'),
+      to: 'node scripts/moved-away.mjs\nexec "$GATE" "$1"',
+    });
+    const { status, stderr, stdout } = shippedClosure(root, 'repo');
+
+    expect(status).toBe(1);
+    expect(`${stdout}${stderr}`).toMatch(
+      /\.githooks\/commit-msg:\d+ {2}runs nonexistent scripts\/moved-away\.mjs/,
+    );
+  });
+});
+
+describe('a shipped file of a kind no resolver reads', () => {
+  test('is listed as unchecked under each profile that ships it', () => {
+    const root = copyOfPackage();
+    writeFileSync(
+      join(root, 'assets', 'workspace', 'scripts', 'planted.sql'),
+      'select 1;\n',
+    );
+    const { status, stdout } = shippedClosure(root);
+
+    expect(status).toBe(0);
+    expect(stdout).toMatch(
+      /✓ monorepo — \d+ shipped file\(s\), \d+ read, \d+ unchecked/,
+    );
+    expect(stdout).toContain(
+      'unchecked  scripts/planted.sql  no resolver reads it',
+    );
+  });
+});
+
 describe('a blueprint import only the created manifest declares', () => {
   test('is a package the rung itself does not add', () => {
     expect(Object.keys(TOOLCHAIN_RANGES)).toContain(DEVKIT_PACKAGE);

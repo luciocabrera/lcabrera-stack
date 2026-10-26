@@ -26,7 +26,7 @@ export const BASELINE_COMMANDS = [
 /**
  * @param {{ agentDirectory?: string, allowedBins?: string[],
  *   allowedCommands?: string[], allowedConfigKeys?: string[],
- *   directory: string, root: string }} args
+ *   directory: string, hookDirectory?: string, root: string }} args
  */
 export const analyseDirectory = ({
   agentDirectory,
@@ -34,22 +34,29 @@ export const analyseDirectory = ({
   allowedCommands = BASELINE_COMMANDS,
   allowedConfigKeys = [],
   directory,
+  hookDirectory,
   root,
   shipped = new Set(),
 }) => {
   const files = readFilesUnder({ directory, root });
   const rootDirectory = relative(root, directory).replaceAll('\\', '/');
-  const { escapes } = analyseClosure({
+  const { escapes, unchecked } = analyseClosure({
     agentDirectory,
     allowedBins,
     allowedCommands,
     allowedConfigKeys,
     exists: (path) => existsSync(resolve(root, path)),
     files,
+    hookDirectory,
     rootDirectory,
     shipped,
   });
-  return { directory: rootDirectory, escapes, fileCount: files.length };
+  return {
+    directory: rootDirectory,
+    escapes,
+    fileCount: files.length,
+    unchecked,
+  };
 };
 
 const ESCAPE_VERBS = {
@@ -65,15 +72,32 @@ const ESCAPE_VERBS = {
 export const describeEscape = (finding) =>
   `${finding.file}:${finding.line}  ${ESCAPE_VERBS[finding.kind]} ${finding.resolved ?? finding.reference}`;
 
+/**
+ * @param {{ unchecked?: string[] }} result
+ * @returns {string[]}
+ */
+export const describeUnchecked = ({ unchecked = [] }) =>
+  unchecked.map((path) => `    unchecked  ${path}  no resolver reads it`);
+
+const readCount = ({ fileCount, unchecked = [] }) =>
+  fileCount - unchecked.length;
+
 /** @param {ReturnType<typeof analyseDirectory>[]} results */
 export const renderClosureReport = (results) => {
   const lines = results.flatMap((result) => {
+    const unchecked = describeUnchecked(result);
     if (result.escapes.length === 0) {
-      return [`✓ ${result.directory} — self-contained`];
+      return [
+        unchecked.length === 0
+          ? `✓ ${result.directory} — self-contained`
+          : `✓ ${result.directory} — no escapes in the ${readCount(result)} file(s) a resolver reads`,
+        ...unchecked,
+      ];
     }
     return [
       `✗ ${result.directory}`,
       ...result.escapes.map((finding) => `    ${describeEscape(finding)}`),
+      ...unchecked,
     ];
   });
   return lines.join('\n');
