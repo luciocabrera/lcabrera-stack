@@ -11,6 +11,11 @@ area:
   - packages/api/ARCHITECTURE.md
   - packages/api/README.md
   - packages/server/README.md
+  - packages/utils/src/guards/is-finite-number.util*.ts
+  - packages/utils/src/guards/is-string-list.util*.ts
+  - packages/utils/package.json
+  - packages/utils/README.md
+  - reports/api-surface/utils.txt
   - packages/server/src/filters/filters.types.ts
   - packages/server/src/filters/ARCHITECTURE.md
   - packages/server/src/table-page/**

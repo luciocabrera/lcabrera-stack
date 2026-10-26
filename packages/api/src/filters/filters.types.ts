@@ -45,6 +45,10 @@ export type EmptyFilter = {
   readonly type: 'empty';
 };
 
+export type FilterOperatorSet<TOperator extends string> = Readonly<
+  Record<TOperator, true>
+>;
+
 export type NumberFilter = {
   readonly operator:
     | 'between'

@@ -11,47 +11,55 @@ distinct values against a caller-supplied source registry, producing the
 `allowedColumns` + `columnType` that `db/select-filter-options.util.ts` then
 runs on. Also pure, and equally table-agnostic.
 
-## Why it lives in `@lcabrera/server`
+## Where the shapes are declared, and why
 
 The filter _shapes_ describe the Table's per-column filter state — a UI concept
-— but they are also the input to the SQL query layer, so they are a **contract**
-between the two. Only this side can reach `QueryFilter`, and the dependency may
-not run the other way: `@lcabrera/ui` is browser-safe and this package's graph
-includes the Postgres driver and `node:crypto`
-([ADR-038](../../../../docs/decisions/ADR-038-public-package-topology-by-runtime.md)).
+— but they are also what a request carries in its `filter` param and the input
+to the SQL query layer, so they are a **contract** between all three. Two
+constraints place them:
 
-So the shapes are **restated** on each side rather than shared, exactly as
-`sort/` restates the request-sort shape
-([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)):
-`filters.types.ts` here re-exports what `toQueryFilters` accepts from
-`@lcabrera/api/filters/filters.types`, where the shapes are declared once for
-both ends of a request's `filter` param
-([ADR-141](../../../../docs/decisions/ADR-141-declare-the-column-filter-wire-shape-in-the-api-package.md)),
-and `packages/ui/src/types/filterOperators.types.ts` declares the Table's own set,
-plus the operator aliases and the `{ label, value }` option type that only the
-filter UI has any use for. Neither file imports or re-exports the other, and
+- **Only this package can reach `QueryFilter`**, so the mappers live here. Its
+  graph includes the Postgres driver and `node:crypto`, so nothing browser-safe
+  may depend on it
+  ([ADR-038](../../../../docs/decisions/ADR-038-public-package-topology-by-runtime.md)).
+- **Both ends of the request must name the same shape.** `@lcabrera/api` is
+  browser-safe and this package already depends on it, so the shapes are
+  declared there once, beside `parseColumnFilters`, the parse that reads them
+  back off a request. `filters.types.ts` here re-exports them under the names
+  and subpath it always had, so `toQueryFilters` accepts exactly what the parse
+  returns
+  ([ADR-141](../../../../docs/decisions/ADR-141-declare-the-column-filter-wire-shape-in-the-api-package.md)).
+
+The one copy that is **restated** rather than shared is the Table's:
+`packages/ui/src/types/filterOperators.types.ts` declares its own set, plus the
+operator aliases and the `{ label, value }` option type that only the filter UI
+has any use for, exactly as `sort/` restates the request-sort shape
+([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
+It imports neither `@lcabrera/api`'s declaration nor this re-export, and
 `@lcabrera/ui` does not list this package as a dependency. Structural typing is
-what makes that affordable — a filter built in the Table is assignable here with
-no adapter or conversion step.
+what makes that affordable — a filter built in the Table is assignable to the
+declared shapes with no adapter or conversion step.
 
 The two are also not quite the same contract, which is the deeper reason to keep
-them apart: the UI's models a filter the user is still _editing_, and this one
-models what can be turned into SQL. Two fields here are laxer than a SQL-facing
-contract would choose on its own — `NumberFilter.value` admits `undefined` and
-`SelectFilter.operator` is optional — because they were authored for a drafting
-filter. They stay as they are so the UI's shape remains assignable; tightening
-either is a behaviour change for the mappers, not a type-only edit.
+them apart: the UI's models a filter the user is still _editing_, and the
+declared one models what can be turned into SQL. Two of its fields are laxer
+than a SQL-facing contract would choose on its own — `NumberFilter.value` admits
+`undefined` and `SelectFilter.operator` is optional — because they were authored
+for a drafting filter. They stay as they are so the UI's shape remains
+assignable; tightening either is a behaviour change for the parse and the
+mappers, not a type-only edit.
 
-## How the two copies stay in step
+## How the UI's copy stays in step
 
 A **conformance test in a consumer** is the guard, and it has to live there:
-only something that depends on both packages can compare their two copies, and
-neither package may depend on the other ([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
+only something that depends on both `@lcabrera/ui` and this package can compare
+the UI's copy with the declared shapes, and neither of those two may depend on
+the other ([ADR-039](../../../../docs/decisions/ADR-039-duplicate-over-undeclared-edges.md)).
 Any consumer of both should carry one; this repository's does.
 
 - **The compile-time half is the call itself.** The fixture is annotated
   `Record<string, ColumnFilter>` using `@lcabrera/ui`'s union and passed to
-  `toQueryFilters`, which demands this package's — so the file only compiles
+  `toQueryFilters`, which demands the declared shapes — so the file only compiles
   while the UI's shapes are assignable to these. The annotation is deliberately
   not `satisfies`: `satisfies` would keep each value's narrow literal type and
   check only the filters written down, while the annotation widens them to the
@@ -68,9 +76,9 @@ Any consumer of both should carry one; this repository's does.
   as a refusal, not as an unfiltered read.
 
 The direction checked is UI → query layer, which is the direction filters
-travel. Nothing asserts the reverse, so a variant added _here_ and unused by the
-Table is not caught — widen this package's shapes only when the mappers can
-honour them.
+travel. Nothing asserts the reverse, so a variant added to the declared shapes
+and unused by the Table is not caught — widen them only when the parse and the
+mappers can honour them.
 
 ## Files
 

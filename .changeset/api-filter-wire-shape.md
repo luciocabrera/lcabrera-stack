@@ -1,6 +1,7 @@
 ---
 '@lcabrera/api': minor
 '@lcabrera/server': minor
+'@lcabrera/utils': minor
 ---
 
 The column filters a paginated read carries in its `filter` param now have a declared shape, and a server refuses a payload that does not match it.
@@ -14,3 +15,5 @@ Breaking for callers:
 - A `filter` param that is not JSON, is not an object, or holds an entry of no known shape was read as "no filters", and the endpoint returned every row. `resolvePageRead` now returns a refusal, and `createTablePageLoader` answers it with an empty page carrying the refusal message.
 
 `@lcabrera/server/filters/filters.types` re-exports the filter types from `@lcabrera/api` under the same names, so imports from it keep working.
+
+`@lcabrera/utils` adds two guards: `isFiniteNumber` (`@lcabrera/utils/guards/is-finite-number.util`) narrows a value to a number that is not `NaN` or infinite, and `isStringList` (`@lcabrera/utils/guards/is-string-list.util`) narrows a value to an array whose every member is a string.

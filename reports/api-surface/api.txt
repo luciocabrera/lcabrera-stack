@@ -32,6 +32,7 @@ ColumnFiltersParse [type] ColumnFiltersRefusal | { readonly filters: ColumnFilte
 ColumnFiltersRefusal [type] { readonly column: string; readonly kind: 'refused'; readonly reason: 'invalid-filter'; } | { readonly kind: 'refused'; readonly reason: 'unreadable'; }
 DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'; readonly type: 'date'; /** ISO date string. */ readonly value: string; readonly value2?: string; }
 EmptyFilter [type] { readonly operator: 'isEmpty' | 'isNotEmpty'; readonly type: 'empty'; }
+FilterOperatorSet [type] Readonly<Record<TOperator, true>>
 NumberFilter [type] { readonly operator: 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; /** Absent from the serialised form while the value is still being typed. */ readonly value: number | undefined; readonly value2?: number; }
 SelectFilter [type] { /** Defaults to `'equals'`. */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for `'select'`. */ readonly value?: string; /** Multiple values for `'multiSelect'`. */ readonly values?: readonly string[]; }
 TextFilter [type] { readonly operator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
