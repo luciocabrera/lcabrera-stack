@@ -1,10 +1,7 @@
-import type {
-  BuiltQuery,
-  SelectQueryDescriptor,
-} from './query-builder.types.ts';
+import type { SelectQueryDescriptor } from './query-builder.types.ts';
 
-import { buildSelectQuery } from './build-select-query.util.ts';
+import { buildReadQuery } from './build-read-query.util.ts';
 
-export const buildDistinctQuery = (
-  descriptor: SelectQueryDescriptor,
-): BuiltQuery => buildSelectQuery({ ...descriptor, distinct: true });
+/** @deprecated Use `buildReadQuery` from `@lcabrera/server/db/query-builder/build-read-query.util` with `distinct: true`. */
+export const buildDistinctQuery = (descriptor: SelectQueryDescriptor) =>
+  buildReadQuery({ ...descriptor, distinct: true });

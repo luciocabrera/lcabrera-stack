@@ -3,7 +3,7 @@ id: express-a-read-through-one-entry-point
 lines:
   - application
 persona: application-developer
-state: unmet
+state: met
 packages:
   - server
 requires: []
@@ -13,9 +13,13 @@ evidence:
   - type: doc
     ref: packages/server/src/db/query-builder/ARCHITECTURE.md
   - type: code
-    ref: packages/server/src/db/query-builder
-  - type: code
-    ref: packages/server/src/db/group-query-builder
+    ref: packages/server/src/db/query-builder/build-read-query.util.ts
+  - type: test
+    ref: packages/server/src/db/query-builder/build-read-query.util.test.ts
+  - type: command
+    ref: vp run test:ci
+  - type: command
+    ref: vp run api-surface:verify
 ---
 
 # One entry point expresses a read

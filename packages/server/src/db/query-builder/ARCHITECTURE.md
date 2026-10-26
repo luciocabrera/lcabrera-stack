@@ -1,45 +1,71 @@
 # Query Builder Architecture
 
 Generic, schema/table-agnostic Postgres query construction for the common
-single-table shapes — reads (flat list view, optional filter/sort/pagination;
-count; distinct) and writes (insert/update/delete; max-value) — the pattern
-every list/rollup query used to hand-roll per file. Pure
-functions only; no DB access lives in this folder (see `@lcabrera/server/db/get-pool.util`
-for that) — callers execute the returned `{ text, values }` themselves (or use
-the `../*.util.ts` executors that pair each builder with `getPool`).
+single-table shapes — reads (rows with optional filter/sort/pagination, a
+count, a distinct projection, and a grouped aggregate read) and writes
+(insert/update/delete; max-value). Pure functions only; no DB access lives in
+this folder (see `@lcabrera/server/db/get-pool.util` for that) — callers
+execute the returned `{ text, values }` themselves, or use the `../*.util.ts`
+executors that pair a read or a write with `getPool`.
 
-> **Executing a plain SELECT? Prefer `../select-rows.util.ts`.** It composes
-> `buildSelectQuery` with `getPool` so callers don't re-wire the two by hand
-> (the Usage example below is exactly what it replaces). Reach for the
-> builders directly only when you need the SQL _without_ running it — a count
-> paired to a data query, or a shape this folder doesn't build. See
-> `../ARCHITECTURE.md` for the pure/impure split.
+## The query entry point
+
+**`build-read-query.util.ts` is the query entry point.** `buildReadQuery` takes
+one descriptor carrying every dimension of a read — `fields`, `filters`, `sort`,
+pagination (`limit`/`offset`, or a keyset `cursor`), `distinct`, and for an
+aggregate read `aggregates`, `grouping`, `keys` and the rest of a
+`GroupQueryDescriptor` — and returns the query. Which SQL shape it emits follows
+from the descriptor, not from the function you picked:
+
+| Descriptor carries | Emits                                                                                            | Returns           |
+| ------------------ | ------------------------------------------------------------------------------------------------ | ----------------- |
+| `grouping`         | `GROUP BY GROUPING SETS` with a `GROUPING()` mask (see `../group-query-builder/ARCHITECTURE.md`) | `BuiltGroupQuery` |
+| `count: true`      | `count(<column>)` over the same `WHERE` a row read gets                                          | `BuiltQuery`      |
+| neither            | `SELECT [DISTINCT] fields …`                                                                     | `BuiltQuery`      |
+
+The return type follows the descriptor, so a grouped read is typed with the
+keys and masks its rows are decoded by without a narrowing step. The three
+shapes refuse each other's fields at the type level: a grouped read takes no
+`limit`, `offset`, `cursor` or `fields`, because it is never paginated and its
+projection is its keys and aggregates.
+
+A grouped read still needs the `capabilities` map the catalogue answers, which
+takes a round trip; resolve it with `getColumnGroupingCapabilities`, or let the
+`selectGroupedRows` executor do both.
+
+`buildSelectQuery`, `buildDistinctQuery` and `buildCountQuery` here, and
+`buildGroupQuery` in `../group-query-builder/`, remain exported for existing
+callers. Each is `@deprecated` and delegates to `buildReadQuery`, so their output
+and their refusals are the entry point's.
 
 ## Files
 
-| File                                     | Role                                                                                                                                                                                                                  |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `query-builder.types.ts`                 | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `QueryCursor`, `BuiltQuery`, and the `Select`/`Count`/`Distinct`/`Insert`/`Update`/`Delete`/`MaxValue` `…QueryDescriptor` types                                     |
-| `quote-identifier.util.ts`               | Safe double-quote identifier escaping                                                                                                                                                                                 |
-| `assert-safe-identifier.util.ts`         | **Mandatory**, always called — syntax check (see Security model)                                                                                                                                                      |
-| `assert-column-allowed.util.ts`          | **Optional**, opt-in — membership check (see Security model)                                                                                                                                                          |
-| `append-filter-clause.util.ts`           | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                                                                                                         |
-| `is-unary-filter.util.ts`                | Narrows a filter to the arm that carries no value (`IS NULL` / `IS NOT NULL`) — a predicate, because excluding the operators by literal does not subtract the arm and leaves `filter.value` unresolved                |
-| `build-where-clause.util.ts`             | `QueryFilter[]` (plus an optional keyset `cursor`) → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                                     |
-| `assert-keyset-cursor.util.ts`           | Refuses a keyset cursor the builder cannot resume correctly — no sort, a tuple that does not match it, or one not ending on a non-null unique column (ADR-052)                                                        |
-| `build-keyset-comparison.util.ts`        | The "sorts strictly after this value" half of one keyset branch, for one column, honouring Postgres's default null placement                                                                                          |
-| `build-keyset-branch.util.ts`            | One OR-branch: earlier sort columns pinned with `IS NOT DISTINCT FROM`, the column at that position advanced past the cursor                                                                                          |
-| `build-keyset-clause.util.ts`            | Composes the branches into the seek predicate `buildWhereClause` ANDs in                                                                                                                                              |
-| `build-returning-clause.util.ts`         | Shared `RETURNING` builder for the write builders: `''`, `RETURNING *` (the `['*']` wildcard), or a quoted column projection                                                                                          |
-| `build-order-by-clause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                                                                                                                        |
-| `build-optional-numeric-clauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                                                                                                      |
-| `build-select-query.util.ts`             | **Public entry point.** Composes everything above into one `SELECT`                                                                                                                                                   |
-| `build-count-query.util.ts`              | `count(<column>)` query sharing `buildWhereClause`'s output, so a data query and its matching count query can never drift apart; `column` defaults to `*`, or names the column to count (e.g. a non-`id` primary key) |
-| `build-distinct-query.util.ts`           | **Public entry point.** Paginated `SELECT DISTINCT` for one column (filter-option lists, ADR-009); excludes NULL/empty and orders ascending                                                                           |
-| `build-insert-query.util.ts`             | **Public entry point.** `INSERT INTO … (cols) VALUES ($1, …) [RETURNING …]` from a `{ values }` map; keys quoted, values parameterized                                                                                |
-| `build-update-query.util.ts`             | **Public entry point.** `UPDATE … SET col = $n WHERE … [RETURNING …]`; reuses `buildWhereClause` with an offset `startParamIndex`, requires ≥1 filter                                                                 |
-| `build-delete-query.util.ts`             | **Public entry point.** `DELETE FROM … WHERE … [RETURNING …]`; reuses `buildWhereClause`, requires ≥1 filter                                                                                                          |
-| `build-max-value-query.util.ts`          | **Public entry point.** `SELECT COALESCE(MAX(col), 0)` — the generic "next id" read for tables without a sequence/default                                                                                             |
+| File                                     | Role                                                                                                                                                                                                                               |
+| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `query-builder.types.ts`                 | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `QueryCursor`, `BuiltQuery`, the `Select`/`Count`/`Insert`/`Update`/`Delete`/`MaxValue` `…QueryDescriptor` types, and the read union `ReadQueryDescriptor` with `BuiltReadQuery` |
+| `quote-identifier.util.ts`               | Safe double-quote identifier escaping                                                                                                                                                                                              |
+| `assert-safe-identifier.util.ts`         | **Mandatory**, always called — syntax check (see Security model)                                                                                                                                                                   |
+| `assert-column-allowed.util.ts`          | **Optional**, opt-in — membership check (see Security model)                                                                                                                                                                       |
+| `append-filter-clause.util.ts`           | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                                                                                                                      |
+| `is-unary-filter.util.ts`                | Narrows a filter to the arm that carries no value (`IS NULL` / `IS NOT NULL`) — a predicate, because excluding the operators by literal does not subtract the arm and leaves `filter.value` unresolved                             |
+| `build-where-clause.util.ts`             | `QueryFilter[]` (plus an optional keyset `cursor`) → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                                                  |
+| `assert-keyset-cursor.util.ts`           | Refuses a keyset cursor the builder cannot resume correctly — no sort, a tuple that does not match it, or one not ending on a non-null unique column (ADR-052)                                                                     |
+| `build-keyset-comparison.util.ts`        | The "sorts strictly after this value" half of one keyset branch, for one column, honouring Postgres's default null placement                                                                                                       |
+| `build-keyset-branch.util.ts`            | One OR-branch: earlier sort columns pinned with `IS NOT DISTINCT FROM`, the column at that position advanced past the cursor                                                                                                       |
+| `build-keyset-clause.util.ts`            | Composes the branches into the seek predicate `buildWhereClause` ANDs in                                                                                                                                                           |
+| `build-returning-clause.util.ts`         | Shared `RETURNING` builder for the write builders: `''`, `RETURNING *` (the `['*']` wildcard), or a quoted column projection                                                                                                       |
+| `build-order-by-clause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                                                                                                                                     |
+| `build-optional-numeric-clauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                                                                                                                   |
+| `build-read-query.util.ts`               | **The query entry point.** One `ReadQueryDescriptor` → a row, count or grouped read                                                                                                                                                |
+| `build-rows-read.util.ts`                | Private. Composes the clauses above into one `SELECT [DISTINCT]`                                                                                                                                                                   |
+| `build-count-read.util.ts`               | Private. `count(<column>)` sharing `buildWhereClause`'s output, so a row read and its count cannot drift apart; `column` defaults to `*`                                                                                           |
+| `build-select-query.util.ts`             | Deprecated. `buildReadQuery` with a row descriptor                                                                                                                                                                                 |
+| `build-count-query.util.ts`              | Deprecated. `buildReadQuery` with `count: true`                                                                                                                                                                                    |
+| `build-distinct-query.util.ts`           | Deprecated. `buildReadQuery` with `distinct: true`                                                                                                                                                                                 |
+| `build-insert-query.util.ts`             | Write builder. `INSERT INTO … (cols) VALUES ($1, …) [RETURNING …]` from a `{ values }` map; keys quoted, values parameterized                                                                                                      |
+| `build-update-query.util.ts`             | Write builder. `UPDATE … SET col = $n WHERE … [RETURNING …]`; reuses `buildWhereClause` with an offset `startParamIndex`, requires ≥1 filter                                                                                       |
+| `build-delete-query.util.ts`             | Write builder. `DELETE FROM … WHERE … [RETURNING …]`; reuses `buildWhereClause`, requires ≥1 filter                                                                                                                                |
+| `build-max-value-query.util.ts`          | Write-path read. `SELECT COALESCE(MAX(col), 0)` — the generic "next id" read for tables without a sequence/default                                                                                                                 |
 
 ## The null tests are unary, and both directions exist
 
@@ -95,7 +121,7 @@ regardless of `allowedColumns`.
 
 ## Pagination: `offset` by default, `cursor` to seek
 
-`buildSelectQuery` paginates with `OFFSET` unless the descriptor carries a
+A row read paginates with `OFFSET` unless the descriptor carries a
 `cursor`, in which case it emits a keyset ("seek") predicate and resumes strictly
 after the row that cursor describes — O(limit) rather than O(offset). The
 decision, the shape of the predicate and why it is not the compact
@@ -141,25 +167,40 @@ is).
 ## Usage
 
 ```ts
-import { buildSelectQuery } from '@lcabrera/server/db/query-builder/build-select-query.util';
-import { getPool } from '@lcabrera/server/db/get-pool.util';
+import { buildReadQuery } from '@lcabrera/server/db/query-builder/build-read-query.util';
 
-const { text, values } = buildSelectQuery({
-  fields: ['order_id', 'customer_name', 'total_amount'],
-  schema: 'reporting',
-  sort: [{ column: 'total_amount', direction: 'desc' }],
-  table: 'v_order_totals',
+const page = buildReadQuery({
+  allowedColumns: ['id', 'region', 'amount'],
+  fields: ['id', 'region', 'amount'],
+  filters: [{ column: 'region', operator: 'eq', value: 'north' }],
+  limit: 50,
+  schema: 'catalog',
+  sort: [{ column: 'amount', direction: 'desc' }],
+  table: 'items',
 });
 
-const result = await getPool().query(text, values);
-```
+const total = buildReadQuery({
+  allowedColumns: ['id', 'region'],
+  column: 'id',
+  count: true,
+  filters: [{ column: 'region', operator: 'eq', value: 'north' }],
+  schema: 'catalog',
+  table: 'items',
+});
 
-A future caller accepting a column name from a request:
-
-```ts
-buildSelectQuery({
-  allowedColumns: ['total_amount', 'order_count', 'order_id'],
-  fields: [userProvidedSortColumn],
-  // ...
+const grouped = buildReadQuery({
+  aggregates: [{ fn: 'count' }, { column: 'amount', fn: 'sum' }],
+  allowedColumns: ['region', 'status', 'amount'],
+  capabilities,
+  filters: [{ column: 'status', operator: 'eq', value: 'open' }],
+  grouping: 'rollup',
+  keys: ['region', 'status'],
+  maxRows: 5000,
+  schema: 'catalog',
+  sort: [{ aggregateAlias: 'sum_amount', direction: 'desc' }],
+  table: 'items',
 });
 ```
+
+Pass `allowedColumns` whenever a column name arrives on a request; the
+Security model above applies to every shape the entry point emits.

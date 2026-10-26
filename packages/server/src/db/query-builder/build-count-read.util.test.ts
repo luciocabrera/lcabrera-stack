@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { buildCountQuery } from './build-count-query.util.ts';
+import { buildCountRead } from './build-count-read.util.ts';
 
-describe('buildCountQuery', () => {
+describe('buildCountRead', () => {
   it('counts every row with `count(*)` by default', () => {
-    const result = buildCountQuery({
+    const result = buildCountRead({
       schema: 'reporting',
       table: 'v_order_totals',
     });
@@ -16,7 +16,7 @@ describe('buildCountQuery', () => {
   });
 
   it('counts the given column when `column` is provided', () => {
-    const result = buildCountQuery({
+    const result = buildCountRead({
       column: 'order_id',
       schema: 'public',
       table: 'enterprise_orders',
@@ -28,8 +28,8 @@ describe('buildCountQuery', () => {
     });
   });
 
-  it('applies the same WHERE clause a matching buildSelectQuery call would produce', () => {
-    const result = buildCountQuery({
+  it('applies the same WHERE clause a matching buildRowsRead call would produce', () => {
+    const result = buildCountRead({
       filters: [{ column: 'order_status', operator: 'eq', value: 'Shipped' }],
       schema: 'reporting',
       table: 'v_order_totals',
@@ -43,7 +43,7 @@ describe('buildCountQuery', () => {
 
   it('rejects an unsafe table name', () => {
     expect(() =>
-      buildCountQuery({
+      buildCountRead({
         schema: 'reporting',
         table: 't; DROP TABLE reporting.users',
       }),
@@ -52,7 +52,7 @@ describe('buildCountQuery', () => {
 
   it('rejects an unsafe count column', () => {
     expect(() =>
-      buildCountQuery({
+      buildCountRead({
         column: 'id); DROP TABLE reporting.users --',
         schema: 'reporting',
         table: 'v_order_totals',
@@ -62,7 +62,7 @@ describe('buildCountQuery', () => {
 
   it('rejects a count column outside allowedColumns', () => {
     expect(() =>
-      buildCountQuery({
+      buildCountRead({
         allowedColumns: ['order_status'],
         column: 'password_hash',
         schema: 'reporting',

@@ -1,7 +1,7 @@
 import type { ExecutorOptions } from './db.types.ts';
 import type { CountQueryDescriptor } from './query-builder/query-builder.types.ts';
 
-import { buildCountQuery } from './query-builder/build-count-query.util.ts';
+import { buildReadQuery } from './query-builder/build-read-query.util.ts';
 import { runQuery } from './run-query.util.ts';
 
 export const getRowsCount = async ({
@@ -9,7 +9,7 @@ export const getRowsCount = async ({
   ...descriptor
 }: CountQueryDescriptor &
   ExecutorOptions & { readonly column: string }): Promise<number> => {
-  const { text, values } = buildCountQuery(descriptor);
+  const { text, values } = buildReadQuery({ ...descriptor, count: true });
   const result = await runQuery<{ readonly count: number | string }>({
     text,
     tx,
