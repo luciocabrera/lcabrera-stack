@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { buildSelectQuery } from './build-select-query.util.ts';
+import { buildRowsRead } from './build-rows-read.util.ts';
 
-describe('buildSelectQuery', () => {
+describe('buildRowsRead', () => {
   it('builds a plain select with explicit fields and no filters/sort/pagination', () => {
-    const result = buildSelectQuery({
+    const result = buildRowsRead({
       fields: ['order_id', 'customer_name'],
       schema: 'reporting',
       table: 'v_order_totals',
@@ -17,7 +17,7 @@ describe('buildSelectQuery', () => {
   });
 
   it('emits SELECT DISTINCT when distinct is set', () => {
-    const result = buildSelectQuery({
+    const result = buildRowsRead({
       distinct: true,
       fields: ['color'],
       schema: 'public',
@@ -31,7 +31,7 @@ describe('buildSelectQuery', () => {
   });
 
   it('composes WHERE, ORDER BY, LIMIT, and OFFSET with correctly incrementing placeholders', () => {
-    const result = buildSelectQuery({
+    const result = buildRowsRead({
       fields: ['order_id', 'total_amount'],
       filters: [{ column: 'order_status', operator: 'eq', value: 'Shipped' }],
       limit: 10,
@@ -51,7 +51,7 @@ describe('buildSelectQuery', () => {
 
   it('rejects an unsafe schema name', () => {
     expect(() =>
-      buildSelectQuery({
+      buildRowsRead({
         fields: ['a'],
         schema: 'reporting; DROP SCHEMA reporting',
         table: 't',
@@ -61,7 +61,7 @@ describe('buildSelectQuery', () => {
 
   it('rejects an unsafe table name', () => {
     expect(() =>
-      buildSelectQuery({
+      buildRowsRead({
         fields: ['a'],
         schema: 'reporting',
         table: 't; DROP TABLE reporting.users',
@@ -71,7 +71,7 @@ describe('buildSelectQuery', () => {
 
   it('rejects an unsafe field name', () => {
     expect(() =>
-      buildSelectQuery({
+      buildRowsRead({
         fields: ['a; DROP TABLE reporting.users'],
         schema: 'reporting',
         table: 'v_order_totals',
@@ -81,7 +81,7 @@ describe('buildSelectQuery', () => {
 
   it('rejects a field not present in an optional allowedColumns list', () => {
     expect(() =>
-      buildSelectQuery({
+      buildRowsRead({
         allowedColumns: ['order_id'],
         fields: ['password_hash'],
         schema: 'reporting',
@@ -94,7 +94,7 @@ describe('buildSelectQuery', () => {
 
   it('allows a field that is present in an optional allowedColumns list', () => {
     expect(() =>
-      buildSelectQuery({
+      buildRowsRead({
         allowedColumns: ['order_id'],
         fields: ['order_id'],
         schema: 'reporting',
@@ -104,7 +104,7 @@ describe('buildSelectQuery', () => {
   });
 
   it('seeks past a keyset cursor instead of counting rows, keeping LIMIT last', () => {
-    const result = buildSelectQuery({
+    const result = buildRowsRead({
       cursor: { uniqueColumn: 'order_id', values: ['2026-01-04', 4821] },
       fields: ['order_id', 'order_date'],
       filters: [{ column: 'order_status', operator: 'eq', value: 'Shipped' }],
@@ -138,7 +138,7 @@ describe('buildSelectQuery', () => {
       table: 'enterprise_orders',
     } as const;
 
-    expect(buildSelectQuery(descriptor)).toEqual({
+    expect(buildRowsRead(descriptor)).toEqual({
       text: 'SELECT "order_id" FROM "public"."enterprise_orders" ORDER BY "order_id" ASC LIMIT $1 OFFSET $2',
       values: [50, 100],
     });
@@ -146,12 +146,28 @@ describe('buildSelectQuery', () => {
 
   it('refuses a cursor without a total order to seek along', () => {
     expect(() =>
-      buildSelectQuery({
+      buildRowsRead({
         cursor: { uniqueColumn: 'order_id', values: [4821] },
         fields: ['order_id'],
         schema: 'public',
         table: 'enterprise_orders',
       }),
     ).toThrow(/requires a sort/);
+  });
+
+  it('ignores a count or grouping field the descriptor also carries', () => {
+    const descriptor = {
+      count: true,
+      fields: ['id'],
+      grouping: 'rollup',
+      keys: ['id'],
+      schema: 'catalog',
+      table: 'items',
+    } as const;
+
+    expect(buildRowsRead(descriptor)).toEqual({
+      text: 'SELECT "id" FROM "catalog"."items"',
+      values: [],
+    });
   });
 });

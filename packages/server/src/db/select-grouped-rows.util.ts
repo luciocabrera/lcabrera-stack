@@ -12,7 +12,7 @@ import { assertColumnAxisKey } from './group-query-builder/assert-column-axis-ke
 import { assertGroupAggregates } from './group-query-builder/assert-group-aggregates.util.ts';
 import { assertGroupDepth } from './group-query-builder/assert-group-depth.util.ts';
 import { assertGroupRowBackstop } from './group-query-builder/assert-group-row-backstop.util.ts';
-import { buildGroupQuery } from './group-query-builder/build-group-query.util.ts';
+import { buildGroupedRead } from './group-query-builder/build-grouped-read.util.ts';
 import { collectCapabilityColumns } from './group-query-builder/collect-capability-columns.util.ts';
 import { isUnexpandedLeadingCount } from './group-query-builder/is-unexpanded-leading-count.util.ts';
 import { toColumnAxisDiscoveryLimit } from './group-query-builder/to-column-axis-discovery-limit.util.ts';
@@ -97,7 +97,7 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
             }),
           };
 
-    const built = buildGroupQuery({
+    const built = buildGroupedRead({
       ...grouped,
       capabilities,
       ...(columnAxis !== undefined && { columnAxis }),

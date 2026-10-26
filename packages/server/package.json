@@ -57,6 +57,7 @@
     "./db/query-builder/build-insert-query.util": "./src/db/query-builder/build-insert-query.util.ts",
     "./db/query-builder/build-max-value-query.util": "./src/db/query-builder/build-max-value-query.util.ts",
     "./db/query-builder/build-order-by-clause.util": "./src/db/query-builder/build-order-by-clause.util.ts",
+    "./db/query-builder/build-read-query.util": "./src/db/query-builder/build-read-query.util.ts",
     "./db/query-builder/build-select-query.util": "./src/db/query-builder/build-select-query.util.ts",
     "./db/query-builder/build-update-query.util": "./src/db/query-builder/build-update-query.util.ts",
     "./db/query-builder/query-builder.types": "./src/db/query-builder/query-builder.types.ts",
@@ -212,6 +213,10 @@
       "./db/query-builder/build-order-by-clause.util": {
         "types": "./dist/db/query-builder/build-order-by-clause.util.d.mts",
         "default": "./dist/db/query-builder/build-order-by-clause.util.mjs"
+      },
+      "./db/query-builder/build-read-query.util": {
+        "types": "./dist/db/query-builder/build-read-query.util.d.mts",
+        "default": "./dist/db/query-builder/build-read-query.util.mjs"
       },
       "./db/query-builder/build-select-query.util": {
         "types": "./dist/db/query-builder/build-select-query.util.d.mts",

@@ -86,4 +86,22 @@ describe('getRowsCount', () => {
 
     expect(query).not.toHaveBeenCalled();
   });
+
+  it('builds a plain count when the descriptor also carries a row or grouping field', async () => {
+    query.mockResolvedValue({ rows: [{ count: 0 }] });
+    const descriptor = {
+      column: 'id',
+      grouping: 'rollup',
+      limit: 5,
+      schema: 'catalog',
+      table: 'items',
+    } as const;
+
+    await getRowsCount(descriptor);
+
+    expect(query).toHaveBeenCalledWith(
+      'SELECT count("id") AS count FROM "catalog"."items"',
+      [],
+    );
+  });
 });
