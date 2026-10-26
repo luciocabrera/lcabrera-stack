@@ -47,10 +47,11 @@ const isUnderRoot = ({ path, rootDirectory }) => {
   return path === root || path.startsWith(`${root}/`);
 };
 
+const isCarried = (path, shipped) =>
+  shipped.has(path) || holdsShippedFile(path, shipped);
+
 const travelsWith = ({ path, rootDirectory, shipped }) =>
-  shipped.has(path) ||
-  holdsShippedFile(path, shipped) ||
-  isUnderRoot({ path, rootDirectory });
+  isCarried(path, shipped) || isUnderRoot({ path, rootDirectory });
 
 /**
  * The same containment question for a module specifier, which answers it with
@@ -106,7 +107,9 @@ export const classifyPathToken = ({
     resolveFrom(fromDirectory, withoutFragment),
     resolveFrom('', withoutFragment),
   ];
-  const resolved = candidates.find((candidate) => exists(candidate));
+  const resolved = candidates.find(
+    (candidate) => exists(candidate) || isCarried(candidate, shipped),
+  );
   if (resolved === undefined) return { kind: 'unresolved' };
   return {
     kind: travelsWith({ path: resolved, rootDirectory, shipped })
@@ -223,3 +226,19 @@ export const toCommandEscapes = ({ allowed, commands, file }) =>
       line: command.line,
       reference: command.word,
     }));
+
+export const toMissingScripts = ({ containment, exists, file, operands }) =>
+  exists === undefined
+    ? []
+    : operands
+        .filter(
+          (entry) =>
+            classifyPathToken({ ...containment, exists, token: entry.token })
+              .kind === 'unresolved',
+        )
+        .map((entry) => ({
+          file: file.path,
+          kind: 'missing',
+          line: entry.line,
+          reference: entry.token,
+        }));

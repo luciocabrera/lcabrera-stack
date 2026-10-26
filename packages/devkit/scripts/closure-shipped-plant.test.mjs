@@ -12,6 +12,7 @@ import { spawnSync } from 'node:child_process';
 import {
   cpSync,
   mkdtempSync,
+  readFileSync,
   rmSync,
   symlinkSync,
   writeFileSync,
@@ -45,18 +46,68 @@ const copyOfPackage = () => {
   return root;
 };
 
-const shippedClosure = (root) =>
+const shippedClosure = (root, profile = 'monorepo') =>
   spawnSync(
     process.execPath,
     [
       join(root, 'scripts', 'devkit.mjs'),
       'closure',
       '--profile',
-      'monorepo',
+      profile,
       '--shipped',
     ],
     { cwd: root, encoding: 'utf8' },
   );
+
+const appendTo = (path, text) =>
+  writeFileSync(path, `${readFileSync(path, 'utf8')}${text}`);
+
+const replaceIn = ({ from, path, to }) => {
+  const content = readFileSync(path, 'utf8');
+  if (!content.includes(from)) throw new Error(`${path} lacks ${from}`);
+  writeFileSync(
+    path,
+    content.replace(from, () => to),
+  );
+};
+
+describe('a shipped script reference that resolves nowhere', () => {
+  test('the unplanted copy is self-contained, so a plant is what fails it', () => {
+    const { status, stderr, stdout } = shippedClosure(copyOfPackage(), 'full');
+
+    expect(`${stdout}${stderr}`).not.toContain('runs nonexistent');
+    expect(status).toBe(0);
+  });
+
+  test('is reported when a shipped skill runs it inline', () => {
+    const root = copyOfPackage();
+    appendTo(
+      join(root, 'assets', 'skills', 'worktree-housekeeping', 'SKILL.md'),
+      '\nThen run `node scripts/moved-away.mjs`.\n',
+    );
+    const { status, stderr, stdout } = shippedClosure(root, 'full');
+
+    expect(status).toBe(1);
+    expect(`${stdout}${stderr}`).toMatch(
+      /worktree-housekeeping\/SKILL\.md:\d+ {2}runs nonexistent scripts\/moved-away\.mjs/,
+    );
+  });
+
+  test('is reported when a shipped workflow step runs it', () => {
+    const root = copyOfPackage();
+    replaceIn({
+      from: 'run: corepack enable',
+      path: join(root, 'assets', 'workflows', 'check.yml'),
+      to: 'run: node scripts/ghost-not-anywhere.mjs',
+    });
+    const { status, stderr, stdout } = shippedClosure(root, 'full');
+
+    expect(status).toBe(1);
+    expect(`${stdout}${stderr}`).toMatch(
+      /check\.yml:\d+ {2}runs nonexistent scripts\/ghost-not-anywhere\.mjs/,
+    );
+  });
+});
 
 describe('a blueprint import only the created manifest declares', () => {
   test('is a package the rung itself does not add', () => {
