@@ -5,7 +5,7 @@ import type { QueryFilter } from './query-builder/query-builder.types.ts';
 
 import { GroupingRefusedError } from '../errors/grouping-refused.error.ts';
 import { assertColumnAxisMaxDistinct } from './group-query-builder/assert-column-axis-max-distinct.util.ts';
-import { buildSelectQuery } from './query-builder/build-select-query.util.ts';
+import { buildReadQuery } from './query-builder/build-read-query.util.ts';
 import { runQuery } from './run-query.util.ts';
 
 type SelectColumnAxisValuesArgs = ExecutorOptions & {
@@ -30,7 +30,7 @@ export const selectColumnAxisValues = async ({
 }: SelectColumnAxisValuesArgs) => {
   assertColumnAxisMaxDistinct(maxDistinct);
 
-  const built = buildSelectQuery({
+  const built = buildReadQuery({
     allowedColumns,
     distinct: true,
     fields: [key],

@@ -1,3 +1,8 @@
+import type {
+  BuiltGroupQuery,
+  GroupQueryDescriptor,
+} from '../group-query-builder/group-query-builder.types.ts';
+
 export type BinaryOperator =
   | 'eq'
   | 'gt'
@@ -14,6 +19,9 @@ export type BuiltQuery = {
   readonly values: readonly unknown[];
 };
 
+export type BuiltReadQuery<TDescriptor extends ReadQueryDescriptor> =
+  TDescriptor extends GroupedReadQueryDescriptor ? BuiltGroupQuery : BuiltQuery;
+
 export type ColumnType = 'boolean' | 'date' | 'enum' | 'number' | 'text';
 
 export type ComparisonOperator = BinaryOperator | UnaryOperator;
@@ -27,6 +35,24 @@ export type CountQueryDescriptor = {
   readonly table: string;
 };
 
+export type CountReadQueryDescriptor = CountQueryDescriptor & {
+  readonly aggregates?: never;
+  readonly capabilities?: never;
+  readonly columnAxis?: never;
+  readonly count: true;
+  readonly cursor?: never;
+  readonly distinct?: never;
+  readonly fields?: never;
+  readonly grouping?: never;
+  readonly keys?: never;
+  readonly limit?: never;
+  readonly maxRows?: never;
+  readonly offset?: never;
+  readonly periods?: never;
+  readonly sort?: never;
+  readonly subtotalPlacement?: never;
+};
+
 export type DeleteQueryDescriptor = {
   /** Same opt-in authorization as `SelectQueryDescriptor`. */
   readonly allowedColumns?: readonly string[];
@@ -36,6 +62,16 @@ export type DeleteQueryDescriptor = {
   readonly returning?: readonly string[];
   readonly schema: string;
   readonly table: string;
+};
+
+export type GroupedReadQueryDescriptor = GroupQueryDescriptor & {
+  readonly column?: never;
+  readonly count?: never;
+  readonly cursor?: never;
+  readonly distinct?: never;
+  readonly fields?: never;
+  readonly limit?: never;
+  readonly offset?: never;
 };
 
 export type InsertQueryDescriptor = {
@@ -77,6 +113,24 @@ export type QueryFilter =
 export type QuerySort = {
   readonly column: string;
   readonly direction: 'asc' | 'desc';
+};
+
+export type ReadQueryDescriptor =
+  | CountReadQueryDescriptor
+  | GroupedReadQueryDescriptor
+  | RowsReadQueryDescriptor;
+
+export type RowsReadQueryDescriptor = SelectQueryDescriptor & {
+  readonly aggregates?: never;
+  readonly capabilities?: never;
+  readonly column?: never;
+  readonly columnAxis?: never;
+  readonly count?: never;
+  readonly grouping?: never;
+  readonly keys?: never;
+  readonly maxRows?: never;
+  readonly periods?: never;
+  readonly subtotalPlacement?: never;
 };
 
 export type SelectQueryDescriptor = {

@@ -431,4 +431,23 @@ describe('selectGroupedRows', () => {
       false,
     );
   });
+
+  it('builds the same grouped query when the descriptor also carries a count or row field', async () => {
+    resolveCapabilityThenEmpty();
+    await selectGroupedRows(DESCRIPTOR);
+    const plain = statements()[3];
+
+    const withForeign = {
+      ...DESCRIPTOR,
+      count: true,
+      fields: ['country'],
+      limit: 10,
+    };
+    query.mockReset();
+    resolveCapabilityThenEmpty();
+    await selectGroupedRows(withForeign);
+
+    expect(statements()[3]).toBe(plain);
+    expect(plain).toContain('GROUP BY GROUPING SETS');
+  });
 });

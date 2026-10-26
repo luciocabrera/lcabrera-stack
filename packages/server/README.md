@@ -29,17 +29,43 @@ Pure and database-free: each builder takes a descriptor and returns
 `{ text, values }`. Nothing here opens a connection, so the SQL is testable
 without a database.
 
-| Import                       | Builds                                                          |
-| ---------------------------- | --------------------------------------------------------------- |
-| `build-select-query.util`    | `SELECT` with filters, sorting, limit/offset                    |
-| `build-count-query.util`     | `COUNT(*)` (or of one column) over the same filters             |
-| `build-distinct-query.util`  | Paginated `SELECT DISTINCT` on one column — filter-option lists |
-| `build-insert-query.util`    | `INSERT … RETURNING`                                            |
-| `build-update-query.util`    | `UPDATE … RETURNING` — **refuses to build without a filter**    |
-| `build-delete-query.util`    | `DELETE … RETURNING` — **refuses to build without a filter**    |
-| `build-max-value-query.util` | `COALESCE(MAX(col), 0)`, for assigning the next id              |
-| `build-order-by-clause.util` | The `ORDER BY` fragment on its own                              |
-| `query-builder.types`        | Descriptors, `QueryFilter`, `ComparisonOperator`, `BuiltQuery`  |
+**`build-read-query.util` is the one entry point for a read.** `buildReadQuery`
+takes a single descriptor — fields, filters, sort, `limit`/`offset` or a keyset
+`cursor`, `distinct`, `count: true` for a total, or `aggregates`, `grouping` and
+`keys` for a grouped read — and returns the query. A grouped descriptor returns
+the keys and grouping masks its rows are decoded by as well; its `capabilities`
+map comes from `get-column-grouping-capabilities.util`.
+
+```ts
+import { buildReadQuery } from '@lcabrera/server/db/query-builder/build-read-query.util';
+
+const { text, values } = buildReadQuery({
+  aggregates: [{ fn: 'count' }, { column: 'amount', fn: 'sum' }],
+  allowedColumns: ['region', 'status', 'amount'],
+  capabilities,
+  filters: [{ column: 'status', operator: 'eq', value: 'open' }],
+  grouping: 'rollup',
+  keys: ['region', 'status'],
+  maxRows: 5000,
+  schema: 'catalog',
+  sort: [{ aggregateAlias: 'sum_amount', direction: 'desc' }],
+  table: 'items',
+});
+```
+
+| Import                       | Builds                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `build-read-query.util`      | Every read: rows, a distinct projection, a count, or a grouped aggregate read |
+| `build-insert-query.util`    | `INSERT … RETURNING`                                                          |
+| `build-update-query.util`    | `UPDATE … RETURNING` — **refuses to build without a filter**                  |
+| `build-delete-query.util`    | `DELETE … RETURNING` — **refuses to build without a filter**                  |
+| `build-max-value-query.util` | `COALESCE(MAX(col), 0)`, for assigning the next id                            |
+| `build-order-by-clause.util` | The `ORDER BY` fragment on its own                                            |
+| `query-builder.types`        | Descriptors, `QueryFilter`, `ComparisonOperator`, `BuiltQuery`                |
+
+`build-select-query.util`, `build-distinct-query.util`, `build-count-query.util`
+and `group-query-builder/build-group-query.util` are deprecated. Each still
+exports its builder and returns the same SQL as before. Move to `buildReadQuery`.
 
 ### Executing — `@lcabrera/server/db/*`
 
