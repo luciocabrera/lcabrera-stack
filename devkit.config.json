@@ -60,6 +60,12 @@
     "shippedDocs": {
       "repoOnlyDirs": ["apps", "docker", "docs", "packages", "scripts"]
     },
+    "harness": {
+      "additionalRoots": [
+        { "kind": "skill", "dir": "packages/devkit/assets/skills" },
+        { "kind": "rule", "dir": "packages/devkit/assets/rules" }
+      ]
+    },
     "departedNames": {
       "rosterFile": "scripts/departed-names.json"
     },

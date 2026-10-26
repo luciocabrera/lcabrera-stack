@@ -11,8 +11,10 @@ requires:
   - agent-instructions-do-not-contradict
   - published-docs-ship-self-contained
 issues:
-  - 1069
-  - 1070
+  - 1505
+  - 1506
+  - 1507
+  - 1508
 evidence:
   - type: command
     ref: vp run devkit:closure

@@ -9,13 +9,15 @@ packages:
 requires:
   - agent-instructions-do-not-contradict
 issues:
-  - 1071
-  - 1068
+  - 1504
+  - 1509
 evidence:
   - type: command
     ref: vp run skills:validate
   - type: command
-    ref: vp run devkit:closure
+    ref: vp run harness:verify
+  - type: command
+    ref: vp run devkit:closure:shipped
 ---
 
 # A skill that arrived with the setup does its job in my repository
@@ -33,9 +35,11 @@ still costs me maintenance.
 
 - Every shipped skill, path rule and subagent definition is structurally
   well-formed: frontmatter parses, required fields are present, and the file
-  matches the contract its kind declares — `vp run skills:validate`.
+  matches the contract its kind declares — `vp run skills:validate` and
+  `vp run harness:verify`, which read the copies under `packages/devkit/assets`
+  as well as this repository's own.
 - Every path any of them references resolves in a repository holding only the
-  installed package — `vp run devkit:closure`.
+  installed package — `vp run devkit:closure:shipped`.
 - Each one's description states **when to use it**, specifically enough to
   discriminate: a description that would match any task, or none, is a defect
   reported by name.

@@ -12,11 +12,13 @@ import {
   classifyLink,
   classifyPathToken,
   toCommandEscapes,
+  toMissingScripts,
 } from './closure-classify.mjs';
 import {
   extractProsePathTokens,
   shellCommandWords,
   shellPathTokens,
+  shellScriptOperands,
 } from './closure-extract.mjs';
 import {
   extractRunScripts,
@@ -81,6 +83,14 @@ const stepPathEscapes = ({ containment, exists, file, scripts }) =>
     tokens: shellPathTokens(scripts),
   });
 
+const stepMissingScripts = ({ containment, exists, file, scripts }) =>
+  toMissingScripts({
+    containment: { ...containment, fromDirectory: '' },
+    exists,
+    file,
+    operands: shellScriptOperands(scripts),
+  });
+
 const secretEscapes = ({ file }) =>
   extractSecretReferences(file.content)
     .filter((entry) => !entry.fallback && !AUTOMATIC_SECRETS.has(entry.name))
@@ -97,6 +107,7 @@ const workflowEscapes = ({ allowed, containment, exists, file }) => {
     ...localActionEscapes({ containment, file }),
     ...stepCommandEscapes({ allowed, file, scripts }),
     ...stepPathEscapes({ containment, exists, file, scripts }),
+    ...stepMissingScripts({ containment, exists, file, scripts }),
     ...secretEscapes({ file }),
   ];
 };
