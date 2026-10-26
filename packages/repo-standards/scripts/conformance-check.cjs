@@ -4,12 +4,15 @@
  *
  * Why: a malformed, dead-pointing or unselectable artifact fails silently, and
  * nothing else on the merge bar reads these files as a set.
+ * The roots `gates.harness.additionalRoots` names in `devkit.config.json` are
+ * read alongside the three conventional ones.
  * Usage: `require('./conformance-check.cjs').checkConformance({ repoRoot })`.
  */
 'use strict';
 
 const fs = require('node:fs');
 
+const { readGates } = require('./config.mjs');
 const { collectArtifacts, KINDS } = require('./conformance-artifacts.cjs');
 const { contractFindings } = require('./conformance-contract.cjs');
 const { referenceFindings } = require('./conformance-references.cjs');
@@ -32,11 +35,18 @@ const artifactReferenceFindings = (artifact, repoRoot) =>
   }));
 
 /**
- * @param {{ repoRoot?: string }} [args]
+ * @param {{
+ *   repoRoot?: string;
+ *   additionalRoots?: readonly { kind: 'rule' | 'skill' | 'subagent', dir: string }[];
+ * }} [args]
  */
 const checkConformance = (args = {}) => {
   const repoRoot = args.repoRoot ?? process.cwd();
-  const collected = collectArtifacts({ repoRoot });
+  const collected = collectArtifacts({
+    additionalRoots:
+      args.additionalRoots ?? readGates(repoRoot).harness.additionalRoots,
+    repoRoot,
+  });
 
   const findings = [
     ...collected.findings,

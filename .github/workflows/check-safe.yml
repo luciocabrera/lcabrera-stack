@@ -226,7 +226,7 @@ jobs:
         # leave the shipped set. It runs per PROFILE, because a file in the small
         # profile pointing at one only the large profile places resolves for a
         # consumer who took everything and dangles for the one who did not.
-        run: vp run devkit:closure -- --shipped
+        run: vp run devkit:closure:shipped
 
       - name: This repository's materialised files match the package
         id: devkit_check_gate

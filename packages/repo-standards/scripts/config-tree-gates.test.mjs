@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { DEFAULT_TREE_GATES, resolveTreeGates } from './config-tree-gates.mjs';
+import { KINDS } from './conformance-artifacts.cjs';
 
 describe('resolveTreeGates', () => {
   it('an empty gates block is the documented default', () => {
@@ -173,6 +174,48 @@ describe('resolveTreeGates', () => {
         inventory: { trees: [{ inventory: '/etc/x', root: 'a' }] },
       }),
     ).toThrow(/gates\.inventory\.trees\[\]\.inventory/);
+  });
+
+  it('reads added harness roots, and adds none by default', () => {
+    expect(resolveTreeGates({}).harness.additionalRoots).toEqual([]);
+    expect(
+      resolveTreeGates({
+        harness: {
+          additionalRoots: [
+            { dir: 'vendor/skills/', kind: 'skill' },
+            { dir: 'vendor/rules', kind: 'rule' },
+          ],
+        },
+      }).harness.additionalRoots,
+    ).toEqual([
+      { dir: 'vendor/skills', kind: 'skill' },
+      { dir: 'vendor/rules', kind: 'rule' },
+    ]);
+  });
+
+  it('accepts a harness root of every kind conformance checks', () => {
+    const roots = Object.keys(KINDS).map((kind) => ({ dir: kind, kind }));
+    expect(
+      resolveTreeGates({ harness: { additionalRoots: roots } }).harness
+        .additionalRoots,
+    ).toEqual(roots);
+  });
+
+  it('refuses a harness root with an unknown kind, no dir, or an escaping dir', () => {
+    for (const entry of [
+      { dir: 'vendor/skills', kind: 'skills' },
+      { kind: 'skill' },
+      'vendor/skills',
+    ]) {
+      expect(() =>
+        resolveTreeGates({ harness: { additionalRoots: [entry] } }),
+      ).toThrow(/gates\.harness\.additionalRoots/u);
+    }
+    expect(() =>
+      resolveTreeGates({
+        harness: { additionalRoots: [{ dir: '../x', kind: 'rule' }] },
+      }),
+    ).toThrow(/gates\.harness\.additionalRoots\[\]\.dir/u);
   });
 
   it('ignores a non-object where a block belongs rather than crashing', () => {

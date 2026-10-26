@@ -1,7 +1,7 @@
 /**
  * The agent-facing artifact roster, enumerated from disk: every skill under
  * `.github/skills`, every path rule under `.claude/rules`, every subagent
- * under `.claude/agents`.
+ * under `.claude/agents`, and every artifact under a root the repository adds.
  *
  * Why: a roster written down anywhere but the filesystem stops covering an
  * artifact the day one is added, and reports the same clean pass either way.
@@ -66,26 +66,24 @@ const markdownFileNames = (directory) =>
 
 /**
  * @param {string} repoRoot
- * @param {'rule' | 'subagent'} kind
+ * @param {{ kind: 'rule' | 'subagent', dir: string }} root
  */
-const collectFlatKind = (repoRoot, kind) => {
-  const root = path.join(repoRoot, KINDS[kind].root);
-
-  return markdownFileNames(root).map((fileName) =>
+const collectFlatKind = (repoRoot, root) =>
+  markdownFileNames(path.join(repoRoot, root.dir)).map((fileName) =>
     readArtifact(
-      kind,
+      root.kind,
       fileName.replace(/\.md$/, ''),
-      `${KINDS[kind].root}/${fileName}`,
-      path.join(root, fileName),
+      `${root.dir}/${fileName}`,
+      path.join(repoRoot, root.dir, fileName),
     ),
   );
-};
 
 /**
  * @param {string} repoRoot
+ * @param {string} dir
  */
-const collectSkills = (repoRoot) => {
-  const root = path.join(repoRoot, KINDS.skill.root);
+const collectSkills = (repoRoot, dir) => {
+  const root = path.join(repoRoot, dir);
   const directories = fs
     .readdirSync(root, { withFileTypes: true })
     .filter((entry) => entry.isDirectory())
@@ -101,7 +99,7 @@ const collectSkills = (repoRoot) => {
       readArtifact(
         'skill',
         entry.name,
-        `${KINDS.skill.root}/${entry.name}/SKILL.md`,
+        `${dir}/${entry.name}/SKILL.md`,
         entry.filePath,
       ),
     ),
@@ -109,8 +107,8 @@ const collectSkills = (repoRoot) => {
       .filter((entry) => !SUPPORT_DIRECTORIES.has(entry.name))
       .map((entry) => ({
         kind: 'skill',
-        label: `${KINDS.skill.root}/${entry.name}`,
-        message: `Missing SKILL.md in ${KINDS.skill.root}/${entry.name} (not on the support allowlist: ${[...SUPPORT_DIRECTORIES].join(', ')})`,
+        label: `${dir}/${entry.name}`,
+        message: `Missing SKILL.md in ${dir}/${entry.name} (not on the support allowlist: ${[...SUPPORT_DIRECTORIES].join(', ')})`,
       })),
     skippedDirectories: missing
       .filter((entry) => SUPPORT_DIRECTORIES.has(entry.name))
@@ -122,53 +120,56 @@ const collectSkills = (repoRoot) => {
 };
 
 /**
- * @param {string} kind
- */
-const missingRootFinding = (kind) => ({
-  kind,
-  label: KINDS[kind].root,
-  message: `Artifact root not found: ${KINDS[kind].root}`,
-});
-
-/**
  * @param {string} repoRoot
- * @param {'rule' | 'subagent'} kind
+ * @param {{ kind: string, dir: string }} root
  */
-const collectFlatKindOrFinding = (repoRoot, kind) =>
-  fs.existsSync(path.join(repoRoot, KINDS[kind].root))
-    ? { artifacts: collectFlatKind(repoRoot, kind), findings: [] }
-    : { artifacts: [], findings: [missingRootFinding(kind)] };
+const collectRoot = (repoRoot, root) => {
+  if (!fs.existsSync(path.join(repoRoot, root.dir))) {
+    return {
+      artifacts: [],
+      findings: [
+        {
+          kind: root.kind,
+          label: root.dir,
+          message: `Artifact root not found: ${root.dir}`,
+        },
+      ],
+      skippedDirectories: [],
+      unreadableNames: [],
+    };
+  }
 
-/**
- * @param {string} repoRoot
- */
-const collectSkillsOrFinding = (repoRoot) =>
-  fs.existsSync(path.join(repoRoot, KINDS.skill.root))
-    ? collectSkills(repoRoot)
+  return root.kind === 'skill'
+    ? collectSkills(repoRoot, root.dir)
     : {
-        artifacts: [],
-        findings: [missingRootFinding('skill')],
+        artifacts: collectFlatKind(repoRoot, root),
+        findings: [],
         skippedDirectories: [],
         unreadableNames: [],
       };
+};
+
+const DEFAULT_ROOTS = ['skill', 'rule', 'subagent'].map((kind) => ({
+  dir: KINDS[kind].root,
+  kind,
+}));
 
 /**
- * @param {{ repoRoot: string }} args
+ * @param {{
+ *   repoRoot: string;
+ *   additionalRoots?: readonly { kind: 'rule' | 'skill' | 'subagent', dir: string }[];
+ * }} args
  */
-const collectArtifacts = ({ repoRoot }) => {
-  const skills = collectSkillsOrFinding(repoRoot);
-  const rules = collectFlatKindOrFinding(repoRoot, 'rule');
-  const subagents = collectFlatKindOrFinding(repoRoot, 'subagent');
+const collectArtifacts = ({ additionalRoots = [], repoRoot }) => {
+  const collected = [...DEFAULT_ROOTS, ...additionalRoots].map((root) =>
+    collectRoot(repoRoot, root),
+  );
 
   return {
-    artifacts: [
-      ...skills.artifacts,
-      ...rules.artifacts,
-      ...subagents.artifacts,
-    ],
-    findings: [...skills.findings, ...rules.findings, ...subagents.findings],
-    skippedDirectories: skills.skippedDirectories,
-    unreadableNames: skills.unreadableNames,
+    artifacts: collected.flatMap((entry) => entry.artifacts),
+    findings: collected.flatMap((entry) => entry.findings),
+    skippedDirectories: collected.flatMap((entry) => entry.skippedDirectories),
+    unreadableNames: collected.flatMap((entry) => entry.unreadableNames),
   };
 };
 

@@ -5,8 +5,8 @@
  * a moved file, or carries a description too vague to ever trigger is never
  * used, and that is indistinguishable from one nobody needed.
  * Usage: `repo-verify-harness`.
- * Exit 0 only when every artifact under `.github/skills`, `.claude/rules` and
- * `.claude/agents` satisfies its frontmatter contract, every path it names
+ * Exit 0 only when every artifact under `.github/skills`, `.claude/rules`,
+ * `.claude/agents` and each root `gates.harness.additionalRoots` adds satisfies its frontmatter contract, every path it names
  * resolves, and every description says when to use it.
  */
 
@@ -37,14 +37,21 @@ const renderCounts = (checked) =>
     .join(', ');
 
 const runCli = () => {
-  const result = checkConformance({ repoRoot: process.cwd() });
+  try {
+    const result = checkConformance({ repoRoot: process.cwd() });
 
-  process.exitCode = reportConformance({
-    failureHeading: 'Harness conformance failed:',
-    messages: result.findings.map((found) => found.message),
-    passedMessage: `Harness conformance passed: ${renderCounts(result.checked)}.`,
-    skippedDirectories: result.skippedDirectories,
-  });
+    process.exitCode = reportConformance({
+      failureHeading: 'Harness conformance failed:',
+      messages: result.findings.map((found) => found.message),
+      passedMessage: `Harness conformance passed: ${renderCounts(result.checked)}.`,
+      skippedDirectories: result.skippedDirectories,
+    });
+  } catch (error) {
+    console.error(
+      `Harness conformance could not run: ${error instanceof Error ? error.message : String(error)}`,
+    );
+    process.exitCode = 1;
+  }
 };
 
 if (require.main === module) {
