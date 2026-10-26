@@ -391,11 +391,17 @@ from a tree that reaches `full`
 
 **Update.** Every row is `seed`, by the sorting rule rather than by default.
 Each file is either configuration whose values belong to the consumer or code
-the consumer is meant to rewrite into their own. What decides pass or fail is
-not in these files: the lint rules, the tsconfig factories and writer, and the
+the consumer is meant to rewrite into their own. No gate this toolchain runs is
+in these files: the lint rules, the tsconfig factories and writer, and the
 table, loaders and routing helpers the application calls are imported from
-packages, and move only by a version bump. The hooks-path script is the one
-seed by necessity, for the reason its row gives.
+packages, and move only by a version bump. The test files the groups ship do
+decide pass or fail, but only over the code beside them — the consumer's roster
+and the consumer's application. A test covers code its owner is meant to
+rewrite, so it is rewritten with that code: weakening one weakens the consumer's
+check on their own files, never a check the toolchain makes. The sorting rule —
+who may edit it — answers the consumer, and the verdict stays `seed`. The same
+holds for any test shipped beside seeded code. The hooks-path script is
+the one seed by necessity, for the reason its row gives.
 
 **Verdict.** Every row is `portable`. These files are written to ship, and
 `seeds:verify` reads every one of them, and `shipped-ranges:verify` reads every
