@@ -10,6 +10,7 @@ import {
   screen,
   waitFor,
 } from '@testing-library/react';
+import { useState } from 'react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
 
@@ -66,6 +67,28 @@ const openColumnActions = (label: string) => {
 
 const settle = () => act(async () => {});
 
+const RerenderingParent = () => {
+  const [renderCount, setRenderCount] = useState(0);
+
+  return (
+    <>
+      <button
+        onClick={() => {
+          setRenderCount((count) => count + 1);
+        }}
+        type='button'
+      >
+        Re-render
+      </button>
+      <output data-testid='render-count'>{renderCount}</output>
+      <Table
+        columns={[{ dataType: 'string', key: 'reference', label: 'Reference' }]}
+        rows={ORDERS}
+      />
+    </>
+  );
+};
+
 const filterReference = async (value: string) => {
   openColumnActions('Reference');
   fireEvent.click(screen.getByText('Manage Column'));
@@ -117,6 +140,27 @@ describe('Table from rows alone', () => {
     await settle();
 
     expect(columnValues('reference')).toStrictEqual(['Alpha', 'Gamma', 'Beta']);
+  });
+
+  it('keeps a sort and a filter when the parent re-renders with new inline columns', async () => {
+    render(<RerenderingParent />);
+    const rerenderParent = async () => {
+      fireEvent.click(screen.getByRole('button', { name: 'Re-render' }));
+      await settle();
+    };
+
+    openColumnActions('Reference');
+    fireEvent.click(screen.getByText('Descending'));
+    await settle();
+    await rerenderParent();
+
+    expect(columnValues('reference')).toStrictEqual(['Gamma', 'Beta', 'Alpha']);
+
+    await filterReference('Beta');
+    await rerenderParent();
+
+    expect(screen.getByTestId('render-count').textContent).toBe('2');
+    expect(columnValues('reference')).toStrictEqual(['Beta']);
   });
 
   it('restores the given order when the sort is cleared', async () => {

@@ -17,7 +17,6 @@ import { TableFocusProvider } from './contexts/TableFocus';
 import { useTableDataState } from './hooks/useTableDataState.hook';
 import { styles } from './Table.stylex';
 import { TableContent } from './TableContent';
-import { createEmptyColumnsState } from './utils/createEmptyColumnsState.util';
 import { inferTableColumnsFromJson } from './utils/inferTableColumnsFromJson.util';
 
 export const Table = <TData extends Record<string, unknown>, TResponse>(
@@ -54,7 +53,7 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
       }) as readonly TableColumn<TData>[]);
     const ownStack = (
       <TableConfigProvider<TData>
-        columnsState={createEmptyColumnsState({ columns: ownColumns })}
+        columnsState={{ columns: [...ownColumns] }}
         metaState={
           title === undefined
             ? {}

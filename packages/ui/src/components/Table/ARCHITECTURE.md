@@ -14,7 +14,11 @@ filtering, infinite scroll, settings drawers, and cookie-based persistence.
 inside its own `TableConfigProvider`, `TableFocusProvider` and
 `FiltersDataProvider`, and adds `GlobalSettingsProvider` and
 `NotificationProvider` when those are missing. Columns come from `columns`, or
-from `inferTableColumnsFromJson` over the rows. Given `rows`, `useTableDataState`
+from `inferTableColumnsFromJson` over the rows. It hands the provider only
+`columns`, never an empty sorting or filter state: the provider resyncs
+`columnsState` on every new identity, and with no loader behind it that resync
+would clear whatever the user had sorted, filtered, pinned or sized whenever the
+parent re-rendered. Given `rows`, `useTableDataState`
 sorts and filters them in memory from the columns store, so a sort or filter
 reorders the rows with no loader behind them
 ([ADR-142](../../../../../docs/decisions/ADR-142-a-table-given-rows-keeps-its-state-in-memory-and-the-route-level-layout-supplies-persistence.md)).
