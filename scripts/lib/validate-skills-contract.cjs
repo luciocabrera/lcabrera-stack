@@ -5,8 +5,10 @@
  * Why: the checks live once in `lib/conformance-*.cjs`, so the merge-bar gate
  * and this report can never diverge on what conformance means. Only the
  * projection narrows: the report stamps every finding as a skill-contract
- * finding under `.github/skills/`, so a rule or subagent finding here would be
- * placed where it is not. `verify-harness-conformance.cjs` carries those.
+ * finding, so a rule or subagent finding here would be placed where it is not.
+ * `verify-harness-conformance.cjs` carries those. A skill finding keeps its
+ * label, because a skill root `gates.harness.additionalRoots` adds is not
+ * `.github/skills/`.
  * Usage: `require('./lib/validate-skills-contract.cjs').validateSkills(...)`.
  */
 'use strict';
@@ -24,6 +26,7 @@ const {
  * @property {readonly string[]} checkedSkills
  * @property {readonly string[]} skippedDirectories
  * @property {readonly string[]} errors
+ * @property {readonly { label: string, message: string }[]} findings
  */
 
 /**
@@ -38,12 +41,15 @@ const validateSkills = (args = {}) => {
     ...result.unreadableSkills,
   ].toSorted((a, b) => a.localeCompare(b));
 
+  const findings = result.findings
+    .filter((found) => found.kind === 'skill')
+    .map((found) => ({ label: found.label, message: found.message }));
+
   return {
     checkedSkillCount: checkedSkills.length,
     checkedSkills,
-    errors: result.findings
-      .filter((found) => found.kind === 'skill')
-      .map((found) => found.message),
+    errors: findings.map((found) => found.message),
+    findings,
     skippedDirectories: result.skippedDirectories,
   };
 };

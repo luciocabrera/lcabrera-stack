@@ -461,15 +461,16 @@ places is the manifest line that names it.
 
 ### The devkit bins and the gate chains
 
-| Task             | Profile | Update  | Verdict          | Dependency | Reason                                                                                                                                     |
-| ---------------- | ------- | ------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| `devkit:sync`    | `agent` | package | **portable**     | —          | The materialiser itself, and the only executable that has to work before any rung exists. It is run from the package, never from the tree. |
-| `devkit:doctor`  | `repo`  | package | **portable**     | —          | Reports what the materialised copies have diverged into.                                                                                   |
-| `devkit:check`   | `repo`  | package | **portable**     | —          | The same read as a gate, which needs somewhere to fail.                                                                                    |
-| `devkit:closure` | `repo`  | package | **portable**     | —          | The closure probe behind this document.                                                                                                    |
-| `check:safe`     | `repo`  | seed    | **parameterise** | **hard**   | A chain of the consumer's own task names. Which gates belong in it is theirs, so it is a seeded manifest line and grows with the rung.     |
-| `check:push`     | `repo`  | seed    | **parameterise** | **hard**   | The same chain with the slow tail dropped, so a pre-push hook can afford it. Where the cut falls is the consumer's.                        |
-| `ready`          | `repo`  | seed    | **parameterise** | **hard**   | `check:safe` followed by a build, composed in the manifest.                                                                                |
+| Task                     | Profile | Update  | Verdict          | Dependency | Reason                                                                                                                                     |
+| ------------------------ | ------- | ------- | ---------------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `devkit:sync`            | `agent` | package | **portable**     | —          | The materialiser itself, and the only executable that has to work before any rung exists. It is run from the package, never from the tree. |
+| `devkit:doctor`          | `repo`  | package | **portable**     | —          | Reports what the materialised copies have diverged into.                                                                                   |
+| `devkit:check`           | `repo`  | package | **portable**     | —          | The same read as a gate, which needs somewhere to fail.                                                                                    |
+| `devkit:closure`         | `repo`  | package | **portable**     | —          | The closure probe behind this document.                                                                                                    |
+| `devkit:closure:shipped` | `repo`  | package | **portable**     | —          | The same probe over the shipped set, named so a gate chain can run it without arguments.                                                   |
+| `check:safe`             | `repo`  | seed    | **parameterise** | **hard**   | A chain of the consumer's own task names. Which gates belong in it is theirs, so it is a seeded manifest line and grows with the rung.     |
+| `check:push`             | `repo`  | seed    | **parameterise** | **hard**   | The same chain with the slow tail dropped, so a pre-push hook can afford it. Where the cut falls is the consumer's.                        |
+| `ready`                  | `repo`  | seed    | **parameterise** | **hard**   | `check:safe` followed by a build, composed in the manifest.                                                                                |
 
 `devkit:sync` is the one row this table sets against "nothing executable lands
 on `agent`", and it is not really an exception: it runs from the package that is
