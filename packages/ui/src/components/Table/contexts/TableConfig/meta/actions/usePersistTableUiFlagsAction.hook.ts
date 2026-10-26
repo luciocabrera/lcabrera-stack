@@ -1,11 +1,12 @@
+import { use } from 'react';
+
 import type {
   TableChromeState,
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
 
+import { TablePersistenceContext } from '#ui/components/Table/contexts/TableConfig/TablePersistenceContext.context';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { PERSIST_TABLE_UI_FLAGS_FETCHER_KEY } from '#ui/constants/globalSettings.constants';
-import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
 import { buildUiFlagsCookieEntry } from './utils';
 
@@ -16,9 +17,7 @@ type PersistTableUiFlagsArgs = {
 };
 
 export const usePersistTableUiFlagsAction = () => {
-  const persistCookie = usePersistCookieAction({
-    fetcherKey: PERSIST_TABLE_UI_FLAGS_FETCHER_KEY,
-  });
+  const persistence = use(TablePersistenceContext);
   const { groupingStore } = useTableConfigContextValue();
 
   return ({
@@ -26,6 +25,8 @@ export const usePersistTableUiFlagsAction = () => {
     nextStatePatch,
     totalsPlacement,
   }: PersistTableUiFlagsArgs) => {
+    if (persistence === undefined) return;
+
     const entry = buildUiFlagsCookieEntry({
       currentState,
       nextStatePatch,
@@ -33,7 +34,7 @@ export const usePersistTableUiFlagsAction = () => {
     });
 
     if (entry) {
-      persistCookie([entry]);
+      persistence.uiFlags([entry]);
     }
   };
 };

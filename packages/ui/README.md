@@ -28,12 +28,17 @@ npm install react react-dom react-router @stylexjs/stylex
 | -------------------- | --------- | ------------------------------------------------------ |
 | `react`              | `^19.2.0` | Uses `use()`, `<Activity>` and `useEffectEvent`        |
 | `react-dom`          | `^19.2.0` |                                                        |
-| `react-router`       | `^8.0.0`  | Framework mode — loaders, actions, `useLoaderData`     |
+| `react-router`       | `^8.0.0`  | Imported by the package; a mounted router is optional  |
 | `@stylexjs/stylex`   | `^0.19.0` |                                                        |
 | `@react-router/node` | `^8.0.0`  | **Optional** — only the `./entry/*` SSR helpers use it |
 
 `@react-router/node` is an optional peer so a browser-only consumer is not forced
 to install it.
+
+`react-router` stays a required peer because the package's modules import it:
+the app shell, the route views, `Form`, `NavLink` and the table's route-level
+layout all run inside a data router. A `Table` given `rows` does not need one
+mounted; see [A table from rows](#a-table-from-rows).
 
 ## Before you install: this package ships TypeScript source
 
@@ -110,7 +115,7 @@ section above.
 
 `AppDocument`, `AppProviders`, `AppShell`, `Button`, `Form`, `JsonExplorer`,
 `NavLink`, `RootErrorBoundary`, `RouteErrorBoundary`, `SectionCard`,
-`StatusBadge`, `TableLayout`, `Tabs`, `hydrateApp`, `useNotifyOnError`, plus the
+`StatusBadge`, `Table`, `TableLayout`, `Tabs`, `hydrateApp`, `useNotifyOnError`, plus the
 `FieldNode`, `LayoutProps` and `Pagination` types.
 
 ### Subpaths
@@ -148,6 +153,41 @@ Anything reachable from the root barrel needs no subpath at all.
 
 ## Usage
 
+### A table from rows
+
+`Table` renders an array of rows in one call. It needs no column definition, no
+loader and no router.
+
+```tsx
+import { Table } from '@lcabrera/ui';
+
+export const Orders = ({ orders }: { readonly orders: readonly Order[] }) => (
+  <Table rows={orders} />
+);
+```
+
+Without `columns`, the table infers one column per key with
+`inferTableColumnsFromJson`. Each column is labelled from its key (`orderTotal`
+becomes `Order Total`) and typed from the values. To adjust the inferred set,
+call the helper yourself and pass the result:
+
+```tsx
+import { Table } from '@lcabrera/ui';
+import { inferTableColumnsFromJson } from '@lcabrera/ui/components/Table/utils/inferTableColumnsFromJson.util';
+
+const columns = inferTableColumnsFromJson({ rows: orders }).filter(
+  (column) => column.key !== 'internalId',
+);
+
+<Table columns={columns} rows={orders} title='Orders' />;
+```
+
+Rows passed this way stay in memory. Sorting, filtering, resizing, pinning and
+scrolling all run on them in the browser, and the table writes nothing back to a
+URL or a cookie. When no table providers sit above it, `Table` mounts its own,
+plus the notification and global-settings providers if those are missing too.
+Grouping and drill-down need a server, so they belong to `TableLayout`.
+
 ### A full data table
 
 `TableLayout` is the assembled table: header, virtualized body, settings and
@@ -179,6 +219,11 @@ export const Orders = () => {
   );
 };
 ```
+
+`TableLayout` is also where persistence lives. Inside it, a sort, a filter or a
+column change is written to a cookie and to the URL through the
+`/_action/persist-cookie` route, and the loader reads it back when it builds the
+next page.
 
 `dataPromise` is passed **unresolved** — the table suspends on it, so the shell,
 header and skeleton stream to the browser before the rows exist. `onLoadMore` is

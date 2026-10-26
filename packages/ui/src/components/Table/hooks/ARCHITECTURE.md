@@ -23,6 +23,7 @@ hooks/
 ├── useSyncTableGroupExpansion.hook.ts   → Drops collapsed paths the rows just loaded no longer carry
 ├── useTableGroupFoldAll.hook.ts         → The fold-every-group pair plus whether either has anything to do
 ├── useTableGroupLevelFold.hook.ts       → The same pair for one column's level, plus whether it is offered at all
+├── useTableDataState.hook.ts            → The data state `Table` hands its data provider: the response's, or the rows sorted and filtered in memory
 ├── useTableColumnLayoutLock.hook.ts     → Whether a grouped column refuses pinning, and hiding with it — asked once by `PinAndHideActions`, drilled to its four delegates
 ├── utils/
 │   ├── createResizeStartData.util.ts    → Drag-start snapshot: origin + effective width/bounds (+ .test)

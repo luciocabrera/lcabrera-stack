@@ -1,7 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { CopyButton } from '#ui/components/CopyButton';
-import { StaticTable } from '#ui/components/StaticTable';
+import { Table } from '#ui/components/Table';
 import { Tabs } from '#ui/components/Tabs';
 
 import type { JsonExplorerProps } from './JsonExplorer.types';
@@ -19,7 +19,7 @@ export const JsonExplorer = ({ sections }: JsonExplorerProps) => (
               value={JSON.stringify(section.rows, undefined, 2)}
             />
           </div>
-          <StaticTable
+          <Table
             columns={section.columns}
             rows={section.rows}
             title={section.label}

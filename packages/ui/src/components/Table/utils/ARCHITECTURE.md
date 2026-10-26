@@ -8,6 +8,14 @@ Pure utility functions for column processing and state persistence.
 utils/
 ├── createActionsColumn.util.ts                   → Build the row-actions column, merging consumer overrides onto defaults
 ├── createBasicColumn.util.ts                     → Build generic non-render table columns from shared metadata
+├── compareCellValues.util.ts                     → Order two cell values, a missing one last
+├── compareRowsBySorting.util.ts                  → Order two rows by a sorting state
+├── deriveLocalRows.util.ts                       → Filter then sort rows held in memory
+├── isMissingCellValue.util.ts                    → Whether a cell holds nothing
+├── matchesColumnFilter.util.ts                   → Whether a cell satisfies a ColumnFilter, read the way the server reads it
+├── matchesDateFilter.util.ts / matchesNumberFilter.util.ts / matchesSelectFilter.util.ts / matchesTextFilter.util.ts → One matcher per filter type
+├── selectTableResponse.util.ts                   → Read rows, total and error out of a resolved response
+├── toComparableCellValue.util.ts                 → A cell value as something that compares the way it reads
 ├── deriveColumnViewState.util.ts                 → Compose normalized columns + pinning-derived slices
 ├── getColumnSettingsNextStatePatch.util.ts       → Build the next table-meta patch after column-settings accept
 ├── getColumnPinSide.util.ts                      → Detect which side a column is pinned to
@@ -255,7 +263,7 @@ graph LR
     Slice["state slice"] --> Serialize["serializeStateSlice()"]
     Serialize --> KV["{ key, value }"]
     KV --> Build["buildColumnSizingCookieEntry() / buildUiFlagsCookieEntry()"]
-    Build --> Action["usePersistCookieAction()"]
+    Build --> Action["TablePersistenceContext (usePersistCookieAction, held by TableLayout)"]
     Action --> Route["POST /_action/persist-cookie → Set-Cookie"]
   end
 ```

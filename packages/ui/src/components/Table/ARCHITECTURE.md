@@ -5,10 +5,19 @@ filtering, infinite scroll, settings drawers, and cookie-based persistence.
 
 ## Entry Points
 
-| Component     | Use Case                                                          |
-| ------------- | ----------------------------------------------------------------- |
-| `TableLayout` | Route-level: receives `dataPromise`, sets up providers + Suspense |
-| `Table`       | Inner: receives resolved `response`, creates `TableDataProvider`  |
+| Component     | Use Case                                                                                  |
+| ------------- | ----------------------------------------------------------------------------------------- |
+| `TableLayout` | Route-level: receives `dataPromise`, sets up providers, Suspense and persistence          |
+| `Table`       | Receives a resolved `response` or `rows`; mounts its own providers when none are above it |
+
+`Table` checks for `TableConfigContext`. With none above it, it renders itself
+inside its own `TableConfigProvider`, `TableFocusProvider` and
+`FiltersDataProvider`, and adds `GlobalSettingsProvider` and
+`NotificationProvider` when those are missing. Columns come from `columns`, or
+from `inferTableColumnsFromJson` over the rows. Given `rows`, `useTableDataState`
+sorts and filters them in memory from the columns store, so a sort or filter
+reorders the rows with no loader behind them
+([ADR-142](../../../../../docs/decisions/ADR-142-a-table-given-rows-keeps-its-state-in-memory-and-the-route-level-layout-supplies-persistence.md)).
 
 ## Component Hierarchy
 
@@ -587,7 +596,12 @@ reading that serves a tree and a lattice alike (ADR-080).
 ## Persistence
 
 Table state is written to one channel — the cookie — with the URL carrying
-filters and sorting:
+filters and sorting. Only `TableLayout` writes it: it builds one cookie
+submitter each for table state, column sizing and UI flags with
+`useTablePersistence` and provides them as `TablePersistenceContext`. The
+persist-action hooks read that context. Without it, a change applies to the
+stores and nothing is submitted, which is how a `Table` given `rows` keeps its
+state in memory with or without a router.
 
 - Cookies + URL for SSR/shareable column state (filters, sorting, pinning, sizing, visibility)
 - Meta UI state is written by the mutation action itself, not by a subscription effect
@@ -606,7 +620,8 @@ filters and sorting:
 ```mermaid
 graph LR
   ColumnChange["column state change"] --> ColumnAction["usePersistTableStateAction()"]
-  ColumnAction --> Fetcher["useFetcher.submit()"]
+  ColumnAction --> Context["TablePersistenceContext (from TableLayout)"]
+  Context --> Fetcher["useFetcher.submit()"]
   Fetcher --> Route["POST /_action/persist-cookie"]
   Route --> Cookie["Set-Cookie header"]
   Route --> Decision{"search params changed?"}

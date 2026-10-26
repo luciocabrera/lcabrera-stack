@@ -462,13 +462,17 @@ export type TableProps<
   TData extends Record<string, unknown>,
   TResponse,
 > = BaseProps &
-  InfiniteScroll<TData, TResponse> & {
+  InfiniteScroll<TData, TResponse> &
+  TableSource<TData, TResponse> & {
+    /** Read only when the Table mounts its own providers; inferred from the rows when omitted. */
+    readonly columns?: readonly TableColumn<TData>[];
     readonly dataErrorSelector?: (
       response: TResponse,
     ) => TableResponseError | undefined;
     readonly isFlexWrapperEnabled?: boolean;
     readonly isLoading?: boolean;
-    readonly response: TResponse;
+    /** Read only when the Table mounts its own providers. */
+    readonly title?: string;
   };
 
 export type TableQueryRefusalReason =
@@ -551,3 +555,14 @@ type TableColumnCapabilityShared = {
   readonly role: TableColumnAnalyticalRole;
   readonly typeName: string;
 };
+
+type TableSource<TData, TResponse> =
+  | {
+      readonly response: TResponse;
+      readonly rows?: never;
+    }
+  | {
+      readonly response?: never;
+      /** Sorted and filtered in memory; a server never sees them. */
+      readonly rows: readonly TData[];
+    };

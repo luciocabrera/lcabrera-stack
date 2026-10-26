@@ -3,19 +3,25 @@ id: render-a-table-from-rows-alone
 lines:
   - application
 persona: application-developer
-state: unmet
+state: met
 packages:
   - ui
 requires: []
 issues:
   - 994
 evidence:
+  - type: command
+    ref: vp run test:ci
+  - type: test
+    ref: packages/ui/src/components/Table/Table.fromRows.test.tsx
   - type: code
     ref: packages/ui/src/public-api.ts
   - type: code
-    ref: packages/ui/src/components/StaticTable/StaticTable.component.tsx
+    ref: packages/ui/src/components/Table/Table.component.tsx
   - type: doc
     ref: packages/ui/README.md
+  - type: doc
+    ref: docs/decisions/ADR-142-a-table-given-rows-keeps-its-state-in-memory-and-the-route-level-layout-supplies-persistence.md
 ---
 
 # A table renders from rows and columns alone
@@ -43,17 +49,13 @@ leads with.
 
 ## Notes
 
-`StaticTable` has this props shape today and is exported from neither the entry
-map nor the public surface, so the only documented route in is `TableLayout`,
-whose props are a columns-state object and a promise. Whether the answer is to
-export the one that exists or to build a different one is the issue's business,
-not this file's — the requirement is the shape a consumer needs, not the
-implementation that satisfies it.
+`Table` is the export. It is on the root barrel and on the `./components/Table`
+subpath, and it takes `rows` with `columns` optional. Without `columns` it infers
+them with `inferTableColumnsFromJson`, and the README's usage section opens with
+that call and documents the helper. `Table.fromRows.test.tsx` renders it with no
+columns, no providers and no router, and asserts the inferred headers.
 
-Re-examined against the application `devkit create --profile monorepo` now emits
-(#1076), which renders a table from rows the module holds and nothing else. It
-does not earn this: reaching the table there still costs a columns list, a
-persistence key, a table name, a title and a loader built by
-`createTableRouteLoader`, because that is what the published surface offers. The
-demonstration this requirement asks for is one call taking rows and columns, and
-no export answering that description exists yet.
+The `command` pointer was checked by breaking the property. Making `Table` skip
+mounting its own providers fails the rows-alone render and every in-memory case
+in that file. Returning the given rows unsorted from `useTableDataState` fails
+the sort, clear-sort and filter cases. Both were reverted.

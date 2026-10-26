@@ -6,6 +6,7 @@ import type {
 } from '#ui/components/Table/Table.types';
 import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 import type { TStore } from '#ui/hooks/useStore.hook';
+import type { PersistCookieEntry } from '#ui/routing/actions/routing.types';
 
 export type TableConfigContextValue<TData = Record<string, unknown>> = {
   readonly columnsStore: TStore<TableColumnsState<TData>>;
@@ -21,3 +22,11 @@ export type TableConfigProviderProps<TData extends Record<string, unknown>> = {
   readonly groupingState?: Partial<TableGroupingState>;
   readonly metaState?: Partial<TableMetaState>;
 };
+
+export type TablePersistence = {
+  readonly columnSizing: PersistCookie;
+  readonly tableState: PersistCookie;
+  readonly uiFlags: PersistCookie;
+};
+
+type PersistCookie = (entries: readonly PersistCookieEntry[]) => void;
