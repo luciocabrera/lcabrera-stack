@@ -10,10 +10,17 @@ filtering, infinite scroll, settings drawers, and cookie-based persistence.
 | `TableLayout` | Route-level: receives `dataPromise`, sets up providers, Suspense and persistence          |
 | `Table`       | Receives a resolved `response` or `rows`; mounts its own providers when none are above it |
 
-`Table` checks for `TableConfigContext`. With none above it, it renders itself
-inside its own `TableConfigProvider`, `TableFocusProvider` and
-`FiltersDataProvider`, and adds `GlobalSettingsProvider` and
-`NotificationProvider` when those are missing. Columns come from `columns`, or
+`Table` renders itself inside its own `TableConfigProvider`, `TableFocusProvider`
+and `FiltersDataProvider` when it is given `rows`, or when no
+`TableConfigContext` is above it. It adds `GlobalSettingsProvider` and
+`NotificationProvider` when those are missing. A `Table` given `response` under
+`TableLayout` reads the layout's stack, as before. `TableOwnStackContext` is what
+stops the recursion. The outer render sets it to `true` for the one `Table` it
+renders inside the new stack, and that `Table` sets it back to `false` for
+everything below it, so a grid rendered inside a cell decides again. The new
+stack also sets `TablePersistenceContext` to `undefined`. Without that, a
+rows-backed grid inside a `TableLayout` would submit its in-memory sort to the
+enclosing route's cookie. Columns come from `columns`, or
 from `inferTableColumnsFromJson` over the rows. It hands the provider only
 `columns`, never an empty sorting or filter state: the provider resyncs
 `columnsState` on every new identity, and with no loader behind it that resync

@@ -12,13 +12,17 @@ import {
 } from '@testing-library/react';
 import { useState } from 'react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 
 import { AppProviders } from '#ui/components/AppProviders';
 import { PERSIST_COOKIE_ACTION } from '#ui/constants/globalSettings.constants';
 
 import type { TableColumn } from './Table.types';
 
+import { FiltersDataProvider } from './contexts/FiltersData';
+import { TableConfigProvider } from './contexts/TableConfig';
+import { TablePersistenceContext } from './contexts/TableConfig/TablePersistenceContext.context';
+import { TableFocusProvider } from './contexts/TableFocus';
 import { Table } from './Table.component';
 import { TableLayout } from './TableLayout';
 import { createEmptyColumnsState } from './utils/createEmptyColumnsState.util';
@@ -247,6 +251,57 @@ const renderRoute = async (element: ReactNode) => {
 
   return submissions;
 };
+
+describe('Table given rows inside another grid', () => {
+  const ENCLOSING_COLUMNS: readonly TableColumn<Order>[] = [
+    { key: 'orderTotal', label: 'Enclosing Total' },
+  ];
+  const ENCLOSING_PERSISTENCE = {
+    columnSizing: vi.fn(),
+    tableState: vi.fn(),
+    uiFlags: vi.fn(),
+  };
+
+  const renderInsideEnclosingGrid = () =>
+    render(
+      <TablePersistenceContext value={ENCLOSING_PERSISTENCE}>
+        <TableConfigProvider<Order>
+          columnsState={{
+            ...createEmptyColumnsState({ columns: ENCLOSING_COLUMNS }),
+            sorting: [{ columnKey: 'orderTotal', direction: 'desc' }],
+          }}
+        >
+          <TableFocusProvider>
+            <FiltersDataProvider<Order> columns={[...ENCLOSING_COLUMNS]}>
+              <Table columns={COLUMNS} rows={ORDERS} title='Inner' />
+            </FiltersDataProvider>
+          </TableFocusProvider>
+        </TableConfigProvider>
+      </TablePersistenceContext>,
+    );
+
+  it('renders its own columns, in the given order, ignoring the enclosing grid', () => {
+    renderInsideEnclosingGrid();
+
+    expect(
+      screen
+        .getAllByTestId('table-header-label')
+        .map((label) => label.textContent),
+    ).toStrictEqual(['Reference']);
+    expect(columnValues('reference')).toStrictEqual(['Beta', 'Alpha', 'Gamma']);
+  });
+
+  it('sorts in memory without submitting through the enclosing grid', async () => {
+    renderInsideEnclosingGrid();
+
+    openColumnActions('Reference');
+    fireEvent.click(screen.getByText('Ascending'));
+    await settle();
+
+    expect(columnValues('reference')).toStrictEqual(['Alpha', 'Beta', 'Gamma']);
+    expect(ENCLOSING_PERSISTENCE.tableState).not.toHaveBeenCalled();
+  });
+});
 
 describe('Table persistence inside a router', () => {
   it('submits a sort to the cookie action from the route-level layout', async () => {

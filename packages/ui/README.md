@@ -184,8 +184,9 @@ const columns = inferTableColumnsFromJson({ rows: orders }).filter(
 
 Rows passed this way stay in memory. Sorting, filtering, resizing, pinning and
 scrolling all run on them in the browser, and the table writes nothing back to a
-URL or a cookie. When no table providers sit above it, `Table` mounts its own,
-plus the notification and global-settings providers if those are missing too.
+URL or a cookie. A `Table` given `rows` always mounts its own table providers,
+so it renders the same inside another grid as on its own. It also adds the
+notification and global-settings providers if those are missing.
 Grouping and drill-down need a server, so they belong to `TableLayout`.
 
 ### A full data table

@@ -24,8 +24,8 @@ grouping sits there ([ADR-061](../../../../../../../docs/decisions/ADR-061-group
 would be discarded by a revalidation the user did not ask for. Focus belongs to
 the grid the user is operating, not to the page of rows currently loaded into it.
 
-Both mount sites compose it — `TableLayout`, and `Table` when no provider stack
-sits above it.
+Both mount sites compose it — `TableLayout`, and `Table` when it is given
+`rows` or no provider stack sits above it.
 
 ## File Structure
 

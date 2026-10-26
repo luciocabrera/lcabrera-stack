@@ -32,12 +32,17 @@ written to the URL and the rows kept their order.
   them in memory from the columns store's sorting and filter state
   (`useTableDataState`, `deriveLocalRows`). The filter matchers read a filter
   the way the server's query filters read it.
-- When no `TableConfigContext` sits above it, `Table` renders itself inside its
-  own `TableConfigProvider`, `TableFocusProvider` and `FiltersDataProvider`. It
-  also adds a `GlobalSettingsProvider` and a `NotificationProvider` when those
-  are missing, because the settings panel and the notify actions read them.
-  Columns come from `columns`, or from `inferTableColumnsFromJson` over the
-  rows.
+- A `Table` given `rows`, or a `Table` with no `TableConfigContext` above it,
+  renders itself inside its own `TableConfigProvider`, `TableFocusProvider` and
+  `FiltersDataProvider`. Rows always get their own stack, so the same `Table`
+  renders identically inside another grid's providers. It also adds a
+  `GlobalSettingsProvider` and a `NotificationProvider` when those are missing,
+  because the settings panel and the notify actions read them. Columns come
+  from `columns`, or from `inferTableColumnsFromJson` over the rows. A boolean
+  context, `TableOwnStackContext`, marks the `Table` rendered inside the new
+  stack and is cleared below it. The new stack also clears
+  `TablePersistenceContext`, so an enclosing layout's persistence never reaches
+  it.
 - Persistence is a context, `TablePersistenceContext`, holding one cookie
   submitter each for table state, column sizing and UI flags. `TableLayout`,
   the route-level entry, builds them with `useTablePersistence` and provides
@@ -74,6 +79,10 @@ written to the URL and the rows kept their order.
   wraps the grid in a router whose persistence goes nowhere, it throws inside a
   declarative `<BrowserRouter>`, and it needs a route element that renders the
   table's children.
+- **Move the grid body into a separate component and have `Table` wrap it.**
+  This would end the recursion without a marker context. Rejected because the
+  issue's scope allows no new table component or delegate. The boolean context
+  gives the same rule (rows always get their own stack) inside `Table` itself.
 - **Keep `StaticTable` and export it.** This was #1502. Rejected by the
   issue's amended scope: a second table component that only mounts providers
   duplicates what `Table` can do itself.
