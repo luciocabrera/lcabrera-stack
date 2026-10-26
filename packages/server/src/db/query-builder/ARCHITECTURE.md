@@ -154,9 +154,17 @@ is).
 
 ## What this does NOT do
 
-- No joins, no subqueries, no raw SQL fragments — single table/view only.
-  A view that already encodes a join (e.g. `reporting.v_order_totals`)
-  is queried as a flat target; this builder doesn't build the join itself.
+- No joins. A read names one target, a table or a view. A view that already
+  encodes a join is read as a flat target; the builder does not build the join.
+  [ADR-143](../../../../../docs/decisions/ADR-143-join-along-a-foreign-key-and-filter-a-flat-grouped-result.md)
+  proposes joins along a foreign key, with an allowlist per joined table, and
+  is not built.
+- No filter on a grouped result (`HAVING`). An aggregate's own `filters` emit
+  `FILTER (WHERE …)`, which narrows the rows that one aggregate reads and never
+  removes a group. ADR-143 proposes `groupFilters` for flat grouped reads, and
+  is not built.
+- No subqueries, no common table expressions, no window functions, no raw SQL
+  fragments.
 - No multi-row `INSERT … VALUES (…), (…)`, no `ON CONFLICT`/upsert, no
   `UPDATE … FROM` — the write builders cover the single-row-shaped mutation
   the same way the read builders cover the flat list.
