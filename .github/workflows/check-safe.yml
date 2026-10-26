@@ -210,6 +210,14 @@ jobs:
         # scripts/verify-devkit-seeds.mjs.
         run: vp run seeds:verify
 
+      - name: Every shipped file has a classification row
+        id: classification_gate
+        # A file packages/devkit ships with no row in its CLASSIFICATION.md
+        # reads exactly like one whose verdict was weighed, and a row naming a
+        # path that no longer ships is a verdict about nothing. See
+        # scripts/verify-devkit-classification.mjs.
+        run: vp run classification:verify
+
       - name: Shipped ranges admit the versions this repository publishes
         id: shipped_ranges_gate
         # A range in a shipped asset decides which release a bootstrapped

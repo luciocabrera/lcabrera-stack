@@ -2,7 +2,7 @@
 id: devkit-classification-coverage
 title: Record a verdict for every shipped blueprint file and gate the coverage
 owner: agent:claude
-status: active
+status: review
 branch: chore/1508-devkit-classification-coverage
 area:
   - packages/devkit/CLASSIFICATION.md
@@ -15,7 +15,7 @@ area:
 started: 2026-10-26
 updated: 2026-10-26
 plan: (none)
-pr: (none)
+pr: #1514
 issue: #1508
 ---
 
@@ -25,6 +25,6 @@ Record a verdict for every shipped blueprint file and gate the coverage
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR ready for review
 - Blockers: none
 - Next:

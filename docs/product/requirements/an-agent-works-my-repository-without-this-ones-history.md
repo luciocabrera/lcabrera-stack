@@ -13,11 +13,14 @@ requires:
 issues:
   - 1069
   - 1070
+  - 1508
 evidence:
   - type: command
     ref: vp run devkit:closure
   - type: command
     ref: vp run seeds:verify
+  - type: command
+    ref: vp run classification:verify
   - type: doc
     ref: packages/devkit/CLASSIFICATION.md
 ---
@@ -46,7 +49,9 @@ invents a substitute, and I find out from the result.
   references resolved; an artifact kind that closure cannot read is reported as
   unchecked rather than passing.
 - Every shipped file carries a recorded verdict for why it is shippable, against
-  a stated criterion — not a per-file judgement made once and forgotten.
+  a stated criterion — not a per-file judgement made once and forgotten. A file
+  shipped with no row, or a row naming a path that no longer ships, fails
+  `vp run classification:verify`.
 - **The checks fail when a reference is dead.** A shipped file pointing at a path
   outside the shipped set, and one naming the originating repository, each produce
   a finding, proven by planting each one.
