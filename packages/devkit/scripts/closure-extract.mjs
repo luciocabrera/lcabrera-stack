@@ -108,6 +108,18 @@ const shellBlockLines = (content) => {
   return collected;
 };
 
+const isCommentStart = ({ characters, index }) =>
+  characters[index] === '#' &&
+  (index === 0 || /\s/.test(characters[index - 1]));
+
+export const withoutComment = (text) => {
+  const characters = [...text];
+  const start = characters.findIndex((_, index) =>
+    isCommentStart({ characters, index }),
+  );
+  return start === -1 ? text : characters.slice(0, start).join('');
+};
+
 export const shellSegments = (text) =>
   text
     .split(/&&|\|\||[|;]/)

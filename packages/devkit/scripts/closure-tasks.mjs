@@ -9,7 +9,11 @@
  * tooling. Pure: the caller says which tasks are defined and which lines to read.
  */
 
-import { shellCodeLines, shellSegments } from './closure-extract.mjs';
+import {
+  shellCodeLines,
+  shellSegments,
+  withoutComment,
+} from './closure-extract.mjs';
 
 export const RUNNER_PREFIXES = Object.freeze([
   'bun run',
@@ -51,7 +55,7 @@ const taskAfter = ({ prefixes, segment }) => {
 export const taskInvocations = ({ lines, prefixes = RUNNER_PREFIXES }) => {
   const split = prefixes.map((prefix) => wordsOf(prefix));
   return lines.flatMap(({ line, text }) =>
-    shellSegments(text)
+    shellSegments(withoutComment(text))
       .map((segment) => taskAfter({ prefixes: split, segment }))
       .filter((task) => TASK_NAME.test(task))
       .map((task) => ({ line, task })),

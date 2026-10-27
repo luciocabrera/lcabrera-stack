@@ -20,6 +20,7 @@ import {
   shellCommandWords,
   shellPathTokens,
   shellScriptOperands,
+  withoutComment,
 } from './closure-extract.mjs';
 import { taskInvocations, toTaskEscapes } from './closure-tasks.mjs';
 import {
@@ -138,18 +139,6 @@ const workflowEscapes = ({ allowed, containment, exists, file, tasks }) => {
     ...stepMissingScripts({ containment, exists, file, scripts }),
     ...secretEscapes({ file }),
   ];
-};
-
-const isCommentStart = ({ characters, index }) =>
-  characters[index] === '#' &&
-  (index === 0 || /\s/.test(characters[index - 1]));
-
-const withoutComment = (text) => {
-  const characters = [...text];
-  const start = characters.findIndex((_, index) =>
-    isCommentStart({ characters, index }),
-  );
-  return start === -1 ? text : characters.slice(0, start).join('');
 };
 
 const shellLines = (content) =>

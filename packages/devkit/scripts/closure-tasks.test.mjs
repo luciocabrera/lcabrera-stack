@@ -141,6 +141,40 @@ describe('a task a shipped file runs', () => {
     );
   });
 
+  test('is not read from a comment that a separator would split, in any reader', () => {
+    expect(
+      analyse({
+        allowedTasks: [],
+        files: [
+          {
+            content: ['```bash', '# tidy up && pnpm run build', '```'].join(
+              '\n',
+            ),
+            path: SKILL,
+          },
+          {
+            content: [
+              'jobs:',
+              '  check:',
+              '    steps:',
+              '      - run: |',
+              '          # lint first; npm run harness:verify',
+              '          echo done',
+            ].join('\n'),
+            path: '.github/workflows/check.yml',
+          },
+          {
+            content: [
+              '#!/usr/bin/env sh',
+              '# lint first; npm run harness:verify',
+            ].join('\n'),
+            path: '.githooks/pre-push',
+          },
+        ],
+      }),
+    ).toEqual([]);
+  });
+
   test('is not judged when the caller defines no tasks', () => {
     expect(
       analyse({
