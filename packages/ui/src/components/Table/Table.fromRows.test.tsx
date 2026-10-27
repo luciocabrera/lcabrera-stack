@@ -469,6 +469,31 @@ describe('Table persistence inside a router', () => {
     expect(submissions[0]).toContain('"searchParamKey":"sorting"');
   });
 
+  it('keeps the layout’s stack and persistence when it reads a rows array with no selector', async () => {
+    const submissions = await renderRoute(
+      <TableLayout<Order, readonly Order[]>
+        columnsState={{
+          ...createEmptyColumnsState({
+            columns: [{ key: 'reference', label: 'Layout Reference' }],
+          }),
+        }}
+        dataPromise={Promise.resolve(ORDERS)}
+        metaState={{ persistenceKey: 'orders' }}
+      />,
+    );
+
+    await screen.findByText('Beta');
+
+    expect(headerLabels()).toStrictEqual(['Layout Reference']);
+
+    openColumnActions('Layout Reference');
+    fireEvent.click(screen.getByText('Ascending'));
+
+    await waitFor(() => {
+      expect(submissions).toHaveLength(1);
+    });
+  });
+
   it('keeps a Table given rows in memory, submitting nothing', async () => {
     const submissions = await renderRoute(
       <Table columns={COLUMNS} response={ORDERS} />,

@@ -26,7 +26,7 @@ reads the layout's stack, as before.
 `TableOwnStackContext` stops the recursion. The outer render sets it to `true`
 for the one `Table` it renders inside the new stack, and that `Table` sets it
 back to `false` for everything below it, so a grid rendered inside a cell
-decides again.
+decides again. `TableLayout` sets it to `true` around its own `Table` as well. Without that, a layout read with no `dataSelector` would look like a plain-array table and mount a second stack, which would drop the layout's state and persistence.
 
 The new stack also sets `TablePersistenceContext` to `undefined`. Without that,
 a rows-backed grid inside a `TableLayout` would submit its in-memory sort to the

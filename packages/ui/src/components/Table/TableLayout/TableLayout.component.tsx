@@ -7,6 +7,7 @@ import {
   TableConfigProvider,
   TableFocusProvider,
 } from '#ui/components/Table/contexts';
+import { TableOwnStackContext } from '#ui/components/Table/contexts/TableConfig/TableOwnStackContext.context';
 import { TablePersistenceContext } from '#ui/components/Table/contexts/TableConfig/TablePersistenceContext.context';
 import { TableSuspenseBoundary } from '#ui/components/Table/TableSuspenseBoundary';
 
@@ -47,22 +48,24 @@ export const TableLayout = <
           >
             <TableFocusProvider>
               <FiltersDataProvider<TData> columns={columnsState.columns}>
-                <TableSuspenseBoundary<TData, TResponse>
-                  actions={actions}
-                  dataPromise={dataPromise}
-                >
-                  {(response) => (
-                    <Table<TData, TResponse>
-                      actions={actions}
-                      columns={columnsState.columns}
-                      dataErrorSelector={dataErrorSelector}
-                      dataSelector={dataSelector}
-                      dataTotalSelector={dataTotalSelector}
-                      onLoadMore={onLoadMore}
-                      response={response}
-                    />
-                  )}
-                </TableSuspenseBoundary>
+                <TableOwnStackContext value>
+                  <TableSuspenseBoundary<TData, TResponse>
+                    actions={actions}
+                    dataPromise={dataPromise}
+                  >
+                    {(response) => (
+                      <Table<TData, TResponse>
+                        actions={actions}
+                        columns={columnsState.columns}
+                        dataErrorSelector={dataErrorSelector}
+                        dataSelector={dataSelector}
+                        dataTotalSelector={dataTotalSelector}
+                        onLoadMore={onLoadMore}
+                        response={response}
+                      />
+                    )}
+                  </TableSuspenseBoundary>
+                </TableOwnStackContext>
               </FiltersDataProvider>
             </TableFocusProvider>
           </TableConfigProvider>

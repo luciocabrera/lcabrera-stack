@@ -52,7 +52,7 @@ written to the URL and the rows kept their order.
   providers. It also adds a `GlobalSettingsProvider` and a
   `NotificationProvider` when those are missing, because the settings panel and
   the notify actions read them. A boolean context, `TableOwnStackContext`,
-  marks the `Table` rendered inside the new stack and is cleared below it. The
+  marks the `Table` rendered inside the new stack, and is cleared below it. `TableLayout` sets it around its own `Table` too, so a layout read with no `dataSelector` keeps its stack. The
   new stack also clears `TablePersistenceContext`, so an enclosing layout's
   persistence never reaches it.
 - Persistence is a context, `TablePersistenceContext`, holding one cookie
