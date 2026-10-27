@@ -200,6 +200,26 @@ describe('Table from rows alone', () => {
     expect(screen.getAllByRole('tab').length).toBeGreaterThan(0);
   });
 
+  it('offers no grouping, which needs a server, from the column menu or the settings', async () => {
+    render(<Table rows={ORDERS} />);
+
+    openColumnActions('Reference');
+    await settle();
+
+    expect(screen.getByText('Ascending')).not.toBeNull();
+    expect(screen.queryByText('Group by This')).toBeNull();
+
+    fireEvent.click(screen.getByRole('button', { name: 'Table settings' }));
+    await settle();
+
+    expect(
+      screen.getAllByRole('tab').map((tab) => tab.textContent),
+    ).not.toContain('Grouping');
+    expect(
+      screen.getByTestId('table-scroll-container').dataset.scrollLocked,
+    ).toBe('false');
+  });
+
   it('shows the empty state, with nothing to retry, when a filter matches no row', async () => {
     render(<Table rows={ORDERS} />);
 
