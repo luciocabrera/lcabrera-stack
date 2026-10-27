@@ -49,24 +49,15 @@ still costs me maintenance.
   reported by name.
 
   Owner amendment, 2026-10-27: for a description that would match any task,
-  the check reports three phrasings. The first is `all`, `any` or `every`,
-  optionally followed by `other` or `kind of`, before a generic noun such as
-  `task`, `file` or `request`, when the word after the noun is not a scope
-  word (`in`, `for`, `of`, `on`, `under`, `that`, …) and not an apostrophe or
-  hyphen. The second is one of `anything else`, `everything else`,
-  `no matter what`, `whatever you` and `whatever the user`. The third is
-  `at all` at the end of a clause. A paraphrase that makes the same claim in
-  other words is out of scope by owner decision. Known limitations, none of
-  them reported: a generic noun followed by a scope word, whatever the scope
-  covers ("every task in this repository"); a bare universal pronoun
-  ("everything you do"); a quantifier before a noun outside the generic list
-  ("every coding task", "any part of the codebase"); and `anything` followed
-  by a scope that covers everything ("anything in the repo"). The check is
-  `descriptionFindings` in
-  `packages/repo-standards/scripts/conformance-triggers.cjs`, added for the
-  universal scope by
-  [#1515](https://github.com/luciocabrera/lcabrera-stack/pull/1515); the
-  missed phrasings were recorded in
+  the check reports one that claims every task through the known over-broad
+  forms. Known limitations, by owner decision: a description that makes the same
+  claim in other words is not reported, and is out of scope. Which forms are
+  reported is defined by `descriptionFindings` in
+  `packages/repo-standards/scripts/conformance-triggers.cjs`, added for this by
+  [#1515](https://github.com/luciocabrera/lcabrera-stack/pull/1515), and its test file
+  `conformance-triggers.test.mjs` holds the cases that must be reported and the
+  scoped ones that must not. The misses found when this was decided are
+  recorded in
   [#1537](https://github.com/luciocabrera/lcabrera-stack/issues/1537), closed
   as not planned.
 
