@@ -1,11 +1,13 @@
 /**
  * Description quality, at the only tier a script can judge: is the description
- * long enough to carry a situation, does it name something concrete, and does
- * it say when the artifact applies rather than what it is.
+ * long enough to carry a situation, does it name something concrete, does it
+ * say when the artifact applies rather than what it is, and does it stop short
+ * of claiming every task.
  *
  * Why: an agent selects a skill or subagent from its description alone, so a
  * label like "code quality helper" never triggers and reads, in a usage report,
- * exactly like an artifact nobody needed. Judgement of a description that
+ * exactly like an artifact nobody needed, while one that claims any task
+ * crowds out every other artifact. Judgement of a description that
  * clears this floor is the model-in-the-loop tier, not this one.
  * Usage: `require('./conformance-triggers.cjs').descriptionFindings(...)`.
  */
@@ -22,6 +24,68 @@ const CONCRETE_TOKEN =
   /`[^`]+`|[\w@.-]\/[\w@.-]|\w\.[a-z]{2,5}\b|\b[A-Z]\w|\d|\w-\w/;
 
 const CONJUNCTION_SLASH = /\b(?:and\/or|or\/and)\b/gi;
+
+const QUANTIFIERS = new Set(['all', 'any', 'every']);
+
+const GENERIC_NOUNS = new Set([
+  'change',
+  'changes',
+  'file',
+  'files',
+  'job',
+  'jobs',
+  'prompt',
+  'prompts',
+  'question',
+  'questions',
+  'request',
+  'requests',
+  'situation',
+  'situations',
+  'task',
+  'tasks',
+  'thing',
+  'things',
+  'work',
+]);
+
+const KIND_WORDS = new Set(['kind', 'kinds']);
+
+const SCOPE_WORDS = new Set([
+  'about',
+  'below',
+  'beneath',
+  'for',
+  'from',
+  'in',
+  'inside',
+  'matching',
+  'named',
+  'of',
+  'on',
+  'that',
+  'to',
+  'under',
+  'which',
+  'whose',
+  'within',
+]);
+
+const COMPOUND_JOINERS = new Set(["'", '-', '’']);
+
+const OPEN_ENDED_PHRASES = [
+  'anything else',
+  'everything else',
+  'no matter what',
+  'whatever you',
+  'whatever the user',
+].map((phrase) => phrase.split(' '));
+
+const CLAUSE_FINAL_PHRASES = [['at', 'all']];
+
+const WORD = /^[a-z]/;
+
+const TOKEN = /[a-z]+|[^\sa-z]/g;
 
 const SENTENCE_START = /(^|[.!?:;—]\s+)([A-Z])/g;
 
@@ -41,6 +105,81 @@ const withoutSentenceInitialCapitals = (description) =>
     SENTENCE_START,
     (_match, lead, letter) => `${lead}${letter.toLowerCase()}`,
   );
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
+ * @returns {number}
+ */
+const nounIndexAfter = (tokens, index) => {
+  if (tokens[index] === 'other') {
+    return nounIndexAfter(tokens, index + 1);
+  }
+  return KIND_WORDS.has(tokens[index]) && tokens[index + 1] === 'of'
+    ? nounIndexAfter(tokens, index + 2)
+    : index;
+};
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
+ * @returns {string | undefined}
+ */
+const quantifiedPhrase = (tokens, index) => {
+  const nounIndex = nounIndexAfter(tokens, index + 1);
+  const noun = tokens[nounIndex] ?? '';
+  const next = tokens[nounIndex + 1] ?? '';
+  const isQualified = SCOPE_WORDS.has(next) || COMPOUND_JOINERS.has(next);
+  const isClaim =
+    QUANTIFIERS.has(tokens[index] ?? '') &&
+    GENERIC_NOUNS.has(noun) &&
+    !isQualified;
+  return isClaim ? tokens.slice(index, nounIndex + 1).join(' ') : undefined;
+};
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
+ * @param {readonly string[]} phrase
+ * @returns {boolean}
+ */
+const startsWith = (tokens, index, phrase) =>
+  phrase.every((word, offset) => tokens[index + offset] === word);
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
+ * @param {readonly string[]} phrase
+ * @returns {boolean}
+ */
+const endsClauseWith = (tokens, index, phrase) =>
+  startsWith(tokens, index, phrase) &&
+  !WORD.test(tokens[index + phrase.length] ?? '');
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
+ * @returns {string | undefined}
+ */
+const openEndedPhrase = (tokens, index) =>
+  (
+    OPEN_ENDED_PHRASES.find((phrase) => startsWith(tokens, index, phrase)) ??
+    CLAUSE_FINAL_PHRASES.find((phrase) => endsClauseWith(tokens, index, phrase))
+  )?.join(' ');
+
+/**
+ * @param {string} description
+ * @returns {string | undefined}
+ */
+const universalScope = (description) => {
+  const tokens = description.toLowerCase().match(TOKEN) ?? [];
+  return tokens
+    .map(
+      (_token, index) =>
+        quantifiedPhrase(tokens, index) ?? openEndedPhrase(tokens, index),
+    )
+    .find((phrase) => phrase !== undefined);
+};
 
 /**
  * @param {string} description
@@ -68,6 +207,7 @@ const descriptionFindings = (artifact) => {
   }
 
   const words = wordCount(description);
+  const claimedScope = universalScope(description);
   const finding = (reason) => ({
     kind: artifact.kind,
     label: artifact.label,
@@ -94,6 +234,13 @@ const descriptionFindings = (artifact) => {
       : [
           finding(
             'names no situation that selects it — say when it applies, what it follows, or what dispatches it',
+          ),
+        ]),
+    ...(claimedScope === undefined
+      ? []
+      : [
+          finding(
+            `"${claimedScope}" would select it for every task — name the situation that sets it apart`,
           ),
         ]),
   ];
