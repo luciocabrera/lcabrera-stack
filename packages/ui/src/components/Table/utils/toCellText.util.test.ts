@@ -24,7 +24,9 @@ describe('toCellText', () => {
     expect(toCellText([1, 2])).toBe('[1,2]');
   });
 
-  it('writes nothing for a value JSON cannot hold', () => {
+  it('writes nothing for a missing value or one JSON cannot hold', () => {
     expect(toCellText(undefined)).toBe('');
+    expect(toCellText(JSON.parse('null'))).toBe('');
+    expect(toCellText(() => undefined)).toBe('');
   });
 });

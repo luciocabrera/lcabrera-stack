@@ -19,12 +19,16 @@ export const matchesDateFilter = ({ filter, value }: MatchesDateFilterArgs) => {
 
   if (time === undefined) return false;
 
-  const start = parseDate(from)?.getTime() ?? NaN;
+  const start = parseDate(from)?.getTime();
 
+  if (start === undefined) return false;
   if (operator === 'after') return time > start;
   if (operator === 'before') return time < start;
+  if (operator !== 'between' || to === undefined || to === '') {
+    return time === start;
+  }
 
-  return operator === 'between' && to !== undefined && to !== ''
-    ? time >= start && time <= (parseDate(to)?.getTime() ?? NaN)
-    : time === start;
+  const end = parseDate(to)?.getTime();
+
+  return end !== undefined && time >= start && time <= end;
 };

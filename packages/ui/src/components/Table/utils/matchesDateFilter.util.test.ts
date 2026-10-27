@@ -71,6 +71,47 @@ describe('matchesDateFilter', () => {
     expect(matchesDateFilter({ filter, value: '2024-01-02' })).toBe(false);
   });
 
+  it('reads a number as a timestamp', () => {
+    expect(
+      matchesDateFilter({
+        filter: { operator: 'equals', type: 'date', value: '2024-01-02' },
+        value: Date.parse('2024-01-02'),
+      }),
+    ).toBe(true);
+  });
+
+  it.each([' ', NaN, new Date('not a date')])(
+    'never matches the unreadable value %o',
+    (value) => {
+      expect(
+        matchesDateFilter({
+          filter: { operator: 'after', type: 'date', value: '2000-01-01' },
+          value,
+        }),
+      ).toBe(false);
+    },
+  );
+
+  it('never matches against a filter date it cannot read', () => {
+    expect(
+      matchesDateFilter({
+        filter: { operator: 'before', type: 'date', value: 'soon' },
+        value: '2024-01-02',
+      }),
+    ).toBe(false);
+    expect(
+      matchesDateFilter({
+        filter: {
+          operator: 'between',
+          type: 'date',
+          value: '2024-01-01',
+          value2: 'later',
+        },
+        value: '2024-01-02',
+      }),
+    ).toBe(false);
+  });
+
   it('reads a Date value', () => {
     expect(
       matchesDateFilter({
