@@ -110,10 +110,10 @@ const withoutSentenceInitialCapitals = (description) =>
  */
 const nounIndexAfter = (tokens, index) => {
   if (tokens[index] === 'other') {
-    return index + 1;
+    return nounIndexAfter(tokens, index + 1);
   }
   return KIND_WORDS.has(tokens[index]) && tokens[index + 1] === 'of'
-    ? index + 2
+    ? nounIndexAfter(tokens, index + 2)
     : index;
 };
 

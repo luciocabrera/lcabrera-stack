@@ -81,6 +81,16 @@ describe('conformance triggers — planted vague descriptions', () => {
     },
     {
       description:
+        'Use for any other kind of task, from README.md to the scripts under scripts/ and the config at the root.',
+      phrase: 'any other kind of task',
+    },
+    {
+      description:
+        'Use for any kind of other task, from README.md to the scripts under scripts/ and the config at the root.',
+      phrase: 'any kind of other task',
+    },
+    {
+      description:
         'Use for all kinds of work, from README.md to the scripts under scripts/ and the config at the root.',
       phrase: 'all kinds of work',
     },
