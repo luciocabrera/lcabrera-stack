@@ -23,6 +23,20 @@ const serve = async (query: string) => {
   return { response, selectPage };
 };
 
+const expectRefusedWithoutReading = async ({
+  response,
+  selectPage,
+}: Awaited<ReturnType<typeof serve>>) => {
+  expect(selectPage).not.toHaveBeenCalled();
+  expect(await response.json()).toStrictEqual(
+    expect.objectContaining({
+      data: [],
+      error: expect.objectContaining({ kind: 'unexpected' }),
+      hasMore: false,
+    }),
+  );
+};
+
 describe('serveTablePageRequest', () => {
   it('reads the window and sort a page request carries', async () => {
     const { selectPage } = await serve(
@@ -76,16 +90,29 @@ describe('serveTablePageRequest', () => {
     });
   });
 
-  it('refuses an unreadable filter instead of reading every row', async () => {
-    const { response, selectPage } = await serve('filter=not-json');
-
-    expect(selectPage).not.toHaveBeenCalled();
-    expect(await response.json()).toStrictEqual(
-      expect.objectContaining({
-        data: [],
-        error: expect.objectContaining({ kind: 'unexpected' }),
-        hasMore: false,
+  it('refuses a well-formed filter it cannot apply instead of answering with every row', async () => {
+    const filter = encodeURIComponent(
+      JSON.stringify({
+        name: { operator: 'equals', type: 'text', value: 'X' },
       }),
     );
+    const served = await serve(`filter=${filter}`);
+
+    await expectRefusedWithoutReading(served);
+  });
+
+  it('pages by offset when a cursor arrives, since it reads no keyset', async () => {
+    const cursor = encodeURIComponent(JSON.stringify([42]));
+    const { selectPage } = await serve(`limit=10&skip=20&cursor=${cursor}`);
+
+    expect(selectPage).toHaveBeenCalledWith(
+      expect.objectContaining({ limit: 10, offset: 20 }),
+    );
+  });
+
+  it('refuses an unreadable filter instead of reading every row', async () => {
+    const served = await serve('filter=not-json');
+
+    await expectRefusedWithoutReading(served);
   });
 });

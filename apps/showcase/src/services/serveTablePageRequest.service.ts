@@ -7,6 +7,9 @@ import {
   INITIAL_PAGE_SIZE,
 } from '@lcabrera/ui/components/Table/Table.constants';
 
+const UNFILTERABLE_PAGE_MESSAGE =
+  'This table cannot apply a column filter on the server, so no rows were read.';
+
 export type ServeTablePageRequestArgs = {
   readonly fallbackSort: readonly ColumnSort[];
   readonly maxLimit: number;
@@ -37,7 +40,11 @@ export const serveTablePageRequest = async ({
     return Response.json(toRefusedTablePage(parsed.message));
   }
 
-  const { limit, skip, sort } = parsed.params;
+  const { filters, limit, skip, sort } = parsed.params;
+
+  if (filters.length > 0) {
+    return Response.json(toRefusedTablePage(UNFILTERABLE_PAGE_MESSAGE));
+  }
   const page = await selectPage({
     limit: Math.min(maxLimit, Math.max(1, limit)),
     offset: skip,
