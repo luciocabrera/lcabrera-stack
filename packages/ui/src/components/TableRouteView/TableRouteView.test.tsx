@@ -182,6 +182,22 @@ describe('TableRouteView', () => {
     );
   });
 
+  it('loads more from the page path the loader declares when given no fetcher', () => {
+    useLoaderDataMock.mockReturnValue({
+      ...loaderData,
+      metaState: { ...metaState, pagePath: '/rows/page' },
+    });
+    render(<TableRouteView<Row, Response> />);
+
+    expect(lastProps().onLoadMore).toBeTypeOf('function');
+  });
+
+  it('renders a single page when neither a fetcher nor a page path is given', () => {
+    render(<TableRouteView<Row, Response> />);
+
+    expect(lastProps().onLoadMore).toBeUndefined();
+  });
+
   it('sends no filter when the loader meta declares no capability', async () => {
     render(<TableRouteView<Row, Response> fetchPage={fetchPage} />);
 

@@ -15,25 +15,35 @@ import { resolveGroupRead } from '../db/olap/resolve-group-read.util.ts';
 import { resolveGroupRestriction } from '../db/olap/resolve-group-restriction.util.ts';
 import { toGroupKeyTruncations } from '../db/olap/to-group-key-truncations.util.ts';
 import { selectRows } from '../db/select-rows.util.ts';
+import { createTableLoaderReads } from './create-table-loader-reads.util.ts';
+import { createTablePageLoader } from './create-table-page-loader.util.ts';
 import { parseTablePageParams } from './parse-table-page-params.util.ts';
 import { selectGroupedTablePage } from './select-grouped-table-page.util.ts';
+import {
+  TABLE_PAGE_DEFAULT_GROUP_MAX_ROWS,
+  TABLE_PAGE_DEFAULT_LIMIT,
+  TABLE_PAGE_DEFAULT_MAX_LIMIT,
+  TABLE_SOURCE_CAPABILITIES,
+} from './table-page.constants.ts';
 import { toKeysetCursor } from './to-keyset-cursor.util.ts';
 
 export type CreateTablePageReaderArgs<TKey extends string = string> = {
-  /** Page size a request that names no `limit` gets. */
-  readonly defaultLimit: number;
-  /** Order a request that sends no usable sort gets; must be non-empty. */
-  readonly fallbackSort: readonly ColumnSort[];
+  /** Page size of the first page and of a request that names no `limit`. Defaults to 50. */
+  readonly defaultLimit?: number;
+  /** Order a request that sends no usable sort gets. Defaults to `primaryKey` ascending. */
+  readonly fallbackSort?: readonly ColumnSort[];
   /** Columns a row read projects. Defaults to `target.allowedColumns`. */
   readonly fields?: readonly string[];
-  /** Row ceiling of a grouped read, which is never paginated. */
-  readonly groupMaxRows: number;
+  /** Row ceiling of a grouped read, which is never paginated. Defaults to 5000. */
+  readonly groupMaxRows?: number;
   /** Sort keys that name no data column; dropped from every read this reader resolves. */
   readonly ignoredSortColumns?: readonly string[];
-  /** Largest page a request can ask for; smaller pages pass through. */
-  readonly maxLimit: number;
+  /** Largest page a request can ask for; smaller pages pass through. Defaults to 1000. */
+  readonly maxLimit?: number;
   /** Longest ORDER BY a request can ask for. Defaults to the allowed column count. */
   readonly maxSortRules?: number;
+  /** Path the route answering with `pageLoader` is mounted at; `source` carries it to the grid. */
+  readonly pagePath?: string;
   /** Unique, non-null column that breaks sort ties and anchors keyset pages. */
   readonly primaryKey: TKey;
   readonly target: TablePageTarget;
@@ -53,13 +63,14 @@ export const createTablePageReader = <
   TRow extends QueryResultRow,
   TKey extends keyof TRow & string,
 >({
-  defaultLimit,
+  defaultLimit = TABLE_PAGE_DEFAULT_LIMIT,
   fallbackSort,
   fields,
-  groupMaxRows,
+  groupMaxRows = TABLE_PAGE_DEFAULT_GROUP_MAX_ROWS,
   ignoredSortColumns,
-  maxLimit,
+  maxLimit = TABLE_PAGE_DEFAULT_MAX_LIMIT,
   maxSortRules,
+  pagePath,
   primaryKey,
   target,
 }: CreateTablePageReaderArgs<TKey>) => {
@@ -166,7 +177,9 @@ export const createTablePageReader = <
   const resolvePageRead = async (params: URLSearchParams) => {
     const parsed = parseTablePageParams({
       defaultLimit,
-      fallbackSort,
+      fallbackSort: fallbackSort ?? [
+        { columnKey: primaryKey, direction: 'asc' },
+      ],
       ignoredSortColumns,
       params,
     });
@@ -185,12 +198,23 @@ export const createTablePageReader = <
 
   return {
     deleteRow,
+    pageLoader: createTablePageLoader({ resolvePageRead, selectPage }),
     resolveGroupRead: resolveTableGroupRead,
     resolveGroupRestriction: resolveTableGroupRestriction,
     resolvePageRead,
     selectGroupingCapabilities,
     selectGroupKeyTruncations,
     selectPage,
+    source: {
+      ...createTableLoaderReads({
+        limit: defaultLimit,
+        reader: { selectGroupingCapabilities, selectPage },
+      }),
+      capabilities: TABLE_SOURCE_CAPABILITIES,
+      ...(pagePath !== undefined && { pagePath }),
+      schemaName: target.schema,
+      tableName: target.table,
+    },
   };
 };
 

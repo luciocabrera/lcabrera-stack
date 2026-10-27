@@ -130,17 +130,18 @@ One table declared once, and the reads and request handlers bound to it. The
 handlers take a Web `Request` and return a `Response`, so they need no
 framework.
 
-| Import                           | What it does                                                                                       |
-| -------------------------------- | -------------------------------------------------------------------------------------------------- |
-| `create-table-page-reader.util`  | Table, primary key, fallback sort and ceilings in → `selectPage`, `resolvePageRead` and the rest   |
-| `create-table-page-loader.util`  | A reader's `resolvePageRead` and `selectPage` → `({ request }) => Promise<Response>` with the page |
-| `parse-table-page-params.util`   | `limit`/`skip`/`cursor`/`filter`/`sort` search params → the params, or a refusal of the `filter`   |
-| `create-row-delete-action.util`  | `({ request }) => Promise<Response>` that deletes the row a `{ intent: 'delete', id }` form names  |
-| `create-table-loader-reads.util` | The first page's read for a table, from its sort, filters and grouping                             |
-| `create-group-detail-reads.util` | The reads for a page that opens one group's rows                                                   |
-| `to-integer-row-id.util`         | A form value → a positive safe integer, or `undefined`                                             |
-| `to-keyset-cursor.util`          | A client cursor → `QueryCursor` when it matches the sort and ends on a unique column, else offset  |
-| `table-page.types`               | `TablePage`, `TablePageRead`, `TablePageTarget` and the other shapes the factories share           |
+| Import                           | What it does                                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create-table-page-reader.util`  | Schema, table, columns and primary key in → `selectPage`, `resolvePageRead` and the rest, a `pageLoader` and a grid `source`; every limit has a default |
+| `create-table-page-loader.util`  | A reader's `resolvePageRead` and `selectPage` → `({ request }) => Promise<Response>` with the page                                                      |
+| `parse-table-page-params.util`   | `limit`/`skip`/`cursor`/`filter`/`sort` search params → the params, or a refusal of the `filter`                                                        |
+| `create-row-delete-action.util`  | `({ request }) => Promise<Response>` that deletes the row a `{ intent: 'delete', id }` form names                                                       |
+| `create-table-loader-reads.util` | The first page's read for a table, from its sort, filters and grouping                                                                                  |
+| `create-group-detail-reads.util` | The reads for a page that opens one group's rows                                                                                                        |
+| `to-integer-row-id.util`         | A form value → a positive safe integer, or `undefined`                                                                                                  |
+| `to-refused-table-page.util`     | The empty page that carries a refusal message instead of rows                                                                                           |
+| `to-keyset-cursor.util`          | A client cursor → `QueryCursor` when it matches the sort and ends on a unique column, else offset                                                       |
+| `table-page.types`               | `TablePage`, `TablePageRead`, `TablePageTarget` and the other shapes the factories share                                                                |
 
 ### Credentials — `@lcabrera/server/crypto/*`, `/tokens/*`, `/tickets/*`
 
@@ -181,6 +182,28 @@ parameter — there is no code path that concatenates a value into SQL.
 One thing worth knowing before you type the row: `TRow` is an **unchecked**
 contract with the table, because `pg` does not validate it. Postgres `numeric`
 columns arrive as **strings**, so type them `string` and coerce at the caller.
+
+### Serve a grid from a table by name
+
+```ts
+import { createTablePageReader } from '@lcabrera/server/table-page/create-table-page-reader.util';
+
+export const orders = createTablePageReader<Order, 'id'>({
+  pagePath: '/orders/page',
+  primaryKey: 'id',
+  target: {
+    allowedColumns: ['id', 'country', 'placed_on', 'total'],
+    schema: 'sales',
+    table: 'orders',
+  },
+});
+```
+
+`orders.pageLoader` is the `loader` of the resource route at `pagePath`, and
+`orders.source` is the setting `@lcabrera/ui`'s `createTableRouteLoader` takes;
+that package's README shows the route and the view. `allowedColumns` is the
+whole surface a request can reach — the query builder rejects a filter, sort or
+cursor naming any other column before a statement is built.
 
 ### Take column names from a request
 

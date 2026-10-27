@@ -184,6 +184,61 @@ export const Orders = () => {
 header and skeleton stream to the browser before the rows exist. `onLoadMore` is
 what infinite scroll calls as you approach the end of the loaded range.
 
+### A grid on a Postgres table, by name
+
+Name a schema, a table, its columns and its primary key, and the grid filters,
+sorts, groups and pages against it. There is no grid component to learn for
+this: the reader from `@lcabrera/server` describes the table as a **source**,
+`createTableRouteLoader` takes that source as a setting, and `TableRouteView`
+reads its next pages from the path the source names. The query parameters
+travel between the two ends through `@lcabrera/api` and are parsed by
+`@lcabrera/server`, so your code writes neither half.
+
+```ts
+// app/routes/orders/.server/orders.source.ts — server-only
+import { createTablePageReader } from '@lcabrera/server/table-page/create-table-page-reader.util';
+
+export const orders = createTablePageReader<Order, 'id'>({
+  pagePath: '/orders/page',
+  primaryKey: 'id',
+  target: {
+    allowedColumns: ['id', 'country', 'placed_on', 'total'],
+    schema: 'sales',
+    table: 'orders',
+  },
+});
+```
+
+```ts
+// app/routes/orders/orders.loader.ts
+import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
+
+import { orders } from './.server/orders.source';
+
+export const loader = createTableRouteLoader<Order, OrdersPage>({
+  appId: 'my-app',
+  columns: COLUMNS,
+  persistenceKey: 'orders',
+  source: orders.source,
+  title: { plural: 'Orders', singular: 'Order' },
+});
+```
+
+```tsx
+// app/routes/orders/Orders.component.tsx
+import { TableRouteView } from '@lcabrera/ui';
+
+export const Orders = () => <TableRouteView<Order, OrdersPage> />;
+```
+
+Mount `orders.pageLoader` as the `loader` of a resource route at `pagePath`
+(`route('orders/page', 'routes/orders-page.ts')` in `routes.ts`). The source
+turns on server-side filtering, keyset paging and grouping; a key in the
+route's `meta` overrides any of them. Every other `createTablePageReader`
+setting — page sizes, the fallback order, the grouped-row ceiling — has a
+default, and passing `fetchPage` and `tableName` instead of `source` still
+works for a page that does not come from one table.
+
 ### The app shell
 
 `AppShell` renders the navigation chrome and the routed outlet; it takes the

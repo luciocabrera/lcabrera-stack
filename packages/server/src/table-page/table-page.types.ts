@@ -2,10 +2,12 @@ import type { ColumnFiltersRefusal } from '@lcabrera/api/filters/filters.types';
 
 import type {
   AggregateFn,
+  ColumnGroupingCapability,
   GroupCardinalityWarning,
   GroupingMode,
   GroupKeyPeriod,
 } from '../db/group-query-builder/group-query-builder.types.ts';
+import type { OlapGroupReadResolution } from '../db/olap/olap.types.ts';
 import type { toGroupRow } from '../db/olap/to-group-row.util.ts';
 import type {
   QueryFilter,
@@ -13,6 +15,10 @@ import type {
 } from '../db/query-builder/query-builder.types.ts';
 import type { SerializableDbError } from '../errors/errors.types.ts';
 import type { ColumnSort } from '../sort/sort.types.ts';
+
+export type TableGroupingCapabilities = Readonly<
+  Record<string, ColumnGroupingCapability>
+>;
 
 export type TablePage<TRow> = {
   readonly data: readonly (TablePageGroupRow | TRow)[];
@@ -69,6 +75,10 @@ export type TablePageRead = {
   /** Defaults to `'last'`. */
   readonly totalsPlacement?: 'first' | 'last';
 };
+
+export type TablePageReadResolution =
+  | OlapGroupReadResolution
+  | TablePageParamsRefusal;
 
 export type TablePageSortRule = {
   readonly columnKey: string;

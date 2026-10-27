@@ -428,6 +428,18 @@ export const loader = createTableRouteLoader<Row, RowResponse>({
 ```
 
 - **The route owns only the fetch.** `fetchPage` receives the sanitized `filters` and the `effectiveSorting` (tiebreaker appended) and returns its promise **unawaited** — the factory hands it back as `dataPromise` for Suspense streaming.
+- **A page that is one Postgres table takes a `source`, not a `fetchPage` (ADR-144).** `@lcabrera/server`'s `createTablePageReader` returns a `source` — the first-page read, the grouping-capability read, the schema and table names, the capabilities it serves and the `pagePath` its `pageLoader` is mounted at. Pass `source` in place of `fetchPage`/`tableName`/`schemaName`; its capabilities land on `metaState` with the route's own `meta` winning, and its `pagePath` is what `TableRouteView` fetches every later page from. Connecting to a table is that setting, never a new view or wrapper.
+
+```ts
+export const loader = createTableRouteLoader<Row, RowResponse>({
+  appId: APP_ID,
+  columns: COLUMNS,
+  persistenceKey: PERSISTENCE_KEY,
+  title: TITLE,
+  source: rowsReader.source, // from a .server module
+});
+```
+
 - **The returned data-promise key is always `dataPromise`** — `TableRouteLoaderData<TData, TResponse>` (exported from the same file, derived from the factory) is the shape the view side reads. Do not rename it per route.
 
 ### The view side
@@ -443,7 +455,7 @@ export const Orders = () => (
 ```
 
 - **Never re-derive the sort composition by hand.** The loader deliberately stores only the _user's_ sorting and appends the primary-key tiebreaker for the server query alone, so every load-more must reproduce it. `buildTablePageQuery` (`src/routing/shared/`) is that composition; `TableRouteView` calls it for you. A route that hand-rolls `sanitizeSorting` + `appendPrimaryKeySorting` in `onLoadMore` is one edit away from paginating incoherently.
-- **A request-shaping capability is declared once, on the loader `meta` — never as a prop (ADR-063).** `isKeysetEnabled` / `isServerFilterEnabled` describe the endpoint, and **absent means off**: sending a `cursor` an endpoint ignores is noise; sending a `filter` it ignores appends unfiltered rows to a filtered table. The loader builds the first page and the view builds every page after it, so a flag either half must act on has to be somewhere both can read — a prop is invisible to the loader by construction. The test is mechanical: **if the loader or the load-more query would have to read it, it goes on `meta`.** A prop carries only what the component alone can supply (`fetchPage`, `actions`, the two selectors).
+- **A request-shaping capability is declared once, on the loader `meta` — never as a prop (ADR-063).** `isKeysetEnabled` / `isServerFilterEnabled` describe the endpoint, and **absent means off**: sending a `cursor` an endpoint ignores is noise; sending a `filter` it ignores appends unfiltered rows to a filtered table. The loader builds the first page and the view builds every page after it, so a flag either half must act on has to be somewhere both can read — a prop is invisible to the loader by construction. The test is mechanical: **if the loader or the load-more query would have to read it, it goes on `meta`.** A prop carries only what the component alone can supply (`fetchPage`, `actions`, the two selectors), and `fetchPage` may be left off when the loader's `source` declared a `pagePath`.
 - **Escape hatch:** a route whose response is not `{ data, hasMore?, total? }`, or that needs its own JSX around the table, calls **`useTableRoutePage`** and renders `TableLayout` itself. The hook returns exactly the four props `TableLayout` needs.
 - **The fetcher is a declaration, not a function you write.** `createPaginatedFetcher` (`@lcabrera/api/http`) takes the path, a response type guard and an optional base-URL strategy; the guard is required, because an unvalidated page is a cast that fails three layers away.
 
