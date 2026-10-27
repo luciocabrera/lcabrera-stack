@@ -228,6 +228,29 @@ describe('TableEmptyState', () => {
       expect(screen.getByRole('button', { name: 'Retry' })).not.toBeNull();
     });
 
+    it('titles a refusal of an unlisted column, which arrives naming none, and still offers to clear', () => {
+      useGetTableDataErrorMock.mockReturnValue({
+        kind: 'grouping-refused',
+        message: 'The request named a column this grouped read cannot use.',
+        reason: 'unknown-column',
+      });
+      useGetNormalizedColumnMock.mockReturnValue(undefined);
+
+      renderInTable(<TableEmptyState />);
+
+      expect(screen.getByRole('heading').textContent).toBe(
+        'This grouping was refused',
+      );
+      expect(
+        screen.getByText(
+          'The request named a column this grouped read cannot use.',
+        ),
+      ).not.toBeNull();
+      expect(
+        screen.getByRole('button', { name: 'Clear grouping' }),
+      ).not.toBeNull();
+    });
+
     it('blames no column when a key combination is what was refused', () => {
       useGetTableDataErrorMock.mockReturnValue({
         column: 'delivery_date',

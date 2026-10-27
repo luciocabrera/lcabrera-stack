@@ -42,6 +42,67 @@ describe('toSerializableDbError', () => {
     });
   });
 
+  it.each([
+    {
+      column: 'hidden_note',
+      message:
+        'Column "hidden_note" is not in the allowed list for this query.',
+      reason: 'unknown-column',
+      sentence: 'The request named a column this grouped read cannot use.',
+    },
+    {
+      column: 'hidden_note',
+      message:
+        'Column "hidden_note" cannot be a row key and a column axis at once.',
+      reason: 'duplicate-keys',
+      sentence:
+        'The request used the same column more than once among its group keys and column axis.',
+    },
+  ] as const)(
+    'maps a $reason grouping refusal to a fixed message with no column',
+    ({ column, message, reason, sentence }) => {
+      const mapped = toSerializableDbError(
+        new GroupingRefusedError({ column, message, reason }),
+      );
+
+      expect(mapped).toStrictEqual({
+        kind: 'grouping-refused',
+        message: sentence,
+        reason,
+      });
+      expect(JSON.stringify(mapped)).not.toContain(column);
+    },
+  );
+
+  it('keeps the column and the message of a refusal about a listed group key', () => {
+    expect(
+      toSerializableDbError(
+        new GroupingRefusedError({
+          column: 'city',
+          message: 'Column "city" is not a legal group key: not-a-dimension.',
+          reason: 'column-not-groupable',
+        }),
+      ),
+    ).toStrictEqual({
+      column: 'city',
+      kind: 'grouping-refused',
+      message: 'Column "city" is not a legal group key: not-a-dimension.',
+      reason: 'column-not-groupable',
+    });
+  });
+
+  it('withholds the request keys a duplicate-keys refusal quotes without naming a column', () => {
+    const mapped = toSerializableDbError(
+      new GroupingRefusedError({
+        message:
+          'Group keys must be distinct; got "hidden_note", "hidden_note".',
+        reason: 'duplicate-keys',
+      }),
+    );
+
+    expect(JSON.stringify(mapped)).not.toContain('hidden_note');
+  });
+
   it('maps a refused query to its reason and a fixed message that omits the column', () => {
     const mapped = toSerializableDbError(
       new QueryRefusedError({

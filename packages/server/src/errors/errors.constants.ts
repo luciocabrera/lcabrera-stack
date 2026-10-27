@@ -1,14 +1,26 @@
 /**
  * Private to `errors/`: the SQLSTATE codes `mapDbError` translates — Postgres' own
- * values, not names of ours — and the fixed sentence each query refusal serialises to.
+ * values, not names of ours — and the fixed sentence each refusal that can name a
+ * request-supplied column serialises to.
  * Exporting a growing catalogue of SQLSTATEs from a published package would be surface
  * with no behaviour behind it.
  */
-import type { QueryRefusalReason } from './errors.types.ts';
+import type {
+  GroupingRefusalReason,
+  QueryRefusalReason,
+} from './errors.types.ts';
 
 export const SQLSTATE_FOREIGN_KEY_VIOLATION = '23503';
 export const SQLSTATE_UNIQUE_VIOLATION = '23505';
 export const SQLSTATE_QUERY_CANCELED = '57014';
+
+export const GROUPING_REFUSED_MESSAGES: Readonly<
+  Partial<Record<GroupingRefusalReason, string>>
+> = {
+  'duplicate-keys':
+    'The request used the same column more than once among its group keys and column axis.',
+  'unknown-column': 'The request named a column this grouped read cannot use.',
+};
 
 export const QUERY_REFUSED_MESSAGES: Readonly<
   Record<QueryRefusalReason, string>

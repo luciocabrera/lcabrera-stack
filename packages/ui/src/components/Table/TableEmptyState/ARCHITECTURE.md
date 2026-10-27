@@ -68,12 +68,15 @@ false sentence about each:
 - `aggregate-not-legal` names an _aggregated_ column, which need not be a group
   key at all.
 - `unknown-column` is raised for a group key and for an aggregated column alike,
-  so the payload cannot tell the two apart.
-- `too-many-keys`, `duplicate-keys`, `no-keys` and `row-limit-reached` name no
-  column in the first place.
+  so the payload cannot tell the two apart. A server withholds that column, since
+  the read does not list it, so the payload names none.
+- `duplicate-keys` can quote a column the read does not list, so it arrives
+  without one too.
+- `too-many-keys`, `no-keys` and `row-limit-reached` name no column in the
+  first place.
 
-Those keep the neutral heading and let the endpoint's sentence carry the column
-in the role it actually plays — which each of those messages already does.
+Those keep the neutral heading and let the endpoint's sentence say what was
+refused.
 
 ## Design Decision — Which recovery is offered
 

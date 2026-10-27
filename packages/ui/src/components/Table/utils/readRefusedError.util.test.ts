@@ -15,6 +15,16 @@ describe('readRefusedError', () => {
     expect(readRefusedError(error)).toStrictEqual(error);
   });
 
+  it('reads a grouping-refused payload that names no column', () => {
+    const error = {
+      kind: 'grouping-refused',
+      message: 'The request named a column this grouped read cannot use.',
+      reason: 'unknown-column',
+    } as const;
+
+    expect(readRefusedError(error)).toStrictEqual(error);
+  });
+
   it('reads a query-refused payload and drops fields outside the member', () => {
     expect(
       readRefusedError({

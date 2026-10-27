@@ -85,11 +85,14 @@ typed error carrying a closed `reason` and the `column`, serialised as
 - The serialised form does not say which column was refused, so a client cannot
   highlight it from the body alone. The client sent the column, so it can work
   it out; the server log has the full message.
-- The two refusal kinds differ here: `grouping-refused` carries `column` and the
-  error's own message. A group key is picked from the capabilities the server
-  published, so naming it back tells the client which of its own choices to
-  undo. A column outside `allowedColumns` was never published, so echoing it
-  back only reflects request text into a response body.
+- `grouping-refused` carries `column` and the error's own message only for a
+  column that passed the allow-list. A group key is picked from the
+  capabilities the server published, so naming it back tells the client which
+  of its own choices to undo. A column outside `allowedColumns` was never
+  published, so echoing it back only reflects request text into a response
+  body. The two grouping reasons that can name such a column,
+  `unknown-column` and `duplicate-keys`, therefore serialise like
+  `query-refused`: a fixed sentence per reason and no `column` (#1532).
 - `assertSafeIdentifier` still throws a plain `Error`. It checks names this
   package was configured with (schema, table) as well as request-supplied
   columns, so typing it as a request refusal would mislabel a configuration
