@@ -14,6 +14,7 @@ import {
   analyseDirectory,
   BASELINE_COMMANDS,
   describeEscape,
+  describeUnchecked,
   renderClosureReport,
 } from './closure-report.mjs';
 import { analyseClosure } from './closure.mjs';
@@ -81,6 +82,7 @@ const shippedContext = ({ profile, root }) => {
     allowedPackages: providedPackages({ entries, profile }),
     configKeys: allowedConfigKeys(config),
     entries,
+    hookDirectory: config.paths.hooks,
     shipped: new Set(entries.map((entry) => entry.path)),
   };
 };
@@ -93,6 +95,7 @@ const shippedEscapes = ({ profile, root }) => {
     allowedPackages,
     configKeys,
     entries,
+    hookDirectory,
     shipped,
   } = shippedContext({ profile, root });
   const files = entries.map((entry) => ({
@@ -100,7 +103,7 @@ const shippedEscapes = ({ profile, root }) => {
     path: entry.path,
   }));
 
-  const { escapes } = analyseClosure({
+  const { escapes, unchecked } = analyseClosure({
     agentDirectory,
     allowedBins,
     allowedCommands,
@@ -108,11 +111,12 @@ const shippedEscapes = ({ profile, root }) => {
     allowedPackages,
     exists: (path) => existsSync(resolve(root, path)),
     files,
+    hookDirectory,
     rootDirectory: '',
     shipped,
   });
 
-  return { escapes, fileCount: files.length };
+  return { escapes, fileCount: files.length, unchecked };
 };
 
 const shippedResults = ({ profile, root }) =>
@@ -121,20 +125,23 @@ const shippedResults = ({ profile, root }) =>
     ...shippedEscapes({ profile: name, root }),
   }));
 
+const coverageOf = (result) =>
+  `${result.fileCount} shipped file(s), ${result.fileCount - result.unchecked.length} read, ${result.unchecked.length} unchecked`;
+
 const reportClean = (results) => {
   for (const result of results) {
-    console.log(
-      `✓ ${result.name} — ${result.fileCount} shipped file(s), self-contained`,
-    );
+    console.log(`✓ ${result.name} — ${coverageOf(result)}, no escapes`);
+    for (const line of describeUnchecked(result)) console.log(line);
   }
 };
 
 const reportEscapes = (results) => {
   for (const result of results) {
-    console.error(`✗ ${result.name} — ${result.fileCount} shipped file(s)`);
+    console.error(`✗ ${result.name} — ${coverageOf(result)}`);
     for (const finding of result.escapes) {
       console.error(`    ${describeEscape(finding)}`);
     }
+    for (const line of describeUnchecked(result)) console.error(line);
   }
   const total = results.reduce((sum, result) => sum + result.escapes.length, 0);
   console.error(`\n${total} escape(s) across ${results.length} profile(s).`);
@@ -163,8 +170,14 @@ const runDirectoryClosure = ({ directories, profile, root }) => {
     return 1;
   }
 
-  const { agentDirectory, allowedBins, allowedCommands, configKeys, shipped } =
-    shippedContext({ profile, root });
+  const {
+    agentDirectory,
+    allowedBins,
+    allowedCommands,
+    configKeys,
+    hookDirectory,
+    shipped,
+  } = shippedContext({ profile, root });
   const results = directories.map((directory) =>
     analyseDirectory({
       agentDirectory,
@@ -172,6 +185,7 @@ const runDirectoryClosure = ({ directories, profile, root }) => {
       allowedCommands,
       allowedConfigKeys: configKeys,
       directory: resolve(root, directory),
+      hookDirectory,
       root,
       shipped,
     }),

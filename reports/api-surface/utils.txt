@@ -55,8 +55,14 @@ isCheckboxChecked [const] ({ formData, name }: IsCheckboxCheckedArgs) => boolean
 ## ./forms/read-form-string.util
 readFormString [const] ({ formData, name }: ReadFormStringArgs) => string
 
+## ./guards/is-finite-number.util
+isFiniteNumber [const] (value: unknown) => value is number
+
 ## ./guards/is-object.util
 isObject [const] (value: unknown) => value is Record<string, unknown>
+
+## ./guards/is-string-list.util
+isStringList [const] (value: unknown) => value is readonly string[]
 
 ## ./json/safe-json-parse.util
 safeJsonParse [const] (raw: null | string) => unknown
