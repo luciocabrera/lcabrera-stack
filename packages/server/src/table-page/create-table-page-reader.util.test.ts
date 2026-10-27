@@ -420,6 +420,19 @@ describe('resolvePageRead', () => {
     });
   });
 
+  it('refuses an unreadable filter instead of reading the whole table', async () => {
+    const resolved = await reader.resolvePageRead(
+      paramsFor({
+        filter: JSON.stringify({ status: { type: 'select', value: 1 } }),
+      }),
+    );
+
+    expect(resolved).toMatchObject({
+      kind: 'refused',
+      reason: 'invalid-filter',
+    });
+  });
+
   it('refuses an unreadable group token instead of reading the whole table', async () => {
     const resolved = await reader.resolvePageRead(
       paramsFor({ group: 'not json' }),

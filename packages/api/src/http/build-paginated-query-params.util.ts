@@ -1,5 +1,7 @@
 import type { PaginatedQuery } from './http.types.ts';
 
+import { COLUMN_FILTERS_PARAM } from '../filters/filters.constants.ts';
+
 export const buildPaginatedQueryParams = ({
   cursor,
   filter,
@@ -20,8 +22,8 @@ export const buildPaginatedQueryParams = ({
     params.append('cursor', JSON.stringify(cursor));
   }
 
-  if (filter && typeof filter === 'object' && Object.keys(filter).length > 0) {
-    params.append('filter', JSON.stringify(filter));
+  if (filter && Object.keys(filter).length > 0) {
+    params.append(COLUMN_FILTERS_PARAM, JSON.stringify(filter));
   }
 
   return params;

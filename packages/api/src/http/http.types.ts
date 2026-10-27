@@ -1,3 +1,5 @@
+import type { ColumnFilters } from '../filters/filters.types.ts';
+
 /**
  * What a fetcher built by `createPaginatedFetcher` accepts: the query itself plus the
  * per-call concerns the factory cannot know statically.
@@ -14,7 +16,7 @@ export type PaginatedFetchArgs = PaginatedQuery & {
 export type PaginatedQuery = {
   /** Sort-key tuple of the last row loaded, in `sorting` order, for an endpoint that can seek past it. */
   readonly cursor?: readonly unknown[];
-  readonly filter?: unknown;
+  readonly filter?: ColumnFilters;
   readonly limit: number;
   /** Rows already loaded — not an offset past `cursor`, which is sent alongside it and may be ignored. */
   readonly skip: number;

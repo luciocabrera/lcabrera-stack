@@ -1,3 +1,5 @@
+import type { ColumnFiltersRefusal } from '@lcabrera/api/filters/filters.types';
+
 import type {
   AggregateFn,
   GroupCardinalityWarning,
@@ -43,6 +45,16 @@ export type TablePageParams = {
   readonly skip: number;
   readonly sort: readonly QuerySort[];
 };
+
+export type TablePageParamsRefusal = {
+  readonly kind: 'refused';
+  readonly message: string;
+  readonly reason: ColumnFiltersRefusal['reason'];
+};
+
+export type TablePageParamsResolution =
+  | TablePageParamsRefusal
+  | { readonly kind: 'parsed'; readonly params: TablePageParams };
 
 export type TablePageRead = {
   /** One value per `sort` entry, from the last row of the previous page. */
