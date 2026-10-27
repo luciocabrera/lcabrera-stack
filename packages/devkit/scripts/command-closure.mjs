@@ -31,10 +31,14 @@ import {
   PROFILES,
   targetPathFor,
 } from './config.mjs';
-import { gateBinNames, tasksFor } from './init.mjs';
+import { GATE_TASKS, gateBinNames, tasksFor } from './init.mjs';
 import { isRetirement } from './manifest.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
-import { WORKSPACE_DEPENDENCIES, workspaceScriptsFor } from './workspace.mjs';
+import {
+  BLUEPRINT_TASK_NAMES,
+  WORKSPACE_DEPENDENCIES,
+  workspaceScriptsFor,
+} from './workspace.mjs';
 
 const MANIFEST_NAME = 'package.json';
 
@@ -94,11 +98,6 @@ const runPrefixesFor = (config) => {
     : RUNNER_PREFIXES;
 };
 
-/**
- * @param {{ config: object, entries: { path: string, content: string }[],
- *   runPrefixes: readonly string[] }} args
- * @returns {string[]}
- */
 const configuredTasks = ({ config, runPrefixes }) =>
   taskInvocations({
     lines: Object.values(config.commands ?? {})
@@ -107,36 +106,49 @@ const configuredTasks = ({ config, runPrefixes }) =>
     prefixes: runPrefixes,
   }).map((invocation) => invocation.task);
 
-const definedTasks = ({ config, entries, runPrefixes }) => {
-  const references = commandReferencePaths(config);
-  return [
-    ...Object.keys(tasksFor({ profile: config.profile })),
-    ...Object.keys(workspaceScriptsFor({ profile: config.profile })),
-    ...configuredTasks({ config, runPrefixes }),
-    ...entries
-      .filter((entry) => references.has(entry.path))
-      .flatMap((entry) =>
-        extractTaskInvocations({
-          content: entry.content,
-          prefixes: runPrefixes,
-        }).map((invocation) => invocation.task),
-      ),
-  ];
-};
+const KIT_TASK_NAMES = new Set([
+  ...Object.keys(GATE_TASKS),
+  ...BLUEPRINT_TASK_NAMES,
+]);
+
+const documentedTasks = ({ entries, references, runPrefixes }) =>
+  entries
+    .filter((entry) => references.has(entry.path))
+    .flatMap((entry) =>
+      extractTaskInvocations({
+        content: entry.content,
+        prefixes: runPrefixes,
+      }).map((invocation) => invocation.task),
+    )
+    .filter((task) => !KIT_TASK_NAMES.has(task));
+
+/**
+ * @param {{ config: object, entries: { path: string, content: string }[],
+ *   references: Set<string>, runPrefixes: readonly string[] }} args
+ * @returns {string[]}
+ */
+const definedTasks = ({ config, entries, references, runPrefixes }) => [
+  ...Object.keys(tasksFor({ profile: config.profile })),
+  ...Object.keys(workspaceScriptsFor({ profile: config.profile })),
+  ...configuredTasks({ config, runPrefixes }),
+  ...documentedTasks({ entries, references, runPrefixes }),
+];
 
 const shippedContext = ({ profile, root }) => {
   const { config, entries: planned } = buildPlan({ profile, root });
   const entries = planned.filter((entry) => !isRetirement(entry.state));
   const runPrefixes = runPrefixesFor(config);
+  const references = commandReferencePaths(config);
   return {
     agentDirectory: config.paths.agents,
     allowedBins: gateBinNames(),
     allowedCommands: [...BASELINE_COMMANDS, ...configuredCommandWords(config)],
     allowedPackages: providedPackages({ entries, profile }),
-    allowedTasks: definedTasks({ config, entries, runPrefixes }),
+    allowedTasks: definedTasks({ config, entries, references, runPrefixes }),
     configKeys: allowedConfigKeys(config),
     entries,
     hookDirectory: config.paths.hooks,
+    references,
     runPrefixes,
     shipped: new Set(entries.map((entry) => entry.path)),
   };
@@ -152,6 +164,7 @@ const shippedEscapes = ({ profile, root }) => {
     configKeys,
     entries,
     hookDirectory,
+    references,
     runPrefixes,
     shipped,
   } = shippedContext({ profile, root });
@@ -175,7 +188,13 @@ const shippedEscapes = ({ profile, root }) => {
     shipped,
   });
 
-  return { escapes, fileCount: files.length, unchecked };
+  return {
+    escapes: escapes.filter(
+      (finding) => finding.kind !== 'task' || !references.has(finding.file),
+    ),
+    fileCount: files.length,
+    unchecked,
+  };
 };
 
 const shippedResults = ({ profile, root }) =>

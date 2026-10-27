@@ -256,17 +256,44 @@ describe('a shipped instruction running a task the receiving repository lacks', 
       `${JSON.stringify({
         commands: {
           audit: 'pnpm audit --audit-level moderate',
-          check: 'pnpm run check',
+          check: 'pnpm run verify-everything',
           install: 'pnpm install --frozen-lockfile',
           run: 'pnpm run',
           test: 'pnpm run test',
         },
       })}\n`,
     );
+    appendTo(skill(root), '\nRun `{{commands.check}}` before you push.\n');
     const { stderr, stdout } = shippedClosure(root, 'repo');
 
     expect(`${stdout}${stderr}`).toContain('repo — ');
     expect(stderr).not.toContain('runs the undefined task');
+  });
+
+  test.each([
+    ['repo', 'typecheck:all'],
+    ['repo', 'commands:verify'],
+    ['agent', 'adr:verify'],
+  ])(
+    'is reported at %s for %s, which only a higher rung wires',
+    (profile, task) => {
+      const root = copyOfPackage();
+      appendTo(skill(root), `\nRun \`npm run ${task}\`.\n`);
+      const { status, stderr } = shippedClosure(root, profile);
+
+      expect(status).toBe(1);
+      expect(stderr).toContain(`runs the undefined task ${task}`);
+    },
+  );
+
+  test('passes the same task at the rung that wires it', () => {
+    const root = copyOfPackage();
+    appendTo(
+      skill(root),
+      '\nRun `npm run typecheck:all` and `npm run commands:verify`.\n',
+    );
+
+    expect(shippedClosure(root, 'monorepo').status).toBe(0);
   });
 
   test('is reported after the configured runner is substituted in', () => {
