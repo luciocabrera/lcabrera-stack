@@ -3,18 +3,19 @@ id: build-an-api-from-the-server-packages
 lines:
   - application
 persona: application-developer
-state: unmet
+state: met
 packages:
   - server
   - utils
 requires: []
-issues:
-  - 1001
+issues: []
 evidence:
   - type: doc
     ref: packages/server/README.md
-  - type: doc
-    ref: packages/utils/README.md
+  - type: test
+    ref: packages/server/src/table-page/create-table-page-loader.http.test.ts
+  - type: command
+    ref: vp run test:ci
   - type: code
     ref: packages/server/src/errors/to-serializable-db-error.util.ts
 ---
@@ -42,9 +43,21 @@ supported at all.
 
 ## Notes
 
-`packages/server/README.md` documents the pieces well and shows fragments —
-reading a page of rows, taking column names from a request, mapping a driver
-error — but every fragment stops at the data layer, so the step a reader
-actually has to take, from those calls to something serving a response, is the
-one nothing shows. The gap is the composition and the statement that it is
-supported, not the exports.
+The example is the "Serve an HTTP API" section of `packages/server/README.md`:
+an endpoint from a Web `Request` to a `Response`, and a `node:http` server for
+it. Its own test copies that section's two code blocks out of the README, imports
+them with only `pg` replaced, and makes real HTTP requests. A change that breaks
+the example as written, or lets driver text into a response, fails `test:ci`.
+That was checked by making the README's `handle` return the driver error, by
+deleting its pool listener, and by renaming one block; each failed the test.
+
+`@lcabrera/api` installs with `@lcabrera/server`, which depends on it for the
+filter wire shape, but the example imports nothing from it.
+
+The two things the example works around are filed rather than built into it: a
+column outside `allowedColumns` is refused with an untyped error, so it reads as
+a server fault
+([#1524](https://github.com/luciocabrera/lcabrera-stack/issues/1524)), and the
+pool `getPool` returns has no `error` listener, so an idle-connection failure
+stops the process unless the consumer attaches one
+([#1523](https://github.com/luciocabrera/lcabrera-stack/issues/1523)).

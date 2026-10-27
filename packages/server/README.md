@@ -93,6 +93,9 @@ optional `tx` and translates driver rejections (see the two sections below).
 | `persistence.error`                 | `PersistenceError` — the base class and the fallback                          |
 | `unique-constraint-violation.error` | `23505`; `fields.constraint` names the index                                  |
 | `foreign-key-violation.error`       | `23503`; `fields.constraint` tells the insert and delete directions apart     |
+| `query-canceled.error`              | `57014`; the statement was stopped, by `statement_timeout` or a cancel        |
+| `grouping-refused.error`            | A grouped read this package refused, with a `reason`; not a driver error      |
+| `to-serializable-db-error.util`     | Anything thrown → `SerializableDbError`, plain data safe to put in a response |
 | `has-postgres-error-code.util`      | Narrows `unknown` to a pg rejection with any SQLSTATE you name                |
 | `errors.types`                      | `PgErrorFields` — the `code`/`column`/`constraint` a translated error carries |
 
@@ -123,16 +126,22 @@ request carries, and the mapper into the `QuerySort[]` the builders consume.
 
 ### Table pages — `@lcabrera/server/table-page/*`
 
-A grid's reads over one table: the parse of a page request, the page read, the
-grouped read and the handler that answers a page request.
+One table declared once, and the reads and request handlers bound to it. The
+handlers take a Web `Request` and return a `Response`, so they need no
+framework.
 
-| Import                           | What it does                                                                                                        |
-| -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `create-table-page-reader.util`  | Takes a schema, a table, its columns and a primary key; returns the reads, a `pageLoader` and a `source` for a grid |
-| `create-table-page-loader.util`  | A `({ request }) => Response` that answers a page request, or a refused one with an empty flagged page              |
-| `create-table-loader-reads.util` | The first-page `fetchPage` and grouping-capability read a route loader takes                                        |
-| `parse-table-page-params.util`   | A page request's search params → window, sort, cursor and filters, or a typed refusal                               |
-| `to-refused-table-page.util`     | The empty page that carries a refusal message instead of rows                                                       |
+| Import                           | What it does                                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create-table-page-reader.util`  | Schema, table, columns and primary key in → `selectPage`, `resolvePageRead` and the rest, a `pageLoader` and a grid `source`; every limit has a default |
+| `create-table-page-loader.util`  | A reader's `resolvePageRead` and `selectPage` → `({ request }) => Promise<Response>` with the page                                                      |
+| `parse-table-page-params.util`   | `limit`/`skip`/`cursor`/`filter`/`sort` search params → the params, or a refusal of the `filter`                                                        |
+| `create-row-delete-action.util`  | `({ request }) => Promise<Response>` that deletes the row a `{ intent: 'delete', id }` form names                                                       |
+| `create-table-loader-reads.util` | The first page's read for a table, from its sort, filters and grouping                                                                                  |
+| `create-group-detail-reads.util` | The reads for a page that opens one group's rows                                                                                                        |
+| `to-integer-row-id.util`         | A form value → a positive safe integer, or `undefined`                                                                                                  |
+| `to-refused-table-page.util`     | The empty page that carries a refusal message instead of rows                                                                                           |
+| `to-keyset-cursor.util`          | A client cursor → `QueryCursor` when it matches the sort and ends on a unique column, else offset                                                       |
+| `table-page.types`               | `TablePage`, `TablePageRead`, `TablePageTarget` and the other shapes the factories share                                                                |
 
 ### Credentials — `@lcabrera/server/crypto/*`, `/tokens/*`, `/tickets/*`
 
@@ -381,6 +390,229 @@ Passing the **requested** subject rather than one parsed out of the ticket is wh
 makes the check meaningful: a valid ticket for a different subject fails. The
 caller supplies `expiresAt` and `now`, which keeps both functions pure and makes
 expiry trivially testable.
+
+## Serve an HTTP API
+
+This package and `@lcabrera/utils` are enough to put an HTTP API over a Postgres
+table. No interface package is involved: you do not install `@lcabrera/ui` or
+any component library, and you do not need a web framework. `@lcabrera/api`
+installs with this package, because it declares the filter shapes a request
+carries, but the example below does not import it.
+
+```bash
+npm install @lcabrera/server @lcabrera/utils
+```
+
+Install `@lcabrera/utils` directly even though this package depends on it: the
+example imports it, and a strict package manager such as pnpm does not let you
+import a dependency you did not declare.
+
+The example is two files. `api.ts` is the endpoint, a function from a Web
+`Request` to a `Response`, which is the shape Node, Deno, Bun and most routers
+can call. `server.ts` serves it with `node:http`. The pool opens on the first
+query, configured from `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` and
+`DB_PASSWORD` (`readEnvConfig` in `db/env.schema` lists the optional pool
+settings).
+
+```ts
+// api.ts
+import { insertRow } from '@lcabrera/server/db/insert-row.util';
+import { toSerializableDbError } from '@lcabrera/server/errors/to-serializable-db-error.util';
+import { UniqueConstraintViolationError } from '@lcabrera/server/errors/unique-constraint-violation.error';
+import { createTablePageLoader } from '@lcabrera/server/table-page/create-table-page-loader.util';
+import { createTablePageReader } from '@lcabrera/server/table-page/create-table-page-reader.util';
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
+import { safeJsonParse } from '@lcabrera/utils/json/safe-json-parse.util';
+
+type Item = {
+  readonly id: number;
+  readonly name: string;
+  readonly status: string;
+};
+
+const TARGET = {
+  allowedColumns: ['id', 'name', 'status'],
+  schema: 'catalog',
+  table: 'items',
+};
+
+const items = createTablePageReader<Item, 'id'>({
+  defaultLimit: 50,
+  fallbackSort: [{ columnKey: 'id', direction: 'asc' }],
+  groupMaxRows: 5000,
+  maxLimit: 500,
+  primaryKey: 'id',
+  target: TARGET,
+});
+
+const readItemsPage = createTablePageLoader(items);
+
+const STATUS_BY_KIND = {
+  'db-canceled': 503,
+  'db-failed': 500,
+  'grouping-refused': 422,
+  unexpected: 500,
+} as const;
+
+const toErrorResponse = (thrown: unknown) => {
+  const error = toSerializableDbError(thrown);
+  const status =
+    thrown instanceof UniqueConstraintViolationError
+      ? 409
+      : STATUS_BY_KIND[error.kind];
+
+  return Response.json({ error }, { status });
+};
+
+const readNewItem = async (request: Request) => {
+  const body = safeJsonParse(await request.text());
+
+  return isObject(body) && typeof body.name === 'string'
+    ? { name: body.name, status: 'draft' }
+    : undefined;
+};
+
+const createItem = async (request: Request) => {
+  const values = await readNewItem(request);
+
+  if (values === undefined) {
+    return Response.json(
+      { error: { kind: 'invalid-body', message: 'Send { "name": string }.' } },
+      { status: 400 },
+    );
+  }
+
+  const [item] = await insertRow<Item>({ ...TARGET, values });
+
+  return Response.json(item, { status: 201 });
+};
+
+const route = async (request: Request) => {
+  switch (request.method) {
+    case 'GET': {
+      return readItemsPage({ request });
+    }
+    case 'POST': {
+      return createItem(request);
+    }
+    default: {
+      return new Response(undefined, {
+        headers: { allow: 'GET, POST' },
+        status: 405,
+      });
+    }
+  }
+};
+
+export const handle = async (request: Request) => {
+  if (new URL(request.url).pathname !== '/items') {
+    return new Response(undefined, { status: 404 });
+  }
+
+  try {
+    return await route(request);
+  } catch (error) {
+    console.error(error);
+
+    return toErrorResponse(error);
+  }
+};
+```
+
+```ts
+// server.ts
+import type { IncomingMessage, ServerResponse } from 'node:http';
+
+import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
+import { parsePositiveInteger } from '@lcabrera/utils/numbers/parse-positive-integer.util';
+import { createServer } from 'node:http';
+import { text } from 'node:stream/consumers';
+
+import { handle } from './api.ts';
+
+const toRequest = async (incoming: IncomingMessage) => {
+  const url = new URL(incoming.url ?? '/', 'http://localhost');
+  const method = incoming.method ?? 'GET';
+  const hasBody = method !== 'GET' && method !== 'HEAD';
+
+  return new Request(url, {
+    method,
+    ...(hasBody && { body: await text(incoming) }),
+  });
+};
+
+const serve = async (incoming: IncomingMessage, outgoing: ServerResponse) => {
+  try {
+    const response = await handle(await toRequest(incoming));
+
+    outgoing.writeHead(response.status, Object.fromEntries(response.headers));
+    outgoing.end(await response.text());
+  } catch {
+    outgoing.destroy();
+  }
+};
+
+getPool().on('error', (error) => {
+  console.error('An idle database connection failed.', error);
+});
+
+export const server = createServer((incoming, outgoing) => {
+  void serve(incoming, outgoing);
+});
+
+server.listen(
+  parsePositiveInteger({ fallback: 3000, value: process.env.PORT }),
+);
+
+process.once('SIGTERM', () => {
+  server.close(() => {
+    void closePool();
+  });
+});
+```
+
+`GET /items` reads the search params a paginated request already uses:
+`limit`, `skip`, `cursor`, `sort` and a JSON `filter`. It answers
+`{ data, hasMore }`, plus `total` on the first page. Page size is clamped to
+`maxLimit`, and a request that sorts by nothing gets `fallbackSort`. A `filter`
+the package cannot read, or one it refuses, gets a 200 with an empty page whose
+`error` says why. It never becomes a read of the whole table. `POST /items`
+inserts a row and returns it. `toRequest` passes on the method, the URL and the
+body, which is all these two routes read; pass `incoming.headers` through as
+well if your handler reads a header.
+
+### The error contract
+
+A raw driver error never reaches a response. A `pg` error message names your
+tables, columns and indexes, and its `detail` line quotes the values that
+collided, so three steps keep it out:
+
+1. Every executor translates a driver rejection into a `PersistenceError`
+   subclass before your code sees it. Its message is written by this package;
+   the driver's error stays on `cause`.
+2. `toSerializableDbError` turns whatever was thrown into plain data: a `kind`,
+   that message and, for a database failure, the SQLSTATE `code`. Anything it
+   does not recognise, your own code's errors included, becomes `unexpected`
+   with a fixed message.
+3. `handle` catches everything `route` throws and puts only that plain data in
+   the body. The full error, `cause` included, goes to the server log.
+
+The status codes are this example's choice, not the package's: 409 for a
+unique-key conflict, 503 when `statement_timeout` stopped the query, 422 for a
+grouped read the package refused, and 500 for anything else.
+
+Two gaps in the package show in the example, and each has an issue open:
+
+- A request that filters or sorts on a column `allowedColumns` does not list is
+  refused with a plain `Error`, so it answers 500 `unexpected` where a 4xx is
+  due. The column name still stays out of the body.
+  [#1524](https://github.com/luciocabrera/lcabrera-stack/issues/1524)
+  tracks a typed refusal.
+- `server.ts` attaches an `error` listener to the pool. `pg` emits `error` on
+  the pool when an idle connection fails, for example when the database
+  restarts, and with no listener that event stops the Node process.
+  [#1523](https://github.com/luciocabrera/lcabrera-stack/issues/1523)
+  tracks the pool handling it itself.
 
 ## Guarantees
 
