@@ -8,7 +8,7 @@ import { QueryRefusedError } from './query-refused.error.ts';
 import { toSerializableDbError } from './to-serializable-db-error.util.ts';
 
 describe('toSerializableDbError', () => {
-  it('maps a refusal with the reason, the column and the bound', () => {
+  it('maps a grouping refusal through its fixed sentence, keeping a vetted column and the bound', () => {
     expect(
       toSerializableDbError(
         new GroupingRefusedError({
@@ -18,28 +18,31 @@ describe('toSerializableDbError', () => {
           reason: 'estimate-too-large',
         }),
       ),
-    ).toEqual({
+    ).toStrictEqual({
       column: 'city',
       estimatedRows: 120_000,
       kind: 'grouping-refused',
-      message: 'This grouping is estimated to return 120000 rows.',
+      message:
+        'This grouping is estimated to return more rows than the read allows. Group by fewer columns or filter the rows down.',
       reason: 'estimate-too-large',
     });
   });
 
-  it('omits the optional fields a refusal did not name', () => {
-    expect(
-      toSerializableDbError(
-        new GroupingRefusedError({
-          message: 'too deep',
-          reason: 'too-many-keys',
-        }),
-      ),
-    ).toEqual({
+  it('serialises a grouping refusal of an unlisted column without naming it', () => {
+    const mapped = toSerializableDbError(
+      new GroupingRefusedError({
+        column: 'hidden_note',
+        message:
+          'Column "hidden_note" is not in the allowed list for this query.',
+        reason: 'unknown-column',
+      }),
+    );
+
+    expect(mapped).toMatchObject({
       kind: 'grouping-refused',
-      message: 'too deep',
-      reason: 'too-many-keys',
+      reason: 'unknown-column',
     });
+    expect(JSON.stringify(mapped)).not.toContain('hidden_note');
   });
 
   it('maps a refused query to its reason and a fixed message that omits the column', () => {

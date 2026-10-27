@@ -324,7 +324,8 @@ describe('selectPage — groups', () => {
       data: [],
       error: {
         kind: 'grouping-refused',
-        message: 'too deep',
+        message:
+          'The request named more group keys than this kind of grouping takes.',
         reason: 'too-many-keys',
       },
       hasMore: false,
