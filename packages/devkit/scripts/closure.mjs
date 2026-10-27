@@ -10,9 +10,13 @@
  * place, a `secret` a value only their repository settings can supply, a
  * `requires` a config key no consumer could set, and a `missing` a script run
  * by a command that exists nowhere at all.
+ *
+ * A file no resolver reads is returned as `unchecked` rather than dropped: the
+ * analysis finds nothing in it for the same reason it finds nothing in a file
+ * that is genuinely self-contained, so only naming it tells the two apart.
  */
 
-import { artifactEscapes } from './closure-artifacts.mjs';
+import { artifactEscapes, artifactReaders } from './closure-artifacts.mjs';
 import {
   classifyImport,
   classifyLink,
@@ -43,8 +47,18 @@ const SOURCE_EXTENSIONS = [
   '.tsx',
 ];
 
+const MARKDOWN_EXTENSIONS = ['.md', '.mdx'];
+
 const isSourceFile = (path) =>
   SOURCE_EXTENSIONS.some((extension) => path.endsWith(extension));
+
+const isMarkdownFile = (path) =>
+  MARKDOWN_EXTENSIONS.some((extension) => path.endsWith(extension));
+
+const isRead = ({ agentDirectory, file, hookDirectory }) =>
+  isMarkdownFile(file.path) ||
+  isSourceFile(file.path) ||
+  artifactReaders({ agentDirectory, file, hookDirectory }).length > 0;
 
 const KEY_SEPARATOR = String.fromCodePoint(0);
 
@@ -91,6 +105,7 @@ const toRequiresEscapes = ({ allowedKeys, file }) =>
  *   allowedConfigKeys?: Iterable<string>,
  *   allowedPackages?: Iterable<string>,
  *   exists?: (repoRelativePath: string) => boolean,
+ *   hookDirectory?: string,
  *   shipped?: Set<string> }} args
  */
 export const analyseClosure = ({
@@ -101,6 +116,7 @@ export const analyseClosure = ({
   allowedPackages = [],
   exists,
   files,
+  hookDirectory,
   rootDirectory,
   shipped = new Set(),
 }) => {
@@ -199,8 +215,14 @@ export const analyseClosure = ({
       },
       exists,
       file,
+      hookDirectory,
     }),
   );
+
+  const unchecked = files
+    .filter((file) => !isRead({ agentDirectory, file, hookDirectory }))
+    .map((file) => file.path)
+    .toSorted((left, right) => left.localeCompare(right));
 
   return {
     escapes: dedupe([
@@ -211,5 +233,6 @@ export const analyseClosure = ({
       ...requiresEscapes,
       ...otherEscapes,
     ]),
+    unchecked,
   };
 };
