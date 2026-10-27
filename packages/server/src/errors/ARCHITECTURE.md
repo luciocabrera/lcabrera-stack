@@ -13,6 +13,8 @@ There are two families here, and the split matters:
   `QueryRefusedError`. It is thrown directly for a column outside
   `allowedColumns` or a keyset cursor that does not match its sort
   ([ADR-145](../../../../docs/decisions/ADR-145-refuse-a-column-outside-allowedcolumns-with-a-typed-error.md)),
+  and for a join or a group filter the builder will not build
+  ([ADR-143](../../../../docs/decisions/ADR-143-join-along-a-foreign-key-and-filter-a-flat-grouped-result.md)),
   and `GroupingRefusedError` extends it for a grouped read, adding the
   estimated rows
   ([ADR-066](../../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md)).

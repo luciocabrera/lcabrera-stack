@@ -104,4 +104,41 @@ describe('getRowsCount', () => {
       [],
     );
   });
+
+  it('counts over a join with a relation map the caller passed, asking the catalogue nothing', async () => {
+    query.mockResolvedValue({ rows: [{ count: '3' }] });
+
+    const count = await getRowsCount({
+      allowedColumns: ['vendor_id'],
+      column: { column: 'id', source: 'vendor' },
+      joins: [
+        {
+          alias: 'vendor',
+          allowedColumns: ['id'],
+          foreignKey: ['vendor_id'],
+          kind: 'inner',
+        },
+      ],
+      relations: [
+        {
+          columns: ['vendor_id'],
+          referencedColumns: ['id'],
+          referencedSchema: 'catalog',
+          referencedTable: 'vendors',
+          schema: 'catalog',
+          table: 'items',
+        },
+      ],
+      schema: 'catalog',
+      table: 'items',
+    });
+
+    expect(count).toBe(3);
+    expect(query).toHaveBeenCalledOnce();
+    expect(query).toHaveBeenCalledWith(
+      'SELECT count("vendor"."id") AS count FROM "catalog"."items" ' +
+        'INNER JOIN "catalog"."vendors" AS "vendor" ON "items"."vendor_id" = "vendor"."id"',
+      [],
+    );
+  });
 });

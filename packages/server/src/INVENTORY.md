@@ -25,7 +25,7 @@ split this folder is built around.
 | `withTransaction`               | `db/with-transaction.util.ts`                 | Borrows a pooled connection and runs a callback inside BEGIN/COMMIT/ROLLBACK, always releasing it — thread its `tx` through every executor in the sequence (ADR-051)                                                                                                                                                                                                                                                                                                                                                                                    |
 | `runInTransaction`              | `db/run-in-transaction.util.ts`               | The same BEGIN/COMMIT/ROLLBACK over a connection the **caller** owns; opens and closes nothing (the migration runner's case)                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `ExecutorOptions`               | `db/db.types.ts`                              | The optional `tx` seam every executor accepts, plus `TransactionClient` (pg's `ClientBase`) — kept off the pure `query-builder/` descriptors on purpose                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `selectRows`                    | `db/select-rows.util.ts`                      | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place a row read meets `getPool`                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `selectRows`                    | `db/select-rows.util.ts`                      | Builds a `SelectQueryDescriptor` and runs it on the pool — the one place a row read meets `getPool`. A read with `joins` and no `relations` reads the relation map first                                                                                                                                                                                                                                                                                                                                                                                |
 | `selectDistinctRows`            | `db/select-distinct-rows.util.ts`             | `selectRows` + `distinct: true` — deduplicated rows over the same descriptor                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `selectGroupedRows`             | `db/select-grouped-rows.util.ts`              | Resolves the group keys' and aggregate columns' capabilities, builds the `GROUPING SETS` query from that answer and runs it — the analytical sibling of `selectRows`, returning the decode metadata beside the rows. Checks depth before any round trip, and runs inside a transaction carrying its own `statement_timeout` (ADR-066). When `columnAxis` is set, discovers distinct values then emits one `FILTER` aggregate per value (ADR-123)                                                                                                        |
 | `selectColumnAxisValues`        | `db/select-column-axis-values.util.ts`        | Private. Capped `SELECT DISTINCT` of one column, same filters as the grouped read, refusing past `maxDistinct` by name. `assertColumnAxisMaxDistinct` (`assert-column-axis-max-distinct.util.ts`) runs first so a zero ceiling never becomes `LIMIT`. `toColumnAxisDiscoveryLimit` (`to-column-axis-discovery-limit.util.ts`) is the DISTINCT `LIMIT`: min(caller ceiling, heap fit) + 1, with the unexpanded `count(*)` reserved as a fixed attribute rather than multiplied by axis values. SQL NULL becomes `undefined`. Used by `selectGroupedRows` |
@@ -37,17 +37,21 @@ split this folder is built around.
 | `getMaxValue`                   | `db/get-max-value.util.ts`                    | Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty) — generic "next id" for id assignment                                                                                                                                                                                                                                                                                                                                                                                                                                         |
 | `getRowsCount`                  | `db/get-rows-count.util.ts`                   | Runs a `count: true` read and returns the row count; requires an explicit `column` (never `count(*)`) — pass the data query's filters so a page and its total share them                                                                                                                                                                                                                                                                                                                                                                                |
 | `getColumnGroupingCapabilities` | `db/get-column-grouping-capabilities.util.ts` | Per column: may it be a group key (and if not, which of five reasons), and which aggregates are legal for its real Postgres type — one catalogue round trip, ADR-058                                                                                                                                                                                                                                                                                                                                                                                    |
+| `getForeignKeyRelations`        | `db/get-foreign-key-relations.util.ts`        | The relation map a read with `joins` is built against: every foreign key declared on the base target and on the tables its keys reach, as deep as the join chain — one catalogue round trip, ADR-143                                                                                                                                                                                                                                                                                                                                                    |
+| `resolveReadRelations`          | `db/resolve-read-relations.util.ts`           | Private. The relation map a read needs: the caller's, none for a read without `joins`, or `getForeignKeyRelations` otherwise. Used by `selectRows`, `getRowsCount` and `selectGroupedRows`                                                                                                                                                                                                                                                                                                                                                              |
+| `getReadGroupingCapabilities`   | `db/get-read-grouping-capabilities.util.ts`   | Private. `getColumnGroupingCapabilities` per source a grouped read names, with a joined column's entry keyed `<alias>.<column>`. Used by `selectGroupedRows`                                                                                                                                                                                                                                                                                                                                                                                            |
 
 ### `src/db/query-builder/` — see its own `ARCHITECTURE.md`
 
-Generic, schema/table-agnostic SQL builder for the common single-table
-read **and** write shapes.
+Generic, schema/table-agnostic SQL builder for the common read **and** write
+shapes. A read may join along a declared foreign key (ADR-143).
 
 - **Reads:** `buildReadQuery` (`build-read-query.util.ts`) is the one query entry
   point. A single descriptor carries fields, filters, sort, pagination
   (`limit`/`offset`, or a keyset `cursor`, ADR-052), `distinct`, `count: true`
   for a total, or `aggregates`/`grouping`/`keys` for a grouped read, and the
-  return type follows the shape. It composes the private `buildRowsRead`
+  return type follows the shape. `joins` and `relations` reach further tables,
+  and a grouped read takes `groupFilters` (ADR-143). It composes the private `buildRowsRead`
   (`build-rows-read.util.ts`), `buildCountRead` (`build-count-read.util.ts`) and
   `buildGroupedRead` (`../group-query-builder/build-grouped-read.util.ts`).
   `buildSelectQuery`, `buildDistinctQuery`, `buildCountQuery` and
@@ -61,9 +65,12 @@ read **and** write shapes.
 
 plus the shared `query-builder.types.ts` types. Every other file in that
 folder (`assertSafeIdentifier`, `assertColumnAllowed`, `assertKeysetCursor`,
-`appendFilterClause`, `buildWhereClause`, `buildKeysetClause`,
-`buildKeysetBranch`, `buildKeysetComparison`, `buildReturningClause`,
-`buildOrderByClause`, `buildOptionalNumericClauses`, `quoteIdentifier`) is a private,
+`appendFilterClause`, `appendComparisonClause`, `buildWhereClause`,
+`buildKeysetClause`, `buildKeysetBranch`, `buildKeysetComparison`,
+`buildReturningClause`, `buildOrderByClause`, `buildOptionalNumericClauses`,
+`quoteIdentifier`, `resolveReadScope`, `resolveJoinRelation`, `buildJoinClause`,
+`resolveColumnReference`, `buildProjectedColumn`, `toColumnName`,
+`isSameColumnReference`, `buildForeignKeyRelationsQuery`) is a private,
 individually-tested implementation detail composed by those builders —
 import them directly only from within `query-builder/`.
 
@@ -116,7 +123,8 @@ which is how a pure function enforces ADR-058. Everything it composes
 `resolveAggregateAlias`,
 `expandColumnAxisAggregates`, `toColumnAxisAlias`, `isUnexpandedLeadingCount`,
 `toExpandingMeasureCount`, `buildAggregateProjection`,
-`buildGroupingSetsClause`, `buildGroupOrderByClause`, `collectCapabilityColumns`)
+`buildGroupingSetsClause`, `buildGroupOrderByClause`, `collectCapabilityColumns`,
+`resolveGroupKeyColumns`, `assertGroupFilters`, `buildHavingClause`)
 is a private,
 individually-tested implementation detail — import those directly only from
 within `group-query-builder/`.

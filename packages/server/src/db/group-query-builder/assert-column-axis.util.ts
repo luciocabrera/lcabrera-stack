@@ -1,9 +1,14 @@
 import type {
+  ColumnReference,
+  ReadScope,
+} from '../query-builder/query-builder.types.ts';
+import type {
   ColumnAxis,
   ColumnGroupingCapability,
 } from './group-query-builder.types.ts';
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
+import { toColumnName } from '../query-builder/to-column-name.util.ts';
 import { assertColumnAxisKey } from './assert-column-axis-key.util.ts';
 import { assertColumnAxisMaxDistinct } from './assert-column-axis-max-distinct.util.ts';
 import { POSTGRES_MAX_HEAP_ATTRIBUTES } from './group-query-builder.constants.ts';
@@ -13,8 +18,9 @@ type AssertColumnAxisArgs = {
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
   readonly columnAxis: ColumnAxis;
   readonly fixedAggregateCount?: number;
-  readonly keys: readonly string[];
+  readonly keys: readonly ColumnReference[];
   readonly measureCount: number;
+  readonly scope?: ReadScope;
 };
 
 export const assertColumnAxis = ({
@@ -24,11 +30,19 @@ export const assertColumnAxis = ({
   fixedAggregateCount = 0,
   keys,
   measureCount,
+  scope,
 }: AssertColumnAxisArgs) => {
-  const { key, maxDistinct, values } = columnAxis;
+  const { maxDistinct, values } = columnAxis;
+  const key = toColumnName(columnAxis.key);
 
   assertColumnAxisMaxDistinct(maxDistinct);
-  assertColumnAxisKey({ allowedColumns, capabilities, key, keys });
+  assertColumnAxisKey({
+    allowedColumns,
+    capabilities,
+    key: columnAxis.key,
+    keys,
+    scope,
+  });
 
   if (values.length > maxDistinct) {
     throw new GroupingRefusedError({

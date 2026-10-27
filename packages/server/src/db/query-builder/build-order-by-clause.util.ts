@@ -1,16 +1,20 @@
-import type { QuerySort } from './query-builder.types.ts';
+import type {
+  ColumnReference,
+  QuerySort,
+  ReadScope,
+} from './query-builder.types.ts';
 
-import { assertColumnAllowed } from './assert-column-allowed.util.ts';
-import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
-import { quoteIdentifier } from './quote-identifier.util.ts';
+import { resolveColumnReference } from './resolve-column-reference.util.ts';
 
 type BuildOrderByClauseArgs = {
   readonly allowedColumns?: readonly string[];
-  readonly sort?: readonly QuerySort[];
+  readonly scope?: ReadScope;
+  readonly sort?: readonly QuerySort<ColumnReference>[];
 };
 
 export const buildOrderByClause = ({
   allowedColumns,
+  scope,
   sort = [],
 }: BuildOrderByClauseArgs): string => {
   if (sort.length === 0) {
@@ -18,11 +22,14 @@ export const buildOrderByClause = ({
   }
 
   const clauses = sort.map(({ column, direction }) => {
-    assertSafeIdentifier(column);
-    assertColumnAllowed({ allowedColumns, column });
-
     const directionSql = direction === 'desc' ? 'DESC' : 'ASC';
-    return `${quoteIdentifier(column)} ${directionSql}`;
+    const { sql } = resolveColumnReference({
+      allowedColumns,
+      reference: column,
+      scope,
+    });
+
+    return `${sql} ${directionSql}`;
   });
 
   return `ORDER BY ${clauses.join(', ')}`;

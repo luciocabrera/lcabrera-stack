@@ -2,7 +2,9 @@ import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
 import { describe, expect, it } from 'vite-plus/test';
 
 import type { BuiltGroupAggregate } from '../group-query-builder/group-query-builder.types';
+import type { ColumnReference } from '../query-builder/query-builder.types';
 
+import { toColumnName } from '../query-builder/to-column-name.util';
 import {
   decodeGroupedRows,
   toGroupAggregates,
@@ -14,13 +16,18 @@ const REQUESTED = [
   { column: 'quantity', fn: 'avg' },
 ] as const;
 
-const alias = (aggregate: { readonly column?: string; readonly fn: string }) =>
+type EmittedAggregate = {
+  readonly column?: ColumnReference;
+  readonly fn: string;
+};
+
+const alias = (aggregate: EmittedAggregate) =>
   aggregate.column === undefined
     ? `${aggregate.fn}_all`
-    : `${aggregate.fn}_${aggregate.column}`;
+    : `${aggregate.fn}_${toColumnName(aggregate.column)}`;
 
 const emit = (
-  requested: readonly { readonly column?: string; readonly fn: string }[],
+  requested: readonly EmittedAggregate[],
 ): readonly BuiltGroupAggregate[] =>
   requested.map(
     (aggregate) =>
