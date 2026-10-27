@@ -1,9 +1,13 @@
+import type { ColumnReference } from '../query-builder/query-builder.types.ts';
 import type { GroupSort } from './group-query-builder.types.ts';
+
+import { isSameColumnReference } from '../query-builder/is-same-column-reference.util.ts';
+import { toColumnName } from '../query-builder/to-column-name.util.ts';
 
 type AssertGroupSortArgs = {
   readonly aggregateAliases: readonly string[];
   readonly hasColumnAxis?: boolean;
-  readonly keys: readonly string[];
+  readonly keys: readonly ColumnReference[];
   readonly sort: readonly GroupSort[];
 };
 
@@ -17,15 +21,21 @@ export const assertGroupSort = ({
 
   for (const entry of sort) {
     if ('key' in entry) {
+      const name = toColumnName(entry.key);
+
       if (rankingAlias !== undefined) {
         throw new Error(
-          `Cannot sort by "${rankingAlias}" ahead of group key "${entry.key}": an aggregate may order the innermost level only, never rank an ancestor.`,
+          `Cannot sort by "${rankingAlias}" ahead of group key "${name}": an aggregate may order the innermost level only, never rank an ancestor.`,
         );
       }
 
-      if (!keys.includes(entry.key)) {
+      if (
+        keys.every(
+          (key) => !isSameColumnReference({ left: key, right: entry.key }),
+        )
+      ) {
         throw new Error(
-          `Cannot sort by "${entry.key}": it is not one of this query's group keys.`,
+          `Cannot sort by "${name}": it is not one of this query's group keys.`,
         );
       }
 

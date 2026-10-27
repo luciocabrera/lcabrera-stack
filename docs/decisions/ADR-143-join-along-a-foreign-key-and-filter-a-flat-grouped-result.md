@@ -7,9 +7,8 @@ governs:
 
 **Status:** Accepted; approved by the owner on 2026-10-27. Clarified the same
 day, within that approval: a keyset cursor rests on a base-target column (see
-"A keyset cursor rests on the base target"). Nothing it describes is built yet; the implementation follows under #998. `What this does NOT do` in
-`packages/server/src/db/query-builder/ARCHITECTURE.md` lists what is true today,
-and the change that builds a feature also removes it from that list.
+"A keyset cursor rests on the base target"). Built under #998; the names the
+decision left open are recorded under "Implementation notes".
 
 **Date:** 2026-10-26
 
@@ -232,6 +231,57 @@ any join other than the ones above. The write builders are not affected.
   gives the subtotals a grid would expect. Deferred because it needs a subquery,
   which this decision keeps excluded. It is the likely shape for the follow-up
   on filtered subtotals.
+
+## Implementation notes
+
+Recorded with the change that built the decision under #998. Each one settles a
+name or a detail the decision left open, and none of them changes it.
+
+- **The descriptor fields.** A read carries `joins` and `relations`. A join is
+  `{ alias, allowedColumns, foreignKey, kind, source? }`: `foreignKey` holds
+  the referencing columns, and `source` is an earlier join's alias, omitted for
+  the base target. A relation is `{ schema, table, columns, referencedSchema,
+  referencedTable, referencedColumns }`, with both column lists in constraint
+  order. The group filter is `groupFilters`, as decided.
+- **The relation map's executor** is `getForeignKeyRelations`, a public
+  subpath beside `getColumnGroupingCapabilities`. It reads every foreign key
+  declared on the base target and on the tables those keys reach, as deep as
+  the join chain, in one recursive catalogue query. `selectRows`,
+  `getRowsCount` and `selectGroupedRows` call it when a descriptor joins and
+  carries no `relations`.
+- **A join matches a foreign key by its column set**, so the order a caller
+  lists `foreignKey` in does not matter, and the `ON` clause pairs the columns
+  in constraint order. Two foreign keys over the same columns on the same table
+  are refused as ambiguous rather than one of them being picked.
+- **Columns are qualified only once a read joins.** A read without `joins`
+  emits the same SQL as before. With a join, the base target is qualified by its
+  own table name, so a join alias equal to that name is refused, as is one an
+  earlier join already holds.
+- **A grouped read over a join keys `capabilities` and `periods` by the
+  projected name**, `<alias>.<column>`, the same name `BuiltGroupQuery.keys`
+  reports and the row carries. `selectGroupedRows` resolves capabilities with
+  one catalogue round trip per source table a read names.
+- **A joined aggregate's default alias** is `<fn>_<alias>_<column>`, so it
+  stays a safe identifier. An explicit `alias` still wins.
+- **`HAVING` reuses the aggregate's own `FILTER` parameters.** The expression is
+  written again with the same `$n` placeholders, so each filter value is bound
+  once. Only the group filter's own value takes a new parameter.
+- **Every refusal is a `QueryRefusedError`**, the family a column outside
+  `allowedColumns` and a keyset cursor already throw
+  ([ADR-145](ADR-145-refuse-a-column-outside-allowedcolumns-with-a-typed-error.md)),
+  raised by the pure builder before it returns any SQL. Each has its own
+  reason, so it crosses a loader edge as `query-refused` with a fixed sentence
+  that names no table, column or alias: `join-allowlist-missing`,
+  `join-relations-missing`, `join-not-declared`, `join-ambiguous`,
+  `join-kind-unsupported`, `join-alias-taken`, `join-source-unknown`,
+  `keyset-unique-column-joined`, `projected-alias-too-long`,
+  `group-filter-grouping-unsupported`, `group-filter-column-axis`,
+  `group-filter-alias-unknown` and `group-filter-operator-unsupported`. A
+  column outside its source's list goes through `assertColumnAllowed`, so it
+  fails exactly as a base column outside the list does. On a grouped read,
+  `assertGroupColumn` still wraps a column refusal as a `GroupingRefusedError`,
+  but passes `join-source-unknown` through unchanged. An unsafe identifier is
+  still the plain `Error` it always was.
 
 ## References
 

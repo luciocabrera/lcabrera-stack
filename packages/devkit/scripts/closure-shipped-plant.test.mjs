@@ -180,3 +180,132 @@ describe('a blueprint import only the created manifest declares', () => {
     );
   });
 });
+
+const skill = (root) =>
+  join(root, 'assets', 'skills', 'worktree-housekeeping', 'SKILL.md');
+
+describe('a shipped instruction running a task the receiving repository lacks', () => {
+  test('is reported inline and fenced', () => {
+    const root = copyOfPackage();
+    appendTo(
+      skill(root),
+      '\nThen run `npm run harness:verify`.\n\n```bash\nnpm run fallow:dead-code:verify\n```\n',
+    );
+    const { status, stderr } = shippedClosure(root, 'agent');
+
+    expect(status).toBe(1);
+    expect(stderr).toMatch(
+      /worktree-housekeeping\/SKILL\.md:\d+ {2}runs the undefined task harness:verify/,
+    );
+    expect(stderr).toMatch(
+      /worktree-housekeeping\/SKILL\.md:\d+ {2}runs the undefined task fallow:dead-code:verify/,
+    );
+  });
+
+  test('passes for a task the profile wires into the manifest', () => {
+    const root = copyOfPackage();
+    appendTo(
+      skill(root),
+      '\nRun `npm run commit:verify` and `{{commands.run}} branch:verify`.\n',
+    );
+
+    expect(shippedClosure(root, 'agent').status).toBe(0);
+  });
+
+  test('passes for a task the shipped command reference documents, only where it ships', () => {
+    const root = copyOfPackage();
+    appendTo(
+      join(root, 'assets', 'root', 'COMMANDS.md'),
+      '\n- `{{commands.run}} planted:task` — a task this repository adds.\n',
+    );
+    appendTo(skill(root), '\nRun `npm run planted:task`.\n');
+
+    expect(shippedClosure(root, 'repo').status).toBe(0);
+    expect(shippedClosure(root, 'agent').stderr).toContain(
+      'runs the undefined task planted:task',
+    );
+  });
+
+  test.each([
+    ['repo', 'root'],
+    ['full', 'full'],
+  ])(
+    'reads the command reference where %s places it under a configured paths.%s',
+    (profile, group) => {
+      const root = copyOfPackage();
+      writeFileSync(
+        join(root, 'devkit.config.json'),
+        `${JSON.stringify({ paths: { full: 'docs', root: 'docs' } })}\n`,
+      );
+      appendTo(
+        join(root, 'assets', group, 'COMMANDS.md'),
+        '\n- `{{commands.run}} planted:task` — a task this repository adds.\n',
+      );
+      appendTo(skill(root), '\nRun `npm run planted:task`.\n');
+      const { stderr, stdout } = shippedClosure(root, profile);
+
+      expect(`${stdout}${stderr}`).toContain(`${profile} — `);
+      expect(stderr).not.toContain('runs the undefined task');
+    },
+  );
+
+  test('passes for a task the consumer names in its own commands block', () => {
+    const root = copyOfPackage();
+    writeFileSync(
+      join(root, 'devkit.config.json'),
+      `${JSON.stringify({
+        commands: {
+          audit: 'pnpm audit --audit-level moderate',
+          check: 'pnpm run verify-everything',
+          install: 'pnpm install --frozen-lockfile',
+          run: 'pnpm run',
+          test: 'pnpm run test',
+        },
+      })}\n`,
+    );
+    appendTo(skill(root), '\nRun `{{commands.check}}` before you push.\n');
+    const { stderr, stdout } = shippedClosure(root, 'repo');
+
+    expect(`${stdout}${stderr}`).toContain('repo — ');
+    expect(stderr).not.toContain('runs the undefined task');
+  });
+
+  test.each([
+    ['repo', 'typecheck:all'],
+    ['repo', 'commands:verify'],
+    ['agent', 'adr:verify'],
+  ])(
+    'is reported at %s for %s, which only a higher rung wires',
+    (profile, task) => {
+      const root = copyOfPackage();
+      appendTo(skill(root), `\nRun \`npm run ${task}\`.\n`);
+      const { status, stderr } = shippedClosure(root, profile);
+
+      expect(status).toBe(1);
+      expect(stderr).toContain(`runs the undefined task ${task}`);
+    },
+  );
+
+  test('passes the same task at the rung that wires it', () => {
+    const root = copyOfPackage();
+    appendTo(
+      skill(root),
+      '\nRun `npm run typecheck:all` and `npm run commands:verify`.\n',
+    );
+
+    expect(shippedClosure(root, 'monorepo').status).toBe(0);
+  });
+
+  test('is reported after the configured runner is substituted in', () => {
+    const root = copyOfPackage();
+    writeFileSync(
+      join(root, 'devkit.config.json'),
+      `${JSON.stringify({ commands: { run: 'pnpm' } })}\n`,
+    );
+    appendTo(skill(root), '\nRun `{{commands.run}} harness:verify`.\n');
+    const { status, stderr } = shippedClosure(root, 'agent');
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('runs the undefined task harness:verify');
+  });
+});

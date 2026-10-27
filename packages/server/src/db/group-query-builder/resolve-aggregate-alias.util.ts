@@ -17,5 +17,9 @@ export const resolveAggregateAlias = (aggregate: GroupAggregate): string => {
   const spec = AGGREGATE_SQL[aggregate.fn];
   const prefix = spec.distinct ? `${spec.sql}_distinct` : spec.sql;
 
-  return `${prefix}_${aggregate.column}`;
+  const { column } = aggregate;
+
+  return typeof column === 'string'
+    ? `${prefix}_${column}`
+    : `${prefix}_${column.source}_${column.column}`;
 };

@@ -53,4 +53,13 @@ describe('resolveAggregateAlias', () => {
       resolveAggregateAlias({ column: 'a_b_c', fn: 'countDistinct' }),
     ).toMatch(/^[a-z_][a-z0-9_]*$/);
   });
+
+  it('names a joined column by its source and column', () => {
+    expect(
+      resolveAggregateAlias({
+        column: { column: 'rating', source: 'vendor' },
+        fn: 'avg',
+      }),
+    ).toBe('avg_vendor_rating');
+  });
 });

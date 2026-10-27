@@ -1,6 +1,13 @@
 import type { OlapGroupPeriod } from '@lcabrera/api/olap/olap.types';
 
-import type { QueryFilter } from '../query-builder/query-builder.types.ts';
+import type {
+  BinaryOperator,
+  ColumnReference,
+  ForeignKeyRelation,
+  QueryFilter,
+  ReadJoin,
+  UnaryOperator,
+} from '../query-builder/query-builder.types.ts';
 
 export type AggregateFn =
   | 'avg'
@@ -51,14 +58,14 @@ export type BuiltGroupQuery = {
 export type ColumnAnalyticalRole = 'dimension' | 'fact' | 'unsupported';
 
 export type ColumnAxis = {
-  readonly key: string;
+  readonly key: ColumnReference;
   /** Caller-supplied ceiling on distinct axis values; the package does not invent one. */
   readonly maxDistinct: number;
   readonly values: readonly unknown[];
 };
 
 export type ColumnAxisRequest = {
-  readonly key: string;
+  readonly key: ColumnReference;
   readonly maxDistinct: number;
 };
 
@@ -98,8 +105,8 @@ export type DistinctEstimate =
 
 export type GroupAggregate = {
   readonly alias?: string;
-  readonly column?: string;
-  readonly filters?: readonly QueryFilter[];
+  readonly column?: ColumnReference;
+  readonly filters?: readonly QueryFilter<ColumnReference>[];
   readonly fn: AggregateFn;
 };
 
@@ -113,6 +120,22 @@ export type GroupCardinalityWarning =
       readonly estimatedRows: number;
       readonly kind: 'estimate-above-warn-threshold';
     };
+
+export type GroupFilter =
+  | {
+      readonly aggregateAlias: string;
+      readonly operator: GroupFilterBinaryOperator;
+      readonly value: unknown;
+    }
+  | {
+      readonly aggregateAlias: string;
+      readonly operator: UnaryOperator;
+    };
+
+export type GroupFilterBinaryOperator = Exclude<
+  BinaryOperator,
+  'ilike' | 'notIlike'
+>;
 
 export type GroupGuardRails = {
   readonly estimate: GroupCardinalityEstimate;
@@ -134,14 +157,21 @@ export type GroupKeyRefusalReason =
 export type GroupQueryDescriptor = {
   readonly aggregates: readonly GroupAggregate[];
   readonly allowedColumns: readonly string[];
+  /** A joined column's entry is keyed by its projected name, `<alias>.<column>`. */
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
   readonly columnAxis?: ColumnAxis;
-  readonly filters?: readonly QueryFilter[];
+  readonly filters?: readonly QueryFilter<ColumnReference>[];
+  /** `HAVING`; accepted only with `grouping: 'flat'` and no `columnAxis`. */
+  readonly groupFilters?: readonly GroupFilter[];
   readonly grouping: GroupingMode;
-  readonly keys: readonly string[];
+  readonly joins?: readonly ReadJoin[];
+  readonly keys: readonly ColumnReference[];
   /** A safety belt, not a page: a grouped read is never paginated. */
   readonly maxRows: number;
+  /** A joined key's entry is keyed by its projected name, `<alias>.<column>`. */
   readonly periods?: Readonly<Record<string, GroupKeyPeriod>>;
+  /** Required once `joins` is non-empty; resolve it with `getForeignKeyRelations`. */
+  readonly relations?: readonly ForeignKeyRelation[];
   readonly schema: string;
   readonly sort?: readonly GroupSort[];
   readonly subtotalPlacement?: 'first' | 'last';
@@ -155,7 +185,7 @@ export type GroupRowLimit = {
 
 export type GroupSort =
   | { readonly aggregateAlias: string; readonly direction: 'asc' | 'desc' }
-  | { readonly direction: 'asc' | 'desc'; readonly key: string };
+  | { readonly direction: 'asc' | 'desc'; readonly key: ColumnReference };
 
 type ColumnCapabilityShared = {
   readonly aggregates: readonly AggregateFn[];
