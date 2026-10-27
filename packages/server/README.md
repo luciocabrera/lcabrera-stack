@@ -500,7 +500,7 @@ export const handle = async (request: Request) => {
 // server.ts
 import type { IncomingMessage, ServerResponse } from 'node:http';
 
-import { closePool, getPool } from '@lcabrera/server/db/get-pool.util';
+import { closePool } from '@lcabrera/server/db/get-pool.util';
 import { parsePositiveInteger } from '@lcabrera/utils/numbers/parse-positive-integer.util';
 import { createServer } from 'node:http';
 import { text } from 'node:stream/consumers';
@@ -528,10 +528,6 @@ const serve = async (incoming: IncomingMessage, outgoing: ServerResponse) => {
     outgoing.destroy();
   }
 };
-
-getPool().on('error', (error) => {
-  console.error('An idle database connection failed.', error);
-});
 
 export const server = createServer((incoming, outgoing) => {
   void serve(incoming, outgoing);
@@ -578,18 +574,16 @@ The status codes are this example's choice, not the package's: 409 for a
 unique-key conflict, 503 when `statement_timeout` stopped the query, 422 for a
 grouped read the package refused, and 500 for anything else.
 
-Two gaps in the package show in the example, and each has an issue open:
+The example attaches no `error` listener to the pool: `getPool` attaches its
+own, so an idle connection that fails is dropped and reported as a process
+warning rather than stopping the server (see Guarantees below).
 
-- A request that filters or sorts on a column `allowedColumns` does not list is
-  refused with a plain `Error`, so it answers 500 `unexpected` where a 4xx is
-  due. The column name still stays out of the body.
-  [#1524](https://github.com/luciocabrera/lcabrera-stack/issues/1524)
-  tracks a typed refusal.
-- `server.ts` attaches an `error` listener to the pool. `pg` emits `error` on
-  the pool when an idle connection fails, for example when the database
-  restarts, and with no listener that event stops the Node process.
-  [#1523](https://github.com/luciocabrera/lcabrera-stack/issues/1523)
-  tracks the pool handling it itself.
+One gap in the package shows in the example, and it has an issue open. A request
+that filters or sorts on a column `allowedColumns` does not list is refused with
+a plain `Error`, so it answers 500 `unexpected` where a 4xx is due. The column
+name still stays out of the body.
+[#1524](https://github.com/luciocabrera/lcabrera-stack/issues/1524) tracks a
+typed refusal.
 
 ## Guarantees
 

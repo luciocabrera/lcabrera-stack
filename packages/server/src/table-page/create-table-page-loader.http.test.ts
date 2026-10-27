@@ -21,17 +21,23 @@ import {
   vi,
 } from 'vite-plus/test';
 
-const { end, on, query } = vi.hoisted(() => ({
+type PoolListener = (error: Error) => void;
+
+const { end, listenerCount, poolListeners, query } = vi.hoisted(() => ({
   end: vi.fn(),
-  on: vi.fn(),
+  listenerCount: vi.fn(),
+  poolListeners: [] as (readonly [string, PoolListener])[],
   query: vi.fn(),
 }));
 
 vi.mock('pg', () => ({
   Pool: class {
     public readonly end = end;
-    public readonly on = on;
+    public readonly listenerCount = listenerCount;
     public readonly query = query;
+    public readonly on = (...registration: readonly [string, PoolListener]) => {
+      poolListeners.push(registration);
+    };
   },
 }));
 
@@ -65,10 +71,7 @@ const PAGE_ROWS = [
   { id: 2, name: 'b', status: 'draft' },
 ];
 
-const served: { current: Server | undefined; poolEvents: string[] } = {
-  current: undefined,
-  poolEvents: [],
-};
+const served: { current: Server | undefined } = { current: undefined };
 
 type RequestArgs = {
   readonly init?: RequestInit;
@@ -112,7 +115,6 @@ beforeAll(async () => {
   );
 
   served.current = example.server;
-  served.poolEvents = on.mock.calls.map(([event]) => String(event));
 
   if (!example.server.listening) await once(example.server, 'listening');
 });
@@ -133,8 +135,24 @@ beforeEach(() => {
 });
 
 describe('the README HTTP API example', () => {
-  it('listens for idle-connection failures on the pool', () => {
-    expect(served.poolEvents).toStrictEqual(['error']);
+  it('leaves an idle-connection failure to the listener the package attaches', async () => {
+    const emitWarning = vi
+      .spyOn(process, 'emitWarning')
+      .mockImplementation(() => undefined);
+    query.mockResolvedValue({ rows: [] });
+    listenerCount.mockReturnValue(1);
+
+    await request({ path: '/items' });
+    const [registration, ...extra] = poolListeners;
+    const [event, onError] = registration ?? [];
+
+    expect(extra).toStrictEqual([]);
+    expect(event).toBe('error');
+    expect(() => onError?.(new Error('idle connection lost'))).not.toThrow();
+    expect(emitWarning).toHaveBeenCalledWith(
+      expect.any(String),
+      expect.objectContaining({ code: 'LCABRERA_SERVER_POOL_IDLE_ERROR' }),
+    );
   });
 
   it('serves a page of rows read through the pool', async () => {
