@@ -7,7 +7,7 @@ import type {
 } from './group-query-builder/group-query-builder.types.ts';
 
 import { readGroupStatementTimeoutMs } from './env.schema.ts';
-import { getColumnGroupingCapabilities } from './get-column-grouping-capabilities.util.ts';
+import { getReadGroupingCapabilities } from './get-read-grouping-capabilities.util.ts';
 import { assertColumnAxisKey } from './group-query-builder/assert-column-axis-key.util.ts';
 import { assertGroupAggregates } from './group-query-builder/assert-group-aggregates.util.ts';
 import { assertGroupDepth } from './group-query-builder/assert-group-depth.util.ts';
@@ -18,6 +18,9 @@ import { isUnexpandedLeadingCount } from './group-query-builder/is-unexpanded-le
 import { toColumnAxisDiscoveryLimit } from './group-query-builder/to-column-axis-discovery-limit.util.ts';
 import { toExpandingMeasureCount } from './group-query-builder/to-expanding-measure-count.util.ts';
 import { toGroupKeyTruncations } from './olap/to-group-key-truncations.util.ts';
+import { resolveReadScope } from './query-builder/resolve-read-scope.util.ts';
+import { toColumnName } from './query-builder/to-column-name.util.ts';
+import { resolveReadRelations } from './resolve-read-relations.util.ts';
 import { runQuery } from './run-query.util.ts';
 import { selectColumnAxisValues } from './select-column-axis-values.util.ts';
 import { setStatementTimeout } from './set-statement-timeout.util.ts';
@@ -38,7 +41,7 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
 
   assertGroupDepth({
     grouping: grouped.grouping,
-    keys: grouped.keys,
+    keys: grouped.keys.map((key) => toColumnName(key)),
   });
 
   const run = async (client: TransactionClient) => {
@@ -47,13 +50,16 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
       tx: client,
     });
 
-    const capabilities = await getColumnGroupingCapabilities({
-      columns: collectCapabilityColumns({
+    const relations = await resolveReadRelations({ ...grouped, tx: client });
+    const scope = resolveReadScope({ ...grouped, relations });
+    const capabilities = await getReadGroupingCapabilities({
+      references: collectCapabilityColumns({
         aggregates: grouped.aggregates,
         columnAxisKey: columnAxisRequest?.key,
         keys: grouped.keys,
       }),
       schema: grouped.schema,
+      scope,
       table: grouped.table,
       tx: client,
     });
@@ -64,11 +70,13 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
         capabilities,
         key: columnAxisRequest.key,
         keys: grouped.keys,
+        scope,
       });
       assertGroupAggregates({
         aggregates: grouped.aggregates,
         allowedColumns: grouped.allowedColumns,
         capabilities,
+        scope,
       });
     }
 
@@ -81,6 +89,7 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
             values: await selectColumnAxisValues({
               allowedColumns: grouped.allowedColumns,
               filters: grouped.filters,
+              joins: grouped.joins,
               key: columnAxisRequest.key,
               limit: toColumnAxisDiscoveryLimit({
                 keyCount: grouped.keys.length,
@@ -91,6 +100,7 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
                 }),
               }),
               maxDistinct: columnAxisRequest.maxDistinct,
+              relations,
               schema: grouped.schema,
               table: grouped.table,
               tx: client,
@@ -101,6 +111,7 @@ export const selectGroupedRows = async <TRow extends QueryResultRow>({
       ...grouped,
       capabilities,
       ...(columnAxis !== undefined && { columnAxis }),
+      ...(relations !== undefined && { relations }),
     });
     const result = await runQuery<TRow>({
       text: built.text,

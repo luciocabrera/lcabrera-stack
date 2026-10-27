@@ -7,17 +7,19 @@ import {
 } from './group-query-builder.constants.ts';
 
 type ResolveGroupKeyExpressionArgs = {
+  readonly columnSql?: string;
   readonly key: string;
   readonly period?: GroupKeyPeriod;
   readonly typeName?: string;
 };
 
 export const resolveGroupKeyExpression = ({
+  columnSql,
   key,
   period,
   typeName,
 }: ResolveGroupKeyExpressionArgs): string => {
-  const quoted = quoteIdentifier(key);
+  const quoted = columnSql ?? quoteIdentifier(key);
 
   if (period === undefined) return quoted;
 

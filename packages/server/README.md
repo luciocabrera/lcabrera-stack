@@ -1,7 +1,7 @@
 # `@lcabrera/server`
 
 **Node-only** server primitives: a generic, injection-safe SQL builder for
-single-table reads and writes on Postgres, a column-filter contract that maps
+reads and writes on Postgres, a column-filter contract that maps
 straight into it, and the credential primitives — secret hashing, API tokens,
 short-lived access tickets — that every service ends up rewriting.
 
@@ -35,6 +35,52 @@ takes a single descriptor — fields, filters, sort, `limit`/`offset` or a keyse
 `keys` for a grouped read — and returns the query. A grouped descriptor returns
 the keys and grouping masks its rows are decoded by as well; its `capabilities`
 map comes from `get-column-grouping-capabilities.util`.
+
+A read can reach further tables with `joins`, but only along a foreign key the
+schema declares, and only in the many-to-one direction, so a join adds columns
+to a row and never repeats one. Each join names the referencing columns on a
+table the read already reaches, an `alias`, `inner` or `left`, and its own
+`allowedColumns`. The base target's `allowedColumns` is then required too. The
+target and the `ON` clause come from the `relations` map, which
+`get-foreign-key-relations.util` reads from the catalogue. A joined column is
+written `{ column, source: '<alias>' }`, is checked against that join's own
+list, and comes back as `<alias>.<column>`. A keyset cursor's `uniqueColumn`
+stays a base-target column.
+
+A flat grouped read (`grouping: 'flat'`, no `columnAxis`) can also filter its
+groups with `groupFilters`, which become `HAVING`: each entry names one of the
+read's aggregate aliases, an operator and a parameterized value.
+
+```ts
+const page = buildReadQuery({
+  allowedColumns: ['id', 'vendor_id', 'amount'],
+  fields: ['id', 'amount', { column: 'name', source: 'vendor' }],
+  joins: [
+    {
+      alias: 'vendor',
+      allowedColumns: ['name', 'region'],
+      foreignKey: ['vendor_id'],
+      kind: 'left',
+    },
+  ],
+  relations, // getForeignKeyRelations({ depth: 1, schema: 'catalog', table: 'items' })
+  schema: 'catalog',
+  sort: [{ column: 'id', direction: 'asc' }],
+  table: 'items',
+});
+
+const busyRegions = buildReadQuery({
+  aggregates: [{ fn: 'count' }, { column: 'amount', fn: 'sum' }],
+  allowedColumns: ['region', 'amount'],
+  capabilities,
+  groupFilters: [{ aggregateAlias: 'sum_amount', operator: 'gt', value: 1000 }],
+  grouping: 'flat',
+  keys: ['region'],
+  maxRows: 5000,
+  schema: 'catalog',
+  table: 'items',
+});
+```
 
 ```ts
 import { buildReadQuery } from '@lcabrera/server/db/query-builder/build-read-query.util';
@@ -72,18 +118,19 @@ exports its builder and returns the same SQL as before. Move to `buildReadQuery`
 The one place the pure builders meet a connection. Every executor takes an
 optional `tx` and translates driver rejections (see the two sections below).
 
-| Import                    | What it does                                                                                                |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `get-pool.util`           | `getPool` / `closePool` — a lazily-initialised `pg.Pool` singleton that survives an idle-connection failure |
-| `env.schema`              | `readEnvConfig` — Zod-validated `DB_*` credentials plus optional pool tuning                                |
-| `db.types`                | `ExecutorOptions` (the optional `tx`) and `TransactionClient`                                               |
-| `select-rows.util`        | Builds a select descriptor and runs it                                                                      |
-| `insert-row.util`         | Builds an insert and runs it; defaults to `RETURNING *`                                                     |
-| `update-rows.util`        | Builds an update and runs it; defaults to `RETURNING *`                                                     |
-| `delete-rows.util`        | Builds a delete and runs it; defaults to `RETURNING *`                                                      |
-| `get-max-value.util`      | Returns the numeric `MAX(col)`, or 0 for an empty table                                                     |
-| `with-transaction.util`   | Runs a callback on one pooled connection in BEGIN/COMMIT/ROLLBACK, always releasing                         |
-| `run-in-transaction.util` | The same, over a connection you opened yourself; opens and closes nothing                                   |
+| Import                           | What it does                                                                                                |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `get-pool.util`                  | `getPool` / `closePool` — a lazily-initialised `pg.Pool` singleton that survives an idle-connection failure |
+| `env.schema`                     | `readEnvConfig` — Zod-validated `DB_*` credentials plus optional pool tuning                                |
+| `db.types`                       | `ExecutorOptions` (the optional `tx`) and `TransactionClient`                                               |
+| `select-rows.util`               | Builds a select descriptor and runs it; reads the relation map first when it joins and carries none         |
+| `get-foreign-key-relations.util` | The foreign keys a read with `joins` may follow, in one catalogue round trip                                |
+| `insert-row.util`                | Builds an insert and runs it; defaults to `RETURNING *`                                                     |
+| `update-rows.util`               | Builds an update and runs it; defaults to `RETURNING *`                                                     |
+| `delete-rows.util`               | Builds a delete and runs it; defaults to `RETURNING *`                                                      |
+| `get-max-value.util`             | Returns the numeric `MAX(col)`, or 0 for an empty table                                                     |
+| `with-transaction.util`          | Runs a callback on one pooled connection in BEGIN/COMMIT/ROLLBACK, always releasing                         |
+| `run-in-transaction.util`        | The same, over a connection you opened yourself; opens and closes nothing                                   |
 
 ### Typed errors — `@lcabrera/server/errors/*`
 

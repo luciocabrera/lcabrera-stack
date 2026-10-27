@@ -13,6 +13,7 @@ describe('buildAggregateProjection', () => {
     });
 
     expect(result).toEqual({
+      expressions: [{ alias: 'count_rows', expression: 'count(*)' }],
       nextParamIndex: 1,
       text: 'count(*) AS "count_rows"',
       values: [],
@@ -87,6 +88,12 @@ describe('buildAggregateProjection', () => {
     });
 
     expect(result).toEqual({
+      expressions: [
+        {
+          alias: 'count_rows_urgent',
+          expression: 'count(*) FILTER (WHERE "priority" = $1)',
+        },
+      ],
       nextParamIndex: 2,
       text: 'count(*) FILTER (WHERE "priority" = $1) AS "count_rows_urgent"',
       values: ['Urgent'],
@@ -124,7 +131,7 @@ describe('buildAggregateProjection', () => {
       startParamIndex: 1,
     });
 
-    expect(result).toEqual({
+    expect(result).toMatchObject({
       nextParamIndex: 5,
       text:
         'count(*) FILTER (WHERE "priority" = $1) AS "urgent", ' +

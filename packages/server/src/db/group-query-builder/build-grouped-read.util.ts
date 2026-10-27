@@ -8,13 +8,17 @@ import { assertSafeIdentifier } from '../query-builder/assert-safe-identifier.ut
 import { buildOptionalNumericClauses } from '../query-builder/build-optional-numeric-clauses.util.ts';
 import { buildWhereClause } from '../query-builder/build-where-clause.util.ts';
 import { quoteIdentifier } from '../query-builder/quote-identifier.util.ts';
+import { resolveReadScope } from '../query-builder/resolve-read-scope.util.ts';
+import { toColumnName } from '../query-builder/to-column-name.util.ts';
 import { assertColumnAxis } from './assert-column-axis.util.ts';
 import { assertGroupAggregates } from './assert-group-aggregates.util.ts';
 import { assertGroupAliases } from './assert-group-aliases.util.ts';
+import { assertGroupFilters } from './assert-group-filters.util.ts';
 import { assertGroupKeys } from './assert-group-keys.util.ts';
 import { buildAggregateProjection } from './build-aggregate-projection.util.ts';
 import { buildGroupOrderByClause } from './build-group-order-by-clause.util.ts';
 import { buildGroupingSetsClause } from './build-grouping-sets-clause.util.ts';
+import { buildHavingClause } from './build-having-clause.util.ts';
 import { expandColumnAxisAggregates } from './expand-column-axis-aggregates.util.ts';
 import { expandGroupingSets } from './expand-grouping-sets.util.ts';
 import {
@@ -24,7 +28,7 @@ import {
 import { isUnexpandedLeadingCount } from './is-unexpanded-leading-count.util.ts';
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
 import { resolveGroupGuardRails } from './resolve-group-guard-rails.util.ts';
-import { resolveGroupKeyExpression } from './resolve-group-key-expression.util.ts';
+import { resolveGroupKeyColumns } from './resolve-group-key-columns.util.ts';
 import { toExpandingMeasureCount } from './to-expanding-measure-count.util.ts';
 import { toGroupingSetMask } from './to-grouping-set-mask.util.ts';
 
@@ -34,10 +38,13 @@ export const buildGroupedRead = ({
   capabilities,
   columnAxis,
   filters,
+  groupFilters,
   grouping,
-  keys,
+  joins,
+  keys: keyReferences,
   maxRows,
   periods,
+  relations,
   schema,
   sort,
   subtotalPlacement,
@@ -45,7 +52,31 @@ export const buildGroupedRead = ({
 }: GroupQueryDescriptor): BuiltGroupQuery => {
   assertSafeIdentifier(schema);
   assertSafeIdentifier(table);
-  assertGroupKeys({ allowedColumns, capabilities, grouping, keys, periods });
+
+  const scope = resolveReadScope({
+    allowedColumns,
+    joins,
+    relations,
+    schema,
+    table,
+  });
+
+  assertGroupKeys({
+    allowedColumns,
+    capabilities,
+    grouping,
+    keys: keyReferences,
+    periods,
+    scope,
+  });
+  assertGroupFilters({
+    aggregateAliases: aggregates.map((aggregate) =>
+      resolveAggregateAlias(aggregate),
+    ),
+    groupFilters,
+    grouping,
+    hasColumnAxis: columnAxis !== undefined,
+  });
 
   const leadingCount = aggregates[0];
   const hasUnexpandedCount = isUnexpandedLeadingCount(leadingCount);
@@ -56,13 +87,14 @@ export const buildGroupedRead = ({
       allowedColumns,
       capabilities,
       columnAxis,
-      keys,
+      keys: keyReferences,
       measureCount: toExpandingMeasureCount(aggregates),
+      scope,
       ...(hasUnexpandedCount && { fixedAggregateCount: 1 }),
     });
   }
 
-  assertGroupAggregates({ aggregates, allowedColumns, capabilities });
+  assertGroupAggregates({ aggregates, allowedColumns, capabilities, scope });
   const expanded =
     columnAxis === undefined
       ? undefined
@@ -90,6 +122,14 @@ export const buildGroupedRead = ({
     }
   }
 
+  const keyColumns = resolveGroupKeyColumns({
+    allowedColumns,
+    capabilities,
+    keys: keyReferences,
+    periods,
+    scope,
+  });
+  const keys = keyColumns.map(({ name }) => name);
   const guardRails = resolveGroupGuardRails({
     capabilities,
     grouping,
@@ -110,51 +150,50 @@ export const buildGroupedRead = ({
 
   const sets = expandGroupingSets({ grouping, keys });
   const expressionByKey = Object.fromEntries(
-    keys.map((key) => [
-      key,
-      resolveGroupKeyExpression({
-        key,
-        period: periods?.[key],
-        typeName: capabilities[key]?.typeName,
-      }),
-    ]),
+    keyColumns.map(({ expression, name }) => [name, expression]),
   );
-  const keyExpressions = keys.map((key) => expressionByKey[key] ?? key);
+  const keyExpressions = keyColumns.map(({ expression }) => expression);
 
   const projection = buildAggregateProjection({
     aliased,
     allowedColumns,
+    scope,
     startParamIndex: 1,
   });
   const whereClause = buildWhereClause({
     allowedColumns,
     filters,
+    scope,
     startParamIndex: projection.nextParamIndex,
+  });
+  const havingClause = buildHavingClause({
+    expressions: projection.expressions,
+    groupFilters,
+    startParamIndex: whereClause.nextParamIndex,
   });
   const limitClause = buildOptionalNumericClauses({
     clauses: [{ keyword: 'LIMIT', value: guardRails.rowLimit.limit }],
-    startParamIndex: whereClause.nextParamIndex,
+    startParamIndex: havingClause.nextParamIndex,
   });
 
   const selectList = [
-    ...keys.map((key, index) =>
-      periods?.[key] === undefined
-        ? keyExpressions[index]
-        : `${keyExpressions[index]} AS ${quoteIdentifier(key)}`,
-    ),
+    ...keyColumns.map(({ projection: keyProjection }) => keyProjection),
     `GROUPING(${keyExpressions.join(', ')}) AS ${quoteIdentifier(GROUP_MASK_ALIAS)}`,
     ...(projection.text.length > 0 ? [projection.text] : []),
   ].join(', ');
+  const from =
+    scope?.from ?? `${quoteIdentifier(schema)}.${quoteIdentifier(table)}`;
 
   const text = [
-    `SELECT ${selectList} FROM ${quoteIdentifier(schema)}.${quoteIdentifier(table)}`,
+    `SELECT ${selectList} FROM ${from}`,
     whereClause.text,
     buildGroupingSetsClause({ expressionByKey, sets }),
+    havingClause.text,
     buildGroupOrderByClause({
       aggregateAliases,
       expressionByKey,
       hasColumnAxis: columnAxis !== undefined,
-      keys,
+      keys: keyReferences,
       sets,
       sort,
       subtotalPlacement,
@@ -168,7 +207,9 @@ export const buildGroupedRead = ({
     aggregates: aliased.map(({ aggregate, alias }) => ({
       alias,
       fn: aggregate.fn,
-      ...(aggregate.column !== undefined && { column: aggregate.column }),
+      ...(aggregate.column !== undefined && {
+        column: toColumnName(aggregate.column),
+      }),
       ...('axisValue' in aggregate && { axis: { value: aggregate.axisValue } }),
     })),
     groupingSetMasks: sets.map((set) => toGroupingSetMask({ keys, set })),
@@ -177,7 +218,7 @@ export const buildGroupedRead = ({
     maskAlias: GROUP_MASK_ALIAS,
     ...(columnAxis !== undefined && {
       columnAxis: {
-        key: columnAxis.key,
+        key: toColumnName(columnAxis.key),
         values: columnAxis.values.map((value) => value ?? undefined),
       },
     }),
@@ -185,6 +226,7 @@ export const buildGroupedRead = ({
     values: [
       ...projection.values,
       ...whereClause.values,
+      ...havingClause.values,
       ...limitClause.values,
     ],
   };
