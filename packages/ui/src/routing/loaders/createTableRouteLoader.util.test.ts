@@ -3,7 +3,10 @@ import type { LoaderFunctionArgs } from 'react-router';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table';
-import type { TableGroupingState } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupingState,
+  TableMetaState,
+} from '#ui/components/Table/Table.types';
 
 import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
 import { serializeSortingToURL } from '#ui/utils/urlState';
@@ -1000,6 +1003,69 @@ describe('createTableRouteLoader', () => {
       });
 
       expect(result.columnsState.columnOrder).toEqual(['status', 'name', 'id']);
+    });
+  });
+
+  describe('a source', () => {
+    const SOURCE_CAPABILITIES = {
+      isGroupingEnabled: true,
+      isKeysetEnabled: true,
+      isServerFilterEnabled: true,
+    } as const;
+
+    const loadFromSource = async (meta?: Partial<TableMetaState>) => {
+      const fetchPage = vi.fn<
+        (args: FetchPageArgs) => Promise<typeof response>
+      >(async () => response);
+      const resolveGroupingCapabilities = vi.fn(async () => ({}));
+      const loader = createTableRouteLoader<Row, typeof response>({
+        appId: baseConfig.appId,
+        columns,
+        persistenceKey: baseConfig.persistenceKey,
+        title: baseConfig.title,
+        ...(meta !== undefined && { meta }),
+        source: {
+          capabilities: SOURCE_CAPABILITIES,
+          fetchPage,
+          pagePath: '/rows/page',
+          resolveGroupingCapabilities,
+          schemaName: 'sales',
+          tableName: 'orders',
+        },
+      });
+      const result = await loader({
+        request: new Request('http://localhost/rows'),
+      } as LoaderFunctionArgs);
+
+      return { fetchPage, resolveGroupingCapabilities, result };
+    };
+
+    it('reads the first page, the names and the page path from the source', async () => {
+      const { fetchPage, resolveGroupingCapabilities, result } =
+        await loadFromSource();
+
+      expect(fetchPage).toHaveBeenCalledOnce();
+      expect(resolveGroupingCapabilities).toHaveBeenCalledOnce();
+      expect(result.metaState).toEqual(
+        expect.objectContaining({
+          ...SOURCE_CAPABILITIES,
+          pagePath: '/rows/page',
+          schemaName: 'sales',
+          tableName: 'orders',
+        }),
+      );
+    });
+
+    it("lets the route's meta turn off a capability the source serves", async () => {
+      const { resolveGroupingCapabilities, result } = await loadFromSource({
+        isGroupingEnabled: false,
+      });
+
+      expect(result.metaState.isGroupingEnabled).toBe(false);
+      expect(result.metaState.isKeysetEnabled).toBe(true);
+      expect(result.metaState.isServerFilterEnabled).toBe(true);
+      expect(result.metaState.pagePath).toBe('/rows/page');
+      expect(resolveGroupingCapabilities).not.toHaveBeenCalled();
     });
   });
 });
