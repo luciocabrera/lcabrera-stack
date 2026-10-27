@@ -2,7 +2,7 @@
 '@lcabrera/server': minor
 ---
 
-`mapDbError` now returns a `QueryRefusedError`, or any subclass such as `GroupingRefusedError`, unchanged. Before, it wrapped a refusal in a `PersistenceError`, so a refusal that reached a `catch` calling `mapDbError` serialised as `{ kind: 'unexpected' }` instead of `query-refused` or `grouping-refused`.
+`mapDbError` now returns a `QueryRefusedError`, or any subclass such as `GroupingRefusedError`, unchanged. Before, it wrapped a refusal in a `PersistenceError`, so a refusal that reached a `catch` calling `mapDbError` serialised as a database failure, `{ kind: 'db-failed' }`, instead of `query-refused` or `grouping-refused`.
 
 Breaking for callers:
 

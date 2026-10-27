@@ -109,8 +109,8 @@ generic `PersistenceError` and grow the `cause` chain per hop.
 **`mapDbError` returns a refusal unchanged too, so its return type is
 `PersistenceError | QueryRefusedError`.** A refusal raised inside a `try` whose
 `catch` calls `mapDbError` would otherwise come out as a generic
-`PersistenceError` and serialise as `unexpected` instead of `query-refused` or
-`grouping-refused`. The union is the honest type: a refusal is not a
+`PersistenceError` and serialise as `db-failed`, a database failure, instead
+of `query-refused` or `grouping-refused`. The union is the honest type: a refusal is not a
 `PersistenceError`, so a caller reading `fields` narrows with `instanceof
 PersistenceError` first.
 
