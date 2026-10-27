@@ -1,7 +1,9 @@
 /**
  * Runs the README's "Serve an HTTP API" example as written: its two code blocks are
- * copied into a scratch directory inside this package and imported, with only `pg`
- * replaced, and the server they start is called over real HTTP.
+ * copied into a scratch directory under this package's `node_modules/.cache` and
+ * imported, with only `pg` replaced, and the server they start is called over real
+ * HTTP. No lint pass reads `node_modules`, so a run interrupted before `afterAll`
+ * leaves nothing the next one reports.
  */
 
 import type { Server } from 'node:http';
@@ -42,7 +44,7 @@ vi.mock('pg', () => ({
 }));
 
 const PACKAGE_ROOT = join(import.meta.dirname, '..', '..');
-const SCRATCH = join(PACKAGE_ROOT, '.tmp', 'readme-http-api');
+const SCRATCH = join(PACKAGE_ROOT, 'node_modules', '.cache', 'readme-http-api');
 const SECTION_HEADING = '## Serve an HTTP API';
 
 const readExampleBlocks = () => {
