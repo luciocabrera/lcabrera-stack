@@ -1,10 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import type {
-  ColumnFiltersState,
-  SortingState,
-  TableColumn,
-} from '#ui/components/Table';
+import type { TableColumn } from '#ui/components/Table';
 import type {
   FilterOptionsTransport,
   TableCellPalette,
@@ -12,17 +8,24 @@ import type {
   TableGroupingState,
   TableLockedFilters,
   TableMetaState,
-  TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
 
 import { toChromeUiFlags } from '#ui/components/Table/utils/toChromeUiFlags.util';
 
+import type {
+  TableRouteLoaderSourceArgs,
+  TableRouteSource,
+} from './loaders.types';
+
 import { appendPrimaryKeySorting } from '../shared/appendPrimaryKeySorting.util';
 import { sanitizeSorting } from '../shared/sanitizeSorting.util';
 import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescriptors.util';
+import { hasTableRouteSource } from './hasTableRouteSource.util';
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
 import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
 import { startInjectedResolver } from './startInjectedResolver.util';
+
+export type { TableRouteSource } from './loaders.types';
 
 const NO_GROUPING_CAPABILITIES: Readonly<
   Record<string, TableColumnGroupingCapability>
@@ -38,59 +41,48 @@ export type TableRouteLoaderData<
 type CreateTableRouteLoaderArgs<
   TData extends Record<string, unknown>,
   TResponse,
-> = {
+> = TableRouteLoaderSourceArgs<TData, TResponse> & {
   readonly appId: string;
   readonly cellPalette?: TableCellPalette;
   readonly columns: TableColumn<TData>[];
   readonly defaultGrouping?: TableGroupingState;
-  readonly fetchPage: (
-    args: TableRouteFetchPageArgs<TData>,
-  ) => Promise<TResponse>;
   readonly filterOptions?: { readonly transport: FilterOptionsTransport };
   readonly includeFilters?: boolean;
   readonly meta?: Partial<TableMetaState>;
   readonly persistenceKey: string;
-  readonly resolveGroupingCapabilities?: () => Promise<
-    Readonly<Record<string, TableColumnGroupingCapability>>
-  >;
   readonly resolveLockedFilters?: (args: {
     readonly request: Request;
   }) =>
     | Promise<TableLockedFilters | undefined>
     | TableLockedFilters
     | undefined;
-  readonly schemaName?: string;
-  readonly tableName: string;
   readonly title: TableMetaState['title'];
-};
-
-type TableRouteFetchPageArgs<TData extends Record<string, unknown>> = {
-  readonly effectiveSorting: SortingState<TData>;
-  readonly filters: ColumnFiltersState<TData>;
-  readonly grouping: TableGroupingState;
-  readonly request: Request;
-  readonly totalsPlacement: TableTotalsPlacement;
 };
 
 export const createTableRouteLoader = <
   TData extends Record<string, unknown>,
   TResponse,
->({
-  appId,
-  cellPalette,
-  columns,
-  defaultGrouping,
-  fetchPage,
-  filterOptions,
-  includeFilters = true,
-  meta,
-  persistenceKey,
-  resolveGroupingCapabilities,
-  resolveLockedFilters,
-  schemaName,
-  tableName,
-  title,
-}: CreateTableRouteLoaderArgs<TData, TResponse>) => {
+>(
+  args: CreateTableRouteLoaderArgs<TData, TResponse>,
+) => {
+  const {
+    appId,
+    cellPalette,
+    columns,
+    defaultGrouping,
+    filterOptions,
+    includeFilters = true,
+    persistenceKey,
+    resolveLockedFilters,
+    title,
+  } = args;
+  const source: TableRouteSource<TData, TResponse> = hasTableRouteSource(args)
+    ? args.source
+    : args;
+  const { fetchPage, resolveGroupingCapabilities, schemaName, tableName } =
+    source;
+  const meta = { ...source.capabilities, ...args.meta };
+
   const decoratedColumns = filterOptions
     ? appendDistinctFilterDescriptors({
         columns,
@@ -101,10 +93,10 @@ export const createTableRouteLoader = <
     : columns;
 
   const capabilityMeta = resolveTableCapabilityMeta({ meta });
-  const isUrlStateNested = meta?.isUrlStateNested === true;
-  const isColumnLayoutTransient = meta?.isColumnLayoutTransient === true;
-  const groupDetailsPath = meta?.groupDetailsPath;
-  const declaredLockedFilters = meta?.lockedFilters;
+  const isUrlStateNested = meta.isUrlStateNested === true;
+  const isColumnLayoutTransient = meta.isColumnLayoutTransient === true;
+  const groupDetailsPath = meta.groupDetailsPath;
+  const declaredLockedFilters = meta.lockedFilters;
 
   return async ({ request }: LoaderFunctionArgs) => {
     const {
@@ -180,6 +172,7 @@ export const createTableRouteLoader = <
         tableName,
         title,
         ...(schemaName !== undefined && { schemaName }),
+        ...(source.pagePath !== undefined && { pagePath: source.pagePath }),
         ...meta,
         defaultGroupFold: groupingPreferences.defaultFold,
         groupDetailsPath,

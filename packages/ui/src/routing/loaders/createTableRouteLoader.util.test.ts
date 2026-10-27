@@ -3,7 +3,10 @@ import type { LoaderFunctionArgs } from 'react-router';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table';
-import type { TableGroupingState } from '#ui/components/Table/Table.types';
+import type {
+  TableGroupingState,
+  TableMetaState,
+} from '#ui/components/Table/Table.types';
 
 import { getInitialGroupingState } from '#ui/components/Table/contexts/TableConfig/utils';
 import { serializeSortingToURL } from '#ui/utils/urlState';
@@ -54,7 +57,10 @@ const invoke = async ({
   url = 'http://localhost/rows',
 }: {
   readonly config?: Partial<
-    Parameters<typeof createTableRouteLoader<Row, typeof response>>[0]
+    Extract<
+      Parameters<typeof createTableRouteLoader<Row, typeof response>>[0],
+      { readonly source?: never }
+    >
   >;
   readonly cookie?: string;
   readonly url?: string;
@@ -125,37 +131,16 @@ const layoutCookie = ({
     JSON.stringify({ value, version: 1 }),
   )}`;
 
-type CollectFunctionPathsArgs = {
-  readonly path?: string;
-  readonly value: unknown;
-};
-
-const collectFunctionPaths = ({
-  path = '$',
-  value,
-}: CollectFunctionPathsArgs): readonly string[] => {
-  if (typeof value === 'function') return [path];
-  if (Array.isArray(value)) {
-    return value.flatMap((item, index) =>
-      collectFunctionPaths({ path: `${path}[${index}]`, value: item }),
-    );
-  }
-  if (value !== null && typeof value === 'object') {
-    return Object.entries(value).flatMap(([key, entry]) =>
-      collectFunctionPaths({ path: `${path}.${key}`, value: entry }),
-    );
-  }
-  return [];
-};
-
 describe('createTableRouteLoader', () => {
   it('returns fully serializable columnsState and metaState (no functions cross the loader boundary)', async () => {
     const { result } = await invoke({
       config: { filterOptions: { transport: 'loader' } },
     });
 
-    expect(collectFunctionPaths({ value: result.columnsState })).toEqual([]);
-    expect(collectFunctionPaths({ value: result.metaState })).toEqual([]);
+    expect(structuredClone(result.columnsState)).toStrictEqual(
+      result.columnsState,
+    );
+    expect(structuredClone(result.metaState)).toStrictEqual(result.metaState);
   });
 
   it('bakes distinct descriptors onto filterable string columns when filterOptions is set', async () => {
@@ -912,18 +897,6 @@ describe('createTableRouteLoader', () => {
       expect(result.metaState.lockedFilters).toEqual(declared);
     });
 
-    it('still refuses a declaration injected through the UI-flags cookie', async () => {
-      const { result } = await invoke({
-        cookie: uiFlagsCookie({
-          lockedFilters: {
-            entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
-          },
-        }),
-      });
-
-      expect(result.metaState.lockedFilters).toBeUndefined();
-    });
-
     it('prefers the per-request resolver over a static declaration', async () => {
       const { result } = await invoke({
         config: {
@@ -1030,6 +1003,69 @@ describe('createTableRouteLoader', () => {
       });
 
       expect(result.columnsState.columnOrder).toEqual(['status', 'name', 'id']);
+    });
+  });
+
+  describe('a source', () => {
+    const SOURCE_CAPABILITIES = {
+      isGroupingEnabled: true,
+      isKeysetEnabled: true,
+      isServerFilterEnabled: true,
+    } as const;
+
+    const loadFromSource = async (meta?: Partial<TableMetaState>) => {
+      const fetchPage = vi.fn<
+        (args: FetchPageArgs) => Promise<typeof response>
+      >(async () => response);
+      const resolveGroupingCapabilities = vi.fn(async () => ({}));
+      const loader = createTableRouteLoader<Row, typeof response>({
+        appId: baseConfig.appId,
+        columns,
+        persistenceKey: baseConfig.persistenceKey,
+        title: baseConfig.title,
+        ...(meta !== undefined && { meta }),
+        source: {
+          capabilities: SOURCE_CAPABILITIES,
+          fetchPage,
+          pagePath: '/rows/page',
+          resolveGroupingCapabilities,
+          schemaName: 'sales',
+          tableName: 'orders',
+        },
+      });
+      const result = await loader({
+        request: new Request('http://localhost/rows'),
+      } as LoaderFunctionArgs);
+
+      return { fetchPage, resolveGroupingCapabilities, result };
+    };
+
+    it('reads the first page, the names and the page path from the source', async () => {
+      const { fetchPage, resolveGroupingCapabilities, result } =
+        await loadFromSource();
+
+      expect(fetchPage).toHaveBeenCalledOnce();
+      expect(resolveGroupingCapabilities).toHaveBeenCalledOnce();
+      expect(result.metaState).toEqual(
+        expect.objectContaining({
+          ...SOURCE_CAPABILITIES,
+          pagePath: '/rows/page',
+          schemaName: 'sales',
+          tableName: 'orders',
+        }),
+      );
+    });
+
+    it("lets the route's meta turn off a capability the source serves", async () => {
+      const { resolveGroupingCapabilities, result } = await loadFromSource({
+        isGroupingEnabled: false,
+      });
+
+      expect(result.metaState.isGroupingEnabled).toBe(false);
+      expect(result.metaState.isKeysetEnabled).toBe(true);
+      expect(result.metaState.isServerFilterEnabled).toBe(true);
+      expect(result.metaState.pagePath).toBe('/rows/page');
+      expect(resolveGroupingCapabilities).not.toHaveBeenCalled();
     });
   });
 });

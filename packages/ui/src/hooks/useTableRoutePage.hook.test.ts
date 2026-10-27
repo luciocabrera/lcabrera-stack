@@ -3,7 +3,14 @@
 import type { PaginatedQuery } from '@lcabrera/api/http/http.types';
 
 import { renderHook } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  beforeEach,
+  describe,
+  expect,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import type { TableColumn } from '#ui/components/Table';
 import type { TableMetaState } from '#ui/components/Table/Table.types';
@@ -80,9 +87,21 @@ const setup = (metaOverrides?: Partial<TableMetaState>) => {
   return { fetchPage, result };
 };
 
+const loadMore = <THandler>(current: { readonly onLoadMore?: THandler }) => {
+  if (current.onLoadMore === undefined) {
+    throw new Error('the hook returned no load-more handler');
+  }
+
+  return current.onLoadMore;
+};
+
 beforeEach(() => {
   useLoaderDataMock.mockReset();
   useLoaderDataMock.mockReturnValue(loaderData);
+});
+
+afterEach(() => {
+  vi.unstubAllGlobals();
 });
 
 describe('useTableRoutePage', () => {
@@ -97,7 +116,7 @@ describe('useTableRoutePage', () => {
   it('re-derives the primary-key tiebreaker for the load-more query', async () => {
     const { fetchPage, result } = setup();
 
-    await result.current.onLoadMore({ limit: 50, skip: 50 });
+    await loadMore(result.current)({ limit: 50, skip: 50 });
 
     expect(fetchPage).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -114,7 +133,7 @@ describe('useTableRoutePage', () => {
   it('sends neither filter nor cursor by default', async () => {
     const { fetchPage, result } = setup();
 
-    await result.current.onLoadMore({ lastRow, limit: 50, skip: 50 });
+    await loadMore(result.current)({ lastRow, limit: 50, skip: 50 });
 
     const query = fetchPage.mock.calls[0]?.[0];
     expect(query?.cursor).toBeUndefined();
@@ -124,7 +143,7 @@ describe('useTableRoutePage', () => {
   it('sends the column filters when the meta declares server filtering', async () => {
     const { fetchPage, result } = setup({ isServerFilterEnabled: true });
 
-    await result.current.onLoadMore({ limit: 50, skip: 50 });
+    await loadMore(result.current)({ limit: 50, skip: 50 });
 
     expect(fetchPage.mock.calls[0]?.[0]?.filter).toBe(columnFilters);
   });
@@ -132,20 +151,20 @@ describe('useTableRoutePage', () => {
   it('sends the keyset cursor when the meta declares keyset and a row is given', async () => {
     const { fetchPage, result } = setup({ isKeysetEnabled: true });
 
-    await result.current.onLoadMore({ lastRow, limit: 50, skip: 50 });
+    await loadMore(result.current)({ lastRow, limit: 50, skip: 50 });
 
     expect(fetchPage.mock.calls[0]?.[0]?.cursor).toStrictEqual(['shipped', 42]);
   });
 
   it('builds the same query from absent capability meta as from meta declaring both off', async () => {
     const absent = setup();
-    await absent.result.current.onLoadMore({ lastRow, limit: 50, skip: 50 });
+    await loadMore(absent.result.current)({ lastRow, limit: 50, skip: 50 });
 
     const declaredOff = setup({
       isKeysetEnabled: false,
       isServerFilterEnabled: false,
     });
-    await declaredOff.result.current.onLoadMore({
+    await loadMore(declaredOff.result.current)({
       lastRow,
       limit: 50,
       skip: 50,
@@ -161,7 +180,7 @@ describe('useTableRoutePage', () => {
   it('omits the cursor on the first page even with keyset enabled', async () => {
     const { fetchPage, result } = setup({ isKeysetEnabled: true });
 
-    await result.current.onLoadMore({ limit: 50, skip: 0 });
+    await loadMore(result.current)({ limit: 50, skip: 0 });
 
     expect(fetchPage.mock.calls[0]?.[0]?.cursor).toBeUndefined();
   });
@@ -174,7 +193,40 @@ describe('useTableRoutePage', () => {
     );
 
     await expect(
-      result.current.onLoadMore({ limit: 50, skip: 50 }),
+      loadMore(result.current)({ limit: 50, skip: 50 }),
     ).resolves.toBe(page);
+  });
+
+  it('asks the declared page path for the next page when given no fetcher', async () => {
+    const page = { data: [lastRow], hasMore: false };
+    const fetchMock = vi.fn<typeof fetch>(async () => Response.json(page));
+    vi.stubGlobal('fetch', fetchMock);
+    useLoaderDataMock.mockReturnValue({
+      ...loaderData,
+      metaState: { ...metaState, pagePath: '/rows/page' },
+    });
+    const { result } = renderHook(() => useTableRoutePage<Row, Response>());
+
+    await expect(
+      loadMore(result.current)({ limit: 50, skip: 50 }),
+    ).resolves.toStrictEqual(page);
+    expect(fetchMock.mock.calls[0]?.[0]).toMatch(/^\/rows\/page\?.*limit=50/u);
+  });
+
+  it('prefers the given fetcher over the declared page path', async () => {
+    const fetchMock = vi.fn<typeof fetch>();
+    vi.stubGlobal('fetch', fetchMock);
+    const { fetchPage, result } = setup({ pagePath: '/rows/page' });
+
+    await loadMore(result.current)({ limit: 50, skip: 50 });
+
+    expect(fetchPage).toHaveBeenCalledOnce();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it('offers no load-more handler with neither a fetcher nor a page path', () => {
+    const { result } = renderHook(() => useTableRoutePage<Row, Response>());
+
+    expect(result.current.onLoadMore).toBeUndefined();
   });
 });

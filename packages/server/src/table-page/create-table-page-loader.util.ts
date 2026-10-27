@@ -1,10 +1,12 @@
 import type { OlapGroupRead } from '../db/olap/olap.types.ts';
-import type { TablePageReader } from './create-table-page-reader.util.ts';
+import type { TablePageReadResolution } from './table-page.types.ts';
 
 import { toRefusedTablePage } from './to-refused-table-page.util.ts';
 
 export type CreateTablePageLoaderArgs = {
-  readonly resolvePageRead: TablePageReader['resolvePageRead'];
+  readonly resolvePageRead: (
+    params: URLSearchParams,
+  ) => Promise<TablePageReadResolution>;
   readonly selectPage: (read: OlapGroupRead) => Promise<unknown>;
 };
 

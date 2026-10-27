@@ -5,10 +5,6 @@ import type {
   EnterpriseOrderTableRow,
 } from './config';
 
-import { fetchOrdersPage } from './fetchOrdersPage.service';
-
 export const EnterpriseOrders = () => (
-  <TableRouteView<EnterpriseOrderTableRow, EnterpriseOrdersResponse>
-    fetchPage={fetchOrdersPage}
-  />
+  <TableRouteView<EnterpriseOrderTableRow, EnterpriseOrdersResponse> />
 );

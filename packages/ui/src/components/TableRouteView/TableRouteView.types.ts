@@ -10,5 +10,6 @@ export type TableRouteViewProps<
   TableLayoutProps<TData, TResponse>,
   'actions' | 'dataErrorSelector' | 'dataSelector' | 'dataTotalSelector'
 > & {
-  readonly fetchPage: (query: PaginatedQuery) => Promise<TResponse>;
+  /** Defaults to a fetcher for the `pagePath` the route loader declares. */
+  readonly fetchPage?: (query: PaginatedQuery) => Promise<TResponse>;
 };
