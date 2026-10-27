@@ -1,31 +1,5 @@
-import type {
-  TableGroupingRefusalReason,
-  TableQueryRefusalReason,
-} from '../Table.types';
-
-import { createTableRefusalReasonGuard } from './createTableRefusalReasonGuard.util';
-
-const isGroupingRefusalReason =
-  createTableRefusalReasonGuard<TableGroupingRefusalReason>({
-    'aggregate-not-legal': true,
-    'column-axis-too-wide': true,
-    'column-not-groupable': true,
-    'duplicate-keys': true,
-    'estimate-too-large': true,
-    'no-keys': true,
-    'row-limit-reached': true,
-    'too-many-keys': true,
-    'unknown-column': true,
-  });
-
-const isQueryRefusalReason =
-  createTableRefusalReasonGuard<TableQueryRefusalReason>({
-    'column-not-allowed': true,
-    'keyset-cursor-mismatch': true,
-    'keyset-sort-missing': true,
-    'keyset-sort-not-unique': true,
-    'keyset-unique-value-missing': true,
-  });
+import { isTableGroupingRefusalReason } from './isTableGroupingRefusalReason.util';
+import { isTableQueryRefusalReason } from './isTableQueryRefusalReason.util';
 
 export const readRefusedError = (error: unknown) => {
   if (
@@ -39,7 +13,7 @@ export const readRefusedError = (error: unknown) => {
     return;
   }
 
-  if (error.kind === 'query-refused' && isQueryRefusalReason(error.reason))
+  if (error.kind === 'query-refused' && isTableQueryRefusalReason(error.reason))
     return {
       kind: 'query-refused' as const,
       message: error.message,
@@ -48,7 +22,7 @@ export const readRefusedError = (error: unknown) => {
 
   if (
     error.kind !== 'grouping-refused' ||
-    !isGroupingRefusalReason(error.reason)
+    !isTableGroupingRefusalReason(error.reason)
   )
     return;
 
