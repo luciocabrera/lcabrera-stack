@@ -42,23 +42,25 @@ graph TD
   BTQ --> SS["sanitizeSorting"]
   BTQ --> APKS["appendPrimaryKeySorting (ADR-008)"]
   BTQ --> TKCV["toKeysetCursorValues (ADR-052)"]
-  H --> FP["fetchPage — the route's createPaginatedFetcher"]
+  H --> FP["fetchPage, or a fetcher for metaState.pagePath"]
   TRV --> TL["TableLayout"]
 
   style FP stroke-dasharray: 5 5
 ```
 
-`fetchPage` is dashed because it is the one piece the route supplies.
+`fetchPage` is dashed because it is the one piece the route may supply. Left
+off, the hook builds a `createPaginatedFetcher` for the `pagePath` the loader's
+`source` put on `metaState` (ADR-144); with neither, the table loads one page.
 
 ## Props
 
-| Prop                | Type                                                | Required | Description                                                              |
-| ------------------- | --------------------------------------------------- | -------- | ------------------------------------------------------------------------ |
-| `actions`           | `ReactNode`                                         | No       | Toolbar content, forwarded to `TableLayout`                              |
-| `dataErrorSelector` | `(r: TResponse) => TableResponseError \| undefined` | No       | Defaults to `response.error` (ADR-068)                                   |
-| `dataSelector`      | `(r: TResponse) => readonly TData[]`                | No       | Defaults to `response.data`                                              |
-| `dataTotalSelector` | `(r: TResponse) => number \| undefined`             | No       | Defaults to `response.total`                                             |
-| `fetchPage`         | `(query: PaginatedQuery) => Promise<TRes>`          | Yes      | The route's paginated read — typically a `createPaginatedFetcher` result |
+| Prop                | Type                                                | Required | Description                                                                |
+| ------------------- | --------------------------------------------------- | -------- | -------------------------------------------------------------------------- |
+| `actions`           | `ReactNode`                                         | No       | Toolbar content, forwarded to `TableLayout`                                |
+| `dataErrorSelector` | `(r: TResponse) => TableResponseError \| undefined` | No       | Defaults to `response.error` (ADR-068)                                     |
+| `dataSelector`      | `(r: TResponse) => readonly TData[]`                | No       | Defaults to `response.data`                                                |
+| `dataTotalSelector` | `(r: TResponse) => number \| undefined`             | No       | Defaults to `response.total`                                               |
+| `fetchPage`         | `(query: PaginatedQuery) => Promise<TRes>`          | No       | The route's paginated read; defaults to a fetcher for `metaState.pagePath` |
 
 Every prop here is something only the component can supply — a function or a
 node. What the _endpoint_ can do is not a prop; see below.

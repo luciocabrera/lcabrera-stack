@@ -21,6 +21,8 @@ export const ENTERPRISE_ORDERS_PATH = '/enterprise-orders';
 
 export const ENTERPRISE_ORDERS_GROUP_PATH = `${ENTERPRISE_ORDERS_PATH}/group`;
 
+export const ENTERPRISE_ORDERS_PAGE_PATH = '/_api/enterprise-orders/paginated';
+
 export const ENTERPRISE_ORDER_GROUP_MAX_ROWS = 5000;
 
 export const ENTERPRISE_ORDER_COLUMNS = [

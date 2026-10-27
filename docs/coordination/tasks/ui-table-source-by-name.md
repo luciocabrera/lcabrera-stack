@@ -2,7 +2,7 @@
 id: ui-table-source-by-name
 title: Drive a grid from a schema and table name
 owner: agent:claude
-status: active
+status: review
 branch: feat/996-ui-table-source-by-name
 area:
   - packages/server/src/table-page/**
@@ -14,6 +14,11 @@ area:
   - packages/ui/src/components/TableRouteView/**
   - packages/ui/README.md
   - packages/ui/src/INVENTORY.md
+  - packages/ui/src/PATTERNS.md
+  - packages/ui/src/components/Table/Table.types.ts
+  - apps/showcase/src/INVENTORY.md
+  - apps/showcase/src/services/serveTablePageRequest*
+  - .changeset/grid-source-by-table-name.md
   - apps/showcase/src/routes/enterprise-orders/**
   - apps/showcase/src/routes/api/**
   - apps/showcase/src/routes/car-sales/**
@@ -25,7 +30,7 @@ area:
 started: 2026-10-27
 updated: 2026-10-27
 plan: (none)
-pr: (none)
+pr: '#1522'
 issue: #996
 ---
 
@@ -35,6 +40,6 @@ Drive a grid from a schema and table name
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR ready for review
 - Blockers: none
-- Next:
+- Next: review

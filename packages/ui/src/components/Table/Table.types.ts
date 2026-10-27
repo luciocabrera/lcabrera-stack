@@ -160,6 +160,8 @@ export type TableCapabilityState = {
   readonly isUrlStateNested?: boolean;
   readonly locale?: string;
   readonly lockedFilters?: TableLockedFilters;
+  /** Endpoint that answers a next-page query; used when the route view is given no `fetchPage`. */
+  readonly pagePath?: string;
   readonly schemaName?: string;
   readonly tableName?: string;
   readonly title?: TableTitle;

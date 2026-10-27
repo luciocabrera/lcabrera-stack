@@ -1,12 +1,25 @@
+import type { selectGroupedRows } from '@lcabrera/server/db/select-grouped-rows.util';
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { describe, expect, it, vi } from 'vite-plus/test';
 
-import { selectOrdersPage } from './.server/enterpriseOrders.service';
 import { loader } from './enterprise-orders.loader';
 
-vi.mock('./.server/enterpriseOrders.service', () => ({
-  selectOrderGroupingCapabilities: vi.fn(async () => ({
+const { selectGroupedRowsMock, selectRowsMock } = vi.hoisted(() => ({
+  selectGroupedRowsMock: vi.fn<
+    (descriptor: Parameters<typeof selectGroupedRows>[0]) => Promise<unknown>
+  >(async () => ({
+    aggregates: [{ alias: 'count_rows', fn: 'count' }],
+    groupingSetMasks: [0],
+    keys: [],
+    maskAlias: 'group_mask',
+    rows: [],
+  })),
+  selectRowsMock: vi.fn(async () => []),
+}));
+
+vi.mock('@lcabrera/server/db/get-column-grouping-capabilities.util', () => ({
+  getColumnGroupingCapabilities: vi.fn(async () => ({
     total_amount: {
       aggregates: ['avg', 'sum'],
       canGroup: false,
@@ -16,45 +29,23 @@ vi.mock('./.server/enterpriseOrders.service', () => ({
       typeName: 'numeric',
     },
   })),
-  selectOrdersPage: vi.fn(async () => ({ data: [], hasMore: false, total: 0 })),
+}));
+vi.mock('@lcabrera/server/db/get-rows-count.util', () => ({
+  getRowsCount: vi.fn(async () => 0),
+}));
+vi.mock('@lcabrera/server/db/select-grouped-rows.util', () => ({
+  selectGroupedRows: selectGroupedRowsMock,
+}));
+vi.mock('@lcabrera/server/db/select-rows.util', () => ({
+  selectRows: selectRowsMock,
 }));
 
-type CollectFunctionPathsArgs = {
-  readonly path?: string;
-  readonly value: unknown;
-};
-
-const collectFunctionPaths = ({
-  path = '$',
-  value,
-}: CollectFunctionPathsArgs): readonly string[] => {
-  if (typeof value === 'function') return [path];
-  if (Array.isArray(value)) {
-    return value.flatMap((item, index) =>
-      collectFunctionPaths({ path: `${path}[${index}]`, value: item }),
-    );
-  }
-  if (value !== null && typeof value === 'object') {
-    return Object.entries(value).flatMap(([key, entry]) =>
-      collectFunctionPaths({ path: `${path}.${key}`, value: entry }),
-    );
-  }
-  return [];
-};
+const groupedRead = () => selectGroupedRowsMock.mock.calls[0]?.[0];
 
 const invokeLoader = async (search = '') =>
   loader({
     request: new Request(`http://localhost/enterprise-orders${search}`),
   } as LoaderFunctionArgs);
-
-const NO_GROUPING = {
-  aggregates: [],
-  keys: [],
-  mode: 'flat',
-  periods: {},
-  shares: [],
-  totalsPlacement: 'last',
-};
 
 const sortKeys = (value: object) =>
   Object.keys(value).toSorted((a, b) => a.localeCompare(b));
@@ -66,8 +57,10 @@ describe('enterprise-orders loader', () => {
   it('returns fully serializable columnsState (columns included) and metaState', async () => {
     const result = await invokeLoader();
 
-    expect(collectFunctionPaths({ value: result.columnsState })).toEqual([]);
-    expect(collectFunctionPaths({ value: result.metaState })).toEqual([]);
+    expect(structuredClone(result.columnsState)).toStrictEqual(
+      result.columnsState,
+    );
+    expect(structuredClone(result.metaState)).toStrictEqual(result.metaState);
   });
 
   it('bakes distinct descriptors with loader transport onto filterable string columns', async () => {
@@ -115,10 +108,19 @@ describe('enterprise-orders loader', () => {
   });
 
   describe('grouping', () => {
-    it('declares the capability so the table offers grouping at all', async () => {
+    it('takes every request-shaping capability, and the page path, from the source', async () => {
       const { metaState } = await invokeLoader();
 
-      expect(metaState.isGroupingEnabled).toBe(true);
+      expect(metaState).toEqual(
+        expect.objectContaining({
+          isGroupingEnabled: true,
+          isKeysetEnabled: true,
+          isServerFilterEnabled: true,
+          pagePath: '/_api/enterprise-orders/paginated',
+          schemaName: 'public',
+          tableName: 'enterprise_orders',
+        }),
+      );
     });
 
     it('applies a group key from the URL, so a shared link restores it', async () => {
@@ -127,16 +129,13 @@ describe('enterprise-orders loader', () => {
       );
 
       expect(result.groupingState.keys).toEqual(['order_status']);
-      expect(selectOrdersPage).toHaveBeenCalledWith(
+      expect(groupedRead()).toEqual(
         expect.objectContaining({
-          grouping: {
-            aggregates: [],
-            keys: ['order_status'],
-            mode: 'flat',
-            periods: {},
-            shares: [],
-            totalsPlacement: 'last',
-          },
+          aggregates: [{ fn: 'count' }],
+          grouping: 'flat',
+          keys: ['order_status'],
+          schema: 'public',
+          table: 'enterprise_orders',
         }),
       );
     });
@@ -147,9 +146,8 @@ describe('enterprise-orders loader', () => {
       );
 
       expect(result.groupingState.keys).toEqual([]);
-      expect(selectOrdersPage).toHaveBeenCalledWith(
-        expect.objectContaining({ grouping: NO_GROUPING }),
-      );
+      expect(selectGroupedRowsMock).not.toHaveBeenCalled();
+      expect(selectRowsMock).toHaveBeenCalledOnce();
     });
 
     it("refuses a key that is not one of this route's columns", async () => {
@@ -192,18 +190,7 @@ describe('enterprise-orders loader', () => {
         'order_status',
         'shipping_country',
       ]);
-      expect(selectOrdersPage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          grouping: {
-            aggregates: [],
-            keys: ['order_status', 'shipping_country'],
-            mode: 'flat',
-            periods: {},
-            shares: [],
-            totalsPlacement: 'last',
-          },
-        }),
-      );
+      expect(groupedRead()?.keys).toEqual(['order_status', 'shipping_country']);
     });
 
     it('refuses a key list past the configured depth', async () => {
@@ -224,18 +211,10 @@ describe('enterprise-orders loader', () => {
       expect(result.groupingState.aggregates).toEqual([
         { columnKey: 'total_amount', fn: 'sum' },
       ]);
-      expect(selectOrdersPage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          grouping: {
-            aggregates: [{ columnKey: 'total_amount', fn: 'sum' }],
-            keys: ['order_status'],
-            mode: 'flat',
-            periods: {},
-            shares: [],
-            totalsPlacement: 'last',
-          },
-        }),
-      );
+      expect(groupedRead()?.aggregates).toEqual([
+        { fn: 'count' },
+        { column: 'total_amount', fn: 'sum' },
+      ]);
     });
 
     it('applies two aggregates on one column from the URL', async () => {
@@ -249,16 +228,11 @@ describe('enterprise-orders loader', () => {
         { columnKey: 'total_amount', fn: 'sum' },
         { columnKey: 'total_amount', fn: 'avg' },
       ]);
-      expect(selectOrdersPage).toHaveBeenCalledWith(
-        expect.objectContaining({
-          grouping: expect.objectContaining({
-            aggregates: [
-              { columnKey: 'total_amount', fn: 'sum' },
-              { columnKey: 'total_amount', fn: 'avg' },
-            ],
-          }),
-        }),
-      );
+      expect(groupedRead()?.aggregates).toEqual([
+        { fn: 'count' },
+        { column: 'total_amount', fn: 'sum' },
+        { column: 'total_amount', fn: 'avg' },
+      ]);
     });
 
     it('ships the catalogue capabilities so the aggregate menu can be built', async () => {

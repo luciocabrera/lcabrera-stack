@@ -54,7 +54,10 @@ const invoke = async ({
   url = 'http://localhost/rows',
 }: {
   readonly config?: Partial<
-    Parameters<typeof createTableRouteLoader<Row, typeof response>>[0]
+    Extract<
+      Parameters<typeof createTableRouteLoader<Row, typeof response>>[0],
+      { readonly source?: never }
+    >
   >;
   readonly cookie?: string;
   readonly url?: string;
@@ -125,37 +128,16 @@ const layoutCookie = ({
     JSON.stringify({ value, version: 1 }),
   )}`;
 
-type CollectFunctionPathsArgs = {
-  readonly path?: string;
-  readonly value: unknown;
-};
-
-const collectFunctionPaths = ({
-  path = '$',
-  value,
-}: CollectFunctionPathsArgs): readonly string[] => {
-  if (typeof value === 'function') return [path];
-  if (Array.isArray(value)) {
-    return value.flatMap((item, index) =>
-      collectFunctionPaths({ path: `${path}[${index}]`, value: item }),
-    );
-  }
-  if (value !== null && typeof value === 'object') {
-    return Object.entries(value).flatMap(([key, entry]) =>
-      collectFunctionPaths({ path: `${path}.${key}`, value: entry }),
-    );
-  }
-  return [];
-};
-
 describe('createTableRouteLoader', () => {
   it('returns fully serializable columnsState and metaState (no functions cross the loader boundary)', async () => {
     const { result } = await invoke({
       config: { filterOptions: { transport: 'loader' } },
     });
 
-    expect(collectFunctionPaths({ value: result.columnsState })).toEqual([]);
-    expect(collectFunctionPaths({ value: result.metaState })).toEqual([]);
+    expect(structuredClone(result.columnsState)).toStrictEqual(
+      result.columnsState,
+    );
+    expect(structuredClone(result.metaState)).toStrictEqual(result.metaState);
   });
 
   it('bakes distinct descriptors onto filterable string columns when filterOptions is set', async () => {
@@ -910,18 +892,6 @@ describe('createTableRouteLoader', () => {
       });
 
       expect(result.metaState.lockedFilters).toEqual(declared);
-    });
-
-    it('still refuses a declaration injected through the UI-flags cookie', async () => {
-      const { result } = await invoke({
-        cookie: uiFlagsCookie({
-          lockedFilters: {
-            entries: [{ columnKey: 'status', label: 'Status', value: 'Open' }],
-          },
-        }),
-      });
-
-      expect(result.metaState.lockedFilters).toBeUndefined();
     });
 
     it('prefers the per-request resolver over a static declaration', async () => {

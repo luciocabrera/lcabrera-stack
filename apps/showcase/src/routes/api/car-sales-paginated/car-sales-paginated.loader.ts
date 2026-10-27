@@ -1,14 +1,16 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
 import { selectCarSalesPage } from '@/routes/car-sales/.server/carSales.service';
+import {
+  CAR_SALES_FALLBACK_SORT,
+  MAX_CAR_SALES_LIMIT,
+} from '@/routes/car-sales/config';
+import { serveTablePageRequest } from '@/services/serveTablePageRequest.service';
 
-import { parseCarSalesPageParams } from './parseCarSalesPageParams.util';
-
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const url = new URL(request.url);
-  const { limit, skip, sorting } = parseCarSalesPageParams(url.searchParams);
-
-  const page = await selectCarSalesPage({ limit, offset: skip, sorting });
-
-  return Response.json(page);
-};
+export const loader = async ({ request }: LoaderFunctionArgs) =>
+  serveTablePageRequest({
+    fallbackSort: CAR_SALES_FALLBACK_SORT,
+    maxLimit: MAX_CAR_SALES_LIMIT,
+    request,
+    selectPage: selectCarSalesPage,
+  });

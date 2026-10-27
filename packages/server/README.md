@@ -121,6 +121,19 @@ request carries, and the mapper into the `QuerySort[]` the builders consume.
 | `sort.types`              | `ColumnSort` — the request-sort shape                                                                |
 | `resolve-query-sort.util` | Request sort, or a fallback when it is empty → non-empty `QuerySort[]`; refuses to yield no ORDER BY |
 
+### Table pages — `@lcabrera/server/table-page/*`
+
+A grid's reads over one table: the parse of a page request, the page read, the
+grouped read and the handler that answers a page request.
+
+| Import                           | What it does                                                                                                        |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `create-table-page-reader.util`  | Takes a schema, a table, its columns and a primary key; returns the reads, a `pageLoader` and a `source` for a grid |
+| `create-table-page-loader.util`  | A `({ request }) => Response` that answers a page request, or a refused one with an empty flagged page              |
+| `create-table-loader-reads.util` | The first-page `fetchPage` and grouping-capability read a route loader takes                                        |
+| `parse-table-page-params.util`   | A page request's search params → window, sort, cursor and filters, or a typed refusal                               |
+| `to-refused-table-page.util`     | The empty page that carries a refusal message instead of rows                                                       |
+
 ### Credentials — `@lcabrera/server/crypto/*`, `/tokens/*`, `/tickets/*`
 
 | Import                                | What it does                                                                  |
@@ -160,6 +173,28 @@ parameter — there is no code path that concatenates a value into SQL.
 One thing worth knowing before you type the row: `TRow` is an **unchecked**
 contract with the table, because `pg` does not validate it. Postgres `numeric`
 columns arrive as **strings**, so type them `string` and coerce at the caller.
+
+### Serve a grid from a table by name
+
+```ts
+import { createTablePageReader } from '@lcabrera/server/table-page/create-table-page-reader.util';
+
+export const orders = createTablePageReader<Order, 'id'>({
+  pagePath: '/orders/page',
+  primaryKey: 'id',
+  target: {
+    allowedColumns: ['id', 'country', 'placed_on', 'total'],
+    schema: 'sales',
+    table: 'orders',
+  },
+});
+```
+
+`orders.pageLoader` is the `loader` of the resource route at `pagePath`, and
+`orders.source` is the setting `@lcabrera/ui`'s `createTableRouteLoader` takes;
+that package's README shows the route and the view. `allowedColumns` is the
+whole surface a request can reach — the query builder rejects a filter, sort or
+cursor naming any other column before a statement is built.
 
 ### Take column names from a request
 

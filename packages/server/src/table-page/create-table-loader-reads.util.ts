@@ -1,6 +1,6 @@
 import type { ColumnFilter } from '../filters/filters.types.ts';
-import type { TablePageReader } from './create-table-page-reader.util.ts';
 import type {
+  TableGroupingCapabilities,
   TablePageGrouping,
   TablePageRead,
   TablePageSortRule,
@@ -15,7 +15,8 @@ export type CreateTableLoaderReadsArgs<
 > = {
   /** Size of the first page the table opens on. */
   readonly limit: number;
-  readonly reader: Pick<TablePageReader, 'selectGroupingCapabilities'> & {
+  readonly reader: {
+    readonly selectGroupingCapabilities: () => Promise<TableGroupingCapabilities>;
     readonly selectPage: (read: TableLoaderRead<TGrouping>) => Promise<TPage>;
   };
 };
