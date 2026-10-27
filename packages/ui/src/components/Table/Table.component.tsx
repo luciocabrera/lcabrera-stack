@@ -92,10 +92,11 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
     return (
       <Suspense
         fallback={
-          <Table<TData, readonly TData[]>
-            actions={actions}
-            columns={columns}
+          <Table<TData, TResponse>
+            {...props}
+            dataSelector={undefined}
             isLoading
+            onLoadMore={undefined}
             response={generatePlaceholderData<TData>({
               columns,
               rowCount: INITIAL_PAGE_SIZE,

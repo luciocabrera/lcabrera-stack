@@ -86,6 +86,34 @@ const columnValues = (columnKey: keyof Order) =>
 const headerLabels = () =>
   screen.getAllByTestId('table-header-label').map((label) => label.textContent);
 
+const gridAncestorClasses = () => {
+  const classes: string[] = [];
+
+  for (
+    let node = screen.getByTestId('table-scroll-container').parentElement;
+    node !== null && node !== document.body;
+    node = node.parentElement
+  ) {
+    classes.push(node.className);
+  }
+
+  return classes;
+};
+
+type UnwrappedOrdersProps = {
+  readonly response: Promise<readonly Order[]> | readonly Order[];
+};
+
+const UnwrappedOrders = ({ response }: UnwrappedOrdersProps) => (
+  <Table
+    columns={ORDER_COLUMNS}
+    icon={<span data-testid='table-icon' />}
+    isFlexWrapperEnabled={false}
+    response={response}
+    title='Orders'
+  />
+);
+
 const openColumnActions = (label: string) => {
   fireEvent.click(
     screen.getByRole('button', { name: `${label} column actions` }),
@@ -154,6 +182,22 @@ describe('Table from a plain array or a promise', () => {
       'Reference',
     ]);
     expect(columnValues('reference')).toStrictEqual(['Beta', 'Alpha', 'Gamma']);
+  });
+
+  it('keeps the caller’s props on the loading grid while the promise is pending', async () => {
+    const pending = new Promise<readonly Order[]>(() => undefined);
+
+    await act(async () => {
+      render(<UnwrappedOrders response={pending} />);
+    });
+    const pendingLayout = gridAncestorClasses();
+    const pendingIcons = screen.queryAllByTestId('table-icon').length;
+
+    cleanup();
+    render(<UnwrappedOrders response={ORDERS} />);
+
+    expect(pendingIcons).toBe(1);
+    expect(pendingLayout).toStrictEqual(gridAncestorClasses());
   });
 
   it('shows a loading grid with its columns while the promise is pending', async () => {
