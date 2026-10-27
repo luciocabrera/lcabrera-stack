@@ -34,7 +34,7 @@ export const useTableRoutePage = <
   const onLoadMore =
     fetchNextPage === undefined
       ? undefined
-      : async ({ lastRow, limit, skip }: Pagination<TData>) =>
+      : ({ lastRow, limit, skip }: Pagination<TData>) =>
           fetchNextPage(
             buildTablePageQuery<TData>({
               columnsState,

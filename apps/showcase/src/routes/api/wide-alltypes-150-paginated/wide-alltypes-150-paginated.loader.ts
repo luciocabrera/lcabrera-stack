@@ -7,7 +7,7 @@ import {
 } from '@/routes/wide-alltypes-150/config';
 import { serveTablePageRequest } from '@/services/serveTablePageRequest.service';
 
-export const loader = async ({ request }: LoaderFunctionArgs) =>
+export const loader = ({ request }: LoaderFunctionArgs) =>
   serveTablePageRequest({
     fallbackSort: WIDE_ALLTYPES_FALLBACK_SORT,
     maxLimit: MAX_WIDE_ALLTYPES_LIMIT,

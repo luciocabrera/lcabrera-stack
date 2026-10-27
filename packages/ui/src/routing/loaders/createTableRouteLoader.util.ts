@@ -1,10 +1,6 @@
 import type { LoaderFunctionArgs } from 'react-router';
 
-import type {
-  ColumnFiltersState,
-  SortingState,
-  TableColumn,
-} from '#ui/components/Table';
+import type { TableColumn } from '#ui/components/Table';
 import type {
   FilterOptionsTransport,
   TableCellPalette,
@@ -12,17 +8,21 @@ import type {
   TableGroupingState,
   TableLockedFilters,
   TableMetaState,
-  TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
 
 import { toChromeUiFlags } from '#ui/components/Table/utils/toChromeUiFlags.util';
+
+import type { TableRouteLoaderSourceArgs } from './loaders.types';
 
 import { appendPrimaryKeySorting } from '../shared/appendPrimaryKeySorting.util';
 import { sanitizeSorting } from '../shared/sanitizeSorting.util';
 import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescriptors.util';
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
 import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
+import { resolveTableRouteSource } from './resolveTableRouteSource.util';
 import { startInjectedResolver } from './startInjectedResolver.util';
+
+export type { TableRouteSource } from './loaders.types';
 
 const NO_GROUPING_CAPABILITIES: Readonly<
   Record<string, TableColumnGroupingCapability>
@@ -34,29 +34,6 @@ export type TableRouteLoaderData<
 > = Awaited<
   ReturnType<ReturnType<typeof createTableRouteLoader<TData, TResponse>>>
 >;
-
-export type TableRouteSource<
-  TData extends Record<string, unknown>,
-  TResponse,
-> = {
-  /** Request-shaping capabilities the source serves; the route's `meta` overrides each one. */
-  readonly capabilities?: Partial<
-    Pick<
-      TableMetaState,
-      'isGroupingEnabled' | 'isKeysetEnabled' | 'isServerFilterEnabled'
-    >
-  >;
-  readonly fetchPage: (
-    args: TableRouteFetchPageArgs<TData>,
-  ) => Promise<TResponse>;
-  /** Endpoint the grid asks for every page after the first. */
-  readonly pagePath?: string;
-  readonly resolveGroupingCapabilities?: () => Promise<
-    Readonly<Record<string, TableColumnGroupingCapability>>
-  >;
-  readonly schemaName?: string;
-  readonly tableName: string;
-};
 
 type CreateTableRouteLoaderArgs<
   TData extends Record<string, unknown>,
@@ -79,29 +56,6 @@ type CreateTableRouteLoaderArgs<
   readonly title: TableMetaState['title'];
 };
 
-type TableRouteFetchPageArgs<TData extends Record<string, unknown>> = {
-  readonly effectiveSorting: SortingState<TData>;
-  readonly filters: ColumnFiltersState<TData>;
-  readonly grouping: TableGroupingState;
-  readonly request: Request;
-  readonly totalsPlacement: TableTotalsPlacement;
-};
-
-type TableRouteLoaderSourceArgs<
-  TData extends Record<string, unknown>,
-  TResponse,
-> =
-  | (Omit<TableRouteSource<TData, TResponse>, 'capabilities' | 'pagePath'> & {
-      readonly source?: never;
-    })
-  | {
-      readonly fetchPage?: never;
-      readonly resolveGroupingCapabilities?: never;
-      readonly schemaName?: never;
-      readonly source: TableRouteSource<TData, TResponse>;
-      readonly tableName?: never;
-    };
-
 export const createTableRouteLoader = <
   TData extends Record<string, unknown>,
   TResponse,
@@ -119,8 +73,7 @@ export const createTableRouteLoader = <
     resolveLockedFilters,
     title,
   } = args;
-  const source: TableRouteSource<TData, TResponse> =
-    args.source === undefined ? args : args.source;
+  const source = resolveTableRouteSource<TData, TResponse>(args);
   const { fetchPage, resolveGroupingCapabilities, schemaName, tableName } =
     source;
   const meta = { ...source.capabilities, ...args.meta };

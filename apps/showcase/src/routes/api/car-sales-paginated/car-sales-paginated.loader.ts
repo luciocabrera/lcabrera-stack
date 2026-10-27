@@ -7,7 +7,7 @@ import {
 } from '@/routes/car-sales/config';
 import { serveTablePageRequest } from '@/services/serveTablePageRequest.service';
 
-export const loader = async ({ request }: LoaderFunctionArgs) =>
+export const loader = ({ request }: LoaderFunctionArgs) =>
   serveTablePageRequest({
     fallbackSort: CAR_SALES_FALLBACK_SORT,
     maxLimit: MAX_CAR_SALES_LIMIT,
