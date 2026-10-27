@@ -6,21 +6,12 @@ import { isQueryRefusalReason } from './is-query-refusal-reason.util.ts';
 import { PersistenceError } from './persistence.error.ts';
 import { QueryCanceledError } from './query-canceled.error.ts';
 import { QueryRefusedError } from './query-refused.error.ts';
+import { toGroupingRefused } from './to-grouping-refused.util.ts';
 
 const UNEXPECTED_MESSAGE = 'The request could not be completed.';
 
 export const toSerializableDbError = (error: unknown): SerializableDbError => {
-  if (error instanceof GroupingRefusedError) {
-    return {
-      kind: 'grouping-refused',
-      message: error.message,
-      reason: error.reason,
-      ...(error.column !== undefined && { column: error.column }),
-      ...(error.estimatedRows !== undefined && {
-        estimatedRows: error.estimatedRows,
-      }),
-    };
-  }
+  if (error instanceof GroupingRefusedError) return toGroupingRefused(error);
 
   if (
     error instanceof QueryRefusedError &&

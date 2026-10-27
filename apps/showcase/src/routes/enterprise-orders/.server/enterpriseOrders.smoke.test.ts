@@ -415,7 +415,8 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
 
       expect(page.error).toEqual({
         kind: 'grouping-refused',
-        message: 'A flat grouping takes at most 4 group keys; got 5.',
+        message:
+          'The request named more group keys than this kind of grouping takes.',
         reason: 'too-many-keys',
       });
       expect(page.data).toEqual([]);
@@ -507,8 +508,8 @@ describe.skipIf(!IS_SMOKE_ENABLED)('enterprise-orders live DB smoke', () => {
         kind: 'grouping-refused',
         reason: 'aggregate-not-legal',
       });
-      expect(page.error?.message).toMatch(
-        /is not legal for column "customer_name"/,
+      expect(page.error?.message).toBe(
+        "The request asked for aggregates this grouped read cannot compute: it needs at least one, at most one distinct count, a column for every function but count, and a function the column's type supports.",
       );
     });
 

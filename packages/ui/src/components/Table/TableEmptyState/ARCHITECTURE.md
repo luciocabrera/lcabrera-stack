@@ -49,9 +49,8 @@ title is store-driven and both branches read what they need for themselves.
 | `db-failed` / `unexpected`                  | `This table could not be loaded`   | the endpoint's own |
 
 **The heading is the table's, the sentence is the endpoint's**, and neither can
-be written by the other. Only the endpoint knows why it refused — the catalogue
-rule, the estimate, the threshold — and it has already vetted that text for
-anything a client may not see (ADR-050). Only the table knows what the user
+be written by the other. Only the endpoint knows why it refused, and it has
+already vetted that text for anything a client may not see (ADR-050). Only the table knows what the user
 calls the column: the refusal names `total_amount`, the header said "Total
 Amount". `<column>` is that label, falling back to the raw key when this table
 declares no column by that name.
@@ -67,13 +66,18 @@ false sentence about each:
   applied and is legal on its own.
 - `aggregate-not-legal` names an _aggregated_ column, which need not be a group
   key at all.
-- `unknown-column` is raised for a group key and for an aggregated column alike,
-  so the payload cannot tell the two apart.
-- `too-many-keys`, `duplicate-keys`, `no-keys` and `row-limit-reached` name no
-  column in the first place.
+- `unknown-column` is raised for a group key, an aggregated column, a column
+  axis and a granularity on a column that is not a group key, and for a column
+  the read does not list as well as one the catalogue cannot describe. The
+  payload cannot tell those apart, and a server sends no column with it because
+  the column may be one the read does not list.
+- `duplicate-keys` can name a column the read does not list, so it arrives
+  without one too.
+- `too-many-keys`, `no-keys` and `row-limit-reached` name no column in the
+  first place.
 
-Those keep the neutral heading and let the endpoint's sentence carry the column
-in the role it actually plays — which each of those messages already does.
+Those keep the neutral heading and let the endpoint's sentence say what was
+refused.
 
 ## Design Decision — Which recovery is offered
 
