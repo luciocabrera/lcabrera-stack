@@ -50,8 +50,10 @@ hope.
 
 The guarantee is narrow on purpose, and knowing its edge matters more than
 knowing it exists: it covers **identifiers and values**, and it holds for the
-single-table reads and writes the builder covers. Anything that widens the shape
-of a query — a join, a subquery, a raw fragment — widens exactly the surface
-this rests on, which is why
+reads and writes the builder covers. Anything that widens the shape of a query
+— a join, a subquery, a raw fragment — widens exactly the surface this rests
+on, which is why
 [`express-a-join-and-an-aggregate-filter`](./express-a-join-and-an-aggregate-filter.md)
-carries the safety model as part of its decision rather than as a follow-up.
+carried the safety model as part of its decision rather than as a follow-up: a
+join reaches only a table a declared foreign key names, and every column it
+touches is validated and allowlisted against its own table.

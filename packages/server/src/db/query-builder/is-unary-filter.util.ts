@@ -1,11 +1,11 @@
-import type { QueryFilter, UnaryOperator } from './query-builder.types.ts';
+import type {
+  ComparisonOperator,
+  UnaryOperator,
+} from './query-builder.types.ts';
 
-export type UnaryQueryFilter = Extract<
-  QueryFilter,
-  { readonly operator: UnaryOperator }
->;
+type Comparison = { readonly operator: ComparisonOperator };
 
-export const isUnaryFilter = (
-  filter: QueryFilter,
-): filter is UnaryQueryFilter =>
+export const isUnaryFilter = <TComparison extends Comparison>(
+  filter: TComparison,
+): filter is Extract<TComparison, { readonly operator: UnaryOperator }> =>
   filter.operator === 'isNotNull' || filter.operator === 'isNull';

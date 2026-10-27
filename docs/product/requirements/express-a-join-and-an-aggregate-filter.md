@@ -3,7 +3,7 @@ id: express-a-join-and-an-aggregate-filter
 lines:
   - application
 persona: application-developer
-state: unmet
+state: met
 packages:
   - server
 requires:
@@ -16,9 +16,15 @@ evidence:
   - type: doc
     ref: packages/server/src/db/query-builder/ARCHITECTURE.md
   - type: code
-    ref: packages/server/src/db/query-builder/assert-column-allowed.util.ts
+    ref: packages/server/src/db/query-builder/resolve-column-reference.util.ts
   - type: code
-    ref: packages/server/src/db/group-query-builder
+    ref: packages/server/src/db/query-builder/resolve-read-scope.util.ts
+  - type: code
+    ref: packages/server/src/db/group-query-builder/build-having-clause.util.ts
+  - type: test
+    ref: packages/server/src/db/query-builder/build-read-query.util.test.ts
+  - type: command
+    ref: vp run test:ci
 ---
 
 # A read spans more than one table, and can be filtered on its aggregates

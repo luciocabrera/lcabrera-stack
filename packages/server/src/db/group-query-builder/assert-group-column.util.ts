@@ -1,27 +1,35 @@
+import type {
+  ColumnReference,
+  ReadScope,
+} from '../query-builder/query-builder.types.ts';
+
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
-import { assertColumnAllowed } from '../query-builder/assert-column-allowed.util.ts';
-import { assertSafeIdentifier } from '../query-builder/assert-safe-identifier.util.ts';
+import { resolveColumnReference } from '../query-builder/resolve-column-reference.util.ts';
+import { toColumnName } from '../query-builder/to-column-name.util.ts';
 
 type AssertGroupColumnArgs = {
   readonly allowedColumns: readonly string[];
-  readonly column: string;
+  readonly column: ColumnReference;
+  readonly scope?: ReadScope;
 };
 
 export const assertGroupColumn = ({
   allowedColumns,
   column,
+  scope,
 }: AssertGroupColumnArgs) => {
   try {
-    assertSafeIdentifier(column);
-    assertColumnAllowed({ allowedColumns, column });
+    return resolveColumnReference({ allowedColumns, reference: column, scope });
   } catch (error) {
+    const name = toColumnName(column);
+
     throw new GroupingRefusedError({
       cause: error,
-      column,
+      column: name,
       message:
         error instanceof Error
           ? error.message
-          : `Column "${column}" cannot be used in a grouped query.`,
+          : `Column "${name}" cannot be used in a grouped query.`,
       reason: 'unknown-column',
     });
   }

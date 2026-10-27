@@ -3,12 +3,14 @@ import type {
   SelectQueryDescriptor,
 } from './query-builder.types.ts';
 
-import { assertColumnAllowed } from './assert-column-allowed.util.ts';
 import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
 import { buildOptionalNumericClauses } from './build-optional-numeric-clauses.util.ts';
 import { buildOrderByClause } from './build-order-by-clause.util.ts';
+import { buildProjectedColumn } from './build-projected-column.util.ts';
 import { buildWhereClause } from './build-where-clause.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
+import { resolveColumnReference } from './resolve-column-reference.util.ts';
+import { resolveReadScope } from './resolve-read-scope.util.ts';
 
 export const buildRowsRead = ({
   allowedColumns,
@@ -16,8 +18,10 @@ export const buildRowsRead = ({
   distinct,
   fields,
   filters,
+  joins,
   limit,
   offset,
+  relations,
   schema,
   sort,
   table,
@@ -25,21 +29,35 @@ export const buildRowsRead = ({
   assertSafeIdentifier(schema);
   assertSafeIdentifier(table);
 
-  for (const field of fields) {
-    assertSafeIdentifier(field);
-    assertColumnAllowed({ allowedColumns, column: field });
-  }
+  const scope = resolveReadScope({
+    allowedColumns,
+    joins,
+    relations,
+    schema,
+    table,
+  });
+  const quotedFields = fields
+    .map((field) => {
+      const column = resolveColumnReference({
+        allowedColumns,
+        reference: field,
+        scope,
+      });
 
-  const quotedFields = fields.map((field) => quoteIdentifier(field)).join(', ');
-  const quotedFrom = `${quoteIdentifier(schema)}.${quoteIdentifier(table)}`;
+      return buildProjectedColumn({ ...column, isAliased: column.isJoined });
+    })
+    .join(', ');
+  const quotedFrom =
+    scope?.from ?? `${quoteIdentifier(schema)}.${quoteIdentifier(table)}`;
 
   const whereClause = buildWhereClause({
     allowedColumns,
     cursor,
     filters,
+    scope,
     sort,
   });
-  const orderByClause = buildOrderByClause({ allowedColumns, sort });
+  const orderByClause = buildOrderByClause({ allowedColumns, scope, sort });
   const paginationClause = buildOptionalNumericClauses({
     clauses: [
       { keyword: 'LIMIT', value: limit },

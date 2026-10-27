@@ -51,4 +51,16 @@ describe('collectCapabilityColumns', () => {
       }),
     ).toStrictEqual(['region', 'year']);
   });
+
+  it('keeps a joined reference and collects it once', () => {
+    const rating = { column: 'rating', source: 'vendor' };
+
+    expect(
+      collectCapabilityColumns({
+        aggregates: [{ column: rating, fn: 'avg' }],
+        columnAxisKey: 'status',
+        keys: [rating],
+      }),
+    ).toStrictEqual([rating, 'status']);
+  });
 });

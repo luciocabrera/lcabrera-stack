@@ -1,14 +1,26 @@
-import type { QueryCursor, QuerySort } from './query-builder.types.ts';
+import type {
+  ColumnReference,
+  QueryCursor,
+  QuerySort,
+} from './query-builder.types.ts';
+
+import { toColumnName } from './to-column-name.util.ts';
 
 type AssertKeysetCursorArgs = {
   readonly cursor: QueryCursor;
-  readonly sort?: readonly QuerySort[];
+  readonly sort?: readonly QuerySort<ColumnReference>[];
 };
 
 export const assertKeysetCursor = ({
   cursor,
   sort = [],
 }: AssertKeysetCursorArgs) => {
+  if (typeof cursor.uniqueColumn !== 'string') {
+    throw new TypeError(
+      `Keyset cursor names the joined column "${toColumnName(cursor.uniqueColumn)}" as its unique column; a cursor rests on a base-target column, written as a bare string.`,
+    );
+  }
+
   if (sort.length === 0) {
     throw new Error('Keyset pagination requires a sort; none was provided.');
   }
@@ -23,7 +35,7 @@ export const assertKeysetCursor = ({
 
   if (lastColumn !== cursor.uniqueColumn) {
     throw new Error(
-      `Keyset pagination requires the sort to end on the unique column "${cursor.uniqueColumn}", but it ends on "${lastColumn}".`,
+      `Keyset pagination requires the sort to end on the unique column "${cursor.uniqueColumn}", but it ends on "${lastColumn === undefined ? '' : toColumnName(lastColumn)}".`,
     );
   }
 

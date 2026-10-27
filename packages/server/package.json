@@ -35,6 +35,7 @@
     "./db/delete-rows.util": "./src/db/delete-rows.util.ts",
     "./db/env.schema": "./src/db/env.schema.ts",
     "./db/get-column-grouping-capabilities.util": "./src/db/get-column-grouping-capabilities.util.ts",
+    "./db/get-foreign-key-relations.util": "./src/db/get-foreign-key-relations.util.ts",
     "./db/get-max-value.util": "./src/db/get-max-value.util.ts",
     "./db/get-pool.util": "./src/db/get-pool.util.ts",
     "./db/get-rows-count.util": "./src/db/get-rows-count.util.ts",
@@ -125,6 +126,10 @@
       "./db/get-column-grouping-capabilities.util": {
         "types": "./dist/db/get-column-grouping-capabilities.util.d.mts",
         "default": "./dist/db/get-column-grouping-capabilities.util.mjs"
+      },
+      "./db/get-foreign-key-relations.util": {
+        "types": "./dist/db/get-foreign-key-relations.util.d.mts",
+        "default": "./dist/db/get-foreign-key-relations.util.mjs"
       },
       "./db/get-max-value.util": {
         "types": "./dist/db/get-max-value.util.d.mts",
