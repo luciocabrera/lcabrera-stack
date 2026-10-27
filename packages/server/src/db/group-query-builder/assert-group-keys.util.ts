@@ -1,10 +1,15 @@
 import type {
+  ColumnReference,
+  ReadScope,
+} from '../query-builder/query-builder.types.ts';
+import type {
   ColumnGroupingCapability,
   GroupingMode,
   GroupKeyPeriod,
 } from './group-query-builder.types.ts';
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
+import { toColumnName } from '../query-builder/to-column-name.util.ts';
 import { assertGroupColumn } from './assert-group-column.util.ts';
 import { assertGroupDepth } from './assert-group-depth.util.ts';
 import { assertGroupKeyPeriods } from './assert-group-key-periods.util.ts';
@@ -13,21 +18,29 @@ type AssertGroupKeysArgs = {
   readonly allowedColumns: readonly string[];
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
   readonly grouping: GroupingMode;
-  readonly keys: readonly string[];
+  readonly keys: readonly ColumnReference[];
   readonly periods?: Readonly<Record<string, GroupKeyPeriod>>;
+  readonly scope?: ReadScope;
 };
 
 export const assertGroupKeys = ({
   allowedColumns,
   capabilities,
   grouping,
-  keys,
+  keys: references,
   periods = {},
+  scope,
 }: AssertGroupKeysArgs) => {
+  const keys = references.map((reference) => toColumnName(reference));
+
   assertGroupDepth({ grouping, keys });
 
-  for (const key of keys) {
-    assertGroupColumn({ allowedColumns, column: key });
+  for (const reference of references) {
+    const { name: key } = assertGroupColumn({
+      allowedColumns,
+      column: reference,
+      scope,
+    });
 
     const capability = capabilities[key];
 

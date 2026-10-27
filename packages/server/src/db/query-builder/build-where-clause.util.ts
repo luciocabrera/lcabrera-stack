@@ -1,8 +1,10 @@
-import type { ClauseAccumulator } from './append-filter-clause.util.ts';
+import type { ClauseAccumulator } from './append-comparison-clause.util.ts';
 import type {
+  ColumnReference,
   QueryCursor,
   QueryFilter,
   QuerySort,
+  ReadScope,
 } from './query-builder.types.ts';
 
 import { appendFilterClause } from './append-filter-clause.util.ts';
@@ -11,8 +13,9 @@ import { buildKeysetClause } from './build-keyset-clause.util.ts';
 type BuildWhereClauseArgs = {
   readonly allowedColumns?: readonly string[];
   readonly cursor?: QueryCursor;
-  readonly filters?: readonly QueryFilter[];
-  readonly sort?: readonly QuerySort[];
+  readonly filters?: readonly QueryFilter<ColumnReference>[];
+  readonly scope?: ReadScope;
+  readonly sort?: readonly QuerySort<ColumnReference>[];
   readonly startParamIndex?: number;
 };
 
@@ -26,18 +29,20 @@ export const buildWhereClause = ({
   allowedColumns,
   cursor,
   filters = [],
+  scope,
   sort,
   startParamIndex = 1,
 }: BuildWhereClauseArgs): WhereClauseResult => {
   const result = filters.reduce<ClauseAccumulator>(
     (accumulator, filter) =>
-      appendFilterClause({ accumulator, allowedColumns, filter }),
+      appendFilterClause({ accumulator, allowedColumns, filter, scope }),
     { clauses: [], paramIndex: startParamIndex, values: [] },
   );
 
   const keyset = buildKeysetClause({
     allowedColumns,
     cursor,
+    scope,
     sort,
     startParamIndex: result.paramIndex,
   });

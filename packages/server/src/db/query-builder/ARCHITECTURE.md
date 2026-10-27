@@ -1,8 +1,9 @@
 # Query Builder Architecture
 
 Generic, schema/table-agnostic Postgres query construction for the common
-single-table shapes — reads (rows with optional filter/sort/pagination, a
-count, a distinct projection, and a grouped aggregate read) and writes
+shapes — reads (rows with optional filter/sort/pagination, a count, a distinct
+projection, and a grouped aggregate read, any of them joined along a declared
+foreign key) and single-table writes
 (insert/update/delete; max-value). Pure functions only; no DB access lives in
 this folder (see `@lcabrera/server/db/get-pool.util` for that) — callers
 execute the returned `{ text, values }` themselves, or use the `../*.util.ts`
@@ -41,32 +42,41 @@ built as the old builder's shape, as it was before the entry point existed.
 
 ## Files
 
-| File                                     | Role                                                                                                                                                                                                                               |
-| ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `query-builder.types.ts`                 | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `QueryCursor`, `BuiltQuery`, the `Select`/`Count`/`Insert`/`Update`/`Delete`/`MaxValue` `…QueryDescriptor` types, and the read union `ReadQueryDescriptor` with `BuiltReadQuery` |
-| `quote-identifier.util.ts`               | Safe double-quote identifier escaping                                                                                                                                                                                              |
-| `assert-safe-identifier.util.ts`         | **Mandatory**, always called — syntax check (see Security model)                                                                                                                                                                   |
-| `assert-column-allowed.util.ts`          | **Optional**, opt-in — membership check (see Security model)                                                                                                                                                                       |
-| `append-filter-clause.util.ts`           | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                                                                                                                      |
-| `is-unary-filter.util.ts`                | Narrows a filter to the arm that carries no value (`IS NULL` / `IS NOT NULL`) — a predicate, because excluding the operators by literal does not subtract the arm and leaves `filter.value` unresolved                             |
-| `build-where-clause.util.ts`             | `QueryFilter[]` (plus an optional keyset `cursor`) → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                                                  |
-| `assert-keyset-cursor.util.ts`           | Refuses a keyset cursor the builder cannot resume correctly — no sort, a tuple that does not match it, or one not ending on a non-null unique column (ADR-052)                                                                     |
-| `build-keyset-comparison.util.ts`        | The "sorts strictly after this value" half of one keyset branch, for one column, honouring Postgres's default null placement                                                                                                       |
-| `build-keyset-branch.util.ts`            | One OR-branch: earlier sort columns pinned with `IS NOT DISTINCT FROM`, the column at that position advanced past the cursor                                                                                                       |
-| `build-keyset-clause.util.ts`            | Composes the branches into the seek predicate `buildWhereClause` ANDs in                                                                                                                                                           |
-| `build-returning-clause.util.ts`         | Shared `RETURNING` builder for the write builders: `''`, `RETURNING *` (the `['*']` wildcard), or a quoted column projection                                                                                                       |
-| `build-order-by-clause.util.ts`          | `QuerySort[]` → `ORDER BY ...`                                                                                                                                                                                                     |
-| `build-optional-numeric-clauses.util.ts` | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                                                                                                                   |
-| `build-read-query.util.ts`               | **The query entry point.** One `ReadQueryDescriptor` → a row, count or grouped read                                                                                                                                                |
-| `build-rows-read.util.ts`                | Private. Composes the clauses above into one `SELECT [DISTINCT]`                                                                                                                                                                   |
-| `build-count-read.util.ts`               | Private. `count(<column>)` sharing `buildWhereClause`'s output, so a row read and its count cannot drift apart; `column` defaults to `*`                                                                                           |
-| `build-select-query.util.ts`             | Deprecated. Calls `buildRowsRead`                                                                                                                                                                                                  |
-| `build-count-query.util.ts`              | Deprecated. Calls `buildCountRead`                                                                                                                                                                                                 |
-| `build-distinct-query.util.ts`           | Deprecated. Calls `buildRowsRead` with `distinct: true`                                                                                                                                                                            |
-| `build-insert-query.util.ts`             | Write builder. `INSERT INTO … (cols) VALUES ($1, …) [RETURNING …]` from a `{ values }` map; keys quoted, values parameterized                                                                                                      |
-| `build-update-query.util.ts`             | Write builder. `UPDATE … SET col = $n WHERE … [RETURNING …]`; reuses `buildWhereClause` with an offset `startParamIndex`, requires ≥1 filter                                                                                       |
-| `build-delete-query.util.ts`             | Write builder. `DELETE FROM … WHERE … [RETURNING …]`; reuses `buildWhereClause`, requires ≥1 filter                                                                                                                                |
-| `build-max-value-query.util.ts`          | Write-path read. `SELECT COALESCE(MAX(col), 0)` — the generic "next id" read for tables without a sequence/default                                                                                                                 |
+| File                                        | Role                                                                                                                                                                                                                                   |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `query-builder.types.ts`                    | `ComparisonOperator`, `QueryFilter`, `QuerySort`, `QueryCursor`, `BuiltQuery`, the `Select`/`Count`/`Insert`/`Update`/`Delete`/`MaxValue` `…QueryDescriptor` types, and the read union `ReadQueryDescriptor` with `BuiltReadQuery`     |
+| `quote-identifier.util.ts`                  | Safe double-quote identifier escaping                                                                                                                                                                                                  |
+| `assert-safe-identifier.util.ts`            | **Mandatory**, always called — syntax check (see Security model)                                                                                                                                                                       |
+| `assert-column-allowed.util.ts`             | **Optional**, opt-in — membership check (see Security model)                                                                                                                                                                           |
+| `append-filter-clause.util.ts`              | Reducer step used by `buildWhereClause`: one filter → one SQL clause + values                                                                                                                                                          |
+| `is-unary-filter.util.ts`                   | Narrows a filter to the arm that carries no value (`IS NULL` / `IS NOT NULL`) — a predicate, because excluding the operators by literal does not subtract the arm and leaves `filter.value` unresolved                                 |
+| `build-where-clause.util.ts`                | `QueryFilter[]` (plus an optional keyset `cursor`) → `{ text, values }`, correctly incrementing `$n` placeholders                                                                                                                      |
+| `assert-keyset-cursor.util.ts`              | Refuses a keyset cursor the builder cannot resume correctly — no sort, a tuple that does not match it, or one not ending on a non-null unique column (ADR-052)                                                                         |
+| `build-keyset-comparison.util.ts`           | The "sorts strictly after this value" half of one keyset branch, for one column, honouring Postgres's default null placement                                                                                                           |
+| `build-keyset-branch.util.ts`               | One OR-branch: earlier sort columns pinned with `IS NOT DISTINCT FROM`, the column at that position advanced past the cursor                                                                                                           |
+| `build-keyset-clause.util.ts`               | Composes the branches into the seek predicate `buildWhereClause` ANDs in                                                                                                                                                               |
+| `build-returning-clause.util.ts`            | Shared `RETURNING` builder for the write builders: `''`, `RETURNING *` (the `['*']` wildcard), or a quoted column projection                                                                                                           |
+| `build-order-by-clause.util.ts`             | `QuerySort[]` → `ORDER BY ...`                                                                                                                                                                                                         |
+| `build-optional-numeric-clauses.util.ts`    | `LIMIT`/`OFFSET` fragment builder, skips `undefined` values without gapping `$n`                                                                                                                                                       |
+| `build-read-query.util.ts`                  | **The query entry point.** One `ReadQueryDescriptor` → a row, count or grouped read                                                                                                                                                    |
+| `build-rows-read.util.ts`                   | Private. Composes the clauses above into one `SELECT [DISTINCT]`                                                                                                                                                                       |
+| `build-count-read.util.ts`                  | Private. `count(<column>)` sharing `buildWhereClause`'s output, so a row read and its count cannot drift apart; `column` defaults to `*`                                                                                               |
+| `build-select-query.util.ts`                | Deprecated. Calls `buildRowsRead`                                                                                                                                                                                                      |
+| `build-count-query.util.ts`                 | Deprecated. Calls `buildCountRead`                                                                                                                                                                                                     |
+| `build-distinct-query.util.ts`              | Deprecated. Calls `buildRowsRead` with `distinct: true`                                                                                                                                                                                |
+| `build-insert-query.util.ts`                | Write builder. `INSERT INTO … (cols) VALUES ($1, …) [RETURNING …]` from a `{ values }` map; keys quoted, values parameterized                                                                                                          |
+| `build-update-query.util.ts`                | Write builder. `UPDATE … SET col = $n WHERE … [RETURNING …]`; reuses `buildWhereClause` with an offset `startParamIndex`, requires ≥1 filter                                                                                           |
+| `build-delete-query.util.ts`                | Write builder. `DELETE FROM … WHERE … [RETURNING …]`; reuses `buildWhereClause`, requires ≥1 filter                                                                                                                                    |
+| `resolve-read-scope.util.ts`                | Turns a read's `joins` into the `FROM` list and one source per alias, refusing a join without the base `allowedColumns`, without `relations`, with a taken alias, a kind other than `inner`/`left`, or a start that is not yet reached |
+| `resolve-join-relation.util.ts`             | Finds the one foreign key on the source table whose referencing columns are the ones a join names; refuses none, more than one, or an unsafe target                                                                                    |
+| `build-join-clause.util.ts`                 | `INNER`/`LEFT JOIN … AS "<alias>" ON` one quoted equality per column pair of that foreign key — no caller text                                                                                                                         |
+| `resolve-column-reference.util.ts`          | A bare string or a `{ column, source }` → its projected name and its qualified SQL, after `assertSafeIdentifier` and `assertColumnAllowed` against **its own source's** list                                                           |
+| `build-projected-column.util.ts`            | `"<alias>"."<column>" AS "<alias>.<column>"`, refusing a projected alias past 63 bytes rather than letting Postgres truncate it                                                                                                        |
+| `to-column-name.util.ts`                    | A reference's projected name: the column, or `<alias>.<column>`                                                                                                                                                                        |
+| `is-same-column-reference.util.ts`          | Whether two references name the same column of the same source; a dotted string never equals a joined reference                                                                                                                        |
+| `append-comparison-clause.util.ts`          | One operator applied to an already-rendered term; shared by a `WHERE` filter and a grouped `HAVING` filter                                                                                                                             |
+| `build-foreign-key-relations-query.util.ts` | The catalogue query `getForeignKeyRelations` runs: every `pg_constraint` foreign key reachable from the base target within the join depth, with both column lists in constraint order                                                  |
+| `build-max-value-query.util.ts`             | Write-path read. `SELECT COALESCE(MAX(col), 0)` — the generic "next id" read for tables without a sequence/default                                                                                                                     |
 
 ## The null tests are unary, and both directions exist
 
@@ -123,6 +133,45 @@ for that day to come, only remembered at the new call site.
 Filter **values** are always parameterized, never string-interpolated,
 regardless of `allowedColumns`.
 
+### A join widens what a read reaches, so it narrows what it may name
+
+[ADR-143](../../../../../docs/decisions/ADR-143-join-along-a-foreign-key-and-filter-a-flat-grouped-result.md)
+is the decision. What it means for a call site:
+
+- **A join follows a declared foreign key, many-to-one.** The descriptor names
+  only the referencing columns, on the base target or an earlier join. The
+  target table and its referenced columns come from the `relations` map, which
+  the executors read with `getForeignKeyRelations` and a pure caller passes in.
+  A foreign key always references a primary or unique key, so a join adds
+  columns to a row and never repeats one; a count, a keyset page and an
+  aggregate over the join stay correct.
+- **Every source has its own allowlist, and it is required.** Once a read has a
+  join, the base `allowedColumns` is required on every shape, and each join
+  carries its own. A `{ column, source }` reference is checked against its
+  source's list only, so a name allowed on one table is not allowed on another.
+  The foreign-key columns a join is named by are checked the same way.
+- **The SQL is the builder's alone.** The `ON` clause is one quoted equality
+  per column pair; every column is qualified once the read joins; a joined
+  column is projected as `"<alias>.<column>"`, which no safe identifier can
+  collide with. An alias that would pass Postgres's 63-byte identifier limit is
+  refused rather than truncated.
+- **A keyset cursor rests on the base target.** Its `uniqueColumn` is a bare
+  string, because a joined column repeats across the base rows that reference
+  it. Earlier sort entries may still name a joined column.
+- **A grouped read over a join** takes its `capabilities` and `periods` keyed by
+  the projected name, `<alias>.<column>`; `selectGroupedRows` resolves them per
+  source table.
+
+### A filter on a grouped result
+
+`groupFilters` emits `HAVING`. Each entry names an aggregate alias the same
+descriptor declares, a comparison operator (not `ilike`/`notIlike`) and a
+value, which is parameterized. Postgres does not let `HAVING` name an output
+alias, so the builder writes the aggregate's expression again, its own
+`FILTER` included, reusing that filter's parameters. It is refused with
+`rollup` or `cube`, where `HAVING` would also test the subtotals, and with a
+`columnAxis`, where one alias stands for one expression per axis value.
+
 ## Pagination: `offset` by default, `cursor` to seek
 
 A row read paginates with `OFFSET` unless the descriptor carries a
@@ -158,15 +207,12 @@ is).
 
 ## What this does NOT do
 
-- No joins. A read names one target, a table or a view. A view that already
-  encodes a join is read as a flat target; the builder does not build the join.
-  [ADR-143](../../../../../docs/decisions/ADR-143-join-along-a-foreign-key-and-filter-a-flat-grouped-result.md)
-  decides joins along a foreign key, with an allowlist per joined table; they
-  are not built yet.
-- No filter on a grouped result (`HAVING`). An aggregate's own `filters` emit
-  `FILTER (WHERE …)`, which narrows the rows that one aggregate reads and never
-  removes a group. ADR-143 decides `groupFilters` for flat grouped reads
-  without a column axis; they are not built yet.
+- No join other than many-to-one along a foreign key the catalogue declares:
+  no one-to-many direction, no `RIGHT`, `FULL` or `CROSS` join, no condition
+  other than key equality. A relation the schema does not declare is still a
+  view, read as a flat target.
+- No filter on a `rollup`, `cube` or column-axis grouped result. `groupFilters`
+  covers a flat grouped read only.
 - No subqueries, no common table expressions, no window functions, no raw SQL
   fragments.
 - No multi-row `INSERT … VALUES (…), (…)`, no `ON CONFLICT`/upsert, no
@@ -211,6 +257,35 @@ const grouped = buildReadQuery({
   maxRows: 5000,
   schema: 'catalog',
   sort: [{ aggregateAlias: 'sum_amount', direction: 'desc' }],
+  table: 'items',
+});
+
+const joined = buildReadQuery({
+  allowedColumns: ['id', 'vendor_id', 'amount'],
+  fields: ['id', 'amount', { column: 'name', source: 'vendor' }],
+  joins: [
+    {
+      alias: 'vendor',
+      allowedColumns: ['name'],
+      foreignKey: ['vendor_id'],
+      kind: 'inner',
+    },
+  ],
+  relations,
+  schema: 'catalog',
+  sort: [{ column: 'id', direction: 'asc' }],
+  table: 'items',
+});
+
+const busy = buildReadQuery({
+  aggregates: [{ fn: 'count' }, { column: 'amount', fn: 'sum' }],
+  allowedColumns: ['region', 'amount'],
+  capabilities,
+  groupFilters: [{ aggregateAlias: 'sum_amount', operator: 'gt', value: 1000 }],
+  grouping: 'flat',
+  keys: ['region'],
+  maxRows: 5000,
+  schema: 'catalog',
   table: 'items',
 });
 ```
