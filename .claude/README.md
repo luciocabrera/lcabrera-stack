@@ -120,13 +120,14 @@ directory under `.github/skills/` must have a `SKILL.md` unless it is on the
 explicit support allowlist (`code-smell-shared`). `name` (must match folder) and
 `description` are required, and the description must say **when** to use the
 skill — it drives auto-invocation, so a label that names no situation never
-triggers. Relative markdown links must resolve, and a relative script path
-named from a `SKILL.md` or `.claude/agents/*.md` must exist. The same gate holds
-a subagent to `name` (matching its file) plus that description, and a path rule
-to a non-empty `paths`. Optional:
-`argument-hint`, `user-invocable`, `allowed-tools`, `paths` (globs for
-file-scoped auto-invoke), `context: fork` (isolates verbose output in a
-sub-agent — used by the scan/report skills).
+triggers, and one that claims any task ("any task", "anything else", "at all")
+is selected for everything and is reported the same way. Relative markdown
+links must resolve, and a relative script path named from a `SKILL.md` or
+`.claude/agents/*.md` must exist. The same gate holds a subagent to `name`
+(matching its file) plus that description, and a path rule to a non-empty
+`paths`. Optional: `argument-hint`, `user-invocable`, `allowed-tools`, `paths`
+(globs for file-scoped auto-invoke), `context: fork` (isolates verbose output in
+a sub-agent — used by the scan/report skills).
 
 ---
 

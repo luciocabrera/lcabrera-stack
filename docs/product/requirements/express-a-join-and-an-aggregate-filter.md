@@ -12,6 +12,8 @@ issues:
   - 998
 evidence:
   - type: doc
+    ref: docs/decisions/ADR-143-join-along-a-foreign-key-and-filter-a-flat-grouped-result.md
+  - type: doc
     ref: packages/server/src/db/query-builder/ARCHITECTURE.md
   - type: code
     ref: packages/server/src/db/query-builder/assert-column-allowed.util.ts
