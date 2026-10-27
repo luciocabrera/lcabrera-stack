@@ -45,6 +45,8 @@ keyset cursor ─▶ QueryRefusedError ─────────────�
 grouping guard ─▶ GroupingRefusedError ─────────┤─▶ extends QueryRefusedError (never PersistenceError)
                   (adds estimatedRows) ─────────┘
 
+typed error or refusal ─▶ mapDbError ─▶ the same instance, unchanged
+
 any of them  ──▶ toSerializableDbError ──▶ SerializableDbError (plain data)
 ```
 
@@ -104,11 +106,19 @@ compose (`selectFilterOptions` → `selectDistinctRows` → `selectRows`), so on
 rejection meets it more than once; re-wrapping would bury the specific type under a
 generic `PersistenceError` and grow the `cause` chain per hop.
 
+**`mapDbError` returns a refusal unchanged too, so its return type is
+`PersistenceError | QueryRefusedError`.** A refusal raised inside a `try` whose
+`catch` calls `mapDbError` would otherwise come out as a generic
+`PersistenceError` and serialise as `unexpected` instead of `query-refused` or
+`grouping-refused`. The union is the honest type: a refusal is not a
+`PersistenceError`, so a caller reading `fields` narrows with `instanceof
+PersistenceError` first.
+
 ## Files
 
 | File                                   | Role                                                                                   |
 | -------------------------------------- | -------------------------------------------------------------------------------------- |
-| `map-db-error.util.ts`                 | **Public entry point.** SQLSTATE → typed error; idempotent                             |
+| `map-db-error.util.ts`                 | **Public entry point.** SQLSTATE → typed error; idempotent; refusals pass through      |
 | `persistence.error.ts`                 | **Public.** The base class and the fallback                                            |
 | `unique-constraint-violation.error.ts` | **Public.** `23505`                                                                    |
 | `foreign-key-violation.error.ts`       | **Public.** `23503`                                                                    |
