@@ -10,7 +10,7 @@ area:
   - packages/server/src/db/ARCHITECTURE.md
   - docs/product/requirements/express-a-join-and-an-aggregate-filter.md
 started: 2026-10-26
-updated: 2026-10-26
+updated: 2026-10-27
 plan: (none)
 pr: #1520
 issue: #998
@@ -22,6 +22,6 @@ Decide whether the read builder expresses joins and aggregate filters
 
 ## Status / next
 
-- Current step: ADR-143 proposed; architecture exclusion lists corrected
-- Blockers: the owner's approval of ADR-143 before any join is built
-- Next: implement through `buildReadQuery` once approved
+- Current step: ADR-143 accepted (owner approval 2026-10-27); architecture exclusion lists corrected
+- Blockers: none
+- Next: merge; implement through `buildReadQuery` in a separate PR under #998

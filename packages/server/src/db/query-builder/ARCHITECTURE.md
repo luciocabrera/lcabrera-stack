@@ -157,12 +157,12 @@ is).
 - No joins. A read names one target, a table or a view. A view that already
   encodes a join is read as a flat target; the builder does not build the join.
   [ADR-143](../../../../../docs/decisions/ADR-143-join-along-a-foreign-key-and-filter-a-flat-grouped-result.md)
-  proposes joins along a foreign key, with an allowlist per joined table, and
-  is not built.
+  decides joins along a foreign key, with an allowlist per joined table; they
+  are not built yet.
 - No filter on a grouped result (`HAVING`). An aggregate's own `filters` emit
   `FILTER (WHERE …)`, which narrows the rows that one aggregate reads and never
-  removes a group. ADR-143 proposes `groupFilters` for flat grouped reads
-  without a column axis, and is not built.
+  removes a group. ADR-143 decides `groupFilters` for flat grouped reads
+  without a column axis; they are not built yet.
 - No subqueries, no common table expressions, no window functions, no raw SQL
   fragments.
 - No multi-row `INSERT … VALUES (…), (…)`, no `ON CONFLICT`/upsert, no

@@ -5,8 +5,8 @@ governs:
 
 # ADR-143 — Join only along a foreign key, and filter a grouped result only when it is flat and has no column axis
 
-**Status:** Proposed. This records the decision for the package owner to
-approve. Nothing it describes is built yet. `What this does NOT do` in
+**Status:** Accepted; approved by the owner on 2026-10-27. Nothing it
+describes is built yet; the implementation follows under #998. `What this does NOT do` in
 `packages/server/src/db/query-builder/ARCHITECTURE.md` lists what is true today,
 and the change that builds a feature also removes it from that list.
 
