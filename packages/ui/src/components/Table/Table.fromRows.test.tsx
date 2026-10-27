@@ -159,6 +159,26 @@ const filterReference = async (value: string) => {
 };
 
 describe('Table from a plain array or a promise', () => {
+  it('renders a declared actions column with no router', () => {
+    render(
+      <Table
+        columns={[
+          { dataType: 'string', key: 'reference', label: 'Reference' },
+          {
+            key: 'actions',
+            label: 'Actions',
+            render: (row: Order) => (
+              <button type='button'>{`Open ${row.reference}`}</button>
+            ),
+          },
+        ]}
+        response={ORDERS}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Open Alpha' })).not.toBeNull();
+  });
+
   it('renders a plain array with the columns it is given, with no providers or router', () => {
     render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 

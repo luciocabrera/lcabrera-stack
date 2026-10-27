@@ -195,12 +195,14 @@ const columns = inferTableColumnsFromJson({ rows });
 <Table columns={columns} response={rows} title='Rows' />;
 ```
 
-An array given with no `dataSelector` stays in memory. Sorting, filtering,
-resizing, pinning and scrolling all run on it in the browser, and the table
-writes nothing back to a URL or a cookie. Such a table always mounts its own
-table providers, so it renders the same inside another grid as on its own. It
-also adds the notification and global-settings providers if those are missing.
-Grouping and drill-down need a server, so they belong to `TableLayout`.
+When no `TableLayout` sits above it, a `Table` given an array with no
+`dataSelector` keeps the rows in memory. Sorting, filtering, resizing, pinning
+and scrolling all run on them in the browser, and the table writes nothing back
+to a URL or a cookie. Such a table mounts its own table providers, so it renders
+the same inside another grid as on its own. It also adds the notification and
+global-settings providers if those are missing. Under `TableLayout`, the
+layout's providers and persistence are used instead. Grouping and drill-down
+need a server, so they belong to `TableLayout`.
 
 ### A full data table
 

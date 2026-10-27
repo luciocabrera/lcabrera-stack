@@ -18,7 +18,7 @@ columns store, so a sort or filter reorders them with no loader behind them. Any
 other response is read through its selectors, as `TableLayout` does.
 
 `Table` renders itself inside its own `TableConfigProvider`, `TableFocusProvider`
-and `FiltersDataProvider` when it is given rows to hold, or when no
+and `FiltersDataProvider` when it is given rows to hold outside a `TableLayout`, or when no
 `TableConfigContext` is above it. It adds `GlobalSettingsProvider` and
 `NotificationProvider` when those are missing. A `Table` under `TableLayout`
 reads the layout's stack, as before.

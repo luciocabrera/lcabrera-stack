@@ -47,9 +47,9 @@ written to the URL and the rows kept their order.
   through its selectors.
 - A `Table` holding rows in memory, or a `Table` with no `TableConfigContext`
   above it, renders itself inside its own `TableConfigProvider`,
-  `TableFocusProvider` and `FiltersDataProvider`. Rows always get their own
-  stack, so the same `Table` renders identically inside another grid's
-  providers. It also adds a `GlobalSettingsProvider` and a
+  `TableFocusProvider` and `FiltersDataProvider`. Outside a `TableLayout`,
+  rows get their own stack, so the same `Table` renders identically inside
+  another grid's providers. It also adds a `GlobalSettingsProvider` and a
   `NotificationProvider` when those are missing, because the settings panel and
   the notify actions read them. A boolean context, `TableOwnStackContext`,
   marks the `Table` rendered inside the new stack, and is cleared below it. `TableLayout` sets it around its own `Table` too, so a layout read with no `dataSelector` keeps its stack. The
@@ -93,8 +93,8 @@ written to the URL and the rows kept their order.
   table's children.
 - **Move the grid body into a separate component and end the recursion that
   way, without a marker context.** Rejected because the issue's scope allows no
-  new table component. The boolean context gives the same rule (rows always get
-  their own stack) inside `Table` itself. Separately, and only to keep each unit
+  new table component. The boolean context gives the same rule (rows get their own
+  stack outside a `TableLayout`) inside `Table` itself. Separately, and only to keep each unit
   under fallow's `maxUnitSize`, `Table`'s three trees are rendered by private
   pieces in the same bundle: `TableOwnStack` (the self-mounted providers) and
   `TableGrid` (the grid content), with the Suspense branch left in `Table`.
