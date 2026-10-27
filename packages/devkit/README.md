@@ -113,6 +113,18 @@ not held to this: prose names files the consumer is expected to write, so its
 absence proves nothing. An operand holding `$`, `<`, `>`, `{`, `}` or `*` is a
 placeholder and is skipped.
 
+Under `--shipped`, a **task** is a task a shipped file runs through a package runner — `npm run`,
+`pnpm run`, `yarn run`, `bun run`, `vp run`, `{{commands.run}}` or the value
+your `commands.run` holds — that the shipped set never defines. The runner
+resolves on every machine, so the command check passes it; the task after it
+exists only where a manifest declares it. A task is defined when the profile
+wires it into your manifest, or when the shipped `COMMANDS.md` spells it as a
+run. It is read from markdown inline code and fenced shell blocks, a workflow's
+step scripts and a shell script's commands, never from a comment. An invocation
+passing the runner an option before the task (`--filter`, `-w`) names a
+workspace's task and is not judged. A directory you name is not held to this,
+because the tasks it may run are the ones your own repository defines.
+
 Reading a file is what makes those answers worth anything, and not every shipped
 file is markdown. A workflow's actions, step scripts and secret expressions, the
 commands and scripts a shell script runs — any file whose first line is an

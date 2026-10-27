@@ -67,6 +67,7 @@ const ESCAPE_VERBS = {
   missing: 'runs nonexistent',
   requires: 'declares',
   secret: 'reads',
+  task: 'runs the undefined task',
 };
 
 export const describeEscape = (finding) =>

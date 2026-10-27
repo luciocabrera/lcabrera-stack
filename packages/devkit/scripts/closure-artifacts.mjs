@@ -21,6 +21,7 @@ import {
   shellPathTokens,
   shellScriptOperands,
 } from './closure-extract.mjs';
+import { taskInvocations, toTaskEscapes } from './closure-tasks.mjs';
 import {
   extractRunScripts,
   extractSecretReferences,
@@ -94,6 +95,13 @@ const localActionEscapes = ({ containment, file }) =>
 const stepCommandEscapes = ({ allowed, file, scripts }) =>
   toCommandEscapes({ allowed, commands: shellCommandWords(scripts), file });
 
+const stepTaskEscapes = ({ allowedTasks, file, runPrefixes, scripts }) =>
+  toTaskEscapes({
+    allowedTasks,
+    file,
+    invocations: taskInvocations({ lines: scripts, prefixes: runPrefixes }),
+  });
+
 const stepPathEscapes = ({ containment, exists, file, scripts }) =>
   pathEscapes({
     containment: { ...containment, fromDirectory: '' },
@@ -120,11 +128,12 @@ const secretEscapes = ({ file }) =>
       reference: `secrets.${entry.name}`,
     }));
 
-const workflowEscapes = ({ allowed, containment, exists, file }) => {
+const workflowEscapes = ({ allowed, containment, exists, file, tasks }) => {
   const scripts = extractRunScripts(file.content);
   return [
     ...localActionEscapes({ containment, file }),
     ...stepCommandEscapes({ allowed, file, scripts }),
+    ...stepTaskEscapes({ ...tasks, file, scripts }),
     ...stepPathEscapes({ containment, exists, file, scripts }),
     ...stepMissingScripts({ containment, exists, file, scripts }),
     ...secretEscapes({ file }),
@@ -149,10 +158,11 @@ const shellLines = (content) =>
     text: withoutComment(text),
   }));
 
-const shellEscapes = ({ allowed, containment, exists, file }) => {
+const shellEscapes = ({ allowed, containment, exists, file, tasks }) => {
   const scripts = shellLines(file.content);
   return [
     ...stepCommandEscapes({ allowed, file, scripts }),
+    ...stepTaskEscapes({ ...tasks, file, scripts }),
     ...stepPathEscapes({ containment, exists, file, scripts }),
     ...stepMissingScripts({ containment, exists, file, scripts }),
   ];
@@ -190,28 +200,32 @@ export const artifactReaders = ({ agentDirectory, file, hookDirectory }) =>
 
 /**
  * @param {{ agentDirectory?: string, allowed: Set<string>,
- *   allowedBins?: Set<string>, containment: object,
+ *   allowedBins?: Set<string>, allowedTasks?: Set<string>, containment: object,
  *   exists?: (repoRelativePath: string) => boolean,
- *   file: { path: string, content: string }, hookDirectory?: string }} args
+ *   file: { path: string, content: string }, hookDirectory?: string,
+ *   runPrefixes?: readonly string[] }} args
  */
 export const artifactEscapes = ({
   agentDirectory,
   allowed,
   allowedBins,
+  allowedTasks,
   containment,
   exists,
   file,
   hookDirectory,
+  runPrefixes,
 }) => {
   const readers = new Set(
     artifactReaders({ agentDirectory, file, hookDirectory }),
   );
+  const tasks = { allowedTasks, runPrefixes };
   return [
     ...(readers.has('workflow')
-      ? workflowEscapes({ allowed, containment, exists, file })
+      ? workflowEscapes({ allowed, containment, exists, file, tasks })
       : []),
     ...(readers.has('shell')
-      ? shellEscapes({ allowed, containment, exists, file })
+      ? shellEscapes({ allowed, containment, exists, file, tasks })
       : []),
     ...(allowedBins === undefined ? [] : binEscapes({ allowedBins, file })),
     ...(readers.has('agent')

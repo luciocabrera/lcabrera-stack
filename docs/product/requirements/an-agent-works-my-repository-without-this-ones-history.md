@@ -3,21 +3,19 @@ id: an-agent-works-my-repository-without-this-ones-history
 lines:
   - toolchain
 persona: repository-maintainer
-state: unmet
+state: met
 packages:
   - devkit
   - repo-standards
 requires:
   - agent-instructions-do-not-contradict
   - published-docs-ship-self-contained
-issues:
-  - 1505
-  - 1506
-  - 1507
-  - 1508
+issues: []
 evidence:
   - type: command
-    ref: vp run devkit:closure
+    ref: vp run devkit:closure:shipped
+  - type: test
+    ref: packages/devkit/scripts/closure-shipped-plant.test.mjs
   - type: command
     ref: vp run seeds:verify
   - type: command
@@ -40,11 +38,12 @@ invents a substitute, and I find out from the result.
 ## Acceptance
 
 - Every shipped file resolves against a repository holding only the installed
-  package: every link, every referenced path, every command named in prose —
-  `vp run devkit:closure`.
+  package: every link, every referenced path, every command named in prose, and
+  every task it runs through a package runner, which the shipped profile's
+  manifest tasks or its `COMMANDS.md` must define —
+  `vp run devkit:closure:shipped`.
 - No shipped file names anything only the originating repository has: a package
-  name, a secret, a task runner, or a task defined only there —
-  `vp run seeds:verify`.
+  name, a secret or a task runner — `vp run seeds:verify`.
 - Closure reaches **every kind** of shipped artifact, not only the ones written
   in markdown. A workflow seed, a hook and a subagent definition each have their
   references resolved; an artifact kind that closure cannot read is reported as
@@ -59,18 +58,22 @@ invents a substitute, and I find out from the result.
 
 ## Notes
 
-The third criterion is the one that is currently false, and it fails in the
-quietest possible way. `devkit closure` reads markdown structure — links, fenced
-commands, inline paths — so a workflow seed or a hook, which have none, produce
-no findings at all. That is reported identically to a file with nothing wrong in
-it. `verify-devkit-seeds.mjs` exists because of this and covers part of the gap
-by grepping for the originating repository's identity, which is a different
-question from whether a reference resolves.
+The probes are plants, and each one fails its gate: a shipped skill running
+`npm run harness:verify` inline or in a fenced block, a hook or workflow step
+running a script outside the shipped set, a blueprint import only the created
+manifest declares — `closure-shipped-plant.test.mjs` holds them. A shipped file
+of a kind no resolver reads is listed as unchecked under every profile that
+ships it rather than passing silently.
 
-As the shipped set grows to the whole harness, and then to configs and scripts,
-the unread fraction grows with it. An artifact kind closure
-cannot parse has to be reported as unchecked, or the coverage number means
-nothing.
+The split between the two gates is by question. `devkit closure --shipped` asks
+whether a reference resolves in the receiving repository, which is the question
+a task name poses: `npm` exists everywhere, the task after `npm run` only where
+a manifest defines it. `seeds:verify` asks whether a file names the originating
+repository's identity, which no resolver can answer.
+
+A task a consumer adds is theirs to define and is not judged: closure checks
+only the shipped set, and a runner invocation passing an option before the task
+names a workspace's task, which the shipped set does not resolve.
 
 This requirement is about **reachability**, not correctness: it says an
 instruction can be followed in the repository it landed in, not that following it

@@ -17,6 +17,7 @@ import {
   describeUnchecked,
   renderClosureReport,
 } from './closure-report.mjs';
+import { extractTaskInvocations, RUNNER_PREFIXES } from './closure-tasks.mjs';
 import { analyseClosure } from './closure.mjs';
 import { buildPlan } from './command-materialise.mjs';
 import {
@@ -25,10 +26,10 @@ import {
   includesRung,
   PROFILES,
 } from './config.mjs';
-import { gateBinNames } from './init.mjs';
+import { gateBinNames, tasksFor } from './init.mjs';
 import { isRetirement } from './manifest.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
-import { WORKSPACE_DEPENDENCIES } from './workspace.mjs';
+import { WORKSPACE_DEPENDENCIES, workspaceScriptsFor } from './workspace.mjs';
 
 const MANIFEST_NAME = 'package.json';
 
@@ -72,17 +73,51 @@ const providedPackages = ({ entries, profile }) => {
   ];
 };
 
+const COMMAND_REFERENCE = 'COMMANDS.md';
+
+const runPrefixesFor = (config) => {
+  const configured = config.commands?.run;
+  return typeof configured === 'string' && configured.trim() !== ''
+    ? [...RUNNER_PREFIXES, configured.trim()]
+    : RUNNER_PREFIXES;
+};
+
+/**
+ * @param {{ entries: { path: string, content: string }[], profile: string,
+ *   runPrefixes: readonly string[] }} args
+ * @returns {string[]}
+ */
+const definedTasks = ({ entries, profile, runPrefixes }) => [
+  ...Object.keys(tasksFor({ profile })),
+  ...Object.keys(workspaceScriptsFor({ profile })),
+  ...entries
+    .filter((entry) => entry.path === COMMAND_REFERENCE)
+    .flatMap((entry) =>
+      extractTaskInvocations({
+        content: entry.content,
+        prefixes: runPrefixes,
+      }).map((invocation) => invocation.task),
+    ),
+];
+
 const shippedContext = ({ profile, root }) => {
   const { config, entries: planned } = buildPlan({ profile, root });
   const entries = planned.filter((entry) => !isRetirement(entry.state));
+  const runPrefixes = runPrefixesFor(config);
   return {
     agentDirectory: config.paths.agents,
     allowedBins: gateBinNames(),
     allowedCommands: [...BASELINE_COMMANDS, ...configuredCommandWords(config)],
     allowedPackages: providedPackages({ entries, profile }),
+    allowedTasks: definedTasks({
+      entries,
+      profile: config.profile,
+      runPrefixes,
+    }),
     configKeys: allowedConfigKeys(config),
     entries,
     hookDirectory: config.paths.hooks,
+    runPrefixes,
     shipped: new Set(entries.map((entry) => entry.path)),
   };
 };
@@ -93,9 +128,11 @@ const shippedEscapes = ({ profile, root }) => {
     allowedBins,
     allowedCommands,
     allowedPackages,
+    allowedTasks,
     configKeys,
     entries,
     hookDirectory,
+    runPrefixes,
     shipped,
   } = shippedContext({ profile, root });
   const files = entries.map((entry) => ({
@@ -109,10 +146,12 @@ const shippedEscapes = ({ profile, root }) => {
     allowedCommands,
     allowedConfigKeys: configKeys,
     allowedPackages,
+    allowedTasks,
     exists: (path) => existsSync(resolve(root, path)),
     files,
     hookDirectory,
     rootDirectory: '',
+    runPrefixes,
     shipped,
   });
 

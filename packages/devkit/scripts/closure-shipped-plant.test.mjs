@@ -180,3 +180,62 @@ describe('a blueprint import only the created manifest declares', () => {
     );
   });
 });
+
+const skill = (root) =>
+  join(root, 'assets', 'skills', 'worktree-housekeeping', 'SKILL.md');
+
+describe('a shipped instruction running a task the receiving repository lacks', () => {
+  test('is reported inline and fenced', () => {
+    const root = copyOfPackage();
+    appendTo(
+      skill(root),
+      '\nThen run `npm run harness:verify`.\n\n```bash\nnpm run fallow:dead-code:verify\n```\n',
+    );
+    const { status, stderr } = shippedClosure(root, 'agent');
+
+    expect(status).toBe(1);
+    expect(stderr).toMatch(
+      /worktree-housekeeping\/SKILL\.md:\d+ {2}runs the undefined task harness:verify/,
+    );
+    expect(stderr).toMatch(
+      /worktree-housekeeping\/SKILL\.md:\d+ {2}runs the undefined task fallow:dead-code:verify/,
+    );
+  });
+
+  test('passes for a task the profile wires into the manifest', () => {
+    const root = copyOfPackage();
+    appendTo(
+      skill(root),
+      '\nRun `npm run commit:verify` and `{{commands.run}} branch:verify`.\n',
+    );
+
+    expect(shippedClosure(root, 'agent').status).toBe(0);
+  });
+
+  test('passes for a task the shipped command reference documents, only where it ships', () => {
+    const root = copyOfPackage();
+    appendTo(
+      join(root, 'assets', 'root', 'COMMANDS.md'),
+      '\n- `{{commands.run}} planted:task` — a task this repository adds.\n',
+    );
+    appendTo(skill(root), '\nRun `npm run planted:task`.\n');
+
+    expect(shippedClosure(root, 'repo').status).toBe(0);
+    expect(shippedClosure(root, 'agent').stderr).toContain(
+      'runs the undefined task planted:task',
+    );
+  });
+
+  test('is reported after the configured runner is substituted in', () => {
+    const root = copyOfPackage();
+    writeFileSync(
+      join(root, 'devkit.config.json'),
+      `${JSON.stringify({ commands: { run: 'pnpm' } })}\n`,
+    );
+    appendTo(skill(root), '\nRun `{{commands.run}} harness:verify`.\n');
+    const { status, stderr } = shippedClosure(root, 'agent');
+
+    expect(status).toBe(1);
+    expect(stderr).toContain('runs the undefined task harness:verify');
+  });
+});
