@@ -27,9 +27,11 @@ const CONJUNCTION_SLASH = /\b(?:and\/or|or\/and)\b/gi;
 
 const QUANTIFIERS = new Set(['all', 'any', 'every']);
 
-const TASK_NOUNS = new Set([
+const GENERIC_NOUNS = new Set([
   'change',
   'changes',
+  'file',
+  'files',
   'job',
   'jobs',
   'prompt',
@@ -47,21 +49,22 @@ const TASK_NOUNS = new Set([
   'work',
 ]);
 
-const FILE_NOUNS = new Set(['file', 'files']);
-
 const KIND_WORDS = new Set(['kind', 'kinds']);
 
 const SCOPE_WORDS = new Set([
-  'at',
+  'about',
   'below',
   'beneath',
+  'for',
   'from',
   'in',
   'inside',
   'matching',
   'named',
   'of',
+  'on',
   'that',
+  'to',
   'under',
   'which',
   'whose',
@@ -120,11 +123,10 @@ const nounIndexAfter = (tokens, index) => {
 const quantifiedPhrase = (tokens, index) => {
   const nounIndex = nounIndexAfter(tokens, index + 1);
   const noun = tokens[nounIndex] ?? '';
-  const isUnscopedFile =
-    FILE_NOUNS.has(noun) && !SCOPE_WORDS.has(tokens[nounIndex + 1] ?? '');
   const isClaim =
     QUANTIFIERS.has(tokens[index] ?? '') &&
-    (isUnscopedFile || TASK_NOUNS.has(noun));
+    GENERIC_NOUNS.has(noun) &&
+    !SCOPE_WORDS.has(tokens[nounIndex + 1] ?? '');
   return isClaim ? tokens.slice(index, nounIndex + 1).join(' ') : undefined;
 };
 

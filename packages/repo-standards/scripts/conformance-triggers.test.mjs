@@ -81,7 +81,7 @@ describe('conformance triggers — planted vague descriptions', () => {
     },
     {
       description:
-        'Use for all kinds of work in this repo, from README.md to the scripts under scripts/ at the root.',
+        'Use for all kinds of work, from README.md to the scripts under scripts/ and the config at the root.',
       phrase: 'all kinds of work',
     },
     {
@@ -113,6 +113,10 @@ describe('conformance triggers — planted vague descriptions', () => {
     'Use when finishing any code change, before a PR is opened from the branch it was made on.',
     'Use when editing any file under docs/product/, or when writing acceptance criteria for a package.',
     'Use when editing any file in docs/product/, before the pull request for that change is opened.',
+    'Use when making any change to packages/ui, before a changeset is written for that package.',
+    'Use for every task in packages/devkit/assets, after the blueprint has been copied into a repo.',
+    'Use when answering any question about `vp run harness:verify`, before its findings are acted on.',
+    'Use when reviewing every request for a new ADR, before the number is taken with `vp run adr:verify`.',
     "Use when editing any file inside a workspace's scripts/lib directory, before the gate is run on it.",
     'Use when editing any file beneath packages/ui, before a changeset is written for the package.',
     'Use when changing any file that a workspace ships to npm, before `vp run tarball:verify` runs.',
