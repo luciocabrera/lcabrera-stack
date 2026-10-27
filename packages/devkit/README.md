@@ -118,8 +118,9 @@ Under `--shipped`, a **task** is a task a shipped file runs through a package ru
 your `commands.run` holds — that the shipped set never defines. The runner
 resolves on every machine, so the command check passes it; the task after it
 exists only where a manifest declares it. A task is defined when the profile
-wires it into your manifest, or when the shipped `COMMANDS.md` spells it as a
-run. It is read from markdown inline code and fenced shell blocks, a workflow's
+wires it into your manifest, when the shipped `COMMANDS.md` spells it as a run,
+or when a value in your `commands` block runs it, because a `{{commands.*}}`
+placeholder is replaced by that value before closure reads the file. It is read from markdown inline code and fenced shell blocks, a workflow's
 step scripts and a shell script's commands, never from a comment. An invocation
 passing the runner an option before the task (`--filter`, `-w`) names a
 workspace's task and is not judged. A directory you name is not held to this,

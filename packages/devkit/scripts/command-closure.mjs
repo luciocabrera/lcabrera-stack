@@ -17,7 +17,11 @@ import {
   describeUnchecked,
   renderClosureReport,
 } from './closure-report.mjs';
-import { extractTaskInvocations, RUNNER_PREFIXES } from './closure-tasks.mjs';
+import {
+  extractTaskInvocations,
+  RUNNER_PREFIXES,
+  taskInvocations,
+} from './closure-tasks.mjs';
 import { analyseClosure } from './closure.mjs';
 import { buildPlan } from './command-materialise.mjs';
 import {
@@ -95,11 +99,20 @@ const runPrefixesFor = (config) => {
  *   runPrefixes: readonly string[] }} args
  * @returns {string[]}
  */
+const configuredTasks = ({ config, runPrefixes }) =>
+  taskInvocations({
+    lines: Object.values(config.commands ?? {})
+      .filter((command) => typeof command === 'string')
+      .map((text) => ({ line: 0, text })),
+    prefixes: runPrefixes,
+  }).map((invocation) => invocation.task);
+
 const definedTasks = ({ config, entries, runPrefixes }) => {
   const references = commandReferencePaths(config);
   return [
     ...Object.keys(tasksFor({ profile: config.profile })),
     ...Object.keys(workspaceScriptsFor({ profile: config.profile })),
+    ...configuredTasks({ config, runPrefixes }),
     ...entries
       .filter((entry) => references.has(entry.path))
       .flatMap((entry) =>

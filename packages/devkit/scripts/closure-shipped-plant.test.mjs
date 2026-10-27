@@ -249,6 +249,26 @@ describe('a shipped instruction running a task the receiving repository lacks', 
     },
   );
 
+  test('passes for a task the consumer names in its own commands block', () => {
+    const root = copyOfPackage();
+    writeFileSync(
+      join(root, 'devkit.config.json'),
+      `${JSON.stringify({
+        commands: {
+          audit: 'pnpm audit --audit-level moderate',
+          check: 'pnpm run check',
+          install: 'pnpm install --frozen-lockfile',
+          run: 'pnpm run',
+          test: 'pnpm run test',
+        },
+      })}\n`,
+    );
+    const { stderr, stdout } = shippedClosure(root, 'repo');
+
+    expect(`${stdout}${stderr}`).toContain('repo — ');
+    expect(stderr).not.toContain('runs the undefined task');
+  });
+
   test('is reported after the configured runner is substituted in', () => {
     const root = copyOfPackage();
     writeFileSync(
