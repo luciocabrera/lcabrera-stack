@@ -129,13 +129,14 @@ same reason — the one place in this folder where the seam is not optional.
   and pass its `tx` to each executor. `runInTransaction` is the variant for a
   connection you opened yourself. A transaction narrows a read-then-write race
   but does not close one — ADR-051 has the locking/retry decision.
-- **Need the SQL without running it** (a count paired to a data query, a
-  DB-function call, an `EXISTS` check)? Build a read with `buildReadQuery`, the
+- **Need the SQL without running it** (a count paired to a data query)? Build
+  a read with `buildReadQuery`, the
   query entry point, or a write with `buildInsertQuery`/`buildUpdateQuery`/
   `buildDeleteQuery`/`buildMaxValueQuery`, and run it yourself via `getPool` —
   and wrap the call in `mapDbError`, or you reintroduce the raw-message leak the
   executors close.
-- **Anything the builders do not cover** (joins, multi-row inserts, upserts,
+- **Anything the builders do not cover** (joins, a filter on a grouped result,
+  subqueries and `EXISTS` checks, DB-function calls, multi-row inserts, upserts,
   single-scalar aggregates) stays hand-written SQL through `getPool` — forcing
   every query through the builder is the hand-rolled-SQL anti-pattern inverted.
 
