@@ -11,6 +11,7 @@ area:
   - packages/devkit/README.md
   - docs/product/requirements/an-agent-works-my-repository-without-this-ones-history.md
   - .changeset/closure-checks-shipped-tasks.md
+  - scripts/verify-devkit-seeds.mjs
 started: 2026-10-27
 updated: 2026-10-27
 plan: (none)
