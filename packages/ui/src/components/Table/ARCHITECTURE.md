@@ -23,6 +23,11 @@ and `FiltersDataProvider` when it is given rows to hold, or when no
 `NotificationProvider` when those are missing. A `Table` under `TableLayout`
 reads the layout's stack, as before.
 
+`Table` itself only decides which tree to render. Two private pieces in the
+same bundle render the trees: `TableOwnStack.component.tsx` mounts the
+providers, and `TableGrid.component.tsx` renders the data provider and
+`TableContent`. The Suspense branch stays in `Table`. Neither piece is exported.
+
 `TableOwnStackContext` stops the recursion. The outer render sets it to `true`
 for the one `Table` it renders inside the new stack, and that `Table` sets it
 back to `false` for everything below it, so a grid rendered inside a cell

@@ -91,10 +91,14 @@ written to the URL and the rows kept their order.
   wraps the grid in a router whose persistence goes nowhere, it throws inside a
   declarative `<BrowserRouter>`, and it needs a route element that renders the
   table's children.
-- **Move the grid body into a separate component and have `Table` wrap it.**
-  This would end the recursion without a marker context. Rejected because the
-  issue's scope allows no new table component or delegate. The boolean context
-  gives the same rule (rows always get their own stack) inside `Table` itself.
+- **Move the grid body into a separate component and end the recursion that
+  way, without a marker context.** Rejected because the issue's scope allows no
+  new table component. The boolean context gives the same rule (rows always get
+  their own stack) inside `Table` itself. Separately, and only to keep each unit
+  under fallow's `maxUnitSize`, `Table`'s three trees are rendered by private
+  pieces in the same bundle: `TableOwnStack` (the self-mounted providers) and
+  `TableGrid` (the grid content), with the Suspense branch left in `Table`.
+  Neither is exported. `TableOwnStackContext` still ends the recursion.
 - **Infer the columns when `columns` is omitted.** This was the first version
   of this change. Rejected by the owner on 2026-10-27: the columns are the
   table's metadata, and inferring them hides that from the caller. The helper
