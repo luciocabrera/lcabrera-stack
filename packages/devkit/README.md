@@ -115,9 +115,9 @@ placeholder and is skipped.
 
 Reading a file is what makes those answers worth anything, and not every shipped
 file is markdown. A workflow's actions, step scripts and secret expressions, the
-commands and scripts a shell script runs — a hook in your `paths.hooks`
-directory, or any file whose first line is an `sh`, `bash`, `dash` or `zsh`
-shebang — the executables a hook or a step invokes out of the install's bin
+commands and scripts a shell script runs — any file whose first line is an
+`sh`, `bash`, `dash` or `zsh` shebang, or a file in your `paths.hooks`
+directory with no shebang and no extension — the executables a hook or a step invokes out of the install's bin
 directory, and the paths a definition in your `paths.agents` directory names in
 its frontmatter or its plain prose are all read. Without them a file with no
 markdown structure reports the same clean pass as one that is genuinely

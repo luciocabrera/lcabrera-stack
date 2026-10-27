@@ -47,9 +47,15 @@ const isUnder = ({ directory, path }) =>
 const isAgentFile = ({ agentDirectory, path }) =>
   isUnder({ directory: agentDirectory, path });
 
+const hasExtension = (path) => /\.[^/.]+$/.test(path.split('/').at(-1) ?? '');
+
+const isBareHook = ({ file, hookDirectory }) =>
+  isUnder({ directory: hookDirectory, path: file.path }) &&
+  !file.content.startsWith('#!') &&
+  !hasExtension(file.path);
+
 const isShellScript = ({ file, hookDirectory }) =>
-  isUnder({ directory: hookDirectory, path: file.path }) ||
-  SHELL_SHEBANG.test(file.content);
+  SHELL_SHEBANG.test(file.content) || isBareHook({ file, hookDirectory });
 
 const toLinkEscape = ({ file, reference }) => ({
   file: file.path,

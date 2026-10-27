@@ -114,6 +114,50 @@ describe('hook seeds', () => {
   });
 });
 
+describe('a file in the hook directory that is not a shell script', () => {
+  test('a README there is prose, not a script', () => {
+    const { escapes, unchecked } = analyse({
+      files: [
+        {
+          content: '# Hooks\n\nThe hook runs scripts/local-only.mjs first.\n',
+          path: `${HOOKS}/README.md`,
+        },
+      ],
+      present: ['scripts/local-only.mjs'],
+    });
+
+    expect(escapes).toEqual([]);
+    expect(unchecked).toEqual([]);
+  });
+
+  test('a hook with another interpreter is left unchecked', () => {
+    const { escapes, unchecked } = analyse({
+      files: [
+        {
+          content: '#!/usr/bin/env node\nnode scripts/gone.mjs\n',
+          path: `${HOOKS}/pre-push`,
+        },
+      ],
+    });
+
+    expect(escapes).toEqual([]);
+    expect(unchecked).toEqual([`${HOOKS}/pre-push`]);
+  });
+
+  test('a sample with a shell shebang is still read by it', () => {
+    const { escapes } = analyse({
+      files: [
+        {
+          content: '#!/bin/sh\nnode scripts/gone.mjs\n',
+          path: `${HOOKS}/pre-push.sample`,
+        },
+      ],
+    });
+
+    expect(escapes.map((finding) => finding.kind)).toEqual(['missing']);
+  });
+});
+
 describe('the files no resolver reads', () => {
   const files = [
     { content: '# Notes\n', path: 'docs/notes.md' },
