@@ -56,5 +56,5 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
     );
   }
 
-  return <TableGrid<TData, TResponse> {...props} />;
+  return <TableGrid<TData, TResponse> {...props} response={response} />;
 };

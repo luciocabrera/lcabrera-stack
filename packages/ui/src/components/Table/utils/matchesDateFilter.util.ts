@@ -1,7 +1,8 @@
+import { parseDate } from '@lcabrera/utils/formatters/parse-date.util';
+
 import type { DateFilter } from '#ui/types/filterOperators.types';
 
-import { isMissingCellValue } from './isMissingCellValue.util';
-import { toCellText } from './toCellText.util';
+import { isEmptyCellValue } from '#ui/components/Table/cellRenderers/isEmptyCellValue.util';
 
 type MatchesDateFilterArgs = {
   readonly filter: DateFilter;
@@ -12,19 +13,18 @@ export const matchesDateFilter = ({ filter, value }: MatchesDateFilterArgs) => {
   const { operator, value: from, value2: to } = filter;
 
   if (from === '') return true;
-  if (isMissingCellValue(value)) return false;
+  if (isEmptyCellValue(value)) return false;
 
-  const time =
-    value instanceof Date ? value.getTime() : Date.parse(toCellText(value));
+  const time = parseDate(value)?.getTime();
 
-  if (Number.isNaN(time)) return false;
+  if (time === undefined) return false;
 
-  const start = Date.parse(from);
+  const start = parseDate(from)?.getTime() ?? NaN;
 
   if (operator === 'after') return time > start;
   if (operator === 'before') return time < start;
 
   return operator === 'between' && to !== undefined && to !== ''
-    ? time >= start && time <= Date.parse(to)
+    ? time >= start && time <= (parseDate(to)?.getTime() ?? NaN)
     : time === start;
 };

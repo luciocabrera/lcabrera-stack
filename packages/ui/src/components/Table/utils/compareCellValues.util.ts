@@ -1,4 +1,5 @@
-import { isMissingCellValue } from './isMissingCellValue.util';
+import { isEmptyCellValue } from '#ui/components/Table/cellRenderers/isEmptyCellValue.util';
+
 import { toComparableCellValue } from './toComparableCellValue.util';
 
 type CompareCellValuesArgs = {
@@ -7,8 +8,8 @@ type CompareCellValuesArgs = {
 };
 
 export const compareCellValues = ({ left, right }: CompareCellValuesArgs) => {
-  const isLeftMissing = isMissingCellValue(left);
-  const isRightMissing = isMissingCellValue(right);
+  const isLeftMissing = isEmptyCellValue(left);
+  const isRightMissing = isEmptyCellValue(right);
 
   if (isLeftMissing || isRightMissing) {
     return Number(isLeftMissing) - Number(isRightMissing);

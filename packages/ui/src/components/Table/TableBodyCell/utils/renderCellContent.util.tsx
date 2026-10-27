@@ -8,6 +8,7 @@ import type {
 } from '#ui/components/Table/Table.types';
 
 import { TableCheckDisplay } from '#ui/components/Table/TableCheckDisplay';
+import { toCellText } from '#ui/components/Table/utils/toCellText.util';
 
 import { parseNumberValue } from './parseNumberValue.util';
 
@@ -17,26 +18,6 @@ type RenderCellContentArgs = {
   readonly label?: string;
   readonly locale?: string;
   readonly value: unknown;
-};
-
-const stringifyCellValue = (value: unknown) => {
-  if (typeof value === 'string') {
-    return value;
-  }
-
-  if (
-    typeof value === 'boolean' ||
-    typeof value === 'number' ||
-    typeof value === 'bigint'
-  ) {
-    return String(value);
-  }
-
-  if (value === null || value === undefined) {
-    return '';
-  }
-
-  return typeof value === 'object' ? JSON.stringify(value) : '';
 };
 
 export const renderCellContent = ({
@@ -61,7 +42,7 @@ export const renderCellContent = ({
         });
       }
 
-      return stringifyCellValue(value);
+      return toCellText(value);
     }
     case 'date': {
       return formatDate({
@@ -82,7 +63,7 @@ export const renderCellContent = ({
         });
       }
 
-      return stringifyCellValue(value);
+      return toCellText(value);
     }
     default: {
       return typeof value === 'string' ? value : '';

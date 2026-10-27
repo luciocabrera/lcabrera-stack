@@ -1,6 +1,7 @@
 import type { SelectFilter } from '#ui/types/filterOperators.types';
 
-import { isMissingCellValue } from './isMissingCellValue.util';
+import { isEmptyCellValue } from '#ui/components/Table/cellRenderers/isEmptyCellValue.util';
+
 import { toCellText } from './toCellText.util';
 
 type MatchesSelectFilterArgs = {
@@ -16,7 +17,7 @@ export const matchesSelectFilter = ({
   const chosen = values !== undefined && values.length > 0 ? values : [single];
 
   if (chosen.every((entry) => entry === undefined || entry === '')) return true;
-  if (isMissingCellValue(value)) return false;
+  if (isEmptyCellValue(value)) return false;
 
   const isChosen = chosen.includes(toCellText(value));
 

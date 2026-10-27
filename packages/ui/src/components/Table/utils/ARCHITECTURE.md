@@ -11,7 +11,6 @@ utils/
 ├── compareCellValues.util.ts                     → Order two cell values, a missing one last
 ├── compareRowsBySorting.util.ts                  → Order two rows by a sorting state
 ├── deriveLocalRows.util.ts                       → Filter then sort rows held in memory
-├── isMissingCellValue.util.ts                    → Whether a cell holds nothing
 ├── matchesColumnFilter.util.ts                   → Whether a cell satisfies a ColumnFilter, read the way the server reads it
 ├── matchesDateFilter.util.ts / matchesNumberFilter.util.ts / matchesSelectFilter.util.ts / matchesTextFilter.util.ts → One matcher per filter type
 ├── selectTableResponse.util.ts                   → Read rows, total and error out of a resolved response

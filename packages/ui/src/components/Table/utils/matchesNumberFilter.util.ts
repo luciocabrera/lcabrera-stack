@@ -1,6 +1,6 @@
 import type { NumberFilter } from '#ui/types/filterOperators.types';
 
-import { isMissingCellValue } from './isMissingCellValue.util';
+import { isEmptyCellValue } from '#ui/components/Table/cellRenderers/isEmptyCellValue.util';
 
 type CompareNumbersArgs = {
   readonly cell: number;
@@ -32,7 +32,7 @@ export const matchesNumberFilter = ({
 
   const cell = Number(value);
 
-  if (isMissingCellValue(value) || Number.isNaN(cell)) return false;
+  if (isEmptyCellValue(value) || Number.isNaN(cell)) return false;
 
   return operator === 'between'
     ? cell >= target && cell <= (value2 ?? target)

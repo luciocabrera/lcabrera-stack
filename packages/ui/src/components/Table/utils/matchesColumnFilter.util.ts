@@ -1,6 +1,7 @@
 import type { ColumnFilter } from '#ui/types/filterOperators.types';
 
-import { isMissingCellValue } from './isMissingCellValue.util';
+import { isEmptyCellValue } from '#ui/components/Table/cellRenderers/isEmptyCellValue.util';
+
 import { matchesDateFilter } from './matchesDateFilter.util';
 import { matchesNumberFilter } from './matchesNumberFilter.util';
 import { matchesSelectFilter } from './matchesSelectFilter.util';
@@ -19,7 +20,7 @@ export const matchesColumnFilter = ({
   switch (filter.type) {
     case 'boolean': {
       return (
-        !isMissingCellValue(value) && toCellText(value) === String(filter.value)
+        !isEmptyCellValue(value) && toCellText(value) === String(filter.value)
       );
     }
     case 'date': {
