@@ -18,6 +18,8 @@ const unsubscribeFromNothing = () => undefined;
 
 const subscribeToNothing = () => unsubscribeFromNothing;
 
+const NO_DATA_STATE = { data: [], error: undefined, totalRows: 0 };
+
 export const useTableDataState = <
   TData extends Record<string, unknown>,
   TResponse,
@@ -36,15 +38,25 @@ export const useTableDataState = <
     () => columnsStore?.get().columnFilters,
     () => columnsStore?.getServerSnapshot().columnFilters,
   );
+  const { dataErrorSelector, dataSelector, dataTotalSelector, response } =
+    props;
 
-  if (props.rows === undefined) {
-    return selectTableResponse(props);
+  if (response instanceof Promise) return NO_DATA_STATE;
+
+  if (dataSelector !== undefined) {
+    return selectTableResponse({
+      dataErrorSelector,
+      dataSelector,
+      dataTotalSelector,
+      response: response as TResponse,
+    });
   }
 
+  const rows: readonly TData[] = Array.isArray(response) ? response : [];
   const data =
     sorting === undefined || columnFilters === undefined
-      ? props.rows
-      : deriveLocalRows({ columnFilters, rows: props.rows, sorting });
+      ? rows
+      : deriveLocalRows({ columnFilters, rows, sorting });
 
   return { data, error: undefined, totalRows: data.length };
 };

@@ -462,15 +462,19 @@ export type TableProps<
   TData extends Record<string, unknown>,
   TResponse,
 > = BaseProps &
-  InfiniteScroll<TData, TResponse> &
-  TableSource<TData, TResponse> & {
-    /** Read only when the Table mounts its own providers; inferred from the rows when omitted. */
-    readonly columns?: readonly TableColumn<TData>[];
+  InfiniteScroll<TData, TResponse> & {
+    /** Seeds the providers the Table mounts when none are above it. */
+    readonly columns: readonly TableColumn<TData>[];
     readonly dataErrorSelector?: (
       response: TResponse,
     ) => TableResponseError | undefined;
     readonly isFlexWrapperEnabled?: boolean;
     readonly isLoading?: boolean;
+    /** A value or a promise of one; an array read with no `dataSelector` is the rows, sorted and filtered in memory. */
+    readonly response:
+      | Promise<readonly TData[] | TResponse>
+      | readonly TData[]
+      | TResponse;
     /** Read only when the Table mounts its own providers. */
     readonly title?: string;
   };
@@ -555,14 +559,3 @@ type TableColumnCapabilityShared = {
   readonly role: TableColumnAnalyticalRole;
   readonly typeName: string;
 };
-
-type TableSource<TData, TResponse> =
-  | {
-      readonly response: TResponse;
-      readonly rows?: never;
-    }
-  | {
-      readonly response?: never;
-      /** Sorted and filtered in memory; a server never sees them. */
-      readonly rows: readonly TData[];
-    };

@@ -24,6 +24,6 @@ Render the Table from rows alone, with or without a router
 
 ## Status / next
 
-- Current step: review threads addressed, gate green
+- Current step: owner redesign (required columns, one response input) applied, gate green
 - Blockers: none
 - Next:

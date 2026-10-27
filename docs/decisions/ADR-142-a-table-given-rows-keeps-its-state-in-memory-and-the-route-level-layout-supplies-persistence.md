@@ -28,21 +28,33 @@ written to the URL and the rows kept their order.
 
 ## Decision
 
-- `Table` takes either `response` or `rows`. Given `rows`, it sorts and filters
-  them in memory from the columns store's sorting and filter state
+- `Table` requires `columns`. The columns are the table's metadata (labels,
+  data types and formats, and what can be sorted, filtered or resized), so the
+  table infers none. `inferTableColumnsFromJson` remains a helper a caller may
+  run on their rows and pass in.
+- `Table` has one data input, and it is the existing `response` prop, now typed
+  as a value or a promise of one. `response` was kept over `TableLayout`'s
+  `dataPromise` because `Table` already read its data through `response` and
+  its selectors, and because the input is no longer always a promise; a second
+  prop alongside it would have given the table two inputs. Given a promise,
+  `Table` suspends on it through the existing `TableDataResolver`. While the promise is pending, it renders itself as a loading grid over placeholder rows, then
+  renders itself again with the resolved value. `TableLayout` keeps `dataPromise` and passes
+  the resolved response, as before.
+- An array given with no `dataSelector` is the rows themselves. `Table` sorts
+  and filters them in memory from the columns store's sorting and filter state
   (`useTableDataState`, `deriveLocalRows`). The filter matchers read a filter
-  the way the server's query filters read it.
-- A `Table` given `rows`, or a `Table` with no `TableConfigContext` above it,
-  renders itself inside its own `TableConfigProvider`, `TableFocusProvider` and
-  `FiltersDataProvider`. Rows always get their own stack, so the same `Table`
-  renders identically inside another grid's providers. It also adds a
-  `GlobalSettingsProvider` and a `NotificationProvider` when those are missing,
-  because the settings panel and the notify actions read them. Columns come
-  from `columns`, or from `inferTableColumnsFromJson` over the rows. A boolean
-  context, `TableOwnStackContext`, marks the `Table` rendered inside the new
-  stack and is cleared below it. The new stack also clears
-  `TablePersistenceContext`, so an enclosing layout's persistence never reaches
-  it.
+  the way the server's query filters read it. Any other response is read
+  through its selectors.
+- A `Table` holding rows in memory, or a `Table` with no `TableConfigContext`
+  above it, renders itself inside its own `TableConfigProvider`,
+  `TableFocusProvider` and `FiltersDataProvider`. Rows always get their own
+  stack, so the same `Table` renders identically inside another grid's
+  providers. It also adds a `GlobalSettingsProvider` and a
+  `NotificationProvider` when those are missing, because the settings panel and
+  the notify actions read them. A boolean context, `TableOwnStackContext`,
+  marks the `Table` rendered inside the new stack and is cleared below it. The
+  new stack also clears `TablePersistenceContext`, so an enclosing layout's
+  persistence never reaches it.
 - Persistence is a context, `TablePersistenceContext`, holding one cookie
   submitter each for table state, column sizing and UI flags. `TableLayout`,
   the route-level entry, builds them with `useTablePersistence` and provides
@@ -83,6 +95,13 @@ written to the URL and the rows kept their order.
   This would end the recursion without a marker context. Rejected because the
   issue's scope allows no new table component or delegate. The boolean context
   gives the same rule (rows always get their own stack) inside `Table` itself.
+- **Infer the columns when `columns` is omitted.** This was the first version
+  of this change. Rejected by the owner on 2026-10-27: the columns are the
+  table's metadata, and inferring them hides that from the caller. The helper
+  stays available to call explicitly.
+- **A separate `rows` prop beside `response`.** Also part of the first version.
+  Rejected on 2026-10-27 in favour of one data input that takes a value or a
+  promise.
 - **Keep `StaticTable` and export it.** This was #1502. Rejected by the
   issue's amended scope: a second table component that only mounts providers
   duplicates what `Table` can do itself.

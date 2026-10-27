@@ -37,8 +37,8 @@ to install it.
 
 `react-router` stays a required peer because the package's modules import it:
 the app shell, the route views, `Form`, `NavLink` and the table's route-level
-layout all run inside a data router. A `Table` given `rows` does not need one
-mounted; see [A table from rows](#a-table-from-rows).
+layout all run inside a data router. A `Table` given an array of rows does not
+need one mounted; see [A table from rows](#a-table-from-rows).
 
 ## Before you install: this package ships TypeScript source
 
@@ -155,38 +155,51 @@ Anything reachable from the root barrel needs no subpath at all.
 
 ### A table from rows
 
-`Table` renders an array of rows in one call. It needs no column definition, no
-loader and no router.
+`Table` takes its columns and one data input, `response`. That input is either
+an array of rows or a promise of one. There is no loader and no router.
 
 ```tsx
+import type { TableColumn } from '@lcabrera/ui/components/Table';
+
 import { Table } from '@lcabrera/ui';
 
+const columns: readonly TableColumn<Order>[] = [
+  { dataType: 'string', key: 'reference', label: 'Reference' },
+  { dataType: 'currency', key: 'orderTotal', label: 'Order Total' },
+  { dataType: 'date', key: 'placedOn', label: 'Placed On' },
+];
+
 export const Orders = ({ orders }: { readonly orders: readonly Order[] }) => (
-  <Table rows={orders} />
+  <Table columns={columns} response={orders} />
 );
 ```
 
-Without `columns`, the table infers one column per key with
-`inferTableColumnsFromJson`. Each column is labelled from its key (`orderTotal`
-becomes `Order Total`) and typed from the values. To adjust the inferred set,
-call the helper yourself and pass the result:
+`columns` is required because it is the table's metadata: the labels, the data
+types and formats, and what can be sorted, filtered or resized. Pass a promise
+instead of the array, `response={fetchOrders()}`, and the table shows its
+skeleton until the rows arrive. A promise of some other response shape works
+too: give the table a `dataSelector` that reads the rows out of it.
+
+For rows whose shape you do not know in advance, the
+`inferTableColumnsFromJson` helper builds a column list from the rows. It takes
+one column per key, labels it from the key (`orderTotal` becomes `Order Total`)
+and types it from the values. It is an option you call yourself, not something
+the table does for you:
 
 ```tsx
 import { Table } from '@lcabrera/ui';
 import { inferTableColumnsFromJson } from '@lcabrera/ui/components/Table/utils/inferTableColumnsFromJson.util';
 
-const columns = inferTableColumnsFromJson({ rows: orders }).filter(
-  (column) => column.key !== 'internalId',
-);
+const columns = inferTableColumnsFromJson({ rows });
 
-<Table columns={columns} rows={orders} title='Orders' />;
+<Table columns={columns} response={rows} title='Rows' />;
 ```
 
-Rows passed this way stay in memory. Sorting, filtering, resizing, pinning and
-scrolling all run on them in the browser, and the table writes nothing back to a
-URL or a cookie. A `Table` given `rows` always mounts its own table providers,
-so it renders the same inside another grid as on its own. It also adds the
-notification and global-settings providers if those are missing.
+An array given with no `dataSelector` stays in memory. Sorting, filtering,
+resizing, pinning and scrolling all run on it in the browser, and the table
+writes nothing back to a URL or a cookie. Such a table always mounts its own
+table providers, so it renders the same inside another grid as on its own. It
+also adds the notification and global-settings providers if those are missing.
 Grouping and drill-down need a server, so they belong to `TableLayout`.
 
 ### A full data table

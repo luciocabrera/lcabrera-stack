@@ -7,38 +7,38 @@ describe('needsOwnTableStack', () => {
     expect(
       needsOwnTableStack({
         hasConfig: false,
-        hasRows: false,
         isInOwnStack: false,
+        isRowsResponse: false,
       }),
     ).toBe(true);
   });
 
-  it('mounts a stack for rows under another grid’s config', () => {
+  it('mounts a stack for a rows response under another grid’s config', () => {
     expect(
       needsOwnTableStack({
         hasConfig: true,
-        hasRows: true,
         isInOwnStack: false,
+        isRowsResponse: true,
       }),
     ).toBe(true);
   });
 
-  it('uses the stack it was just given for rows', () => {
+  it('uses the stack it was just given for a rows response', () => {
     expect(
       needsOwnTableStack({
         hasConfig: true,
-        hasRows: true,
         isInOwnStack: true,
+        isRowsResponse: true,
       }),
     ).toBe(false);
   });
 
-  it('uses the enclosing stack for a response', () => {
+  it('uses the enclosing stack for a selected response', () => {
     expect(
       needsOwnTableStack({
         hasConfig: true,
-        hasRows: false,
         isInOwnStack: false,
+        isRowsResponse: false,
       }),
     ).toBe(false);
   });

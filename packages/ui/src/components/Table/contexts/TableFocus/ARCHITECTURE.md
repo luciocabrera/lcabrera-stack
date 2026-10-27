@@ -25,7 +25,7 @@ would be discarded by a revalidation the user did not ask for. Focus belongs to
 the grid the user is operating, not to the page of rows currently loaded into it.
 
 Both mount sites compose it — `TableLayout`, and `Table` when it is given
-`rows` or no provider stack sits above it.
+rows to hold or no provider stack sits above it.
 
 ## File Structure
 

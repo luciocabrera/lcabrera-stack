@@ -21,7 +21,7 @@ export const JsonExplorer = ({ sections }: JsonExplorerProps) => (
           </div>
           <Table
             columns={section.columns}
-            rows={section.rows}
+            response={section.rows}
             title={section.label}
           />
         </>

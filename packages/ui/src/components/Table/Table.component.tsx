@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { use } from 'react';
+import { Suspense, use } from 'react';
 
 import { GlobalSettingsProvider } from '#ui/contexts/GlobalSettingsContext';
 import { GlobalSettingsContext } from '#ui/contexts/GlobalSettingsContext/GlobalSettingsContext.context';
@@ -7,7 +7,7 @@ import { NotificationProvider } from '#ui/contexts/NotificationContext';
 import { NotificationContext } from '#ui/contexts/NotificationContext/NotificationContext.context';
 
 import type { TableConfigContextValue } from './contexts/TableConfig/TableConfigContext.types';
-import type { TableColumn, TableProps } from './Table.types';
+import type { TableProps } from './Table.types';
 
 import { TableCellRenderingProvider, TableDataProvider } from './contexts';
 import { FiltersDataProvider } from './contexts/FiltersData';
@@ -17,9 +17,11 @@ import { TableOwnStackContext } from './contexts/TableConfig/TableOwnStackContex
 import { TablePersistenceContext } from './contexts/TableConfig/TablePersistenceContext.context';
 import { TableFocusProvider } from './contexts/TableFocus';
 import { useTableDataState } from './hooks/useTableDataState.hook';
+import { INITIAL_PAGE_SIZE } from './Table.constants';
 import { styles } from './Table.stylex';
+import { generatePlaceholderData } from './TableBody/utils';
 import { TableContent } from './TableContent';
-import { inferTableColumnsFromJson } from './utils/inferTableColumnsFromJson.util';
+import { TableDataResolver } from './TableDataResolver';
 import { needsOwnTableStack } from './utils/needsOwnTableStack.util';
 import { toOwnStackMetaState } from './utils/toOwnStackMetaState.util';
 
@@ -37,6 +39,7 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
     isFlexWrapperEnabled = true,
     isLoading = false,
     onLoadMore,
+    response,
     title,
   } = props;
   const config = use(TableConfigContext) as
@@ -47,8 +50,8 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
   const hasNotifications = use(NotificationContext) !== undefined;
   const isNeedsOwnStack = needsOwnTableStack({
     hasConfig: config !== undefined,
-    hasRows: props.rows !== undefined,
     isInOwnStack,
+    isRowsResponse: dataSelector === undefined,
   });
   const { data, error, totalRows } = useTableDataState({
     columnsStore: isNeedsOwnStack ? undefined : config?.columnsStore,
@@ -56,19 +59,14 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
   });
 
   if (isNeedsOwnStack) {
-    const ownColumns =
-      columns ??
-      (inferTableColumnsFromJson({
-        rows: data,
-      }) as readonly TableColumn<TData>[]);
     const ownStack = (
       <TablePersistenceContext value={undefined}>
         <TableConfigProvider<TData>
-          columnsState={{ columns: [...ownColumns] }}
+          columnsState={{ columns: [...columns] }}
           metaState={toOwnStackMetaState(title)}
         >
           <TableFocusProvider>
-            <FiltersDataProvider<TData> columns={[...ownColumns]}>
+            <FiltersDataProvider<TData> columns={[...columns]}>
               <TableOwnStackContext value>
                 <Table<TData, TResponse> {...props} />
               </TableOwnStackContext>
@@ -87,6 +85,30 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
       withSettings
     ) : (
       <NotificationProvider>{withSettings}</NotificationProvider>
+    );
+  }
+
+  if (response instanceof Promise) {
+    return (
+      <Suspense
+        fallback={
+          <Table<TData, readonly TData[]>
+            actions={actions}
+            columns={columns}
+            isLoading
+            response={generatePlaceholderData<TData>({
+              columns,
+              rowCount: INITIAL_PAGE_SIZE,
+            })}
+          />
+        }
+      >
+        <TableDataResolver<readonly TData[] | TResponse> dataPromise={response}>
+          {(resolved) => (
+            <Table<TData, TResponse> {...props} response={resolved} />
+          )}
+        </TableDataResolver>
+      </Suspense>
     );
   }
 

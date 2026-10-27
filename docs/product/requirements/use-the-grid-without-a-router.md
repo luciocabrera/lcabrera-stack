@@ -49,7 +49,7 @@ write to — what I do not accept is an interaction that throws.
 
 Persistence is a context that only the route-level `TableLayout` provides. Every
 persist action reads it, and without it the action applies the change to the
-stores and submits nothing, so no router hook is reached. A `Table` given rows
+stores and submits nothing, so no router hook is reached. A `Table` given an array of rows
 sorts and filters them in memory. The empty state offers Retry only under the
 layout, because outside it there is no loader to revalidate.
 `Table.fromRows.test.tsx` sorts, clears a sort, filters to some rows and to none,

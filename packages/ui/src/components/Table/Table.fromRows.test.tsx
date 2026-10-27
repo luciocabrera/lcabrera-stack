@@ -12,12 +12,20 @@ import {
 } from '@testing-library/react';
 import { useState } from 'react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { afterEach, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  beforeAll,
+  describe,
+  expect,
+  expectTypeOf,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 import { AppProviders } from '#ui/components/AppProviders';
 import { PERSIST_COOKIE_ACTION } from '#ui/constants/globalSettings.constants';
 
-import type { TableColumn } from './Table.types';
+import type { TableColumn, TableProps } from './Table.types';
 
 import { FiltersDataProvider } from './contexts/FiltersData';
 import { TableConfigProvider } from './contexts/TableConfig';
@@ -26,6 +34,7 @@ import { TableFocusProvider } from './contexts/TableFocus';
 import { Table } from './Table.component';
 import { TableLayout } from './TableLayout';
 import { createEmptyColumnsState } from './utils/createEmptyColumnsState.util';
+import { inferTableColumnsFromJson } from './utils/inferTableColumnsFromJson.util';
 
 type Order = {
   readonly orderTotal: number;
@@ -38,6 +47,17 @@ const ORDERS: readonly Order[] = [
   { orderTotal: 5, placedOn: '2024-01-15', reference: 'Alpha' },
   { orderTotal: 12, placedOn: '2024-02-20', reference: 'Gamma' },
 ];
+
+const ORDER_COLUMNS: readonly TableColumn<Order>[] = [
+  { dataType: 'number', key: 'orderTotal', label: 'Order Total' },
+  { dataType: 'date', key: 'placedOn', label: 'Placed On' },
+  { dataType: 'string', key: 'reference', label: 'Reference' },
+];
+
+type OrderPage = {
+  readonly data: readonly Order[];
+  readonly total: number;
+};
 
 beforeAll(() => {
   Object.assign(HTMLElement.prototype, {
@@ -63,6 +83,9 @@ const columnValues = (columnKey: keyof Order) =>
     .filter((cell) => cell.dataset.columnKey === columnKey)
     .map((cell) => cell.textContent);
 
+const headerLabels = () =>
+  screen.getAllByTestId('table-header-label').map((label) => label.textContent);
+
 const openColumnActions = (label: string) => {
   fireEvent.click(
     screen.getByRole('button', { name: `${label} column actions` }),
@@ -87,7 +110,7 @@ const RerenderingParent = () => {
       <output data-testid='render-count'>{renderCount}</output>
       <Table
         columns={[{ dataType: 'string', key: 'reference', label: 'Reference' }]}
-        rows={ORDERS}
+        response={ORDERS}
       />
     </>
   );
@@ -106,32 +129,89 @@ const filterReference = async (value: string) => {
   await settle();
 };
 
-describe('Table from rows alone', () => {
-  it('renders the rows with headers inferred from their keys, with no columns, providers or router', () => {
-    render(<Table rows={ORDERS} />);
+describe('Table from a plain array or a promise', () => {
+  it('renders a plain array with the columns it is given, with no providers or router', () => {
+    render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 
-    expect(
-      screen
-        .getAllByTestId('table-header-label')
-        .map((label) => label.textContent),
-    ).toStrictEqual(['Order Total', 'Placed On', 'Reference']);
+    expect(headerLabels()).toStrictEqual([
+      'Order Total',
+      'Placed On',
+      'Reference',
+    ]);
     expect(columnValues('reference')).toStrictEqual(['Beta', 'Alpha', 'Gamma']);
   });
 
-  it('renders the columns it is given instead of inferring them', () => {
+  it('renders the same rows from a promise of that array', async () => {
+    await act(async () => {
+      render(
+        <Table columns={ORDER_COLUMNS} response={Promise.resolve(ORDERS)} />,
+      );
+    });
+
+    expect(headerLabels()).toStrictEqual([
+      'Order Total',
+      'Placed On',
+      'Reference',
+    ]);
+    expect(columnValues('reference')).toStrictEqual(['Beta', 'Alpha', 'Gamma']);
+  });
+
+  it('shows a loading grid with its columns while the promise is pending', async () => {
+    const pending = new Promise<readonly Order[]>(() => undefined);
+
+    await act(async () => {
+      render(<Table columns={ORDER_COLUMNS} response={pending} />);
+    });
+
+    expect(headerLabels()).toStrictEqual([
+      'Order Total',
+      'Placed On',
+      'Reference',
+    ]);
+    expect(
+      screen.getByTestId('table-scroll-container').dataset.scrollLocked,
+    ).toBe('true');
+  });
+
+  it('reads a promised response through its selectors', async () => {
+    await act(async () => {
+      render(
+        <Table
+          columns={ORDER_COLUMNS}
+          dataSelector={(page: OrderPage) => page.data}
+          dataTotalSelector={(page: OrderPage) => page.total}
+          response={Promise.resolve({ data: ORDERS, total: 3 })}
+        />,
+      );
+    });
+
+    expect(columnValues('reference')).toStrictEqual(['Beta', 'Alpha', 'Gamma']);
+  });
+
+  it('renders columns a caller inferred from the rows', () => {
+    const rows: readonly Record<string, unknown>[] = ORDERS;
+
     render(
-      <Table columns={[{ key: 'reference', label: 'Ref' }]} rows={ORDERS} />,
+      <Table columns={inferTableColumnsFromJson({ rows })} response={rows} />,
     );
 
-    expect(
-      screen
-        .getAllByTestId('table-header-label')
-        .map((label) => label.textContent),
-    ).toStrictEqual(['Ref']);
+    expect(headerLabels()).toStrictEqual([
+      'Order Total',
+      'Placed On',
+      'Reference',
+    ]);
+  });
+
+  it('requires the columns', () => {
+    expectTypeOf<
+      Record<never, never> extends Pick<TableProps<Order, unknown>, 'columns'>
+        ? 'optional'
+        : 'required'
+    >().toEqualTypeOf<'required'>();
   });
 
   it('reorders the rendered rows when a column is sorted outside a router', async () => {
-    render(<Table rows={ORDERS} />);
+    render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 
     openColumnActions('Order Total');
     fireEvent.click(screen.getByText('Descending'));
@@ -168,7 +248,7 @@ describe('Table from rows alone', () => {
   });
 
   it('restores the given order when the sort is cleared', async () => {
-    render(<Table rows={ORDERS} />);
+    render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 
     openColumnActions('Reference');
     fireEvent.click(screen.getByText('Ascending'));
@@ -184,7 +264,7 @@ describe('Table from rows alone', () => {
   });
 
   it('narrows the rendered rows when a column is filtered outside a router', async () => {
-    render(<Table rows={ORDERS} />);
+    render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 
     await filterReference('Gamma');
 
@@ -192,7 +272,7 @@ describe('Table from rows alone', () => {
   });
 
   it('opens the table settings with no app providers above it', async () => {
-    render(<Table rows={ORDERS} />);
+    render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'Table settings' }));
     await settle();
@@ -201,7 +281,7 @@ describe('Table from rows alone', () => {
   });
 
   it('offers no grouping, which needs a server, from the column menu or the settings', async () => {
-    render(<Table rows={ORDERS} />);
+    render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 
     openColumnActions('Reference');
     await settle();
@@ -221,7 +301,7 @@ describe('Table from rows alone', () => {
   });
 
   it('shows the empty state, with nothing to retry, when a filter matches no row', async () => {
-    render(<Table rows={ORDERS} />);
+    render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 
     await filterReference('Delta');
 
@@ -293,7 +373,7 @@ describe('Table given rows inside another grid', () => {
         >
           <TableFocusProvider>
             <FiltersDataProvider<Order> columns={[...ENCLOSING_COLUMNS]}>
-              <Table columns={COLUMNS} rows={ORDERS} title='Inner' />
+              <Table columns={COLUMNS} response={ORDERS} title='Inner' />
             </FiltersDataProvider>
           </TableFocusProvider>
         </TableConfigProvider>
@@ -347,7 +427,7 @@ describe('Table persistence inside a router', () => {
 
   it('keeps a Table given rows in memory, submitting nothing', async () => {
     const submissions = await renderRoute(
-      <Table columns={COLUMNS} rows={ORDERS} />,
+      <Table columns={COLUMNS} response={ORDERS} />,
     );
 
     openColumnActions('Reference');

@@ -1,11 +1,11 @@
 type NeedsOwnTableStackArgs = {
   readonly hasConfig: boolean;
-  readonly hasRows: boolean;
   readonly isInOwnStack: boolean;
+  readonly isRowsResponse: boolean;
 };
 
 export const needsOwnTableStack = ({
   hasConfig,
-  hasRows,
   isInOwnStack,
-}: NeedsOwnTableStackArgs) => !hasConfig || (hasRows && !isInOwnStack);
+  isRowsResponse,
+}: NeedsOwnTableStackArgs) => !hasConfig || (isRowsResponse && !isInOwnStack);

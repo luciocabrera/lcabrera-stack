@@ -54,6 +54,7 @@ export const TableLayout = <
                   {(response) => (
                     <Table<TData, TResponse>
                       actions={actions}
+                      columns={columnsState.columns}
                       dataErrorSelector={dataErrorSelector}
                       dataSelector={dataSelector}
                       dataTotalSelector={dataTotalSelector}
