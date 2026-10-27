@@ -231,7 +231,8 @@ describe('TableEmptyState', () => {
     it('titles a refusal of an unlisted column, which arrives naming none, and still offers to clear', () => {
       useGetTableDataErrorMock.mockReturnValue({
         kind: 'grouping-refused',
-        message: 'The request named a column this grouped read cannot use.',
+        message:
+          'The request named a column this grouped read does not take where it was named: a group key or an aggregated column must be one the read allows, and a granularity must be for one of the group keys.',
         reason: 'unknown-column',
       });
       useGetNormalizedColumnMock.mockReturnValue(undefined);
@@ -243,7 +244,7 @@ describe('TableEmptyState', () => {
       );
       expect(
         screen.getByText(
-          'The request named a column this grouped read cannot use.',
+          'The request named a column this grouped read does not take where it was named: a group key or an aggregated column must be one the read allows, and a granularity must be for one of the group keys.',
         ),
       ).not.toBeNull();
       expect(

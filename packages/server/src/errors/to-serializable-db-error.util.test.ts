@@ -48,7 +48,8 @@ describe('toSerializableDbError', () => {
       message:
         'Column "hidden_note" is not in the allowed list for this query.',
       reason: 'unknown-column',
-      sentence: 'The request named a column this grouped read cannot use.',
+      sentence:
+        'The request named a column this grouped read does not take where it was named: a group key or an aggregated column must be one the read allows, and a granularity must be for one of the group keys.',
     },
     {
       column: 'hidden_note',

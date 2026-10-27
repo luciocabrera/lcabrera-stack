@@ -18,7 +18,8 @@ describe('readRefusedError', () => {
   it('reads a grouping-refused payload that names no column', () => {
     const error = {
       kind: 'grouping-refused',
-      message: 'The request named a column this grouped read cannot use.',
+      message:
+        'The request named a column this grouped read does not take where it was named: a group key or an aggregated column must be one the read allows, and a granularity must be for one of the group keys.',
       reason: 'unknown-column',
     } as const;
 

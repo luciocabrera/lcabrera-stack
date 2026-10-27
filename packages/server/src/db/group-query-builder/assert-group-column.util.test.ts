@@ -47,7 +47,8 @@ describe('assertGroupColumn', () => {
 
     expect(mapped).toStrictEqual({
       kind: 'grouping-refused',
-      message: 'The request named a column this grouped read cannot use.',
+      message:
+        'The request named a column this grouped read does not take where it was named: a group key or an aggregated column must be one the read allows, and a granularity must be for one of the group keys.',
       reason: 'unknown-column',
     });
     expect(JSON.stringify(mapped)).not.toContain('secret');

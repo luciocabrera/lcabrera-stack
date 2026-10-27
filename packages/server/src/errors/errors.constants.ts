@@ -19,7 +19,8 @@ export const GROUPING_REFUSED_MESSAGES: Readonly<
 > = {
   'duplicate-keys':
     'The request used the same column more than once among its group keys and column axis.',
-  'unknown-column': 'The request named a column this grouped read cannot use.',
+  'unknown-column':
+    'The request named a column this grouped read does not take where it was named: a group key or an aggregated column must be one the read allows, and a granularity must be for one of the group keys.',
 };
 
 export const QUERY_REFUSED_MESSAGES: Readonly<

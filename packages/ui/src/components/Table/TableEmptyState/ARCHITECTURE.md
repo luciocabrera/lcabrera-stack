@@ -67,8 +67,9 @@ false sentence about each:
   applied and is legal on its own.
 - `aggregate-not-legal` names an _aggregated_ column, which need not be a group
   key at all.
-- `unknown-column` is raised for a group key and for an aggregated column alike,
-  so the payload cannot tell the two apart. A server withholds that column, since
+- `unknown-column` is raised for a group key, for an aggregated column and for
+  a granularity on a column that is not a group key, so the payload cannot tell
+  them apart. A server withholds that column, since
   the read does not list it, so the payload names none.
 - `duplicate-keys` can quote a column the read does not list, so it arrives
   without one too.
