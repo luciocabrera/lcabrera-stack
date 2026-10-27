@@ -1,6 +1,7 @@
 /*
- * The escapes of the artifacts that are not markdown: workflow files, the
- * executables any shipped file invokes, and subagent definitions.
+ * The escapes of the artifacts that are not markdown: workflow files, shell
+ * scripts such as hooks, the executables any shipped file invokes, and subagent
+ * definitions — and which of those resolvers read a given file at all.
  *
  * Why apart from `closure.mjs`: each kind is read by its own extractor, and a
  * resolver that never fires reports the same clean pass as a file that is
@@ -30,13 +31,31 @@ const WORKFLOW_EXTENSIONS = ['.yaml', '.yml'];
 
 const AUTOMATIC_SECRETS = new Set(['GITHUB_TOKEN']);
 
-const isWorkflowFile = (path) =>
-  WORKFLOW_EXTENSIONS.some((extension) => path.endsWith(extension));
+const WORKFLOW_JOBS = /^jobs:/m;
+
+const SHELL_SHEBANG = /^#!\S*(?:\/|\s)(?:ba|da|z)?sh\b/;
+
+const isWorkflowFile = ({ content, path }) =>
+  WORKFLOW_EXTENSIONS.some((extension) => path.endsWith(extension)) &&
+  WORKFLOW_JOBS.test(content);
+
+const isUnder = ({ directory, path }) =>
+  directory !== undefined &&
+  directory !== '' &&
+  path.startsWith(`${directory.replace(/\/$/, '')}/`);
 
 const isAgentFile = ({ agentDirectory, path }) =>
-  agentDirectory !== undefined &&
-  agentDirectory !== '' &&
-  path.startsWith(`${agentDirectory.replace(/\/$/, '')}/`);
+  isUnder({ directory: agentDirectory, path });
+
+const hasExtension = (path) => /\.[^/.]+$/.test(path.split('/').at(-1) ?? '');
+
+const isBareHook = ({ file, hookDirectory }) =>
+  isUnder({ directory: hookDirectory, path: file.path }) &&
+  !file.content.startsWith('#!') &&
+  !hasExtension(file.path);
+
+const isShellScript = ({ file, hookDirectory }) =>
+  SHELL_SHEBANG.test(file.content) || isBareHook({ file, hookDirectory });
 
 const toLinkEscape = ({ file, reference }) => ({
   file: file.path,
@@ -112,6 +131,33 @@ const workflowEscapes = ({ allowed, containment, exists, file }) => {
   ];
 };
 
+const isCommentStart = ({ characters, index }) =>
+  characters[index] === '#' &&
+  (index === 0 || /\s/.test(characters[index - 1]));
+
+const withoutComment = (text) => {
+  const characters = [...text];
+  const start = characters.findIndex((_, index) =>
+    isCommentStart({ characters, index }),
+  );
+  return start === -1 ? text : characters.slice(0, start).join('');
+};
+
+const shellLines = (content) =>
+  content.split('\n').map((text, index) => ({
+    line: index + 1,
+    text: withoutComment(text),
+  }));
+
+const shellEscapes = ({ allowed, containment, exists, file }) => {
+  const scripts = shellLines(file.content);
+  return [
+    ...stepCommandEscapes({ allowed, file, scripts }),
+    ...stepPathEscapes({ containment, exists, file, scripts }),
+    ...stepMissingScripts({ containment, exists, file, scripts }),
+  ];
+};
+
 const binEscapes = ({ allowedBins, file }) =>
   extractBinInvocations(file.content)
     .filter((entry) => !allowedBins.has(entry.name))
@@ -131,10 +177,22 @@ const agentEscapes = ({ containment, exists, file }) =>
   });
 
 /**
+ * @param {{ agentDirectory?: string, hookDirectory?: string,
+ *   file: { path: string, content: string } }} args
+ * @returns {string[]}
+ */
+export const artifactReaders = ({ agentDirectory, file, hookDirectory }) =>
+  [
+    isWorkflowFile(file) && 'workflow',
+    isShellScript({ file, hookDirectory }) && 'shell',
+    isAgentFile({ agentDirectory, path: file.path }) && 'agent',
+  ].filter((reader) => reader !== false);
+
+/**
  * @param {{ agentDirectory?: string, allowed: Set<string>,
  *   allowedBins?: Set<string>, containment: object,
  *   exists?: (repoRelativePath: string) => boolean,
- *   file: { path: string, content: string } }} args
+ *   file: { path: string, content: string }, hookDirectory?: string }} args
  */
 export const artifactEscapes = ({
   agentDirectory,
@@ -143,12 +201,21 @@ export const artifactEscapes = ({
   containment,
   exists,
   file,
-}) => [
-  ...(isWorkflowFile(file.path)
-    ? workflowEscapes({ allowed, containment, exists, file })
-    : []),
-  ...(allowedBins === undefined ? [] : binEscapes({ allowedBins, file })),
-  ...(isAgentFile({ agentDirectory, path: file.path })
-    ? agentEscapes({ containment, exists, file })
-    : []),
-];
+  hookDirectory,
+}) => {
+  const readers = new Set(
+    artifactReaders({ agentDirectory, file, hookDirectory }),
+  );
+  return [
+    ...(readers.has('workflow')
+      ? workflowEscapes({ allowed, containment, exists, file })
+      : []),
+    ...(readers.has('shell')
+      ? shellEscapes({ allowed, containment, exists, file })
+      : []),
+    ...(allowedBins === undefined ? [] : binEscapes({ allowedBins, file })),
+    ...(readers.has('agent')
+      ? agentEscapes({ containment, exists, file })
+      : []),
+  ];
+};

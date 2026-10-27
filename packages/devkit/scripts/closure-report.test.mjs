@@ -51,3 +51,34 @@ describe('renderClosureReport', () => {
     );
   });
 });
+
+describe('the unchecked files', () => {
+  test('are named under their directory, whether it is clean or not', () => {
+    expect(
+      renderClosureReport([
+        {
+          directory: 'docker',
+          escapes: [],
+          fileCount: 3,
+          unchecked: ['docker/compose.yml'],
+        },
+        {
+          directory: 'db',
+          escapes: [
+            { file: 'db/README.md', kind: 'link', line: 2, resolved: 'x.md' },
+          ],
+          fileCount: 2,
+          unchecked: ['db/setup.sql'],
+        },
+      ]),
+    ).toBe(
+      [
+        '✓ docker — no escapes; 2 file(s) read by a resolver for their kind',
+        '    unchecked  docker/compose.yml  no resolver for its kind',
+        '✗ db',
+        '    db/README.md:2  needs x.md',
+        '    unchecked  db/setup.sql  no resolver for its kind',
+      ].join('\n'),
+    );
+  });
+});
