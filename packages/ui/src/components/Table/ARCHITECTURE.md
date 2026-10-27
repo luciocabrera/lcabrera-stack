@@ -11,7 +11,7 @@ filtering, infinite scroll, settings drawers, and cookie-based persistence.
 | `Table`       | Receives `columns` and one `response`: a value or a promise of one               |
 
 `Table` has one data input, `response`, which is a value or a promise of one.
-Given a promise, `Table` suspends on it through `TableDataResolver`. Its fallback is itself as a loading grid over placeholder rows, and it then renders itself
+Given a promise, `Table` suspends on it through `TableDataResolver`. Its fallback is itself as a loading grid over placeholder rows. The placeholders are read through a `dataSelector`, so the user's sort and filters never apply to them. It then renders itself
 again with the resolved value. An array given with no `dataSelector` is the rows
 themselves. `useTableDataState` sorts and filters those rows in memory from the
 columns store, so a sort or filter reorders them with no loader behind them. Any

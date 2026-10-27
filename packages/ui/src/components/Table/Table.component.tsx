@@ -33,9 +33,11 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
     return (
       <Suspense
         fallback={
-          <Table<TData, TResponse>
+          <Table<TData, readonly TData[]>
             {...props}
-            dataSelector={undefined}
+            dataErrorSelector={undefined}
+            dataSelector={(placeholderRows) => placeholderRows}
+            dataTotalSelector={undefined}
             isLoading
             onLoadMore={undefined}
             response={generatePlaceholderData<TData>({

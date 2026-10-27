@@ -37,7 +37,7 @@ written to the URL and the rows kept their order.
   `dataPromise` because `Table` already read its data through `response` and
   its selectors, and because the input is no longer always a promise; a second
   prop alongside it would have given the table two inputs. Given a promise,
-  `Table` suspends on it through the existing `TableDataResolver`. While the promise is pending, it renders itself as a loading grid over placeholder rows, then
+  `Table` suspends on it through the existing `TableDataResolver`. While the promise is pending, it renders itself as a loading grid over placeholder rows, which are read through a selector so no sort or filter applies to them. It then
   renders itself again with the resolved value. `TableLayout` keeps `dataPromise` and passes
   the resolved response, as before.
 - An array given with no `dataSelector` is the rows themselves. `Table` sorts

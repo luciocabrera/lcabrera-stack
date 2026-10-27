@@ -9,6 +9,7 @@ import {
   render,
   screen,
   waitFor,
+  within,
 } from '@testing-library/react';
 import { useState } from 'react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
@@ -198,6 +199,39 @@ describe('Table from a plain array or a promise', () => {
 
     expect(pendingIcons).toBe(1);
     expect(pendingLayout).toStrictEqual(gridAncestorClasses());
+  });
+
+  it('keeps the loading grid’s placeholder rows when a filter is active', async () => {
+    const { rerender } = await act(async () =>
+      render(
+        <Table columns={ORDER_COLUMNS} response={Promise.resolve(ORDERS)} />,
+      ),
+    );
+
+    await filterReference('Gamma');
+
+    expect(columnValues('reference')).toStrictEqual(['Gamma']);
+
+    await act(async () => {
+      rerender(
+        <Table
+          columns={ORDER_COLUMNS}
+          response={new Promise<readonly Order[]>(() => undefined)}
+        />,
+      );
+    });
+
+    const loadingGrid = screen
+      .getAllByTestId('table-scroll-container')
+      .find((container) => container.dataset.scrollLocked === 'true');
+    const placeholderValues = within(loadingGrid ?? document.body)
+      .queryAllByRole('gridcell')
+      .filter((cell) => cell.dataset.columnKey === 'reference')
+      .map((cell) => cell.textContent);
+
+    expect(loadingGrid).toBeDefined();
+    expect(placeholderValues.length).toBeGreaterThan(1);
+    expect(new Set(placeholderValues)).toStrictEqual(new Set(['']));
   });
 
   it('shows a loading grid with its columns while the promise is pending', async () => {
