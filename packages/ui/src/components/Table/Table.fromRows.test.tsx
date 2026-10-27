@@ -27,6 +27,7 @@ import { AppProviders } from '#ui/components/AppProviders';
 import { PERSIST_COOKIE_ACTION } from '#ui/constants/globalSettings.constants';
 
 import type { TableColumn, TableProps } from './Table.types';
+import type { TableLayoutProps } from './TableLayout/TableLayout.types';
 
 import { FiltersDataProvider } from './contexts/FiltersData';
 import { TableConfigProvider } from './contexts/TableConfig';
@@ -306,6 +307,73 @@ describe('Table from a plain array or a promise', () => {
         ? 'optional'
         : 'required'
     >().toEqualTypeOf<'required'>();
+  });
+
+  it('pairs the response with its selectors in the props type', () => {
+    type Columns = { readonly columns: readonly TableColumn<Order>[] };
+    type SelectPage = (page: OrderPage) => readonly Order[];
+
+    expectTypeOf<Columns & { readonly response: readonly Order[] }>().toExtend<
+      TableProps<Order, OrderPage>
+    >();
+    expectTypeOf<
+      Columns & { readonly response: Promise<readonly Order[]> }
+    >().toExtend<TableProps<Order, OrderPage>>();
+    expectTypeOf<
+      Columns & {
+        readonly dataSelector: SelectPage;
+        readonly response: Promise<OrderPage>;
+      }
+    >().toExtend<TableProps<Order, OrderPage>>();
+    expectTypeOf<
+      Columns & {
+        readonly dataSelector: SelectPage;
+        readonly response: OrderPage;
+      }
+    >().toExtend<TableProps<Order, OrderPage>>();
+
+    expectTypeOf<
+      Columns & {
+        readonly dataSelector: SelectPage;
+        readonly response: readonly Order[];
+      }
+    >().not.toExtend<TableProps<Order, OrderPage>>();
+    expectTypeOf<Columns & { readonly response: OrderPage }>().not.toExtend<
+      TableProps<Order, OrderPage>
+    >();
+    expectTypeOf<
+      Columns & {
+        readonly dataTotalSelector: (page: OrderPage) => number;
+        readonly response: readonly Order[];
+      }
+    >().not.toExtend<TableProps<Order, OrderPage>>();
+  });
+
+  it('pairs the layout’s data promise with its selectors in the props type', () => {
+    type LayoutBase = Pick<
+      TableLayoutProps<Order, OrderPage>,
+      'columnsState' | 'metaState'
+    >;
+
+    expectTypeOf<
+      LayoutBase & { readonly dataPromise: Promise<readonly Order[]> }
+    >().toExtend<TableLayoutProps<Order, OrderPage>>();
+    expectTypeOf<
+      LayoutBase & {
+        readonly dataPromise: Promise<OrderPage>;
+        readonly dataSelector: (page: OrderPage) => readonly Order[];
+      }
+    >().toExtend<TableLayoutProps<Order, OrderPage>>();
+
+    expectTypeOf<
+      LayoutBase & { readonly dataPromise: Promise<OrderPage> }
+    >().not.toExtend<TableLayoutProps<Order, OrderPage>>();
+    expectTypeOf<
+      LayoutBase & {
+        readonly dataPromise: Promise<readonly Order[]>;
+        readonly onLoadMore: () => Promise<OrderPage>;
+      }
+    >().not.toExtend<TableLayoutProps<Order, OrderPage>>();
   });
 
   it('reorders the rendered rows when a column is sorted outside a router', async () => {

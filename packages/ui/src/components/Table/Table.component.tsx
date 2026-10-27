@@ -49,7 +49,12 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
       >
         <TableDataResolver<readonly TData[] | TResponse> dataPromise={response}>
           {(resolved) => (
-            <Table<TData, TResponse> {...props} response={resolved} />
+            <Table<TData, TResponse>
+              {...({ ...props, response: resolved } as TableProps<
+                TData,
+                TResponse
+              >)}
+            />
           )}
         </TableDataResolver>
       </Suspense>

@@ -19,20 +19,51 @@ import { useTablePersistence } from './useTablePersistence.hook';
 export const TableLayout = <
   TData extends Record<string, unknown>,
   TResponse = Record<string, unknown>,
->({
-  actions,
-  cellPalette,
-  cellRenderers,
-  columnsState,
-  dataErrorSelector,
-  dataPromise,
-  dataSelector,
-  dataTotalSelector,
-  groupingState,
-  metaState,
-  onLoadMore,
-}: TableLayoutProps<TData, TResponse>) => {
+>(
+  props: TableLayoutProps<TData, TResponse>,
+) => {
+  const {
+    actions,
+    cellPalette,
+    cellRenderers,
+    columnsState,
+    groupingState,
+    metaState,
+  } = props;
   const persistence = useTablePersistence();
+  const { columns } = columnsState;
+  const table =
+    props.dataSelector === undefined ? (
+      <TableSuspenseBoundary<TData, readonly TData[]>
+        actions={actions}
+        dataPromise={props.dataPromise}
+      >
+        {(rows) => (
+          <Table<TData, TResponse>
+            actions={actions}
+            columns={columns}
+            response={rows}
+          />
+        )}
+      </TableSuspenseBoundary>
+    ) : (
+      <TableSuspenseBoundary<TData, TResponse>
+        actions={actions}
+        dataPromise={props.dataPromise}
+      >
+        {(response) => (
+          <Table<TData, TResponse>
+            actions={actions}
+            columns={columns}
+            dataErrorSelector={props.dataErrorSelector}
+            dataSelector={props.dataSelector}
+            dataTotalSelector={props.dataTotalSelector}
+            onLoadMore={props.onLoadMore}
+            response={response}
+          />
+        )}
+      </TableSuspenseBoundary>
+    );
 
   return (
     <TablePersistenceContext value={persistence}>
@@ -48,24 +79,7 @@ export const TableLayout = <
           >
             <TableFocusProvider>
               <FiltersDataProvider<TData> columns={columnsState.columns}>
-                <TableOwnStackContext value>
-                  <TableSuspenseBoundary<TData, TResponse>
-                    actions={actions}
-                    dataPromise={dataPromise}
-                  >
-                    {(response) => (
-                      <Table<TData, TResponse>
-                        actions={actions}
-                        columns={columnsState.columns}
-                        dataErrorSelector={dataErrorSelector}
-                        dataSelector={dataSelector}
-                        dataTotalSelector={dataTotalSelector}
-                        onLoadMore={onLoadMore}
-                        response={response}
-                      />
-                    )}
-                  </TableSuspenseBoundary>
-                </TableOwnStackContext>
+                <TableOwnStackContext value>{table}</TableOwnStackContext>
               </FiltersDataProvider>
             </TableFocusProvider>
           </TableConfigProvider>

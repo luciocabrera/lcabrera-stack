@@ -40,6 +40,12 @@ written to the URL and the rows kept their order.
   `Table` suspends on it through the existing `TableDataResolver`. While the promise is pending, it renders itself as a loading grid over placeholder rows, which are read through a selector so no sort or filter applies to them. It then
   renders itself again with the resolved value. `TableLayout` keeps `dataPromise` and passes
   the resolved response, as before.
+- The props type enforces the pairing. `TableProps` is a union of
+  `TableRowsSource`, where `response` is rows or a promise of them and no
+  selector props are accepted, and `TableSelectedSource`, where `dataSelector`
+  is required and `dataTotalSelector`, `dataErrorSelector` and `onLoadMore`
+  may follow it. `TableLayoutProps` pairs `dataPromise` the same way. A
+  mismatched pair is a type error rather than a runtime failure.
 - An array given with no `dataSelector` is the rows themselves. `Table` sorts
   and filters them in memory from the columns store's sorting and filter state
   (`useTableDataState`, `deriveLocalRows`). The filter matchers read a filter
