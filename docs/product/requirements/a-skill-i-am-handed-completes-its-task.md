@@ -9,8 +9,7 @@ packages:
 requires:
   - agent-instructions-do-not-contradict
 issues:
-  - 1504
-  - 1509
+  - 1537
 evidence:
   - type: command
     ref: vp run skills:validate
@@ -18,6 +17,12 @@ evidence:
     ref: vp run harness:verify
   - type: command
     ref: vp run devkit:closure:shipped
+  - type: code
+    ref: packages/repo-standards/scripts/conformance-triggers.cjs
+  - type: command
+    ref: vp run usage:report
+  - type: test
+    ref: packages/repo-standards/scripts/usage-render.test.mjs
 ---
 
 # A skill that arrived with the setup does its job in my repository
