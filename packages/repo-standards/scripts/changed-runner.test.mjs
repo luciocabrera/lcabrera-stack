@@ -1,6 +1,6 @@
 import { spawn } from 'node:child_process';
 import { join } from 'node:path';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterAll, describe, expect, it } from 'vite-plus/test';
 
 import {
   exitStatusOf,
@@ -8,6 +8,7 @@ import {
   REPO_ROOT,
   runInSequence,
 } from './changed-runner.mjs';
+import { createFixtureRoots, writeIn } from './repo-fixtures.mjs';
 
 const recordingRunner = (events) => (group) => {
   events.push(`start ${group.name}`);
@@ -76,10 +77,28 @@ describe('exitStatusOf', () => {
   });
 });
 
-const runVp = (args) =>
+const roots = createFixtureRoots('changed-runner-');
+
+afterAll(() => {
+  roots.removeAll();
+});
+
+const probeWorkspace = () => {
+  const root = roots.make();
+  const write = writeIn(root);
+  write('pnpm-workspace.yaml', 'packages:\n  - packages/*\n');
+  write('package.json', '{"name":"probe-root","private":true}\n');
+  write(
+    'packages/a/package.json',
+    '{"name":"@repo-standards-probe/a","private":true,"scripts":{"test":"node -e 0"}}\n',
+  );
+  return root;
+};
+
+const runVp = (cwd, args) =>
   exitStatusOf(
     spawn(join(REPO_ROOT, 'node_modules', '.bin', 'vp'), args, {
-      cwd: REPO_ROOT,
+      cwd,
       stdio: 'ignore',
     }),
   );
@@ -110,8 +129,9 @@ describe('filteredRunArgs', () => {
       task: 'test',
     });
     const bare = args.filter((arg) => arg !== '--fail-if-no-match');
+    const workspace = probeWorkspace();
 
-    await expect(runVp(bare)).resolves.toBe(0);
-    await expect(runVp(args)).resolves.not.toBe(0);
+    await expect(runVp(workspace, bare)).resolves.toBe(0);
+    await expect(runVp(workspace, args)).resolves.not.toBe(0);
   });
 });
