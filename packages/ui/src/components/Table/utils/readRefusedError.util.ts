@@ -1,30 +1,33 @@
-import type { TableResponseError } from '../Table.types';
-
 import { isTableGroupingRefusalReason } from './isTableGroupingRefusalReason.util';
+import { isTableQueryRefusalReason } from './isTableQueryRefusalReason.util';
 
-type GroupingRefusedError = Extract<
-  TableResponseError,
-  { readonly kind: 'grouping-refused' }
->;
-
-export const readGroupingRefusedError = (
-  error: unknown,
-): GroupingRefusedError | undefined => {
+export const readRefusedError = (error: unknown) => {
   if (
     typeof error !== 'object' ||
     error === null ||
     !('kind' in error) ||
-    error.kind !== 'grouping-refused' ||
     !('message' in error) ||
     typeof error.message !== 'string' ||
-    !('reason' in error) ||
-    !isTableGroupingRefusalReason(error.reason)
+    !('reason' in error)
   ) {
     return;
   }
 
+  if (error.kind === 'query-refused' && isTableQueryRefusalReason(error.reason))
+    return {
+      kind: 'query-refused' as const,
+      message: error.message,
+      reason: error.reason,
+    };
+
+  if (
+    error.kind !== 'grouping-refused' ||
+    !isTableGroupingRefusalReason(error.reason)
+  )
+    return;
+
   return {
-    kind: 'grouping-refused',
+    kind: 'grouping-refused' as const,
     message: error.message,
     reason: error.reason,
     ...('column' in error &&

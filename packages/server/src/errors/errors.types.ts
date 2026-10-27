@@ -21,6 +21,13 @@ export type PgErrorFields = {
   readonly constraint?: string;
 };
 
+export type QueryRefusalReason =
+  | 'column-not-allowed'
+  | 'keyset-cursor-mismatch'
+  | 'keyset-sort-missing'
+  | 'keyset-sort-not-unique'
+  | 'keyset-unique-value-missing';
+
 export type SerializableDbError =
   | {
       /** The raw SQLSTATE, when the driver supplied one. Never the message. */
@@ -36,4 +43,9 @@ export type SerializableDbError =
       readonly reason: GroupingRefusalReason;
     }
   | { readonly kind: 'db-canceled'; readonly message: string }
+  | {
+      readonly kind: 'query-refused';
+      readonly message: string;
+      readonly reason: QueryRefusalReason;
+    }
   | { readonly kind: 'unexpected'; readonly message: string };

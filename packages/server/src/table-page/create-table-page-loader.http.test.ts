@@ -278,7 +278,7 @@ describe('the README HTTP API example', () => {
     expect(query).not.toHaveBeenCalled();
   });
 
-  it('answers a filter on an unlisted column as unexpected, without naming the column', async () => {
+  it('answers a filter on an unlisted column with a 400 refusal that does not name the column', async () => {
     const filter = JSON.stringify({
       hidden_note: { operator: 'contains', type: 'text', value: 'x' },
     });
@@ -287,15 +287,32 @@ describe('the README HTTP API example', () => {
       path: `/items?filter=${encodeURIComponent(filter)}`,
     });
 
-    expect(response.status).toBe(500);
+    expect(response.status).toBe(400);
     expect(JSON.parse(response.body)).toStrictEqual({
       error: {
-        kind: 'unexpected',
-        message: 'The request could not be completed.',
+        kind: 'query-refused',
+        message: 'The request named a column this query does not allow.',
+        reason: 'column-not-allowed',
       },
     });
     expect(response.body).not.toContain('hidden_note');
     expect(query).not.toHaveBeenCalled();
+  });
+
+  it('answers a sort on an unlisted column with the same 400 refusal', async () => {
+    const sort = JSON.stringify([
+      { columnKey: 'hidden_note', direction: 'asc' },
+    ]);
+
+    const response = await request({
+      path: `/items?sort=${encodeURIComponent(sort)}`,
+    });
+
+    expect(response.status).toBe(400);
+    expect(JSON.parse(response.body)).toMatchObject({
+      error: { kind: 'query-refused', reason: 'column-not-allowed' },
+    });
+    expect(response.body).not.toContain('hidden_note');
   });
 
   it('answers an unknown path with a 404 and an unsupported method with a 405', async () => {
