@@ -45,8 +45,11 @@ consumer could set it. Re-run it rather than trusting this table's age; the
 verdicts are judgements, the escapes underneath them are measurements.
 
 Two things it deliberately does not treat as a dependency: a repository name
-appearing in an example, and a path that resolves nowhere. Both were false
-positives in earlier hand surveys.
+appearing in an example, and a path that is only named and resolves nowhere.
+Both were false positives in earlier hand surveys. A path that `node`, `bash` or
+`sh` is told to run is the exception: when it resolves nowhere it is reported as
+**missing**, because a script the file runs is a dependency whether or not
+anything still holds it.
 
 Every reason below is derived from the file it names. A reason that only makes
 sense by reading the row above it is a defect, not a shorthand: it hides which
