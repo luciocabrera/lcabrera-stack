@@ -76,11 +76,14 @@ const COMPOUND_JOINERS = new Set(["'", '-', '’']);
 const OPEN_ENDED_PHRASES = [
   'anything else',
   'everything else',
-  'at all',
   'no matter what',
   'whatever you',
   'whatever the user',
 ].map((phrase) => phrase.split(' '));
+
+const CLAUSE_FINAL_PHRASES = [['at', 'all']];
+
+const WORD = /^[a-z]/;
 
 const TOKEN = /[a-z]+|[^\sa-z]/g;
 
@@ -137,11 +140,31 @@ const quantifiedPhrase = (tokens, index) => {
 /**
  * @param {readonly string[]} tokens
  * @param {number} index
+ * @param {readonly string[]} phrase
+ * @returns {boolean}
+ */
+const startsWith = (tokens, index, phrase) =>
+  phrase.every((word, offset) => tokens[index + offset] === word);
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
+ * @param {readonly string[]} phrase
+ * @returns {boolean}
+ */
+const endsClauseWith = (tokens, index, phrase) =>
+  startsWith(tokens, index, phrase) &&
+  !WORD.test(tokens[index + phrase.length] ?? '');
+
+/**
+ * @param {readonly string[]} tokens
+ * @param {number} index
  * @returns {string | undefined}
  */
 const openEndedPhrase = (tokens, index) =>
-  OPEN_ENDED_PHRASES.find((phrase) =>
-    phrase.every((word, offset) => tokens[index + offset] === word),
+  (
+    OPEN_ENDED_PHRASES.find((phrase) => startsWith(tokens, index, phrase)) ??
+    CLAUSE_FINAL_PHRASES.find((phrase) => endsClauseWith(tokens, index, phrase))
   )?.join(' ');
 
 /**

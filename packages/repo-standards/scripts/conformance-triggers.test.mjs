@@ -81,6 +81,11 @@ describe('conformance triggers — planted vague descriptions', () => {
     },
     {
       description:
+        'Use when a request touches README.md or the scripts under scripts/ at all.',
+      phrase: 'at all',
+    },
+    {
+      description:
         'Use for any other kind of task, from README.md to the scripts under scripts/ and the config at the root.',
       phrase: 'any other kind of task',
     },
@@ -124,6 +129,8 @@ describe('conformance triggers — planted vague descriptions', () => {
     'Use when editing any file under docs/product/, or when writing acceptance criteria for a package.',
     'Use when editing any file in docs/product/, before the pull request for that change is opened.',
     'Use when making any change to packages/ui, before a changeset is written for that package.',
+    'Use when you need to look at all files under docs/product/, before a requirement is flipped to met.',
+    'Use when the gate stops at all workspaces in packages/, before `vp run check:safe` is run again.',
     'Use when editing any file-scoped rule under .claude/rules/, before the gate is run on it.',
     "Use when editing any file's frontmatter under .github/skills, before the gate is run on it.",
     'Use when editing any file’s frontmatter under .github/skills, before the gate is run on it.',
