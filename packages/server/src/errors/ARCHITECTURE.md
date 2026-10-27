@@ -94,7 +94,7 @@ leak the translation layer exists to close.
 redaction only holds until the first consumer forgets. `cause` keeps the whole
 original rejection reachable for a server log, which is where a developer reads it.
 
-## Two things that look wrong and are not
+## What looks wrong and is not
 
 **Narrowing is structural, never `instanceof pg.DatabaseError`.** A consumer can
 resolve two copies of `pg` — its own plus a transitive one — and `instanceof` is
