@@ -12,14 +12,17 @@ import type {
 
 import { toChromeUiFlags } from '#ui/components/Table/utils/toChromeUiFlags.util';
 
-import type { TableRouteLoaderSourceArgs } from './loaders.types';
+import type {
+  TableRouteLoaderSourceArgs,
+  TableRouteSource,
+} from './loaders.types';
 
 import { appendPrimaryKeySorting } from '../shared/appendPrimaryKeySorting.util';
 import { sanitizeSorting } from '../shared/sanitizeSorting.util';
 import { appendDistinctFilterDescriptors } from './appendDistinctFilterDescriptors.util';
+import { hasTableRouteSource } from './hasTableRouteSource.util';
 import { readTableLoaderStateFromRequest } from './readTableLoaderStateFromRequest.util';
 import { resolveTableCapabilityMeta } from './resolveTableCapabilityMeta.util';
-import { resolveTableRouteSource } from './resolveTableRouteSource.util';
 import { startInjectedResolver } from './startInjectedResolver.util';
 
 export type { TableRouteSource } from './loaders.types';
@@ -73,7 +76,9 @@ export const createTableRouteLoader = <
     resolveLockedFilters,
     title,
   } = args;
-  const source = resolveTableRouteSource<TData, TResponse>(args);
+  const source: TableRouteSource<TData, TResponse> = hasTableRouteSource(args)
+    ? args.source
+    : args;
   const { fetchPage, resolveGroupingCapabilities, schemaName, tableName } =
     source;
   const meta = { ...source.capabilities, ...args.meta };

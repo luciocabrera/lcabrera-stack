@@ -3,11 +3,12 @@ import type {
   TableRouteSource,
 } from './loaders.types';
 
-export const resolveTableRouteSource = <
+export const hasTableRouteSource = <
   TData extends Record<string, unknown>,
   TResponse,
 >(
   args: TableRouteLoaderSourceArgs<TData, TResponse>,
-): TableRouteSource<TData, TResponse> => {
-  return args.source === undefined ? args : args.source;
-};
+): args is Extract<
+  TableRouteLoaderSourceArgs<TData, TResponse>,
+  { readonly source: TableRouteSource<TData, TResponse> }
+> => args.source !== undefined;
