@@ -25,6 +25,7 @@ import {
   configuredCommandWords,
   includesRung,
   PROFILES,
+  targetPathFor,
 } from './config.mjs';
 import { gateBinNames, tasksFor } from './init.mjs';
 import { isRetirement } from './manifest.mjs';
@@ -73,7 +74,14 @@ const providedPackages = ({ entries, profile }) => {
   ];
 };
 
-const COMMAND_REFERENCE = 'COMMANDS.md';
+const COMMAND_REFERENCE_ASSETS = ['full/COMMANDS.md', 'root/COMMANDS.md'];
+
+const commandReferencePaths = (config) =>
+  new Set(
+    COMMAND_REFERENCE_ASSETS.map((assetPath) =>
+      targetPathFor({ assetPath, config }),
+    ).filter((path) => path !== undefined),
+  );
 
 const runPrefixesFor = (config) => {
   const configured = config.commands?.run;
@@ -83,22 +91,25 @@ const runPrefixesFor = (config) => {
 };
 
 /**
- * @param {{ entries: { path: string, content: string }[], profile: string,
+ * @param {{ config: object, entries: { path: string, content: string }[],
  *   runPrefixes: readonly string[] }} args
  * @returns {string[]}
  */
-const definedTasks = ({ entries, profile, runPrefixes }) => [
-  ...Object.keys(tasksFor({ profile })),
-  ...Object.keys(workspaceScriptsFor({ profile })),
-  ...entries
-    .filter((entry) => entry.path === COMMAND_REFERENCE)
-    .flatMap((entry) =>
-      extractTaskInvocations({
-        content: entry.content,
-        prefixes: runPrefixes,
-      }).map((invocation) => invocation.task),
-    ),
-];
+const definedTasks = ({ config, entries, runPrefixes }) => {
+  const references = commandReferencePaths(config);
+  return [
+    ...Object.keys(tasksFor({ profile: config.profile })),
+    ...Object.keys(workspaceScriptsFor({ profile: config.profile })),
+    ...entries
+      .filter((entry) => references.has(entry.path))
+      .flatMap((entry) =>
+        extractTaskInvocations({
+          content: entry.content,
+          prefixes: runPrefixes,
+        }).map((invocation) => invocation.task),
+      ),
+  ];
+};
 
 const shippedContext = ({ profile, root }) => {
   const { config, entries: planned } = buildPlan({ profile, root });
@@ -109,11 +120,7 @@ const shippedContext = ({ profile, root }) => {
     allowedBins: gateBinNames(),
     allowedCommands: [...BASELINE_COMMANDS, ...configuredCommandWords(config)],
     allowedPackages: providedPackages({ entries, profile }),
-    allowedTasks: definedTasks({
-      entries,
-      profile: config.profile,
-      runPrefixes,
-    }),
+    allowedTasks: definedTasks({ config, entries, runPrefixes }),
     configKeys: allowedConfigKeys(config),
     entries,
     hookDirectory: config.paths.hooks,

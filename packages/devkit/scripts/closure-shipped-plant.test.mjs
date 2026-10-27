@@ -226,6 +226,29 @@ describe('a shipped instruction running a task the receiving repository lacks', 
     );
   });
 
+  test.each([
+    ['repo', 'root'],
+    ['full', 'full'],
+  ])(
+    'reads the command reference where %s places it under a configured paths.%s',
+    (profile, group) => {
+      const root = copyOfPackage();
+      writeFileSync(
+        join(root, 'devkit.config.json'),
+        `${JSON.stringify({ paths: { full: 'docs', root: 'docs' } })}\n`,
+      );
+      appendTo(
+        join(root, 'assets', group, 'COMMANDS.md'),
+        '\n- `{{commands.run}} planted:task` — a task this repository adds.\n',
+      );
+      appendTo(skill(root), '\nRun `npm run planted:task`.\n');
+      const { stderr, stdout } = shippedClosure(root, profile);
+
+      expect(`${stdout}${stderr}`).toContain(`${profile} — `);
+      expect(stderr).not.toContain('runs the undefined task');
+    },
+  );
+
   test('is reported after the configured runner is substituted in', () => {
     const root = copyOfPackage();
     writeFileSync(
