@@ -24,6 +24,7 @@ import {
   ENTERPRISE_ORDER_GROUP_MAX_ROWS,
   ENTERPRISE_ORDER_LIST_COLUMNS,
   ENTERPRISE_ORDER_PRIMARY_KEY,
+  ENTERPRISE_ORDERS_PAGE_PATH,
   ENTERPRISE_ORDERS_SCHEMA,
   ENTERPRISE_ORDERS_TABLE,
   MAX_ENTERPRISE_ORDERS_LIMIT,
@@ -47,17 +48,20 @@ const ordersPage = createTablePageReader<
   ignoredSortColumns: [ACTIONS_COLUMN_KEY],
   maxLimit: MAX_ENTERPRISE_ORDERS_LIMIT,
   maxSortRules: MAX_ENTERPRISE_ORDERS_SORT_RULES,
+  pagePath: ENTERPRISE_ORDERS_PAGE_PATH,
   primaryKey: ENTERPRISE_ORDER_PRIMARY_KEY,
   target: TARGET,
 });
 
 export const {
   deleteRow: deleteOrder,
+  pageLoader: ordersPageLoader,
   resolveGroupRead: resolveOrdersGroupRead,
   resolveGroupRestriction: resolveOrdersGroupRestriction,
   resolvePageRead: resolveOrdersPageRead,
   selectGroupingCapabilities: selectOrderGroupingCapabilities,
   selectGroupKeyTruncations: selectOrderGroupKeyTruncations,
+  source: ordersSource,
 } = ordersPage;
 
 type SelectOrdersPageArgs = Omit<TablePageRead, 'grouping'> & {

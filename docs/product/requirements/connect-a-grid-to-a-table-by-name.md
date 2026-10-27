@@ -3,22 +3,32 @@ id: connect-a-grid-to-a-table-by-name
 lines:
   - application
 persona: application-developer
-state: unmet
+state: met
 packages:
   - ui
   - api
   - server
 requires: []
-issues:
-  - 996
-  - 999
+issues: []
 evidence:
+  - type: code
+    ref: packages/server/src/table-page/create-table-page-reader.util.ts
   - type: code
     ref: packages/ui/src/routing/loaders/createTableRouteLoader.util.ts
   - type: code
+    ref: packages/ui/src/hooks/useTableRoutePage.hook.ts
+  - type: code
     ref: packages/api/src/http/http.types.ts
+  - type: doc
+    ref: packages/ui/README.md
+  - type: test
+    ref: apps/showcase/src/routes/enterprise-orders/enterprise-orders.loader.test.ts
+  - type: test
+    ref: packages/server/src/table-page/create-table-page-reader.util.test.ts
   - type: test
     ref: apps/showcase/src/routes/enterprise-orders/filterContract.test.ts
+  - type: command
+    ref: vp run test:ci
 ---
 
 # A grid connects to a table by naming it
