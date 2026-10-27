@@ -108,7 +108,19 @@ const shellBlockLines = (content) => {
   return collected;
 };
 
-const shellSegments = (text) =>
+const isCommentStart = ({ characters, index }) =>
+  characters[index] === '#' &&
+  (index === 0 || /\s/.test(characters[index - 1]));
+
+export const withoutComment = (text) => {
+  const characters = [...text];
+  const start = characters.findIndex((_, index) =>
+    isCommentStart({ characters, index }),
+  );
+  return start === -1 ? text : characters.slice(0, start).join('');
+};
+
+export const shellSegments = (text) =>
   text
     .split(/&&|\|\||[|;]/)
     .map((segment) => segment.trim().replace(/^\$\s*/, ''));
@@ -208,11 +220,13 @@ export const shellScriptOperands = (lines) =>
         isPathToken(entry.token) && !PLACEHOLDER_CHARACTERS.test(entry.token),
     );
 
+export const shellCodeLines = (content) => [
+  ...inlineCodeSpans(content),
+  ...shellBlockLines(content),
+];
+
 export const extractScriptOperands = (content) =>
-  shellScriptOperands([
-    ...inlineCodeSpans(content),
-    ...shellBlockLines(content),
-  ]);
+  shellScriptOperands(shellCodeLines(content));
 
 export const extractPathTokens = (content) => {
   const inline = inlineCodeSpans(content)
