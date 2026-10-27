@@ -87,17 +87,18 @@ optional `tx` and translates driver rejections (see the two sections below).
 
 ### Typed errors — `@lcabrera/server/errors/*`
 
-| Import                              | What it does                                                                  |
-| ----------------------------------- | ----------------------------------------------------------------------------- |
-| `map-db-error.util`                 | SQLSTATE → a typed error; returns an already-translated one unchanged         |
-| `persistence.error`                 | `PersistenceError` — the base class and the fallback                          |
-| `unique-constraint-violation.error` | `23505`; `fields.constraint` names the index                                  |
-| `foreign-key-violation.error`       | `23503`; `fields.constraint` tells the insert and delete directions apart     |
-| `query-canceled.error`              | `57014`; the statement was stopped, by `statement_timeout` or a cancel        |
-| `grouping-refused.error`            | A grouped read this package refused, with a `reason`; not a driver error      |
-| `to-serializable-db-error.util`     | Anything thrown → `SerializableDbError`, plain data safe to put in a response |
-| `has-postgres-error-code.util`      | Narrows `unknown` to a pg rejection with any SQLSTATE you name                |
-| `errors.types`                      | `PgErrorFields` — the `code`/`column`/`constraint` a translated error carries |
+| Import                              | What it does                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------- |
+| `map-db-error.util`                 | SQLSTATE → a typed error; returns an already-translated one unchanged                       |
+| `persistence.error`                 | `PersistenceError` — the base class and the fallback                                        |
+| `unique-constraint-violation.error` | `23505`; `fields.constraint` names the index                                                |
+| `foreign-key-violation.error`       | `23503`; `fields.constraint` tells the insert and delete directions apart                   |
+| `query-canceled.error`              | `57014`; the statement was stopped, by `statement_timeout` or a cancel                      |
+| `grouping-refused.error`            | A grouped read this package refused; a `QueryRefusedError` with grouping reasons            |
+| `query-refused.error`               | The base of every refusal, thrown for a column or cursor the call named; not a driver error |
+| `to-serializable-db-error.util`     | Anything thrown → `SerializableDbError`, plain data safe to put in a response               |
+| `has-postgres-error-code.util`      | Narrows `unknown` to a pg rejection with any SQLSTATE you name                              |
+| `errors.types`                      | `PgErrorFields` — the `code`/`column`/`constraint` a translated error carries               |
 
 ### Column filters — `@lcabrera/server/filters/*`
 
@@ -220,7 +221,9 @@ const rows = await selectRows<Order>({
 });
 ```
 
-An identifier outside the list throws before any SQL is built.
+An identifier outside the list throws a `QueryRefusedError` with reason
+`column-not-allowed` before any SQL is built, so a caller can tell a refused
+request from a database failure without reading the message.
 
 ### Sort a page by what the request asked for
 
@@ -451,6 +454,7 @@ const STATUS_BY_KIND = {
   'db-canceled': 503,
   'db-failed': 500,
   'grouping-refused': 422,
+  'query-refused': 400,
   unexpected: 500,
 } as const;
 
@@ -595,18 +599,19 @@ collided, so three steps keep it out:
 
 The status codes are this example's choice, not the package's: 409 for a
 unique-key conflict, 503 when `statement_timeout` stopped the query, 422 for a
-grouped read the package refused, and 500 for anything else.
+grouped read the package refused, 400 for a request the package refused
+because of what it named, and 500 for anything else.
+
+A request that filters or sorts on a column `allowedColumns` does not list, or
+sends a keyset cursor that does not match its sort, is refused with a
+`QueryRefusedError` before any SQL runs. `toSerializableDbError` maps it to
+`{ kind: 'query-refused', reason, message }`. The message is fixed for each
+`reason` and does not repeat the column the request named; the error on the
+server keeps the column for the log.
 
 The example attaches no `error` listener to the pool: `getPool` attaches its
 own, so an idle connection that fails is dropped and reported as a process
 warning rather than stopping the server (see Guarantees below).
-
-One gap in the package shows in the example, and it has an issue open. A request
-that filters or sorts on a column `allowedColumns` does not list is refused with
-a plain `Error`, so it answers 500 `unexpected` where a 4xx is due. The column
-name still stays out of the body.
-[#1524](https://github.com/luciocabrera/lcabrera-stack/issues/1524) tracks a
-typed refusal.
 
 ## Guarantees
 
