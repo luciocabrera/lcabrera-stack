@@ -110,7 +110,7 @@ describe('the prepare task', () => {
     expect(WORKSPACE_SCRIPTS.prepare).toContain(`node ${HOOKS_PATH_SCRIPT}`);
   });
 
-  test('ships a tree the closure calls self-contained on every path that places it', () => {
+  test('ships a tree the closure reads and finds no escapes in on every path that places it', () => {
     const { code, printed } = printedBy(() =>
       runCommand({
         argv: ['closure', '--profile', 'monorepo', '--shipped'],
@@ -119,7 +119,8 @@ describe('the prepare task', () => {
     );
 
     expect(code).toBe(0);
-    expect(printed).toContain('self-contained');
+    expect(printed).toMatch(/✓ monorepo — .*, no escapes/);
+    expect(printed).not.toContain('unchecked  scripts/hooks-path.mjs');
   });
 });
 
