@@ -45,6 +45,8 @@ keyset cursor ─▶ QueryRefusedError ─────────────�
 grouping guard ─▶ GroupingRefusedError ─────────┤─▶ extends QueryRefusedError (never PersistenceError)
                   (adds estimatedRows) ─────────┘
 
+typed error or refusal ─▶ mapDbError ─▶ the same instance, unchanged
+
 any of them  ──▶ toSerializableDbError ──▶ SerializableDbError (plain data)
 ```
 
@@ -96,7 +98,7 @@ leak the translation layer exists to close.
 redaction only holds until the first consumer forgets. `cause` keeps the whole
 original rejection reachable for a server log, which is where a developer reads it.
 
-## Two things that look wrong and are not
+## What looks wrong and is not
 
 **Narrowing is structural, never `instanceof pg.DatabaseError`.** A consumer can
 resolve two copies of `pg` — its own plus a transitive one — and `instanceof` is
@@ -108,11 +110,19 @@ compose (`selectFilterOptions` → `selectDistinctRows` → `selectRows`), so on
 rejection meets it more than once; re-wrapping would bury the specific type under a
 generic `PersistenceError` and grow the `cause` chain per hop.
 
+**`mapDbError` returns a refusal unchanged too, so its return type is
+`PersistenceError | QueryRefusedError`.** A refusal raised inside a `try` whose
+`catch` calls `mapDbError` would otherwise come out as a generic
+`PersistenceError` and serialise as `db-failed`, a database failure, instead
+of `query-refused` or `grouping-refused`. The union is the honest type: a refusal is not a
+`PersistenceError`, so a caller reading `fields` narrows with `instanceof
+PersistenceError` first.
+
 ## Files
 
 | File                                   | Role                                                                                   |
 | -------------------------------------- | -------------------------------------------------------------------------------------- |
-| `map-db-error.util.ts`                 | **Public entry point.** SQLSTATE → typed error; idempotent                             |
+| `map-db-error.util.ts`                 | **Public entry point.** SQLSTATE → typed error; idempotent; refusals pass through      |
 | `persistence.error.ts`                 | **Public.** The base class and the fallback                                            |
 | `unique-constraint-violation.error.ts` | **Public.** `23505`                                                                    |
 | `foreign-key-violation.error.ts`       | **Public.** `23503`                                                                    |
