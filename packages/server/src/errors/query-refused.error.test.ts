@@ -18,7 +18,7 @@ describe('QueryRefusedError', () => {
     expect(error.name).toBe('QueryRefusedError');
   });
 
-  it('is neither a PersistenceError nor a GroupingRefusedError', () => {
+  it('is not a PersistenceError, and is the base a grouping refusal extends', () => {
     const error = new QueryRefusedError({
       message: 'no sort',
       reason: 'keyset-sort-missing',
@@ -27,6 +27,21 @@ describe('QueryRefusedError', () => {
     expect(error).toBeInstanceOf(Error);
     expect(error).not.toBeInstanceOf(PersistenceError);
     expect(error).not.toBeInstanceOf(GroupingRefusedError);
+    expect(
+      new GroupingRefusedError({ message: 'no keys', reason: 'no-keys' }),
+    ).toBeInstanceOf(QueryRefusedError);
+  });
+
+  it('keeps the cause it was given', () => {
+    const cause = new Error('inner');
+
+    expect(
+      new QueryRefusedError({
+        cause,
+        message: 'refused',
+        reason: 'column-not-allowed',
+      }).cause,
+    ).toBe(cause);
   });
 
   it('leaves the column undefined when a refusal names none', () => {

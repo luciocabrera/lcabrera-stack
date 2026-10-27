@@ -1,7 +1,6 @@
 import type { TableResponseError } from '#ui/components/Table/Table.types';
 
-import { readGroupingRefusedError } from './readGroupingRefusedError.util';
-import { readQueryRefusedError } from './readQueryRefusedError.util';
+import { readRefusedError } from './readRefusedError.util';
 
 type ToTableResponseErrorArgs = {
   readonly error: unknown;
@@ -12,8 +11,7 @@ export const toTableResponseError = ({
   error,
   fallback,
 }: ToTableResponseErrorArgs): TableResponseError => {
-  const refused =
-    readGroupingRefusedError(error) ?? readQueryRefusedError(error);
+  const refused = readRefusedError(error);
   if (refused !== undefined) {
     return refused;
   }

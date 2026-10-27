@@ -87,18 +87,18 @@ optional `tx` and translates driver rejections (see the two sections below).
 
 ### Typed errors — `@lcabrera/server/errors/*`
 
-| Import                              | What it does                                                                  |
-| ----------------------------------- | ----------------------------------------------------------------------------- |
-| `map-db-error.util`                 | SQLSTATE → a typed error; returns an already-translated one unchanged         |
-| `persistence.error`                 | `PersistenceError` — the base class and the fallback                          |
-| `unique-constraint-violation.error` | `23505`; `fields.constraint` names the index                                  |
-| `foreign-key-violation.error`       | `23503`; `fields.constraint` tells the insert and delete directions apart     |
-| `query-canceled.error`              | `57014`; the statement was stopped, by `statement_timeout` or a cancel        |
-| `grouping-refused.error`            | A grouped read this package refused, with a `reason`; not a driver error      |
-| `query-refused.error`               | A column or cursor the call named that this package refused, with a `reason`  |
-| `to-serializable-db-error.util`     | Anything thrown → `SerializableDbError`, plain data safe to put in a response |
-| `has-postgres-error-code.util`      | Narrows `unknown` to a pg rejection with any SQLSTATE you name                |
-| `errors.types`                      | `PgErrorFields` — the `code`/`column`/`constraint` a translated error carries |
+| Import                              | What it does                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------- |
+| `map-db-error.util`                 | SQLSTATE → a typed error; returns an already-translated one unchanged                       |
+| `persistence.error`                 | `PersistenceError` — the base class and the fallback                                        |
+| `unique-constraint-violation.error` | `23505`; `fields.constraint` names the index                                                |
+| `foreign-key-violation.error`       | `23503`; `fields.constraint` tells the insert and delete directions apart                   |
+| `query-canceled.error`              | `57014`; the statement was stopped, by `statement_timeout` or a cancel                      |
+| `grouping-refused.error`            | A grouped read this package refused; a `QueryRefusedError` with grouping reasons            |
+| `query-refused.error`               | The base of every refusal, thrown for a column or cursor the call named; not a driver error |
+| `to-serializable-db-error.util`     | Anything thrown → `SerializableDbError`, plain data safe to put in a response               |
+| `has-postgres-error-code.util`      | Narrows `unknown` to a pg rejection with any SQLSTATE you name                              |
+| `errors.types`                      | `PgErrorFields` — the `code`/`column`/`constraint` a translated error carries               |
 
 ### Column filters — `@lcabrera/server/filters/*`
 

@@ -9,16 +9,22 @@ There are two families here, and the split matters:
 
 - **Translated driver rejections** — everything under `PersistenceError`. The
   database rejected something.
-- **Refusals this package raised itself** — `GroupingRefusedError` for a grouped
-  read ([ADR-066](../../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md)),
-  and `QueryRefusedError` for a column outside `allowedColumns` or a keyset
-  cursor that does not match its sort
-  ([ADR-145](../../../../docs/decisions/ADR-145-refuse-a-column-outside-allowedcolumns-with-a-typed-error.md)).
+- **Refusals this package raised itself** — everything under
+  `QueryRefusedError`. It is thrown directly for a column outside
+  `allowedColumns` or a keyset cursor that does not match its sort
+  ([ADR-145](../../../../docs/decisions/ADR-145-refuse-a-column-outside-allowedcolumns-with-a-typed-error.md)),
+  and `GroupingRefusedError` extends it for a grouped read, adding the
+  estimated rows
+  ([ADR-066](../../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md)).
   Nothing came from the driver, and most instances are raised before a
-  connection is even borrowed. Both carry a closed `reason` and the `column` the
-  refusal is about.
+  connection is even borrowed. Each carries a closed `reason` and the `column`
+  the refusal is about.
 
-Neither refusal extends `PersistenceError`.
+The subclass exists because `grouping-refused` is a published serialised kind
+with its own reason vocabulary, which a client branches on; the base class
+carries the shared fields, so the two do not duplicate them.
+
+No refusal extends `PersistenceError`.
 Widening the base to cover a pure pre-flight refusal would stop
 `instanceof PersistenceError` meaning "the database rejected this", which is the
 one thing it is for. `toSerializableDbError` is what covers both families in one
@@ -32,16 +38,19 @@ pg rejection ──▶ mapDbError ──┬─ 23505 ─▶ UniqueConstraintViol
                               ├─ 57014 ─▶ QueryCanceledError ────────────┤
                               └─ else ──▶ PersistenceError ───────────────┘
 
-guard rail   ──▶ GroupingRefusedError (extends Error, never PersistenceError)
 allow-list,
-keyset cursor ─▶ QueryRefusedError    (extends Error, never PersistenceError)
+keyset cursor ─▶ QueryRefusedError ─────────────┐
+grouping guard ─▶ GroupingRefusedError ─────────┤─▶ extends QueryRefusedError (never PersistenceError)
+                  (adds estimatedRows) ─────────┘
 
 any of them  ──▶ toSerializableDbError ──▶ SerializableDbError (plain data)
 ```
 
 Subclassing is what makes `error instanceof PersistenceError` the single check
 that catches every translated failure, including a SQLSTATE this package starts
-naming later.
+naming later, and `error instanceof QueryRefusedError` the single check for
+every refusal. `toSerializableDbError` tests `GroupingRefusedError` before its
+base.
 
 `57014` is named for the **SQLSTATE, not the cause**: `statement_timeout` raises
 it and so does `pg_cancel_backend`, so `StatementTimeoutError` would be a claim
@@ -108,7 +117,8 @@ generic `PersistenceError` and grow the `cause` chain per hop.
 | `has-postgres-error-code.util.ts`      | **Public.** Generic SQLSTATE narrowing for a code this package does not name           |
 | `errors.types.ts`                      | **Public.** `PgErrorFields`, the two refusal reasons, `SerializableDbError`            |
 | `read-pg-error-fields.util.ts`         | Private. Lifts those fields off an unknown rejection                                   |
-| `errors.constants.ts`                  | Private. The SQLSTATEs `mapDbError` names                                              |
+| `errors.constants.ts`                  | Private. The SQLSTATEs `mapDbError` names, and the sentence per query refusal          |
+| `is-query-refusal-reason.util.ts`      | Private. Narrows a refusal's `reason` to the query vocabulary                          |
 
 ## Why there is no barrel
 

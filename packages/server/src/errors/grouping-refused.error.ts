@@ -1,5 +1,7 @@
 import type { GroupingRefusalReason } from './errors.types.ts';
 
+import { QueryRefusedError } from './query-refused.error.ts';
+
 type GroupingRefusedErrorArgs = {
   readonly cause?: unknown;
   readonly column?: string;
@@ -8,22 +10,12 @@ type GroupingRefusedErrorArgs = {
   readonly reason: GroupingRefusalReason;
 };
 
-export class GroupingRefusedError extends Error {
-  public readonly column: string | undefined;
+export class GroupingRefusedError extends QueryRefusedError<GroupingRefusalReason> {
   public readonly estimatedRows: number | undefined;
-  public readonly reason: GroupingRefusalReason;
 
-  public constructor({
-    cause,
-    column,
-    estimatedRows,
-    message,
-    reason,
-  }: GroupingRefusedErrorArgs) {
-    super(message, { cause });
+  public constructor({ estimatedRows, ...refusal }: GroupingRefusedErrorArgs) {
+    super(refusal);
     this.name = 'GroupingRefusedError';
-    this.reason = reason;
-    this.column = column;
     this.estimatedRows = estimatedRows;
   }
 }

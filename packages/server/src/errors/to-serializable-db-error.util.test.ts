@@ -76,6 +76,29 @@ describe('toSerializableDbError', () => {
     expect(JSON.stringify(mapped)).not.toContain('row_key');
   });
 
+  it('maps a grouping refusal to grouping-refused, not to the query-refused base', () => {
+    expect(
+      toSerializableDbError(
+        new GroupingRefusedError({ message: 'no keys', reason: 'no-keys' }),
+      ),
+    ).toMatchObject({ kind: 'grouping-refused', reason: 'no-keys' });
+  });
+
+  it('says nothing about a refusal whose reason it has no sentence for', () => {
+    expect(
+      toSerializableDbError(
+        new QueryRefusedError<string>({
+          column: 'hidden_note',
+          message: 'refused hidden_note',
+          reason: 'some-other-reason',
+        }),
+      ),
+    ).toStrictEqual({
+      kind: 'unexpected',
+      message: 'The request could not be completed.',
+    });
+  });
+
   it('maps a cancellation before the PersistenceError it extends', () => {
     expect(
       toSerializableDbError(
