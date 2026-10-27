@@ -108,6 +108,9 @@ itself. Two checks apply, one mandatory and one opt-in:
    which a syntax check alone cannot express — a regex can't stop a
    syntactically valid but unintended column (e.g. an internal column
    nobody meant to expose) from being selected, sorted, or filtered on.
+   A column outside the list throws `QueryRefusedError` (reason
+   `column-not-allowed`), which is what lets an edge answer a refused request
+   differently from a server fault.
 
 **When `allowedColumns` MUST be passed:** the moment any caller lets a
 column name come from end-user input (e.g. a `TableLayout`-driven sortable
@@ -134,7 +137,8 @@ Two things to know before reaching for it:
 - **It refuses what it cannot resume.** A cursor needs a total order, so the
   sort must be non-empty, match the tuple one for one, and end on a **non-null**
   unique column — Postgres permits many NULLs in a unique index, so a null there
-  is not a total order. Each failure throws at construction time; that the column
+  is not a total order. Each failure throws a `QueryRefusedError` at
+  construction time, with a `keyset-*` reason; that the column
   really is unique stays the caller's to guarantee, like `allowedColumns`.
 - **Pass one or the other.** A `cursor` and an `offset` together are accepted and
   mean what they say — skip `n` rows _after_ the cursor — which is almost never

@@ -4,6 +4,7 @@ import { ForeignKeyViolationError } from './foreign-key-violation.error.ts';
 import { GroupingRefusedError } from './grouping-refused.error.ts';
 import { PersistenceError } from './persistence.error.ts';
 import { QueryCanceledError } from './query-canceled.error.ts';
+import { QueryRefusedError } from './query-refused.error.ts';
 import { toSerializableDbError } from './to-serializable-db-error.util.ts';
 
 describe('toSerializableDbError', () => {
@@ -39,6 +40,40 @@ describe('toSerializableDbError', () => {
       message: 'too deep',
       reason: 'too-many-keys',
     });
+  });
+
+  it('maps a refused query to its reason and a fixed message that omits the column', () => {
+    const mapped = toSerializableDbError(
+      new QueryRefusedError({
+        column: 'hidden_note',
+        message:
+          'Column "hidden_note" is not in the allowed list for this query.',
+        reason: 'column-not-allowed',
+      }),
+    );
+
+    expect(mapped).toStrictEqual({
+      kind: 'query-refused',
+      message: 'The request named a column this query does not allow.',
+      reason: 'column-not-allowed',
+    });
+    expect(JSON.stringify(mapped)).not.toContain('hidden_note');
+  });
+
+  it('maps a refused keyset cursor without naming the unique column', () => {
+    const mapped = toSerializableDbError(
+      new QueryRefusedError({
+        column: 'row_key',
+        message: 'Keyset cursor has no value for its unique column "row_key".',
+        reason: 'keyset-unique-value-missing',
+      }),
+    );
+
+    expect(mapped).toMatchObject({
+      kind: 'query-refused',
+      reason: 'keyset-unique-value-missing',
+    });
+    expect(JSON.stringify(mapped)).not.toContain('row_key');
   });
 
   it('maps a cancellation before the PersistenceError it extends', () => {

@@ -469,6 +469,13 @@ export type TableProps<
     readonly response: TResponse;
   };
 
+export type TableQueryRefusalReason =
+  | 'column-not-allowed'
+  | 'keyset-cursor-mismatch'
+  | 'keyset-sort-missing'
+  | 'keyset-sort-not-unique'
+  | 'keyset-unique-value-missing';
+
 export type TableResponseError =
   | {
       /** Present when the refusal is about exactly one column. */
@@ -485,6 +492,11 @@ export type TableResponseError =
       readonly message: string;
     }
   | { readonly kind: 'db-canceled'; readonly message: string }
+  | {
+      readonly kind: 'query-refused';
+      readonly message: string;
+      readonly reason: TableQueryRefusalReason;
+    }
   | { readonly kind: 'unexpected'; readonly message: string };
 
 export type TableSettingsTabRole =
