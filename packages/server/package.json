@@ -96,6 +96,7 @@
     "./table-page/table-page.types": "./src/table-page/table-page.types.ts",
     "./table-page/to-integer-row-id.util": "./src/table-page/to-integer-row-id.util.ts",
     "./table-page/to-keyset-cursor.util": "./src/table-page/to-keyset-cursor.util.ts",
+    "./table-page/to-refused-table-page.util": "./src/table-page/to-refused-table-page.util.ts",
     "./tickets/is-access-ticket-valid.util": "./src/tickets/is-access-ticket-valid.util.ts",
     "./tickets/sign-access-ticket.util": "./src/tickets/sign-access-ticket.util.ts",
     "./tokens/generate-api-token.util": "./src/tokens/generate-api-token.util.ts",
@@ -370,6 +371,10 @@
       "./table-page/to-keyset-cursor.util": {
         "types": "./dist/table-page/to-keyset-cursor.util.d.mts",
         "default": "./dist/table-page/to-keyset-cursor.util.mjs"
+      },
+      "./table-page/to-refused-table-page.util": {
+        "types": "./dist/table-page/to-refused-table-page.util.d.mts",
+        "default": "./dist/table-page/to-refused-table-page.util.mjs"
       },
       "./tickets/is-access-ticket-valid.util": {
         "types": "./dist/tickets/is-access-ticket-valid.util.d.mts",

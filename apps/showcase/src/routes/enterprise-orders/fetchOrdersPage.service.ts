@@ -3,9 +3,11 @@ import { isTablePageResponse } from '@lcabrera/api/table-page/is-table-page-resp
 
 import type { EnterpriseOrdersResponse } from './config';
 
+import { ENTERPRISE_ORDERS_PAGE_PATH } from './config';
+
 export const fetchOrdersPage = createPaginatedFetcher<EnterpriseOrdersResponse>(
   {
     isValid: isTablePageResponse<EnterpriseOrdersResponse>,
-    path: '/_api/enterprise-orders/paginated',
+    path: ENTERPRISE_ORDERS_PAGE_PATH,
   },
 );
