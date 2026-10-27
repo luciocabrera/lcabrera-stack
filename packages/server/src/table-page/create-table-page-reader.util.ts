@@ -163,16 +163,18 @@ export const createTablePageReader = <
       selectTruncations: selectGroupKeyTruncations,
     });
 
-  const resolvePageRead = async (params: URLSearchParams) =>
-    resolveTableGroupRead({
-      ...parseTablePageParams({
-        defaultLimit,
-        fallbackSort,
-        ignoredSortColumns,
-        params,
-      }),
+  const resolvePageRead = async (params: URLSearchParams) => {
+    const parsed = parseTablePageParams({
+      defaultLimit,
+      fallbackSort,
+      ignoredSortColumns,
       params,
     });
+
+    return parsed.kind === 'refused'
+      ? parsed
+      : resolveTableGroupRead({ ...parsed.params, params });
+  };
 
   const deleteRow = async (id: TRow[TKey]) => {
     await deleteRows({

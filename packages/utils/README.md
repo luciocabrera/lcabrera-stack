@@ -39,6 +39,8 @@ export for each helper:
 | `forms`      | `isCheckboxChecked`                                                                     | `@lcabrera/utils/forms/is-checkbox-checked.util`               |
 | `forms`      | `readFormString`                                                                        | `@lcabrera/utils/forms/read-form-string.util`                  |
 | `guards`     | `isObject`                                                                              | `@lcabrera/utils/guards/is-object.util`                        |
+| `guards`     | `isFiniteNumber`                                                                        | `@lcabrera/utils/guards/is-finite-number.util`                 |
+| `guards`     | `isStringList`                                                                          | `@lcabrera/utils/guards/is-string-list.util`                   |
 | `json`       | `safeJsonParse`                                                                         | `@lcabrera/utils/json/safe-json-parse.util`                    |
 | `numbers`    | `parsePositiveInteger`                                                                  | `@lcabrera/utils/numbers/parse-positive-integer.util`          |
 | `numbers`    | `roundToCents`                                                                          | `@lcabrera/utils/numbers/round-to-cents.util`                  |

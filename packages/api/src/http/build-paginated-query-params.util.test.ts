@@ -32,7 +32,9 @@ describe('buildPaginatedQueryParams', () => {
   });
 
   it('appends the filter payload when the filter object has keys', () => {
-    const filter = { status: 'active' };
+    const filter = {
+      status: { type: 'select', value: 'active' },
+    } as const;
 
     const params = buildPaginatedQueryParams({ filter, limit: 10, skip: 0 });
 
@@ -58,14 +60,9 @@ describe('buildPaginatedQueryParams', () => {
     ).toBe(false);
   });
 
-  it('omits filter for empty objects and non-object values', () => {
+  it('omits filter for an empty filter object', () => {
     expect(
       buildPaginatedQueryParams({ filter: {}, limit: 10, skip: 0 }).has(
-        'filter',
-      ),
-    ).toBe(false);
-    expect(
-      buildPaginatedQueryParams({ filter: 'raw', limit: 10, skip: 0 }).has(
         'filter',
       ),
     ).toBe(false);

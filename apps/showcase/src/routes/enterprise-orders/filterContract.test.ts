@@ -1,13 +1,18 @@
 /**
- * `@lcabrera/ui` and `@lcabrera/server` each declare the column-filter shapes
- * independently — neither package depends on the other, so neither can import
- * the other's definition. This suite keeps the two in step.
+ * `@lcabrera/ui` declares the column-filter shapes independently of the query
+ * layer — `@lcabrera/server` re-exports the ones `@lcabrera/api` declares, and
+ * `@lcabrera/ui` does not import that declaration. This suite keeps the two in step.
  *
  * The assertion is the call itself, not a type-level trick: `toQueryFilters`
  * requires `@lcabrera/server`'s shape and the values below are typed as
  * `@lcabrera/ui`'s, so the file only compiles while a filter built in the UI is
- * assignable to the query layer. The call checks one direction; the last case
- * adds the other.
+ * assignable to the query layer. The call checks one direction; the case that
+ * assigns query-layer filters back to UI ones adds the other.
+ *
+ * The serialised half runs the same filters through `@lcabrera/api`: the client builds the
+ * request with `buildPaginatedQueryParams`, whose `filter` is typed, and the server reads it
+ * back with `parseColumnFilters`, which refuses any filter whose shape it does not know. A
+ * variant the UI sends and the parse rejects fails that case at run time.
  *
  * The annotation is `: Record<string, ColumnFilter>` and deliberately not
  * `satisfies`. `satisfies` keeps each value's narrow literal type, so the call
@@ -19,6 +24,8 @@
 import type { ColumnFilter as QueryColumnFilter } from '@lcabrera/server/filters/filters.types';
 import type { ColumnFilter } from '@lcabrera/ui/types/filterOperators.types';
 
+import { parseColumnFilters } from '@lcabrera/api/filters/parse-column-filters.util';
+import { buildPaginatedQueryParams } from '@lcabrera/api/http/build-paginated-query-params.util';
 import { toQueryFilters } from '@lcabrera/server/filters/to-query-filters.util';
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -56,5 +63,32 @@ describe('column-filter contract between @lcabrera/ui and @lcabrera/server', () 
     const backToUiFilters: Record<string, ColumnFilter> = queryLayerFilters;
 
     expect(backToUiFilters).toStrictEqual(uiFilters);
+  });
+
+  it('reads back every UI filter variant from the serialised request', () => {
+    const query = buildPaginatedQueryParams({
+      filter: uiFilters,
+      limit: 1,
+      skip: 0,
+    });
+
+    expect(parseColumnFilters(query)).toStrictEqual({
+      filters: uiFilters,
+      kind: 'parsed',
+    });
+  });
+
+  it('reads back a number filter left undefined mid-edit', () => {
+    const query = buildPaginatedQueryParams({
+      filter: {
+        quantity: { operator: 'equals', type: 'number', value: undefined },
+      },
+      limit: 1,
+      skip: 0,
+    });
+
+    expect(parseColumnFilters(query)).toMatchObject({
+      kind: 'parsed',
+    });
   });
 });

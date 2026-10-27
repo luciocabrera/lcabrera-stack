@@ -93,15 +93,15 @@ same reason — the one place in this folder where the seam is not optional.
 | `delete-rows.util.ts`                      | **Public entry point.** Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns rows                                                                                                                                                                                                            |
 | `get-max-value.util.ts`                    | **Public entry point.** Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty)                                                                                                                                                                                                                |
 | `get-column-grouping-capabilities.util.ts` | **Public entry point.** One catalogue round trip resolving, per column, whether it may be a group key (and why not) and which aggregates are legal                                                                                                                                                               |
-| `get-rows-count.util.ts`                   | **Public entry point.** Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) so a page and its total share filters                                                                                                                                                 |
-| `query-builder/`                           | Pure SELECT/count/distinct/insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                                                                                                                                                                           |
+| `get-rows-count.util.ts`                   | **Public entry point.** Runs a `count: true` read and returns the row count; requires an explicit `column` (never `count(*)`) so a page and its total share filters                                                                                                                                              |
+| `query-builder/`                           | Pure read (rows, count, distinct, grouped) and insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                                                                                                                                                       |
 | `group-query-builder/`                     | Pure grouped-read construction and the ADR-058 legality gates — see `group-query-builder/ARCHITECTURE.md`                                                                                                                                                                                                        |
 
 ## Choosing an entry point
 
 - **Reading a flat list/rollup?** Use `selectRows` — it is the whole path.
 - **Reading a _grouped_ result?** Use `selectGroupedRows`. Do not call
-  `buildGroupQuery` yourself: it is pure and needs the catalogue's capability
+  `buildReadQuery` with `grouping` yourself: it is pure and needs the catalogue's capability
   answer, a caller assembling that map by hand is a caller who can defeat
   ADR-058's gates, and running it outside a transaction gives up the statement
   timeout entirely. It returns `aggregates`/`keys`/`maskAlias` beside the rows
@@ -115,7 +115,7 @@ same reason — the one place in this folder where the seam is not optional.
   with the data query's `filters`/`allowedColumns` and an explicit primary-key
   `column`, so the page and its total can never drift.
 - **Reading _distinct_ rows** over a list of columns? Use `selectDistinctRows`
-  (or `selectRows`/`buildSelectQuery` with `distinct: true`) — same descriptor,
+  (or `selectRows`/`buildReadQuery` with `distinct: true`) — same descriptor,
   deduplicated.
 - **Populating a filter dropdown** (one column's distinct values)? Use
   `selectFilterOptions` — pass the column's `columnType` so only `text` columns
@@ -130,9 +130,9 @@ same reason — the one place in this folder where the seam is not optional.
   connection you opened yourself. A transaction narrows a read-then-write race
   but does not close one — ADR-051 has the locking/retry decision.
 - **Need the SQL without running it** (a count paired to a data query, a
-  DB-function call, an `EXISTS` check)? Use `buildSelectQuery`/
-  `buildCountQuery`/`buildDistinctQuery`/`buildInsertQuery`/`buildUpdateQuery`/
-  `buildDeleteQuery`/`buildMaxValueQuery` and run it yourself via `getPool` —
+  DB-function call, an `EXISTS` check)? Build a read with `buildReadQuery`, the
+  query entry point, or a write with `buildInsertQuery`/`buildUpdateQuery`/
+  `buildDeleteQuery`/`buildMaxValueQuery`, and run it yourself via `getPool` —
   and wrap the call in `mapDbError`, or you reintroduce the raw-message leak the
   executors close.
 - **Anything the builders do not cover** (joins, multi-row inserts, upserts,

@@ -4,13 +4,23 @@ import { parseTablePageParams } from './parse-table-page-params.util.ts';
 
 const FALLBACK_SORT = [{ columnKey: 'id', direction: 'asc' }] as const;
 
-const parse = (params: URLSearchParams) =>
+const resolve = (params: URLSearchParams) =>
   parseTablePageParams({
     defaultLimit: 50,
     fallbackSort: FALLBACK_SORT,
     ignoredSortColumns: ['menu'],
     params,
   });
+
+const parse = (params: URLSearchParams) => {
+  const resolved = resolve(params);
+
+  if (resolved.kind === 'refused') {
+    throw new Error(`refused: ${resolved.reason}`);
+  }
+
+  return resolved.params;
+};
 
 it('parses limit/skip and translates the filter + sort payloads', () => {
   const result = parse(
@@ -30,18 +40,36 @@ it('parses limit/skip and translates the filter + sort payloads', () => {
   expect(result.sort).toStrictEqual([{ column: 'id', direction: 'desc' }]);
 });
 
-it('falls back for missing/invalid params and malformed JSON', () => {
-  const result = parse(new URLSearchParams({ filter: '{bad', limit: '-1' }));
+it('falls back for missing or invalid limit and skip', () => {
+  const result = parse(new URLSearchParams({ limit: '-1' }));
 
   expect(result.skip).toBe(0);
   expect(result.filters).toStrictEqual([]);
   expect(result.limit).toBe(50);
 });
 
-it('ignores a filter payload that is not an object', () => {
-  expect(
-    parse(new URLSearchParams({ filter: '"nope"' })).filters,
-  ).toStrictEqual([]);
+it.each([
+  { filter: '{bad', label: 'malformed JSON' },
+  { filter: '"nope"', label: 'a payload that is not an object' },
+])('refuses $label rather than reading unfiltered rows', ({ filter }) => {
+  expect(resolve(new URLSearchParams({ filter }))).toStrictEqual({
+    kind: 'refused',
+    message:
+      'The filter in this request could not be read, so no rows were read.',
+    reason: 'unreadable',
+  });
+});
+
+it('refuses a payload holding a filter of no known shape', () => {
+  const filter = JSON.stringify({
+    is_active: { type: 'boolean', value: true },
+    score: { operator: 'near', type: 'number', value: 1 },
+  });
+
+  expect(resolve(new URLSearchParams({ filter }))).toMatchObject({
+    kind: 'refused',
+    reason: 'invalid-filter',
+  });
 });
 
 it.each([
@@ -97,7 +125,9 @@ it('keeps every sort rule when no column is ignored', () => {
     }),
   });
 
-  expect(result.sort).toStrictEqual([{ column: 'menu', direction: 'asc' }]);
+  expect(result.kind === 'parsed' && result.params.sort).toStrictEqual([
+    { column: 'menu', direction: 'asc' },
+  ]);
 });
 
 it('parses a keyset cursor tuple, and ignores one that is not an array', () => {

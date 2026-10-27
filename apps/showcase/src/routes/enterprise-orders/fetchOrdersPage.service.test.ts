@@ -48,7 +48,7 @@ describe('fetchOrdersPage', () => {
 
     await fetchOrdersPage({
       cursor: [42],
-      filter: { order_status: { operator: 'equals', value: 'shipped' } },
+      filter: { order_status: { type: 'select', value: 'shipped' } },
       limit: 50,
       skip: 50,
     });

@@ -1,68 +1,15 @@
 /**
- * Duplicated with `@lcabrera/ui` on purpose (ADR-039): structural typing is what makes it
- * work without an adapter. `NumberFilter.value` admitting `undefined` and
- * `SelectFilter.operator` being optional are laxities held for assignability from the UI's
- * drafting shape — tightening them is a behaviour change, not a type-only edit.
+ * The column-filter shapes `toQueryFilters` maps to query filters. They are declared once in
+ * `@lcabrera/api`, beside the parse that reads them off a request, and re-exported here so the
+ * shape a client serialises and the shape this package maps cannot drift apart.
  */
 
-export type BooleanFilter = {
-  readonly type: 'boolean';
-  readonly value: boolean;
-};
-
-export type ColumnFilter =
-  | BooleanFilter
-  | DateFilter
-  | EmptyFilter
-  | NumberFilter
-  | SelectFilter
-  | TextFilter;
-
-export type DateFilter = {
-  readonly operator: 'after' | 'before' | 'between' | 'equals';
-  readonly type: 'date';
-  /** ISO date string. */
-  readonly value: string;
-  readonly value2?: string;
-};
-
-export type EmptyFilter = {
-  readonly operator: 'isEmpty' | 'isNotEmpty';
-  readonly type: 'empty';
-};
-
-export type NumberFilter = {
-  readonly operator:
-    | 'between'
-    | 'equals'
-    | 'greaterThan'
-    | 'greaterThanOrEqual'
-    | 'lessThan'
-    | 'lessThanOrEqual'
-    | 'notEquals';
-  readonly type: 'number';
-  readonly value: number | undefined;
-  readonly value2?: number;
-};
-
-export type SelectFilter = {
-  /** Defaults to `'equals'`. */
-  readonly operator?: 'equals' | 'notEquals';
-  readonly type: 'multiSelect' | 'select';
-  /** Single value for `'select'`. */
-  readonly value?: string;
-  /** Multiple values for `'multiSelect'`. */
-  readonly values?: readonly string[];
-};
-
-export type TextFilter = {
-  readonly operator:
-    | 'contains'
-    | 'endsWith'
-    | 'equals'
-    | 'notContains'
-    | 'notEquals'
-    | 'startsWith';
-  readonly type: 'text';
-  readonly value: string;
-};
+export type {
+  BooleanFilter,
+  ColumnFilter,
+  DateFilter,
+  EmptyFilter,
+  NumberFilter,
+  SelectFilter,
+  TextFilter,
+} from '@lcabrera/api/filters/filters.types';
