@@ -128,7 +128,12 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
         expect(response.error?.kind).toBe('grouping-refused');
         expect(response.data).toEqual([]);
         expect(structuredClone(response.error)).toEqual(response.error);
-        expect(response.error?.message).toContain(key);
+        expect(response.error).toMatchObject({
+          column: key,
+          message:
+            'The request grouped by a column in a way its type does not support.',
+          reason: 'column-not-groupable',
+        });
       }
     });
 
@@ -146,7 +151,9 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
         }),
       ).not.toBeNull();
       expect(
-        screen.getByText((text) => text.includes(columnKey)),
+        screen.getByText(
+          'The request grouped by a column in a way its type does not support.',
+        ),
       ).not.toBeNull();
       expect(
         screen.getByRole('button', { name: 'Clear grouping' }),
@@ -216,7 +223,9 @@ describe.skipIf(!IS_SMOKE_ENABLED)(
         }),
       ).toBeNull();
       expect(
-        screen.getByText((text) => text.includes('widest group key')),
+        screen.getByText(
+          'This grouping is estimated to return more rows than the read allows. Group by fewer columns or filter the rows down.',
+        ),
       ).not.toBeNull();
       expect(
         screen.getByRole('button', { name: 'Clear grouping' }),

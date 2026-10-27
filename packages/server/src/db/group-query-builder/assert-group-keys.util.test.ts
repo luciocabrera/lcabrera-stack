@@ -180,7 +180,7 @@ describe('a granularity on a group key', () => {
       reason: 'unknown-column',
     });
     expect(mapped.message).toContain(
-      'a granularity must be for one of the group keys',
+      'a granularity for a column that is not a group key',
     );
     expect(JSON.stringify(mapped)).not.toContain('order_date');
   });

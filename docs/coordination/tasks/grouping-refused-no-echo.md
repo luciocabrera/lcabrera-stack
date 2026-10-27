@@ -11,6 +11,10 @@ area:
   - docs/decisions/ADR-145-*
   - .changeset/server-grouping-refused-*
   - packages/server/README.md
+  - packages/server/src/INVENTORY.md
+  - packages/server/src/table-page/create-table-page-reader.util.test.ts
+  - packages/server/src/db/group-query-builder/assert-group-keys.util.test.ts
+  - apps/showcase/src/routes/enterprise-orders/.server/*.test.ts*
   - packages/server/src/db/group-query-builder/assert-group-column.util.test.ts
 started: 2026-10-27
 updated: 2026-10-27

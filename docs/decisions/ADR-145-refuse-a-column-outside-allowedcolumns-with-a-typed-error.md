@@ -85,14 +85,20 @@ typed error carrying a closed `reason` and the `column`, serialised as
 - The serialised form does not say which column was refused, so a client cannot
   highlight it from the body alone. The client sent the column, so it can work
   it out; the server log has the full message.
-- `grouping-refused` carries `column` and the error's own message only for a
-  column that passed the allow-list. A group key is picked from the
-  capabilities the server published, so naming it back tells the client which
-  of its own choices to undo. A column outside `allowedColumns` was never
-  published, so echoing it back only reflects request text into a response
-  body. The two grouping reasons that can name such a column,
-  `unknown-column` and `duplicate-keys`, therefore serialise like
-  `query-refused`: a fixed sentence per reason and no `column` (#1532).
+- `grouping-refused` serialises like `query-refused`: a fixed sentence per
+  reason, from a table keyed by every `GroupingRefusalReason`, so a new reason
+  does not compile until it has a sentence and a decision about its column
+  (#1532). The table also says whether the reason keeps `column`. A group key
+  is picked from the capabilities the server published, so naming it back
+  tells the client which of its own choices to undo, and the reasons raised
+  only after the allow-list accepted the column keep it. A column outside
+  `allowedColumns` was never published, so echoing it back only reflects
+  request text into a response body. `unknown-column` and `duplicate-keys` can
+  be raised before the allow-list, so they never carry `column`.
+  `unknown-column` also covers a listed column the catalogue has no capability
+  for. Giving that case its own reason would change the published reason union
+  and the copy `@lcabrera/ui` keeps of it, so its sentence names every cause
+  instead.
 - `assertSafeIdentifier` still throws a plain `Error`. It checks names this
   package was configured with (schema, table) as well as request-supplied
   columns, so typing it as a request refusal would mislabel a configuration

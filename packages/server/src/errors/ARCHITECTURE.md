@@ -76,10 +76,10 @@ to a shape the client cannot recognise, silently, with no error anywhere.
 The `query-refused` arm does not carry the error's message either: it carries a
 fixed sentence per `reason`, so the column the request named stays on the
 server-side error and out of the body. The `grouping-refused` arm does the same
-for the two reasons that can name a column the read does not list,
-`unknown-column` and `duplicate-keys`: a fixed sentence and no `column`. Its
-other reasons name a column only after it passed the allow-list, so they keep
-the error's message and `column`. Its fallback arm carries none of the
+through `toGroupingRefused`: `GROUPING_REFUSALS` holds a sentence for every
+grouping reason, and whether the reason keeps `column`. Only the reasons raised
+after the allow-list accepted the column keep it; `unknown-column` and
+`duplicate-keys` can be raised before it, so they never do. Its fallback arm carries none of the
 original message. An untranslated throw is by
 definition one this package never vetted, so forwarding its text would reopen the
 leak the translation layer exists to close.
@@ -135,6 +135,7 @@ PersistenceError` first.
 | `read-pg-error-fields.util.ts`         | Private. Lifts those fields off an unknown rejection                                   |
 | `errors.constants.ts`                  | Private. The SQLSTATEs `mapDbError` names, and the fixed sentence per refusal reason   |
 | `is-query-refusal-reason.util.ts`      | Private. Narrows a refusal's `reason` to the query vocabulary                          |
+| `to-grouping-refused.util.ts`          | Private. A `GroupingRefusedError` → its `grouping-refused` member                      |
 
 ## Why there is no barrel
 

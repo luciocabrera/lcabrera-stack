@@ -274,7 +274,7 @@ SQL through `getPool` yourself.
 | `QueryRefusalReason`             | `errors/errors.types.ts`                      | The closed set of reasons a query is refused for what it named: `column-not-allowed` and the `keyset-*` cursor reasons                                                                                                                                     |
 | `SerializableDbError`            | `errors/errors.types.ts`                      | `db-canceled` / `db-failed` / `grouping-refused` / `query-refused` / `unexpected` — plain data, no prototype, no `cause`                                                                                                                                   |
 
-`readPgErrorFields` (`errors/read-pg-error-fields.util.ts`), `isQueryRefusalReason` (`errors/is-query-refusal-reason.util.ts`) and the SQLSTATE and refusal-message
+`readPgErrorFields` (`errors/read-pg-error-fields.util.ts`), `isQueryRefusalReason` (`errors/is-query-refusal-reason.util.ts`), `toGroupingRefused` (`errors/to-grouping-refused.util.ts`) and the SQLSTATE and refusal-message
 constants (`errors/errors.constants.ts`) are private to this folder.
 
 **These are classes, and server-only.** React Router single fetch strips

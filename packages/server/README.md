@@ -654,10 +654,10 @@ sends a keyset cursor that does not match its sort, is refused with a
 `QueryRefusedError` before any SQL runs. `toSerializableDbError` maps it to
 `{ kind: 'query-refused', reason, message }`. The message is fixed for each
 `reason` and does not repeat the column the request named; the error on the
-server keeps the column for the log. A grouped read that names a column the
-read does not list, or names one column twice, serialises as
-`grouping-refused` the same way: a fixed message for its `reason` and no
-`column`.
+server keeps the column for the log. A refused grouped read serialises as
+`grouping-refused` the same way, with a fixed message for its `reason`. It
+keeps `column` only when that column already passed the allow-list, so a
+`unknown-column` or `duplicate-keys` refusal carries none.
 
 The example attaches no `error` listener to the pool: `getPool` attaches its
 own, so an idle connection that fails is dropped and reported as a process
