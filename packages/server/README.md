@@ -72,18 +72,18 @@ exports its builder and returns the same SQL as before. Move to `buildReadQuery`
 The one place the pure builders meet a connection. Every executor takes an
 optional `tx` and translates driver rejections (see the two sections below).
 
-| Import                    | What it does                                                                        |
-| ------------------------- | ----------------------------------------------------------------------------------- |
-| `get-pool.util`           | `getPool` / `closePool` — a lazily-initialised `pg.Pool` singleton                  |
-| `env.schema`              | `readEnvConfig` — Zod-validated `DB_*` credentials plus optional pool tuning        |
-| `db.types`                | `ExecutorOptions` (the optional `tx`) and `TransactionClient`                       |
-| `select-rows.util`        | Builds a select descriptor and runs it                                              |
-| `insert-row.util`         | Builds an insert and runs it; defaults to `RETURNING *`                             |
-| `update-rows.util`        | Builds an update and runs it; defaults to `RETURNING *`                             |
-| `delete-rows.util`        | Builds a delete and runs it; defaults to `RETURNING *`                              |
-| `get-max-value.util`      | Returns the numeric `MAX(col)`, or 0 for an empty table                             |
-| `with-transaction.util`   | Runs a callback on one pooled connection in BEGIN/COMMIT/ROLLBACK, always releasing |
-| `run-in-transaction.util` | The same, over a connection you opened yourself; opens and closes nothing           |
+| Import                    | What it does                                                                                                |
+| ------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `get-pool.util`           | `getPool` / `closePool` — a lazily-initialised `pg.Pool` singleton that survives an idle-connection failure |
+| `env.schema`              | `readEnvConfig` — Zod-validated `DB_*` credentials plus optional pool tuning                                |
+| `db.types`                | `ExecutorOptions` (the optional `tx`) and `TransactionClient`                                               |
+| `select-rows.util`        | Builds a select descriptor and runs it                                                                      |
+| `insert-row.util`         | Builds an insert and runs it; defaults to `RETURNING *`                                                     |
+| `update-rows.util`        | Builds an update and runs it; defaults to `RETURNING *`                                                     |
+| `delete-rows.util`        | Builds a delete and runs it; defaults to `RETURNING *`                                                      |
+| `get-max-value.util`      | Returns the numeric `MAX(col)`, or 0 for an empty table                                                     |
+| `with-transaction.util`   | Runs a callback on one pooled connection in BEGIN/COMMIT/ROLLBACK, always releasing                         |
+| `run-in-transaction.util` | The same, over a connection you opened yourself; opens and closes nothing                                   |
 
 ### Typed errors — `@lcabrera/server/errors/*`
 
@@ -361,6 +361,14 @@ expiry trivially testable.
   `DB_IDLE_TIMEOUT_MS` and `DB_STATEMENT_TIMEOUT_MS` are optional and defaulted, so
   connection acquisition and statement duration are bounded out of the box rather
   than waiting forever.
+- **An idle connection that fails does not stop the process** — `pg` emits
+  `error` on the pool when a connection sitting idle in it drops, and an
+  unhandled `error` event would throw. `getPool` attaches a listener, so the pool
+  discards the connection and the next query opens a new one. While no other
+  listener is attached, the failure surfaces as a process warning with code
+  `LCABRERA_SERVER_POOL_IDLE_ERROR` (observe it with `process.on('warning', …)`).
+  Attach your own with `getPool().on('error', …)` to receive the error itself;
+  the warning is then left to you.
 - **Pure builders, isolated execution** — `query-builder/` never touches a
   connection.
 - **Published as compiled ESM** (`.mjs` + `.d.mts`) with source maps and
