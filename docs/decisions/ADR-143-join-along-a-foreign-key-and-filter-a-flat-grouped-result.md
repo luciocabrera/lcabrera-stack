@@ -3,7 +3,7 @@ governs:
   - server
 ---
 
-# ADR-143 — Join only along a foreign key, and filter a grouped result only when it is flat
+# ADR-143 — Join only along a foreign key, and filter a grouped result only when it is flat and has no column axis
 
 **Status:** Proposed. This records the decision for the package owner to
 approve. Nothing it describes is built yet. `What this does NOT do` in
@@ -146,6 +146,18 @@ takes. No new builder and no new entry point are added.
   not only the ones that pass. A grid would show a subtotal that does not add
   up to the rows under it, and nothing would report an error. Defining a
   filtered subtotal is a separate decision.
+- `groupFilters` is also refused when the descriptor carries a `columnAxis`,
+  whatever its `grouping`. A column axis is legal with `grouping: 'flat'`
+  (`buildGroupedRead` checks it independently of the grouping mode), but
+  `expandColumnAxisAggregates` replaces each declared aggregate with one per
+  axis value, aliased `<alias>_c<index>` and carrying an extra axis `FILTER`.
+  The alias a group filter names then has no single expression: it stands for
+  N of them, one per axis value. Testing one of them, all of them or any of
+  them are three different questions, and the descriptor cannot say which one
+  it means. The refusal covers the unexpanded leading `count` as well, so the
+  rule does not depend on which aggregate a filter names. Like the `rollup`
+  and `cube` refusals, it is raised before any SQL is built. Filtering a pivoted read is a separate
+  decision.
 
 ### What stays excluded
 
@@ -176,7 +188,8 @@ any join other than the ones above. The write builders are not affected.
   the many side is something the caller has to know to do.
 - A view is still the answer for a relation the schema does not declare as a
   foreign key, and for a join on anything other than key equality.
-- The rollup and cube filter is left open. A grid that offers subtotals cannot
+- The rollup, cube and column-axis filters are left open. A grid that offers
+  subtotals or a pivoted column axis cannot
   offer a group filter until that decision is made.
 
 ## Alternatives considered

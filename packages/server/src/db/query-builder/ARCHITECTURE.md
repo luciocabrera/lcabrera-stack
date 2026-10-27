@@ -161,8 +161,8 @@ is).
   is not built.
 - No filter on a grouped result (`HAVING`). An aggregate's own `filters` emit
   `FILTER (WHERE …)`, which narrows the rows that one aggregate reads and never
-  removes a group. ADR-143 proposes `groupFilters` for flat grouped reads, and
-  is not built.
+  removes a group. ADR-143 proposes `groupFilters` for flat grouped reads
+  without a column axis, and is not built.
 - No subqueries, no common table expressions, no window functions, no raw SQL
   fragments.
 - No multi-row `INSERT … VALUES (…), (…)`, no `ON CONFLICT`/upsert, no
