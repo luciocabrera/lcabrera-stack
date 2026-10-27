@@ -3,14 +3,12 @@ id: a-skill-i-am-handed-completes-its-task
 lines:
   - toolchain
 persona: repository-maintainer
-state: unmet
+state: met
 packages:
   - devkit
 requires:
   - agent-instructions-do-not-contradict
-issues:
-  - 1504
-  - 1509
+issues: []
 evidence:
   - type: command
     ref: vp run skills:validate
@@ -18,6 +16,12 @@ evidence:
     ref: vp run harness:verify
   - type: command
     ref: vp run devkit:closure:shipped
+  - type: code
+    ref: packages/repo-standards/scripts/conformance-triggers.cjs
+  - type: command
+    ref: vp run usage:report
+  - type: test
+    ref: packages/repo-standards/scripts/usage-render.test.mjs
 ---
 
 # A skill that arrived with the setup does its job in my repository
@@ -43,6 +47,20 @@ still costs me maintenance.
 - Each one's description states **when to use it**, specifically enough to
   discriminate: a description that would match any task, or none, is a defect
   reported by name.
+
+  Owner amendment, 2026-10-27: for a description that would match any task,
+  the check reports one that claims every task through the known over-broad
+  forms. Known limitations, by owner decision: a description that makes the same
+  claim in other words is not reported, and is out of scope. Which forms are
+  reported is defined by `descriptionFindings` in
+  `packages/repo-standards/scripts/conformance-triggers.cjs`, added for this by
+  [#1515](https://github.com/luciocabrera/lcabrera-stack/pull/1515), and its test file
+  `conformance-triggers.test.mjs` holds the cases that must be reported and the
+  scoped ones that must not. The misses found when this was decided are
+  recorded in
+  [#1537](https://github.com/luciocabrera/lcabrera-stack/issues/1537), closed
+  as not planned.
+
 - **The checks fail when an artifact is broken.** A malformed frontmatter, a
   reference to a moved file, and a description too vague to trigger each produce
   a finding, proven by planting each one.
