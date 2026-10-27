@@ -71,6 +71,8 @@ const SCOPE_WORDS = new Set([
   'within',
 ]);
 
+const COMPOUND_JOINERS = new Set(["'", '-', '’']);
+
 const OPEN_ENDED_PHRASES = [
   'anything else',
   'everything else',
@@ -123,10 +125,12 @@ const nounIndexAfter = (tokens, index) => {
 const quantifiedPhrase = (tokens, index) => {
   const nounIndex = nounIndexAfter(tokens, index + 1);
   const noun = tokens[nounIndex] ?? '';
+  const next = tokens[nounIndex + 1] ?? '';
+  const isQualified = SCOPE_WORDS.has(next) || COMPOUND_JOINERS.has(next);
   const isClaim =
     QUANTIFIERS.has(tokens[index] ?? '') &&
     GENERIC_NOUNS.has(noun) &&
-    !SCOPE_WORDS.has(tokens[nounIndex + 1] ?? '');
+    !isQualified;
   return isClaim ? tokens.slice(index, nounIndex + 1).join(' ') : undefined;
 };
 
