@@ -138,7 +138,12 @@ describe('workflow files', () => {
 
   test('the last of a chain of secrets is answered by nothing', () => {
     const escapes = analyse({
-      content: `          A: \${{ secrets.PUBLISH_TOKEN || secrets.FALLBACK_TOKEN }}\n`,
+      content: [
+        'jobs:',
+        '  check:',
+        '    env:',
+        `      A: \${{ secrets.PUBLISH_TOKEN || secrets.FALLBACK_TOKEN }}`,
+      ].join('\n'),
       path,
     });
 

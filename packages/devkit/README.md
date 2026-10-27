@@ -115,10 +115,22 @@ placeholder and is skipped.
 
 Reading a file is what makes those answers worth anything, and not every shipped
 file is markdown. A workflow's actions, step scripts and secret expressions, the
-executables a hook or a step invokes out of the install's bin directory, and the
-paths a definition in your `paths.agents` directory names in its frontmatter or
-its plain prose are all read. Without them a file with no markdown structure
-reports the same clean pass as one that is genuinely self-contained.
+commands and scripts a shell script runs — any file whose first line is an
+`sh`, `bash`, `dash` or `zsh` shebang, or a file in your `paths.hooks`
+directory with no shebang and no extension — the executables a hook or a step invokes out of the install's bin
+directory, and the paths a definition in your `paths.agents` directory names in
+its frontmatter or its plain prose are all read. Without them a file with no
+markdown structure reports the same clean pass as one that is genuinely
+self-contained. A YAML file counts as a workflow when it has a top-level `jobs:`
+key; any other YAML file is configuration.
+
+A file that no resolver for its kind reads is listed under its directory or
+profile as **unchecked** — a config file, a stylesheet, SQL, an env template.
+Those are not findings and do not fail the run, but they are not a pass either.
+The link, inline-command and bin scans still run over every file, so a link in
+one of them can still be reported; what nothing did is read it as the kind of
+file it is, and the line says so instead of counting it as self-contained. The
+`--shipped` header gives the split, read and unchecked, for each profile.
 
 Two of those answer themselves. An executable a gate task already names is
 placed by this kit, so it is not an escape; neither is a secret that something
