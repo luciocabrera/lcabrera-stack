@@ -3,13 +3,12 @@ id: a-skill-i-am-handed-completes-its-task
 lines:
   - toolchain
 persona: repository-maintainer
-state: unmet
+state: met
 packages:
   - devkit
 requires:
   - agent-instructions-do-not-contradict
-issues:
-  - 1537
+issues: []
 evidence:
   - type: command
     ref: vp run skills:validate
@@ -48,6 +47,23 @@ still costs me maintenance.
 - Each one's description states **when to use it**, specifically enough to
   discriminate: a description that would match any task, or none, is a defect
   reported by name.
+
+  Owner amendment, 2026-10-27: for a description that would match any task,
+  the check catches the known over-broad phrasings, `all`, `any` or `every`
+  before a generic noun such as `task`, and the open-ended phrases such as
+  `anything else` and `at all`. A paraphrase that makes the same claim in other
+  words is out of scope by owner decision. Known limitations: a bare universal
+  pronoun ("everything you do"), a quantifier before a noun outside the
+  generic list ("every coding task", "any part of the codebase") and a scope
+  that covers everything ("anything in the repo") are not caught. The check is
+  `descriptionFindings` in
+  `packages/repo-standards/scripts/conformance-triggers.cjs`, added for the
+  universal scope by
+  [#1515](https://github.com/luciocabrera/lcabrera-stack/pull/1515); the
+  missed phrasings were recorded in
+  [#1537](https://github.com/luciocabrera/lcabrera-stack/issues/1537), closed
+  as not planned.
+
 - **The checks fail when an artifact is broken.** A malformed frontmatter, a
   reference to a moved file, and a description too vague to trigger each produce
   a finding, proven by planting each one.
