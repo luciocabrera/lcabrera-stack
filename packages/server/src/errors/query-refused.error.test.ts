@@ -1,10 +1,29 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
+
+import type {
+  GroupingRefusalReason,
+  QueryRefusalReason,
+} from './errors.types.ts';
 
 import { GroupingRefusedError } from './grouping-refused.error.ts';
 import { PersistenceError } from './persistence.error.ts';
 import { QueryRefusedError } from './query-refused.error.ts';
 
+const readRefusalReason = (error: unknown) =>
+  error instanceof QueryRefusedError ? error.reason : undefined;
+
 describe('QueryRefusedError', () => {
+  it('types a reason read through instanceof as every reason a refusal can carry', () => {
+    expectTypeOf(readRefusalReason).returns.toEqualTypeOf<
+      GroupingRefusalReason | QueryRefusalReason | undefined
+    >();
+    expect(
+      readRefusalReason(
+        new GroupingRefusedError({ message: 'no keys', reason: 'no-keys' }),
+      ),
+    ).toBe('no-keys');
+  });
+
   it('carries the reason and the column a refusal is about', () => {
     const error = new QueryRefusedError({
       column: 'secret',

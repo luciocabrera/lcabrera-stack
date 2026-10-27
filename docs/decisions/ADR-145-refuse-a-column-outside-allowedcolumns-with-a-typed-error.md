@@ -34,13 +34,19 @@ typed error carrying a closed `reason` and the `column`, serialised as
   the one refusal class. It extends `Error`, not `PersistenceError`, for the
   reason ADR-066 gives for `GroupingRefusedError`: `instanceof PersistenceError`
   means the database rejected something. It carries `reason`, `cause` and, when
-  the refusal is about one column, `column`. Its type parameter is the reason
-  vocabulary, defaulting to `QueryRefusalReason`. Its message still quotes the
+  the refusal is about one column, `column`. Its message still quotes the
   column, for the server log.
-- `GroupingRefusedError` now extends `QueryRefusedError<GroupingRefusalReason>`
-  and adds only `estimatedRows`. Its constructor, fields, `name` and serialised
-  kind are unchanged, so code that throws or catches it keeps working, and
-  `instanceof QueryRefusedError` is one check for every refusal.
+- Its `reason` is typed `GroupingRefusalReason | QueryRefusalReason`, because
+  that is what `instanceof QueryRefusedError` can actually see. A generic class
+  was tried and rejected: TypeScript narrows `instanceof` on a generic class to
+  its `any` instantiation, so the narrowed `reason` was `any`, and an
+  exhaustive `switch` over it was not checked at all. A type-level test pins the
+  union.
+- `GroupingRefusedError` now extends `QueryRefusedError`, narrows `reason` to
+  `GroupingRefusalReason` and adds only `estimatedRows`. Its constructor,
+  fields, `name` and serialised kind are unchanged, so code that throws or
+  catches it keeps working, and `instanceof QueryRefusedError` is one check for
+  every refusal.
 - `QueryRefusalReason` in `errors/errors.types` is the closed set:
   `column-not-allowed`, `keyset-sort-missing`, `keyset-cursor-mismatch`,
   `keyset-sort-not-unique`, `keyset-unique-value-missing`.

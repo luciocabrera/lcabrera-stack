@@ -1,4 +1,6 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
+
+import type { GroupingRefusalReason } from './errors.types.ts';
 
 import { GroupingRefusedError } from './grouping-refused.error.ts';
 import { PersistenceError } from './persistence.error.ts';
@@ -39,6 +41,7 @@ describe('GroupingRefusedError', () => {
     });
 
     expect(error).toBeInstanceOf(QueryRefusedError);
+    expectTypeOf(error.reason).toEqualTypeOf<GroupingRefusalReason>();
     expect(error.name).toBe('GroupingRefusedError');
     expect(error.cause).toBe(cause);
     expect(error.column).toBe('city');

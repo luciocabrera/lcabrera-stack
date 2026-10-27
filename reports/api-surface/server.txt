@@ -220,7 +220,7 @@ PersistenceError [class] PersistenceError
 QueryCanceledError [class] QueryCanceledError
 
 ## ./errors/query-refused.error
-QueryRefusedError [class] QueryRefusedError<TReason>
+QueryRefusedError [class] QueryRefusedError
 
 ## ./errors/to-serializable-db-error.util
 toSerializableDbError [const] (error: unknown) => SerializableDbError

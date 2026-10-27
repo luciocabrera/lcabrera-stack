@@ -10,8 +10,9 @@ type GroupingRefusedErrorArgs = {
   readonly reason: GroupingRefusalReason;
 };
 
-export class GroupingRefusedError extends QueryRefusedError<GroupingRefusalReason> {
+export class GroupingRefusedError extends QueryRefusedError {
   public readonly estimatedRows: number | undefined;
+  declare public readonly reason: GroupingRefusalReason;
 
   public constructor({ estimatedRows, ...refusal }: GroupingRefusedErrorArgs) {
     super(refusal);

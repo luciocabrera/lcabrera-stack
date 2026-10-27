@@ -84,13 +84,13 @@ describe('toSerializableDbError', () => {
     ).toMatchObject({ kind: 'grouping-refused', reason: 'no-keys' });
   });
 
-  it('says nothing about a refusal whose reason it has no sentence for', () => {
+  it('says nothing about a base refusal carrying a grouping reason it has no sentence for', () => {
     expect(
       toSerializableDbError(
-        new QueryRefusedError<string>({
+        new QueryRefusedError({
           column: 'hidden_note',
           message: 'refused hidden_note',
-          reason: 'some-other-reason',
+          reason: 'unknown-column',
         }),
       ),
     ).toStrictEqual({
