@@ -223,7 +223,7 @@ GroupingRefusedError [class] GroupingRefusedError
 hasPostgresErrorCode [const] ({ code, error }: HasPostgresErrorCodeArgs) => boolean
 
 ## ./errors/map-db-error.util
-mapDbError [const] (error: unknown) => PersistenceError
+mapDbError [const] (error: unknown) => PersistenceError | QueryRefusedError
 
 ## ./errors/persistence.error
 PersistenceError [class] PersistenceError
