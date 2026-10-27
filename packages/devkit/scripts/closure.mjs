@@ -8,8 +8,9 @@
  * not have, a `command` a tool their shell may not resolve, an `import` a module
  * their install will not provide, a `bin` an executable their install will not
  * place, a `secret` a value only their repository settings can supply, a
- * `requires` a config key no consumer could set, and a `missing` a script run
- * by a command that exists nowhere at all.
+ * `requires` a config key no consumer could set, a `missing` a script run by a
+ * command that exists nowhere at all, and a `task` a runner invocation naming a
+ * task the shipped set never defines.
  *
  * A file no resolver reads is returned as `unchecked` rather than dropped: the
  * analysis finds nothing in it for the same reason it finds nothing in a file
@@ -32,6 +33,7 @@ import {
   extractPathTokens,
   extractScriptOperands,
 } from './closure-extract.mjs';
+import { extractTaskInvocations, toTaskEscapes } from './closure-tasks.mjs';
 import { requiredConfigKeys, requiresDeclarationLine } from './frontmatter.mjs';
 
 export { classifyLink, classifyPathToken } from './closure-classify.mjs';
@@ -104,8 +106,10 @@ const toRequiresEscapes = ({ allowedKeys, file }) =>
  *   allowedCommands?: Iterable<string>,
  *   allowedConfigKeys?: Iterable<string>,
  *   allowedPackages?: Iterable<string>,
+ *   allowedTasks?: Iterable<string>,
  *   exists?: (repoRelativePath: string) => boolean,
  *   hookDirectory?: string,
+ *   runPrefixes?: readonly string[],
  *   shipped?: Set<string> }} args
  */
 export const analyseClosure = ({
@@ -114,13 +118,16 @@ export const analyseClosure = ({
   allowedCommands = [],
   allowedConfigKeys = [],
   allowedPackages = [],
+  allowedTasks,
   exists,
   files,
   hookDirectory,
   rootDirectory,
+  runPrefixes,
   shipped = new Set(),
 }) => {
   const allowed = new Set(allowedCommands);
+  const tasks = allowedTasks === undefined ? undefined : new Set(allowedTasks);
   const allowedKeys = new Set(allowedConfigKeys);
   const packages = new Set(allowedPackages);
   const bins = allowedBins === undefined ? undefined : new Set(allowedBins);
@@ -160,6 +167,19 @@ export const analyseClosure = ({
       file,
     }),
   );
+
+  const taskEscapes = files
+    .filter((file) => isMarkdownFile(file.path))
+    .flatMap((file) =>
+      toTaskEscapes({
+        allowedTasks: tasks,
+        file,
+        invocations: extractTaskInvocations({
+          content: file.content,
+          prefixes: runPrefixes,
+        }),
+      }),
+    );
 
   const missingScripts = files.flatMap((file) =>
     toMissingScripts({
@@ -208,6 +228,7 @@ export const analyseClosure = ({
       agentDirectory,
       allowed,
       allowedBins: bins,
+      allowedTasks: tasks,
       containment: {
         fromDirectory: directoryOf(file.path),
         rootDirectory,
@@ -216,6 +237,7 @@ export const analyseClosure = ({
       exists,
       file,
       hookDirectory,
+      runPrefixes,
     }),
   );
 
@@ -228,6 +250,7 @@ export const analyseClosure = ({
     escapes: dedupe([
       ...linkEscapes,
       ...commandEscapes,
+      ...taskEscapes,
       ...missingScripts,
       ...importEscapes,
       ...requiresEscapes,

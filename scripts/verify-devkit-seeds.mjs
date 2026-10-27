@@ -2,10 +2,9 @@
  * Fails when a file `packages/devkit` ships names something only this repository
  * has: one of its package names, one of its secrets, or its task runner.
  *
- * Why in addition to `devkit closure`: that probe reads markdown structure —
- * links, fenced commands, inline paths. The workflow and hook seeds have none of
- * it, so closure sees nothing in them at all, and a repository name written in
- * prose is invisible to it everywhere.
+ * Why in addition to `devkit closure`: closure asks whether a reference
+ * resolves in the receiving repository. A repository name, owner or secret
+ * written in prose is not a reference, so no resolver reads it.
  *
  * The deciding half is `./lib/devkit-seeds.mjs` (pure); this file is the reading,
  * the printing and the exit code. See `.claude/rules/scripts.md`.
