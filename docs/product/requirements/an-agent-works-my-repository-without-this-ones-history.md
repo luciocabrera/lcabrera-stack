@@ -38,10 +38,17 @@ invents a substitute, and I find out from the result.
 ## Acceptance
 
 - Every shipped file resolves against a repository holding only the installed
-  package: every link, every referenced path, every command named in prose, and
-  every task it runs through a package runner, which the shipped profile's
-  manifest tasks or its `COMMANDS.md` must define —
-  `vp run devkit:closure:shipped`.
+  package: every link, every referenced path, every command named in prose —
+  `vp run devkit:closure:shipped`. The same gate holds a task that a shipped
+  file runs, outside a comment, as `npm run`, `pnpm run`, `yarn run`, `bun run`,
+  `vp run`, `{{commands.run}}` or the configured `commands.run` value followed by
+  the task. The task must be wired by the profile being checked at its own rung,
+  be run by a value in the consumer's `commands` block, or be documented in the
+  shipped `COMMANDS.md` while the kit wires it at no rung. Three cases are not
+  checked:
+  the shipped `COMMANDS.md` itself, which documents every rung; a run that
+  passes the runner an option before the task (`--filter`, `-r`, `-w`); and a
+  bare `pnpm <task>` or `yarn <task>`, unless `commands.run` is that runner.
 - No shipped file names anything only the originating repository has: a package
   name, a secret or a task runner — `vp run seeds:verify`.
 - Closure reaches **every kind** of shipped artifact, not only the ones written
