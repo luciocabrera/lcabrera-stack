@@ -1,5 +1,6 @@
 import type { ColumnReference, ReadScope } from './query-builder.types.ts';
 
+import { QueryRefusedError } from '../../errors/query-refused.error.ts';
 import { assertColumnAllowed } from './assert-column-allowed.util.ts';
 import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
@@ -38,11 +39,14 @@ export const resolveColumnReference = ({
   const joined = scope?.joins.get(source);
 
   if (joined === undefined) {
-    throw new Error(
-      scope === undefined
-        ? `Column "${column}" names the source "${source}", but this read has no join.`
-        : `Column "${column}" names the source "${source}", which is not one of this read's joins.`,
-    );
+    throw new QueryRefusedError({
+      column,
+      message:
+        scope === undefined
+          ? `Column "${column}" names the source "${source}", but this read has no join.`
+          : `Column "${column}" names the source "${source}", which is not one of this read's joins.`,
+      reason: 'join-source-unknown',
+    });
   }
 
   assertSafeIdentifier(column);

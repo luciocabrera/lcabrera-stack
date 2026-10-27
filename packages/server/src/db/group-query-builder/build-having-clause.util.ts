@@ -1,6 +1,7 @@
 import type { ClauseAccumulator } from '../query-builder/append-comparison-clause.util.ts';
 import type { GroupFilter } from './group-query-builder.types.ts';
 
+import { QueryRefusedError } from '../../errors/query-refused.error.ts';
 import { appendComparisonClause } from '../query-builder/append-comparison-clause.util.ts';
 
 type BuildHavingClauseArgs = {
@@ -24,9 +25,10 @@ export const buildHavingClause = ({
       )?.expression;
 
       if (term === undefined) {
-        throw new Error(
-          `Cannot filter groups by "${groupFilter.aggregateAlias}": it is not one of this query's aggregates.`,
-        );
+        throw new QueryRefusedError({
+          message: `Cannot filter groups by "${groupFilter.aggregateAlias}": it is not one of this query's aggregates.`,
+          reason: 'group-filter-alias-unknown',
+        });
       }
 
       return appendComparisonClause({

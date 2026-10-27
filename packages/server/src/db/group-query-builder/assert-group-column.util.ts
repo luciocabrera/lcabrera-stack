@@ -4,6 +4,7 @@ import type {
 } from '../query-builder/query-builder.types.ts';
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
+import { QueryRefusedError } from '../../errors/query-refused.error.ts';
 import { resolveColumnReference } from '../query-builder/resolve-column-reference.util.ts';
 import { toColumnName } from '../query-builder/to-column-name.util.ts';
 
@@ -21,6 +22,13 @@ export const assertGroupColumn = ({
   try {
     return resolveColumnReference({ allowedColumns, reference: column, scope });
   } catch (error) {
+    if (
+      error instanceof QueryRefusedError &&
+      error.reason === 'join-source-unknown'
+    ) {
+      throw error;
+    }
+
     const name = toColumnName(column);
 
     throw new GroupingRefusedError({

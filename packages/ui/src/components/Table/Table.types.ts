@@ -471,6 +471,26 @@ export type TableProps<
     readonly response: TResponse;
   };
 
+export type TableQueryRefusalReason =
+  | 'column-not-allowed'
+  | 'group-filter-alias-unknown'
+  | 'group-filter-column-axis'
+  | 'group-filter-grouping-unsupported'
+  | 'group-filter-operator-unsupported'
+  | 'join-alias-taken'
+  | 'join-allowlist-missing'
+  | 'join-ambiguous'
+  | 'join-kind-unsupported'
+  | 'join-not-declared'
+  | 'join-relations-missing'
+  | 'join-source-unknown'
+  | 'keyset-cursor-mismatch'
+  | 'keyset-sort-missing'
+  | 'keyset-sort-not-unique'
+  | 'keyset-unique-column-joined'
+  | 'keyset-unique-value-missing'
+  | 'projected-alias-too-long';
+
 export type TableResponseError =
   | {
       /** Present when the refusal is about exactly one column. */
@@ -487,6 +507,11 @@ export type TableResponseError =
       readonly message: string;
     }
   | { readonly kind: 'db-canceled'; readonly message: string }
+  | {
+      readonly kind: 'query-refused';
+      readonly message: string;
+      readonly reason: TableQueryRefusalReason;
+    }
   | { readonly kind: 'unexpected'; readonly message: string };
 
 export type TableSettingsTabRole =

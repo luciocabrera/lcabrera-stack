@@ -152,9 +152,10 @@ refused rather than returned truncated. Everything they compose
 (`estimateGroupCardinality`, `assertGroupCardinality`, `resolveGroupRowLimit`,
 `resolveWidestGroupKey`, `assertGroupColumn`) is private to the folder.
 `assertGroupColumn` is the one worth knowing about: it wraps the two assertions
-shared with `query-builder/` so an allow-list or identifier refusal is a typed
-`GroupingRefusedError` rather than a bare `Error` the loader edge can only report
-as `unexpected`.
+shared with `query-builder/` so an allow-list or identifier refusal of a group
+column is a `GroupingRefusedError` with reason `unknown-column`, like every other
+grouping refusal, rather than the `QueryRefusedError` or bare `Error` those
+assertions throw on their own.
 
 `group-query-builder.constants.ts` holds every constant the folder owns —
 including the closed `AggregateFn` → SQL map, the depth cap, the warn/refuse row
@@ -257,21 +258,23 @@ plus the refusals the package raises itself
 The executors apply `mapDbError` for you — reach for it directly only when you run
 SQL through `getPool` yourself.
 
-| Artifact                         | Location                                      | Description                                                                                                                                                        |
-| -------------------------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `mapDbError`                     | `errors/map-db-error.util.ts`                 | `23505` → `UniqueConstraintViolationError`, `23503` → `ForeignKeyViolationError`, `57014` → `QueryCanceledError`, else `PersistenceError`; idempotent              |
-| `PersistenceError`               | `errors/persistence.error.ts`                 | Base translated failure: a safe message of ours, the driver rejection on `cause`, pg's routing fields on `fields`                                                  |
-| `UniqueConstraintViolationError` | `errors/unique-constraint-violation.error.ts` | `23505` — `fields.constraint` names the index, which is the consumer's key for routing to a form field                                                             |
-| `ForeignKeyViolationError`       | `errors/foreign-key-violation.error.ts`       | `23503` — insert/update and delete directions share the code; `fields.constraint` tells them apart                                                                 |
-| `QueryCanceledError`             | `errors/query-canceled.error.ts`              | `57014` — the statement was stopped early. Named for the SQLSTATE, because `pg_cancel_backend` raises it as well as `statement_timeout`                            |
-| `GroupingRefusedError`           | `errors/grouping-refused.error.ts`            | A grouped read this package refused, carrying `reason`, the offending `column` and the estimated rows. **Not** a `PersistenceError` — nothing came from the driver |
-| `toSerializableDbError`          | `errors/to-serializable-db-error.util.ts`     | Any of the above → `SerializableDbError`, the plain union a loader or action may return. The mandatory step at any edge (see below)                                |
-| `hasPostgresErrorCode`           | `errors/has-postgres-error-code.util.ts`      | Narrows `unknown` to a pg rejection with a given SQLSTATE (e.g. `55000`), structurally so two copies of `pg` cannot defeat it                                      |
-| `PgErrorFields`                  | `errors/errors.types.ts`                      | The `code`/`column`/`constraint` a translated error carries. `detail` is excluded on purpose — it quotes the offending values                                      |
-| `GroupingRefusalReason`          | `errors/errors.types.ts`                      | The closed set of reasons a grouped read is refused, from `no-keys` to `row-limit-reached`                                                                         |
-| `SerializableDbError`            | `errors/errors.types.ts`                      | `db-canceled` / `db-failed` / `grouping-refused` / `unexpected` — plain data, no prototype, no `cause`                                                             |
+| Artifact                         | Location                                      | Description                                                                                                                                                                                                                                                |
+| -------------------------------- | --------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `mapDbError`                     | `errors/map-db-error.util.ts`                 | `23505` → `UniqueConstraintViolationError`, `23503` → `ForeignKeyViolationError`, `57014` → `QueryCanceledError`, else `PersistenceError`; idempotent                                                                                                      |
+| `PersistenceError`               | `errors/persistence.error.ts`                 | Base translated failure: a safe message of ours, the driver rejection on `cause`, pg's routing fields on `fields`                                                                                                                                          |
+| `UniqueConstraintViolationError` | `errors/unique-constraint-violation.error.ts` | `23505` — `fields.constraint` names the index, which is the consumer's key for routing to a form field                                                                                                                                                     |
+| `ForeignKeyViolationError`       | `errors/foreign-key-violation.error.ts`       | `23503` — insert/update and delete directions share the code; `fields.constraint` tells them apart                                                                                                                                                         |
+| `QueryCanceledError`             | `errors/query-canceled.error.ts`              | `57014` — the statement was stopped early. Named for the SQLSTATE, because `pg_cancel_backend` raises it as well as `statement_timeout`                                                                                                                    |
+| `GroupingRefusedError`           | `errors/grouping-refused.error.ts`            | A grouped read this package refused. Extends `QueryRefusedError` with the grouping `reason` vocabulary and the estimated rows                                                                                                                              |
+| `QueryRefusedError`              | `errors/query-refused.error.ts`               | The base of every refusal this package raises, carrying `reason`, `column` and `cause`. Thrown directly for a column outside `allowedColumns` or a keyset cursor that does not match its sort. **Not** a `PersistenceError` — nothing came from the driver |
+| `toSerializableDbError`          | `errors/to-serializable-db-error.util.ts`     | Any of the above → `SerializableDbError`, the plain union a loader or action may return. The mandatory step at any edge (see below)                                                                                                                        |
+| `hasPostgresErrorCode`           | `errors/has-postgres-error-code.util.ts`      | Narrows `unknown` to a pg rejection with a given SQLSTATE (e.g. `55000`), structurally so two copies of `pg` cannot defeat it                                                                                                                              |
+| `PgErrorFields`                  | `errors/errors.types.ts`                      | The `code`/`column`/`constraint` a translated error carries. `detail` is excluded on purpose — it quotes the offending values                                                                                                                              |
+| `GroupingRefusalReason`          | `errors/errors.types.ts`                      | The closed set of reasons a grouped read is refused, from `no-keys` to `row-limit-reached`                                                                                                                                                                 |
+| `QueryRefusalReason`             | `errors/errors.types.ts`                      | The closed set of reasons a query is refused for what it named: `column-not-allowed` and the `keyset-*` cursor reasons                                                                                                                                     |
+| `SerializableDbError`            | `errors/errors.types.ts`                      | `db-canceled` / `db-failed` / `grouping-refused` / `query-refused` / `unexpected` — plain data, no prototype, no `cause`                                                                                                                                   |
 
-`readPgErrorFields` (`errors/read-pg-error-fields.util.ts`) and the SQLSTATE
+`readPgErrorFields` (`errors/read-pg-error-fields.util.ts`), `isQueryRefusalReason` (`errors/is-query-refusal-reason.util.ts`) and the SQLSTATE and refusal-message
 constants (`errors/errors.constants.ts`) are private to this folder.
 
 **These are classes, and server-only.** React Router single fetch strips

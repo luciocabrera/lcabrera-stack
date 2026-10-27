@@ -1,5 +1,6 @@
 import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
+import type { QueryRefusalReason } from '../../errors/errors.types.ts';
 import type {
   BuiltGroupQuery,
   ColumnGroupingCapability,
@@ -14,6 +15,7 @@ import type {
   SelectQueryDescriptor,
 } from './query-builder.types.ts';
 
+import { toSerializableDbError } from '../../errors/to-serializable-db-error.util.ts';
 import { buildGroupedRead } from '../group-query-builder/build-grouped-read.util.ts';
 import { buildCountRead } from './build-count-read.util.ts';
 import { buildReadQuery } from './build-read-query.util.ts';
@@ -177,6 +179,159 @@ const withVendorAlias = (alias: string): SelectQueryDescriptor => ({
 const flatGroupedWith = (
   overrides: Partial<GroupQueryDescriptor>,
 ): GroupQueryDescriptor => ({ ...FLAT_GROUPED, ...overrides });
+
+const serialisedRefusal = (descriptor: ReadQueryDescriptor) => {
+  try {
+    buildReadQuery(descriptor);
+  } catch (error) {
+    return toSerializableDbError(error);
+  }
+
+  return;
+};
+
+const REFUSALS: readonly {
+  readonly descriptor: ReadQueryDescriptor;
+  readonly label: string;
+  readonly reason: QueryRefusalReason;
+}[] = [
+  {
+    descriptor: { ...JOINED_ROWS, allowedColumns: undefined },
+    label: 'a join without the base allowedColumns',
+    reason: 'join-allowlist-missing',
+  },
+  {
+    descriptor: {
+      ...JOINED_ROWS,
+      joins: JSON.parse(
+        '[{"alias":"vendor","foreignKey":["vendor_id"],"kind":"inner"}]',
+      ),
+    },
+    label: 'a join without its own allowedColumns',
+    reason: 'join-allowlist-missing',
+  },
+  {
+    descriptor: { ...JOINED_ROWS, relations: undefined },
+    label: 'a join without the relation map',
+    reason: 'join-relations-missing',
+  },
+  {
+    descriptor: {
+      ...JOINED_ROWS,
+      joins: [{ ...VENDOR_JOIN, foreignKey: ['region'] }],
+    },
+    label: 'a join the relation map does not hold',
+    reason: 'join-not-declared',
+  },
+  {
+    descriptor: {
+      ...JOINED_ROWS,
+      fields: ['id'],
+      filters: [],
+      joins: [VENDOR_JOIN],
+      relations: [
+        ...RELATIONS,
+        {
+          columns: ['vendor_id'],
+          referencedColumns: ['id'],
+          referencedSchema: 'catalog',
+          referencedTable: 'suppliers',
+          schema: 'catalog',
+          table: 'items',
+        },
+      ],
+      sort: [],
+    },
+    label: 'a join two foreign keys could follow',
+    reason: 'join-ambiguous',
+  },
+  {
+    descriptor: {
+      ...JOINED_ROWS,
+      joins: JSON.parse(
+        '[{"alias":"vendor","allowedColumns":["name"],"foreignKey":["vendor_id"],"kind":"right"}]',
+      ),
+    },
+    label: 'a right join',
+    reason: 'join-kind-unsupported',
+  },
+  {
+    descriptor: {
+      ...JOINED_ROWS,
+      fields: ['id'],
+      filters: [],
+      joins: [{ ...VENDOR_JOIN, alias: 'items' }],
+      sort: [],
+    },
+    label: 'a join alias the base target holds',
+    reason: 'join-alias-taken',
+  },
+  {
+    descriptor: {
+      ...JOINED_ROWS,
+      fields: [{ column: 'name', source: 'buyer' }],
+    },
+    label: 'a field naming a source the read does not join',
+    reason: 'join-source-unknown',
+  },
+  {
+    descriptor: {
+      ...JOINED_GROUPED,
+      keys: [{ column: 'region', source: 'buyer' }],
+    },
+    label: 'a group key naming a source the read does not join',
+    reason: 'join-source-unknown',
+  },
+  {
+    descriptor: {
+      ...JOINED_ROWS,
+      cursor: JSON.parse(
+        '{"uniqueColumn":{"column":"id","source":"vendor"},"values":["Acme",7]}',
+      ),
+    },
+    label: 'a cursor resting on a joined column',
+    reason: 'keyset-unique-column-joined',
+  },
+  {
+    descriptor: withVendorAlias('v'.repeat(59)),
+    label: 'a projected alias past 63 bytes',
+    reason: 'projected-alias-too-long',
+  },
+  {
+    descriptor: flatGroupedWith({ grouping: 'rollup' }),
+    label: 'a group filter on a rollup',
+    reason: 'group-filter-grouping-unsupported',
+  },
+  {
+    descriptor: flatGroupedWith({
+      columnAxis: { key: 'region', maxDistinct: 10, values: ['north'] },
+      keys: ['status'],
+    }),
+    label: 'a group filter on a read with a column axis',
+    reason: 'group-filter-column-axis',
+  },
+  {
+    descriptor: flatGroupedWith({
+      groupFilters: [
+        { aggregateAlias: 'avg_amount', operator: 'gt', value: 1 },
+      ],
+    }),
+    label: 'a group filter on an undeclared alias',
+    reason: 'group-filter-alias-unknown',
+  },
+  {
+    descriptor: flatGroupedWith({
+      groupFilters: JSON.parse(
+        '[{"aggregateAlias":"sum_amount","operator":"ilike","value":"x"}]',
+      ),
+    }),
+    label: 'a group filter with ilike',
+    reason: 'group-filter-operator-unsupported',
+  },
+];
+
+const NAMED_IN_A_REQUEST =
+  /vendor|buyer|items|catalog|sum_amount|avg_amount|region|vvvv|right|ilike/u;
 
 describe('buildReadQuery', () => {
   it('builds a filtered, sorted, paginated row read', () => {
@@ -639,6 +794,15 @@ describe('buildReadQuery', () => {
         count: true as const,
         groupFilters: [],
       }).not.toExtend<ReadQueryDescriptor>();
+    });
+  });
+
+  describe('a join or group-filter refusal crosses the edge as query-refused', () => {
+    it.each(REFUSALS)('$label → $reason', ({ descriptor, reason }) => {
+      const refusal = serialisedRefusal(descriptor);
+
+      expect(refusal).toMatchObject({ kind: 'query-refused', reason });
+      expect(JSON.stringify(refusal)).not.toMatch(NAMED_IN_A_REQUEST);
     });
   });
 });

@@ -4,6 +4,7 @@ import type {
   ReadScopeSource,
 } from './query-builder.types.ts';
 
+import { QueryRefusedError } from '../../errors/query-refused.error.ts';
 import { assertColumnAllowed } from './assert-column-allowed.util.ts';
 import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
 
@@ -19,9 +20,10 @@ export const resolveJoinRelation = ({
   source,
 }: ResolveJoinRelationArgs) => {
   if (join.foreignKey.length === 0) {
-    throw new Error(
-      `Join "${join.alias}" names no foreign-key column; a join is named by the referencing columns of a declared foreign key.`,
-    );
+    throw new QueryRefusedError({
+      message: `Join "${join.alias}" names no foreign-key column; a join is named by the referencing columns of a declared foreign key.`,
+      reason: 'join-not-declared',
+    });
   }
 
   for (const column of join.foreignKey) {
@@ -40,23 +42,26 @@ export const resolveJoinRelation = ({
   const listed = join.foreignKey.join(', ');
 
   if (matches.length > 1) {
-    throw new Error(
-      `Join "${join.alias}" is ambiguous: ${matches.length} foreign keys on "${source.schema}"."${source.table}" use (${listed}).`,
-    );
+    throw new QueryRefusedError({
+      message: `Join "${join.alias}" is ambiguous: ${matches.length} foreign keys on "${source.schema}"."${source.table}" use (${listed}).`,
+      reason: 'join-ambiguous',
+    });
   }
 
   const [relation] = matches;
 
   if (relation === undefined) {
-    throw new Error(
-      `Join "${join.alias}" follows no declared foreign key: "${source.schema}"."${source.table}" has none on (${listed}).`,
-    );
+    throw new QueryRefusedError({
+      message: `Join "${join.alias}" follows no declared foreign key: "${source.schema}"."${source.table}" has none on (${listed}).`,
+      reason: 'join-not-declared',
+    });
   }
 
   if (relation.referencedColumns.length !== relation.columns.length) {
-    throw new Error(
-      `The foreign key on "${source.schema}"."${source.table}" (${listed}) pairs ${relation.columns.length} column(s) with ${relation.referencedColumns.length} referenced column(s).`,
-    );
+    throw new QueryRefusedError({
+      message: `The foreign key on "${source.schema}"."${source.table}" (${listed}) pairs ${relation.columns.length} column(s) with ${relation.referencedColumns.length} referenced column(s).`,
+      reason: 'join-not-declared',
+    });
   }
 
   assertSafeIdentifier(relation.referencedSchema);

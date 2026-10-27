@@ -5,6 +5,7 @@ import type {
   ReadScopeSource,
 } from './query-builder.types.ts';
 
+import { QueryRefusedError } from '../../errors/query-refused.error.ts';
 import { assertSafeIdentifier } from './assert-safe-identifier.util.ts';
 import { buildJoinClause } from './build-join-clause.util.ts';
 import { quoteIdentifier } from './quote-identifier.util.ts';
@@ -32,15 +33,19 @@ export const resolveReadScope = ({
   }
 
   if (allowedColumns === undefined) {
-    throw new Error(
-      'A read with a join needs allowedColumns for its base target; reaching a second table cannot be left implicit.',
-    );
+    throw new QueryRefusedError({
+      message:
+        'A read with a join needs allowedColumns for its base target; reaching a second table cannot be left implicit.',
+      reason: 'join-allowlist-missing',
+    });
   }
 
   if (relations === undefined) {
-    throw new Error(
-      'A read with a join needs the relation map; resolve it with getForeignKeyRelations.',
-    );
+    throw new QueryRefusedError({
+      message:
+        'A read with a join needs the relation map; resolve it with getForeignKeyRelations.',
+      reason: 'join-relations-missing',
+    });
   }
 
   const base: ReadScopeSource = {
@@ -56,29 +61,33 @@ export const resolveReadScope = ({
     assertSafeIdentifier(join.alias);
 
     if (join.alias === table || sources.has(join.alias)) {
-      throw new Error(
-        `Join alias "${join.alias}" is already taken by the base target or an earlier join.`,
-      );
+      throw new QueryRefusedError({
+        message: `Join alias "${join.alias}" is already taken by the base target or an earlier join.`,
+        reason: 'join-alias-taken',
+      });
     }
 
     if (!JOIN_KINDS.has(join.kind)) {
-      throw new Error(
-        `Join "${join.alias}" has kind "${String(join.kind)}"; only inner and left joins are offered.`,
-      );
+      throw new QueryRefusedError({
+        message: `Join "${join.alias}" has kind "${String(join.kind)}"; only inner and left joins are offered.`,
+        reason: 'join-kind-unsupported',
+      });
     }
 
     if (!Array.isArray(join.allowedColumns)) {
-      throw new TypeError(
-        `Join "${join.alias}" needs its own allowedColumns; every table a read reaches has one.`,
-      );
+      throw new QueryRefusedError({
+        message: `Join "${join.alias}" needs its own allowedColumns; every table a read reaches has one.`,
+        reason: 'join-allowlist-missing',
+      });
     }
 
     const source = join.source === undefined ? base : sources.get(join.source);
 
     if (source === undefined) {
-      throw new Error(
-        `Join "${join.alias}" starts from "${join.source}", which is neither the base target nor an earlier join.`,
-      );
+      throw new QueryRefusedError({
+        message: `Join "${join.alias}" starts from "${join.source}", which is neither the base target nor an earlier join.`,
+        reason: 'join-source-unknown',
+      });
     }
 
     const relation = resolveJoinRelation({ join, relations, source });

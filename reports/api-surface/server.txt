@@ -210,7 +210,8 @@ withTransaction [const] <TResult>({ run }: WithTransactionArgs<TResult>) => Prom
 ## ./errors/errors.types
 GroupingRefusalReason [type] 'aggregate-not-legal' | 'column-axis-too-wide' | 'column-not-groupable' | 'duplicate-keys' | 'estimate-too-large' | 'no-keys' | 'row-limit-reached' | 'too-many-keys' | 'unknown-column'
 PgErrorFields [type] { readonly code?: string; readonly column?: string; readonly constraint?: string; }
-SerializableDbError [type] { /** The raw SQLSTATE, when the driver supplied one. Never the message. */ readonly code?: string; readonly kind: 'db-failed'; readonly message: string; } | { readonly column?: string; readonly estimatedRows?: number; readonly kind: 'grouping-refused'; readonly message: string; readonly reason: GroupingRefusalReason; } | { readonly kind: 'db-canceled'; readonly message: string; } | { readonly kind: 'unexpected'; readonly message: string; }
+QueryRefusalReason [type] 'column-not-allowed' | 'group-filter-alias-unknown' | 'group-filter-column-axis' | 'group-filter-grouping-unsupported' | 'group-filter-operator-unsupported' | 'join-alias-taken' | 'join-allowlist-missing' | 'join-ambiguous' | 'join-kind-unsupported' | 'join-not-declared' | 'join-relations-missing' | 'join-source-unknown' | 'keyset-cursor-mismatch' | 'keyset-sort-missing' | 'keyset-sort-not-unique' | 'keyset-unique-column-joined' | 'keyset-unique-value-missing' | 'projected-alias-too-long'
+SerializableDbError [type] { /** The raw SQLSTATE, when the driver supplied one. Never the message. */ readonly code?: string; readonly kind: 'db-failed'; readonly message: string; } | { readonly column?: string; readonly estimatedRows?: number; readonly kind: 'grouping-refused'; readonly message: string; readonly reason: GroupingRefusalReason; } | { readonly kind: 'db-canceled'; readonly message: string; } | { readonly kind: 'query-refused'; readonly message: string; readonly reason: QueryRefusalReason; } | { readonly kind: 'unexpected'; readonly message: string; }
 
 ## ./errors/foreign-key-violation.error
 ForeignKeyViolationError [class] ForeignKeyViolationError
@@ -229,6 +230,9 @@ PersistenceError [class] PersistenceError
 
 ## ./errors/query-canceled.error
 QueryCanceledError [class] QueryCanceledError
+
+## ./errors/query-refused.error
+QueryRefusedError [class] QueryRefusedError
 
 ## ./errors/to-serializable-db-error.util
 toSerializableDbError [const] (error: unknown) => SerializableDbError

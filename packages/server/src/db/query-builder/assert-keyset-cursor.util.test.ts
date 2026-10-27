@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { QueryRefusedError } from '../../errors/query-refused.error.ts';
 import { assertKeysetCursor } from './assert-keyset-cursor.util.ts';
 
 const NULL_ORDER_ID_CURSOR = JSON.parse(
@@ -62,4 +63,49 @@ describe('assertKeysetCursor', () => {
       }),
     ).toThrow(/no value for its unique column/);
   });
+
+  it.each([
+    {
+      args: { cursor: { uniqueColumn: 'order_id', values: [1] } },
+      reason: 'keyset-sort-missing',
+    },
+    {
+      args: {
+        cursor: { uniqueColumn: 'order_id', values: [4821] },
+        sort: [
+          { column: 'order_date', direction: 'desc' },
+          { column: 'order_id', direction: 'asc' },
+        ],
+      },
+      reason: 'keyset-cursor-mismatch',
+    },
+    {
+      args: {
+        cursor: { uniqueColumn: 'order_id', values: [4821, '2026-01-04'] },
+        sort: [
+          { column: 'order_id', direction: 'asc' },
+          { column: 'order_date', direction: 'desc' },
+        ],
+      },
+      reason: 'keyset-sort-not-unique',
+    },
+    {
+      args: {
+        cursor: { uniqueColumn: 'order_id', values: NULL_ORDER_ID_CURSOR },
+        sort: [
+          { column: 'order_date', direction: 'desc' },
+          { column: 'order_id', direction: 'asc' },
+        ],
+      },
+      reason: 'keyset-unique-value-missing',
+    },
+  ] as const)(
+    'refuses with a QueryRefusedError whose reason is $reason',
+    ({ args, reason }) => {
+      const refuse = () => assertKeysetCursor(args);
+
+      expect(refuse).toThrow(QueryRefusedError);
+      expect(refuse).toThrow(expect.objectContaining({ reason }));
+    },
+  );
 });

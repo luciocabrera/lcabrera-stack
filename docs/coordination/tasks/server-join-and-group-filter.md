@@ -14,6 +14,11 @@ area:
   - packages/server/package.json
   - .changeset/server-join-and-group-filter.md
   - reports/api-surface/server.txt
+  - reports/api-surface/ui.txt
+  - packages/server/src/errors/**
+  - packages/ui/src/components/Table/Table.types.ts
+  - packages/ui/src/components/Table/utils/refusal.constants.ts
+  - .changeset/ui-join-and-group-filter-refusals.md
 started: 2026-10-27
 updated: 2026-10-27
 plan: (none)

@@ -266,10 +266,22 @@ name or a detail the decision left open, and none of them changes it.
 - **`HAVING` reuses the aggregate's own `FILTER` parameters.** The expression is
   written again with the same `$n` placeholders, so each filter value is bound
   once. Only the group filter's own value takes a new parameter.
-- **The refusals are plain errors** raised by the pure builder before it returns
-  any SQL, as the cursor and sort refusals already were. A column outside its
-  source's list goes through `assertColumnAllowed`, so it fails exactly as a
-  base column outside the list does.
+- **Every refusal is a `QueryRefusedError`**, the family a column outside
+  `allowedColumns` and a keyset cursor already throw
+  ([ADR-145](ADR-145-refuse-a-column-outside-allowedcolumns-with-a-typed-error.md)),
+  raised by the pure builder before it returns any SQL. Each has its own
+  reason, so it crosses a loader edge as `query-refused` with a fixed sentence
+  that names no table, column or alias: `join-allowlist-missing`,
+  `join-relations-missing`, `join-not-declared`, `join-ambiguous`,
+  `join-kind-unsupported`, `join-alias-taken`, `join-source-unknown`,
+  `keyset-unique-column-joined`, `projected-alias-too-long`,
+  `group-filter-grouping-unsupported`, `group-filter-column-axis`,
+  `group-filter-alias-unknown` and `group-filter-operator-unsupported`. A
+  column outside its source's list goes through `assertColumnAllowed`, so it
+  fails exactly as a base column outside the list does. On a grouped read,
+  `assertGroupColumn` still wraps a column refusal as a `GroupingRefusedError`,
+  but passes `join-source-unknown` through unchanged. An unsafe identifier is
+  still the plain `Error` it always was.
 
 ## References
 

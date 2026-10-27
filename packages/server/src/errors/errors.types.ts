@@ -21,6 +21,26 @@ export type PgErrorFields = {
   readonly constraint?: string;
 };
 
+export type QueryRefusalReason =
+  | 'column-not-allowed'
+  | 'group-filter-alias-unknown'
+  | 'group-filter-column-axis'
+  | 'group-filter-grouping-unsupported'
+  | 'group-filter-operator-unsupported'
+  | 'join-alias-taken'
+  | 'join-allowlist-missing'
+  | 'join-ambiguous'
+  | 'join-kind-unsupported'
+  | 'join-not-declared'
+  | 'join-relations-missing'
+  | 'join-source-unknown'
+  | 'keyset-cursor-mismatch'
+  | 'keyset-sort-missing'
+  | 'keyset-sort-not-unique'
+  | 'keyset-unique-column-joined'
+  | 'keyset-unique-value-missing'
+  | 'projected-alias-too-long';
+
 export type SerializableDbError =
   | {
       /** The raw SQLSTATE, when the driver supplied one. Never the message. */
@@ -36,4 +56,9 @@ export type SerializableDbError =
       readonly reason: GroupingRefusalReason;
     }
   | { readonly kind: 'db-canceled'; readonly message: string }
+  | {
+      readonly kind: 'query-refused';
+      readonly message: string;
+      readonly reason: QueryRefusalReason;
+    }
   | { readonly kind: 'unexpected'; readonly message: string };

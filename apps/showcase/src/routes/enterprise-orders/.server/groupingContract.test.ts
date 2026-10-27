@@ -156,6 +156,11 @@ const serverErrors: readonly SerializableDbError[] = [
     message: 'Column "total_amount" is not a legal group key.',
     reason: 'column-not-groupable',
   },
+  {
+    kind: 'query-refused',
+    message: 'The request named a column this query does not allow.',
+    reason: 'column-not-allowed',
+  },
   { kind: 'db-canceled', message: 'The query was cancelled.' },
   { kind: 'unexpected', message: 'The request could not be completed.' },
 ];
@@ -244,6 +249,7 @@ describe('grouping contract between @lcabrera/ui and @lcabrera/server', () => {
     expect(uiErrors.map((error) => error.kind)).toStrictEqual([
       'db-failed',
       'grouping-refused',
+      'query-refused',
       'db-canceled',
       'unexpected',
     ]);

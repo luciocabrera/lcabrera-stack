@@ -1,5 +1,7 @@
 import type { GroupFilter, GroupingMode } from './group-query-builder.types.ts';
 
+import { QueryRefusedError } from '../../errors/query-refused.error.ts';
+
 type AssertGroupFiltersArgs = {
   readonly aggregateAliases: readonly string[];
   readonly groupFilters?: readonly GroupFilter[];
@@ -30,28 +32,33 @@ export const assertGroupFilters = ({
   }
 
   if (grouping !== 'flat') {
-    throw new Error(
-      `A group filter is refused with grouping "${grouping}": HAVING would test every subtotal too, and a subtotal is computed over all its children, not only the ones that pass.`,
-    );
+    throw new QueryRefusedError({
+      message: `A group filter is refused with grouping "${grouping}": HAVING would test every subtotal too, and a subtotal is computed over all its children, not only the ones that pass.`,
+      reason: 'group-filter-grouping-unsupported',
+    });
   }
 
   if (hasColumnAxis) {
-    throw new Error(
-      'A group filter is refused on a read with a column axis: the axis expands each aggregate into one per axis value, so the alias names no single expression.',
-    );
+    throw new QueryRefusedError({
+      message:
+        'A group filter is refused on a read with a column axis: the axis expands each aggregate into one per axis value, so the alias names no single expression.',
+      reason: 'group-filter-column-axis',
+    });
   }
 
   for (const { aggregateAlias, operator } of groupFilters) {
     if (!aggregateAliases.includes(aggregateAlias)) {
-      throw new Error(
-        `Cannot filter groups by "${aggregateAlias}": it is not one of this query's aggregates.`,
-      );
+      throw new QueryRefusedError({
+        message: `Cannot filter groups by "${aggregateAlias}": it is not one of this query's aggregates.`,
+        reason: 'group-filter-alias-unknown',
+      });
     }
 
     if (!GROUP_FILTER_OPERATORS.has(operator)) {
-      throw new Error(
-        `Cannot filter groups by "${aggregateAlias}" with "${String(operator)}"; a group filter takes ${[...GROUP_FILTER_OPERATORS].join(', ')}.`,
-      );
+      throw new QueryRefusedError({
+        message: `Cannot filter groups by "${aggregateAlias}" with "${String(operator)}"; a group filter takes ${[...GROUP_FILTER_OPERATORS].join(', ')}.`,
+        reason: 'group-filter-operator-unsupported',
+      });
     }
   }
 };
