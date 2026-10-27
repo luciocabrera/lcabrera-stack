@@ -5,8 +5,9 @@ governs:
 
 # ADR-143 — Join only along a foreign key, and filter a grouped result only when it is flat and has no column axis
 
-**Status:** Accepted; approved by the owner on 2026-10-27. Nothing it
-describes is built yet; the implementation follows under #998. `What this does NOT do` in
+**Status:** Accepted; approved by the owner on 2026-10-27. Clarified the same
+day, within that approval: a keyset cursor rests on a base-target column (see
+"A keyset cursor rests on the base target"). Nothing it describes is built yet; the implementation follows under #998. `What this does NOT do` in
 `packages/server/src/db/query-builder/ARCHITECTURE.md` lists what is true today,
 and the change that builds a feature also removes it from that list.
 
@@ -104,11 +105,24 @@ takes. No new builder and no new entry point are added.
   not only about columns, so it cannot be left implicit.
 - A column from a joined source is referenced as `{ column, source }`, where
   `source` is the join's alias. A bare string still means the base target.
-  Every reference in `fields`, `filters`, `sort`, `cursor`, the grouped `keys`
-  and `aggregates`, and the foreign-key columns a join is named by, is checked
-  by `assertSafeIdentifier` and by `assertColumnAllowed` against **its own
+  Every reference in `fields`, `filters`, `sort`, the grouped `keys` and
+  `aggregates`, and the foreign-key columns a join is named by, is checked by
+  `assertSafeIdentifier` and by `assertColumnAllowed` against **its own
   source's** list. A column that is allowed on one source is not allowed on
   another source under the same name.
+- **A keyset cursor rests on the base target.** _Clarified 2026-10-27, within
+  the owner's approval; not a new decision._ A cursor's `uniqueColumn` must be
+  a base-target column, written as a bare string. A `{ column, source }`
+  reference there is refused before any SQL is built, alongside the existing
+  `assertKeysetCursor` refusals. A joined column is never unique in the join
+  result: many base rows can reference one target row, so its value repeats.
+  Because `uniqueColumn` must be the last `sort` entry, a keyset read's sort
+  always ends on the base unique column, which a many-to-one join keeps
+  unique. That is what makes the sort tuple a total order. Earlier sort
+  entries may still name a joined column for display. The cursor carries their
+  values like any other sort value, and a `left` join's NULL is compared under
+  the same null placement as a nullable base column. A sort that ends on a
+  joined column can still page with `offset`, but it cannot take a cursor.
 - A projected joined column is aliased `"<alias>.<column>"`. A safe identifier
   cannot contain a dot, so this alias cannot collide with a base column or
   with another join's column, provided Postgres keeps the whole alias. It does
