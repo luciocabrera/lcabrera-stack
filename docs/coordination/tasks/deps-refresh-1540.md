@@ -2,7 +2,7 @@
 id: deps-refresh-1540
 title: Refresh the catalog, Vite+ 1.4, the action pins and Node 26.13.0
 owner: agent:claude
-status: active
+status: review
 branch: build/1540-deps-refresh
 area:
   - pnpm-workspace.yaml
@@ -19,7 +19,7 @@ area:
 started: 2026-10-29
 updated: 2026-10-29
 plan: (none)
-pr: (none)
+pr: #1543
 issue: #1540
 ---
 
@@ -32,6 +32,6 @@ moves reach.
 
 ## Status / next
 
-- Current step: full `vp run check:safe`, then CI.
+- Current step: CI and review on #1543.
 - Blockers: none.
 - Next: delete this file when the PR merges.
