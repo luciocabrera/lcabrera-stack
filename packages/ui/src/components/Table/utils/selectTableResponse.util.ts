@@ -1,14 +1,12 @@
-import type { TableProps } from '#ui/components/Table/Table.types';
+import type { TableGridProps } from '#ui/components/Table/TableGrid/TableGrid.types';
 
 type SelectTableResponseArgs<
   TData extends Record<string, unknown>,
   TResponse,
 > = Pick<
-  TableProps<TData, TResponse>,
-  'dataErrorSelector' | 'dataSelector' | 'dataTotalSelector'
-> & {
-  readonly response: TResponse;
-};
+  TableGridProps<TData, TResponse>,
+  'dataErrorSelector' | 'dataSelector' | 'dataTotalSelector' | 'response'
+>;
 
 export const selectTableResponse = <
   TData extends Record<string, unknown>,
@@ -19,11 +17,18 @@ export const selectTableResponse = <
   dataTotalSelector,
   response,
 }: SelectTableResponseArgs<TData, TResponse>) => {
-  const data = dataSelector ? dataSelector(response) : [];
+  if (dataSelector === undefined) {
+    const rows: readonly TData[] = Array.isArray(response) ? response : [];
+
+    return { data: rows, error: undefined, totalRows: rows.length };
+  }
+
+  const selected = response as TResponse;
+  const data = dataSelector(selected);
 
   return {
     data,
-    error: dataErrorSelector?.(response),
-    totalRows: dataTotalSelector?.(response) ?? data.length,
+    error: dataErrorSelector?.(selected),
+    totalRows: dataTotalSelector?.(selected) ?? data.length,
   };
 };

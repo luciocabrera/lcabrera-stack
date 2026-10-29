@@ -13,7 +13,7 @@ utils/
 ├── deriveLocalRows.util.ts                       → Filter then sort rows held in memory
 ├── matchesColumnFilter.util.ts                   → Whether a cell satisfies a ColumnFilter, read the way the server reads it
 ├── matchesDateFilter.util.ts / matchesNumberFilter.util.ts / matchesSelectFilter.util.ts / matchesTextFilter.util.ts → One matcher per filter type
-├── selectTableResponse.util.ts                   → Read rows, total and error out of a resolved response
+├── selectTableResponse.util.ts                   → A response as a data state: rows as given, or read through its selectors
 ├── toComparableCellValue.util.ts                 → A cell value as something that compares the way it reads
 ├── deriveColumnViewState.util.ts                 → Compose normalized columns + pinning-derived slices
 ├── getColumnSettingsNextStatePatch.util.ts       → Build the next table-meta patch after column-settings accept

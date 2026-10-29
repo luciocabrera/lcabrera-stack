@@ -195,8 +195,8 @@ const columns = inferTableColumnsFromJson({ rows });
 <Table columns={columns} response={rows} title='Rows' />;
 ```
 
-When no `TableLayout` sits above it, a `Table` given an array with no
-`dataSelector` keeps the rows in memory. Sorting, filtering, resizing, pinning
+When no `TableLayout` sits above it, a `Table` keeps its rows in memory,
+whether it was given an array or a response read through `dataSelector`. Sorting, filtering, resizing, pinning
 and scrolling all run on them in the browser, and the table writes nothing back
 to a URL or a cookie. Such a table mounts its own table providers, so it renders
 the same inside another grid as on its own. It also adds the notification and

@@ -62,134 +62,79 @@ describe('matchesColumnFilter', () => {
 
 describe('matchesColumnFilter, blank and missing cells, against the server’s SQL', () => {
   const JSON_NULL: unknown = JSON.parse('null');
-  const BLANK_CELLS = [JSON_NULL, undefined, '', ' '] as const;
-  const cases: readonly {
-    readonly expected: readonly [boolean, boolean, boolean, boolean];
-    readonly filter: ColumnFilter;
-    readonly name: string;
-  }[] = [
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'contains', type: 'text', value: 'a' },
-      name: 'text contains',
-    },
-    {
-      expected: [false, false, true, true],
-      filter: { operator: 'notContains', type: 'text', value: 'a' },
-      name: 'text notContains',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'equals', type: 'text', value: 'a' },
-      name: 'text equals',
-    },
-    {
-      expected: [false, false, true, true],
-      filter: { operator: 'notEquals', type: 'text', value: 'a' },
-      name: 'text notEquals',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'startsWith', type: 'text', value: 'a' },
-      name: 'text startsWith',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'endsWith', type: 'text', value: 'a' },
-      name: 'text endsWith',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'equals', type: 'select', value: 'open' },
-      name: 'select equals',
-    },
-    {
-      expected: [false, false, true, true],
-      filter: { operator: 'notEquals', type: 'select', value: 'open' },
-      name: 'select notEquals',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { type: 'multiSelect', values: ['open'] },
-      name: 'multiSelect equals',
-    },
-    {
-      expected: [false, false, true, true],
-      filter: { operator: 'notEquals', type: 'multiSelect', values: ['open'] },
-      name: 'multiSelect notEquals',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'equals', type: 'number', value: 1 },
-      name: 'number equals',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'notEquals', type: 'number', value: 1 },
-      name: 'number notEquals',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'greaterThan', type: 'number', value: 1 },
-      name: 'number greaterThan',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'lessThan', type: 'number', value: 1 },
-      name: 'number lessThan',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'between', type: 'number', value: 1, value2: 2 },
-      name: 'number between',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'equals', type: 'date', value: '2024-01-01' },
-      name: 'date equals',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'after', type: 'date', value: '2024-01-01' },
-      name: 'date after',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { operator: 'before', type: 'date', value: '2024-01-01' },
-      name: 'date before',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: {
-        operator: 'between',
-        type: 'date',
-        value: '2024-01-01',
-        value2: '2024-02-01',
-      },
-      name: 'date between',
-    },
-    {
-      expected: [false, false, false, false],
-      filter: { type: 'boolean', value: true },
-      name: 'boolean',
-    },
-    {
-      expected: [true, true, false, false],
-      filter: { operator: 'isEmpty', type: 'empty' },
-      name: 'isEmpty',
-    },
-    {
-      expected: [false, false, true, true],
-      filter: { operator: 'isNotEmpty', type: 'empty' },
-      name: 'isNotEmpty',
-    },
+  const NULL_CELLS = [JSON_NULL, undefined];
+  const BLANK_CELLS = ['', ' '];
+  const KEEPS_BLANK_TEXT = new Set(['notContains', 'notEquals']);
+  const DATE = '2024-01-01';
+  const FILTERS: readonly ColumnFilter[] = [
+    ...(
+      [
+        'contains',
+        'endsWith',
+        'equals',
+        'notContains',
+        'notEquals',
+        'startsWith',
+      ] as const
+    ).map((operator) => ({ operator, type: 'text', value: 'a' }) as const),
+    ...(['equals', 'notEquals'] as const).flatMap((operator) => [
+      { operator, type: 'select', value: 'open' } as const,
+      { operator, type: 'multiSelect', values: ['open'] } as const,
+    ]),
+    ...(
+      [
+        'equals',
+        'greaterThan',
+        'greaterThanOrEqual',
+        'lessThan',
+        'lessThanOrEqual',
+        'notEquals',
+      ] as const
+    ).map((operator) => ({ operator, type: 'number', value: 1 }) as const),
+    { operator: 'between', type: 'number', value: 1, value2: 2 },
+    ...(['after', 'before', 'equals'] as const).map(
+      (operator) => ({ operator, type: 'date', value: DATE }) as const,
+    ),
+    { operator: 'between', type: 'date', value: DATE, value2: '2024-02-01' },
+    { type: 'boolean', value: true },
   ];
+  const describeFilter = (filter: ColumnFilter) =>
+    `${filter.type} ${'operator' in filter ? (filter.operator ?? 'equals') : 'equals'}`;
+  const isBlankKept = (filter: ColumnFilter) =>
+    filter.type !== 'number' &&
+    filter.type !== 'date' &&
+    filter.type !== 'boolean' &&
+    'operator' in filter &&
+    KEEPS_BLANK_TEXT.has(filter.operator ?? 'equals');
 
-  it.each(cases)(
-    '$name keeps or drops null, undefined, empty and blank cells as SQL does',
-    ({ expected, filter }) => {
+  it.each(FILTERS.map((filter) => ({ filter, name: describeFilter(filter) })))(
+    '$name drops null and undefined cells, as SQL drops NULL',
+    ({ filter }) => {
+      expect(
+        NULL_CELLS.map((value) => matchesColumnFilter({ filter, value })),
+      ).toStrictEqual([false, false]);
+    },
+  );
+
+  it.each(FILTERS.map((filter) => ({ filter, name: describeFilter(filter) })))(
+    '$name treats empty and blank text as SQL treats an empty string',
+    ({ filter }) => {
       expect(
         BLANK_CELLS.map((value) => matchesColumnFilter({ filter, value })),
+      ).toStrictEqual([isBlankKept(filter), isBlankKept(filter)]);
+    },
+  );
+
+  it.each([
+    { expected: [true, true, false, false], operator: 'isEmpty' },
+    { expected: [false, false, true, true], operator: 'isNotEmpty' },
+  ] as const)(
+    '$operator tells NULL from an empty string',
+    ({ expected, operator }) => {
+      expect(
+        [...NULL_CELLS, ...BLANK_CELLS].map((value) =>
+          matchesColumnFilter({ filter: { operator, type: 'empty' }, value }),
+        ),
       ).toStrictEqual(expected);
     },
   );

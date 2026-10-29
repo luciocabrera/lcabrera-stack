@@ -25,12 +25,14 @@ import {
 
 import { AppProviders } from '#ui/components/AppProviders';
 import { PERSIST_COOKIE_ACTION } from '#ui/constants/globalSettings.constants';
+import { NotificationProvider } from '#ui/contexts/NotificationContext';
 
 import type { TableColumn, TableProps } from './Table.types';
 import type { TableLayoutProps } from './TableLayout/TableLayout.types';
 
 import { FiltersDataProvider } from './contexts/FiltersData';
 import { TableConfigProvider } from './contexts/TableConfig';
+import { TableOwnStackContext } from './contexts/TableConfig/TableOwnStackContext.context';
 import { TablePersistenceContext } from './contexts/TableConfig/TablePersistenceContext.context';
 import { TableFocusProvider } from './contexts/TableFocus';
 import { Table } from './Table.component';
@@ -144,6 +146,17 @@ const RerenderingParent = () => {
       />
     </>
   );
+};
+
+type SortColumnArgs = {
+  readonly command: 'Ascending' | 'Clear Sorting' | 'Descending';
+  readonly label: string;
+};
+
+const sortColumn = async ({ command, label }: SortColumnArgs) => {
+  openColumnActions(label);
+  fireEvent.click(screen.getByText(command));
+  await settle();
 };
 
 const filterReference = async (value: string) => {
@@ -272,6 +285,24 @@ describe('Table from a plain array or a promise', () => {
     ).toBe('true');
   });
 
+  it('does not re-read a selected response when the sort changes', async () => {
+    const dataSelector = vi.fn((page: OrderPage) => page.data);
+
+    render(
+      <Table
+        columns={ORDER_COLUMNS}
+        dataSelector={dataSelector}
+        response={{ data: ORDERS, total: 3 }}
+      />,
+    );
+    const readsBeforeSort = dataSelector.mock.calls.length;
+
+    await sortColumn({ command: 'Descending', label: 'Reference' });
+
+    expect(readsBeforeSort).toBeGreaterThan(0);
+    expect(dataSelector.mock.calls.length).toBe(readsBeforeSort);
+  });
+
   it('reads a promised response through its selectors', async () => {
     await act(async () => {
       render(
@@ -379,15 +410,11 @@ describe('Table from a plain array or a promise', () => {
   it('reorders the rendered rows when a column is sorted outside a router', async () => {
     render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 
-    openColumnActions('Order Total');
-    fireEvent.click(screen.getByText('Descending'));
-    await settle();
+    await sortColumn({ command: 'Descending', label: 'Order Total' });
 
     expect(columnValues('reference')).toStrictEqual(['Beta', 'Gamma', 'Alpha']);
 
-    openColumnActions('Order Total');
-    fireEvent.click(screen.getByText('Ascending'));
-    await settle();
+    await sortColumn({ command: 'Ascending', label: 'Order Total' });
 
     expect(columnValues('reference')).toStrictEqual(['Alpha', 'Gamma', 'Beta']);
   });
@@ -399,9 +426,7 @@ describe('Table from a plain array or a promise', () => {
       await settle();
     };
 
-    openColumnActions('Reference');
-    fireEvent.click(screen.getByText('Descending'));
-    await settle();
+    await sortColumn({ command: 'Descending', label: 'Reference' });
     await rerenderParent();
 
     expect(columnValues('reference')).toStrictEqual(['Gamma', 'Beta', 'Alpha']);
@@ -416,15 +441,11 @@ describe('Table from a plain array or a promise', () => {
   it('restores the given order when the sort is cleared', async () => {
     render(<Table columns={ORDER_COLUMNS} response={ORDERS} />);
 
-    openColumnActions('Reference');
-    fireEvent.click(screen.getByText('Ascending'));
-    await settle();
+    await sortColumn({ command: 'Ascending', label: 'Reference' });
 
     expect(columnValues('reference')).toStrictEqual(['Alpha', 'Beta', 'Gamma']);
 
-    openColumnActions('Reference');
-    fireEvent.click(screen.getByText('Clear Sorting'));
-    await settle();
+    await sortColumn({ command: 'Clear Sorting', label: 'Reference' });
 
     expect(columnValues('reference')).toStrictEqual(['Beta', 'Alpha', 'Gamma']);
   });
@@ -560,9 +581,7 @@ describe('Table given rows inside another grid', () => {
   it('sorts in memory without submitting through the enclosing grid', async () => {
     renderInsideEnclosingGrid();
 
-    openColumnActions('Reference');
-    fireEvent.click(screen.getByText('Ascending'));
-    await settle();
+    await sortColumn({ command: 'Ascending', label: 'Reference' });
 
     expect(columnValues('reference')).toStrictEqual(['Alpha', 'Beta', 'Gamma']);
     expect(ENCLOSING_PERSISTENCE.tableState).not.toHaveBeenCalled();
@@ -570,6 +589,44 @@ describe('Table given rows inside another grid', () => {
 });
 
 describe('Table persistence inside a router', () => {
+  it('does not re-read a route table’s response when a sort is written to the store', async () => {
+    const dataSelector = vi.fn((page: OrderPage) => page.data);
+    const routePersistence = {
+      columnSizing: vi.fn(),
+      tableState: vi.fn(),
+      uiFlags: vi.fn(),
+    };
+
+    render(
+      <NotificationProvider>
+        <TablePersistenceContext value={routePersistence}>
+          <TableConfigProvider<Order>
+            columnsState={createEmptyColumnsState({ columns: COLUMNS })}
+            metaState={{ persistenceKey: 'orders' }}
+          >
+            <TableFocusProvider>
+              <FiltersDataProvider<Order> columns={[...COLUMNS]}>
+                <TableOwnStackContext value>
+                  <Table<Order, OrderPage>
+                    columns={COLUMNS}
+                    dataSelector={dataSelector}
+                    response={{ data: ORDERS, total: 3 }}
+                  />
+                </TableOwnStackContext>
+              </FiltersDataProvider>
+            </TableFocusProvider>
+          </TableConfigProvider>
+        </TablePersistenceContext>
+      </NotificationProvider>,
+    );
+    const readsBeforeSort = dataSelector.mock.calls.length;
+
+    await sortColumn({ command: 'Descending', label: 'Reference' });
+
+    expect(routePersistence.tableState).toHaveBeenCalledTimes(1);
+    expect(dataSelector.mock.calls.length).toBe(readsBeforeSort);
+  });
+
   it('submits a sort to the cookie action from the route-level layout', async () => {
     const dataPromise = Promise.resolve({ data: ORDERS });
     const submissions = await renderRoute(
@@ -621,9 +678,7 @@ describe('Table persistence inside a router', () => {
       <Table columns={COLUMNS} response={ORDERS} />,
     );
 
-    openColumnActions('Reference');
-    fireEvent.click(screen.getByText('Ascending'));
-    await settle();
+    await sortColumn({ command: 'Ascending', label: 'Reference' });
 
     await act(async () => {
       await new Promise((resolve) => {

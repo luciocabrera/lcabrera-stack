@@ -11,11 +11,17 @@ filtering, infinite scroll, settings drawers, and cookie-based persistence.
 | `Table`       | Receives `columns` and one `response`: a value or a promise of one               |
 
 `Table` has one data input, `response`, which is a value or a promise of one.
-Given a promise, `Table` suspends on it through `TableDataResolver`. Its fallback is itself as a loading grid over placeholder rows. The placeholders are read through a `dataSelector`, so the user's sort and filters never apply to them. It then renders itself
+Given a promise, `Table` suspends on it through `TableDataResolver`. Its fallback is itself as a loading grid over placeholder rows. A loading grid is never sorted or filtered, so the user's sort and filters never apply to the placeholders. It then renders itself
 again with the resolved value. An array given with no `dataSelector` is the rows
-themselves. `useTableDataState` sorts and filters those rows in memory from the
-columns store, so a sort or filter reorders them with no loader behind them. Any
-other response is read through its selectors, as `TableLayout` does.
+themselves; any other response is read through its selectors.
+
+`TableGrid` reads the response once per render and subscribes to nothing.
+With no route-level persistence above it (no `TableLayout`), it renders
+`TableGridLocalRows`, which subscribes to the columns store's sorting and
+filters and runs `useTableDataState` to sort and filter the rows in memory.
+Under `TableLayout`, where a loader applies the sort, it renders
+`TableGridContent` directly. A sort or filter write then does not re-render the
+data subtree there.
 
 `Table` renders itself inside its own `TableConfigProvider`, `TableFocusProvider`
 and `FiltersDataProvider` when it is given rows to hold outside a `TableLayout`, or when no

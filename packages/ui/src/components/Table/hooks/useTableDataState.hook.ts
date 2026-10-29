@@ -1,36 +1,26 @@
-import type { TableGridProps } from '#ui/components/Table/TableGrid/TableGrid.types';
+import type { TableDataState } from '#ui/components/Table/Table.types';
 
 import { useGetColumnFilters } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumnFilters.hook';
 import { useGetColumnsSorting } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumnsSorting.hook';
 import { deriveLocalRows } from '#ui/components/Table/utils/deriveLocalRows.util';
-import { selectTableResponse } from '#ui/components/Table/utils/selectTableResponse.util';
 
-export const useTableDataState = <
-  TData extends Record<string, unknown>,
-  TResponse,
->({
-  dataErrorSelector,
-  dataSelector,
-  dataTotalSelector,
-  response,
-}: Pick<
-  TableGridProps<TData, TResponse>,
-  'dataErrorSelector' | 'dataSelector' | 'dataTotalSelector' | 'response'
->) => {
+type UseTableDataStateArgs<TData extends Record<string, unknown>> = Pick<
+  TableDataState<TData>,
+  'data' | 'error' | 'totalRows'
+>;
+
+export const useTableDataState = <TData extends Record<string, unknown>>({
+  data,
+  error,
+  totalRows,
+}: UseTableDataStateArgs<TData>) => {
   const sorting = useGetColumnsSorting<TData>();
   const columnFilters = useGetColumnFilters<TData>();
+  const localRows = deriveLocalRows({ columnFilters, rows: data, sorting });
 
-  if (dataSelector !== undefined) {
-    return selectTableResponse({
-      dataErrorSelector,
-      dataSelector,
-      dataTotalSelector,
-      response: response as TResponse,
-    });
-  }
-
-  const rows: readonly TData[] = Array.isArray(response) ? response : [];
-  const data = deriveLocalRows({ columnFilters, rows, sorting });
-
-  return { data, error: undefined, totalRows: data.length };
+  return {
+    data: localRows,
+    error,
+    totalRows: localRows.length === data.length ? totalRows : localRows.length,
+  };
 };

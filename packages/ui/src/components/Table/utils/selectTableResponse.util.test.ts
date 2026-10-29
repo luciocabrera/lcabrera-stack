@@ -37,7 +37,17 @@ describe('selectTableResponse', () => {
     });
   });
 
-  it('selects no rows without a data selector', () => {
+  it('takes an array given with no data selector as the rows', () => {
+    const rows: readonly Row[] = [{ id: 1 }, { id: 2 }];
+
+    expect(selectTableResponse<Row, Page>({ response: rows })).toStrictEqual({
+      data: rows,
+      error: undefined,
+      totalRows: 2,
+    });
+  });
+
+  it('selects no rows from a non-array response with no data selector', () => {
     expect(
       selectTableResponse<Row, Page>({ response: { rows: [] } }),
     ).toStrictEqual({ data: [], error: undefined, totalRows: 0 });

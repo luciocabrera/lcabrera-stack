@@ -1,52 +1,22 @@
-import * as stylex from '@stylexjs/stylex';
+import { use } from 'react';
 
 import type { TableGridProps } from './TableGrid.types';
 
-import { TableCellRenderingProvider, TableDataProvider } from '../contexts';
-import { TableOwnStackContext } from '../contexts/TableConfig/TableOwnStackContext.context';
-import { useTableDataState } from '../hooks/useTableDataState.hook';
-import { styles } from '../Table.stylex';
-import { TableContent } from '../TableContent';
+import { TablePersistenceContext } from '../contexts/TableConfig/TablePersistenceContext.context';
+import { selectTableResponse } from '../utils/selectTableResponse.util';
+import { TableGridContent } from './TableGridContent.component';
+import { TableGridLocalRows } from './TableGridLocalRows.component';
 
 export const TableGrid = <TData extends Record<string, unknown>, TResponse>(
   props: TableGridProps<TData, TResponse>,
 ) => {
-  const {
-    actions,
-    cellPalette,
-    cellRenderers,
-    dataSelector,
-    dataTotalSelector,
-    icon,
-    isFlexWrapperEnabled = true,
-    isLoading = false,
-    onLoadMore,
-  } = props;
-  const { data, error, totalRows } = useTableDataState(props);
-  const tableContent = (
-    <TableOwnStackContext value={false}>
-      <TableCellRenderingProvider
-        cellPalettes={[cellPalette]}
-        cellRenderers={cellRenderers}
-      >
-        <TableDataProvider<TData>
-          dataState={{ data, error, isLoading, totalRows }}
-        >
-          <TableContent
-            actions={actions}
-            dataSelector={dataSelector}
-            dataTotalSelector={dataTotalSelector}
-            icon={icon}
-            onLoadMore={onLoadMore}
-          />
-        </TableDataProvider>
-      </TableCellRenderingProvider>
-    </TableOwnStackContext>
-  );
+  const { isLoading = false } = props;
+  const isHeldInMemory = use(TablePersistenceContext) === undefined;
+  const dataState = { ...selectTableResponse(props), isLoading };
 
-  return isFlexWrapperEnabled ? (
-    <div {...stylex.props(styles.wrapper)}>{tableContent}</div>
+  return isHeldInMemory && !isLoading ? (
+    <TableGridLocalRows<TData, TResponse> {...props} dataState={dataState} />
   ) : (
-    tableContent
+    <TableGridContent<TData, TResponse> {...props} dataState={dataState} />
   );
 };

@@ -46,11 +46,13 @@ written to the URL and the rows kept their order.
   is required and `dataTotalSelector`, `dataErrorSelector` and `onLoadMore`
   may follow it. `TableLayoutProps` pairs `dataPromise` the same way. A
   mismatched pair is a type error rather than a runtime failure.
-- An array given with no `dataSelector` is the rows themselves. `Table` sorts
-  and filters them in memory from the columns store's sorting and filter state
-  (`useTableDataState`, `deriveLocalRows`). The filter matchers read a filter
-  the way the server's query filters read it. Any other response is read
-  through its selectors.
+- An array given with no `dataSelector` is the rows themselves, and any
+  other response is read through its selectors. With no `TableLayout` above
+  it, `Table` holds the rows in memory and sorts and filters them from the
+  columns store's sorting and filter state (`TableGridLocalRows`,
+  `useTableDataState`, `deriveLocalRows`). The filter matchers read a filter
+  the way the server's query filters read it. Under `TableLayout`, the loader
+  applies the sort, so the grid does not subscribe to it.
 - A `Table` holding rows in memory, or a `Table` with no `TableConfigContext`
   above it, renders itself inside its own `TableConfigProvider`,
   `TableFocusProvider` and `FiltersDataProvider`. Outside a `TableLayout`,
