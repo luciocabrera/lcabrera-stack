@@ -12,6 +12,7 @@ TableConfig/
 ├── TableConfigContext.context.ts            → createContext (undefined default)
 ├── TableConfigContext.provider.tsx           → Provider: seeds stores from the first snapshot, then syncs later prop identities through `syncStoreFromProps`
 ├── TableConfigContext.types.ts              → ContextValue (columnsStore + expansionStore + groupingStore + metaStore + onDrillGroup)
+├── TablePersistenceContext.context.ts       → The route-level layout's cookie submitters; absent, persist actions apply in memory only
 ├── useTableConfigContextValue.hook.ts       → use(TableConfigContext) with guard
 ├── index.ts                                 → Barrel: TableConfigProvider, hooks
 │
@@ -20,8 +21,8 @@ TableConfig/
 │   │
 │   ├── actions/                                 → Public API: every hook here is an executable action, all barrel-exported
 │   │   ├── hooks/                               → Internal to actions/ — shared hooks, never barrel-exported
-│   │   │   ├── usePersistTableStateAction.hook.ts → Cookie persistence (server action) used by six actions
-│   │   │   └── usePersistColumnSizingAction.hook.ts → Reads the store + submits the current widths via usePersistCookieAction (server action)
+│   │   │   ├── usePersistTableStateAction.hook.ts → Cookie persistence through TablePersistenceContext, used by six actions
+│   │   │   └── usePersistColumnSizingAction.hook.ts → Reads the store + submits the current widths via TablePersistenceContext (server action)
 │   │   ├── utils/buildPersistencePayload.util.ts       → Shared persistence-entry builder for batch settings hooks
 │   │   ├── utils/resolveBatchColumnSettingsUpdate.util.ts → Build next derived column config slices for one batch column update
 │   │   ├── utils/resolveBatchTableSettingsUpdate.util.ts → Build next derived column config slices for one table-wide settings update
@@ -358,7 +359,7 @@ consumers without stacking actions on top of one another.
 `usePersistTableStateAction` and `usePersistColumnSizingAction`
 (`actions/hooks/`) are the shared-hook cases: actions inside this context need
 them, nothing outside `actions/` does. `usePersistColumnSizingAction` reads the
-store and submits the current widths through `usePersistCookieAction`, so the
+store and submits the current widths through `TablePersistenceContext`, so the
 three sizing actions compose it the same way six column actions compose
 `usePersistTableStateAction`. `usePersistTableStateAction` previously sat in
 `Table/hooks/`, which forced every action to import the hooks barrel and closed
@@ -377,6 +378,10 @@ written to a **cookie** and to nothing else:
 | `usePersistTableStateAction`   | cookie (via server action) | the loader — `readTableLoaderStateFromRequest` (SSR) |
 | `usePersistColumnSizingAction` | cookie (via server action) | the loader — same                                    |
 | `usePersistTableUiFlagsAction` | cookie (via server action) | the loader — `readPersistedUiFlagsFromCookie`        |
+
+All three submit through `TablePersistenceContext`, which only `TableLayout`
+provides. A stack with no layout above it has nothing to read the cookie back,
+so the actions apply the change to the stores and submit nothing.
 
 **Why one channel, not two.** The cookie is the only thing SSR can read, and both
 stores seed exclusively from what the loader passes down. So the server's markup

@@ -108,7 +108,19 @@ const shellBlockLines = (content) => {
   return collected;
 };
 
-const shellSegments = (text) =>
+const isCommentStart = ({ characters, index }) =>
+  characters[index] === '#' &&
+  (index === 0 || /\s/.test(characters[index - 1]));
+
+export const withoutComment = (text) => {
+  const characters = [...text];
+  const start = characters.findIndex((_, index) =>
+    isCommentStart({ characters, index }),
+  );
+  return start === -1 ? text : characters.slice(0, start).join('');
+};
+
+export const shellSegments = (text) =>
   text
     .split(/&&|\|\||[|;]/)
     .map((segment) => segment.trim().replace(/^\$\s*/, ''));
@@ -181,6 +193,40 @@ export const shellPathTokens = (lines) =>
         })),
     )
     .filter((entry) => isPathToken(entry.token));
+
+const SCRIPT_RUNNERS = new Set(['bash', 'node', 'sh']);
+
+const PLACEHOLDER_CHARACTERS = /[$*<>{}]/;
+
+const scriptOperandOf = (segment) => {
+  const words = segment.split(/\s+/).filter((word) => word !== '');
+  const runner = words.findIndex((word) => !word.includes('='));
+  if (!SCRIPT_RUNNERS.has(words[runner] ?? '')) return '';
+  const operand = words.slice(runner + 1).find((word) => !word.startsWith('-'));
+  return (operand ?? '').replaceAll(/^["']|["']$/g, '');
+};
+
+/** @param {{ line: number, text: string }[]} lines */
+export const shellScriptOperands = (lines) =>
+  lines
+    .flatMap(({ line, text }) =>
+      shellSegments(text).map((segment) => ({
+        line,
+        token: scriptOperandOf(segment),
+      })),
+    )
+    .filter(
+      (entry) =>
+        isPathToken(entry.token) && !PLACEHOLDER_CHARACTERS.test(entry.token),
+    );
+
+export const shellCodeLines = (content) => [
+  ...inlineCodeSpans(content),
+  ...shellBlockLines(content),
+];
+
+export const extractScriptOperands = (content) =>
+  shellScriptOperands(shellCodeLines(content));
 
 export const extractPathTokens = (content) => {
   const inline = inlineCodeSpans(content)

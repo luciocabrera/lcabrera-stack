@@ -76,7 +76,7 @@ export const runGit = ({ args, cwd }) => {
 export const runGitStatus = ({ args, cwd }) => {
   const binary = gitBinary();
   if (binary === undefined) {
-    return { status: null, stdout: '' };
+    return { status: null, stderr: '', stdout: '' };
   }
   try {
     const stdout = execFileSync(binary, args, {
@@ -84,12 +84,13 @@ export const runGitStatus = ({ args, cwd }) => {
       encoding: 'utf8',
       env: buildGitEnv(process.env),
       maxBuffer: 8 * 1024 * 1024,
-      stdio: ['ignore', 'pipe', 'ignore'],
+      stdio: ['ignore', 'pipe', 'pipe'],
     });
-    return { status: 0, stdout: stdout.trim() };
+    return { status: 0, stderr: '', stdout: stdout.trim() };
   } catch (error) {
     return {
       status: typeof error.status === 'number' ? error.status : null,
+      stderr: String(error.stderr ?? '').trim(),
       stdout: String(error.stdout ?? '').trim(),
     };
   }

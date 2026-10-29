@@ -204,8 +204,9 @@ Selection guideline:
 >
 > **`vp run commands:verify` enforces that** (CI step in `check-safe.yml`): a new
 > root script that is undocumented, a documented command that no longer resolves,
-> a wrong per-workspace claim, a broken link, or a stale workspace count all fail
-> the build. So do not re-list commands here — a copy in this file is a copy the
+> a wrong per-workspace claim, a broken link, a stale workspace count, or a
+> `vp run --filter` in a root script or workflow without `--fail-if-no-match` all
+> fail the build. So do not re-list commands here — a copy in this file is a copy the
 > checker does not police, which is exactly how the last set rotted.
 
 **The `.mjs`/`.cjs` scripts running these checks are themselves governed** — see
@@ -276,7 +277,7 @@ policy that governs them:
 
 There is deliberately **no `start:all`/`dev:all`**. One app is runnable, so `dev:showcase` and `start:showcase` are the commands and an "all" alias would just be a second name for one of them. Add one when a second app arrives, and say what it buys.
 
-**`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every workspace now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there). A workspace with tests also gets its own `vite.config.ts`, even an empty one: without it, `vp run --filter <workspace> test` launched from the repo root fails with Vitest's "failed to find the current suite" before any test runs.
+**`vp check` type-checks, but it is not `tsc` — both run, and `typecheck:all` is the authority.** `vp check`'s type pass is **tsgolint** (Oxlint's type-aware path, enabled by `lint.options.typeCheck` in the root `vite.config.ts`), and it does resolve each workspace's own strict `tsconfig.app.json` — `strict`, `noUncheckedIndexedAccess` and `noUnusedLocals` all fire under it. What it does **not** do is run the per-workspace `typecheck` scripts, and those carry work no linter replicates: `packages/ui` gates its public API against server-only `node:*` imports (`check:public-api`), and both React Router apps regenerate route types first. Every workspace now has a `typecheck` script, CI runs `vp run typecheck:all` as its own step in `check-safe.yml`, and `check:safe` chains it. Keep the two passes in sync: a new workspace gets a `typecheck` script **and** a tsconfig, or it silently falls back to the near-empty root `tsconfig.json` and is checked far more loosely than every other workspace (this is exactly how `utils`/`plugins`/`vite-configs` went un-strict for so long — `noUncheckedIndexedAccess` never fired there).
 
 **tsconfigs are generated — never hand-edit them.** `packages/ts-configs/tsconfig.entries.ts` (this repo's per-workspace entries) + `packages/tsconfig/src/tsconfig.shared.ts` (the published factories) are the source of truth for every `tsconfig.app.json`/`tsconfig.node.json`; run `vp run --filter @repo/ts-configs generate` after changing either, then `vp fmt .`. A hand-edit survives exactly until the next unrelated regeneration silently reverts it — the `@lcabrera/ui` bare-specifier alias in both apps was lost this way and had to be folded back into the generator. If a config needs something bespoke, add it to the generator entry, not to the JSON.
 
@@ -306,7 +307,7 @@ Fallow is configured once at the repo root (`.fallowrc.json`) and auto-detects e
 
 `reports/fallow/` is the **single canonical location** for every fallow artifact; only `reports/fallow/baselines/` is tracked. The split is a rule, not a habit: a gate compares against it → tracked; it reports what a tool found → produced on demand ([ADR-049](docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)). **So there is no snapshot to read — run the command and read what it writes.**
 
-Before a PR, run `vp run fallow:audit --base main`. CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails only on newly-introduced dead code, complexity, or duplication. Dead code is also gated **whole-tree**: `vp run fallow:dead-code:verify` exits non-zero on any error-severity dead-code finding anywhere, including an export in an unchanged file that the change made unreachable, which a changed-file audit cannot see. `check:push`, `check:safe` and the CI Fallow Audit job all run it.
+Before a PR, run `vp run fallow:audit --base main`. CI runs `fallow audit --gate new-only` on every PR (`check-safe.yml`) — it fails on newly-introduced dead code, complexity, or duplication, and on an inherited complexity finding that grew (`audit.worsened: "error"` in `.fallowrc.json`). Dead code is also gated **whole-tree**: `vp run fallow:dead-code:verify` exits non-zero on any error-severity dead-code finding anywhere, including an export in an unchanged file that the change made unreachable, which a changed-file audit cannot see. `check:push`, `check:safe` and the CI Fallow Audit job all run it.
 
 **Always feed the audit real coverage** (`--coverage reports/fallow/coverage/coverage-final.json`, from `vp run coverage:merge`). Without it fallow _estimates_ coverage from whether a colocated test file exists, and at an estimated 0% every function with cyclomatic ≥ 5 breaches the CRAP threshold — an unfed audit reports trivially simple code as `critical`. Read a finding's **`exceeded`** field, not `severity`.
 
@@ -631,6 +632,12 @@ to the spec so they cannot drift. If the standard itself must change, change
 The `@lcabrera/*` packages are versioned with **Changesets**, independently. A
 change that affects consumers **carries a changeset in the same PR** — that is the
 part you must not forget; `vp run release:version` consumes them.
+`vp run changesets:verify` enforces the mechanical subset: it fails a PR that
+changes a file in a package's packed tarball (a shipped `README.md` counts, a test
+or a file outside `files` does not) with no changeset naming that package. It
+cannot see a `catalog:` range changed in `pnpm-workspace.yaml`, which pnpm writes
+into every published manifest at pack time while no file under the package
+changes, so that changeset stays a review responsibility.
 
 Two invariants worth knowing before you touch a manifest: **`private: true` is the
 only thing keeping a workspace out of the registry** (the public ones no

@@ -7,24 +7,33 @@
  * because they fail differently for a consumer — a `link` is a file they will
  * not have, a `command` a tool their shell may not resolve, an `import` a module
  * their install will not provide, a `bin` an executable their install will not
- * place, a `secret` a value only their repository settings can supply, and a
- * `requires` a config key no consumer could set.
+ * place, a `secret` a value only their repository settings can supply, a
+ * `requires` a config key no consumer could set, a `missing` a script run by a
+ * command that exists nowhere at all, and a `task` a runner invocation naming a
+ * task the shipped set never defines.
+ *
+ * A file no resolver reads is returned as `unchecked` rather than dropped: the
+ * analysis finds nothing in it for the same reason it finds nothing in a file
+ * that is genuinely self-contained, so only naming it tells the two apart.
  */
 
-import { artifactEscapes } from './closure-artifacts.mjs';
+import { artifactEscapes, artifactReaders } from './closure-artifacts.mjs';
 import {
   classifyImport,
   classifyLink,
   classifyPathToken,
   directoryOf,
   toCommandEscapes,
+  toMissingScripts,
 } from './closure-classify.mjs';
 import {
   extractCommands,
   extractImportSpecifiers,
   extractLinkTargets,
   extractPathTokens,
+  extractScriptOperands,
 } from './closure-extract.mjs';
+import { extractTaskInvocations, toTaskEscapes } from './closure-tasks.mjs';
 import { requiredConfigKeys, requiresDeclarationLine } from './frontmatter.mjs';
 
 export { classifyLink, classifyPathToken } from './closure-classify.mjs';
@@ -40,8 +49,18 @@ const SOURCE_EXTENSIONS = [
   '.tsx',
 ];
 
+const MARKDOWN_EXTENSIONS = ['.md', '.mdx'];
+
 const isSourceFile = (path) =>
   SOURCE_EXTENSIONS.some((extension) => path.endsWith(extension));
+
+const isMarkdownFile = (path) =>
+  MARKDOWN_EXTENSIONS.some((extension) => path.endsWith(extension));
+
+const isRead = ({ agentDirectory, file, hookDirectory }) =>
+  isMarkdownFile(file.path) ||
+  isSourceFile(file.path) ||
+  artifactReaders({ agentDirectory, file, hookDirectory }).length > 0;
 
 const KEY_SEPARATOR = String.fromCodePoint(0);
 
@@ -87,7 +106,10 @@ const toRequiresEscapes = ({ allowedKeys, file }) =>
  *   allowedCommands?: Iterable<string>,
  *   allowedConfigKeys?: Iterable<string>,
  *   allowedPackages?: Iterable<string>,
+ *   allowedTasks?: Iterable<string>,
  *   exists?: (repoRelativePath: string) => boolean,
+ *   hookDirectory?: string,
+ *   runPrefixes?: readonly string[],
  *   shipped?: Set<string> }} args
  */
 export const analyseClosure = ({
@@ -96,12 +118,16 @@ export const analyseClosure = ({
   allowedCommands = [],
   allowedConfigKeys = [],
   allowedPackages = [],
+  allowedTasks,
   exists,
   files,
+  hookDirectory,
   rootDirectory,
+  runPrefixes,
   shipped = new Set(),
 }) => {
   const allowed = new Set(allowedCommands);
+  const tasks = allowedTasks === undefined ? undefined : new Set(allowedTasks);
   const allowedKeys = new Set(allowedConfigKeys);
   const packages = new Set(allowedPackages);
   const bins = allowedBins === undefined ? undefined : new Set(allowedBins);
@@ -142,6 +168,32 @@ export const analyseClosure = ({
     }),
   );
 
+  const taskEscapes = files
+    .filter((file) => isMarkdownFile(file.path))
+    .flatMap((file) =>
+      toTaskEscapes({
+        allowedTasks: tasks,
+        file,
+        invocations: extractTaskInvocations({
+          content: file.content,
+          prefixes: runPrefixes,
+        }),
+      }),
+    );
+
+  const missingScripts = files.flatMap((file) =>
+    toMissingScripts({
+      containment: {
+        fromDirectory: directoryOf(file.path),
+        rootDirectory,
+        shipped,
+      },
+      exists,
+      file,
+      operands: extractScriptOperands(file.content),
+    }),
+  );
+
   const importEscapes = files
     .filter((file) => isSourceFile(file.path))
     .flatMap((file) =>
@@ -176,6 +228,7 @@ export const analyseClosure = ({
       agentDirectory,
       allowed,
       allowedBins: bins,
+      allowedTasks: tasks,
       containment: {
         fromDirectory: directoryOf(file.path),
         rootDirectory,
@@ -183,16 +236,26 @@ export const analyseClosure = ({
       },
       exists,
       file,
+      hookDirectory,
+      runPrefixes,
     }),
   );
+
+  const unchecked = files
+    .filter((file) => !isRead({ agentDirectory, file, hookDirectory }))
+    .map((file) => file.path)
+    .toSorted((left, right) => left.localeCompare(right));
 
   return {
     escapes: dedupe([
       ...linkEscapes,
       ...commandEscapes,
+      ...taskEscapes,
+      ...missingScripts,
       ...importEscapes,
       ...requiresEscapes,
       ...otherEscapes,
     ]),
+    unchecked,
   };
 };

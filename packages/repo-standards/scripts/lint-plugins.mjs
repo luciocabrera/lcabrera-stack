@@ -13,8 +13,18 @@
  * reason. A further probe may share a family when it proves one rule that no
  * other engine or rule reports for its planted code; `scope` is then the
  * prefix Oxlint prints for it, and the file name carries the rule so probes in
- * one family do not overwrite each other.
+ * one family do not overwrite each other. `RULE_PROBES` is planted only where
+ * the config names its rule, at a path the naming entry's `files` match, so a
+ * probe for a rule a repository does not turn on never runs there.
  */
+export { configsDeclaringKeys } from './lint-plugins-config-keys.mjs';
+export {
+  malformedProbes,
+  namedRules,
+  placeRuleProbes,
+  probeFilename,
+} from './lint-plugins-named-rules.mjs';
+import { probeFilename } from './lint-plugins-named-rules.mjs';
 
 export const PLUGIN_PROBES = [
   {
@@ -69,14 +79,55 @@ export const PLUGIN_PROBES = [
   },
 ];
 
+export const RULE_PROBES = [
+  {
+    code: 'export const a = (n: Promise<number>) =>\n  n.then((value) => {\n    globalThis.name = String(value);\n  });\n',
+    plugin: 'promise',
+    rule: 'always-return',
+  },
+  {
+    code: 'export const A = () => {\n  const B = () => <div />;\n  return <B />;\n};\n',
+    ext: 'tsx',
+    plugin: 'react',
+    rule: 'no-unstable-nested-components',
+  },
+  {
+    code: 'export const a = (xs: readonly number[]) =>\n  [...xs].sort((p, q) => p - q);\n',
+    plugin: 'unicorn',
+    rule: 'no-array-sort',
+  },
+  {
+    code: "it('plants a test without an assertion', () => {\n  globalThis.name = 'x';\n});\n",
+    plugin: 'vitest',
+    rule: 'expect-expect',
+  },
+  {
+    code: "it('plants an expect without a matcher', () => {\n  expect(1);\n});\n",
+    plugin: 'vitest',
+    rule: 'valid-expect',
+  },
+  {
+    code: "it('plants an expect inside a catch', () => {\n  try {\n    globalThis.name = 'x';\n  } catch (error) {\n    expect(error).toBeDefined();\n  }\n});\n",
+    plugin: 'vitest',
+    rule: 'no-conditional-expect',
+  },
+  {
+    code: "describe('a suite', () => {\n  expect(1).toBe(1);\n});\n",
+    plugin: 'vitest',
+    rule: 'no-standalone-expect',
+  },
+  {
+    code: "it('plants a toThrow without a message', () => {\n  expect(() => globalThis.name).toThrow();\n});\n",
+    plugin: 'vitest',
+    rule: 'require-to-throw-message',
+  },
+];
+
 export const UNPROBED_PLUGINS = {
   import:
     'its correctness rules overlap tsgolint, which reports the same defect as a ' +
     'TypeScript error first, so a probe passes whether or not the plugin loaded',
 };
-
-export const probeFilename = ({ ext = 'ts', plugin, rule, scope = plugin }) =>
-  `${scope}.${rule}.probe.${ext}`;
 
 export const pluginsWithoutCoverage = (plugins) => {
   const covered = new Set([
@@ -89,23 +140,33 @@ export const pluginsWithoutCoverage = (plugins) => {
 export const probeCode = ({ plugin, rule, scope = plugin }) =>
   `${scope}(${rule})`;
 
-export const silentProbes = ({ probes, reportedCodes }) => {
-  const reported = new Set(reportedCodes);
-  return probes.filter((probe) => !reported.has(probeCode(probe)));
+export const familyPlacements = (dir) =>
+  PLUGIN_PROBES.map((probe) => ({
+    path: `${dir}/${probeFilename(probe)}`,
+    probe,
+    root: dir,
+  }));
+
+export const mergePlacements = (placements) =>
+  placements
+    .reduce((byPath, placement) => {
+      const named = byPath.get(placement.path)?.named ?? placement.named;
+      return byPath.set(placement.path, { ...placement, named });
+    }, new Map())
+    .values()
+    .toArray();
+
+const reportedKey = (filename, code) =>
+  `${filename.replace(/^\.\//u, '')}\0${code}`;
+
+export const silentPlacements = ({ diagnostics, placements }) => {
+  const reported = new Set(
+    diagnostics.map(({ code, filename }) => reportedKey(filename, code)),
+  );
+  return placements.filter(
+    ({ path, probe }) => !reported.has(reportedKey(path, probeCode(probe))),
+  );
 };
-
-const hasKey = (text, key) =>
-  new RegExp(String.raw`^\s{0,4}${key}\s*:`, 'mu').test(stripComments(text));
-
-export const configsDeclaringKeys = (files, keys) =>
-  files
-    .filter(({ path }) => path !== 'vite.config.ts')
-    .flatMap(({ path, text }) =>
-      keys.filter((key) => hasKey(text, key)).map((key) => ({ key, path })),
-    );
-
-const stripComments = (text) =>
-  text.replaceAll(/\/\*[\s\S]*?\*\//gu, '').replaceAll(/\/\/[^\n]*/gu, '');
 
 const globWorkspace = (glob) => glob.replace(/\/\*\*$/u, '');
 

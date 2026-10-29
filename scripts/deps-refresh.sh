@@ -12,9 +12,9 @@
 #     copies of the two above and moved to match them (#1179)
 #   - the pnpm catalog + every workspace package.json via taze — which also bumps
 #     the `vite-plus` dep, and with it vite/rolldown/vitest/oxlint/oxfmt/tsdown
-# then clean + reinstall so the tree resolves against all of it. Superseded
-# scripts/update-deps.sh, which only touched apps/* and left the catalog — where
-# nearly every version actually lives — to be edited by hand.
+# then clean + reinstall + dedupe so the tree resolves against all of it.
+# Superseded scripts/update-deps.sh, which only touched apps/* and left the
+# catalog — where nearly every version actually lives — to be edited by hand.
 #
 # Node IS bumped here, and that is declared rather than incidental. taze rewrites
 # `.node-version` (it reads the file as an update target, the same as a manifest),
@@ -312,6 +312,11 @@ node scripts/sync-devkit-pins.mjs ||
 log "Reinstalling with the refreshed versions (vp install)"
 "$vp_global" install
 
+# A resolve from no lockfile can keep an older version that a newer one in the
+# same lockfile satisfies, and `deps:lockfile` fails that in CI's Quality Gate.
+log "Collapsing what a fresh resolve left duplicated (vp dedupe)"
+"$vp_global" dedupe
+
 # --- did anything actually change? A no-op day makes no issue/branch/PR --------
 # The lockfile counts here, not only the manifests. `pnpm clean --lockfile` above
 # regenerates from nothing, which drops resolutions no manifest reaches any more —
@@ -365,7 +370,7 @@ Refresh all dependencies to their latest in-range versions (TypeScript held for 
 
 ## 3. Context & Background
 
-Opened by `vp run deps:refresh` (scripts/deps-refresh.sh): vp upgrade → pnpm clean → taze → corepack use pnpm@latest → sync the pins devkit emits → vp install, then this issue + branch + PR. Manifests + lockfile, the `.node-version` pin when taze moves it, and the devkit copies of the Node and pnpm pins when the root ones moved; no other source change expected.
+Opened by `vp run deps:refresh` (scripts/deps-refresh.sh): vp upgrade → pnpm clean → taze → corepack use pnpm@latest → sync the pins devkit emits → vp install → vp dedupe, then this issue + branch + PR. Manifests + lockfile, the `.node-version` pin when taze moves it, and the devkit copies of the Node and pnpm pins when the root ones moved; no other source change expected.
 
 ## 4. Reproduction Steps
 

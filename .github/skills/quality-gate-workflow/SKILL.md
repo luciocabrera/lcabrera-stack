@@ -66,7 +66,9 @@ staged files via the `staged` block in the root `vite.config.ts`.
 **Stage 5 is a gate no linter in this list contains, and it blocks.** React Doctor
 is the only pass checking effect cleanup, server/client boundaries and render-path
 cost, so nothing in stages 2–4 or 6 will surface what it finds; its findings
-block the gate at the severity `doctor.config.jsonc` names in `blocking`
+block the gate exactly where `react-doctor --blocking` would at the level
+`doctor.config.jsonc` names, so a `design`-tagged finding or one in a test or
+story file passes unless `surfaces.ciFailure` promotes it
 ([ADR-055](../../../docs/decisions/ADR-055-react-doctor-as-a-gate.md)). Like
 Biome it is **root-only and repo-wide** — there is no per-workspace variant, so
 `cd` to the root for this stage. It writes `reports/react-doctor/full-latest.json`

@@ -42,11 +42,16 @@ describe('assertGroupColumn', () => {
     },
   );
 
-  it('survives the loader edge as grouping-refused rather than unexpected', () => {
+  it('survives the loader edge as grouping-refused without naming the unlisted column', () => {
     const mapped = toSerializableDbError(refusalOf('secret'));
 
-    expect(mapped.kind).toBe('grouping-refused');
-    expect(mapped.message).toContain('not in the allowed list');
+    expect(mapped).toStrictEqual({
+      kind: 'grouping-refused',
+      message:
+        "The request named a column this grouped read cannot resolve: one the read does not allow, one the table's catalogue does not describe, or a granularity for a column that is not a group key.",
+      reason: 'unknown-column',
+    });
+    expect(JSON.stringify(mapped)).not.toContain('secret');
   });
 
   it('keeps the original rejection on cause for a server log', () => {

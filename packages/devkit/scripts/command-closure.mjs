@@ -14,8 +14,14 @@ import {
   analyseDirectory,
   BASELINE_COMMANDS,
   describeEscape,
+  describeUnchecked,
   renderClosureReport,
 } from './closure-report.mjs';
+import {
+  extractTaskInvocations,
+  RUNNER_PREFIXES,
+  taskInvocations,
+} from './closure-tasks.mjs';
 import { analyseClosure } from './closure.mjs';
 import { buildPlan } from './command-materialise.mjs';
 import {
@@ -23,11 +29,16 @@ import {
   configuredCommandWords,
   includesRung,
   PROFILES,
+  targetPathFor,
 } from './config.mjs';
-import { gateBinNames } from './init.mjs';
+import { GATE_TASKS, gateBinNames, tasksFor } from './init.mjs';
 import { isRetirement } from './manifest.mjs';
 import { readProfileFlag } from './profile-flag.mjs';
-import { WORKSPACE_DEPENDENCIES } from './workspace.mjs';
+import {
+  BLUEPRINT_TASK_NAMES,
+  WORKSPACE_DEPENDENCIES,
+  workspaceScriptsFor,
+} from './workspace.mjs';
 
 const MANIFEST_NAME = 'package.json';
 
@@ -71,16 +82,74 @@ const providedPackages = ({ entries, profile }) => {
   ];
 };
 
+const COMMAND_REFERENCE_ASSETS = ['full/COMMANDS.md', 'root/COMMANDS.md'];
+
+const commandReferencePaths = (config) =>
+  new Set(
+    COMMAND_REFERENCE_ASSETS.map((assetPath) =>
+      targetPathFor({ assetPath, config }),
+    ).filter((path) => path !== undefined),
+  );
+
+const runPrefixesFor = (config) => {
+  const configured = config.commands?.run;
+  return typeof configured === 'string' && configured.trim() !== ''
+    ? [...RUNNER_PREFIXES, configured.trim()]
+    : RUNNER_PREFIXES;
+};
+
+const configuredTasks = ({ config, runPrefixes }) =>
+  taskInvocations({
+    lines: Object.values(config.commands ?? {})
+      .filter((command) => typeof command === 'string')
+      .map((text) => ({ line: 0, text })),
+    prefixes: runPrefixes,
+  }).map((invocation) => invocation.task);
+
+const KIT_TASK_NAMES = new Set([
+  ...Object.keys(GATE_TASKS),
+  ...BLUEPRINT_TASK_NAMES,
+]);
+
+const documentedTasks = ({ entries, references, runPrefixes }) =>
+  entries
+    .filter((entry) => references.has(entry.path))
+    .flatMap((entry) =>
+      extractTaskInvocations({
+        content: entry.content,
+        prefixes: runPrefixes,
+      }).map((invocation) => invocation.task),
+    )
+    .filter((task) => !KIT_TASK_NAMES.has(task));
+
+/**
+ * @param {{ config: object, entries: { path: string, content: string }[],
+ *   references: Set<string>, runPrefixes: readonly string[] }} args
+ * @returns {string[]}
+ */
+const definedTasks = ({ config, entries, references, runPrefixes }) => [
+  ...Object.keys(tasksFor({ profile: config.profile })),
+  ...Object.keys(workspaceScriptsFor({ profile: config.profile })),
+  ...configuredTasks({ config, runPrefixes }),
+  ...documentedTasks({ entries, references, runPrefixes }),
+];
+
 const shippedContext = ({ profile, root }) => {
   const { config, entries: planned } = buildPlan({ profile, root });
   const entries = planned.filter((entry) => !isRetirement(entry.state));
+  const runPrefixes = runPrefixesFor(config);
+  const references = commandReferencePaths(config);
   return {
     agentDirectory: config.paths.agents,
     allowedBins: gateBinNames(),
     allowedCommands: [...BASELINE_COMMANDS, ...configuredCommandWords(config)],
     allowedPackages: providedPackages({ entries, profile }),
+    allowedTasks: definedTasks({ config, entries, references, runPrefixes }),
     configKeys: allowedConfigKeys(config),
     entries,
+    hookDirectory: config.paths.hooks,
+    references,
+    runPrefixes,
     shipped: new Set(entries.map((entry) => entry.path)),
   };
 };
@@ -91,8 +160,12 @@ const shippedEscapes = ({ profile, root }) => {
     allowedBins,
     allowedCommands,
     allowedPackages,
+    allowedTasks,
     configKeys,
     entries,
+    hookDirectory,
+    references,
+    runPrefixes,
     shipped,
   } = shippedContext({ profile, root });
   const files = entries.map((entry) => ({
@@ -100,19 +173,28 @@ const shippedEscapes = ({ profile, root }) => {
     path: entry.path,
   }));
 
-  const { escapes } = analyseClosure({
+  const { escapes, unchecked } = analyseClosure({
     agentDirectory,
     allowedBins,
     allowedCommands,
     allowedConfigKeys: configKeys,
     allowedPackages,
+    allowedTasks,
     exists: (path) => existsSync(resolve(root, path)),
     files,
+    hookDirectory,
     rootDirectory: '',
+    runPrefixes,
     shipped,
   });
 
-  return { escapes, fileCount: files.length };
+  return {
+    escapes: escapes.filter(
+      (finding) => finding.kind !== 'task' || !references.has(finding.file),
+    ),
+    fileCount: files.length,
+    unchecked,
+  };
 };
 
 const shippedResults = ({ profile, root }) =>
@@ -121,20 +203,23 @@ const shippedResults = ({ profile, root }) =>
     ...shippedEscapes({ profile: name, root }),
   }));
 
+const coverageOf = (result) =>
+  `${result.fileCount} shipped file(s), ${result.fileCount - result.unchecked.length} read, ${result.unchecked.length} unchecked`;
+
 const reportClean = (results) => {
   for (const result of results) {
-    console.log(
-      `✓ ${result.name} — ${result.fileCount} shipped file(s), self-contained`,
-    );
+    console.log(`✓ ${result.name} — ${coverageOf(result)}, no escapes`);
+    for (const line of describeUnchecked(result)) console.log(line);
   }
 };
 
 const reportEscapes = (results) => {
   for (const result of results) {
-    console.error(`✗ ${result.name} — ${result.fileCount} shipped file(s)`);
+    console.error(`✗ ${result.name} — ${coverageOf(result)}`);
     for (const finding of result.escapes) {
       console.error(`    ${describeEscape(finding)}`);
     }
+    for (const line of describeUnchecked(result)) console.error(line);
   }
   const total = results.reduce((sum, result) => sum + result.escapes.length, 0);
   console.error(`\n${total} escape(s) across ${results.length} profile(s).`);
@@ -163,8 +248,14 @@ const runDirectoryClosure = ({ directories, profile, root }) => {
     return 1;
   }
 
-  const { agentDirectory, allowedBins, allowedCommands, configKeys, shipped } =
-    shippedContext({ profile, root });
+  const {
+    agentDirectory,
+    allowedBins,
+    allowedCommands,
+    configKeys,
+    hookDirectory,
+    shipped,
+  } = shippedContext({ profile, root });
   const results = directories.map((directory) =>
     analyseDirectory({
       agentDirectory,
@@ -172,6 +263,7 @@ const runDirectoryClosure = ({ directories, profile, root }) => {
       allowedCommands,
       allowedConfigKeys: configKeys,
       directory: resolve(root, directory),
+      hookDirectory,
       root,
       shipped,
     }),

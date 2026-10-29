@@ -38,6 +38,27 @@ describe('workflow files', () => {
     expect(references(escapes)).toContain('scripts/release.mjs');
   });
 
+  test('a step running a script that exists nowhere is reported', () => {
+    const escapes = analyse({
+      content: [
+        'jobs:',
+        '  check:',
+        '    steps:',
+        '      - run: node scripts/ghost-not-anywhere.mjs',
+      ].join('\n'),
+      path,
+    });
+
+    expect(escapes).toEqual([
+      {
+        file: path,
+        kind: 'missing',
+        line: 4,
+        reference: 'scripts/ghost-not-anywhere.mjs',
+      },
+    ]);
+  });
+
   test('a step running an unanswered tool is reported', () => {
     const escapes = analyse({
       content: [
@@ -117,7 +138,12 @@ describe('workflow files', () => {
 
   test('the last of a chain of secrets is answered by nothing', () => {
     const escapes = analyse({
-      content: `          A: \${{ secrets.PUBLISH_TOKEN || secrets.FALLBACK_TOKEN }}\n`,
+      content: [
+        'jobs:',
+        '  check:',
+        '    env:',
+        `      A: \${{ secrets.PUBLISH_TOKEN || secrets.FALLBACK_TOKEN }}`,
+      ].join('\n'),
       path,
     });
 

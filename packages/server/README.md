@@ -1,7 +1,7 @@
 # `@lcabrera/server`
 
 **Node-only** server primitives: a generic, injection-safe SQL builder for
-single-table reads and writes on Postgres, a column-filter contract that maps
+reads and writes on Postgres, a column-filter contract that maps
 straight into it, and the credential primitives — secret hashing, API tokens,
 short-lived access tickets — that every service ends up rewriting.
 
@@ -29,46 +29,123 @@ Pure and database-free: each builder takes a descriptor and returns
 `{ text, values }`. Nothing here opens a connection, so the SQL is testable
 without a database.
 
-| Import                       | Builds                                                          |
-| ---------------------------- | --------------------------------------------------------------- |
-| `build-select-query.util`    | `SELECT` with filters, sorting, limit/offset                    |
-| `build-count-query.util`     | `COUNT(*)` (or of one column) over the same filters             |
-| `build-distinct-query.util`  | Paginated `SELECT DISTINCT` on one column — filter-option lists |
-| `build-insert-query.util`    | `INSERT … RETURNING`                                            |
-| `build-update-query.util`    | `UPDATE … RETURNING` — **refuses to build without a filter**    |
-| `build-delete-query.util`    | `DELETE … RETURNING` — **refuses to build without a filter**    |
-| `build-max-value-query.util` | `COALESCE(MAX(col), 0)`, for assigning the next id              |
-| `build-order-by-clause.util` | The `ORDER BY` fragment on its own                              |
-| `query-builder.types`        | Descriptors, `QueryFilter`, `ComparisonOperator`, `BuiltQuery`  |
+**`build-read-query.util` is the one entry point for a read.** `buildReadQuery`
+takes a single descriptor — fields, filters, sort, `limit`/`offset` or a keyset
+`cursor`, `distinct`, `count: true` for a total, or `aggregates`, `grouping` and
+`keys` for a grouped read — and returns the query. A grouped descriptor returns
+the keys and grouping masks its rows are decoded by as well; its `capabilities`
+map comes from `get-column-grouping-capabilities.util`.
+
+A read can reach further tables with `joins`, but only along a foreign key the
+schema declares, and only in the many-to-one direction, so a join adds columns
+to a row and never repeats one. Each join names the referencing columns on a
+table the read already reaches, an `alias`, `inner` or `left`, and its own
+`allowedColumns`. The base target's `allowedColumns` is then required too. The
+target and the `ON` clause come from the `relations` map, which
+`get-foreign-key-relations.util` reads from the catalogue. A joined column is
+written `{ column, source: '<alias>' }`, is checked against that join's own
+list, and comes back as `<alias>.<column>`. A keyset cursor's `uniqueColumn`
+stays a base-target column.
+
+A flat grouped read (`grouping: 'flat'`, no `columnAxis`) can also filter its
+groups with `groupFilters`, which become `HAVING`: each entry names one of the
+read's aggregate aliases, an operator and a parameterized value.
+
+```ts
+const page = buildReadQuery({
+  allowedColumns: ['id', 'vendor_id', 'amount'],
+  fields: ['id', 'amount', { column: 'name', source: 'vendor' }],
+  joins: [
+    {
+      alias: 'vendor',
+      allowedColumns: ['name', 'region'],
+      foreignKey: ['vendor_id'],
+      kind: 'left',
+    },
+  ],
+  relations, // getForeignKeyRelations({ depth: 1, schema: 'catalog', table: 'items' })
+  schema: 'catalog',
+  sort: [{ column: 'id', direction: 'asc' }],
+  table: 'items',
+});
+
+const busyRegions = buildReadQuery({
+  aggregates: [{ fn: 'count' }, { column: 'amount', fn: 'sum' }],
+  allowedColumns: ['region', 'amount'],
+  capabilities,
+  groupFilters: [{ aggregateAlias: 'sum_amount', operator: 'gt', value: 1000 }],
+  grouping: 'flat',
+  keys: ['region'],
+  maxRows: 5000,
+  schema: 'catalog',
+  table: 'items',
+});
+```
+
+```ts
+import { buildReadQuery } from '@lcabrera/server/db/query-builder/build-read-query.util';
+
+const { text, values } = buildReadQuery({
+  aggregates: [{ fn: 'count' }, { column: 'amount', fn: 'sum' }],
+  allowedColumns: ['region', 'status', 'amount'],
+  capabilities,
+  filters: [{ column: 'status', operator: 'eq', value: 'open' }],
+  grouping: 'rollup',
+  keys: ['region', 'status'],
+  maxRows: 5000,
+  schema: 'catalog',
+  sort: [{ aggregateAlias: 'sum_amount', direction: 'desc' }],
+  table: 'items',
+});
+```
+
+| Import                       | Builds                                                                        |
+| ---------------------------- | ----------------------------------------------------------------------------- |
+| `build-read-query.util`      | Every read: rows, a distinct projection, a count, or a grouped aggregate read |
+| `build-insert-query.util`    | `INSERT … RETURNING`                                                          |
+| `build-update-query.util`    | `UPDATE … RETURNING` — **refuses to build without a filter**                  |
+| `build-delete-query.util`    | `DELETE … RETURNING` — **refuses to build without a filter**                  |
+| `build-max-value-query.util` | `COALESCE(MAX(col), 0)`, for assigning the next id                            |
+| `build-order-by-clause.util` | The `ORDER BY` fragment on its own                                            |
+| `query-builder.types`        | Descriptors, `QueryFilter`, `ComparisonOperator`, `BuiltQuery`                |
+
+`build-select-query.util`, `build-distinct-query.util`, `build-count-query.util`
+and `group-query-builder/build-group-query.util` are deprecated. Each still
+exports its builder and returns the same SQL as before. Move to `buildReadQuery`.
 
 ### Executing — `@lcabrera/server/db/*`
 
 The one place the pure builders meet a connection. Every executor takes an
 optional `tx` and translates driver rejections (see the two sections below).
 
-| Import                    | What it does                                                                        |
-| ------------------------- | ----------------------------------------------------------------------------------- |
-| `get-pool.util`           | `getPool` / `closePool` — a lazily-initialised `pg.Pool` singleton                  |
-| `env.schema`              | `readEnvConfig` — Zod-validated `DB_*` credentials plus optional pool tuning        |
-| `db.types`                | `ExecutorOptions` (the optional `tx`) and `TransactionClient`                       |
-| `select-rows.util`        | Builds a select descriptor and runs it                                              |
-| `insert-row.util`         | Builds an insert and runs it; defaults to `RETURNING *`                             |
-| `update-rows.util`        | Builds an update and runs it; defaults to `RETURNING *`                             |
-| `delete-rows.util`        | Builds a delete and runs it; defaults to `RETURNING *`                              |
-| `get-max-value.util`      | Returns the numeric `MAX(col)`, or 0 for an empty table                             |
-| `with-transaction.util`   | Runs a callback on one pooled connection in BEGIN/COMMIT/ROLLBACK, always releasing |
-| `run-in-transaction.util` | The same, over a connection you opened yourself; opens and closes nothing           |
+| Import                           | What it does                                                                                                |
+| -------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| `get-pool.util`                  | `getPool` / `closePool` — a lazily-initialised `pg.Pool` singleton that survives an idle-connection failure |
+| `env.schema`                     | `readEnvConfig` — Zod-validated `DB_*` credentials plus optional pool tuning                                |
+| `db.types`                       | `ExecutorOptions` (the optional `tx`) and `TransactionClient`                                               |
+| `select-rows.util`               | Builds a select descriptor and runs it; reads the relation map first when it joins and carries none         |
+| `get-foreign-key-relations.util` | The foreign keys a read with `joins` may follow, in one catalogue round trip                                |
+| `insert-row.util`                | Builds an insert and runs it; defaults to `RETURNING *`                                                     |
+| `update-rows.util`               | Builds an update and runs it; defaults to `RETURNING *`                                                     |
+| `delete-rows.util`               | Builds a delete and runs it; defaults to `RETURNING *`                                                      |
+| `get-max-value.util`             | Returns the numeric `MAX(col)`, or 0 for an empty table                                                     |
+| `with-transaction.util`          | Runs a callback on one pooled connection in BEGIN/COMMIT/ROLLBACK, always releasing                         |
+| `run-in-transaction.util`        | The same, over a connection you opened yourself; opens and closes nothing                                   |
 
 ### Typed errors — `@lcabrera/server/errors/*`
 
-| Import                              | What it does                                                                  |
-| ----------------------------------- | ----------------------------------------------------------------------------- |
-| `map-db-error.util`                 | SQLSTATE → a typed error; returns an already-translated one unchanged         |
-| `persistence.error`                 | `PersistenceError` — the base class and the fallback                          |
-| `unique-constraint-violation.error` | `23505`; `fields.constraint` names the index                                  |
-| `foreign-key-violation.error`       | `23503`; `fields.constraint` tells the insert and delete directions apart     |
-| `has-postgres-error-code.util`      | Narrows `unknown` to a pg rejection with any SQLSTATE you name                |
-| `errors.types`                      | `PgErrorFields` — the `code`/`column`/`constraint` a translated error carries |
+| Import                              | What it does                                                                                |
+| ----------------------------------- | ------------------------------------------------------------------------------------------- |
+| `map-db-error.util`                 | SQLSTATE → a typed error; returns an already-translated one unchanged                       |
+| `persistence.error`                 | `PersistenceError` — the base class and the fallback                                        |
+| `unique-constraint-violation.error` | `23505`; `fields.constraint` names the index                                                |
+| `foreign-key-violation.error`       | `23503`; `fields.constraint` tells the insert and delete directions apart                   |
+| `query-canceled.error`              | `57014`; the statement was stopped, by `statement_timeout` or a cancel                      |
+| `grouping-refused.error`            | A grouped read this package refused; a `QueryRefusedError` with grouping reasons            |
+| `query-refused.error`               | The base of every refusal, thrown for a column or cursor the call named; not a driver error |
+| `to-serializable-db-error.util`     | Anything thrown → `SerializableDbError`, plain data safe to put in a response               |
+| `has-postgres-error-code.util`      | Narrows `unknown` to a pg rejection with any SQLSTATE you name                              |
+| `errors.types`                      | `PgErrorFields` — the `code`/`column`/`constraint` a translated error carries               |
 
 ### Column filters — `@lcabrera/server/filters/*`
 
@@ -78,7 +155,7 @@ The contract a table filter UI speaks, and the mappers that translate it into
 
 | Import                         | What it does                                                        |
 | ------------------------------ | ------------------------------------------------------------------- |
-| `filters.types`                | `ColumnFilter` and its boolean/date/number/select/text members      |
+| `filters.types`                | `ColumnFilter` and its members, re-exported from `@lcabrera/api`    |
 | `to-query-filters.util`        | Dispatches a `Record<column, ColumnFilter>` to the per-type mappers |
 | `to-date-query-filters.util`   | Date filter → `gt`/`lt`/`eq`, or `gte`+`lte` for `between`          |
 | `to-number-query-filters.util` | Number/currency filter → comparison operators                       |
@@ -94,6 +171,25 @@ request carries, and the mapper into the `QuerySort[]` the builders consume.
 | ------------------------- | ---------------------------------------------------------------------------------------------------- |
 | `sort.types`              | `ColumnSort` — the request-sort shape                                                                |
 | `resolve-query-sort.util` | Request sort, or a fallback when it is empty → non-empty `QuerySort[]`; refuses to yield no ORDER BY |
+
+### Table pages — `@lcabrera/server/table-page/*`
+
+One table declared once, and the reads and request handlers bound to it. The
+handlers take a Web `Request` and return a `Response`, so they need no
+framework.
+
+| Import                           | What it does                                                                                                                                            |
+| -------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `create-table-page-reader.util`  | Schema, table, columns and primary key in → `selectPage`, `resolvePageRead` and the rest, a `pageLoader` and a grid `source`; every limit has a default |
+| `create-table-page-loader.util`  | A reader's `resolvePageRead` and `selectPage` → `({ request }) => Promise<Response>` with the page                                                      |
+| `parse-table-page-params.util`   | `limit`/`skip`/`cursor`/`filter`/`sort` search params → the params, or a refusal of the `filter`                                                        |
+| `create-row-delete-action.util`  | `({ request }) => Promise<Response>` that deletes the row a `{ intent: 'delete', id }` form names                                                       |
+| `create-table-loader-reads.util` | The first page's read for a table, from its sort, filters and grouping                                                                                  |
+| `create-group-detail-reads.util` | The reads for a page that opens one group's rows                                                                                                        |
+| `to-integer-row-id.util`         | A form value → a positive safe integer, or `undefined`                                                                                                  |
+| `to-refused-table-page.util`     | The empty page that carries a refusal message instead of rows                                                                                           |
+| `to-keyset-cursor.util`          | A client cursor → `QueryCursor` when it matches the sort and ends on a unique column, else offset                                                       |
+| `table-page.types`               | `TablePage`, `TablePageRead`, `TablePageTarget` and the other shapes the factories share                                                                |
 
 ### Credentials — `@lcabrera/server/crypto/*`, `/tokens/*`, `/tickets/*`
 
@@ -135,6 +231,28 @@ One thing worth knowing before you type the row: `TRow` is an **unchecked**
 contract with the table, because `pg` does not validate it. Postgres `numeric`
 columns arrive as **strings**, so type them `string` and coerce at the caller.
 
+### Serve a grid from a table by name
+
+```ts
+import { createTablePageReader } from '@lcabrera/server/table-page/create-table-page-reader.util';
+
+export const orders = createTablePageReader<Order, 'id'>({
+  pagePath: '/orders/page',
+  primaryKey: 'id',
+  target: {
+    allowedColumns: ['id', 'country', 'placed_on', 'total'],
+    schema: 'sales',
+    table: 'orders',
+  },
+});
+```
+
+`orders.pageLoader` is the `loader` of the resource route at `pagePath`, and
+`orders.source` is the setting `@lcabrera/ui`'s `createTableRouteLoader` takes;
+that package's README shows the route and the view. `allowedColumns` is the
+whole surface a request can reach — the query builder rejects a filter, sort or
+cursor naming any other column before a statement is built.
+
 ### Take column names from a request
 
 When a column name comes from outside, list what is allowed. `allowedColumns` is
@@ -150,7 +268,9 @@ const rows = await selectRows<Order>({
 });
 ```
 
-An identifier outside the list throws before any SQL is built.
+An identifier outside the list throws a `QueryRefusedError` with reason
+`column-not-allowed` before any SQL is built, so a caller can tell a refused
+request from a database failure without reading the message.
 
 ### Sort a page by what the request asked for
 
@@ -321,6 +441,228 @@ makes the check meaningful: a valid ticket for a different subject fails. The
 caller supplies `expiresAt` and `now`, which keeps both functions pure and makes
 expiry trivially testable.
 
+## Serve an HTTP API
+
+This package and `@lcabrera/utils` are enough to put an HTTP API over a Postgres
+table. No interface package is involved: you do not install `@lcabrera/ui` or
+any component library, and you do not need a web framework. `@lcabrera/api`
+installs with this package, because it declares the filter shapes a request
+carries, but the example below does not import it.
+
+```bash
+npm install @lcabrera/server @lcabrera/utils
+```
+
+Install `@lcabrera/utils` directly even though this package depends on it: the
+example imports it, and a strict package manager such as pnpm does not let you
+import a dependency you did not declare.
+
+The example is two files. `api.ts` is the endpoint, a function from a Web
+`Request` to a `Response`, which is the shape Node, Deno, Bun and most routers
+can call. `server.ts` serves it with `node:http`. The pool opens on the first
+query, configured from `DB_HOST`, `DB_PORT`, `DB_NAME`, `DB_USER` and
+`DB_PASSWORD` (`readEnvConfig` in `db/env.schema` lists the optional pool
+settings).
+
+```ts
+// api.ts
+import { insertRow } from '@lcabrera/server/db/insert-row.util';
+import { toSerializableDbError } from '@lcabrera/server/errors/to-serializable-db-error.util';
+import { UniqueConstraintViolationError } from '@lcabrera/server/errors/unique-constraint-violation.error';
+import { createTablePageLoader } from '@lcabrera/server/table-page/create-table-page-loader.util';
+import { createTablePageReader } from '@lcabrera/server/table-page/create-table-page-reader.util';
+import { isObject } from '@lcabrera/utils/guards/is-object.util';
+import { safeJsonParse } from '@lcabrera/utils/json/safe-json-parse.util';
+
+type Item = {
+  readonly id: number;
+  readonly name: string;
+  readonly status: string;
+};
+
+const TARGET = {
+  allowedColumns: ['id', 'name', 'status'],
+  schema: 'catalog',
+  table: 'items',
+};
+
+const items = createTablePageReader<Item, 'id'>({
+  defaultLimit: 50,
+  fallbackSort: [{ columnKey: 'id', direction: 'asc' }],
+  groupMaxRows: 5000,
+  maxLimit: 500,
+  primaryKey: 'id',
+  target: TARGET,
+});
+
+const readItemsPage = createTablePageLoader(items);
+
+const STATUS_BY_KIND = {
+  'db-canceled': 503,
+  'db-failed': 500,
+  'grouping-refused': 422,
+  'query-refused': 400,
+  unexpected: 500,
+} as const;
+
+const toErrorResponse = (thrown: unknown) => {
+  const error = toSerializableDbError(thrown);
+  const status =
+    thrown instanceof UniqueConstraintViolationError
+      ? 409
+      : STATUS_BY_KIND[error.kind];
+
+  return Response.json({ error }, { status });
+};
+
+const readNewItem = async (request: Request) => {
+  const body = safeJsonParse(await request.text());
+
+  return isObject(body) && typeof body.name === 'string'
+    ? { name: body.name, status: 'draft' }
+    : undefined;
+};
+
+const createItem = async (request: Request) => {
+  const values = await readNewItem(request);
+
+  if (values === undefined) {
+    return Response.json(
+      { error: { kind: 'invalid-body', message: 'Send { "name": string }.' } },
+      { status: 400 },
+    );
+  }
+
+  const [item] = await insertRow<Item>({ ...TARGET, values });
+
+  return Response.json(item, { status: 201 });
+};
+
+const route = async (request: Request) => {
+  switch (request.method) {
+    case 'GET': {
+      return readItemsPage({ request });
+    }
+    case 'POST': {
+      return createItem(request);
+    }
+    default: {
+      return new Response(undefined, {
+        headers: { allow: 'GET, POST' },
+        status: 405,
+      });
+    }
+  }
+};
+
+export const handle = async (request: Request) => {
+  if (new URL(request.url).pathname !== '/items') {
+    return new Response(undefined, { status: 404 });
+  }
+
+  try {
+    return await route(request);
+  } catch (error) {
+    console.error(error);
+
+    return toErrorResponse(error);
+  }
+};
+```
+
+```ts
+// server.ts
+import type { IncomingMessage, ServerResponse } from 'node:http';
+
+import { closePool } from '@lcabrera/server/db/get-pool.util';
+import { parsePositiveInteger } from '@lcabrera/utils/numbers/parse-positive-integer.util';
+import { createServer } from 'node:http';
+import { text } from 'node:stream/consumers';
+
+import { handle } from './api.ts';
+
+const toRequest = async (incoming: IncomingMessage) => {
+  const url = new URL(incoming.url ?? '/', 'http://localhost');
+  const method = incoming.method ?? 'GET';
+  const hasBody = method !== 'GET' && method !== 'HEAD';
+
+  return new Request(url, {
+    method,
+    ...(hasBody && { body: await text(incoming) }),
+  });
+};
+
+const serve = async (incoming: IncomingMessage, outgoing: ServerResponse) => {
+  try {
+    const response = await handle(await toRequest(incoming));
+
+    outgoing.writeHead(response.status, Object.fromEntries(response.headers));
+    outgoing.end(await response.text());
+  } catch {
+    outgoing.destroy();
+  }
+};
+
+export const server = createServer((incoming, outgoing) => {
+  void serve(incoming, outgoing);
+});
+
+server.listen(
+  parsePositiveInteger({ fallback: 3000, value: process.env.PORT }),
+);
+
+process.once('SIGTERM', () => {
+  server.close(() => {
+    void closePool();
+  });
+});
+```
+
+`GET /items` reads the search params a paginated request already uses:
+`limit`, `skip`, `cursor`, `sort` and a JSON `filter`. It answers
+`{ data, hasMore }`, plus `total` on the first page. Page size is clamped to
+`maxLimit`, and a request that sorts by nothing gets `fallbackSort`. A `filter`
+the package cannot read, or one it refuses, gets a 200 with an empty page whose
+`error` says why. It never becomes a read of the whole table. `POST /items`
+inserts a row and returns it. `toRequest` passes on the method, the URL and the
+body, which is all these two routes read; pass `incoming.headers` through as
+well if your handler reads a header.
+
+### The error contract
+
+A raw driver error never reaches a response. A `pg` error message names your
+tables, columns and indexes, and its `detail` line quotes the values that
+collided, so three steps keep it out:
+
+1. Every executor translates a driver rejection into a `PersistenceError`
+   subclass before your code sees it. Its message is written by this package;
+   the driver's error stays on `cause`.
+2. `toSerializableDbError` turns whatever was thrown into plain data: a `kind`,
+   that message and, for a database failure, the SQLSTATE `code`. Anything it
+   does not recognise, your own code's errors included, becomes `unexpected`
+   with a fixed message.
+3. `handle` catches everything `route` throws and puts only that plain data in
+   the body. The full error, `cause` included, goes to the server log.
+
+The status codes are this example's choice, not the package's: 409 for a
+unique-key conflict, 503 when `statement_timeout` stopped the query, 422 for a
+grouped read the package refused, 400 for a request the package refused
+because of what it named, and 500 for anything else.
+
+A request that filters or sorts on a column `allowedColumns` does not list, or
+sends a keyset cursor that does not match its sort, is refused with a
+`QueryRefusedError` before any SQL runs. `toSerializableDbError` maps it to
+`{ kind: 'query-refused', reason, message }`. The message is fixed for each
+`reason` and does not repeat the column the request named; the error on the
+server keeps the column for the log. A refused grouped read serialises as
+`grouping-refused` the same way, with a fixed message for its `reason`. It
+keeps `column` only when that column already passed the allow-list, so a
+`unknown-column` or `duplicate-keys` refusal carries none.
+
+The example attaches no `error` listener to the pool: `getPool` attaches its
+own, so an idle connection that fails is dropped and reported as a process
+warning rather than stopping the server (see Guarantees below).
+
 ## Guarantees
 
 - **Node-only, enforced by the compiler** — no DOM lib, so browser globals fail
@@ -335,6 +677,14 @@ expiry trivially testable.
   `DB_IDLE_TIMEOUT_MS` and `DB_STATEMENT_TIMEOUT_MS` are optional and defaulted, so
   connection acquisition and statement duration are bounded out of the box rather
   than waiting forever.
+- **An idle connection that fails does not stop the process** — `pg` emits
+  `error` on the pool when a connection sitting idle in it drops, and an
+  unhandled `error` event would throw. `getPool` attaches a listener, so the pool
+  discards the connection and the next query opens a new one. While no other
+  listener is attached, the failure surfaces as a process warning with code
+  `LCABRERA_SERVER_POOL_IDLE_ERROR` (observe it with `process.on('warning', …)`).
+  Attach your own with `getPool().on('error', …)` to receive the error itself;
+  the warning is then left to you.
 - **Pure builders, isolated execution** — `query-builder/` never touches a
   connection.
 - **Published as compiled ESM** (`.mjs` + `.d.mts`) with source maps and

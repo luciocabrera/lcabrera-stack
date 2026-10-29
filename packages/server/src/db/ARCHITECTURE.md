@@ -7,12 +7,12 @@ construction, and query execution.
 
 This folder is split deliberately, and the split is the thing to preserve:
 
-| Layer                  | Files                                                                                                                                                                                                                                                                                                                                                                                                   | Touches the DB?                                      |
-| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- |
-| Query **construction** | `query-builder/` and `group-query-builder/` (each has its own `ARCHITECTURE.md`)                                                                                                                                                                                                                                                                                                                        | **No** — pure functions returning `{ text, values }` |
-| Query **execution**    | `get-pool.util.ts`, `run-query.util.ts`, `set-statement-timeout.util.ts`, `select-rows.util.ts`, `select-grouped-rows.util.ts`, `select-column-axis-values.util.ts`, `select-distinct-rows.util.ts`, `select-filter-options.util.ts`, `insert-row.util.ts`, `update-rows.util.ts`, `delete-rows.util.ts`, `get-max-value.util.ts`, `get-rows-count.util.ts`, `get-column-grouping-capabilities.util.ts` | **Yes**                                              |
-| **Transactions**       | `with-transaction.util.ts`, `run-in-transaction.util.ts`, `rollback-transaction.util.ts`                                                                                                                                                                                                                                                                                                                | **Yes**                                              |
-| Configuration          | `env.schema.ts`, `db.types.ts`                                                                                                                                                                                                                                                                                                                                                                          | Reads env only                                       |
+| Layer                  | Files                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Touches the DB?                                      |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------- |
+| Query **construction** | `query-builder/` and `group-query-builder/` (each has its own `ARCHITECTURE.md`)                                                                                                                                                                                                                                                                                                                                                                                                                                         | **No** — pure functions returning `{ text, values }` |
+| Query **execution**    | `get-pool.util.ts`, `run-query.util.ts`, `set-statement-timeout.util.ts`, `select-rows.util.ts`, `select-grouped-rows.util.ts`, `select-column-axis-values.util.ts`, `select-distinct-rows.util.ts`, `select-filter-options.util.ts`, `insert-row.util.ts`, `update-rows.util.ts`, `delete-rows.util.ts`, `get-max-value.util.ts`, `get-rows-count.util.ts`, `get-column-grouping-capabilities.util.ts`, `get-foreign-key-relations.util.ts`, `resolve-read-relations.util.ts`, `get-read-grouping-capabilities.util.ts` | **Yes**                                              |
+| **Transactions**       | `with-transaction.util.ts`, `run-in-transaction.util.ts`, `rollback-transaction.util.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                 | **Yes**                                              |
+| Configuration          | `env.schema.ts`, `db.types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Reads env only                                       |
 
 `query-builder/` and `group-query-builder/` are pure so that every SQL string in
 the repo is testable without a database — that is why its suite runs in the DB-free coverage job
@@ -65,8 +65,9 @@ own. Nothing detects it — thread `tx` through every step that must be atomic.
 `selectGroupedRows` is where that trap costs the most, and where it is closed on
 purpose. It always runs in a transaction — not for atomicity, a read needs none,
 but because a per-query `statement_timeout` can only be set for _this_ query by
-being set transaction-locally (ADR-066). It threads its client through **both**
-round trips, so neither can fall back to the pool: an executor that did would run
+being set transaction-locally (ADR-066). It threads its client through **every**
+round trip — the relation map a join needs, the capabilities, the axis values and
+the grouped query — so none can fall back to the pool: an executor that did would run
 outside the transaction, unbounded, and succeed, which is a failure with no
 symptom at all. `set-statement-timeout.util.ts` takes `tx` as **required** for the
 same reason — the one place in this folder where the seam is not optional.
@@ -93,15 +94,18 @@ same reason — the one place in this folder where the seam is not optional.
 | `delete-rows.util.ts`                      | **Public entry point.** Builds + runs a `DeleteQueryDescriptor`; defaults `RETURNING *`, returns rows                                                                                                                                                                                                            |
 | `get-max-value.util.ts`                    | **Public entry point.** Runs `buildMaxValueQuery` and returns the numeric `MAX(col)` (0 if empty)                                                                                                                                                                                                                |
 | `get-column-grouping-capabilities.util.ts` | **Public entry point.** One catalogue round trip resolving, per column, whether it may be a group key (and why not) and which aggregates are legal                                                                                                                                                               |
-| `get-rows-count.util.ts`                   | **Public entry point.** Runs `buildCountQuery` and returns the row count; requires an explicit `column` (never `count(*)`) so a page and its total share filters                                                                                                                                                 |
-| `query-builder/`                           | Pure SELECT/count/distinct/insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                                                                                                                                                                           |
+| `get-foreign-key-relations.util.ts`        | **Public entry point.** One catalogue round trip returning every foreign key declared on a read's base target and on the tables those keys reach, as deep as its join chain (ADR-143)                                                                                                                            |
+| `resolve-read-relations.util.ts`           | Private. The relation map a read is built against: the caller's, none without `joins`, or `getForeignKeyRelations`                                                                                                                                                                                               |
+| `get-read-grouping-capabilities.util.ts`   | Private. Capabilities per source a grouped read names; a joined column's entry is keyed `<alias>.<column>`                                                                                                                                                                                                       |
+| `get-rows-count.util.ts`                   | **Public entry point.** Runs a `count: true` read and returns the row count; requires an explicit `column` (never `count(*)`) so a page and its total share filters                                                                                                                                              |
+| `query-builder/`                           | Pure read (rows, count, distinct, grouped) and insert/update/delete/max construction — see `query-builder/ARCHITECTURE.md`                                                                                                                                                                                       |
 | `group-query-builder/`                     | Pure grouped-read construction and the ADR-058 legality gates — see `group-query-builder/ARCHITECTURE.md`                                                                                                                                                                                                        |
 
 ## Choosing an entry point
 
 - **Reading a flat list/rollup?** Use `selectRows` — it is the whole path.
 - **Reading a _grouped_ result?** Use `selectGroupedRows`. Do not call
-  `buildGroupQuery` yourself: it is pure and needs the catalogue's capability
+  `buildReadQuery` with `grouping` yourself: it is pure and needs the catalogue's capability
   answer, a caller assembling that map by hand is a caller who can defeat
   ADR-058's gates, and running it outside a transaction gives up the statement
   timeout entirely. It returns `aggregates`/`keys`/`maskAlias` beside the rows
@@ -115,7 +119,7 @@ same reason — the one place in this folder where the seam is not optional.
   with the data query's `filters`/`allowedColumns` and an explicit primary-key
   `column`, so the page and its total can never drift.
 - **Reading _distinct_ rows** over a list of columns? Use `selectDistinctRows`
-  (or `selectRows`/`buildSelectQuery` with `distinct: true`) — same descriptor,
+  (or `selectRows`/`buildReadQuery` with `distinct: true`) — same descriptor,
   deduplicated.
 - **Populating a filter dropdown** (one column's distinct values)? Use
   `selectFilterOptions` — pass the column's `columnType` so only `text` columns
@@ -129,13 +133,15 @@ same reason — the one place in this folder where the seam is not optional.
   and pass its `tx` to each executor. `runInTransaction` is the variant for a
   connection you opened yourself. A transaction narrows a read-then-write race
   but does not close one — ADR-051 has the locking/retry decision.
-- **Need the SQL without running it** (a count paired to a data query, a
-  DB-function call, an `EXISTS` check)? Use `buildSelectQuery`/
-  `buildCountQuery`/`buildDistinctQuery`/`buildInsertQuery`/`buildUpdateQuery`/
-  `buildDeleteQuery`/`buildMaxValueQuery` and run it yourself via `getPool` —
+- **Need the SQL without running it** (a count paired to a data query)? Build
+  a read with `buildReadQuery`, the
+  query entry point, or a write with `buildInsertQuery`/`buildUpdateQuery`/
+  `buildDeleteQuery`/`buildMaxValueQuery`, and run it yourself via `getPool` —
   and wrap the call in `mapDbError`, or you reintroduce the raw-message leak the
   executors close.
-- **Anything the builders do not cover** (joins, multi-row inserts, upserts,
+- **Anything the builders do not cover** (a join that is not many-to-one along
+  a declared foreign key, a filter on a `rollup`, `cube` or pivoted grouped
+  result, subqueries and `EXISTS` checks, DB-function calls, multi-row inserts, upserts,
   single-scalar aggregates) stays hand-written SQL through `getPool` — forcing
   every query through the builder is the hand-rolled-SQL anti-pattern inverted.
 

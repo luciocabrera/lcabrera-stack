@@ -13,6 +13,27 @@ describe('toTableResponseError', () => {
     expect(toTableResponseError({ error, fallback: 'failed' })).toEqual(error);
   });
 
+  it('passes through a query refusal with its reason', () => {
+    const error = {
+      kind: 'query-refused',
+      message: 'The request named a column this query does not allow.',
+      reason: 'column-not-allowed',
+    } as const;
+
+    expect(toTableResponseError({ error, fallback: 'failed' })).toStrictEqual(
+      error,
+    );
+  });
+
+  it('reads a query refusal with an unknown reason as unexpected', () => {
+    expect(
+      toTableResponseError({
+        error: { kind: 'query-refused', message: 'refused', reason: 'other' },
+        fallback: 'failed',
+      }),
+    ).toStrictEqual({ kind: 'unexpected', message: 'failed' });
+  });
+
   it('maps an AbortError to db-canceled', () => {
     expect(
       toTableResponseError({

@@ -324,7 +324,8 @@ describe('selectPage — groups', () => {
       data: [],
       error: {
         kind: 'grouping-refused',
-        message: 'too deep',
+        message:
+          'The request named more group keys than this kind of grouping takes.',
         reason: 'too-many-keys',
       },
       hasMore: false,
@@ -420,6 +421,19 @@ describe('resolvePageRead', () => {
     });
   });
 
+  it('refuses an unreadable filter instead of reading the whole table', async () => {
+    const resolved = await reader.resolvePageRead(
+      paramsFor({
+        filter: JSON.stringify({ status: { type: 'select', value: 1 } }),
+      }),
+    );
+
+    expect(resolved).toMatchObject({
+      kind: 'refused',
+      reason: 'invalid-filter',
+    });
+  });
+
   it('refuses an unreadable group token instead of reading the whole table', async () => {
     const resolved = await reader.resolvePageRead(
       paramsFor({ group: 'not json' }),
@@ -471,6 +485,85 @@ describe('deleteRow', () => {
     expect(deleteRows).toHaveBeenCalledWith({
       ...TARGET,
       filters: [{ column: 'id', operator: 'eq', value: 7 }],
+    });
+  });
+});
+
+describe('a reader named by its target and primary key alone', () => {
+  const named = createTablePageReader<{ readonly id: number }, 'id'>({
+    pagePath: '/items/page',
+    primaryKey: 'id',
+    target: TARGET,
+  });
+
+  it('orders by the primary key and pages at the default size when the request names neither', async () => {
+    const resolved = await named.resolvePageRead(new URLSearchParams());
+
+    expect(resolved).toStrictEqual({
+      kind: 'read',
+      read: expect.objectContaining({
+        limit: 50,
+        sort: [{ column: 'id', direction: 'asc' }],
+      }),
+    });
+  });
+
+  it('clamps a requested page to the default ceiling', async () => {
+    await named.selectPage({ ...readArgs, limit: 999_999_999 });
+
+    expect(firstSelect()?.limit).toBe(1000);
+  });
+
+  it('describes itself as a source the route loader factory takes', () => {
+    expect(named.source).toStrictEqual({
+      capabilities: {
+        isGroupingEnabled: true,
+        isKeysetEnabled: true,
+        isServerFilterEnabled: true,
+      },
+      fetchPage: expect.any(Function),
+      pagePath: '/items/page',
+      resolveGroupingCapabilities: expect.any(Function),
+      schemaName: 'public',
+      tableName: 'items',
+    });
+  });
+
+  it('reads the first page through the source at the default size, with a total', async () => {
+    await named.source.fetchPage({
+      effectiveSorting: [{ columnKey: 'name', direction: 'desc' }],
+      filters: {
+        status: { operator: 'equals', type: 'select', value: 'open' },
+      },
+    });
+
+    expect(firstSelect()).toStrictEqual(
+      expect.objectContaining({
+        fields: TARGET.allowedColumns,
+        limit: 50,
+        offset: 0,
+        sort: [{ column: 'name', direction: 'desc' }],
+      }),
+    );
+    expect(firstSelect()?.filters).toHaveLength(1);
+    expect(getRowsCount).toHaveBeenCalledOnce();
+  });
+
+  it('leaves the page path off a source that names none', () => {
+    expect(
+      createTablePageReader({ primaryKey: 'id', target: TARGET }).source,
+    ).not.toHaveProperty('pagePath');
+  });
+
+  it('answers a page request with the page as JSON', async () => {
+    const response = await named.pageLoader({
+      request: new Request('http://localhost/items/page?limit=10&skip=0'),
+    });
+
+    expect(await response.json()).toStrictEqual({
+      data: [{ id: 7 }],
+      hasMore: true,
+      total: 42,
     });
   });
 });

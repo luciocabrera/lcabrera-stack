@@ -105,12 +105,49 @@ their repository settings can supply, and a **requires** is a config key outside
 what `devkit.config.json` is for — so no consumer could set it, however reliably
 it resolves in the repository that wrote the file.
 
+A **missing** is a script that `node`, `bash` or `sh` is told to run, inline,
+in a fenced shell block or in a workflow step, when that path is neither in the
+shipped set nor anywhere in the repository running the check. A moved or deleted
+script leaves exactly that behind. A path that is only named, and not run, is
+not held to this: prose names files the consumer is expected to write, so its
+absence proves nothing. An operand holding `$`, `<`, `>`, `{`, `}` or `*` is a
+placeholder and is skipped.
+
+Under `--shipped`, a **task** is a task that a shipped file runs through a
+package runner (`npm run`, `pnpm run`, `yarn run`, `bun run`, `vp run`,
+`{{commands.run}}` or the value your `commands.run` holds) and that the shipped
+set never defines. The runner resolves on every machine, so the command check
+passes it; the task after it exists only where a manifest declares it. A task is
+defined in three ways. The profile wires it into your manifest. A value in your
+`commands` block runs it, since a `{{commands.*}}` placeholder is replaced by
+that value before closure reads the file. Or the shipped `COMMANDS.md` spells it
+as a run, which counts only for a task the kit wires at no rung. A task the kit
+wires at a higher rung stays undefined below that rung, and the command
+reference is not held to this, because it documents every rung. Tasks are read
+from markdown inline code and fenced shell blocks, a workflow's step scripts and
+a shell script's commands, never from a comment. An invocation that passes the
+runner an option before the task (`--filter`, `-w`) names a workspace's task and
+is not judged. A directory you name is not held to this, because the tasks it
+may run are the ones your own repository defines.
+
 Reading a file is what makes those answers worth anything, and not every shipped
 file is markdown. A workflow's actions, step scripts and secret expressions, the
-executables a hook or a step invokes out of the install's bin directory, and the
-paths a definition in your `paths.agents` directory names in its frontmatter or
-its plain prose are all read. Without them a file with no markdown structure
-reports the same clean pass as one that is genuinely self-contained.
+commands and scripts a shell script runs — any file whose first line is an
+`sh`, `bash`, `dash` or `zsh` shebang, or a file in your `paths.hooks`
+directory with no shebang and no extension — the executables a hook or a step invokes out of the install's bin
+directory, and the paths a definition in your `paths.agents` directory names in
+its frontmatter or its plain prose are all read. Without them a file with no
+markdown structure reports the same clean pass as one that is genuinely
+self-contained. A YAML file counts as a workflow when it has a top-level `jobs:`
+key; any other YAML file is configuration.
+
+A file that no resolver for its kind reads is listed under its directory or
+profile as **unchecked** — a config file, a stylesheet, SQL, an env template.
+Those are not findings and do not fail the run, but they are not a pass either.
+The link, inline-command and bin scans still run over every file, so a link in
+one of them can still be reported; what nothing did is read it as the kind of
+file it is, and the line says so instead of counting it as self-contained. The
+`--shipped` header gives the split, read and unchecked, for each profile.
 
 Two of those answer themselves. An executable a gate task already names is
 placed by this kit, so it is not an escape; neither is a secret that something
@@ -229,17 +266,31 @@ left: after it the hooks, the workflows and the gate tasks find their binaries,
 and `devkit init --upgrade` has no task left to add. `init` in a repository that
 already exists still decides by what is installed.
 
-**Within a day of a release, that install fails unless you lift pnpm's delay.**
-pnpm installs no version younger than its minimum release age, which defaults to
-a day, and every `@lcabrera/*` floor in the created tree is the version released
-with the kit that wrote it. Until that release is a day old, no version the
-floors admit is old enough to install. Lift the delay for the first install:
+**Within a day of a release, lift pnpm's delay for that install.** pnpm holds
+back any version younger than its minimum release age, a day by default, and
+every `@lcabrera/*` floor in the created tree is the version released with the
+kit that wrote it. Until that release is a day old, no version the floors admit
+is old enough. With the delay at its default, pnpm installs those versions
+anyway and appends each to `minimumReleaseAgeExclude` in `pnpm-workspace.yaml`,
+so the new tree starts with a modified file. Lift the delay for the first
+install:
 
 ```bash
 pnpm_config_minimum_release_age=0 pnpm install
 ```
 
 After the day has passed, a plain install works.
+
+**The per-platform binaries are excluded from that delay.** The blueprint's
+`pnpm-workspace.yaml` lists name patterns under `minimumReleaseAgeExclude` for
+the binary packages its toolchain pins at exact versions. Each of these is
+published a few minutes after the package that pins it. Without the patterns,
+an install in those minutes would take the day-old parent, install its younger
+binaries anyway, and append each one to `minimumReleaseAgeExclude`, leaving a
+fresh tree with a modified file. Reached through its parent's exact pin, a
+binary still installs only once that parent has waited its day. The one
+exception is a package the tree declares itself whose name a pattern matches:
+it installs the moment it is published.
 
 ## Setting up a repository
 

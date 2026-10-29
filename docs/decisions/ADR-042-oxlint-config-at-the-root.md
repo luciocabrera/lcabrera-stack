@@ -266,7 +266,8 @@ the refusal, such as a schema error's `issues` paths.
 top-level `plugins` list, and its probes ship in `@lcabrera/repo-standards` to
 repositories that may not configure the override. A planted test with no
 assertion fails `vp lint` today. An Oxlint upgrade that stopped reporting one
-of these rules would pass every gate.
+of these rules would pass every gate. The 2026-10-22 amendment below
+changes that.
 
 ## Amendment 2026-10-21 — two Oxlint rules check effect dependencies
 
@@ -307,3 +308,80 @@ does not read, which no other Oxlint rule reports, so turning the rule off in
 the root config fails the gate on that probe alone. Probe files are now named
 after their rule as well as their family: this probe and the `no-children-prop`
 one share both the family and the prefix, and would otherwise write one file.
+
+## Amendment 2026-10-21 — the gate parses workspace configs
+
+The `fmt`, `lint` and `staged` check now parses each workspace config instead of
+matching a key at the start of a line. The line match passed a shorthand `fmt`
+and an inline `{ fmt: x }` (#1441). The gate reads the top-level keys of every
+object that the default export (in any of its three spellings), or a
+`defineConfig` call (aliased or
+namespace-qualified too), resolves to. To find those objects it follows the
+callee and the arguments of any call, every `return` of a function it reaches,
+both branches of a conditional, both sides of `??` and `||`, the right side of
+`&&`, and spreads. It
+resolves each identifier with the TypeScript checker in whatever scope declares
+it, reading the initializer, every later `=` assignment and a function
+declaration's body. A computed key is read by its string literal type, not by
+the name of the identifier inside the brackets.
+
+The gate does not flag:
+
+- a key on a nested object
+- a key inside an object that a destructured binding was taken from, as in
+  `const { base } = { base: { fmt } }` spread as `...base`. The binding is not
+  traced back to that object, though its own name still counts as a shorthand
+  key, so `const { fmt } = shared` passed as `{ fmt }` is flagged
+- a key added by mutating an object after it is built
+- a default re-exported from another module
+- a computed key whose value is not a string literal type
+- anything reached only through an imported binding
+
+## Amendment 2026-10-22 — the gate probes every rule the config names
+
+The probes above prove that a plugin family loads and that the hook
+dependency rules fire. `promise/always-return` and
+`react/no-unstable-nested-components`, which `createLintConfig` turns on by
+name, had no probe, and neither had the root's `unicorn/no-array-sort` or the
+`vitest` rules of the test-file override. The 2026-10-20 statement that
+`vp run lint:plugins:verify` does not prove the test-file override live is no
+longer true
+([#1448](https://github.com/luciocabrera/lcabrera-stack/issues/1448)).
+
+The gate now reads `lintConfig` and collects every rule set to anything other
+than `off`, `allow` or `0`, at the top level and in each override. Each needs a
+probe, found the way Oxlint resolves the id. Oxlint reads `@typescript-eslint`,
+`react-hooks`, `import-x` and `jsx-a11y-x` as `typescript`, `react`, `import`
+and `jsx-a11y`, and it resolves an id with no prefix to the `eslint` rule of
+that name, or to another plugin's when `eslint` has none: a bare
+`no-nested-ternary` reported as `eslint(no-nested-ternary)`, and a bare
+`no-array-sort` as `unicorn(no-array-sort)`. The gate matches in the same
+order, so a rule written either way finds its probe. A named rule
+with no probe fails the gate, so a new rule cannot arrive unproven. A top-level
+rule's probe goes in the probe directory. An override rule's probe goes at a
+path one of the override's `files` globs matches, inside a directory the gate
+creates. The gate then requires each rule's code to be reported in its own
+probe's file, not anywhere in the run.
+
+The probe set comes from the config, not from a fixed list. A repository that
+does not name a rule never plants its probe. `@lcabrera/repo-standards` ships
+probes for the rules this repository names. A repository naming any other rule
+exports `LINT_RULE_PROBES` from its root `vite.config.ts`, or the gate fails on
+that rule.
+
+Oxlint behaves differently in the two cases the probes separate. It refuses a
+config that names a rule id it does not know, so renaming a rule in the config
+fails `vp lint` before any probe runs. The gate prints Oxlint's message in that
+case. It does not refuse an override that names a rule whose plugin the override
+does not load: dropping `plugins: ['vitest']` from the test-file override left
+the config loading and every other probe firing, and only the `vitest`
+probes went silent. Only a planted probe shows that case, and the same holds for
+a later entry turning a rule off, or an upgrade after which a rule no longer
+reports the planted code.
+
+A probe is planted only where a glob can be filled: a `*` or `**` directory
+segment and a file name with one `*` that ends in the probe's extension. A
+glob with no `/` matched files at any depth when tried, so `*.test.ts` is read
+as `**/*.test.ts`. An
+override whose every glob uses braces, a character class, a `..` or absolute
+path, or a fixed file name fails the gate rather than passing unprobed.

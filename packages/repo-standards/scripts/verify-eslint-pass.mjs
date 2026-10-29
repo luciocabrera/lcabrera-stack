@@ -110,9 +110,9 @@ const FAILURE_HINT = {
   crashed:
     `a rule threw, so the pass checked nothing. Run\n` +
     `  vp run -r lint:eslint:check\n` +
-    `  and read the TypeError. If it names \`isExternalModuleNameRelative\`, the\n` +
-    `  \`packageExtensions\` entry for eslint-plugin-perfectionist in\n` +
-    `  pnpm-workspace.yaml has been lost or overridden (#472).`,
+    `  and read the error. If it names \`isExternalModuleNameRelative\` or says\n` +
+    `  typescript-eslint does not support TS 7.0, a plugin loaded TypeScript 7,\n` +
+    `  which ships no compiler API: the ESLint toolchain needs TypeScript 6 (#472).`,
   'no-binary':
     `no eslint binary at \`node_modules/.bin/eslint\`. Run \`vp install\`.\n` +
     `  Reported separately because a probe that cannot spawn produces the same\n` +

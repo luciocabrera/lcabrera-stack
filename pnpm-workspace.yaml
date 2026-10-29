@@ -35,38 +35,41 @@ catalogs:
     # peer unmet.
     '@babel/core': ^7.29.7
     '@babel/preset-typescript': ^7.29.7
-    typescript: ^6.0.3
+    # The ESLint toolchain gets TypeScript 6 from .pnpmfile.cjs, because
+    # typescript-eslint has no TypeScript 7 support yet (ADR-139).
+    typescript: ^7.0.2
     # `vite` is aliased to Vite+ core so the whole workspace resolves ONE Vite
     # instance — the `overrides` at the bottom redirect every `vite` edge here.
     # Without this, pnpm auto-installs upstream Vite to satisfy Vitest's `vite`
     # peer and the graph splits across separate Vite+, Vite, and Vitest copies.
     # Keep this in lockstep with the `vite-plus` version (same Vite+ release).
     # See node_modules/vite-plus/docs/guide/migrate-rules.md "Vite and Overrides".
-    vite: npm:@voidzero-dev/vite-plus-core@1.3.0
+    vite: npm:@voidzero-dev/vite-plus-core@1.4.0
     vite-plugin-babel: ^1.7.3
-    vite-plus: 1.3.0
+    vite-plus: 1.4.0
   lint:
-    '@biomejs/biome': ^2.5.15
+    # Held on 2.5 until #1541: Biome 2.6 fails the Biome pass on this tree.
+    '@biomejs/biome': ~2.5.15
     '@eslint/js': ^10.0.1
-    '@typescript-eslint/rule-tester': ^8.71.2
-    '@typescript-eslint/utils': ^8.71.2
-    eslint: ^10.12.0
+    '@typescript-eslint/rule-tester': ^8.72.1
+    '@typescript-eslint/utils': ^8.72.1
+    eslint: ^10.13.0
     eslint-config-prettier: ^10.1.8
-    eslint-plugin-perfectionist: ^5.12.1
-    eslint-plugin-react-dom: ^5.28.0
+    eslint-plugin-perfectionist: ^5.13.0
+    eslint-plugin-react-dom: ^5.28.8
     eslint-plugin-react-hooks: ^7.1.1
     eslint-plugin-react-refresh: ^0.5.7
-    eslint-plugin-react-x: ^5.28.0
+    eslint-plugin-react-x: ^5.28.8
     eslint-plugin-security: ^4.2.0
     eslint-plugin-unicorn: ^78.0.0
     globals: ^17.13.0
     react-doctor: ^0.9.18
-    typescript-eslint: ^8.71.2
+    typescript-eslint: ^8.72.1
 
   react:
-    '@react-router/dev': ^8.4.0
-    '@react-router/node': ^8.4.0
-    '@react-router/serve': ^8.4.0
+    '@react-router/dev': ^8.5.1
+    '@react-router/node': ^8.5.1
+    '@react-router/serve': ^8.5.1
     '@stylexjs/eslint-plugin': ^0.19.1
     '@stylexjs/stylex': ^0.19.1
     '@stylexjs/unplugin': ^0.19.1
@@ -75,14 +78,14 @@ catalogs:
     react: ^19.3.1
     react-dom: ^19.3.1
     react-markdown: ^10.1.0
-    react-router: ^8.4.0
+    react-router: ^8.5.1
 
   runtime:
     zod: ^4.6.7
 
   test:
-    '@anthropic-ai/claude-agent-sdk': ^0.3.301
-    '@stryker-mutator/core': ^10.0.0
+    '@anthropic-ai/claude-agent-sdk': ^0.3.312
+    '@stryker-mutator/core': ^10.1.1
     '@testing-library/react': ^16.3.3
     jsdom: ^30.1.3
     '@playwright/test': ^1.64.1
@@ -99,6 +102,15 @@ catalogs:
     # it for every workspace. Removing it needs a from-scratch lockfile and a
     # coverage run to justify — see
     # docs/decisions/ADR-047-declare-optional-peer-dependencies.md.
+    #
+    # `@opentelemetry/api`: another OPTIONAL PEER of vitest. When the tree holds
+    # two versions of it, pnpm resolves vitest (and vite-plus with it) once per
+    # version, and a test importing `vite-plus/test` can load a different Vitest
+    # than the runner `vp run` started: "failed to find the current suite". The
+    # root declaration gives every vitest edge the same one. It stays below
+    # 1.10.0 because the `@opentelemetry/core` line react-doctor reaches through
+    # `@sentry/node` peers on `<1.10.0`, and a root 1.10.0 leaves that unmet.
+    '@opentelemetry/api': ~1.9.1
     '@vitest/coverage-v8': 5.0.5
     vitest: 5.0.5
 
@@ -106,16 +118,16 @@ catalogs:
     '@arethetypeswrong/core': ^0.18.5
     '@changesets/cli': ^3.0.3
     '@changesets/get-release-plan': ^5.0.2
-    fallow: ^3.33.1
-    knip: ^6.41.0
-    lighthouse: ^13.5.0
+    fallow: ^3.37.0
+    knip: ^6.43.0
+    lighthouse: ^13.6.0
     publint: ^0.3.25
     semver: ^7.8.5
     yaml: ^2.9.1
     ts-morph: ^28.0.0
 
   types:
-    '@types/node': ^26.6.5
+    '@types/node': ^26.6.6
     '@types/pg': ^8.23.1
     '@types/react': ^19.3.0
     '@types/react-dom': ^19.3.0
@@ -129,10 +141,11 @@ cleanupUnusedCatalogs: true
 # FROM that field. Under any other manager (nvm, fnm, a distro package) an
 # install on an unsupported Node proceeded silently.
 engineStrict: true
-# minimumReleaseAge: 1440
-# Nothing reads this list while the line above is commented out, so a wrong entry
-# is invisible until someone re-enables the floor — which is why it is kept
-# accurate rather than left to rot. A scope pattern is durable; a `name@version`
+# pnpm installs no version younger than its `minimumReleaseAge`, 1440 minutes when
+# unset, and this list is read against that default: every entry here installs
+# the moment it is published. A resolving install that falls back to a younger
+# version than the age allows appends it here as `name@version`; one that only
+# reads `pnpm-lock.yaml` does not. A scope pattern is durable; a `name@version`
 # entry is one-shot and stops matching the moment that package moves, becoming
 # dead config that still reads as an active allowance. Prefer a pattern, and drop
 # a pinned entry once its version is out of the tree (check `pnpm-lock.yaml`).
@@ -173,9 +186,9 @@ overrides:
   # `@stryker-mutator/core` -> `typed-rest-client`, which pins qs EXACTLY at
   # 6.15.1, so unlike the entries above this does not merely lift a floor inside
   # a range the parent accepts — it moves the parent off its pin. Same major, and
-  # the 6.16 line already resolves here for express and body-parser, so it is
+  # express and body-parser resolve the same qs this override names, so it is
   # proven in this install. Drop once typed-rest-client repins.
-  qs@6: ^6.16.1
+  qs@6: ^6.17.0
   vite@*: catalog:build
   vitest@*: catalog:test
 peerDependencyRules:
@@ -185,35 +198,5 @@ peerDependencyRules:
   allowedVersions:
     vite: '*'
     vitest: '*'
-
-# `eslint-plugin-perfectionist` reaches for the TypeScript compiler API with a
-# bare `createRequire(import.meta.url)('typescript')` while declaring no
-# `typescript` dependency or peer of its own. pnpm therefore links none into its
-# isolated `node_modules`, Node's resolution walks up to the hidden hoist store
-# (`node_modules/.pnpm/node_modules/typescript`), and lands on whichever build is
-# hoisted there.
-#
-# That is `typescript@7.0.2` — the native Go port pulled in by vite-plus, whose
-# `"."` export is `lib/version.cjs` and exposes only `{version,
-# versionMajorMinor}`. So `isExternalModuleNameRelative` is `undefined` and the
-# ENTIRE eslint pass dies with a TypeError on the first import it sorts, in every
-# workspace, exiting 2 rather than reporting findings (#472).
-#
-# Declaring the peer here makes pnpm link the catalog's `typescript` instead.
-# Optional, because the plugin degrades gracefully when TypeScript is genuinely
-# absent — it falls back to a `startsWith('.')` heuristic — and a hard peer would
-# turn that into an install error. `vp run lint:eslint:verify` is the guard:
-# it plants a misordered import and fails if the rule does not report it, because
-# a crashing pass and a clean pass are indistinguishable from the exit code alone.
-#
-# Do not "fix" this by pinning typescript back — 7.0.2 is legitimately vite-plus's
-# (tsgolint). Upstream should declare the peer itself.
-packageExtensions:
-  eslint-plugin-perfectionist:
-    peerDependencies:
-      typescript: '*'
-    peerDependenciesMeta:
-      typescript:
-        optional: true
 
 # trustPolicy: no-downgrade

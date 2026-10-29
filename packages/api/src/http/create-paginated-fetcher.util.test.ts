@@ -142,7 +142,7 @@ describe('createPaginatedFetcher', () => {
 
     await fetchPage({
       cursor: [7, 'b'],
-      filter: { status: { operator: 'eq', value: 'open' } },
+      filter: { status: { type: 'select', value: 'open' } },
       limit: 10,
       skip: 20,
       sorting: [{ columnKey: 'id', direction: 'asc' }],

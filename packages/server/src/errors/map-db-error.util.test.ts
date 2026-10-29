@@ -1,9 +1,12 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { ForeignKeyViolationError } from './foreign-key-violation.error.ts';
+import { GroupingRefusedError } from './grouping-refused.error.ts';
 import { mapDbError } from './map-db-error.util.ts';
 import { PersistenceError } from './persistence.error.ts';
 import { QueryCanceledError } from './query-canceled.error.ts';
+import { QueryRefusedError } from './query-refused.error.ts';
+import { toSerializableDbError } from './to-serializable-db-error.util.ts';
 import { UniqueConstraintViolationError } from './unique-constraint-violation.error.ts';
 
 type PgErrorArgs = {
@@ -23,12 +26,14 @@ describe('mapDbError', () => {
     const error = mapDbError(cause);
 
     expect(error).toBeInstanceOf(UniqueConstraintViolationError);
-    expect(error.fields).toEqual({
-      code: '23505',
-      column: undefined,
-      constraint: 'orders_order_number_key',
+    expect(error).toMatchObject({
+      cause,
+      fields: {
+        code: '23505',
+        column: undefined,
+        constraint: 'orders_order_number_key',
+      },
     });
-    expect(error.cause).toBe(cause);
   });
 
   it('translates 23503 into a foreign-key violation', () => {
@@ -46,8 +51,7 @@ describe('mapDbError', () => {
 
     expect(error).toBeInstanceOf(QueryCanceledError);
     expect(error).toBeInstanceOf(PersistenceError);
-    expect(error.fields.code).toBe('57014');
-    expect(error.cause).toBe(cause);
+    expect(error).toMatchObject({ cause, fields: { code: '57014' } });
   });
 
   it('falls back to PersistenceError for an unnamed SQLSTATE', () => {
@@ -57,19 +61,17 @@ describe('mapDbError', () => {
 
     expect(error).toBeInstanceOf(PersistenceError);
     expect(error).not.toBeInstanceOf(UniqueConstraintViolationError);
-    expect(error.fields.code).toBe('42703');
+    expect(error).toMatchObject({ fields: { code: '42703' } });
   });
 
   it('falls back to PersistenceError for a rejection that is not a pg error', () => {
     const error = mapDbError('connection reset');
 
     expect(error).toBeInstanceOf(PersistenceError);
-    expect(error.fields).toEqual({
-      code: undefined,
-      column: undefined,
-      constraint: undefined,
+    expect(error).toMatchObject({
+      cause: 'connection reset',
+      fields: { code: undefined, column: undefined, constraint: undefined },
     });
-    expect(error.cause).toBe('connection reset');
   });
 
   it('never puts the driver message on the translated error', () => {
@@ -93,5 +95,37 @@ describe('mapDbError', () => {
     expect(mapDbError(translated)).toBeInstanceOf(
       UniqueConstraintViolationError,
     );
+  });
+
+  it('returns a query refusal unchanged, so it still serialises as query-refused', () => {
+    const refusal = new QueryRefusedError({
+      column: 'secret',
+      message: 'Column "secret" is not allowed.',
+      reason: 'column-not-allowed',
+    });
+    const error = mapDbError(refusal);
+
+    expect(error).toBe(refusal);
+    expect(error).not.toBeInstanceOf(PersistenceError);
+    expect(toSerializableDbError(error)).toEqual({
+      kind: 'query-refused',
+      message: 'The request named a column this query does not allow.',
+      reason: 'column-not-allowed',
+    });
+  });
+
+  it('returns a grouping refusal unchanged, keeping its subclass', () => {
+    const refusal = new GroupingRefusedError({
+      estimatedRows: 10,
+      message: 'The grouping would return too many rows.',
+      reason: 'estimate-too-large',
+    });
+    const error = mapDbError(refusal);
+
+    expect(error).toBe(refusal);
+    expect(toSerializableDbError(error)).toMatchObject({
+      kind: 'grouping-refused',
+      reason: 'estimate-too-large',
+    });
   });
 });

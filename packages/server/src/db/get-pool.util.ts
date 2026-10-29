@@ -12,7 +12,7 @@ const poolRef: { current: Pool | undefined } = { current: undefined };
 export const getPool = (): Pool => {
   if (!poolRef.current) {
     const envConfig = readEnvConfig({ env: process.env });
-    poolRef.current = new Pool({
+    const pool = new Pool({
       connectionTimeoutMillis: envConfig.DB_CONNECTION_TIMEOUT_MS,
       database: envConfig.DB_NAME,
       host: envConfig.DB_HOST,
@@ -23,6 +23,17 @@ export const getPool = (): Pool => {
       statement_timeout: envConfig.DB_STATEMENT_TIMEOUT_MS,
       user: envConfig.DB_USER,
     });
+    pool.on('error', (error: Error) => {
+      if (pool.listenerCount('error') > 1) {
+        return;
+      }
+
+      process.emitWarning(
+        'An idle pooled connection failed; the pool dropped it.',
+        { code: 'LCABRERA_SERVER_POOL_IDLE_ERROR', detail: error.message },
+      );
+    });
+    poolRef.current = pool;
   }
 
   return poolRef.current;

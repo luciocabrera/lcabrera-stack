@@ -238,12 +238,32 @@ Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
   [`merge-queue.md`](../tooling/merge-queue.md), and fix the cause before
   queueing it again — an ejection caused by another entry in the group is
   ordinary, one caused by this PR is not.
-- once merged: delete the branch, remove the worktree
+- once merged, **remove that PR's builder worktree and every reviewer worktree
+  that checked it out, and delete the merged local branch.** Run
+  `vp run housekeeping:prune` from the main checkout.
+  - The builder's worktree must be under the worktrees it would remove; then
+    remove it with `git worktree remove <path>`. Delete its branch with
+    `git branch -D <branch>` only when `git diff --stat <branch> origin/main`
+    prints nothing, or `git log --oneline <branch> --not --remotes` prints
+    nothing (every commit on it is on a remote ref). Otherwise leave the
+    branch and report it to the human. A builder path under KEEPING is the
+    evidence that something there is not merged. Report it to the human, and
+    never `--force` it.
+  - A reviewer's checkout is detached on the PR's head, which a squash-merge
+    leaves off `main`, so the plan reports it rather than removing it. Remove
+    it with `git worktree remove <path>` only when all three hold:
+    `gh pr view <n> --json state` reads `MERGED`; `git status --porcelain` in
+    it is empty; and
+    `git -C <path> log --oneline HEAD --not --remotes --tags --exclude=<branch> --branches`
+    prints nothing, where `<branch>` is the builder branch this step deletes.
+    The last check passes only when a ref this step does not delete (a
+    remote-tracking ref, a tag, or a branch it keeps) contains every commit of
+    that checkout, so removing it never leaves a commit only in the reflog. If
+    any of the three fails, leave the checkout and report it to the human.
+  - Do not run `-- --apply` mid-wave: it acts on every worktree and branch in
+    the plan, including other developers' in this wave.
 - confirm the claim closed (the `coordination-close.yml` workflow deletes the task
   file) and `vp run coordination:verify` reports it gone
-- **before removing a worktree, prove it carries nothing unmerged by content
-  diff** — `git diff --stat <branch> origin/main -- <paths>` — never by ancestry.
-  A squash-merge defeats `--is-ancestor` and the three-dot diff both.
 - **`isMergeQueueEnabled: false` → rebase every remaining open PR in the wave**,
   as this workflow has always said. Without a queue that rebase is the only thing
   that re-runs a whole-tree gate against the base this merge just created, and a
@@ -257,7 +277,9 @@ Hand it over only when [the merge bar](#3-the-merge-bar) is fully met, then:
 
 ### Phase 5 — Close the wave
 
-Re-read the epic. Merged work usually unblocks issues and often reveals new ones.
+Once the wave's PRs are merged and no developer or reviewer is still running,
+the `/worktree-housekeeping` skill sweeps what Phase 4 missed. Re-read the epic.
+Merged work usually unblocks issues and often reveals new ones.
 Update `.tmp/epic-<n>/plan.md` **and the plan comment on the epic issue** — the
 second is the one anyone else can read, and a run that updates only the first
 leaves the epic looking exactly as it did before the wave. Report to the human,
@@ -293,7 +315,9 @@ All of it, every time. Any failure aborts the merge.
       system `ARCHITECTURE.md` only when wiring changed, as the
       [Documentation Update Rule](../../.github/skills/quality-gate-workflow/SKILL.md#documentation-update-rule)
       requires ([ADR-088](../decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md))
-- [ ] A changeset exists if any `@lcabrera/*` package changed
+- [ ] A changeset names every `@lcabrera/*` package the change affects for a
+      consumer. `vp run changesets:verify` checks the shipped-file part; a
+      `catalog:` range change in `pnpm-workspace.yaml` is yours to check
 - [ ] [`merge-checklist.md`](merge-checklist.md)'s **[judgement]** items have been
       read by you, not ticked. Its **[auto]** items you confirm ran — you do not
       re-derive them

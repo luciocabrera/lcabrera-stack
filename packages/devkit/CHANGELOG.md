@@ -1,5 +1,48 @@
 # @lcabrera/devkit
 
+## 0.10.0
+
+### Minor Changes
+
+- 746c121: `devkit closure --shipped` now reports a task that a shipped file runs but the shipped set never defines. The task is read after `npm run`, `pnpm run`, `yarn run`, `bun run`, `vp run`, `{{commands.run}}` or the configured `commands.run` value, in markdown inline code, a fenced shell block, a workflow `run:` step or a shell script's commands, and never in a comment. A task is defined when the profile wires it into the manifest, when a value in the configured `commands` block runs it, or when the shipped `COMMANDS.md` spells it as a run and the kit wires it at no rung. A task the kit wires only at a higher rung is reported below that rung. Any other task is printed as `runs the undefined task <name>`, and the command exits non-zero. Before this, the runner resolved and the task was never looked at, so an instruction to run a task the receiving repository does not have passed.
+
+  An invocation that passes the runner an option before the task, such as `--filter` or `-w`, names a workspace's task and is not checked. `devkit closure <dir>` does not check tasks, because the tasks a named directory may run are the ones its own repository defines.
+
+  `analyseClosure` from `@lcabrera/devkit/closure` takes two new optional arguments: `allowedTasks`, which turns the check on, and `runPrefixes`, the runner spellings to read. Without `allowedTasks` it reports what it did before.
+
+- 37b8ee8: `devkit closure` now reads shell scripts. Any file whose first line is an `sh`, `bash`, `dash` or `zsh` shebang, or a file in the `paths.hooks` directory with no shebang and no extension, has its commands, paths and run scripts resolved the way a workflow `run:` step's are. A hook that runs `node scripts/<file>.mjs` now fails closure when that script is outside the shipped set (`needs`) or exists nowhere (`runs nonexistent`). Comments in the script are not read. A README or a hook with another interpreter in that directory is not read as shell.
+
+  Closure also names the files it did not read. Under each `--shipped` profile, and under each directory in the directory form, a file that no resolver for its kind reads is listed as `unchecked  <path>  no resolver for its kind`. Markdown, JavaScript and TypeScript source, workflows, shell scripts and subagent definitions are read; a JSON or JSONC config, a stylesheet, SQL, an env template or a non-workflow YAML file is not. The `--shipped` header now reads `<n> shipped file(s), <r> read, <u> unchecked` instead of `self-contained`. An unchecked file is not a finding and does not change the exit code. The link, inline-command and bin scans still run over every file, unchecked ones included.
+
+  A YAML file is now treated as a workflow only when it has a top-level `jobs:` key. Any other YAML file, such as a compose file or a workspace manifest, is no longer read as one and is listed as unchecked.
+
+- ab7d6ae: `devkit closure` now reports a script that a shipped file runs but that exists nowhere. When `node`, `bash` or `sh` is told to run a path, in inline code, a fenced shell block or a workflow `run:` step, and that path is neither in the shipped set nor in the repository being checked, closure prints `runs nonexistent <path>` and exits non-zero. Before this, such a path was dropped without a finding, so a reference left behind by a moved or deleted script passed.
+
+  A path that is only named in prose is still not checked this way. Operands that hold `$`, `<`, `>`, `{`, `}` or `*` are treated as placeholders and skipped. A repository whose shipped files run a script that is not there will now fail `devkit closure`. To fix it, correct the reference or ship the script.
+
+- f22a9c1: New `worktree-housekeeping` skill, placed with the other skills. It runs the gate runtime's `repo-housekeeping-prune` with the pull request list on stdin, shows the plan, applies it once the user confirms, and saves a patch for each dirty worktree it leaves in place. It needs `@lcabrera/repo-standards` 0.10.0 or later. An older `repo-housekeeping-prune` ignores the flags it does not know: `--apply` still carries out that release's narrower plan, without superseded worktrees, detached worktrees on the default branch or containers, and `--include-superseded` changes nothing. `--hint` is ignored too, so the bin waits for a pull request list on stdin and then prints a full dry run instead of the one-line count.
+
+### Patch Changes
+
+- 52b5562: The workspace templates no longer run Vitest by its `node_modules` path. The `typescript-config` package's `test` script is `vitest run`, and the `full` application's `test:smoke` is `SMOKE_DB=1 vitest run .smoke.`. That script no longer passes the compose environment file to `node`: the application's `vite.config.ts` already loads it when Vitest reads the config, and it does not override a variable the shell already set. The application's `test` task comes from `@lcabrera/vite-config`, which now runs `vp test run`.
+
+  One created tree now runs two Vitest binaries. The application's `test` task runs the Vitest that `vite-plus` depends on. `test:smoke` and the `typescript-config` package's `test` run the tree's own `vitest`. Keep the `vitest` entry in the `test` catalog at the version `vp toolchain vitest` prints, so the two stay the same release.
+
+- 3def0df: The `docs/agents/dependency-advisories.json` that `devkit init` and `devkit create` place at the `monorepo` rung now starts with no allowances. Its one entry covered GHSA-vfj7-8cjw-p6xm in `braces`, and that advisory has been withdrawn, so the entry matched nothing and a created tree's `deps:audit` failed on it as a stale allowance. The register and the gate that reads it are unchanged.
+- c26e01d: The `workspace` blueprint's `pnpm-workspace.yaml` now lists name patterns under `minimumReleaseAgeExclude` for the per-platform binaries its toolchain pins at exact versions: `@biomejs/cli-*`, `@oxfmt/binding-*`, `@oxlint/binding-*`, `@oxlint-tsgolint/*`, the `@voidzero-dev/vite-plus-<os>-*` packages, `@yuku-core/binding-*` and the `lightningcss-<os>-*` packages.
+
+  Each of these binaries is published a few minutes after the package that pins it. pnpm holds back any version younger than a day. When `minimumReleaseAge` is left at its default, pnpm is not strict about it: if a parent was a day old but one of its binaries was not, a fresh install took the parent, installed the binary anyway and appended `name@version` to `minimumReleaseAgeExclude`. A newly created tree then showed `pnpm-workspace.yaml` as modified after its first install. With the patterns in place, the binaries install without being written to the file. The parent packages still wait a day.
+
+- 73e7edb: The root tasks the `monorepo` and `full` profiles write now pass `--fail-if-no-match` to every filtered run: `build`, `dev`, `start`, `tsconfig:generate` and `db:seed`. Without the flag, a `vp run --filter` that matches no workspace prints a warning and exits 0, so a renamed application or config workspace left these tasks passing having run nothing. Now they exit non-zero. `devkit sync` updates a task the tree still holds as this kit wrote it, and reports one the repository has edited rather than overwriting it.
+- 84c3876: The `full` template's orders loader test no longer clears its mocked reader in a `beforeEach` hook. The Vitest release the template's `test` catalog pins clears every mock's call history before each test by default (`clearMocks: true`), and the template does not turn that off, so the hook repeated what the runner already does.
+- 7b50e16: `@lcabrera/eslint-plugin` now declares `@typescript-eslint/utils` at `^8.72.1`. In a repository it writes, `@lcabrera/devkit` now pins Node 26.13.0 in `.node-version`, pnpm 12.16.1 in the root manifest's `packageManager`, and Vite+ 1.4.0 with the matching `vite` core alias in the `workspace` blueprint's catalog. The CI workflow `init` writes sets up Vite+ with `voidzero-dev/setup-vp` at the v1.22.0 commit.
+- c1faee8: Internal modules no longer export bindings that nothing outside their own file imports. No subpath named in any package's `exports` changes, and every published entry point keeps the same surface.
+
+  - `@lcabrera/devkit`: the internal git runner that throws on failure is now `runGitOrThrow`, so its name says how it differs from `@lcabrera/repo-standards`' `runGit`, which returns `undefined` on failure. The peer-status constants, the profile-flag literal and two closure-artifact predicates are module-private.
+  - `@lcabrera/repo-standards`: the finding formatters behind `repo-verify-conflict-markers` and `repo-verify-departed-names` are `formatConflictMarker` and `formatDepartedName`. Several module-level constants and helpers are module-private, and `conformance-triggers.cjs` no longer exports `MINIMUM_DESCRIPTION_WORDS`. That file is not one of the package's `exports` subpaths.
+  - `@lcabrera/eslint-plugin`: `ruleDocsUrl` is private to `create-rule.ts`; rule documentation URLs are unchanged.
+  - `@lcabrera/ui`: internal Table barrels stop re-exporting a selector, a fold utility and three types that every caller imports from the defining file, and the unused `DesignSystemStyle` type is gone. None of them was reachable from the package's public entry points.
+
 ## 0.9.0
 
 ### Minor Changes

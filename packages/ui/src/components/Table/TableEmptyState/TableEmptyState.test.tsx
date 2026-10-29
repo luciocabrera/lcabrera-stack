@@ -42,19 +42,11 @@ vi.mock('react-router', () => ({
   useRevalidator: () => ({ revalidate: revalidateMock }),
 }));
 
-vi.mock('#ui/components/Button', () => ({
-  Button: ({
-    children,
-    onClick,
-  }: {
-    readonly children: ReactNode;
-    readonly onClick?: () => void;
-  }) => (
-    <button onClick={onClick} type='button'>
-      {children}
-    </button>
-  ),
-}));
+vi.mock('#ui/components/Button', async () => {
+  const { MockButton } = await import('#ui/utils/tests/createMockButton.util');
+
+  return { Button: MockButton };
+});
 
 vi.mock('#ui/components/Icons', () => ({
   NoDataDescriptive: () => <svg data-testid='no-data-icon' />,
@@ -90,16 +82,26 @@ vi.mock('#ui/hooks', () => ({
   useResizeObserver: useResizeObserverMock,
 }));
 
+import { TablePersistenceContext } from '#ui/components/Table/contexts/TableConfig/TablePersistenceContext.context';
+
 import { TableEmptyState } from './TableEmptyState.component';
 
 const REFUSAL_MESSAGE =
   'Column "total_amount" is not a legal group key: too-many-distinct.';
 
+const ROUTE_PERSISTENCE = {
+  columnSizing: vi.fn(),
+  tableState: vi.fn(),
+  uiFlags: vi.fn(),
+};
+
 const renderInTable = (ui: ReactNode) =>
   render(
-    <table>
-      <tbody>{ui}</tbody>
-    </table>,
+    <TablePersistenceContext value={ROUTE_PERSISTENCE}>
+      <table>
+        <tbody>{ui}</tbody>
+      </table>
+    </TablePersistenceContext>,
   );
 
 beforeEach(() => {
@@ -167,6 +169,18 @@ describe('TableEmptyState', () => {
     expect(revalidateMock).toHaveBeenCalledTimes(1);
   });
 
+  it('offers no Retry when no route-level layout supplied the rows', () => {
+    render(
+      <table>
+        <tbody>
+          <TableEmptyState />
+        </tbody>
+      </table>,
+    );
+
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
+  });
+
   describe('when the read was refused rather than empty', () => {
     beforeEach(() => {
       useGetTableDataErrorMock.mockReturnValue({
@@ -228,6 +242,30 @@ describe('TableEmptyState', () => {
       expect(screen.getByRole('button', { name: 'Retry' })).not.toBeNull();
     });
 
+    it('titles a refusal of an unlisted column, which arrives naming none, and still offers to clear', () => {
+      useGetTableDataErrorMock.mockReturnValue({
+        kind: 'grouping-refused',
+        message:
+          "The request named a column this grouped read cannot resolve: one the read does not allow, one the table's catalogue does not describe, or a granularity for a column that is not a group key.",
+        reason: 'unknown-column',
+      });
+      useGetNormalizedColumnMock.mockReturnValue(undefined);
+
+      renderInTable(<TableEmptyState />);
+
+      expect(screen.getByRole('heading').textContent).toBe(
+        'This grouping was refused',
+      );
+      expect(
+        screen.getByText(
+          "The request named a column this grouped read cannot resolve: one the read does not allow, one the table's catalogue does not describe, or a granularity for a column that is not a group key.",
+        ),
+      ).not.toBeNull();
+      expect(
+        screen.getByRole('button', { name: 'Clear grouping' }),
+      ).not.toBeNull();
+    });
+
     it('blames no column when a key combination is what was refused', () => {
       useGetTableDataErrorMock.mockReturnValue({
         column: 'delivery_date',
@@ -252,9 +290,7 @@ describe('TableEmptyState', () => {
       expect(screen.getByRole('heading').textContent).toBe(
         'This grouping was refused',
       );
-      expect(
-        screen.getByText((text) => text.includes('widest group key')),
-      ).not.toBeNull();
+      expect(screen.getByText(/widest group key/)).not.toBeNull();
       expect(
         screen.getByRole('button', { name: 'Clear grouping' }),
       ).not.toBeNull();

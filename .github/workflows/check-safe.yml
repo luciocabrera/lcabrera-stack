@@ -57,7 +57,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
+        uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
         with:
           cache: false
           run-install: false
@@ -210,6 +210,14 @@ jobs:
         # scripts/verify-devkit-seeds.mjs.
         run: vp run seeds:verify
 
+      - name: Every shipped file has a classification row
+        id: classification_gate
+        # A file packages/devkit ships with no row in its CLASSIFICATION.md
+        # reads exactly like one whose verdict was weighed, and a row naming a
+        # path that no longer ships is a verdict about nothing. See
+        # scripts/verify-devkit-classification.mjs.
+        run: vp run classification:verify
+
       - name: Shipped ranges admit the versions this repository publishes
         id: shipped_ranges_gate
         # A range in a shipped asset decides which release a bootstrapped
@@ -226,7 +234,7 @@ jobs:
         # leave the shipped set. It runs per PROFILE, because a file in the small
         # profile pointing at one only the large profile places resolves for a
         # consumer who took everything and dangles for the one who did not.
-        run: vp run devkit:closure -- --shipped
+        run: vp run devkit:closure:shipped
 
       - name: This repository's materialised files match the package
         id: devkit_check_gate
@@ -239,6 +247,13 @@ jobs:
         # (`devkit doctor --accept`) rather than left to fail forever: a gate that
         # is always red is read exactly like one that is always green.
         run: vp run devkit:check
+
+      - name: Build the public packages
+        id: packages_build
+        # Every later step that reads a built package's `dist`, directly or
+        # through its packed tarball, then checks this build of the
+        # checked-out source, never a `dist` some earlier step left behind.
+        run: vp run packages:build
 
       - name: A packed tarball is one a consumer could install
         id: devkit_tarball_gate
@@ -325,7 +340,7 @@ jobs:
         # paths that nothing verified. A single audit corrected 30 files and
         # deleted 2 documents describing directories that no longer existed —
         # AGENTS.md itself listed 6 app directories that were gone. Only
-        # root-anchored paths and relative markdown links are checked, so
+        # root-anchored paths and relative link targets are checked, so
         # teaching examples and suffix conventions never fail the build;
         # inherited breakage is grandfathered in scripts/docs-paths-baseline.json.
         run: vp run docs:verify
@@ -386,6 +401,19 @@ jobs:
         env:
           TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
         run: vp run renames:verify
+
+      - name: A changed published file carries a changeset
+        id: changesets_gate
+        # A merged version bump publishes on its own, so a change to what a
+        # package ships needs a changeset in the same PR. `changeset status`
+        # cannot be the gate: it counts every file under a package directory,
+        # tests included. This one counts a file only when `pnpm pack` lists it,
+        # and accepts a package whose version the PR itself moves, which is the
+        # version PR. Needs a base, so not on a push to `main` (#1472).
+        if: github.event_name != 'push'
+        env:
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
+        run: vp run changesets:verify
 
       - name: Route-folder types/constants name a real artifact
         id: route_names_gate
@@ -468,16 +496,35 @@ jobs:
         # peer, and the exit code is the signal, not the listing.
         run: vp run deps:peers
 
+      - name: The lockfile matches a fresh resolve
+        id: deps_lockfile_gate
+        # The install step above runs `--frozen-lockfile`, which trusts the
+        # lockfile while the pnpmfile checksum matches. That checksum covers
+        # `.pnpmfile.cjs` alone, so an edit to a module it requires changes
+        # what a resolve produces and every install still passes (#1496,
+        # ADR-139). `vp dedupe --check` resolves again and exits non-zero on
+        # any difference.
+        run: vp run deps:lockfile
+
       - name: Published package surface resolves
         id: publish_gate
-        # Builds first on purpose. `exports` points at `src` so this repo never
-        # needs a build, while consumers install `dist` via publishConfig.exports
-        # — a map nothing here exercises. The gate packs each package with pnpm
-        # and reads the tarball a consumer would install, so with no build there
-        # is no artifact and it fails, rather than reporting the structural half
-        # as a pass the way it used to (ADR-073). The build is what gives it
-        # something real to check.
-        run: vp run packages:build && vp run publish:verify
+        # Runs after the build step on purpose. `exports` points at `src` so
+        # this repo never needs a build, while consumers install `dist` via
+        # publishConfig.exports — a map nothing here exercises. The gate packs
+        # each package with pnpm and reads the tarball a consumer would install,
+        # so with no build there is no artifact and it fails, rather than
+        # reporting the structural half as a pass the way it used to (ADR-073).
+        # The build is what gives it something real to check.
+        run: vp run publish:verify
+
+      - name: publint reads every public package's packed tarball
+        id: publint_gate
+        # tarball:verify packs only devkit, repo-standards and
+        # create-lcabrera-stack, so no built package's tarball was linted. This
+        # packs every public package with pnpm after the build step, so publint
+        # reads the `dist` targets publishConfig.exports names and fails one the
+        # tarball does not hold (#1453, ADR-073).
+        run: vp run publint:verify
 
       - name: Public package API surface is unbroken
         id: api_surface_gate
@@ -488,7 +535,7 @@ jobs:
         # (publish:verify checks subpath parity, never the type surface). This
         # diffs each package's exported surface against its tracked snapshot and,
         # against the base ref, requires a changeset for a breaking change. Runs
-        # after packages:build — it snapshots the built dist a consumer installs.
+        # after the build step — it snapshots the built dist a consumer installs.
         # See docs/decisions/ADR-046 and issue #359.
         env:
           API_SURFACE_BASE: ${{ env.DIFF_BASE }}
@@ -580,7 +627,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
+        uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
         with:
           cache: true
           run-install: false
@@ -618,15 +665,17 @@ jobs:
       - name: Fallow audit vs base branch
         id: fallow_audit
         # Gate mode, severity mapping, and baselines come from .fallowrc.json
-        # (audit.gate: new-only) — only newly-introduced dead code, complexity,
-        # or duplication fails this step (exit 1). Exit 2 = runtime/config error.
+        # (audit.gate: new-only, audit.worsened: error) — newly-introduced dead
+        # code, complexity or duplication fails this step (exit 1), and so does
+        # an inherited complexity finding that grew. Exit 2 = runtime/config error.
         run: |
           set -o pipefail
           STATUS=0
           vp run fallow:audit --base "$DIFF_BASE" --coverage reports/fallow/coverage/coverage-final.json --format json --quiet | tee fallow-audit.raw.txt || STATUS=$?
           # vp run echoes a command banner before the JSON — keep everything
           # from the first JSON line onward so the summary step can parse it,
-          # then propagate fallow's exit code (1 = introduced issues, 2 = error).
+          # then propagate fallow's exit code (1 = an introduced or worsened finding,
+          # 2 = error).
           awk 'found || /^[{[]/ {found=1; print}' fallow-audit.raw.txt > fallow-audit.json
           exit $STATUS
 
@@ -656,10 +705,11 @@ jobs:
               echo "| Base | \`$DIFF_BASE\` |"
               echo "| Dead code introduced | $(jq -r '.attribution.dead_code_introduced // "n/a"' fallow-audit.json) |"
               echo "| Complexity introduced | $(jq -r '.attribution.complexity_introduced // "n/a"' fallow-audit.json) |"
+              echo "| Complexity worsened | $(jq -r '.attribution.complexity_worsened // "n/a"' fallow-audit.json) |"
               echo "| Duplication introduced | $(jq -r '.attribution.duplication_introduced // "n/a"' fallow-audit.json) |"
               echo "| Coverage source | $(jq -r '.complexity.summary.coverage_source_consistency // "n/a"' fallow-audit.json) |"
               echo ""
-              echo "> Gate \`new-only\`: the audit fails only on newly-introduced issues; inherited findings are covered by \`reports/fallow/baselines/\`. Dead code is also gated whole-tree by the \`fallow:dead-code:verify\` step."
+              echo "> Gate \`new-only\`: the audit fails on newly-introduced issues, and on an inherited complexity finding that grew (\`audit.worsened: error\`) unless \`reports/fallow/baselines/\` already counts it; those baselines cover the other inherited findings. Dead code is also gated whole-tree by the \`fallow:dead-code:verify\` step."
               echo "> Coverage source \`mixed\` is expected: real Istanbul coverage is fed for the DB-free suites, and files with no tests at all still fall back to fallow's static estimate (which guesses 0% and inflates their CRAP)."
             else
               echo "❌ Audit did not produce JSON output — check the job log (exit 2 usually means an invalid base ref or config error)."
@@ -699,7 +749,7 @@ jobs:
           fetch-depth: 0
 
       - name: Setup Vite+
-        uses: voidzero-dev/setup-vp@68f39c78aaf39be468cabd2afb09c162574c84af # v1.21.2
+        uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
         with:
           cache: true
           run-install: false

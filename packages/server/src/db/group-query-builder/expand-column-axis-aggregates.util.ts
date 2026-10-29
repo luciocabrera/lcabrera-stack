@@ -1,11 +1,14 @@
-import type { QueryFilter } from '../query-builder/query-builder.types.ts';
+import type {
+  ColumnReference,
+  QueryFilter,
+} from '../query-builder/query-builder.types.ts';
 import type { GroupAggregate } from './group-query-builder.types.ts';
 
 import { resolveAggregateAlias } from './resolve-aggregate-alias.util.ts';
 import { toColumnAxisAlias } from './to-column-axis-alias.util.ts';
 
 type ColumnAxisValue = {
-  readonly key: string;
+  readonly key: ColumnReference;
   readonly values: readonly unknown[];
 };
 
@@ -23,9 +26,9 @@ const toAxisFilter = ({
   key,
   value,
 }: {
-  readonly key: string;
+  readonly key: ColumnReference;
   readonly value: unknown;
-}): QueryFilter =>
+}): QueryFilter<ColumnReference> =>
   value === null || value === undefined
     ? { column: key, operator: 'isNull' }
     : { column: key, operator: 'eq', value };

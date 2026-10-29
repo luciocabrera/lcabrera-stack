@@ -431,4 +431,82 @@ describe('selectGroupedRows', () => {
       false,
     );
   });
+
+  it('builds the same grouped query when the descriptor also carries a count or row field', async () => {
+    resolveCapabilityThenEmpty();
+    await selectGroupedRows(DESCRIPTOR);
+    const plain = statements()[3];
+
+    const withForeign = {
+      ...DESCRIPTOR,
+      count: true,
+      fields: ['country'],
+      limit: 10,
+    };
+    query.mockReset();
+    resolveCapabilityThenEmpty();
+    await selectGroupedRows(withForeign);
+
+    expect(statements()[3]).toBe(plain);
+    expect(plain).toContain('GROUP BY GROUPING SETS');
+  });
+
+  it('groups by a joined column, resolving relations and per-source capabilities on the transaction', async () => {
+    resolvePreamble();
+    query
+      .mockResolvedValueOnce({
+        rows: [
+          {
+            columns: ['vendor_id'],
+            referencedColumns: ['id'],
+            referencedSchema: 'public',
+            referencedTable: 'vendors',
+            schema: 'public',
+            table: 'orders',
+          },
+        ],
+      })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [CAPABILITY_ROW] })
+      .mockResolvedValueOnce({ rows: [] })
+      .mockResolvedValueOnce({ rows: [] });
+
+    const result = await selectGroupedRows({
+      ...DESCRIPTOR,
+      allowedColumns: ['vendor_id'],
+      groupFilters: [
+        { aggregateAlias: 'count_rows', operator: 'gt', value: 1 },
+      ],
+      joins: [
+        {
+          alias: 'vendor',
+          allowedColumns: ['country'],
+          foreignKey: ['vendor_id'],
+          kind: 'inner',
+        },
+      ],
+      keys: [{ column: 'country', source: 'vendor' }],
+    });
+
+    expect(query.mock.calls[2]?.[1]).toEqual(['public', 'orders', 1]);
+    expect(query.mock.calls[3]?.[1]?.slice(0, 3)).toEqual([
+      'public',
+      'orders',
+      [],
+    ]);
+    expect(query.mock.calls[4]?.[1]?.slice(0, 3)).toEqual([
+      'public',
+      'vendors',
+      ['country'],
+    ]);
+    expect(statements()[5]).toBe(
+      'SELECT "vendor"."country" AS "vendor.country", GROUPING("vendor"."country") AS "group_mask", ' +
+        'count(*) AS "count_rows" FROM "public"."orders" ' +
+        'INNER JOIN "public"."vendors" AS "vendor" ON "orders"."vendor_id" = "vendor"."id" ' +
+        'GROUP BY GROUPING SETS (("vendor"."country")) HAVING count(*) > $1 ' +
+        'ORDER BY "vendor.country" ASC LIMIT $2',
+    );
+    expect(result.keys).toEqual(['vendor.country']);
+    expect(poolQuery).not.toHaveBeenCalled();
+  });
 });

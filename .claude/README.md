@@ -91,6 +91,7 @@ Auto-invocation is driven by the `description` field (Claude matches it against 
 | `refactor-verified`           | One issue: builder subagent + blind verifier subagent      | description (implementing an issue with criteria)  |
 | `epic`                        | A whole epic: waves of builders, a blind reviewer per PR   | description, or `/epic <n>`                        |
 | `health-swarm`                | Six parallel scouts auditing repo-wide rot                 | description (periodic audit / "what has rotted")   |
+| `worktree-housekeeping`       | Merged worktrees, branches and throwaway containers        | description, or `/worktree-housekeeping`           |
 | `lint-toolchain`              | Configure or debug Oxlint / eslint / Biome / Sonar         | description + `paths`                              |
 | `releasing`                   | Changesets release, changelog, PR label taxonomy           | description (cutting a release)                    |
 | `product-requirement`         | The `docs/product/` register of what a consumer can do     | description (building against a published package) |
@@ -119,13 +120,14 @@ directory under `.github/skills/` must have a `SKILL.md` unless it is on the
 explicit support allowlist (`code-smell-shared`). `name` (must match folder) and
 `description` are required, and the description must say **when** to use the
 skill — it drives auto-invocation, so a label that names no situation never
-triggers. Relative markdown links must resolve, and a relative script path
-named from a `SKILL.md` or `.claude/agents/*.md` must exist. The same gate holds
-a subagent to `name` (matching its file) plus that description, and a path rule
-to a non-empty `paths`. Optional:
-`argument-hint`, `user-invocable`, `allowed-tools`, `paths` (globs for
-file-scoped auto-invoke), `context: fork` (isolates verbose output in a
-sub-agent — used by the scan/report skills).
+triggers, and one that claims any task ("any task", "anything else", "at all")
+is selected for everything and is reported the same way. Relative markdown
+links must resolve, and a relative script path named from a `SKILL.md` or
+`.claude/agents/*.md` must exist. The same gate holds a subagent to `name`
+(matching its file) plus that description, and a path rule to a non-empty
+`paths`. Optional: `argument-hint`, `user-invocable`, `allowed-tools`, `paths`
+(globs for file-scoped auto-invoke), `context: fork` (isolates verbose output in
+a sub-agent — used by the scan/report skills).
 
 ---
 
@@ -153,10 +155,11 @@ answers and one agent with a parameter beats two agents that drift apart.
 
 Hooks are shell commands the harness runs automatically on lifecycle events. They live in the **committed** `.claude/settings.json` (the standard location — not a separate hooks file) so the whole team shares them.
 
-| Event                                                   | Command                                 | Purpose                                                                                                                                                                                                                             |
-| ------------------------------------------------------- | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs` | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception                                                   |
-| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`       | Per-file autofix after each Write/Edit — Oxlint `--fix` → Oxfmt; non-blocking. Biome and the ESLint pass are deliberately absent (a process launch per file, and this hook gates nothing), so quality-gate step 4 is still required |
+| Event                                                   | Command                                                                                          | Purpose                                                                                                                                                                                                                             |
+| ------------------------------------------------------- | ------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `SessionStart`                                          | `node packages/repo-standards/scripts/housekeeping-prune.mjs --hint --threshold 10 --advice "…"` | **Worktree count** — prints one line naming `/worktree-housekeeping` when more than ten linked worktrees look removable from local refs; reads no network, deletes nothing, prints nothing below the threshold                      |
+| `PreToolUse` (`Read\|Bash\|Grep\|Glob\|Write\|Edit\|…`) | `node scripts/claude-secrets-guard.mjs`                                                          | **Security guard** — denies reading a `.env`/secret file (Read/Bash/Grep/Glob) and writing a credential (Write/Edit); `.env.example`/`.sample`/`.template` are the only exception                                                   |
+| `PostToolUse` (`Write\|Edit\|MultiEdit`)                | `node scripts/claude-autofix.mjs`                                                                | Per-file autofix after each Write/Edit — Oxlint `--fix` → Oxfmt; non-blocking. Biome and the ESLint pass are deliberately absent (a process launch per file, and this hook gates nothing), so quality-gate step 4 is still required |
 
 The `PreToolUse` **secrets guard** ([`scripts/claude-secrets-guard.mjs`](../scripts/claude-secrets-guard.mjs)) runs _before_ a tool executes and emits a `permissionDecision: "deny"` when a call would read a secret file (`.env`, `*.pem/.key/.p12`, `id_rsa`, `.npmrc`, `credentials`…) or write a credential (provider-format tokens + high-entropy assignments). The pure core is `scripts/lib/secrets-guard.mjs`, covered by [`scripts/lib/secrets-guard.test.mjs`](../scripts/lib/secrets-guard.test.mjs) — the deny/allow cases that `vp run test:scripts` runs, and CI runs via `test:ci`. False positives are handled by `.example` files, placeholder values, and inline `gitleaks:allow` markers.
 
@@ -211,6 +214,9 @@ Entries use glob-style patterns: `Bash(cd apps/showcase && vp lint*)` approves a
 ## How the Layers Interact
 
 ```text
+Session starts → SessionStart hook counts removable worktrees
+        │       (one line naming /worktree-housekeeping above ten; read-only)
+        ▼
 You ask Claude to do something
         │
         ▼
@@ -239,7 +245,7 @@ git push    → pre-push:   the full CI Quality Gate (adds ESLint + type-check),
                           workspaces and the root scripts/ suites
 ```
 
-There is no `SessionStart` hook and no `Stop` hook. The two above — `PreToolUse` and `PostToolUse` — are the complete set defined in `.claude/settings.json`.
+There is no `Stop` hook. The three above — `SessionStart`, `PreToolUse` and `PostToolUse` — are the complete set defined in `.claude/settings.json`.
 
 ---
 

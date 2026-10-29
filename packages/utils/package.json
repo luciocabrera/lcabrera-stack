@@ -1,6 +1,6 @@
 {
   "name": "@lcabrera/utils",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "private": false,
   "description": "Pure, framework-agnostic TypeScript utilities — no side effects, no dependencies, browser or server.",
   "keywords": [
@@ -46,6 +46,8 @@
     "./forms/is-checkbox-checked.util": "./src/forms/is-checkbox-checked.util.ts",
     "./forms/read-form-string.util": "./src/forms/read-form-string.util.ts",
     "./guards/is-object.util": "./src/guards/is-object.util.ts",
+    "./guards/is-finite-number.util": "./src/guards/is-finite-number.util.ts",
+    "./guards/is-string-list.util": "./src/guards/is-string-list.util.ts",
     "./json/safe-json-parse.util": "./src/json/safe-json-parse.util.ts",
     "./numbers/parse-positive-integer.util": "./src/numbers/parse-positive-integer.util.ts",
     "./numbers/round-to-cents.util": "./src/numbers/round-to-cents.util.ts",
@@ -122,6 +124,14 @@
       "./guards/is-object.util": {
         "types": "./dist/guards/is-object.util.d.mts",
         "default": "./dist/guards/is-object.util.mjs"
+      },
+      "./guards/is-finite-number.util": {
+        "types": "./dist/guards/is-finite-number.util.d.mts",
+        "default": "./dist/guards/is-finite-number.util.mjs"
+      },
+      "./guards/is-string-list.util": {
+        "types": "./dist/guards/is-string-list.util.d.mts",
+        "default": "./dist/guards/is-string-list.util.mjs"
       },
       "./json/safe-json-parse.util": {
         "types": "./dist/json/safe-json-parse.util.d.mts",

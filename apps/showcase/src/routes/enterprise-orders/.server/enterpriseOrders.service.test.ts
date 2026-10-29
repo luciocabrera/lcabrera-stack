@@ -544,7 +544,8 @@ it('maps a refusal to a plain union rather than letting the class escape', async
     column: 'order_id',
     estimatedRows: 500_001,
     kind: 'grouping-refused',
-    message: 'This grouping is estimated to return 500001 rows.',
+    message:
+      'This grouping is estimated to return more rows than the read allows. Group by fewer columns or filter the rows down.',
     reason: 'estimate-too-large',
   });
   expect(page.data).toStrictEqual([]);

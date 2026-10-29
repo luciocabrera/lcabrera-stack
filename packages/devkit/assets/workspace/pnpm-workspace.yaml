@@ -16,6 +16,28 @@ disallowWorkspaceCycles: true
 # Supply chain security (https://pnpm.io/supply-chain-security)
 blockExoticSubdeps: true
 
+# pnpm installs no version younger than a day (`minimumReleaseAge`, 1440 minutes
+# unless set). Each pattern below names the per-platform binaries a package pins
+# exactly and publishes minutes after itself. For those minutes the package is a
+# day old and its binaries are not, so pnpm installs them anyway and appends
+# each to this list, leaving the file modified. Through its parent's exact pin a
+# binary still installs only once that parent has waited the day; a package this
+# tree declares itself and a pattern matches does not wait.
+minimumReleaseAgeExclude:
+  - '@biomejs/cli-*'
+  - '@oxfmt/binding-*'
+  - '@oxlint-tsgolint/*'
+  - '@oxlint/binding-*'
+  - '@voidzero-dev/vite-plus-darwin-*'
+  - '@voidzero-dev/vite-plus-linux-*'
+  - '@voidzero-dev/vite-plus-win32-*'
+  - '@yuku-core/binding-*'
+  - lightningcss-android-*
+  - lightningcss-darwin-*
+  - lightningcss-freebsd-*
+  - lightningcss-linux-*
+  - lightningcss-win32-*
+
 allowBuilds:
   esbuild: true
 
@@ -31,9 +53,9 @@ catalogs:
     # instance; the `overrides` below redirect every `vite` edge here. Without
     # it the graph splits across separate Vite+, Vite and Vitest copies. Keep in
     # lockstep with `vite-plus` (same Vite+ release).
-    vite: npm:@voidzero-dev/vite-plus-core@1.3.0
+    vite: npm:@voidzero-dev/vite-plus-core@1.4.0
     vite-plugin-babel: ^1.7.3
-    vite-plus: 1.3.0
+    vite-plus: 1.4.0
 
   lint:
     '@biomejs/biome': ^2.5.11
@@ -52,7 +74,7 @@ catalogs:
 
   stack:
     '@lcabrera/tsconfig': '>=0.2.2 <1.0.0'
-    '@lcabrera/vite-config': '>=0.8.0 <1.0.0'
+    '@lcabrera/vite-config': '>=0.9.0 <1.0.0'
 
   test:
     '@testing-library/react': ^16.3.3

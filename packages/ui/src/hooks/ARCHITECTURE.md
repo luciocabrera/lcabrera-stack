@@ -37,6 +37,11 @@ hooks/
 | `useBackNavigate`           | Navigation    | `(fallbackTo: string) => void`         | `useNavigate`, `history.state.idx`           |
 | `usePersistCookieAction`    | Persistence   | `(entries) => void`                    | `useFetcher` → `/_action/persist-cookie`     |
 
+The table's persist actions do not call `usePersistCookieAction` themselves.
+`TableLayout` calls it once per fetcher key and provides the submitters as
+`TablePersistenceContext`, so a table rendered without a router never reaches
+`useFetcher`.
+
 ---
 
 ## `useClickOutside`

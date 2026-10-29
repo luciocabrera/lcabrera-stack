@@ -28,12 +28,17 @@ npm install react react-dom react-router @stylexjs/stylex
 | -------------------- | --------- | ------------------------------------------------------ |
 | `react`              | `^19.2.0` | Uses `use()`, `<Activity>` and `useEffectEvent`        |
 | `react-dom`          | `^19.2.0` |                                                        |
-| `react-router`       | `^8.0.0`  | Framework mode — loaders, actions, `useLoaderData`     |
+| `react-router`       | `^8.0.0`  | Imported by the package; a mounted router is optional  |
 | `@stylexjs/stylex`   | `^0.19.0` |                                                        |
 | `@react-router/node` | `^8.0.0`  | **Optional** — only the `./entry/*` SSR helpers use it |
 
 `@react-router/node` is an optional peer so a browser-only consumer is not forced
 to install it.
+
+`react-router` stays a required peer because the package's modules import it:
+the app shell, the route views, `Form`, `NavLink` and the table's route-level
+layout all run inside a data router. A `Table` given an array of rows does not
+need one mounted; see [A table from rows](#a-table-from-rows).
 
 ## Before you install: this package ships TypeScript source
 
@@ -110,7 +115,7 @@ section above.
 
 `AppDocument`, `AppProviders`, `AppShell`, `Button`, `Form`, `JsonExplorer`,
 `NavLink`, `RootErrorBoundary`, `RouteErrorBoundary`, `SectionCard`,
-`StatusBadge`, `TableLayout`, `Tabs`, `hydrateApp`, `useNotifyOnError`, plus the
+`StatusBadge`, `Table`, `TableLayout`, `Tabs`, `hydrateApp`, `useNotifyOnError`, plus the
 `FieldNode`, `LayoutProps` and `Pagination` types.
 
 ### Subpaths
@@ -148,6 +153,57 @@ Anything reachable from the root barrel needs no subpath at all.
 
 ## Usage
 
+### A table from rows
+
+`Table` takes its columns and one data input, `response`. That input is either
+an array of rows or a promise of one. There is no loader and no router.
+
+```tsx
+import type { TableColumn } from '@lcabrera/ui/components/Table';
+
+import { Table } from '@lcabrera/ui';
+
+const columns: readonly TableColumn<Order>[] = [
+  { dataType: 'string', key: 'reference', label: 'Reference' },
+  { dataType: 'currency', key: 'orderTotal', label: 'Order Total' },
+  { dataType: 'date', key: 'placedOn', label: 'Placed On' },
+];
+
+export const Orders = ({ orders }: { readonly orders: readonly Order[] }) => (
+  <Table columns={columns} response={orders} />
+);
+```
+
+`columns` is required because it is the table's metadata: the labels, the data
+types and formats, and what can be sorted, filtered or resized. Pass a promise
+instead of the array, `response={fetchOrders()}`, and the table shows its
+skeleton until the rows arrive. A promise of some other response shape works
+too: give the table a `dataSelector` that reads the rows out of it.
+
+For rows whose shape you do not know in advance, the
+`inferTableColumnsFromJson` helper builds a column list from the rows. It takes
+one column per key, labels it from the key (`orderTotal` becomes `Order Total`)
+and types it from the values. It is an option you call yourself, not something
+the table does for you:
+
+```tsx
+import { Table } from '@lcabrera/ui';
+import { inferTableColumnsFromJson } from '@lcabrera/ui/components/Table/utils/inferTableColumnsFromJson.util';
+
+const columns = inferTableColumnsFromJson({ rows });
+
+<Table columns={columns} response={rows} title='Rows' />;
+```
+
+When no `TableLayout` sits above it, a `Table` keeps its rows in memory,
+whether it was given an array or a response read through `dataSelector`. Sorting, filtering, resizing, pinning
+and scrolling all run on them in the browser, and the table writes nothing back
+to a URL or a cookie. Such a table mounts its own table providers, so it renders
+the same inside another grid as on its own. It also adds the notification and
+global-settings providers if those are missing. Under `TableLayout`, the
+layout's providers and persistence are used instead. Grouping and drill-down
+need a server, so they belong to `TableLayout`.
+
 ### A full data table
 
 `TableLayout` is the assembled table: header, virtualized body, settings and
@@ -180,9 +236,69 @@ export const Orders = () => {
 };
 ```
 
+`TableLayout` is also where persistence lives. Inside it, a sort, a filter or a
+column change is written to a cookie and to the URL through the
+`/_action/persist-cookie` route, and the loader reads it back when it builds the
+next page.
+
 `dataPromise` is passed **unresolved** — the table suspends on it, so the shell,
 header and skeleton stream to the browser before the rows exist. `onLoadMore` is
 what infinite scroll calls as you approach the end of the loaded range.
+
+### A grid on a Postgres table, by name
+
+Name a schema, a table, its columns and its primary key, and the grid filters,
+sorts, groups and pages against it. There is no grid component to learn for
+this: the reader from `@lcabrera/server` describes the table as a **source**,
+`createTableRouteLoader` takes that source as a setting, and `TableRouteView`
+reads its next pages from the path the source names. The query parameters
+travel between the two ends through `@lcabrera/api` and are parsed by
+`@lcabrera/server`, so your code writes neither half.
+
+```ts
+// app/routes/orders/.server/orders.source.ts — server-only
+import { createTablePageReader } from '@lcabrera/server/table-page/create-table-page-reader.util';
+
+export const orders = createTablePageReader<Order, 'id'>({
+  pagePath: '/orders/page',
+  primaryKey: 'id',
+  target: {
+    allowedColumns: ['id', 'country', 'placed_on', 'total'],
+    schema: 'sales',
+    table: 'orders',
+  },
+});
+```
+
+```ts
+// app/routes/orders/orders.loader.ts
+import { createTableRouteLoader } from '@lcabrera/ui/routing/loaders/createTableRouteLoader.util';
+
+import { orders } from './.server/orders.source';
+
+export const loader = createTableRouteLoader<Order, OrdersPage>({
+  appId: 'my-app',
+  columns: COLUMNS,
+  persistenceKey: 'orders',
+  source: orders.source,
+  title: { plural: 'Orders', singular: 'Order' },
+});
+```
+
+```tsx
+// app/routes/orders/Orders.component.tsx
+import { TableRouteView } from '@lcabrera/ui';
+
+export const Orders = () => <TableRouteView<Order, OrdersPage> />;
+```
+
+Mount `orders.pageLoader` as the `loader` of a resource route at `pagePath`
+(`route('orders/page', 'routes/orders-page.ts')` in `routes.ts`). The source
+turns on server-side filtering, keyset paging and grouping; a key in the
+route's `meta` overrides any of them. Every other `createTablePageReader`
+setting — page sizes, the fallback order, the grouped-row ceiling — has a
+default, and passing `fetchPage` and `tableName` instead of `source` still
+works for a page that does not come from one table.
 
 ### The app shell
 

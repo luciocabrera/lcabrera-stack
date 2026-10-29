@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import type { ColumnGroupingCapability } from './group-query-builder.types.ts';
 
+import { toSerializableDbError } from '../../errors/to-serializable-db-error.util.ts';
 import { assertGroupKeys } from './assert-group-keys.util.ts';
 
 const ALLOWED = ['order_status', 'shipping_country', 'city', 'priority', 'doc'];
@@ -151,6 +152,37 @@ describe('a granularity on a group key', () => {
         periods: { order_date: 'month' },
       }),
     ).toThrow(/not one of the group keys/);
+  });
+
+  it('serialises a granularity on a non-key column without naming it, pointing at the granularity', () => {
+    const refusal = (() => {
+      try {
+        assertGroupKeys({
+          allowedColumns: ['status', 'order_date'],
+          capabilities: {
+            order_date: dated(['month']),
+            status: groupable('status'),
+          },
+          grouping: 'flat',
+          keys: ['status'],
+          periods: { order_date: 'month' },
+        });
+      } catch (error) {
+        return error;
+      }
+
+      return;
+    })();
+    const mapped = toSerializableDbError(refusal);
+
+    expect(mapped).toMatchObject({
+      kind: 'grouping-refused',
+      reason: 'unknown-column',
+    });
+    expect(mapped.message).toContain(
+      'a granularity for a column that is not a group key',
+    );
+    expect(JSON.stringify(mapped)).not.toContain('order_date');
   });
 
   it('still refuses an ungroupable column that carries no granularity', () => {

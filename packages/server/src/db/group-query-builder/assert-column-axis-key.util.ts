@@ -1,22 +1,31 @@
+import type {
+  ColumnReference,
+  ReadScope,
+} from '../query-builder/query-builder.types.ts';
 import type { ColumnGroupingCapability } from './group-query-builder.types.ts';
 
 import { GroupingRefusedError } from '../../errors/grouping-refused.error.ts';
+import { toColumnName } from '../query-builder/to-column-name.util.ts';
 import { assertGroupColumn } from './assert-group-column.util.ts';
 
 type AssertColumnAxisKeyArgs = {
   readonly allowedColumns: readonly string[];
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
-  readonly key: string;
-  readonly keys: readonly string[];
+  readonly key: ColumnReference;
+  readonly keys: readonly ColumnReference[];
+  readonly scope?: ReadScope;
 };
 
 export const assertColumnAxisKey = ({
   allowedColumns,
   capabilities,
-  key,
+  key: reference,
   keys,
+  scope,
 }: AssertColumnAxisKeyArgs) => {
-  if (keys.includes(key)) {
+  const key = toColumnName(reference);
+
+  if (keys.some((entry) => toColumnName(entry) === key)) {
     throw new GroupingRefusedError({
       column: key,
       message: `Column "${key}" cannot be a row key and a column axis at once.`,
@@ -24,7 +33,7 @@ export const assertColumnAxisKey = ({
     });
   }
 
-  assertGroupColumn({ allowedColumns, column: key });
+  assertGroupColumn({ allowedColumns, column: reference, scope });
 
   const capability = capabilities[key];
 

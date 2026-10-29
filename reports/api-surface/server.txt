@@ -25,6 +25,9 @@ readPivotMaxDistinct [const] ({ env }: ReadEnvConfigArgs) => number
 ## ./db/get-column-grouping-capabilities.util
 getColumnGroupingCapabilities [const] ({ tx, ...descriptor }: ColumnCapabilitiesQueryDescriptor & ExecutorOptions) => Promise<Readonly<Record<string, ColumnGroupingCapability>>>
 
+## ./db/get-foreign-key-relations.util
+getForeignKeyRelations [const] ({ tx, ...descriptor }: GetForeignKeyRelationsArgs) => Promise<readonly ForeignKeyRelation[]>
+
 ## ./db/get-max-value.util
 getMaxValue [const] ({ tx, ...descriptor }: ExecutorOptions & MaxValueQueryDescriptor) => Promise<number>
 
@@ -33,10 +36,10 @@ closePool [const] () => Promise<void>
 getPool [const] () => Pool
 
 ## ./db/get-rows-count.util
-getRowsCount [const] ({ tx, ...descriptor }: CountQueryDescriptor & ExecutorOptions & { readonly column: string; }) => Promise<number>
+getRowsCount [const] ({ tx, ...descriptor }: CountQueryDescriptor & ExecutorOptions & { readonly column: ColumnReference; }) => Promise<number>
 
 ## ./db/group-query-builder/build-group-query.util
-buildGroupQuery [const] ({ aggregates, allowedColumns, capabilities, columnAxis, filters, grouping, keys, maxRows, periods, schema, sort, subtotalPlacement, table }: GroupQueryDescriptor) => BuiltGroupQuery
+buildGroupQuery [const] (descriptor: GroupQueryDescriptor) => BuiltGroupQuery
 
 ## ./db/group-query-builder/group-query-builder.constants
 AGGREGATE_SQL [const] Record<AggregateFn, AggregateSpec>
@@ -67,22 +70,24 @@ BuiltColumnAxis [type] { readonly key: string; readonly values: readonly unknown
 BuiltGroupAggregate [type] { readonly alias: string; /** Present when this aggregate is one value of a column axis. `value` is undefined for SQL NULL. */ readonly axis?: { readonly value: unknown; }; readonly column?: string; readonly fn: AggregateFn; }
 BuiltGroupQuery [type] { readonly aggregates: readonly BuiltGroupAggregate[]; readonly columnAxis?: BuiltColumnAxis; /** A GROUPING() value per emitted set, in emission order; bit `keys.length - 1 - i` is 1 when `keys[i]` rolled up. */ readonly groupingSetMasks: readonly number[]; readonly guardRails: GroupGuardRails; /** Ordered; the mask bit positions are relative to this. */ readonly keys: readonly string[]; readonly maskAlias: 'group_mask'; readonly text: string; readonly values: readonly unknown[]; }
 ColumnAnalyticalRole [type] 'dimension' | 'fact' | 'unsupported'
-ColumnAxis [type] { readonly key: string; /** Caller-supplied ceiling on distinct axis values; the package does not invent one. */ readonly maxDistinct: number; readonly values: readonly unknown[]; }
-ColumnAxisRequest [type] { readonly key: string; readonly maxDistinct: number; }
+ColumnAxis [type] { readonly key: ColumnReference; /** Caller-supplied ceiling on distinct axis values; the package does not invent one. */ readonly maxDistinct: number; readonly values: readonly unknown[]; }
+ColumnAxisRequest [type] { readonly key: ColumnReference; readonly maxDistinct: number; }
 ColumnCapabilitiesQueryDescriptor [type] { readonly columns: readonly string[]; readonly schema: string; readonly table: string; }
 ColumnCapabilityRow [type] { readonly aggregates: readonly string[]; readonly column: string; readonly hasEquality: boolean; readonly hasStats: boolean; readonly nDistinct: number; readonly relTuples: number; readonly spanDays?: number; readonly typeCategory: string; readonly typeName: string; readonly typeNamespace: string; }
 ColumnGroupingCapability [type] (ColumnCapabilityShared & { readonly canGroup: false; readonly refusal: GroupKeyRefusalReason; }) | (ColumnCapabilityShared & { readonly canGroup: true; readonly refusal?: never; })
 DistinctEstimate [type] { readonly kind: 'known'; readonly value: number; } | { readonly kind: 'undefinedDistinctness'; } | { readonly kind: 'unknown'; }
-GroupAggregate [type] { readonly alias?: string; readonly column?: string; readonly filters?: readonly QueryFilter[]; readonly fn: AggregateFn; }
+GroupAggregate [type] { readonly alias?: string; readonly column?: ColumnReference; readonly filters?: readonly QueryFilter<ColumnReference>[]; readonly fn: AggregateFn; }
 GroupCardinalityEstimate [type] { readonly columns: readonly string[]; readonly kind: 'unknown'; } | { readonly kind: 'known'; readonly rows: number; }
 GroupCardinalityWarning [type] { readonly columns: readonly string[]; readonly kind: 'stats-unavailable'; } | { readonly estimatedRows: number; readonly kind: 'estimate-above-warn-threshold'; }
+GroupFilter [type] { readonly aggregateAlias: string; readonly operator: GroupFilterBinaryOperator; readonly value: unknown; } | { readonly aggregateAlias: string; readonly operator: UnaryOperator; }
+GroupFilterBinaryOperator [type] Exclude<BinaryOperator, 'ilike' | 'notIlike'>
 GroupGuardRails [type] { readonly estimate: GroupCardinalityEstimate; readonly rowLimit: GroupRowLimit; readonly warning?: GroupCardinalityWarning; }
 GroupingMode [type] 'cube' | 'flat' | 'rollup'
 GroupKeyPeriod [type] OlapGroupPeriod
 GroupKeyRefusalReason [type] 'no-equality-operator' | 'not-a-dimension' | 'stats-unavailable' | 'too-many-distinct' | 'unique-ish'
-GroupQueryDescriptor [type] { readonly aggregates: readonly GroupAggregate[]; readonly allowedColumns: readonly string[]; readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>; readonly columnAxis?: ColumnAxis; readonly filters?: readonly QueryFilter[]; readonly grouping: GroupingMode; readonly keys: readonly string[]; /** A safety belt, not a page: a grouped read is never paginated. */ readonly maxRows: number; readonly periods?: Readonly<Record<string, GroupKeyPeriod>>; readonly schema: string; readonly sort?: readonly GroupSort[]; readonly subtotalPlacement?: 'first' | 'last'; readonly table: string; }
+GroupQueryDescriptor [type] { readonly aggregates: readonly GroupAggregate[]; readonly allowedColumns: readonly string[]; /** A joined column's entry is keyed by its projected name, `<alias>.<column>`. */ readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>; readonly columnAxis?: ColumnAxis; readonly filters?: readonly QueryFilter<ColumnReference>[]; /** `HAVING`; accepted only with `grouping: 'flat'` and no `columnAxis`. */ readonly groupFilters?: readonly GroupFilter[]; readonly grouping: GroupingMode; readonly joins?: readonly ReadJoin[]; readonly keys: readonly ColumnReference[]; /** A safety belt, not a page: a grouped read is never paginated. */ readonly maxRows: number; /** A joined key's entry is keyed by its projected name, `<alias>.<column>`. */ readonly periods?: Readonly<Record<string, GroupKeyPeriod>>; /** Required once `joins` is non-empty; resolve it with `getForeignKeyRelations`. */ readonly relations?: readonly ForeignKeyRelation[]; readonly schema: string; readonly sort?: readonly GroupSort[]; readonly subtotalPlacement?: 'first' | 'last'; readonly table: string; }
 GroupRowLimit [type] { readonly backstopAt?: number; readonly limit: number; }
-GroupSort [type] { readonly aggregateAlias: string; readonly direction: 'asc' | 'desc'; } | { readonly direction: 'asc' | 'desc'; readonly key: string; }
+GroupSort [type] { readonly aggregateAlias: string; readonly direction: 'asc' | 'desc'; } | { readonly direction: 'asc' | 'desc'; readonly key: ColumnReference; }
 
 ## ./db/insert-row.util
 insertRow [const] <TRow extends QueryResultRow>({ tx, ...descriptor }: ExecutorOptions & InsertQueryDescriptor) => Promise<readonly TRow[]>
@@ -127,7 +132,7 @@ toGroupLabel [const] (value: unknown) => string
 toGroupRow [const] ({ aggregates, columnKeys, countAlias, maskAlias, row, truncations }: ToGroupRowArgs) => { tableGroup: { aggregates: { alias: string; columnKey: string; fn: AggregateFn; value: unknown; axis?: { readonly value: unknown; } | undefined; }[]; count: number; isSubtotal: boolean; path: { columnKey: string; label: string; value: unknown; }[]; }; }
 
 ## ./db/query-builder/build-count-query.util
-buildCountQuery [const] ({ allowedColumns, column, filters, schema, table }: CountQueryDescriptor) => BuiltQuery
+buildCountQuery [const] (descriptor: CountQueryDescriptor) => BuiltQuery
 
 ## ./db/query-builder/build-delete-query.util
 buildDeleteQuery [const] ({ allowedColumns, filters, returning, schema, table }: DeleteQueryDescriptor) => BuiltQuery
@@ -142,10 +147,13 @@ buildInsertQuery [const] ({ allowedColumns, returning, schema, table, values }: 
 buildMaxValueQuery [const] ({ allowedColumns, column, schema, table }: MaxValueQueryDescriptor) => BuiltQuery
 
 ## ./db/query-builder/build-order-by-clause.util
-buildOrderByClause [const] ({ allowedColumns, sort }: BuildOrderByClauseArgs) => string
+buildOrderByClause [const] ({ allowedColumns, scope, sort }: BuildOrderByClauseArgs) => string
+
+## ./db/query-builder/build-read-query.util
+buildReadQuery [const] <TDescriptor extends ReadQueryDescriptor>(descriptor: TDescriptor) => BuiltReadQuery<TDescriptor>
 
 ## ./db/query-builder/build-select-query.util
-buildSelectQuery [const] ({ allowedColumns, cursor, distinct, fields, filters, limit, offset, schema, sort, table }: SelectQueryDescriptor) => BuiltQuery
+buildSelectQuery [const] (descriptor: SelectQueryDescriptor) => BuiltQuery
 
 ## ./db/query-builder/build-update-query.util
 buildUpdateQuery [const] ({ allowedColumns, filters, returning, schema, table, values }: UpdateQueryDescriptor) => BuiltQuery
@@ -153,16 +161,28 @@ buildUpdateQuery [const] ({ allowedColumns, filters, returning, schema, table, v
 ## ./db/query-builder/query-builder.types
 BinaryOperator [type] 'eq' | 'gt' | 'gte' | 'ilike' | 'in' | 'lt' | 'lte' | 'neq' | 'notIlike'
 BuiltQuery [type] { readonly text: string; readonly values: readonly unknown[]; }
+BuiltReadQuery [type] TDescriptor extends GroupedReadQueryDescriptor ? BuiltGroupQuery : BuiltQuery
+ColumnReference [type] JoinedColumnReference | string
 ColumnType [type] 'boolean' | 'date' | 'enum' | 'number' | 'text'
 ComparisonOperator [type] BinaryOperator | UnaryOperator
-CountQueryDescriptor [type] { readonly allowedColumns?: readonly string[]; /** Defaults to `*`. Pass a column to skip its NULLs. */ readonly column?: string; readonly filters?: readonly QueryFilter[]; readonly schema: string; readonly table: string; }
+CountQueryDescriptor [type] { /** Opt-in on a single-target read; required once `joins` is non-empty. */ readonly allowedColumns?: readonly string[]; /** Defaults to `*`. Pass a column to skip its NULLs. */ readonly column?: ColumnReference; readonly filters?: readonly QueryFilter<ColumnReference>[]; readonly joins?: readonly ReadJoin[]; /** Required once `joins` is non-empty; resolve it with `getForeignKeyRelations`. */ readonly relations?: readonly ForeignKeyRelation[]; readonly schema: string; readonly table: string; }
+CountReadQueryDescriptor [type] CountQueryDescriptor & { readonly aggregates?: never; readonly capabilities?: never; readonly columnAxis?: never; readonly count: true; readonly cursor?: never; readonly distinct?: never; readonly fields?: never; readonly groupFilters?: never; readonly grouping?: never; readonly keys?: never; readonly limit?: never; readonly maxRows?: never; readonly offset?: never; readonly periods?: never; readonly sort?: never; readonly subtotalPlacement?: never; }
 DeleteQueryDescriptor [type] { /** Same opt-in authorization as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; /** At least one is required; an unfiltered DELETE is refused. */ readonly filters: readonly QueryFilter[]; /** `['*']` returns the whole row and must stand alone. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; }
+ForeignKeyRelation [type] { /** The referencing columns, in constraint order. */ readonly columns: readonly string[]; /** Paired one for one with `columns`. */ readonly referencedColumns: readonly string[]; readonly referencedSchema: string; readonly referencedTable: string; readonly schema: string; readonly table: string; }
+GroupedReadQueryDescriptor [type] GroupQueryDescriptor & { readonly column?: never; readonly count?: never; readonly cursor?: never; readonly distinct?: never; readonly fields?: never; readonly limit?: never; readonly offset?: never; }
 InsertQueryDescriptor [type] { /** Same opt-in authorization as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; /** `['*']` returns the whole row and must stand alone. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; readonly values: Readonly<Record<string, unknown>>; }
+JoinedColumnReference [type] { readonly column: string; /** The `alias` of one of the read's `joins`. */ readonly source: string; }
+JoinKind [type] 'inner' | 'left'
 MaxValueQueryDescriptor [type] { /** Same opt-in authorization as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; readonly column: string; readonly schema: string; readonly table: string; }
-QueryCursor [type] { /** Must be the last `sort` entry. */ readonly uniqueColumn: string; /** One value per `sort` entry, in `sort` order. */ readonly values: readonly unknown[]; }
-QueryFilter [type] { readonly column: string; readonly operator: BinaryOperator; readonly value: unknown; } | { readonly column: string; readonly operator: UnaryOperator; }
-QuerySort [type] { readonly column: string; readonly direction: 'asc' | 'desc'; }
-SelectQueryDescriptor [type] { /** Opt-in: every fields/filter/sort column must be a member. Omit only if no column is request-derived. */ readonly allowedColumns?: readonly string[]; /** Resumes after this row; `sort` must be a total order ending on its `uniqueColumn`. */ readonly cursor?: QueryCursor; readonly distinct?: boolean; readonly fields: readonly string[]; readonly filters?: readonly QueryFilter[]; readonly limit?: number; readonly offset?: number; readonly schema: string; readonly sort?: readonly QuerySort[]; readonly table: string; }
+QueryCursor [type] { /** Must be the last `sort` entry, and a base-target column. */ readonly uniqueColumn: string; /** One value per `sort` entry, in `sort` order. */ readonly values: readonly unknown[]; }
+QueryFilter [type] { readonly column: TColumn; readonly operator: BinaryOperator; readonly value: unknown; } | { readonly column: TColumn; readonly operator: UnaryOperator; }
+QuerySort [type] { readonly column: TColumn; readonly direction: 'asc' | 'desc'; }
+ReadJoin [type] { readonly alias: string; /** Every column the read may name on this join's target. */ readonly allowedColumns: readonly string[]; /** The referencing columns of a foreign key declared on `source`. */ readonly foreignKey: readonly string[]; readonly kind: JoinKind; /** An earlier join's `alias`; omit to join from the base target. */ readonly source?: string; }
+ReadQueryDescriptor [type] CountReadQueryDescriptor | GroupedReadQueryDescriptor | RowsReadQueryDescriptor
+ReadScope [type] { readonly base: ReadScopeSource; /** The whole `FROM` list: the base target followed by every join clause. */ readonly from: string; readonly joins: ReadonlyMap<string, ReadScopeSource>; }
+ReadScopeSource [type] { readonly allowedColumns: readonly string[]; readonly qualifier: string; readonly schema: string; readonly table: string; }
+RowsReadQueryDescriptor [type] SelectQueryDescriptor & { readonly aggregates?: never; readonly capabilities?: never; readonly column?: never; readonly columnAxis?: never; readonly count?: never; readonly groupFilters?: never; readonly grouping?: never; readonly keys?: never; readonly maxRows?: never; readonly periods?: never; readonly subtotalPlacement?: never; }
+SelectQueryDescriptor [type] { /** Opt-in: every fields/filter/sort column must be a member. Omit only if no column is request-derived. Required once `joins` is non-empty. */ readonly allowedColumns?: readonly string[]; /** Resumes after this row; `sort` must be a total order ending on its `uniqueColumn`. */ readonly cursor?: QueryCursor; readonly distinct?: boolean; /** A joined column comes back as `<alias>.<column>`. */ readonly fields: readonly ColumnReference[]; readonly filters?: readonly QueryFilter<ColumnReference>[]; readonly joins?: readonly ReadJoin[]; readonly limit?: number; readonly offset?: number; /** Required once `joins` is non-empty; resolve it with `getForeignKeyRelations`. */ readonly relations?: readonly ForeignKeyRelation[]; readonly schema: string; readonly sort?: readonly QuerySort<ColumnReference>[]; readonly table: string; }
 UnaryOperator [type] 'isNotNull' | 'isNull'
 UpdateQueryDescriptor [type] { /** Same opt-in authorization as `SelectQueryDescriptor`. */ readonly allowedColumns?: readonly string[]; /** At least one is required; an unfiltered UPDATE is refused. */ readonly filters: readonly QueryFilter[]; /** `['*']` returns the whole row and must stand alone. */ readonly returning?: readonly string[]; readonly schema: string; readonly table: string; readonly values: Readonly<Record<string, unknown>>; }
 
@@ -190,7 +210,8 @@ withTransaction [const] <TResult>({ run }: WithTransactionArgs<TResult>) => Prom
 ## ./errors/errors.types
 GroupingRefusalReason [type] 'aggregate-not-legal' | 'column-axis-too-wide' | 'column-not-groupable' | 'duplicate-keys' | 'estimate-too-large' | 'no-keys' | 'row-limit-reached' | 'too-many-keys' | 'unknown-column'
 PgErrorFields [type] { readonly code?: string; readonly column?: string; readonly constraint?: string; }
-SerializableDbError [type] { /** The raw SQLSTATE, when the driver supplied one. Never the message. */ readonly code?: string; readonly kind: 'db-failed'; readonly message: string; } | { readonly column?: string; readonly estimatedRows?: number; readonly kind: 'grouping-refused'; readonly message: string; readonly reason: GroupingRefusalReason; } | { readonly kind: 'db-canceled'; readonly message: string; } | { readonly kind: 'unexpected'; readonly message: string; }
+QueryRefusalReason [type] 'column-not-allowed' | 'group-filter-alias-unknown' | 'group-filter-column-axis' | 'group-filter-grouping-unsupported' | 'group-filter-operator-unsupported' | 'join-alias-taken' | 'join-allowlist-missing' | 'join-ambiguous' | 'join-kind-unsupported' | 'join-not-declared' | 'join-relations-missing' | 'join-source-unknown' | 'keyset-cursor-mismatch' | 'keyset-sort-missing' | 'keyset-sort-not-unique' | 'keyset-unique-column-joined' | 'keyset-unique-value-missing' | 'projected-alias-too-long'
+SerializableDbError [type] { /** The raw SQLSTATE, when the driver supplied one. Never the message. */ readonly code?: string; readonly kind: 'db-failed'; readonly message: string; } | { readonly column?: string; readonly estimatedRows?: number; readonly kind: 'grouping-refused'; readonly message: string; readonly reason: GroupingRefusalReason; } | { readonly kind: 'db-canceled'; readonly message: string; } | { readonly kind: 'query-refused'; readonly message: string; readonly reason: QueryRefusalReason; } | { readonly kind: 'unexpected'; readonly message: string; }
 
 ## ./errors/foreign-key-violation.error
 ForeignKeyViolationError [class] ForeignKeyViolationError
@@ -202,13 +223,16 @@ GroupingRefusedError [class] GroupingRefusedError
 hasPostgresErrorCode [const] ({ code, error }: HasPostgresErrorCodeArgs) => boolean
 
 ## ./errors/map-db-error.util
-mapDbError [const] (error: unknown) => PersistenceError
+mapDbError [const] (error: unknown) => PersistenceError | QueryRefusedError
 
 ## ./errors/persistence.error
 PersistenceError [class] PersistenceError
 
 ## ./errors/query-canceled.error
 QueryCanceledError [class] QueryCanceledError
+
+## ./errors/query-refused.error
+QueryRefusedError [class] QueryRefusedError
 
 ## ./errors/to-serializable-db-error.util
 toSerializableDbError [const] (error: unknown) => SerializableDbError
@@ -218,12 +242,12 @@ UniqueConstraintViolationError [class] UniqueConstraintViolationError
 
 ## ./filters/filters.types
 BooleanFilter [type] { readonly type: 'boolean'; readonly value: boolean; }
-ColumnFilter [type] BooleanFilter | DateFilter | EmptyFilter | NumberFilter | SelectFilter | TextFilter
+ColumnFilter [type] | BooleanFilter | DateFilter | EmptyFilter | NumberFilter | SelectFilter | TextFilter
 DateFilter [type] { readonly operator: 'after' | 'before' | 'between' | 'equals'; readonly type: 'date'; /** ISO date string. */ readonly value: string; readonly value2?: string; }
 EmptyFilter [type] { readonly operator: 'isEmpty' | 'isNotEmpty'; readonly type: 'empty'; }
-NumberFilter [type] { readonly operator: 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; readonly value: number | undefined; readonly value2?: number; }
+NumberFilter [type] { readonly operator: | 'between' | 'equals' | 'greaterThan' | 'greaterThanOrEqual' | 'lessThan' | 'lessThanOrEqual' | 'notEquals'; readonly type: 'number'; /** Absent from the serialised form while the value is still being typed. */ readonly value: number | undefined; readonly value2?: number; }
 SelectFilter [type] { /** Defaults to `'equals'`. */ readonly operator?: 'equals' | 'notEquals'; readonly type: 'multiSelect' | 'select'; /** Single value for `'select'`. */ readonly value?: string; /** Multiple values for `'multiSelect'`. */ readonly values?: readonly string[]; }
-TextFilter [type] { readonly operator: 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
+TextFilter [type] { readonly operator: | 'contains' | 'endsWith' | 'equals' | 'notContains' | 'notEquals' | 'startsWith'; readonly type: 'text'; readonly value: string; }
 
 ## ./filters/resolve-filter-options-source.util
 FilterOptionsSourceRefusal [type] 'unknown-column' | 'unknown-source'
@@ -273,34 +297,38 @@ RowDeleteActionArgs [type] { readonly request: Request; }
 
 ## ./table-page/create-table-loader-reads.util
 createTableLoaderReads [const] <TPage, TGrouping extends TablePageGrouping = TablePageGrouping>({ limit, reader }: CreateTableLoaderReadsArgs<TPage, TGrouping>) => { fetchPage: ({ effectiveSorting, filters, grouping, totalsPlacement }: TableLoaderPageArgs<TGrouping>) => Promise<TPage>; resolveGroupingCapabilities: () => Promise<Readonly<Record<string, ColumnGroupingCapability>>>; }
-CreateTableLoaderReadsArgs [type] { /** Size of the first page the table opens on. */ readonly limit: number; readonly reader: Pick<TablePageReader, 'selectGroupingCapabilities'> & { readonly selectPage: (read: TableLoaderRead<TGrouping>) => Promise<TPage>; }; }
+CreateTableLoaderReadsArgs [type] { /** Size of the first page the table opens on. */ readonly limit: number; readonly reader: { readonly selectGroupingCapabilities: () => Promise<TableGroupingCapabilities>; readonly selectPage: (read: TableLoaderRead<TGrouping>) => Promise<TPage>; }; }
 TableLoaderPageArgs [type] { readonly effectiveSorting: readonly TablePageSortRule[]; readonly filters: Readonly<Record<string, ColumnFilter>>; /** A grouping with no keys reads rows. */ readonly grouping?: TGrouping; readonly totalsPlacement?: TablePageRead['totalsPlacement']; }
 TableLoaderRead [type] Omit<TablePageRead, 'grouping'> & { readonly grouping?: TGrouping; }
 
 ## ./table-page/create-table-page-loader.util
 createTablePageLoader [const] ({ resolvePageRead, selectPage }: CreateTablePageLoaderArgs) => TablePageLoader
-CreateTablePageLoaderArgs [type] { readonly resolvePageRead: TablePageReader['resolvePageRead']; readonly selectPage: (read: OlapGroupRead) => Promise<unknown>; }
+CreateTablePageLoaderArgs [type] { readonly resolvePageRead: (params: URLSearchParams) => Promise<TablePageReadResolution>; readonly selectPage: (read: OlapGroupRead) => Promise<unknown>; }
 TablePageLoader [type] (args: TablePageLoaderArgs) => Promise<Response>
 TablePageLoaderArgs [type] { readonly request: Request; }
 
 ## ./table-page/create-table-page-reader.util
-createTablePageReader [const] <TRow extends QueryResultRow, TKey extends keyof TRow & string>({ defaultLimit, fallbackSort, fields, groupMaxRows, ignoredSortColumns, maxLimit, maxSortRules, primaryKey, target }: CreateTablePageReaderArgs<TKey>) => { deleteRow: (id: TRow[TKey]) => Promise<void>; resolveGroupRead: (args: TablePageGroupReadArgs) => Promise<OlapGroupReadResolution>; resolveGroupRestriction: (args: TablePageGroupRestrictionArgs) => Promise<GroupRestrictionStatement | undefined>; resolvePageRead: (params: URLSearchParams) => Promise<OlapGroupReadResolution>; selectGroupingCapabilities: () => Promise<Readonly<Record<string, ColumnGroupingCapability>>>; selectGroupKeyTruncations: (periods: Readonly<Record<string, GroupKeyPeriod>> | undefined) => Promise<Readonly<Record<string, GroupKeyTruncation>>>; selectPage: ({ cursor, filters, grouping, includeTotal, limit, offset, sort, totalsPlacement }: TablePageRead) => Promise<TablePage<TRow>>; }
-CreateTablePageReaderArgs [type] { /** Page size a request that names no `limit` gets. */ readonly defaultLimit: number; /** Order a request that sends no usable sort gets; must be non-empty. */ readonly fallbackSort: readonly ColumnSort[]; /** Columns a row read projects. Defaults to `target.allowedColumns`. */ readonly fields?: readonly string[]; /** Row ceiling of a grouped read, which is never paginated. */ readonly groupMaxRows: number; /** Sort keys that name no data column; dropped from every read this reader resolves. */ readonly ignoredSortColumns?: readonly string[]; /** Largest page a request can ask for; smaller pages pass through. */ readonly maxLimit: number; /** Longest ORDER BY a request can ask for. Defaults to the allowed column count. */ readonly maxSortRules?: number; /** Unique, non-null column that breaks sort ties and anchors keyset pages. */ readonly primaryKey: TKey; readonly target: TablePageTarget; }
+createTablePageReader [const] <TRow extends QueryResultRow, TKey extends keyof TRow & string>({ defaultLimit, fallbackSort, fields, groupMaxRows, ignoredSortColumns, maxLimit, maxSortRules, pagePath, primaryKey, target }: CreateTablePageReaderArgs<TKey>) => { deleteRow: (id: TRow[TKey]) => Promise<void>; pageLoader: TablePageLoader; resolveGroupRead: (args: TablePageGroupReadArgs) => Promise<OlapGroupReadResolution>; resolveGroupRestriction: (args: TablePageGroupRestrictionArgs) => Promise<GroupRestrictionStatement | undefined>; resolvePageRead: (params: URLSearchParams) => Promise<TablePageParamsRefusal | OlapGroupReadResolution>; selectGroupingCapabilities: () => Promise<Readonly<Record<string, ColumnGroupingCapability>>>; selectGroupKeyTruncations: (periods: Readonly<Record<string, GroupKeyPeriod>> | undefined) => Promise<Readonly<Record<string, GroupKeyTruncation>>>; selectPage: ({ cursor, filters, grouping, includeTotal, limit, offset, sort, totalsPlacement }: TablePageRead) => Promise<TablePage<TRow>>; source: { fetchPage: ({ effectiveSorting, filters, grouping, totalsPlacement }: TableLoaderPageArgs<TablePageGrouping>) => Promise<TablePage<TRow>>; resolveGroupingCapabilities: () => Promise<Readonly<Record<string, ColumnGroupingCapability>>>; capabilities: { readonly isGroupingEnabled: true; readonly isKeysetEnabled: true; readonly isServerFilterEnabled: true; }; pagePath?: string | undefined; schemaName: string; tableName: string; }; }
+CreateTablePageReaderArgs [type] { /** Page size of the first page and of a request that names no `limit`. Defaults to 50. */ readonly defaultLimit?: number; /** Order a request that sends no usable sort gets. Defaults to `primaryKey` ascending. */ readonly fallbackSort?: readonly ColumnSort[]; /** Columns a row read projects. Defaults to `target.allowedColumns`. */ readonly fields?: readonly string[]; /** Row ceiling of a grouped read, which is never paginated. Defaults to 5000. */ readonly groupMaxRows?: number; /** Sort keys that name no data column; dropped from every read this reader resolves. */ readonly ignoredSortColumns?: readonly string[]; /** Largest page a request can ask for; smaller pages pass through. Defaults to 1000. */ readonly maxLimit?: number; /** Longest ORDER BY a request can ask for. Defaults to the allowed column count. */ readonly maxSortRules?: number; /** Path the route answering with `pageLoader` is mounted at; `source` carries it to the grid. */ readonly pagePath?: string; /** Unique, non-null column that breaks sort ties and anchors keyset pages. */ readonly primaryKey: TKey; readonly target: TablePageTarget; }
 TablePageGroupReadArgs [type] Omit<Parameters<typeof resolveGroupRead>[0], 'maxLimit' | 'primaryKey' | 'selectTruncations'>
 TablePageGroupRestrictionArgs [type] Omit<Parameters<typeof resolveGroupRestriction>[0], 'selectTruncations'>
 TablePageReader [type] ReturnType<typeof createTablePageReader<TRow, TKey>>
 
 ## ./table-page/parse-table-page-params.util
-parseTablePageParams [const] ({ defaultLimit, fallbackSort, ignoredSortColumns, params }: ParseTablePageParamsArgs) => TablePageParams
+parseTablePageParams [const] ({ defaultLimit, fallbackSort, ignoredSortColumns, params }: ParseTablePageParamsArgs) => TablePageParamsResolution
 ParseTablePageParamsArgs [type] { /** Used when the request names no `limit`, or an unreadable one. */ readonly defaultLimit: number; /** Used when the request carries no usable sort rule; must be non-empty. */ readonly fallbackSort: readonly ColumnSort[]; /** Columns a client may send a sort for that are not data columns. */ readonly ignoredSortColumns?: readonly string[]; readonly params: URLSearchParams; }
 
 ## ./table-page/table-page.types
+TableGroupingCapabilities [type] Readonly<Record<string, ColumnGroupingCapability>>
 TablePage [type] { readonly data: readonly (TablePageGroupRow | TRow)[]; readonly error?: SerializableDbError; readonly groupingWarning?: GroupCardinalityWarning; readonly hasMore: boolean; readonly total?: number; }
 TablePageAggregate [type] { readonly columnKey: string; readonly fn: AggregateFn; }
 TablePageGrouping [type] { readonly aggregates: readonly TablePageAggregate[]; /** Distinct values of this column become measure columns. */ readonly columnAxis?: string; readonly keys: readonly string[]; readonly mode: GroupingMode; readonly periods: Readonly<Record<string, GroupKeyPeriod>>; }
 TablePageGroupRow [type] ReturnType<typeof toGroupRow>
 TablePageParams [type] { readonly cursor?: readonly unknown[]; readonly filters: readonly QueryFilter[]; readonly limit: number; readonly skip: number; readonly sort: readonly QuerySort[]; }
+TablePageParamsRefusal [type] { readonly kind: 'refused'; readonly message: string; readonly reason: ColumnFiltersRefusal['reason']; }
+TablePageParamsResolution [type] TablePageParamsRefusal | { readonly kind: 'parsed'; readonly params: TablePageParams; }
 TablePageRead [type] { /** One value per `sort` entry, from the last row of the previous page. */ readonly cursor?: readonly unknown[]; readonly filters: readonly QueryFilter[]; /** A read with no group keys returns rows, not groups. */ readonly grouping?: TablePageGrouping; readonly includeTotal: boolean; readonly limit: number; readonly offset: number; readonly sort: readonly QuerySort[]; /** Defaults to `'last'`. */ readonly totalsPlacement?: 'first' | 'last'; }
+TablePageReadResolution [type] OlapGroupReadResolution | TablePageParamsRefusal
 TablePageSortRule [type] { readonly columnKey: string; /** A rule with no direction sorts nothing and is dropped. */ readonly direction?: ColumnSort['direction']; }
 TablePageTarget [type] { /** Every request-derived column is checked against this list. */ readonly allowedColumns: readonly string[]; readonly schema: string; readonly table: string; }
 
@@ -310,6 +338,9 @@ toIntegerRowId [const] (raw: string) => number | undefined
 ## ./table-page/to-keyset-cursor.util
 toKeysetCursor [const] ({ cursor, sort, uniqueColumn }: ToKeysetCursorArgs) => { uniqueColumn: string; values: readonly unknown[]; } | undefined
 ToKeysetCursorArgs [type] { readonly cursor?: readonly unknown[]; readonly sort: readonly QuerySort[]; readonly uniqueColumn: string; }
+
+## ./table-page/to-refused-table-page.util
+toRefusedTablePage [const] (message: string) => TablePage<never>
 
 ## ./tickets/is-access-ticket-valid.util
 isAccessTicketValid [const] ({ now, secret, subject, ticket }: VerifyAccessTicketArgs) => boolean

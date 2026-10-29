@@ -12,6 +12,7 @@ export { RootErrorBoundary } from './components/RootErrorBoundary/RootErrorBound
 export { RouteErrorBoundary } from './components/RouteErrorBoundary/RouteErrorBoundary.component';
 export { SectionCard } from './components/SectionCard/SectionCard.component';
 export { StatusBadge } from './components/StatusBadge/StatusBadge.component';
+export { Table } from './components/Table/Table.component';
 export { TableLayout } from './components/Table/TableLayout/TableLayout.component';
 export { TableGroupDetailsView } from './components/TableGroupDetailsView/TableGroupDetailsView.component';
 export { TableRouteView } from './components/TableRouteView/TableRouteView.component';

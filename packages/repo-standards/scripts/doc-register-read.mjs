@@ -51,7 +51,7 @@ const readJson = (root, file) => {
   return existsSync(path) ? JSON.parse(readTextWithin(path, root)) : {};
 };
 
-const readWorkflows = (root) => {
+export const readWorkflows = (root) => {
   const absolute = join(root, WORKFLOW_DIR);
   if (!existsSync(absolute)) {
     return [];

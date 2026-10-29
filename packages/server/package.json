@@ -1,6 +1,6 @@
 {
   "name": "@lcabrera/server",
-  "version": "0.8.2",
+  "version": "0.9.0",
   "private": false,
   "description": "Node-only Postgres primitives: an injection-safe SQL builder, a column-filter contract, and secret/token/ticket helpers.",
   "keywords": [
@@ -35,6 +35,7 @@
     "./db/delete-rows.util": "./src/db/delete-rows.util.ts",
     "./db/env.schema": "./src/db/env.schema.ts",
     "./db/get-column-grouping-capabilities.util": "./src/db/get-column-grouping-capabilities.util.ts",
+    "./db/get-foreign-key-relations.util": "./src/db/get-foreign-key-relations.util.ts",
     "./db/get-max-value.util": "./src/db/get-max-value.util.ts",
     "./db/get-pool.util": "./src/db/get-pool.util.ts",
     "./db/get-rows-count.util": "./src/db/get-rows-count.util.ts",
@@ -57,6 +58,7 @@
     "./db/query-builder/build-insert-query.util": "./src/db/query-builder/build-insert-query.util.ts",
     "./db/query-builder/build-max-value-query.util": "./src/db/query-builder/build-max-value-query.util.ts",
     "./db/query-builder/build-order-by-clause.util": "./src/db/query-builder/build-order-by-clause.util.ts",
+    "./db/query-builder/build-read-query.util": "./src/db/query-builder/build-read-query.util.ts",
     "./db/query-builder/build-select-query.util": "./src/db/query-builder/build-select-query.util.ts",
     "./db/query-builder/build-update-query.util": "./src/db/query-builder/build-update-query.util.ts",
     "./db/query-builder/query-builder.types": "./src/db/query-builder/query-builder.types.ts",
@@ -74,6 +76,7 @@
     "./errors/map-db-error.util": "./src/errors/map-db-error.util.ts",
     "./errors/persistence.error": "./src/errors/persistence.error.ts",
     "./errors/query-canceled.error": "./src/errors/query-canceled.error.ts",
+    "./errors/query-refused.error": "./src/errors/query-refused.error.ts",
     "./errors/to-serializable-db-error.util": "./src/errors/to-serializable-db-error.util.ts",
     "./errors/unique-constraint-violation.error": "./src/errors/unique-constraint-violation.error.ts",
     "./filters/filters.types": "./src/filters/filters.types.ts",
@@ -94,6 +97,7 @@
     "./table-page/table-page.types": "./src/table-page/table-page.types.ts",
     "./table-page/to-integer-row-id.util": "./src/table-page/to-integer-row-id.util.ts",
     "./table-page/to-keyset-cursor.util": "./src/table-page/to-keyset-cursor.util.ts",
+    "./table-page/to-refused-table-page.util": "./src/table-page/to-refused-table-page.util.ts",
     "./tickets/is-access-ticket-valid.util": "./src/tickets/is-access-ticket-valid.util.ts",
     "./tickets/sign-access-ticket.util": "./src/tickets/sign-access-ticket.util.ts",
     "./tokens/generate-api-token.util": "./src/tokens/generate-api-token.util.ts",
@@ -124,6 +128,10 @@
       "./db/get-column-grouping-capabilities.util": {
         "types": "./dist/db/get-column-grouping-capabilities.util.d.mts",
         "default": "./dist/db/get-column-grouping-capabilities.util.mjs"
+      },
+      "./db/get-foreign-key-relations.util": {
+        "types": "./dist/db/get-foreign-key-relations.util.d.mts",
+        "default": "./dist/db/get-foreign-key-relations.util.mjs"
       },
       "./db/get-max-value.util": {
         "types": "./dist/db/get-max-value.util.d.mts",
@@ -213,6 +221,10 @@
         "types": "./dist/db/query-builder/build-order-by-clause.util.d.mts",
         "default": "./dist/db/query-builder/build-order-by-clause.util.mjs"
       },
+      "./db/query-builder/build-read-query.util": {
+        "types": "./dist/db/query-builder/build-read-query.util.d.mts",
+        "default": "./dist/db/query-builder/build-read-query.util.mjs"
+      },
       "./db/query-builder/build-select-query.util": {
         "types": "./dist/db/query-builder/build-select-query.util.d.mts",
         "default": "./dist/db/query-builder/build-select-query.util.mjs"
@@ -280,6 +292,10 @@
       "./errors/query-canceled.error": {
         "types": "./dist/errors/query-canceled.error.d.mts",
         "default": "./dist/errors/query-canceled.error.mjs"
+      },
+      "./errors/query-refused.error": {
+        "types": "./dist/errors/query-refused.error.d.mts",
+        "default": "./dist/errors/query-refused.error.mjs"
       },
       "./errors/to-serializable-db-error.util": {
         "types": "./dist/errors/to-serializable-db-error.util.d.mts",
@@ -360,6 +376,10 @@
       "./table-page/to-keyset-cursor.util": {
         "types": "./dist/table-page/to-keyset-cursor.util.d.mts",
         "default": "./dist/table-page/to-keyset-cursor.util.mjs"
+      },
+      "./table-page/to-refused-table-page.util": {
+        "types": "./dist/table-page/to-refused-table-page.util.d.mts",
+        "default": "./dist/table-page/to-refused-table-page.util.mjs"
       },
       "./tickets/is-access-ticket-valid.util": {
         "types": "./dist/tickets/is-access-ticket-valid.util.d.mts",

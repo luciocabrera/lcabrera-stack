@@ -7,11 +7,12 @@ import { ForeignKeyViolationError } from './foreign-key-violation.error.ts';
 import { hasPostgresErrorCode } from './has-postgres-error-code.util.ts';
 import { PersistenceError } from './persistence.error.ts';
 import { QueryCanceledError } from './query-canceled.error.ts';
+import { QueryRefusedError } from './query-refused.error.ts';
 import { readPgErrorFields } from './read-pg-error-fields.util.ts';
 import { UniqueConstraintViolationError } from './unique-constraint-violation.error.ts';
 
 export const mapDbError = (error: unknown) => {
-  if (error instanceof PersistenceError) {
+  if (error instanceof PersistenceError || error instanceof QueryRefusedError) {
     return error;
   }
 

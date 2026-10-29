@@ -2,25 +2,29 @@
 
 Pure construction and resolution for **grouped** reads, the sibling of
 `../query-builder/` and held to the same rule: no DB access lives here, so the
-whole suite runs without a database (ADR-032). The one impure partner is
+whole suite runs without a database (ADR-032). The impure partner is
 `../get-column-grouping-capabilities.util.ts`, which pairs the query this folder
-builds with `runQuery`.
+builds with `runQuery`; `../get-read-grouping-capabilities.util.ts` runs it once
+per source table when a grouped read joins.
 
-The folder has three halves — two entry points and one rail set they share.
+The folder has three halves — capability, emission, and one rail set they
+share. None is a public way in to a read: the query entry point is
+`../query-builder/build-read-query.util.ts`, which routes any descriptor carrying
+`grouping` to the emission half here.
 
 - **Capability** — which columns may be a group key, which aggregates are legal
   for each, and why a column was refused. `resolveColumnCapability`, decided by
   [ADR-058](../../../../../docs/decisions/ADR-058-grouping-legality-by-analytical-role.md).
 - **Emission** — `GROUPING SETS`, the variadic mask, aggregate projection and
-  ordering. `buildGroupQuery`, decided by
+  ordering. `buildGroupedRead`, decided by
   [ADR-059](../../../../../docs/decisions/ADR-059-aggregation-is-builder-generated.md).
 - **Guard rails** — how large the result will be, whether that is allowed, and
   what `LIMIT` it runs under. `resolveGroupGuardRails`, decided by
   [ADR-066](../../../../../docs/decisions/ADR-066-grouping-guard-rails-and-per-query-timeout.md).
-  Called from inside `buildGroupQuery`, after the legality gates, so the emitted
+  Called from inside `buildGroupedRead`, after the legality gates, so the emitted
   `LIMIT` is the rails' answer and not the requested `maxRows`.
 
-They are joined by a **descriptor field, not an import**: `buildGroupQuery`
+They are joined by a **descriptor field, not an import**: `buildGroupedRead`
 takes the capability map the other half resolved and refuses anything the
 catalogue turned down. That is what lets a pure function enforce ADR-058 —
 the impure half answers "what is legal here", this one refuses everything else.
@@ -88,44 +92,87 @@ documented in ADR-058, and something the UI has to surface rather than hide.
 
 ## Files
 
-| File                                      | Role                                                                                                                                                                                      |
-| ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `group-query-builder.types.ts`            | `AggregateFn`, `ColumnAnalyticalRole`, `GroupKeyRefusalReason`, `DistinctEstimate`, and the capability row/result types                                                                   |
-| `group-query-builder.constants.ts`        | Every constant this folder owns, in one file per the domain-folder rule: the `AGGREGATE_SQL` map and probe names, the group-key bounds, and the schema-qualified identifier exceptions    |
-| `is-identifier-type.util.ts`              | The one place that comparison happens; both the role gate and the refusal rules consult it so they cannot drift                                                                           |
-| `resolve-analytical-role.util.ts`         | **Gate 1.** `pg_type.typcategory` → dimension / fact / unsupported. Admit a category only when every member belongs (see above)                                                           |
-| `build-column-capabilities-query.util.ts` | **Gate 2.** One bound-parameter catalogue query: equality operator, per-aggregate existence, and `pg_stats`/`reltuples`, for every requested column                                       |
-| `resolve-distinct-estimate.util.ts`       | `n_distinct` → a known count, genuinely unknown, or undefined distinctness — three outcomes on purpose                                                                                    |
-| `to-role-aggregates.util.ts`              | Both gates applied to the aggregate menu: the role sets the ceiling, the catalogue removes what does not exist                                                                            |
-| `resolve-column-capability.util.ts`       | **Public entry point.** One catalogue row → one `ColumnGroupingCapability`, refusal reason included                                                                                       |
-| `expand-grouping-sets.util.ts`            | Grouping mode → the ordered sets, over key names rather than SQL, so its suite is array equality. A closed record, so a new mode cannot be added without one                              |
-| `expand-cube-sets.util.ts`                | Cube's own expansion: every subset, in ascending `GROUPING()` mask — the order the PostgreSQL manual lists for `CUBE`                                                                     |
-| `to-grouping-set-mask.util.ts`            | One set → the `GROUPING()` integer, the only thing separating a structural NULL from a real one                                                                                           |
-| `assert-group-column.util.ts`             | The two shared column assertions (`assertSafeIdentifier`, `assertColumnAllowed`) raised as a **typed** refusal — they are shared with the flat builder and so cannot throw one themselves |
-| `assert-group-depth.util.ts`              | The capability-free half of the key rules — non-empty, within the depth cap, no repeats. Split out so the executor can run it **before borrowing a connection**                           |
-| `assert-group-keys.util.ts`               | `assertGroupDepth` plus the allowlist and the catalogue's own refusal                                                                                                                     |
-| `assert-column-axis-max-distinct.util.ts` | Positive integer `maxDistinct`, before DISTINCT and inside `assertColumnAxis`                                                                                                             |
-| `assert-column-axis-key.util.ts`          | Pre-discovery axis gates: not also a row key, catalogue-legal. The executor runs this before DISTINCT                                                                                     |
-| `assert-column-axis.util.ts`              | Key gates plus caller ceiling vs values and the Postgres heap-attribute ceiling. `fixedAggregateCount` is the unexpanded `count(*)`; expanding measures are `measureCount`                |
-| `to-column-axis-alias.util.ts`            | `${aggregateAlias}_c${index}` — values are not identifiers                                                                                                                                |
-| `to-column-axis-discovery-limit.util.ts`  | DISTINCT `LIMIT`: min(caller `maxDistinct`, heap fit) + 1, so discovery does not fetch more than a projection can hold. Same `fixedAggregateCount` as `assertColumnAxis`                  |
-| `is-unexpanded-leading-count.util.ts`     | Bare leading `count(*)` on the descriptor list — no column, no FILTER. The builder holds that one back from axis expansion                                                                |
-| `to-expanding-measure-count.util.ts`      | How many aggregates expand per axis value: total minus the leading unexpanded `count(*)` when present                                                                                     |
-| `expand-column-axis-aggregates.util.ts`   | One `FILTER` aggregate per axis value, value-major across the requested measures                                                                                                          |
-| `estimate-group-cardinality.util.ts`      | The pre-flight row bound, summed over the sets `expandGroupingSets` will emit — so a new mode needs no formula here                                                                       |
-| `resolve-widest-group-key.util.ts`        | Which key contributes most to that bound, i.e. which one a refusal should name                                                                                                            |
-| `assert-group-cardinality.util.ts`        | Refuse / warn / say nothing, against the two thresholds. Unknown statistics warn — never refuse                                                                                           |
-| `resolve-group-row-limit.util.ts`         | The `LIMIT` the read runs under, and whether reaching it is a refusal or a truncation the caller asked for                                                                                |
-| `assert-group-row-backstop.util.ts`       | The post-execution half of that: a result that reached the guard's own ceiling is refused, not returned short                                                                             |
-| `resolve-group-guard-rails.util.ts`       | The three rails as one answer, so `buildGroupQuery` gains one call rather than three                                                                                                      |
-| `assert-group-aggregates.util.ts`         | Every requested `{column, fn}` against the catalogue's menu, plus the one-`countDistinct` budget                                                                                          |
-| `resolve-aggregate-alias.util.ts`         | `count(*)` → `count_rows`, otherwise `${fn}_${column}` with `distinct` folded into the prefix                                                                                             |
-| `assert-group-aliases.util.ts`            | The identifier-length refusal and the collision rules — see the fourth trap below                                                                                                         |
-| `build-aggregate-projection.util.ts`      | The aggregate half of the SELECT list, and where `FILTER (WHERE …)` claims the leading `$n`                                                                                               |
-| `build-grouping-sets-clause.util.ts`      | `GROUP BY GROUPING SETS (…)`, the one grouping construct emitted                                                                                                                          |
-| `assert-group-sort.util.ts`               | Every rule a sort request clears first: the two name checks, and the refusal of an aggregate listed ahead of a group key                                                                  |
-| `build-group-order-by-clause.util.ts`     | `GROUPING(key) <placement>, key <user>` per key, aggregates spliced into the innermost level — and why no `NULLS` keyword appears                                                         |
-| `build-group-query.util.ts`               | **Public entry point.** One `GroupQueryDescriptor` → the SQL, its values, and the keys and masks needed to decode the result                                                              |
+| File                                      | Role                                                                                                                                                                                                               |
+| ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `group-query-builder.types.ts`            | `AggregateFn`, `ColumnAnalyticalRole`, `GroupKeyRefusalReason`, `DistinctEstimate`, and the capability row/result types                                                                                            |
+| `group-query-builder.constants.ts`        | Every constant this folder owns, in one file per the domain-folder rule: the `AGGREGATE_SQL` map and probe names, the group-key bounds, and the schema-qualified identifier exceptions                             |
+| `is-identifier-type.util.ts`              | The one place that comparison happens; both the role gate and the refusal rules consult it so they cannot drift                                                                                                    |
+| `resolve-analytical-role.util.ts`         | **Gate 1.** `pg_type.typcategory` → dimension / fact / unsupported. Admit a category only when every member belongs (see above)                                                                                    |
+| `build-column-capabilities-query.util.ts` | **Gate 2.** One bound-parameter catalogue query: equality operator, per-aggregate existence, and `pg_stats`/`reltuples`, for every requested column                                                                |
+| `resolve-distinct-estimate.util.ts`       | `n_distinct` → a known count, genuinely unknown, or undefined distinctness — three outcomes on purpose                                                                                                             |
+| `to-role-aggregates.util.ts`              | Both gates applied to the aggregate menu: the role sets the ceiling, the catalogue removes what does not exist                                                                                                     |
+| `resolve-column-capability.util.ts`       | One catalogue row → one `ColumnGroupingCapability`, refusal reason included                                                                                                                                        |
+| `expand-grouping-sets.util.ts`            | Grouping mode → the ordered sets, over key names rather than SQL, so its suite is array equality. A closed record, so a new mode cannot be added without one                                                       |
+| `expand-cube-sets.util.ts`                | Cube's own expansion: every subset, in ascending `GROUPING()` mask — the order the PostgreSQL manual lists for `CUBE`                                                                                              |
+| `to-grouping-set-mask.util.ts`            | One set → the `GROUPING()` integer, the only thing separating a structural NULL from a real one                                                                                                                    |
+| `assert-group-column.util.ts`             | Resolves one column reference through `resolveColumnReference` (safe identifier, then its own source's allowlist) and raises a failure as a **typed** refusal, which the shared assertions cannot throw themselves |
+| `assert-group-depth.util.ts`              | The capability-free half of the key rules — non-empty, within the depth cap, no repeats. Split out so the executor can run it **before borrowing a connection**                                                    |
+| `assert-group-keys.util.ts`               | `assertGroupDepth` plus the allowlist and the catalogue's own refusal                                                                                                                                              |
+| `assert-column-axis-max-distinct.util.ts` | Positive integer `maxDistinct`, before DISTINCT and inside `assertColumnAxis`                                                                                                                                      |
+| `assert-column-axis-key.util.ts`          | Pre-discovery axis gates: not also a row key, catalogue-legal. The executor runs this before DISTINCT                                                                                                              |
+| `assert-column-axis.util.ts`              | Key gates plus caller ceiling vs values and the Postgres heap-attribute ceiling. `fixedAggregateCount` is the unexpanded `count(*)`; expanding measures are `measureCount`                                         |
+| `to-column-axis-alias.util.ts`            | `${aggregateAlias}_c${index}` — values are not identifiers                                                                                                                                                         |
+| `to-column-axis-discovery-limit.util.ts`  | DISTINCT `LIMIT`: min(caller `maxDistinct`, heap fit) + 1, so discovery does not fetch more than a projection can hold. Same `fixedAggregateCount` as `assertColumnAxis`                                           |
+| `is-unexpanded-leading-count.util.ts`     | Bare leading `count(*)` on the descriptor list — no column, no FILTER. The builder holds that one back from axis expansion                                                                                         |
+| `to-expanding-measure-count.util.ts`      | How many aggregates expand per axis value: total minus the leading unexpanded `count(*)` when present                                                                                                              |
+| `expand-column-axis-aggregates.util.ts`   | One `FILTER` aggregate per axis value, value-major across the requested measures                                                                                                                                   |
+| `estimate-group-cardinality.util.ts`      | The pre-flight row bound, summed over the sets `expandGroupingSets` will emit — so a new mode needs no formula here                                                                                                |
+| `resolve-widest-group-key.util.ts`        | Which key contributes most to that bound, i.e. which one a refusal should name                                                                                                                                     |
+| `assert-group-cardinality.util.ts`        | Refuse / warn / say nothing, against the two thresholds. Unknown statistics warn — never refuse                                                                                                                    |
+| `resolve-group-row-limit.util.ts`         | The `LIMIT` the read runs under, and whether reaching it is a refusal or a truncation the caller asked for                                                                                                         |
+| `assert-group-row-backstop.util.ts`       | The post-execution half of that: a result that reached the guard's own ceiling is refused, not returned short                                                                                                      |
+| `resolve-group-guard-rails.util.ts`       | The three rails as one answer, so `buildGroupedRead` gains one call rather than three                                                                                                                              |
+| `assert-group-aggregates.util.ts`         | Every requested `{column, fn}` against the catalogue's menu, plus the one-`countDistinct` budget                                                                                                                   |
+| `resolve-aggregate-alias.util.ts`         | `count(*)` → `count_rows`, otherwise `${fn}_${column}` with `distinct` folded into the prefix; a joined column gives `${fn}_${alias}_${column}`                                                                    |
+| `assert-group-aliases.util.ts`            | The identifier-length refusal and the collision rules — see the fourth trap below                                                                                                                                  |
+| `build-aggregate-projection.util.ts`      | The aggregate half of the SELECT list, and where `FILTER (WHERE …)` claims the leading `$n`. Also returns each aggregate's expression by alias, which is what `HAVING` is written from                             |
+| `resolve-group-key-columns.util.ts`       | Each group key → its projected name, its SQL expression (qualified once the read joins, truncated when it has a period) and its SELECT-list entry, aliased for a joined or truncated key                           |
+| `assert-group-filters.util.ts`            | Every rule a `groupFilters` entry clears before any SQL: flat grouping only, no column axis, an alias the descriptor declares, a comparison operator other than `ilike`/`notIlike`                                 |
+| `build-having-clause.util.ts`             | `HAVING <aggregate expression> <op> $n` per entry, from the expressions the projection returned                                                                                                                    |
+| `build-grouping-sets-clause.util.ts`      | `GROUP BY GROUPING SETS (…)`, the one grouping construct emitted                                                                                                                                                   |
+| `assert-group-sort.util.ts`               | Every rule a sort request clears first: the two name checks, and the refusal of an aggregate listed ahead of a group key                                                                                           |
+| `build-group-order-by-clause.util.ts`     | `GROUPING(key) <placement>, key <user>` per key, aggregates spliced into the innermost level — and why no `NULLS` keyword appears                                                                                  |
+| `build-grouped-read.util.ts`              | Private. One `GroupQueryDescriptor` → the SQL, its values, and the keys and masks needed to decode the result; reached through `buildReadQuery`                                                                    |
+| `build-group-query.util.ts`               | Deprecated. Calls `buildGroupedRead`                                                                                                                                                                               |
+
+## Joined columns and the group filter
+
+[ADR-143](../../../../../docs/decisions/ADR-143-join-along-a-foreign-key-and-filter-a-flat-grouped-result.md)
+is the decision; this is how it runs through this folder.
+
+**A grouped read resolves its scope first.** `buildGroupedRead` calls
+`../query-builder/resolve-read-scope.util.ts` before any key is checked, so a
+read with `joins` has its `FROM` list, and one allowlist per source, before a
+column is named. Every key, aggregate column, aggregate filter, axis key and
+`WHERE` filter is a reference — a bare string for the base target or
+`{ column, source }` — and each one is resolved through
+`resolveColumnReference` against its own source. A name allowed on one table is
+not allowed on another, and a dotted string is still an unsafe identifier.
+
+**Inside the folder a column is known by its projected name.** A base column is
+its own name; a joined one is `<alias>.<column>`. That is the key into
+`capabilities` and `periods`, the name `BuiltGroupQuery.keys` reports, and the
+name the row carries, so the mask decoding and the guard rails work unchanged.
+A projected name past 63 bytes is refused, the trap below applied to keys. The
+references themselves are kept for the SQL and for matching a sort key, so a
+dotted string can never stand in for a joined reference there either.
+
+**Capabilities are resolved per source.** The catalogue answers per table, so
+`../select-grouped-rows.util.ts` reads the relation map, resolves the same scope,
+asks for each joined source's columns against that source's table, and keys the
+answers by projected name. Because a join is many-to-one, a joined column's own
+distinct estimate still bounds the values it brings into the result, so the
+guard rails keep their meaning.
+
+**A group filter is written from the aggregate, never from caller text.**
+Postgres does not let `HAVING` name an output alias, so `buildHavingClause` uses
+the expression `buildAggregateProjection` returned for that alias — the same
+`AGGREGATE_SQL` entry and the same `FILTER`, reusing its `$n` — and only the
+filter's own value takes a new parameter, after the `WHERE` values and before
+the `LIMIT`. `assertGroupFilters` runs right after the keys, before anything is
+emitted. It refuses `rollup` and `cube`, where `HAVING` would test subtotals
+computed over children it removed, and any read with a column axis, where one
+alias stands for an expression per axis value.
 
 ## Four traps this folder already pays for
 

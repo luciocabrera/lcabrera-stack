@@ -28,7 +28,10 @@ family from a missing one. It also plants two rule-level probes,
 `react-hooks(exhaustive-deps)` and `react(exhaustive-effect-dependencies)`,
 because Oxlint is the only engine left checking hook dependency arrays, each
 rule catches cases the other does not (ADR-042, amendment 2026-10-21), and a
-loaded family does not prove that one rule still fires.
+loaded family does not prove that one rule still fires. Beyond those, it reads
+every rule the lint config turns on by name, at the top level or in an
+override, and plants a probe for each where that entry applies. A named rule
+with no probe fails it, and so does one whose probe Oxlint does not report.
 
 ## Oxlint
 
@@ -55,7 +58,12 @@ workspace built from a `*-lint` factory. On Vite+ 0.3 none of it loaded, and
 that layer is gone. Vite+ 1.3 would load such a block when `vp lint` runs from
 the package directory, which is why the gate still rejects the key.
 `vp run lint:plugins:verify` fails on a `lint`, `fmt` or `staged` key in any
-workspace config, so none of them can come back.
+workspace config, so none of them can come back. It parses the config rather
+than matching lines, so a shorthand `fmt`, an inline `{ fmt: x }` and a spread
+of a local object all fail it, including inside the arguments of any call the
+default export makes, an aliased `defineConfig`, a `return` nested in an `if`
+and a binding declared or reassigned in any scope. The limits it does not reach
+are listed in the `@lcabrera/repo-standards` README.
 
 **Oxlint runs no ESLint-plugin rules.** The `jsPlugins` bridge is gone: the
 eslint pass already loads `react-x`, `react-dom`, `@stylexjs`, `local-rules`,
@@ -114,8 +122,10 @@ owns these checks and Biome's `useExpect` stays off
 ([ADR-042](../../../docs/decisions/ADR-042-oxlint-config-at-the-root.md),
 amendment "Oxlint owns assertion hygiene in test files"). The rules do not see a test function bound
 by `require`, only a global or an ES `import`. `lint:plugins:verify`
-does not probe this override, so a rule change in it needs a planted test with
-no assertion, run through `vp lint`.
+plants a test file for each rule the override turns on, at a path the override's `files`
+match, and fails when Oxlint does not report one. A rule added to either
+override needs a probe in `RULE_PROBES` of `@lcabrera/repo-standards`, or the
+gate fails naming it.
 
 The other categories are **not** free; measure one before enabling it
 (`vp lint . --format=json`).

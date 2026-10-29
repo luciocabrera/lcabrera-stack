@@ -3,6 +3,15 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+vi.mock('react-router', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('react-router')>();
+
+  return {
+    ...actual,
+    useRouteLoaderData: () => ({ isEvalsDashboardEnabled: false }),
+  };
+});
+
 type MockRootComponentProps = {
   readonly appId?: string;
   readonly getNavigationItems: (iconSize: number) => readonly unknown[];

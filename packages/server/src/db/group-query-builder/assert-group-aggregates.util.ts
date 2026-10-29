@@ -1,3 +1,4 @@
+import type { ReadScope } from '../query-builder/query-builder.types.ts';
 import type {
   ColumnGroupingCapability,
   GroupAggregate,
@@ -11,12 +12,14 @@ type AssertGroupAggregatesArgs = {
   readonly aggregates: readonly GroupAggregate[];
   readonly allowedColumns: readonly string[];
   readonly capabilities: Readonly<Record<string, ColumnGroupingCapability>>;
+  readonly scope?: ReadScope;
 };
 
 export const assertGroupAggregates = ({
   aggregates,
   allowedColumns,
   capabilities,
+  scope,
 }: AssertGroupAggregatesArgs) => {
   if (aggregates.length === 0) {
     throw new GroupingRefusedError({
@@ -48,14 +51,17 @@ export const assertGroupAggregates = ({
       continue;
     }
 
-    assertGroupColumn({ allowedColumns, column: aggregate.column });
-
-    const capability = capabilities[aggregate.column];
+    const { name: column } = assertGroupColumn({
+      allowedColumns,
+      column: aggregate.column,
+      scope,
+    });
+    const capability = capabilities[column];
 
     if (capability === undefined) {
       throw new GroupingRefusedError({
-        column: aggregate.column,
-        message: `No grouping capability was resolved for column "${aggregate.column}"; it is not a column of this table, or the catalogue could not see it.`,
+        column,
+        message: `No grouping capability was resolved for column "${column}"; it is not a column of this table, or the catalogue could not see it.`,
         reason: 'unknown-column',
       });
     }
@@ -67,8 +73,8 @@ export const assertGroupAggregates = ({
           : 'none';
 
       throw new GroupingRefusedError({
-        column: aggregate.column,
-        message: `"${aggregate.fn}" is not legal for column "${aggregate.column}" (${capability.typeName}); the catalogue offers ${offered}.`,
+        column,
+        message: `"${aggregate.fn}" is not legal for column "${column}" (${capability.typeName}); the catalogue offers ${offered}.`,
         reason: 'aggregate-not-legal',
       });
     }

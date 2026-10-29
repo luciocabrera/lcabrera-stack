@@ -19,7 +19,7 @@ checkout.
    an already-applied lockfile and a correct one are indistinguishable once
    `node_modules` exists. Confirm CI parity with
    `vp install --frozen-lockfile --ignore-scripts`.
-2. **Vulnerabilities.** `pnpm audit`. Report severity, path, and **whether the
+2. **Vulnerabilities.** `vp run deps:audit`, the gate itself. Report severity, path, and **whether the
    vulnerable path is actually reachable in production** — "it is in the tree"
    and "it ships and runs" are different claims, and that distinction is the
    discriminating part. The last sweep's advisory was on a real production edge
@@ -42,14 +42,16 @@ Use `vp` for anything it wraps. The genuine exceptions live in
 ## Prior findings
 
 Handled: the hono ReDoS advisory, now pinned forward by an `overrides` entry
-with its removal condition recorded beside it.
+with its removal condition recorded beside it; and the missing audit gate —
+`vp run deps:audit` pipes `vp pm audit --json` into `repo-verify-deps-audit`,
+in CI and on a daily schedule.
 
-Still open (#516): no gate runs `pnpm audit` at all — the supply chain is the
-one thing this repo does not check; `minimumReleaseAge` is commented out while
-its exclude list has rotted; the in-range currency gap and the `vp` local/global
-version split; the unsatisfied `@babel/core` peer; the `jsdom` 30 major. (The undeclared
-`@babel/preset-typescript` listed here left with the workspaces that declared it —
-re-probe rather than assuming it is still open elsewhere.)
+Listed by #516, now closed, and not re-checked since: a rotted
+`minimumReleaseAgeExclude` list, which pnpm reads even with `minimumReleaseAge`
+unset because its one-day default applies; the in-range currency gap; the `vp`
+local/global version split; the unsatisfied `@babel/core` peer; the `jsdom` 30
+major. Re-probe each before reporting it as open. (The undeclared
+`@babel/preset-typescript` it listed left with the workspaces that declared it.)
 
 If the environment blocks a probe, **record it as unverified rather than
 papering over it.**

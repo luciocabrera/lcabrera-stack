@@ -14,7 +14,8 @@
  * is why they are kept correct rather than deleted.
  *
  * `lintConfig` is exported for the same reason: `packages/repo-standards/scripts/verify-lint-plugins.mjs`
- * reads the live plugin list off it.
+ * reads the live plugin list off it, and plants a probe for every rule it or an
+ * override turns on by name.
  */
 
 import { defineConfig } from 'vite-plus';

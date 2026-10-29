@@ -1,8 +1,9 @@
 /**
  * Creates a `full`-rung tree from the packed `@lcabrera/devkit` tarball,
  * installs every `@lcabrera/*` package it resolves from a tarball packed from
- * this checkout and served by a scratch registry, checks its peers, runs the
- * tasks that tree wires for itself with a declare-field probe committed to it
+ * this checkout and served by a scratch registry, checks its peers and that
+ * every optional dependency pinned exactly is excluded from pnpm's release age,
+ * runs the tasks that tree wires for itself with a declare-field probe committed to it
  * and checked in its build under both blueprints' app configs, seeds its
  * database and runs its smoke tests, fetches `/` from the app its root `start`
  * task serves along with a sorted and a filtered page held to SQL, runs every command its
@@ -77,6 +78,7 @@ import {
 } from './lib/devkit-tree-run.mjs';
 import { upgradeFindings } from './lib/devkit-tree-upgrade.mjs';
 import { packedPackages } from './lib/devkit-workspace-closure.mjs';
+import { releaseAgeExcludeFindings } from './lib/devkit-workspace-release-age.mjs';
 import {
   scopedRegistryConfig,
   unpackedSourceFindings,
@@ -276,6 +278,7 @@ const treeChecks = (database) => [
   blueprintFindings,
   peerFindings,
   toolchainBinFindings,
+  releaseAgeExcludeFindings,
   installedHooksFindings,
   plantedProbeFindings,
   taskRunFindings,
@@ -350,7 +353,7 @@ const main = async () => {
               staging,
               tree: join(parent, TREE_NAME),
             }),
-      passed: `Created-workspace gate passed: \`devkit create --profile full\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry with no unmet peer, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\`, ${tasksLabel()} and every command in its \`devkit.config.json\` all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, a class field with no initializer survived that build and a second one under the \`workspace\` blueprint's app config, the tree's seed and smoke tests passed against its database, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200 and a sorted and a filtered page whose rows match SQL, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
+      passed: `Created-workspace gate passed: \`devkit create --profile full\` from the packed tarball placed every blueprint file, \`core.hooksPath\` was \`${HOOKS_PATH}\` after create and again after an install that found it unset, the tree installed every \`@lcabrera/*\` package it resolves from a tarball packed from this checkout through a scratch registry with no unmet peer, with ${TOOLCHAIN_BINS.join(', ')} in its \`node_modules/.bin\` and every optional dependency its packages pin exactly covered by a \`minimumReleaseAgeExclude\` entry, ${tasksLabel()} and every command in its \`devkit.config.json\` all exited zero, the build wrote \`${BUILT_SERVER_ENTRY}\`, a class field with no initializer survived that build and a second one under the \`workspace\` blueprint's app config, the tree's seed and smoke tests passed against its database, \`${commandLabel(START_ARGS)}\` served \`/\` with HTTP 200 and a sorted and a filtered page whose rows match SQL, none of them changed a committed file, \`devkit init --upgrade\` added no task and changed no committed file, and the commit-msg hook took a Conventional Commit and refused a malformed one.`,
       title: 'Created-workspace gate',
     });
   } finally {

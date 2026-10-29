@@ -1,13 +1,15 @@
 /**
  * Packing one distributed workspace and reading files back out of the tarball,
  * shared by the gates that exercise what a consumer receives rather than the
- * workspace link (ADR-073): verify-devkit-tarball.mjs and
- * verify-devkit-workspace.mjs.
+ * workspace link (ADR-073): verify-devkit-tarball.mjs,
+ * verify-devkit-workspace.mjs and verify-packed-publint.mjs.
  */
 
 import { execFileSync } from 'node:child_process';
 import { join } from 'node:path';
 import process from 'node:process';
+
+export const OUTPUT_LIMIT_BYTES = 64 * 1024 * 1024;
 
 /**
  * @param {string} command
@@ -19,6 +21,7 @@ export const run = (command, args, cwd) =>
   execFileSync(command, args, {
     cwd,
     encoding: 'utf8',
+    maxBuffer: OUTPUT_LIMIT_BYTES,
     stdio: ['ignore', 'pipe', 'pipe'],
   });
 
@@ -35,11 +38,10 @@ export const packedFileReader = (tarball) => (target) => {
 };
 
 /**
- * @param {{ directory: string, into: string, repoRoot: string }} args
+ * @param {{ into: string, packageDir: string }} args
  * @returns {{ manifest: Record<string, unknown>, tarball: string }}
  */
-export const packOne = ({ directory, into, repoRoot }) => {
-  const packageDir = join(repoRoot, 'packages', directory);
+export const packDirectory = ({ into, packageDir }) => {
   const output = run('pnpm', ['pack', '--pack-destination', into], packageDir);
   const tarball = output
     .split('\n')
@@ -47,12 +49,19 @@ export const packOne = ({ directory, into, repoRoot }) => {
     .findLast((line) => line.endsWith('.tgz'));
 
   if (tarball === undefined) {
-    throw new Error(`pnpm pack produced no tarball for packages/${directory}`);
+    throw new Error(`pnpm pack produced no tarball for ${packageDir}`);
   }
 
   const packed = packedFileReader(tarball)('package.json');
   if (packed === undefined) {
-    throw new Error(`the tarball for packages/${directory} holds no manifest`);
+    throw new Error(`the tarball for ${packageDir} holds no manifest`);
   }
   return { manifest: JSON.parse(packed), tarball };
 };
+
+/**
+ * @param {{ directory: string, into: string, repoRoot: string }} args
+ * @returns {{ manifest: Record<string, unknown>, tarball: string }}
+ */
+export const packOne = ({ directory, into, repoRoot }) =>
+  packDirectory({ into, packageDir: join(repoRoot, 'packages', directory) });

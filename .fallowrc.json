@@ -1,6 +1,7 @@
 {
   "$schema": "https://raw.githubusercontent.com/fallow-rs/fallow/main/schema.json",
   "entry": [
+    ".pnpmfile.cjs",
     "scripts/build-review-payload.mjs",
     "scripts/claude-autofix.mjs",
     "scripts/claude-secrets-guard.mjs",
@@ -131,7 +132,7 @@
     "unused-dev-dependencies": "error",
     "prop-drilling": "error",
     "thin-wrapper": "error",
-    "duplicate-prop-shape": "warn",
+    "duplicate-prop-shape": "error",
     "stale-suppressions": "error",
     "require-suppression-reason": "error",
     "deprecated-exports-in-use": "error",
@@ -175,6 +176,7 @@
   },
   "audit": {
     "gate": "new-only",
+    "worsened": "error",
     "deadCodeBaseline": "reports/fallow/baselines/dead-code.json",
     "healthBaseline": "reports/fallow/baselines/health.json",
     "dupesBaseline": "reports/fallow/baselines/dupes.json"

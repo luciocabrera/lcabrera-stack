@@ -1,5 +1,36 @@
 # @lcabrera/vite-config
 
+## 0.9.0
+
+### Minor Changes
+
+- 38c1a64: `createLintConfig` now fails `vp lint` on a warning and on an `oxlint-disable` directive that silences nothing, and enables `react/exhaustive-effect-dependencies`, `react/no-unstable-nested-components` and `promise/always-return` at error.
+
+  Oxlint no longer reads `eslint-disable` directives (`respectEslintDisableDirectives: false`). An `eslint-disable` comment names an ESLint rule, which Oxlint would otherwise report as an unused directive; it keeps working for the ESLint pass. A repository that silenced an Oxlint finding with an `eslint-disable` comment will see that finding after upgrading, as will a repository with a stale `oxlint-disable` comment or one of the three rules firing. Fix the code, or delete the stale directive.
+
+- 0f18c43: `createCustomRulesLintConfig` now turns off `react-hooks/exhaustive-deps` and `react-x/exhaustive-deps`. ESLint no longer reports a missing hook dependency, and the `correctness` category of the `./lint` Oxlint config reports it as an error. That covers a prop left out of an effect's or a callback's dependency array and a ref's `.current` read in an effect cleanup.
+
+  **This is the breaking part:** the config sets `reportUnusedDisableDirectives: 'error'`, so an `// eslint-disable-next-line react-hooks/exhaustive-deps` or `react-x/exhaustive-deps` comment left in your code now fails the ESLint pass as an unused directive. Delete the directive (`eslint --fix` removes it). If Oxlint now reports that line, either fix the dependency array or replace the comment with `// oxlint-disable-next-line react-hooks/exhaustive-deps`.
+
+  A project that uses `./eslint-custom-rules` without `./lint` should turn one of the two ESLint rules back on in its own config.
+
+- 7b50e16: The peer ranges move to the versions this package is now exercised against: `vite-plus` `1.4.0` (exact), `@react-router/dev` `^8.5.1`, `eslint` `^10.13.0`, `typescript-eslint` `^8.72.1`, `eslint-plugin-perfectionist` `^5.13.0`, and `eslint-plugin-react-dom` and `eslint-plugin-react-x` `^5.28.8`.
+
+  **This is the breaking part:** `vite-plus` is pinned exactly, so a consumer on 1.3.0 gets an unmet peer until it moves to 1.4.0. Every other floor rises inside its major, so a consumer below one of them, such as `eslint` 10.12, gets an unmet peer and must move up to the floor.
+
+- 52b5562: The `test` and `test:coverage` tasks from `createReactRouterRunConfig` now run `vp test run` instead of invoking Vitest's binary by its `node_modules` path. The arguments are unchanged, and both tasks still run uncached. `vp test` resolves Vitest from vite-plus's own dependencies before the project's.
+
+  **This is the breaking part:** the Vitest that runs these tasks is the one `vite-plus` depends on, and `vp toolchain vitest` prints its version. The project's own `vitest` dependency no longer picks the runner, so upgrading `vite-plus` can move a plain `test` run to a different Vitest major. `test:coverage` passes `VITEST_COVERAGE_FLAGS`, which selects the v8 provider. Keep `@vitest/coverage-v8` at the version `vp toolchain vitest` prints, or the coverage run loads a provider built for a different Vitest.
+
+### Patch Changes
+
+- 61bcb92: The README now says which cases `react/exhaustive-effect-dependencies` reports that the `correctness` category's `react-hooks/exhaustive-deps` does not, and that a prop missing from an effect's dependency array is reported by both. The config is unchanged.
+- cfc2f24: The `start` task from `createReactRouterRunConfig` now runs uncached (`cache: false`), as `test` and `test:coverage` already did. `start` serves until something stops it, so there is no finished run to replay. Tracking a cached task makes Vite Task create an IPC socket directory, a seccomp socket and a shared-memory file in the OS temp dir, and when a signal stops the server those three are left behind on every run. The command itself is unchanged.
+- d15e7a8: The README now says that a workspace `vite.config.ts` sets `pack`, `run` and its Vite/Vitest config, and that `fmt`, `lint` and `staged` belong in the root config only. It used to list `fmt` among the workspace keys. A package-directory `vp fmt` applies a workspace `fmt` block that `vp check` never applies, so the same file could be formatted two ways.
+- Updated dependencies [7b50e16]
+- Updated dependencies [c1faee8]
+  - @lcabrera/eslint-plugin@0.3.5
+
 ## 0.8.0
 
 ### Minor Changes
