@@ -1,5 +1,62 @@
 # @lcabrera/ui
 
+## 0.12.0
+
+### Minor Changes
+
+- 674fbf2: A grid connects to a Postgres table by naming it.
+
+  `@lcabrera/server`:
+
+  - `createTablePageReader` needs only `primaryKey` and `target` (schema, table, columns). `defaultLimit`, `fallbackSort`, `groupMaxRows` and `maxLimit` are now optional, defaulting to 50 rows, the primary key ascending, 5000 grouped rows and a 1000-row ceiling. A new optional `pagePath` names where the page route is mounted.
+  - The reader also returns `pageLoader`, the `({ request }) => Response` handler for that page route, and `source`, the description of the table that `@lcabrera/ui`'s `createTableRouteLoader` takes.
+  - `table-page/to-refused-table-page.util` is exported, for a handler that calls `parseTablePageParams` itself.
+  - `createTablePageLoader`'s `resolvePageRead` and `createTableLoaderReads`'s `reader.selectGroupingCapabilities` are now typed by the new `TablePageReadResolution` and `TableGroupingCapabilities` types instead of through `TablePageReader`. They accept the same values.
+
+  `@lcabrera/ui`:
+
+  - `createTableRouteLoader` takes `source` in place of `fetchPage`, `tableName`, `schemaName` and `resolveGroupingCapabilities`. The source's capabilities go into `metaState` under the route's own `meta`, and its `pagePath` becomes `metaState.pagePath`. Passing both `source` and `fetchPage` is a type error. A loader that passes `fetchPage` is unchanged.
+  - `TableRouteView`'s `fetchPage` prop and `useTableRoutePage`'s `fetchPage` argument are optional. Without them, the next page is fetched from `metaState.pagePath`. If there is no path either, `onLoadMore` is `undefined` and the grid shows one page. Code that calls `useTableRoutePage(...).onLoadMore` directly now has to handle `undefined`.
+  - `TableMetaState` gains an optional `pagePath`.
+
+- 4a3a5ac: `TableQueryRefusalReason` and the reason record that `readRefusedError` checks against now carry the reasons a `query-refused` response can name for a join or a filter on a grouped result: `join-allowlist-missing`, `join-relations-missing`, `join-not-declared`, `join-ambiguous`, `join-kind-unsupported`, `join-alias-taken`, `join-source-unknown`, `keyset-unique-column-joined`, `projected-alias-too-long`, `group-filter-grouping-unsupported`, `group-filter-column-axis`, `group-filter-alias-unknown` and `group-filter-operator-unsupported`. Before this, such a response was not recognised as a refusal. A `dataErrorSelector` or other code that switches over `TableQueryRefusalReason` exhaustively has new cases to handle.
+- 6740c78: `TableResponseError` gains a `query-refused` member carrying a `reason` from the new `TableQueryRefusalReason` (`column-not-allowed`, `keyset-sort-missing`, `keyset-cursor-mismatch`, `keyset-sort-not-unique`, `keyset-unique-value-missing`). It mirrors the `query-refused` member `@lcabrera/server` adds to `SerializableDbError`, so a refusal a server returns reaches the grid as itself instead of as `unexpected`.
+
+  Breaking for callers: a `switch` over `TableResponseError['kind']` that handles every member must handle `query-refused`.
+
+- abe9f7d: The `react` and `react-dom` peer ranges rise from `^19.0.0` to `^19.2.0`. The package imports `Activity` and `useEffectEvent` from `react`, and React exports neither before 19.2.0, so under the old range a project on React 19.0 or 19.1 installed without a warning and then hit an undefined import at runtime. A project on React 19.2.0 or later needs no change; one on an earlier 19.x release now gets a peer-dependency warning at install and must upgrade `react` and `react-dom` to 19.2.0 or later.
+- 25997cd: `Table` renders from an array of rows or a promise, with or without a router, and `StaticTable` is removed.
+
+  - `Table` requires `columns` and takes one data input, `response`. `response` is a value or a promise of one. A promise shows the table's skeleton until it resolves. An array given with no `dataSelector` is the rows themselves. `Table` infers no columns; `inferTableColumnsFromJson` is a helper you can call and pass in.
+  - **Breaking:** a caller that rendered `Table` without `columns` now gets a type error.
+  - **Breaking:** the data props are typed as one of two shapes. With `dataSelector`, `response` is a value or a promise of the shape it reads, and `dataTotalSelector`, `dataErrorSelector` and `onLoadMore` may accompany it. Without `dataSelector`, `response` is an array of rows or a promise of one, and those three props are not accepted. `TableLayoutProps` pairs `dataPromise` with its selectors the same way. A selector given an array of rows, or a non-array response with no selector, is now a type error instead of a runtime throw or an empty grid.
+  - `TableProps` no longer carries `hasMore` and `isLoadingMore`, which `Table` never read.
+  - Outside a `TableLayout`, a `Table` holding rows in memory mounts its own table providers, so inside another grid it still renders its own columns and keeps its own state. Under `TableLayout`, it uses the layout's providers and persistence. A `Table` read through selectors mounts them only when none are above it. In both cases the notification and global-settings providers are added if missing.
+  - Outside a `TableLayout`, rows are held in memory and sorted and filtered in the browser, whether they came as an array or through a `dataSelector`. There, the table writes nothing to a cookie or a URL for them, and none of their interactions needs a router mounted.
+  - Persistence now comes from `TableLayout` only. The layout provides one cookie submitter each for table state, column sizing and UI flags, and the persist actions read them from context. Under `TableLayout`, a sort, filter or column change persists as before. Elsewhere it applies in memory and nothing is submitted.
+  - The empty state offers Retry only under `TableLayout`, where there is a loader to revalidate.
+  - `Table` is exported from the root barrel.
+  - `StaticTable` is removed. It was never on the root barrel or an `exports` subpath, so only a deep import reached it. Render `Table` with `columns` and `response={rows}` instead.
+  - `react-router` remains a required peer because the package's modules import it. A `Table` given an array of rows does not need a router mounted.
+
+### Patch Changes
+
+- c617990: `getCurrencySymbol` now builds its `Intl.NumberFormat` in a private helper that takes the locale and currency as parameters. The resolved symbol is still cached per `locale:currency` key, a rejected currency code still falls back to the code itself, and the returned values are unchanged.
+- 3bc60bc: The column header menu's Pin Left, Pin Right and Clear Pinning items are now rendered by one internal component instead of three copies that took the same props. The items look and behave as before: Pin Left and Pin Right still toggle and report `aria-pressed`, and Clear Pinning stays disabled until the column is pinned. No export changed.
+- bd573b5: `resolveFromCacheOrFetch` and the `createPaginatedFetchActionMocks` test helper check a cached prefetch promise against `undefined` instead of testing its truthiness. Behaviour is unchanged.
+- c1faee8: Internal modules no longer export bindings that nothing outside their own file imports. No subpath named in any package's `exports` changes, and every published entry point keeps the same surface.
+
+  - `@lcabrera/devkit`: the internal git runner that throws on failure is now `runGitOrThrow`, so its name says how it differs from `@lcabrera/repo-standards`' `runGit`, which returns `undefined` on failure. The peer-status constants, the profile-flag literal and two closure-artifact predicates are module-private.
+  - `@lcabrera/repo-standards`: the finding formatters behind `repo-verify-conflict-markers` and `repo-verify-departed-names` are `formatConflictMarker` and `formatDepartedName`. Several module-level constants and helpers are module-private, and `conformance-triggers.cjs` no longer exports `MINIMUM_DESCRIPTION_WORDS`. That file is not one of the package's `exports` subpaths.
+  - `@lcabrera/eslint-plugin`: `ruleDocsUrl` is private to `create-rule.ts`; rule documentation URLs are unchanged.
+  - `@lcabrera/ui`: internal Table barrels stop re-exporting a selector, a fold utility and three types that every caller imports from the defining file, and the unused `DesignSystemStyle` type is gone. None of them was reachable from the package's public entry points.
+
+- aeb37b7: `useNotifyOnError` no longer raises a notification while the error it is given is `undefined`; it notifies when an error arrives and again when the error's identity changes. Effects across the package now depend only on the values they read: the table actions menu, the tab strip, the notification corners, the table's group-expansion pruning and the table config provider's column re-derivation keep their behaviour, except that the tab strip re-scrolls to the active tab when that tab's index changes rather than whenever the tab count changes, and its overflow follows the resize observer alone.
+- Updated dependencies [8adcd2c]
+- Updated dependencies [05f2b74]
+  - @lcabrera/api@0.6.0
+  - @lcabrera/utils@0.3.0
+
 ## 0.11.0
 
 ### Minor Changes

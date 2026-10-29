@@ -1,5 +1,95 @@
 # @lcabrera/server
 
+## 0.9.0
+
+### Minor Changes
+
+- 8adcd2c: The column filters a paginated read carries in its `filter` param now have a declared shape, and a server refuses a payload that does not match it.
+
+  `@lcabrera/api` adds two subpaths. `@lcabrera/api/filters/filters.types` declares `ColumnFilter` and its members, `ColumnFilters` and `ColumnFiltersParse`. `@lcabrera/api/filters/parse-column-filters.util` exports `parseColumnFilters(params)`. It returns `{ kind: 'parsed', filters }` for an absent or well-formed param. It returns `{ kind: 'refused', reason: 'unreadable' }` when the param is not a JSON object, and `{ kind: 'refused', reason: 'invalid-filter', column }` when one entry is not a filter of a known shape. It never throws.
+
+  Breaking for callers:
+
+  - `PaginatedQuery.filter` is `ColumnFilters` instead of `unknown`. A value that is not a record of column filters no longer compiles.
+  - `parseTablePageParams` in `@lcabrera/server` returns `{ kind: 'parsed', params }` or `{ kind: 'refused', message, reason }` instead of the params. Read `params` after checking `kind`.
+  - A `filter` param that is not JSON, is not an object, or holds an entry of no known shape was read as "no filters", and the endpoint returned every row. `resolvePageRead` now returns a refusal, and `createTablePageLoader` answers it with an empty page carrying the refusal message.
+
+  `@lcabrera/server/filters/filters.types` re-exports the filter types from `@lcabrera/api` under the same names, so imports from it keep working.
+
+  `@lcabrera/utils` adds two guards: `isFiniteNumber` (`@lcabrera/utils/guards/is-finite-number.util`) narrows a value to a number that is not `NaN` or infinite, and `isStringList` (`@lcabrera/utils/guards/is-string-list.util`) narrows a value to an array whose every member is a string.
+
+- 674fbf2: A grid connects to a Postgres table by naming it.
+
+  `@lcabrera/server`:
+
+  - `createTablePageReader` needs only `primaryKey` and `target` (schema, table, columns). `defaultLimit`, `fallbackSort`, `groupMaxRows` and `maxLimit` are now optional, defaulting to 50 rows, the primary key ascending, 5000 grouped rows and a 1000-row ceiling. A new optional `pagePath` names where the page route is mounted.
+  - The reader also returns `pageLoader`, the `({ request }) => Response` handler for that page route, and `source`, the description of the table that `@lcabrera/ui`'s `createTableRouteLoader` takes.
+  - `table-page/to-refused-table-page.util` is exported, for a handler that calls `parseTablePageParams` itself.
+  - `createTablePageLoader`'s `resolvePageRead` and `createTableLoaderReads`'s `reader.selectGroupingCapabilities` are now typed by the new `TablePageReadResolution` and `TableGroupingCapabilities` types instead of through `TablePageReader`. They accept the same values.
+
+  `@lcabrera/ui`:
+
+  - `createTableRouteLoader` takes `source` in place of `fetchPage`, `tableName`, `schemaName` and `resolveGroupingCapabilities`. The source's capabilities go into `metaState` under the route's own `meta`, and its `pagePath` becomes `metaState.pagePath`. Passing both `source` and `fetchPage` is a type error. A loader that passes `fetchPage` is unchanged.
+  - `TableRouteView`'s `fetchPage` prop and `useTableRoutePage`'s `fetchPage` argument are optional. Without them, the next page is fetched from `metaState.pagePath`. If there is no path either, `onLoadMore` is `undefined` and the grid shows one page. Code that calls `useTableRoutePage(...).onLoadMore` directly now has to handle `undefined`.
+  - `TableMetaState` gains an optional `pagePath`.
+
+- 6a9a595: `toSerializableDbError` writes a `grouping-refused` body from a fixed sentence per reason, and no longer echoes a column the read does not list.
+
+  A `GroupingRefusedError` with reason `unknown-column` or `duplicate-keys` can name a column taken straight from the request, before the allow-list has accepted it, and its body used to repeat that column in `message` and `column`. Every `grouping-refused` body now carries a fixed sentence for its `reason` instead of the error's message, the same way a `query-refused` body is written. `column` is kept only for the reasons raised after the allow-list accepted the column (`aggregate-not-legal`, `column-axis-too-wide`, `column-not-groupable`, `estimate-too-large`), and `estimatedRows` is kept wherever the error carries it. The error on the server keeps its message, `column` and `cause` for the log.
+
+  Breaking for callers:
+
+  - The `message` of every `grouping-refused` body changed. A client that matched its text, or showed the numbers in it, now gets a fixed sentence; the bound is still on `estimatedRows`.
+  - An `unknown-column` or `duplicate-keys` body no longer has `column`.
+
+  `SerializableDbError` is unchanged.
+
+- 4a3a5ac: A read built by `buildReadQuery` can now join further tables and filter a grouped result.
+
+  **Joins.** A row, count or grouped descriptor takes `joins`: each entry names the referencing columns of a foreign key (`foreignKey`) on the base target or on an earlier join (`source`), an `alias`, `kind: 'inner' | 'left'`, and its own `allowedColumns`. The target table and the `ON` clause come from the descriptor's `relations` map, which the new `@lcabrera/server/db/get-foreign-key-relations.util` reads from the catalogue; `selectRows`, `getRowsCount` and `selectGroupedRows` read it themselves when a descriptor joins and carries none. Only the many-to-one direction is offered, so a join adds columns to a row and never repeats one. Once a read joins, its base `allowedColumns` is required on every shape. A joined column is written `{ column, source }`, is checked against that join's own list, and comes back named `<alias>.<column>`; a join whose projected alias would pass Postgres's 63-byte identifier limit is refused. A keyset cursor's `uniqueColumn` must stay a base-target column. A grouped read over a join keys `capabilities` and `periods` by the projected name.
+
+  **Group filters.** A grouped descriptor takes `groupFilters`, each `{ aggregateAlias, operator, value }` (or `{ aggregateAlias, operator }` for the null tests), which become `HAVING` over that aggregate's own expression with the value as a parameter. They are accepted only with `grouping: 'flat'` and no `columnAxis`, and refused otherwise.
+
+  **Refusals.** Every join and group-filter refusal throws `QueryRefusedError`, and `QueryRefusalReason` gains a reason for each: `join-allowlist-missing`, `join-relations-missing`, `join-not-declared`, `join-ambiguous`, `join-kind-unsupported`, `join-alias-taken`, `join-source-unknown`, `keyset-unique-column-joined`, `projected-alias-too-long`, `group-filter-grouping-unsupported`, `group-filter-column-axis`, `group-filter-alias-unknown` and `group-filter-operator-unsupported`. `toSerializableDbError` turns each one into `query-refused`, with a fixed sentence that names no table, column or alias. A client that switches over `QueryRefusalReason` exhaustively has new cases to handle.
+
+  The type surface widens: `ColumnReference` is `string | { column, source }` and is accepted in `fields`, `filters`, `sort`, a count's `column`, and the grouped `keys`, aggregate columns, column axis and sort keys. `QueryFilter` and `QuerySort` take it as an optional type parameter that defaults to `string`, so existing code that names them keeps compiling. Code that reads a column back off a descriptor (`GroupAggregate.column`, `GroupQueryDescriptor.keys`, `ColumnAxis.key`, a `GroupSort` key, `SelectQueryDescriptor.fields`, a count's `column`) now gets `ColumnReference` and has to handle the object form, whose row comes back under `<alias>.<column>`. A descriptor without `joins` or `groupFilters` builds the same SQL as before.
+
+- 7d4b89a: `mapDbError` now returns a `QueryRefusedError`, or any subclass such as `GroupingRefusedError`, unchanged. Before, it wrapped a refusal in a `PersistenceError`, so a refusal that reached a `catch` calling `mapDbError` serialised as a database failure, `{ kind: 'db-failed' }`, instead of `query-refused` or `grouping-refused`.
+
+  Breaking for callers:
+
+  - The return type of `mapDbError` is now `PersistenceError | QueryRefusedError`. Code that reads `fields` on the result directly must narrow with `instanceof PersistenceError` first.
+  - A refusal passed to `mapDbError` is no longer `instanceof PersistenceError`. Code that relied on the wrapping now receives the refusal itself.
+
+- 6740c78: A column outside `allowedColumns`, or a keyset cursor that does not match its sort, is now refused with a typed error instead of a plain `Error`.
+
+  `@lcabrera/server/errors/query-refused.error` exports `QueryRefusedError`, the base class of every refusal this package raises. It is not a `PersistenceError`: nothing reached the database. It carries `reason`, `column` when the refusal is about one column, and `cause`. Its `reason` is typed `GroupingRefusalReason | QueryRefusalReason`, so a `switch` after `instanceof QueryRefusedError` sees every reason a refusal can carry. When the package throws it directly, `reason` is one of the `QueryRefusalReason` values in `errors/errors.types` (`column-not-allowed`, `keyset-sort-missing`, `keyset-cursor-mismatch`, `keyset-sort-not-unique`, `keyset-unique-value-missing`). Its message is unchanged.
+
+  `GroupingRefusedError` now extends `QueryRefusedError` and narrows `reason` to `GroupingRefusalReason`. Its constructor, fields, `name` and serialised kind are unchanged, so `instanceof QueryRefusedError` catches every refusal. To handle a grouping refusal differently, check `GroupingRefusedError` first.
+
+  `toSerializableDbError` maps a direct refusal to `{ kind: 'query-refused', reason, message }`. The message is a fixed sentence for each reason and does not name the column, so an edge can answer it with a 4xx without echoing request text.
+
+  Breaking for callers:
+
+  - `SerializableDbError` has a new member, `query-refused`. A `switch` over `kind` that handles every member must handle it.
+  - These refusals serialised as `{ kind: 'unexpected' }` before. Code that relied on that now receives `query-refused`.
+
+- 522a41a: `@lcabrera/server/db/query-builder/build-read-query.util` exports `buildReadQuery`, the one entry point for building a read. Its single descriptor takes fields, filters, sort, `limit`/`offset` or a keyset `cursor`, and `distinct`. Add `count: true` to build the matching count, or `aggregates`, `grouping`, `keys` and the other grouped-read fields to build a `GROUPING SETS` read. The return type follows the descriptor: a grouped read returns `BuiltGroupQuery`, with the keys and masks its rows are decoded by, and every other read returns `BuiltQuery`. Identifier validation, `allowedColumns` and the grouping refusals run as they did before.
+
+  `buildSelectQuery`, `buildDistinctQuery`, `buildCountQuery` and `buildGroupQuery` are deprecated. They are still exported from their old subpaths and return the same SQL as before, including for a descriptor that also carries `count` or `grouping`: each builds only the shape it always built, and does not dispatch the way `buildReadQuery` does. Their declared signatures now take the descriptor as one parameter rather than destructuring it, and the types they accept and return are unchanged. To migrate, call `buildReadQuery` with the same descriptor: add `distinct: true` where you used `buildDistinctQuery`, and `count: true` where you used `buildCountQuery`.
+
+### Patch Changes
+
+- 894e2f2: The README now shows how to serve an HTTP API with this package and `@lcabrera/utils` alone: a pool, a paginated read and an insert behind one `Request` to `Response` handler, a `node:http` server for it, and the error contract that keeps driver text out of every response. It also lists the `table-page` subpaths and the `query-canceled`, `grouping-refused` and `to-serializable-db-error` error exports, which the export tables were missing.
+- f6b8275: `getPool` now attaches an `error` listener to the pool it creates, so a connection that fails while idle in the pool no longer stops the process with an unhandled `error` event. The pool drops the connection and the next query opens a new one.
+
+  While no other listener is attached, the failure is reported through `process.emitWarning` with code `LCABRERA_SERVER_POOL_IDLE_ERROR`. A listener added with `getPool().on('error', …)` still receives the error, and the warning is skipped.
+
+- Updated dependencies [8adcd2c]
+- Updated dependencies [05f2b74]
+  - @lcabrera/api@0.6.0
+  - @lcabrera/utils@0.3.0
+
 ## 0.8.2
 
 ### Patch Changes
