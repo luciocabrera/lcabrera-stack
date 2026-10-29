@@ -145,6 +145,7 @@
     "@lcabrera/devkit": "workspace:*",
     "@lcabrera/repo-standards": "workspace:*",
     "@lcabrera/vite-config": "workspace:*",
+    "@opentelemetry/api": "catalog:test",
     "@repo/eval-history": "workspace:*",
     "@vitest/coverage-v8": "catalog:test",
     "eslint": "catalog:lint",

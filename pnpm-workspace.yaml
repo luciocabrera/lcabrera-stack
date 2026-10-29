@@ -102,6 +102,14 @@ catalogs:
     # it for every workspace. Removing it needs a from-scratch lockfile and a
     # coverage run to justify — see
     # docs/decisions/ADR-047-declare-optional-peer-dependencies.md.
+    #
+    # `@opentelemetry/api`: another OPTIONAL PEER of vitest. When the tree holds
+    # two versions of it, pnpm resolves vitest (and vite-plus with it) once per
+    # version, and a test importing `vite-plus/test` can load a different Vitest
+    # than the runner `vp run` started: "failed to find the current suite". The
+    # root declaration gives every vitest edge the same one. It stays below
+    # 1.10.0 because `@sentry/node` 10, under react-doctor, accepts no later.
+    '@opentelemetry/api': ~1.9.1
     '@vitest/coverage-v8': 5.0.5
     vitest: 5.0.5
 
