@@ -11,10 +11,10 @@
     "typegen": "react-router typegen"
   },
   "dependencies": {
-    "@lcabrera/api": ">=0.5.1 <1.0.0",
-    "@lcabrera/server": ">=0.8.2 <1.0.0",
-    "@lcabrera/ui": ">=0.11.0 <1.0.0",
-    "@lcabrera/utils": ">=0.2.3 <1.0.0",
+    "@lcabrera/api": ">=0.6.0 <1.0.0",
+    "@lcabrera/server": ">=0.9.0 <1.0.0",
+    "@lcabrera/ui": ">=0.12.0 <1.0.0",
+    "@lcabrera/utils": ">=0.3.0 <1.0.0",
     "@react-router/serve": "catalog:react",
     "@stylexjs/stylex": "catalog:react",
     "react": "catalog:react",
