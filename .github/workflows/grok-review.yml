@@ -18,8 +18,9 @@ name: Grok Review
 # `synchronize` is what makes this useful: it fires on every push, so the
 # review that lands is against the head that triggered it.
 #
-# A set XAI_API_KEY that the CLI still rejects with "Not signed in" does
-# not fail the job. Mint and submit are skipped, and no review is posted.
+# This review is optional: the API account is not always funded. A set
+# XAI_API_KEY that the CLI still rejects with "Not signed in" does not
+# fail the job. Mint and submit are skipped, and no review is posted.
 # An empty secret still fails. That is the fork case. ADR-116.
 
 on:
@@ -106,10 +107,10 @@ jobs:
       # and claude-review.yml are fail-closed on a fork; they must not be
       # "fixed" with pull_request_target.
       #
-      # A non-empty key can still be rejected. The pinned CLI prints
-      # "Not signed in" and exits 1. That is not the fork case: the secret
-      # is present, and failing every pull request on it hides the
-      # subscription review under a red check. The step records
+      # A non-empty key can still be rejected, as when the account has no
+      # credits. The pinned CLI prints "Not signed in" and exits 1. That is
+      # not the fork case: the secret is present, and failing every pull
+      # request on it hides the subscription review under a red check. The step records
       # signed_in=false and exits 0. Mint and submit then do not run.
       - name: Run the Grok catalog review
         id: catalog
