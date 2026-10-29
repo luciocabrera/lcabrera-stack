@@ -53,9 +53,9 @@ catalogs:
     # instance; the `overrides` below redirect every `vite` edge here. Without
     # it the graph splits across separate Vite+, Vite and Vitest copies. Keep in
     # lockstep with `vite-plus` (same Vite+ release).
-    vite: npm:@voidzero-dev/vite-plus-core@1.3.0
+    vite: npm:@voidzero-dev/vite-plus-core@1.4.0
     vite-plugin-babel: ^1.7.3
-    vite-plus: 1.3.0
+    vite-plus: 1.4.0
 
   lint:
     '@biomejs/biome': ^2.5.11
