@@ -108,7 +108,8 @@ catalogs:
     # version, and a test importing `vite-plus/test` can load a different Vitest
     # than the runner `vp run` started: "failed to find the current suite". The
     # root declaration gives every vitest edge the same one. It stays below
-    # 1.10.0 because `@sentry/node` 10, under react-doctor, accepts no later.
+    # 1.10.0 because the `@opentelemetry/core` line react-doctor reaches through
+    # `@sentry/node` peers on `<1.10.0`, and a root 1.10.0 leaves that unmet.
     '@opentelemetry/api': ~1.9.1
     '@vitest/coverage-v8': 5.0.5
     vitest: 5.0.5
@@ -185,7 +186,7 @@ overrides:
   # `@stryker-mutator/core` -> `typed-rest-client`, which pins qs EXACTLY at
   # 6.15.1, so unlike the entries above this does not merely lift a floor inside
   # a range the parent accepts — it moves the parent off its pin. Same major, and
-  # the 6.16 line already resolves here for express and body-parser, so it is
+  # express and body-parser resolve the same qs this override names, so it is
   # proven in this install. Drop once typed-rest-client repins.
   qs@6: ^6.17.0
   vite@*: catalog:build
