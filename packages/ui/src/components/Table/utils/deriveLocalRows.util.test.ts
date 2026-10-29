@@ -66,4 +66,29 @@ describe('deriveLocalRows', () => {
 
     expect(namesOf(rows)).toStrictEqual(['Gamma', 'Alpha', 'Beta']);
   });
+
+  describe('orders blank and missing cells as Postgres does', () => {
+    const JSON_NULL: unknown = JSON.parse('null');
+    const cells: readonly Record<string, unknown>[] = [
+      { value: 'b' },
+      { value: JSON_NULL },
+      { value: '' },
+      { value: 'a' },
+      { value: undefined },
+    ];
+    const order = (direction: 'asc' | 'desc') =>
+      deriveLocalRows({
+        columnFilters: {},
+        rows: cells,
+        sorting: [{ columnKey: 'value', direction }],
+      }).map((row) => row.value);
+
+    it('puts the empty string first and nulls last when ascending', () => {
+      expect(order('asc')).toStrictEqual(['', 'a', 'b', JSON_NULL, undefined]);
+    });
+
+    it('puts nulls first when descending', () => {
+      expect(order('desc')).toStrictEqual([JSON_NULL, undefined, 'b', 'a', '']);
+    });
+  });
 });

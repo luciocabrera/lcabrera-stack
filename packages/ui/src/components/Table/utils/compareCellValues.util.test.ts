@@ -31,7 +31,18 @@ describe('compareCellValues', () => {
   it('places a missing value after a present one', () => {
     expect(compareCellValues({ left: JSON_NULL, right: 1 })).toBeGreaterThan(0);
     expect(compareCellValues({ left: 'a', right: undefined })).toBeLessThan(0);
-    expect(compareCellValues({ left: '', right: JSON_NULL })).toBe(0);
+    expect(compareCellValues({ left: JSON_NULL, right: undefined })).toBe(0);
+  });
+
+  it('orders an empty string as a value, before other text, as Postgres does', () => {
+    expect(compareCellValues({ left: '', right: JSON_NULL })).toBeLessThan(0);
+    expect(compareCellValues({ left: '', right: 'a' })).toBeLessThan(0);
+  });
+
+  it('orders NaN after every other number and level with another NaN', () => {
+    expect(compareCellValues({ left: NaN, right: 5 })).toBeGreaterThan(0);
+    expect(compareCellValues({ left: 5, right: NaN })).toBeLessThan(0);
+    expect(compareCellValues({ left: NaN, right: NaN })).toBe(0);
   });
 
   it('compares objects through their JSON text', () => {

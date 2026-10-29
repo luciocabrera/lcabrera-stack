@@ -3,7 +3,7 @@ import type { TableRowActionsMenuProps } from './TableRowActionsMenu.types';
 import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
 import { useGetTableCrud } from '../contexts/TableConfig/meta/selectors';
 import { resolveCrudRowId } from '../utils/resolveCrudRowId.util';
-import { TableCrudRowActionsMenu } from './TableCrudRowActionsMenu.component';
+import { TableCrudRowActionsMenu } from './TableCrudRowActionsMenu/TableCrudRowActionsMenu.component';
 
 export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   customActions,

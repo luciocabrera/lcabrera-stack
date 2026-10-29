@@ -7,8 +7,8 @@ import { TableOwnStackContext } from './contexts/TableConfig/TableOwnStackContex
 import { INITIAL_PAGE_SIZE } from './Table.constants';
 import { generatePlaceholderData } from './TableBody/utils';
 import { TableDataResolver } from './TableDataResolver';
-import { TableGrid } from './TableGrid.component';
-import { TableOwnStack } from './TableOwnStack.component';
+import { TableGrid } from './TableGrid/TableGrid.component';
+import { TableOwnStack } from './TableOwnStack/TableOwnStack.component';
 import { needsOwnTableStack } from './utils/needsOwnTableStack.util';
 
 export const Table = <TData extends Record<string, unknown>, TResponse>(

@@ -2,11 +2,11 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { TableGridProps } from './TableGrid.types';
 
-import { TableCellRenderingProvider, TableDataProvider } from './contexts';
-import { TableOwnStackContext } from './contexts/TableConfig/TableOwnStackContext.context';
-import { useTableDataState } from './hooks/useTableDataState.hook';
-import { styles } from './Table.stylex';
-import { TableContent } from './TableContent';
+import { TableCellRenderingProvider, TableDataProvider } from '../contexts';
+import { TableOwnStackContext } from '../contexts/TableConfig/TableOwnStackContext.context';
+import { useTableDataState } from '../hooks/useTableDataState.hook';
+import { styles } from '../Table.stylex';
+import { TableContent } from '../TableContent';
 
 export const TableGrid = <TData extends Record<string, unknown>, TResponse>(
   props: TableGridProps<TData, TResponse>,

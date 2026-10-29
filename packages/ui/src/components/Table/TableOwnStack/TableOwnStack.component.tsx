@@ -7,12 +7,12 @@ import { NotificationContext } from '#ui/contexts/NotificationContext/Notificati
 
 import type { TableOwnStackProps } from './TableOwnStack.types';
 
-import { FiltersDataProvider } from './contexts/FiltersData';
-import { TableConfigProvider } from './contexts/TableConfig';
-import { TableOwnStackContext } from './contexts/TableConfig/TableOwnStackContext.context';
-import { TablePersistenceContext } from './contexts/TableConfig/TablePersistenceContext.context';
-import { TableFocusProvider } from './contexts/TableFocus';
-import { toOwnStackMetaState } from './utils/toOwnStackMetaState.util';
+import { FiltersDataProvider } from '../contexts/FiltersData';
+import { TableConfigProvider } from '../contexts/TableConfig';
+import { TableOwnStackContext } from '../contexts/TableConfig/TableOwnStackContext.context';
+import { TablePersistenceContext } from '../contexts/TableConfig/TablePersistenceContext.context';
+import { TableFocusProvider } from '../contexts/TableFocus';
+import { toOwnStackMetaState } from '../utils/toOwnStackMetaState.util';
 
 export const TableOwnStack = <TData extends Record<string, unknown>>({
   children,

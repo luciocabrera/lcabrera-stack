@@ -1,4 +1,4 @@
-import type { TableGridProps } from '#ui/components/Table/TableGrid.types';
+import type { TableGridProps } from '#ui/components/Table/TableGrid/TableGrid.types';
 
 import { useGetColumnFilters } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumnFilters.hook';
 import { useGetColumnsSorting } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetColumnsSorting.hook';

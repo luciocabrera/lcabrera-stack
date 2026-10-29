@@ -102,8 +102,9 @@ written to the URL and the rows kept their order.
   new table component. The boolean context gives the same rule (rows get their own
   stack outside a `TableLayout`) inside `Table` itself. Separately, and only to keep each unit
   under fallow's `maxUnitSize`, `Table`'s three trees are rendered by private
-  pieces in the same bundle: `TableOwnStack` (the self-mounted providers) and
-  `TableGrid` (the grid content), with the Suspense branch left in `Table`.
+  delegates, each in its own bundle directory under `Table/` with no
+  `index.ts`: `TableOwnStack` (the self-mounted providers) and `TableGrid`
+  (the grid content). The Suspense branch stays in `Table`.
   Neither is exported. `TableOwnStackContext` still ends the recursion.
 - **Infer the columns when `columns` is omitted.** This was the first version
   of this change. Rejected by the owner on 2026-10-27: the columns are the

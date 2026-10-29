@@ -2,13 +2,13 @@ import { useFetcher } from 'react-router';
 
 import { TableActionsPopover } from '#ui/components/Table/TableActionsPopover';
 
-import type { TableCrudRowActionsMenuProps } from './TableRowActionsMenu.types';
+import type { TableCrudRowActionsMenuProps } from './TableCrudRowActionsMenu.types';
 
 import {
   useGetTableDeleteActionPath,
   useGetTableTitleSingular,
-} from '../contexts/TableConfig/meta/selectors';
-import { TableActionMenu } from './TableActionMenu';
+} from '../../contexts/TableConfig/meta/selectors';
+import { TableActionMenu } from '../TableActionMenu';
 
 const DEFAULT_TITLE_SINGULAR = 'Record';
 

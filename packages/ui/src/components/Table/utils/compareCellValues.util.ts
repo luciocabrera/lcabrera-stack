@@ -1,5 +1,3 @@
-import { isEmptyCellValue } from '#ui/components/Table/cellRenderers/isEmptyCellValue.util';
-
 import { toComparableCellValue } from './toComparableCellValue.util';
 
 type CompareCellValuesArgs = {
@@ -8,8 +6,8 @@ type CompareCellValuesArgs = {
 };
 
 export const compareCellValues = ({ left, right }: CompareCellValuesArgs) => {
-  const isLeftMissing = isEmptyCellValue(left);
-  const isRightMissing = isEmptyCellValue(right);
+  const isLeftMissing = (left ?? undefined) === undefined;
+  const isRightMissing = (right ?? undefined) === undefined;
 
   if (isLeftMissing || isRightMissing) {
     return Number(isLeftMissing) - Number(isRightMissing);
@@ -20,6 +18,10 @@ export const compareCellValues = ({ left, right }: CompareCellValuesArgs) => {
 
   if (typeof a === 'string' || typeof b === 'string') {
     return String(a).localeCompare(String(b), undefined, { numeric: true });
+  }
+
+  if (Number.isNaN(a) || Number.isNaN(b)) {
+    return Number(Number.isNaN(a)) - Number(Number.isNaN(b));
   }
 
   if (a === b) return 0;

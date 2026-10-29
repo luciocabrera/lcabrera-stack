@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import type { TableColumn } from './Table.types';
+import type { TableColumn } from '../Table.types';
 
 export type TableOwnStackProps<TData extends Record<string, unknown>> = {
   readonly children: ReactNode;
