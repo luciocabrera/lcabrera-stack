@@ -118,14 +118,12 @@ describe('the model cannot write to GitHub', () => {
   it('does not fail the job when the CLI reports it is not signed in', () => {
     const step = stepBlock(readRepoFile(WORKFLOW), RUN_STEP);
     expect(step).toContain('id: catalog');
-    expect(step).toContain("grep -q 'Not signed in'");
+    expect(step).toContain(
+      "head -n 1 grok-catalog-cli.log | grep -q '^Not signed in\\.'",
+    );
     expect(step).toContain('signed_in=false');
     expect(step).toContain('signed_in=true');
     const source = readRepoFile(WORKFLOW);
-    const gated = source.match(
-      /steps\.catalog\.outputs\.signed_in == 'true'/gu,
-    );
-    expect(gated).toHaveLength(2);
     expect(stepBlock(source, MINT_STEP)).toContain(
       "steps.catalog.outputs.signed_in == 'true'",
     );

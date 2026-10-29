@@ -108,10 +108,13 @@ jobs:
       # "fixed" with pull_request_target.
       #
       # A non-empty key can still be rejected, as when the account has no
-      # credits. The pinned CLI prints "Not signed in" and exits 1. That is
-      # not the fork case: the secret is present, and failing every pull
-      # request on it hides the subscription review under a red check. The step records
+      # credits. The pinned CLI then exits 1 before the model runs, and its
+      # first line of output starts "Not signed in.". That is not the fork
+      # case: the secret is present, and failing every pull request on it
+      # hides the subscription review under a red check. The step records
       # signed_in=false and exits 0. Mint and submit then do not run.
+      # Only the first line is matched: later lines carry the model's turns
+      # over the diff, and a diff can quote the phrase.
       - name: Run the Grok catalog review
         id: catalog
         env:
@@ -143,11 +146,10 @@ jobs:
             --tools 'read_file,grep,list_dir,search_replace' \
             --max-turns 40 \
             --cwd "$GITHUB_WORKSPACE" \
-            --no-alt-screen > grok-catalog-cli.log 2>&1
+            --no-alt-screen 2>&1 | tee grok-catalog-cli.log
           status=$?
           set -e
-          cat grok-catalog-cli.log
-          if [ "$status" -ne 0 ] && grep -q 'Not signed in' grok-catalog-cli.log; then
+          if [ "$status" -ne 0 ] && head -n 1 grok-catalog-cli.log | grep -q '^Not signed in\.'; then
             echo 'signed_in=false' >> "$GITHUB_OUTPUT"
             echo '::notice::The catalog CLI is not signed in, so this check does not fail. No catalog review is posted.'
             exit 0
