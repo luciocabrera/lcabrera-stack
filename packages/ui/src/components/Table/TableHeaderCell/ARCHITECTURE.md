@@ -193,7 +193,7 @@ every file short and independently testable. The three pinning items are one
 delegate, `ColumnPinningButton`, rendered with a `target` of `left`, `right` or
 `clear`: they took the same props and differed only in the command and the side
 they write. As three components they also formed a group fallow's
-`duplicate-prop-shape` rule reports, and that rule fails the gate.
+`duplicate-prop-shape` rule reports.
 `ManageColumnAction` is already a
 single self-connected button, so it stays a leaf without a shell.
 `TableHeaderActionsMenu` itself only gates which sections render and forwards
