@@ -2,7 +2,7 @@
 id: fallow-thin-wrapper-dup-prop-error
 title: Raise fallow thin-wrapper and duplicate-prop-shape to error
 owner: agent:claude
-status: active
+status: review
 branch: build/1495-fallow-thin-wrapper-dup-prop-error
 area:
   - .fallowrc.json
@@ -11,7 +11,7 @@ area:
 started: 2026-10-29
 updated: 2026-10-29
 plan: (none)
-pr: (none)
+pr: '#1548'
 issue: #1495
 ---
 
@@ -21,6 +21,6 @@ Raise fallow thin-wrapper and duplicate-prop-shape to error
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: both rules at error, plants recorded; in review
 - Blockers: none
 - Next:
