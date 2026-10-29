@@ -1,17 +1,18 @@
+import { use } from 'react';
+
 import type { TablePersistenceEntry } from '#ui/components/Table/Table.types';
 import type { PersistCookieEntry } from '#ui/routing/actions/routing.types';
 
 import { resolvePersistenceEntries } from '#ui/components/Table/contexts/TableConfig/columns/actions/utils';
+import { TablePersistenceContext } from '#ui/components/Table/contexts/TableConfig/TablePersistenceContext.context';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { TABLE_NESTED_URL_STATE_PREFIX } from '#ui/components/Table/Table.constants';
 import { serializeStateSlice } from '#ui/components/Table/utils';
 import {
   MAX_COOKIE_ENTRY_VALUE_LENGTH,
-  PERSIST_TABLE_STATE_FETCHER_KEY,
   PERSISTENCE_SIZE_WARNING,
 } from '#ui/constants/globalSettings.constants';
 import { useNotifyAction } from '#ui/contexts/NotificationContext/actions';
-import { usePersistCookieAction } from '#ui/hooks/usePersistCookieAction.hook';
 
 type PersistTableStateArgs =
   | readonly TablePersistenceEntry[]
@@ -44,12 +45,12 @@ const readPersistRequest = (args: PersistTableStateArgs) => {
 
 export const usePersistTableStateAction = () => {
   const { metaStore } = useTableConfigContextValue();
-  const persistCookie = usePersistCookieAction({
-    fetcherKey: PERSIST_TABLE_STATE_FETCHER_KEY,
-  });
+  const persistence = use(TablePersistenceContext);
   const notify = useNotifyAction();
 
   return (args: PersistTableStateArgs) => {
+    if (persistence === undefined) return true;
+
     const { cookieEntries, entries } = readPersistRequest(args);
     const meta = metaStore.get();
     const appId = meta?.appId;
@@ -107,7 +108,7 @@ export const usePersistTableStateAction = () => {
       variant: 'success' as const,
     });
 
-    persistCookie(payload);
+    persistence.tableState(payload);
 
     return true;
   };

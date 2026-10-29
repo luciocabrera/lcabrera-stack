@@ -5,6 +5,8 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { TableMetaState } from '#ui/components/Table/Table.types';
 
+import { TablePersistenceWrapper } from '#ui/utils/tests/tablePersistenceWrapper.util';
+
 import { usePersistTableUiFlagsAction } from './usePersistTableUiFlagsAction.hook';
 
 const { groupingStore, persistMock, setGroupingState } = vi.hoisted(() => {
@@ -35,7 +37,9 @@ vi.mock(
 );
 
 const persistChromeOpen = (totalsPlacement?: 'first' | 'last') => {
-  const { result } = renderHook(() => usePersistTableUiFlagsAction());
+  const { result } = renderHook(() => usePersistTableUiFlagsAction(), {
+    wrapper: TablePersistenceWrapper,
+  });
 
   act(() => {
     result.current({
@@ -90,11 +94,29 @@ describe('usePersistTableUiFlagsAction', () => {
   });
 
   it('does not submit when there is no persistence key', () => {
-    const { result } = renderHook(() => usePersistTableUiFlagsAction());
+    const { result } = renderHook(() => usePersistTableUiFlagsAction(), {
+      wrapper: TablePersistenceWrapper,
+    });
 
     act(() => {
       result.current({
         currentState: {} as Partial<TableMetaState>,
+        nextStatePatch: { isTableSettingsOpen: true },
+      });
+    });
+
+    expect(persistMock).not.toHaveBeenCalled();
+  });
+
+  it('does not submit with no layout persistence above it', () => {
+    const { result } = renderHook(() => usePersistTableUiFlagsAction());
+
+    act(() => {
+      result.current({
+        currentState: {
+          isTableSettingsOpen: false,
+          persistenceKey: 'orders',
+        } as Partial<TableMetaState>,
         nextStatePatch: { isTableSettingsOpen: true },
       });
     });

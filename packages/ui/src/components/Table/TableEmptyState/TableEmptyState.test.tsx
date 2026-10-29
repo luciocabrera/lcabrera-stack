@@ -42,19 +42,11 @@ vi.mock('react-router', () => ({
   useRevalidator: () => ({ revalidate: revalidateMock }),
 }));
 
-vi.mock('#ui/components/Button', () => ({
-  Button: ({
-    children,
-    onClick,
-  }: {
-    readonly children: ReactNode;
-    readonly onClick?: () => void;
-  }) => (
-    <button onClick={onClick} type='button'>
-      {children}
-    </button>
-  ),
-}));
+vi.mock('#ui/components/Button', async () => {
+  const { MockButton } = await import('#ui/utils/tests/createMockButton.util');
+
+  return { Button: MockButton };
+});
 
 vi.mock('#ui/components/Icons', () => ({
   NoDataDescriptive: () => <svg data-testid='no-data-icon' />,
@@ -90,16 +82,26 @@ vi.mock('#ui/hooks', () => ({
   useResizeObserver: useResizeObserverMock,
 }));
 
+import { TablePersistenceContext } from '#ui/components/Table/contexts/TableConfig/TablePersistenceContext.context';
+
 import { TableEmptyState } from './TableEmptyState.component';
 
 const REFUSAL_MESSAGE =
   'Column "total_amount" is not a legal group key: too-many-distinct.';
 
+const ROUTE_PERSISTENCE = {
+  columnSizing: vi.fn(),
+  tableState: vi.fn(),
+  uiFlags: vi.fn(),
+};
+
 const renderInTable = (ui: ReactNode) =>
   render(
-    <table>
-      <tbody>{ui}</tbody>
-    </table>,
+    <TablePersistenceContext value={ROUTE_PERSISTENCE}>
+      <table>
+        <tbody>{ui}</tbody>
+      </table>
+    </TablePersistenceContext>,
   );
 
 beforeEach(() => {
@@ -165,6 +167,18 @@ describe('TableEmptyState', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }));
 
     expect(revalidateMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('offers no Retry when no route-level layout supplied the rows', () => {
+    render(
+      <table>
+        <tbody>
+          <TableEmptyState />
+        </tbody>
+      </table>,
+    );
+
+    expect(screen.queryByRole('button', { name: 'Retry' })).toBeNull();
   });
 
   describe('when the read was refused rather than empty', () => {
@@ -276,9 +290,7 @@ describe('TableEmptyState', () => {
       expect(screen.getByRole('heading').textContent).toBe(
         'This grouping was refused',
       );
-      expect(
-        screen.getByText((text) => text.includes('widest group key')),
-      ).not.toBeNull();
+      expect(screen.getByText(/widest group key/)).not.toBeNull();
       expect(
         screen.getByRole('button', { name: 'Clear grouping' }),
       ).not.toBeNull();

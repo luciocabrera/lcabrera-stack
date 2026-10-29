@@ -74,6 +74,28 @@ describe('renderCellContent', () => {
     expect(formatCurrencyMock).not.toHaveBeenCalled();
   });
 
+  it('falls back to the same text for every value the number columns cannot parse', () => {
+    const date = new Date('2024-01-02T00:00:00.000Z');
+    const fallbacks = (['currency', 'number'] as const).flatMap((dataType) =>
+      [JSON.parse('null') as unknown, undefined, date, true, 7n].map((value) =>
+        renderCellContent({ dataType, value }),
+      ),
+    );
+
+    expect(fallbacks).toStrictEqual([
+      '',
+      '',
+      JSON.stringify(date),
+      'true',
+      '7',
+      '',
+      '',
+      JSON.stringify(date),
+      'true',
+      '7',
+    ]);
+  });
+
   it('renders blank currency and number cells as empty instead of zero', () => {
     const rendered = [
       renderCellContent({ dataType: 'currency', value: '' }),

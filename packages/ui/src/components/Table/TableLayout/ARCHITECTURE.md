@@ -11,7 +11,7 @@ TableLayout/
 ├── TableLayout.component.tsx   → Provider stack + Suspense + Table
 ├── TableLayout.types.ts        → TableLayoutProps (columns, dataPromise, config, ...)
 ├── TableLayout.stylex.ts       → Container styles
-├── useRetainTablePersistFetchers.hook.ts → Keeps the persistence fetchers mounted
+├── useTablePersistence.hook.ts → Holds the persistence fetchers and returns their submitters
 └── index.ts                    → Barrel export
 ```
 
@@ -26,7 +26,8 @@ TableLayout/
 
 ```mermaid
 graph TD
-  TL["TableLayout"] --> container["div.container"]
+  TL["TableLayout"] --> TPC["TablePersistenceContext (useTablePersistence)"]
+  TPC --> container["div.container"]
   container --> TCP["TableConfigProvider (columnsState + groupingState + metaState)"]
   TCP --> FDP["FiltersDataProvider (columnsState.columns)"]
   FDP --> TSB["TableSuspenseBoundary"]
@@ -45,9 +46,12 @@ that submits usually sits in a popover that closes in the same handler. React
 Router drops the redirect of a fetcher whose last owner has unmounted, so the
 loader would never run again
 ([#1153](https://github.com/luciocabrera/lcabrera-stack/issues/1153)).
-The layout holds the table-state and UI-flag fetcher keys above the suspense
-boundary, and the grid shell holds the same keys, so a table rendered without
-the layout is covered too. Both call `useRetainTablePersistFetchers`.
+The layout owns the table-state, UI-flag and column-sizing fetchers above the
+suspense boundary. `useTablePersistence` creates them and returns their
+submitters, and the layout provides those as `TablePersistenceContext`, so every
+persist action submits through a fetcher the layout keeps mounted. A `Table`
+rendered without the layout has no such context and persists nothing
+([ADR-142](../../../../../../docs/decisions/ADR-142-a-table-given-rows-keeps-its-state-in-memory-and-the-route-level-layout-supplies-persistence.md)).
 
 ## Props
 

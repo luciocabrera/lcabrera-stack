@@ -14,7 +14,6 @@ import {
   useGetTableIsLoadingMore,
 } from '../contexts/TableData/data/selectors';
 import { useInfiniteScroll, useScrollResetAfterLoad } from '../hooks';
-import { useRetainTablePersistFetchers } from '../TableLayout/useRetainTablePersistFetchers.hook';
 
 type UseTableContentRuntimeArgs<
   TData extends Record<string, unknown>,
@@ -33,7 +32,6 @@ export const useTableContentRuntime = <
   onLoadMore,
 }: UseTableContentRuntimeArgs<TData, TResponse>) => {
   const threshold = useGetTableThreshold();
-  useRetainTablePersistFetchers();
   useSyncColumnAxisColumns();
   const isLoading = useGetTableIsLoading();
   const isLoadingMore = useGetTableIsLoadingMore();
