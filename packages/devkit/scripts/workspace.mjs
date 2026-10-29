@@ -34,10 +34,10 @@
 
 import { includesRung } from './config.mjs';
 
-export const NODE_VERSION = '26.12.0';
+export const NODE_VERSION = '26.13.0';
 
 export const PACKAGE_MANAGER =
-  'pnpm@12.14.0+sha256.ea206e35474bf87be9564a85ca70ed1c8ebdc45da55aafb0a3bf09d1ba69b179';
+  'pnpm@12.16.1+sha256.ca362a16f2e1c3cfa81d406f3242446179a0e4aea457ba3e9e6c39e6476aba65';
 
 export const TSCONFIG_WORKSPACE = '@repo/typescript-config';
 
