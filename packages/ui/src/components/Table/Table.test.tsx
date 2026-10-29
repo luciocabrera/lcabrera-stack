@@ -77,6 +77,7 @@ describe('Table', () => {
 
     render(
       <Table
+        columns={[]}
         dataSelector={(response: Response) => [...response.rows]}
         dataTotalSelector={(response: Response) => response.total}
         isLoading
@@ -115,6 +116,7 @@ describe('Table', () => {
 
     render(
       <Table
+        columns={[]}
         dataErrorSelector={(current: Response) => current.error}
         dataSelector={(current: Response) => current.data}
         response={response}
@@ -139,6 +141,7 @@ describe('Table', () => {
 
     render(
       <Table
+        columns={[]}
         dataSelector={(response: Response) => response.data}
         response={{ data: [] }}
       />,
@@ -159,6 +162,7 @@ describe('Table', () => {
 
     const { container } = render(
       <Table
+        columns={[]}
         dataSelector={(response: Response) => [...response.rows]}
         isFlexWrapperEnabled={false}
         response={{ rows: [{ id: 1 }] }}

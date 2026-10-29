@@ -10,7 +10,10 @@ describe('isEmptyCellValue', () => {
     },
   );
 
-  it.each([[0], [false], ['0']])('treats %j as a value', (value) => {
-    expect(isEmptyCellValue(value)).toBe(false);
-  });
+  it.each([[0], [false], ['0'], [' '], [NaN], [new Date(0)], [[]]])(
+    'treats %j as a value',
+    (value) => {
+      expect(isEmptyCellValue(value)).toBe(false);
+    },
+  );
 });

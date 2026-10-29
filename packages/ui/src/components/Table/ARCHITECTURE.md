@@ -5,10 +5,51 @@ filtering, infinite scroll, settings drawers, and cookie-based persistence.
 
 ## Entry Points
 
-| Component     | Use Case                                                          |
-| ------------- | ----------------------------------------------------------------- |
-| `TableLayout` | Route-level: receives `dataPromise`, sets up providers + Suspense |
-| `Table`       | Inner: receives resolved `response`, creates `TableDataProvider`  |
+| Component     | Use Case                                                                         |
+| ------------- | -------------------------------------------------------------------------------- |
+| `TableLayout` | Route-level: receives `dataPromise`, sets up providers, Suspense and persistence |
+| `Table`       | Receives `columns` and one `response`: a value or a promise of one               |
+
+`Table` has one data input, `response`, which is a value or a promise of one.
+Given a promise, `Table` suspends on it through `TableDataResolver`. Its fallback is itself as a loading grid over placeholder rows. A loading grid is never sorted or filtered, so the user's sort and filters never apply to the placeholders. It then renders itself
+again with the resolved value. An array given with no `dataSelector` is the rows
+themselves; any other response is read through its selectors.
+
+`TableGrid` reads the response once per render and subscribes to nothing.
+With no route-level persistence above it (no `TableLayout`), it renders
+`TableGridLocalRows`, which subscribes to the columns store's sorting and
+filters and runs `useTableDataState` to sort and filter the rows in memory.
+Under `TableLayout`, where a loader applies the sort, it renders
+`TableGridContent` directly. A sort or filter write then does not re-render the
+data subtree there.
+
+`Table` renders itself inside its own `TableConfigProvider`, `TableFocusProvider`
+and `FiltersDataProvider` when it is given rows to hold outside a `TableLayout`, or when no
+`TableConfigContext` is above it. It adds `GlobalSettingsProvider` and
+`NotificationProvider` when those are missing. A `Table` under `TableLayout`
+reads the layout's stack, as before.
+
+`Table` itself only decides which tree to render. Two private delegates in
+their own bundle directories render the trees, with no `index.ts` (ADR-007):
+`TableOwnStack/` mounts the providers, and `TableGrid/` renders the data
+provider and `TableContent`. The Suspense branch stays in `Table`. Neither
+delegate is exported.
+
+`TableOwnStackContext` stops the recursion. The outer render sets it to `true`
+for the one `Table` it renders inside the new stack, and that `Table` sets it
+back to `false` for everything below it, so a grid rendered inside a cell
+decides again. `TableLayout` sets it to `true` around its own `Table` as well. Without that, a layout read with no `dataSelector` would look like a plain-array table and mount a second stack, which would drop the layout's state and persistence.
+
+The new stack also sets `TablePersistenceContext` to `undefined`. Without that,
+a rows-backed grid inside a `TableLayout` would submit its in-memory sort to the
+enclosing route's cookie.
+
+`columns` is required; the table infers nothing. It hands the provider only
+`columns`, never an empty sorting or filter state. The provider resyncs
+`columnsState` on every new identity, and with no loader behind it, that resync
+would clear whatever the user had sorted, filtered, pinned or sized whenever the
+parent re-rendered
+([ADR-142](../../../../../docs/decisions/ADR-142-a-table-given-rows-keeps-its-state-in-memory-and-the-route-level-layout-supplies-persistence.md)).
 
 ## Component Hierarchy
 
@@ -587,7 +628,12 @@ reading that serves a tree and a lattice alike (ADR-080).
 ## Persistence
 
 Table state is written to one channel — the cookie — with the URL carrying
-filters and sorting:
+filters and sorting. Only `TableLayout` writes it: it builds one cookie
+submitter each for table state, column sizing and UI flags with
+`useTablePersistence` and provides them as `TablePersistenceContext`. The
+persist-action hooks read that context. Without it, a change applies to the
+stores and nothing is submitted, which is how a `Table` given rows keeps its
+state in memory with or without a router.
 
 - Cookies + URL for SSR/shareable column state (filters, sorting, pinning, sizing, visibility)
 - Meta UI state is written by the mutation action itself, not by a subscription effect
@@ -606,7 +652,8 @@ filters and sorting:
 ```mermaid
 graph LR
   ColumnChange["column state change"] --> ColumnAction["usePersistTableStateAction()"]
-  ColumnAction --> Fetcher["useFetcher.submit()"]
+  ColumnAction --> Context["TablePersistenceContext (from TableLayout)"]
+  Context --> Fetcher["useFetcher.submit()"]
   Fetcher --> Route["POST /_action/persist-cookie"]
   Route --> Cookie["Set-Cookie header"]
   Route --> Decision{"search params changed?"}

@@ -3,6 +3,8 @@
 import { act, renderHook } from '@testing-library/react';
 import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { TablePersistenceWrapper } from '#ui/utils/tests/tablePersistenceWrapper.util';
+
 import { usePersistColumnSizingAction } from './usePersistColumnSizingAction.hook';
 
 const { persistMock } = vi.hoisted(() => ({ persistMock: vi.fn() }));
@@ -25,6 +27,16 @@ vi.mock(
   }),
 );
 
+const runPersistColumnSizing = (wrapper?: typeof TablePersistenceWrapper) => {
+  const { result } = renderHook(() => usePersistColumnSizingAction(), {
+    wrapper,
+  });
+
+  act(() => {
+    result.current();
+  });
+};
+
 describe('usePersistColumnSizingAction', () => {
   beforeEach(() => {
     persistMock.mockReset();
@@ -36,11 +48,7 @@ describe('usePersistColumnSizingAction', () => {
     columnsGetMock.mockReturnValue({ columnSizing: { id: 120 } });
     metaGetMock.mockReturnValue({ appId: 'admin', persistenceKey: 'orders' });
 
-    const { result } = renderHook(() => usePersistColumnSizingAction());
-
-    act(() => {
-      result.current();
-    });
+    runPersistColumnSizing(TablePersistenceWrapper);
 
     expect(persistMock).toHaveBeenCalledWith([
       {
@@ -56,11 +64,7 @@ describe('usePersistColumnSizingAction', () => {
     columnsGetMock.mockReturnValue({ columnSizing: { id: 120 } });
     metaGetMock.mockReturnValue({});
 
-    const { result } = renderHook(() => usePersistColumnSizingAction());
-
-    act(() => {
-      result.current();
-    });
+    runPersistColumnSizing(TablePersistenceWrapper);
 
     expect(persistMock).not.toHaveBeenCalled();
   });
@@ -72,11 +76,16 @@ describe('usePersistColumnSizingAction', () => {
       persistenceKey: 'orders-group',
     });
 
-    const { result } = renderHook(() => usePersistColumnSizingAction());
+    runPersistColumnSizing(TablePersistenceWrapper);
 
-    act(() => {
-      result.current();
-    });
+    expect(persistMock).not.toHaveBeenCalled();
+  });
+
+  it('does not submit with no layout persistence above it', () => {
+    columnsGetMock.mockReturnValue({ columnSizing: { id: 120 } });
+    metaGetMock.mockReturnValue({ appId: 'admin', persistenceKey: 'orders' });
+
+    runPersistColumnSizing();
 
     expect(persistMock).not.toHaveBeenCalled();
   });

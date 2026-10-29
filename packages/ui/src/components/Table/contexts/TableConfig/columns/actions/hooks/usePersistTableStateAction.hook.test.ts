@@ -6,6 +6,7 @@ import { beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 import type { TablePersistenceConfig } from '#ui/components/Table/Table.types';
 
 import { MAX_COOKIE_ENTRY_VALUE_LENGTH } from '#ui/constants/globalSettings.constants';
+import { TablePersistenceWrapper } from '#ui/utils/tests/tablePersistenceWrapper.util';
 
 import { usePersistTableStateAction } from './usePersistTableStateAction.hook';
 
@@ -50,6 +51,11 @@ vi.mock('#ui/contexts/NotificationContext/actions', () => ({
   useNotifyAction: () => notifyMock,
 }));
 
+const renderPersistTableState = () =>
+  renderHook(() => usePersistTableStateAction(), {
+    wrapper: TablePersistenceWrapper,
+  });
+
 describe('usePersistTableStateAction', () => {
   beforeEach(() => {
     notifyMock.mockReset();
@@ -67,7 +73,7 @@ describe('usePersistTableStateAction', () => {
       value: '[{"columnKey":"id","direction":"asc"}]',
     });
 
-    const { result } = renderHook(() => usePersistTableStateAction());
+    const { result } = renderPersistTableState();
 
     act(() => {
       result.current({
@@ -106,7 +112,7 @@ describe('usePersistTableStateAction', () => {
       value: '[{"columnKey":"id","direction":"asc"}]',
     });
 
-    const { result } = renderHook(() => usePersistTableStateAction());
+    const { result } = renderPersistTableState();
 
     act(() => {
       result.current({
@@ -159,7 +165,7 @@ describe('usePersistTableStateAction', () => {
       value: '[{"columnKey":"id","direction":"asc"}]',
     });
 
-    const { result } = renderHook(() => usePersistTableStateAction());
+    const { result } = renderPersistTableState();
 
     act(() => {
       result.current({
@@ -186,7 +192,7 @@ describe('usePersistTableStateAction', () => {
         value: '["id","status"]',
       });
 
-    const { result } = renderHook(() => usePersistTableStateAction());
+    const { result } = renderPersistTableState();
 
     act(() => {
       result.current([
@@ -233,7 +239,7 @@ describe('usePersistTableStateAction', () => {
       value: 'x'.repeat(MAX_COOKIE_ENTRY_VALUE_LENGTH + 1),
     });
 
-    const { result } = renderHook(() => usePersistTableStateAction());
+    const { result } = renderPersistTableState();
 
     let isPersistenceResult = true;
 
@@ -265,7 +271,7 @@ describe('usePersistTableStateAction', () => {
       value: '{"status":"active"}',
     });
 
-    const { result } = renderHook(() => usePersistTableStateAction());
+    const { result } = renderPersistTableState();
 
     act(() => {
       result.current({
@@ -300,7 +306,7 @@ describe('usePersistTableStateAction', () => {
       value: '{"status":"active"}',
     });
 
-    const { result } = renderHook(() => usePersistTableStateAction());
+    const { result } = renderPersistTableState();
 
     act(() => {
       result.current({
@@ -324,7 +330,7 @@ describe('usePersistTableStateAction', () => {
       value: '[]',
     });
 
-    const { result } = renderHook(() => usePersistTableStateAction());
+    const { result } = renderPersistTableState();
 
     act(() => {
       result.current({
@@ -341,6 +347,25 @@ describe('usePersistTableStateAction', () => {
       value: [],
     });
   });
+  it('applies the change in memory, submitting and notifying nothing, with no layout persistence above it', () => {
+    const { result } = renderHook(() => usePersistTableStateAction());
+
+    let isApplied = false;
+
+    act(() => {
+      isApplied = result.current({
+        persistenceKey: 'orders',
+        slice: 'sorting',
+        valueSlice: [],
+      });
+    });
+
+    expect(isApplied).toBe(true);
+    expect(serializeStateSliceMock).not.toHaveBeenCalled();
+    expect(notifyMock).not.toHaveBeenCalled();
+    expect(submitMock).not.toHaveBeenCalled();
+  });
+
   describe('a transient column layout', () => {
     it('drops the state slices and keeps the URL params', () => {
       metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
@@ -349,7 +374,7 @@ describe('usePersistTableStateAction', () => {
         value: '["id"]',
       });
 
-      const { result } = renderHook(() => usePersistTableStateAction());
+      const { result } = renderPersistTableState();
 
       act(() => {
         result.current([
@@ -388,7 +413,7 @@ describe('usePersistTableStateAction', () => {
         value: '{"status":"active"}',
       });
 
-      const { result } = renderHook(() => usePersistTableStateAction());
+      const { result } = renderPersistTableState();
 
       act(() => {
         result.current({
@@ -418,7 +443,7 @@ describe('usePersistTableStateAction', () => {
     it('writes nothing, and claims nothing, when every entry was a layout slice', () => {
       metaStoreGetMock.mockReturnValue({ isColumnLayoutTransient: true });
 
-      const { result } = renderHook(() => usePersistTableStateAction());
+      const { result } = renderPersistTableState();
 
       act(() => {
         result.current({
@@ -439,7 +464,7 @@ describe('usePersistTableStateAction', () => {
         value: '["id"]',
       });
 
-      const { result } = renderHook(() => usePersistTableStateAction());
+      const { result } = renderPersistTableState();
 
       act(() => {
         result.current({

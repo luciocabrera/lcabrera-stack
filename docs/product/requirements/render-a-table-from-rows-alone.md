@@ -3,19 +3,25 @@ id: render-a-table-from-rows-alone
 lines:
   - application
 persona: application-developer
-state: unmet
+state: met
 packages:
   - ui
 requires: []
 issues:
   - 994
 evidence:
+  - type: command
+    ref: vp run test:ci
+  - type: test
+    ref: packages/ui/src/components/Table/Table.fromRows.test.tsx
   - type: code
     ref: packages/ui/src/public-api.ts
   - type: code
-    ref: packages/ui/src/components/StaticTable/StaticTable.component.tsx
+    ref: packages/ui/src/components/Table/Table.component.tsx
   - type: doc
     ref: packages/ui/README.md
+  - type: doc
+    ref: docs/decisions/ADR-142-a-table-given-rows-keeps-its-state-in-memory-and-the-route-level-layout-supplies-persistence.md
 ---
 
 # A table renders from rows and columns alone
@@ -36,24 +42,28 @@ leads with.
   `packages/ui/src/public-api.ts`, so reaching it needs no deep import past the
   public surface.
 - `vp run api-surface:verify` records it in `reports/api-surface/ui.txt`.
-- Deriving columns from untyped rows is documented as the zero-configuration
-  path rather than left as an export a reader has to find.
-- A test renders it from rows alone — no router, no loader, no fetch.
+- Deriving columns from untyped rows is documented as an option a caller runs
+  and passes in, rather than left as an export a reader has to find.
+  **Amended 2026-10-27 by the owner:** this read "the zero-configuration path".
+  The columns are the table's metadata, so they stay a required prop and the
+  table infers none (#994 §5).
+- A test renders it from rows and columns alone — no router, no loader, no
+  fetch — and another renders the same rows from a promise of them.
 - The first usage example in `packages/ui/README.md` is that call.
 
 ## Notes
 
-`StaticTable` has this props shape today and is exported from neither the entry
-map nor the public surface, so the only documented route in is `TableLayout`,
-whose props are a columns-state object and a promise. Whether the answer is to
-export the one that exists or to build a different one is the issue's business,
-not this file's — the requirement is the shape a consumer needs, not the
-implementation that satisfies it.
+`Table` is the export. It is on the root barrel and on the `./components/Table`
+subpath. It requires `columns` and takes one data input, `response`, which is an
+array of rows or a promise of one. The README's usage section opens with that
+call, then shows `inferTableColumnsFromJson` as a helper a caller may run on
+rows of unknown shape. In `Table.fromRows.test.tsx`:
 
-Re-examined against the application `devkit create --profile monorepo` now emits
-(#1076), which renders a table from rows the module holds and nothing else. It
-does not earn this: reaching the table there still costs a columns list, a
-persistence key, a table name, a title and a loader built by
-`createTableRouteLoader`, because that is what the published surface offers. The
-demonstration this requirement asks for is one call taking rows and columns, and
-no export answering that description exists yet.
+- one test renders the rows from a plain array with no providers and no router;
+- one renders the same rows from a promise of that array;
+- one checks with `expectTypeOf` that `columns` is required.
+
+The `command` pointer was checked by breaking the property. Making `Table` skip
+mounting its own providers fails the plain-array render and every in-memory case
+in that file. Returning the given rows unsorted from `useTableDataState` fails
+the sort, clear-sort and filter cases. Making `columns` optional fails the `expectTypeOf` check under `vp run typecheck`. All three were reverted.

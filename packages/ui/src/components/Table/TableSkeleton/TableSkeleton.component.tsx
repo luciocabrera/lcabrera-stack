@@ -22,6 +22,7 @@ export const TableSkeleton = <TData extends Record<string, unknown>>({
   return (
     <Table<TData, SkeletonResponse<TData>>
       actions={actions}
+      columns={columns}
       dataSelector={(response) => response.data}
       dataTotalSelector={(response) => response.totalRows}
       isLoading

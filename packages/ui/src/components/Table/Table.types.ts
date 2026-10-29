@@ -9,7 +9,7 @@ import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
 import type { ColumnFilter } from '#ui/types/filterOperators.types';
-import type { InfiniteScroll, Sorting } from '#ui/types/ui.types';
+import type { Pagination, Sorting } from '#ui/types/ui.types';
 
 export type AggregateColumnKey = `${string}:${TableAggregateFn}`;
 
@@ -462,13 +462,16 @@ export type TableProps<
   TData extends Record<string, unknown>,
   TResponse,
 > = BaseProps &
-  InfiniteScroll<TData, TResponse> & {
-    readonly dataErrorSelector?: (
-      response: TResponse,
-    ) => TableResponseError | undefined;
+  (
+    | TableRowsSource<TData>
+    | TableSelectedSource<TData, TResponse, Promise<TResponse> | TResponse>
+  ) & {
+    /** Seeds the providers the Table mounts when none are above it. */
+    readonly columns: readonly TableColumn<TData>[];
     readonly isFlexWrapperEnabled?: boolean;
     readonly isLoading?: boolean;
-    readonly response: TResponse;
+    /** Read only when the Table mounts its own providers. */
+    readonly title?: string;
   };
 
 export type TableQueryRefusalReason =
@@ -513,6 +516,26 @@ export type TableResponseError =
       readonly reason: TableQueryRefusalReason;
     }
   | { readonly kind: 'unexpected'; readonly message: string };
+
+export type TableRowsSource<TData> = {
+  readonly dataErrorSelector?: never;
+  readonly dataSelector?: never;
+  readonly dataTotalSelector?: never;
+  readonly onLoadMore?: never;
+  /** The rows, or a promise of them; sorted and filtered in memory outside a `TableLayout`. */
+  readonly response: Promise<readonly TData[]> | readonly TData[];
+};
+
+export type TableSelectedSource<TData, TResponse, TInput> = {
+  readonly dataErrorSelector?: (
+    response: TResponse,
+  ) => TableResponseError | undefined;
+  readonly dataSelector: (response: TResponse) => readonly TData[];
+  /** May return `undefined` to keep the total already in the store. */
+  readonly dataTotalSelector?: (response: TResponse) => number | undefined;
+  readonly onLoadMore?: (params: Pagination<TData>) => Promise<TResponse>;
+  readonly response: TInput;
+};
 
 export type TableSettingsTabRole =
   | 'columns'

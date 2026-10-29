@@ -1,19 +1,9 @@
-import { useFetcher } from 'react-router';
-
-import { TableActionsPopover } from '#ui/components/Table/TableActionsPopover';
-
 import type { TableRowActionsMenuProps } from './TableRowActionsMenu.types';
 
 import { useGetColumns } from '../contexts/TableConfig/columns/selectors';
-import {
-  useGetTableCrud,
-  useGetTableDeleteActionPath,
-  useGetTableTitleSingular,
-} from '../contexts/TableConfig/meta/selectors';
+import { useGetTableCrud } from '../contexts/TableConfig/meta/selectors';
 import { resolveCrudRowId } from '../utils/resolveCrudRowId.util';
-import { TableActionMenu } from './TableActionMenu';
-
-const DEFAULT_TITLE_SINGULAR = 'Record';
+import { TableCrudRowActionsMenu } from './TableCrudRowActionsMenu/TableCrudRowActionsMenu.component';
 
 export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   customActions,
@@ -22,15 +12,11 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
 }: TableRowActionsMenuProps<TData>) => {
   const crud = useGetTableCrud();
   const columns = useGetColumns<TData>();
-  const deleteActionPath = useGetTableDeleteActionPath();
-  const fetcher = useFetcher();
-  const titleSingular = useGetTableTitleSingular();
 
   if (!crud) {
     return customActions;
   }
 
-  const resolvedTitleSingular = titleSingular ?? DEFAULT_TITLE_SINGULAR;
   const rowId = resolveCrudRowId({ columns, row });
 
   if (rowId === undefined) {
@@ -38,45 +24,11 @@ export const TableRowActionsMenu = <TData extends Record<string, unknown>>({
   }
 
   return (
-    <TableActionsPopover
-      ariaLabel='Row actions'
-      isDisabled={isLoadingState}
-      label='Row actions'
-    >
-      {({ closeMenu }) => {
-        const handleDelete = () => {
-          if (!deleteActionPath) return;
-
-          const shouldDelete = globalThis.confirm(
-            `Are you sure you want to delete this ${resolvedTitleSingular.toLowerCase()}?`,
-          );
-
-          if (!shouldDelete) return;
-
-          void fetcher.submit(
-            {
-              id: String(rowId),
-              intent: 'delete',
-            },
-            {
-              action: deleteActionPath,
-              method: 'post',
-            },
-          );
-
-          closeMenu();
-        };
-
-        return (
-          <TableActionMenu
-            crud={crud}
-            customActions={customActions}
-            onDelete={handleDelete}
-            resolvedTitleSingular={resolvedTitleSingular}
-            rowId={rowId}
-          />
-        );
-      }}
-    </TableActionsPopover>
+    <TableCrudRowActionsMenu
+      crud={crud}
+      customActions={customActions}
+      isLoadingState={isLoadingState}
+      rowId={rowId}
+    />
   );
 };
