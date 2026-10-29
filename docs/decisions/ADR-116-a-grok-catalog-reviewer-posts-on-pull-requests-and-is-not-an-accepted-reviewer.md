@@ -78,12 +78,15 @@ to a consumer who has nothing working — the same reason `claude-review.yml` st
   like a clean pass is not.
 - The review is optional, because the API account is not always funded. A
   non-empty `XAI_API_KEY` can still be rejected, as when the account has no
-  credits. The pinned CLI's headless review prints `Not signed in` and exits 1. `grok models` on that same binary
-  prints `You are using XAI_API_KEY` for any non-empty value, so the models
-  banner is not evidence the review path will accept the key. When the review
-  step sees `Not signed in`, it exits 0 and the mint and submit steps do not
-  run. No placeholder review is posted. An empty secret still fails the job.
-  That remains the fork case.
+  credits. The pinned CLI's headless review then exits 1 with a first line
+  starting `Not signed in.`. `grok models` on that same binary prints
+  `You are using XAI_API_KEY` for any non-empty value, so the models banner is
+  not evidence the review path will accept the key. When the review step sees
+  that first line, it exits 0 and the mint and submit steps do not run. No
+  placeholder review is posted. The bullet above still holds where a secret is
+  missing: an empty `XAI_API_KEY` fails the job, and that remains the fork
+  case. The match is text the pinned CLI prints, so moving the pin means
+  re-checking that first line.
 - Creating the GitHub App, installing it, and adding the three secrets is
   operator work this repository cannot do in a pull request. The intended App
   slug is `grok-clean-code-reviewer`, so the login the exclusion test names is

@@ -115,6 +115,8 @@ jobs:
       # signed_in=false and exits 0. Mint and submit then do not run.
       # Only the first line is matched: later lines carry the model's turns
       # over the diff, and a diff can quote the phrase.
+      # The text is the pinned CLI's. When GROK_VERSION moves, re-check
+      # that first line, or an unfunded account fails every pull request.
       - name: Run the Grok catalog review
         id: catalog
         env:
