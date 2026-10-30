@@ -21,5 +21,3 @@ export const resolveTablePresentation = ({
     layout,
   };
 };
-
-export type TablePresentation = ReturnType<typeof resolveTablePresentation>;
