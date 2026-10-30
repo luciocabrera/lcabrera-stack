@@ -1,8 +1,5 @@
 // @vitest-environment jsdom
 
-import type { StyleXStyles } from '@stylexjs/stylex';
-
-import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { use } from 'react';
 import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
@@ -12,6 +9,7 @@ import { GlobalSettingsContext } from '#ui/contexts/GlobalSettingsContext/Global
 import { NotificationProvider } from '#ui/contexts/NotificationContext';
 import { NotificationContext } from '#ui/contexts/NotificationContext/NotificationContext.context';
 import { groupedColumnAxisFixture } from '#ui/utils/tests/groupedColumnAxisFixture.util';
+import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
 import type {
   ColumnSizingState,
@@ -57,32 +55,12 @@ beforeAll(() => {
 
 afterEach(cleanup);
 
-type HasEveryClassArgs = {
-  readonly element: Element;
-  readonly style: StyleXStyles;
-};
+const ancestorsOf = (element: Element): readonly Element[] => {
+  const { parentElement } = element;
 
-const hasEveryClass = ({ element, style }: HasEveryClassArgs) => {
-  const applied = new Set(element.className.split(' ').filter(Boolean));
-
-  return (stylex.props(style).className ?? '')
-    .split(' ')
-    .filter(Boolean)
-    .every((name) => applied.has(name));
-};
-
-const ancestorsOf = (element: Element) => {
-  const chain: Element[] = [];
-
-  for (
-    let node = element.parentElement;
-    node !== null && node !== document.body;
-    node = node.parentElement
-  ) {
-    chain.push(node);
-  }
-
-  return chain;
+  return parentElement === null
+    ? []
+    : [parentElement, ...ancestorsOf(parentElement)];
 };
 
 const headerOf = (label: string) => {
@@ -169,7 +147,7 @@ describe('Table static layout chrome', () => {
 
     expect(wrapper).not.toBeNull();
     expect(
-      hasEveryClass({
+      hasStylexStyle({
         element: wrapper ?? document.body,
         style: staticContentStyles.rounded,
       }),
@@ -180,14 +158,15 @@ describe('Table static layout chrome', () => {
     render(<Table columns={COLUMNS} response={ROWS} />);
 
     const wrapped = ancestorsOf(screen.getByTestId('table')).some((element) =>
-      hasEveryClass({ element, style: flexWrapperStyles.wrapper }),
+      hasStylexStyle({ element, style: flexWrapperStyles.wrapper }),
     );
 
     cleanup();
     render(<Table columns={COLUMNS} layout='static' response={ROWS} />);
 
     const staticWrapped = ancestorsOf(screen.getByTestId('table')).some(
-      (element) => hasEveryClass({ element, style: flexWrapperStyles.wrapper }),
+      (element) =>
+        hasStylexStyle({ element, style: flexWrapperStyles.wrapper }),
     );
 
     expect([wrapped, staticWrapped]).toStrictEqual([true, false]);
@@ -270,7 +249,7 @@ describe('Table column width in the virtual layout', () => {
     render(<Table columns={columns} response={ROWS} />);
 
     expect(
-      hasEveryClass({
+      hasStylexStyle({
         element: headerOf('Name'),
         style: tableHeaderCellStyles.fill,
       }),
@@ -301,7 +280,7 @@ describe('Table column width in the virtual layout', () => {
     );
 
     expect(
-      hasEveryClass({
+      hasStylexStyle({
         element: headerOf('Name'),
         style: tableHeaderCellStyles.fill,
       }),
