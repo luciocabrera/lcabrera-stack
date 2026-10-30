@@ -6,7 +6,7 @@ import type {
   TableColumn,
 } from '#ui/components/Table/Table.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+import { resolveColumnStartWidth } from './resolveColumnStartWidth.util';
 
 type GetPinnedColumnOffsetsArgs<TData> = {
   readonly columnPinning: ColumnPinningState<TData>;
@@ -39,7 +39,7 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
   );
   for (const col of leftPinnedInEffectiveOrder) {
     const sized = columnSizing[col.key] as number | undefined;
-    const width = sized ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+    const width = sized ?? resolveColumnStartWidth(col);
     result.set(col.key, {
       isFirstPinnedRight: false,
       isLastPinnedLeft: false,
@@ -66,7 +66,7 @@ export const getPinnedColumnOffsets = <TData = Record<string, unknown>>({
     .filter((c) => rightPinnedSet.has(c.key));
   for (const col of rightPinnedInReverseEffectiveOrder) {
     const sized = columnSizing[col.key] as number | undefined;
-    const width = sized ?? col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+    const width = sized ?? resolveColumnStartWidth(col);
     result.set(col.key, {
       isFirstPinnedRight: false,
       isLastPinnedLeft: false,

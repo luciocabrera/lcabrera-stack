@@ -6,6 +6,7 @@ import type {
   TableCellToneColors,
   TableColumn,
   TableGroupRowSummary,
+  TableLayoutMode,
 } from '#ui/components/Table/Table.types';
 import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupDisclosure';
 
@@ -17,6 +18,7 @@ type CreateRenderTableBodyCellArgs<TData extends Record<string, unknown>> = {
   readonly columnSizing: ColumnSizingState<TData>;
   readonly groupingKeys: readonly string[];
   readonly isLoadingState: boolean;
+  readonly layout?: TableLayoutMode;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly tone: (name: string) => TableCellToneColors;
 };
@@ -38,6 +40,7 @@ export const createRenderTableBodyCell =
     columnSizing,
     groupingKeys,
     isLoadingState,
+    layout,
     pinnedOffsets,
     tone,
   }: CreateRenderTableBodyCellArgs<TData>) =>
@@ -61,6 +64,7 @@ export const createRenderTableBodyCell =
       groupSummary,
       hasStructuralMarker,
       isLoadingState,
+      layout,
       pinnedOffsets,
       row,
       rowIndex,

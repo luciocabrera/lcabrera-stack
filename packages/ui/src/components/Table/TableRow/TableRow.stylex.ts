@@ -18,6 +18,13 @@ export const tableRowStyles = stylex.create({
     maxHeight: rowHeight,
     minHeight: rowHeight,
   }),
+  staticLayout: (rowHeight: number) => ({
+    alignItems: null,
+    display: 'table-row',
+    height: rowHeight,
+    maxHeight: null,
+    minHeight: null,
+  }),
   header: {
     padding: 0,
     borderRadius: borderRadius.lg,

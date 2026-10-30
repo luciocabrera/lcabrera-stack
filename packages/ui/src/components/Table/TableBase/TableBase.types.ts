@@ -6,4 +6,4 @@ export type TableBaseProps<
   TData extends Record<string, unknown>,
   TResponse,
 > = ComponentPropsWithRef<'table'> &
-  Pick<TableProps<TData, TResponse>, 'customStylex'>;
+  Pick<TableProps<TData, TResponse>, 'caption' | 'customStylex' | 'footer'>;

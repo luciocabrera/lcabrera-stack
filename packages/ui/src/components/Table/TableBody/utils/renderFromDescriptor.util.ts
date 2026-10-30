@@ -8,6 +8,12 @@ type RenderFromDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly descriptor: TableBodyCellDescriptor<TData>;
 };
 
+const toCellLayout = <TData extends Record<string, unknown>>({
+  align,
+  isFill,
+  staticWidths,
+}: TableBodyCellDescriptor<TData>) => ({ align, isFill, staticWidths });
+
 export const renderFromDescriptor = <TData extends Record<string, unknown>>({
   descriptor,
 }: RenderFromDescriptorArgs<TData>) => {
@@ -15,6 +21,7 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
     return createElement(
       TableBodyCell,
       {
+        cellLayout: toCellLayout(descriptor),
         columnKey: descriptor.columnKey,
         dataType: descriptor.dataType,
         isLoadingState: descriptor.isLoadingState,
@@ -31,6 +38,7 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
   }
 
   return createElement(TableBodyCell, {
+    cellLayout: toCellLayout(descriptor),
     columnKey: descriptor.columnKey,
     dataType: descriptor.dataType,
     format: descriptor.format,

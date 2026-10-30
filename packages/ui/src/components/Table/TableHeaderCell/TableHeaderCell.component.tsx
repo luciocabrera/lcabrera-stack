@@ -1,7 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
+import { use } from 'react';
 
+import { TablePresentationContext } from '#ui/components/Table/contexts/TableConfig/TablePresentationContext.context';
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
+import { resolveColumnStartWidth } from '#ui/components/Table/utils/resolveColumnStartWidth.util';
 import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TableHeaderCellProps } from './TableHeaderCell.types';
@@ -11,10 +14,14 @@ import {
   useGetNormalizedColumn,
   useGetPinnedColumnInfo,
 } from '../contexts/TableConfig/columns/selectors';
-import { ResizeHandle } from './ResizeHandle';
-import { TableHeaderActionsMenu } from './TableHeaderActionsMenu';
 import { tableHeaderCellStyles } from './TableHeaderCell.stylex';
-import { getPinnedStyle, getShadowStyle, resolveAriaSort } from './utils';
+import { TableHeaderCellControls } from './TableHeaderCellControls.component';
+import {
+  getHeaderLayoutStyles,
+  getPinnedStyle,
+  getShadowStyle,
+  resolveAriaSort,
+} from './utils';
 
 export const TableHeaderCell = <TData extends Record<string, unknown>>({
   columnKey,
@@ -26,16 +33,23 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const column = useGetNormalizedColumn<TData>(columnKey);
   const width = useGetColumnWidth<TData>(columnKey);
   const pinInfo = useGetPinnedColumnInfo<TData>(columnKey);
+  const { layout } = use(TablePresentationContext);
 
   const { isHeaderHidden, label, minWidth } = column;
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-  const currentWidth = width ?? effectiveMinWidth;
+  const currentWidth = width ?? resolveColumnStartWidth(column);
   const sortDirection = column.sortDirection;
   const { isResizable, isSortable, isStatic } =
     resolveColumnCapabilities(column);
 
   const pinnedStylex = getPinnedStyle(pinInfo);
   const shadowStylex = getShadowStyle(pinInfo);
+  const layoutStylex = getHeaderLayoutStyles({
+    column,
+    isSized: width !== undefined,
+    layout,
+    pinInfo,
+  });
 
   return (
     <th
@@ -52,6 +66,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         tableHeaderCellStyles.base(effectiveMinWidth, currentWidth),
         pinnedStylex,
         shadowStylex,
+        layoutStylex.cell,
         customStylex,
       )}
     >
@@ -64,17 +79,15 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         <>
           <span
             data-testid='table-header-label'
-            {...stylex.props(tableHeaderCellStyles.content)}
+            {...stylex.props(tableHeaderCellStyles.content, layoutStylex.label)}
           >
             {label}
           </span>
-          {Boolean(isResizable) && (
-            <ResizeHandle columnKey={columnKey} columnLabel={label} />
-          )}
-          <TableHeaderActionsMenu
+          <TableHeaderCellControls<TData>
             columnKey={columnKey}
             columnLabel={label}
             hasSettings={hasSettings}
+            isResizable={Boolean(isResizable)}
             isSortable={isSortable}
             isStatic={isStatic}
             pinSide={pinInfo?.side}

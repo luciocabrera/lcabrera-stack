@@ -4,7 +4,7 @@ import {
   useGetColumnSizing,
   useGetPinnedColumnOffsets,
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+import { sumColumnWidths } from '#ui/components/Table/utils/sumColumnWidths.util';
 
 import type { TableHeaderBandProps } from './TableHeaderBand.types';
 
@@ -18,12 +18,7 @@ export const TableHeaderBand = <TData extends Record<string, unknown>>({
   const columnSizing = useGetColumnSizing<TData>();
   const pinnedOffsets = useGetPinnedColumnOffsets();
 
-  const width = columns.reduce(
-    (total, column) =>
-      total +
-      (columnSizing[column.key] ?? column.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH),
-    0,
-  );
+  const width = sumColumnWidths({ columns, columnSizing });
 
   const pinnedStylex = resolveBandPinnedStyle({
     leading: pinnedOffsets[columns[0]?.key as 'actions'],

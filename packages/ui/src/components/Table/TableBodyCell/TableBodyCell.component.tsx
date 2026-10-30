@@ -1,18 +1,19 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { useTableCellFocus } from '#ui/components/Table/hooks';
 import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TableBodyCellProps } from './TableBodyCell.types';
 
+import { useTableBodyCellSemantics } from './useTableBodyCellSemantics.hook';
 import {
   detectDataType,
   getCellStyleProps,
-  renderCellContent,
   renderDisplayedContent,
+  resolveCellContent,
 } from './utils';
 
 export const TableBodyCell = <TData extends Record<string, unknown>>({
+  cellLayout,
   children,
   columnKey,
   customStylex,
@@ -32,32 +33,30 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
   const hasCustomContent = children !== undefined;
   const dataType = dataTypeProp ?? detectDataType(value);
   const isAlignedByDataType = !hasCustomContent || dataTypeProp !== undefined;
-  const { cellRef, onFocus, tabIndex } = useTableCellFocus({
+  const { cellProps, cellRef } = useTableBodyCellSemantics({
     columnKey,
     rowIndex,
     rowKey,
   });
 
-  const content = hasCustomContent
-    ? children
-    : renderCellContent({
-        dataType,
-        format,
-        label,
-        locale,
-        value,
-      });
+  const content = resolveCellContent({
+    children,
+    dataType,
+    format,
+    label,
+    locale,
+    value,
+  });
 
   return (
     <td
       data-column-key={String(columnKey)}
       data-testid='table-body-cell'
       {...rest}
-      onFocus={onFocus}
+      {...cellProps}
       ref={cellRef}
-      role='gridcell'
-      tabIndex={tabIndex}
       {...getCellStyleProps({
+        ...cellLayout,
         customStylex,
         dataType,
         isAlignedByDataType,

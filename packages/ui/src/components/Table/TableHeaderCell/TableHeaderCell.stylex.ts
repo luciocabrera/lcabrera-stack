@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import type { TableStaticColumnWidths } from '#ui/components/Table/utils/resolveStaticColumnWidths.util';
+
 import { tableDensityVars } from '#ui/components/Table/TableBase/tableDensity.stylex';
 import { typography, zIndex } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
@@ -26,6 +28,39 @@ export const tableHeaderCellStyles = stylex.create({
     minWidth: minWidth ?? width ?? null,
     top: 0,
     width: width ?? minWidth ?? null,
+  }),
+  alignCenter: {
+    justifyContent: 'center',
+    textAlign: 'center',
+  },
+  alignEnd: {
+    justifyContent: 'flex-end',
+    textAlign: 'right',
+  },
+  alignStart: {
+    justifyContent: 'flex-start',
+    textAlign: 'left',
+  },
+  contentAlignCenter: {
+    textAlign: 'center',
+  },
+  contentAlignEnd: {
+    textAlign: 'right',
+  },
+  fill: {
+    flexGrow: 1,
+  },
+  staticLayout: (widths: TableStaticColumnWidths) => ({
+    display: 'table-cell',
+    flexShrink: null,
+    position: 'relative',
+    verticalAlign: 'middle',
+    height: null,
+    maxHeight: null,
+    maxWidth: widths.maxWidth ?? null,
+    minWidth: widths.minWidth ?? null,
+    top: null,
+    width: widths.width ?? null,
   }),
   pinnedLeft: (offset: number) => ({
     backgroundColor: colors.surfaceSecondary,

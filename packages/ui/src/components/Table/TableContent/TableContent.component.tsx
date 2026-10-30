@@ -1,7 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
+import { use } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 
+import { TablePresentationContext } from '../contexts/TableConfig/TablePresentationContext.context';
 import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
@@ -14,11 +16,16 @@ import { useTableContentRuntime } from './useTableContentRuntime.hook';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
+  caption,
+  customStylex,
   dataSelector,
   dataTotalSelector,
+  footer,
   icon,
   onLoadMore,
+  tableProps,
 }: TableContentProps<TData, TResponse>) => {
+  const { features } = use(TablePresentationContext);
   const { containerRef, isLoading, isRounded, sentinelRef, wrapperRef } =
     useTableContentRuntime<TData, TResponse>({
       dataSelector,
@@ -34,10 +41,12 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
           data-rounded={String(isRounded)}
           {...stylex.props(styles.outerContainer, isRounded && styles.rounded)}
         >
-          <TableTitle
-            actions={<TableTitleActions actions={actions} />}
-            icon={icon}
-          />
+          {features.toolbar !== false && (
+            <TableTitle
+              actions={<TableTitleActions actions={actions} />}
+              icon={icon}
+            />
+          )}
           <div
             data-scroll-locked={String(isLoading)}
             ref={containerRef}
@@ -47,7 +56,12 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
             )}
             data-testid='table-scroll-container'
           >
-            <TableBase>
+            <TableBase
+              {...tableProps}
+              caption={caption}
+              customStylex={customStylex}
+              footer={footer}
+            >
               <TableHeader />
               <TableBody tableContainerRef={containerRef} />
             </TableBase>
@@ -59,7 +73,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
             />
           </div>
         </div>
-        <TableDrawersSection />
+        {features.settings !== false && <TableDrawersSection />}
       </div>
     </TableWrapperContext>
   );
