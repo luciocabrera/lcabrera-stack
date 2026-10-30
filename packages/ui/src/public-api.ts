@@ -17,6 +17,20 @@ export { TableLayout } from './components/Table/TableLayout/TableLayout.componen
 export { TableGroupDetailsView } from './components/TableGroupDetailsView/TableGroupDetailsView.component';
 export { TableRouteView } from './components/TableRouteView/TableRouteView.component';
 export { Tabs } from './components/Tabs/Tabs.component';
+export { Text } from './components/Text/Text.component';
+export type {
+  TextElement,
+  TextProps,
+  TextSize,
+  TextTone,
+  TextWeight,
+} from './components/Text/Text.types';
+export { Title } from './components/Title/Title.component';
+export type {
+  TitleLevel,
+  TitleProps,
+  TitleVariant,
+} from './components/Title/Title.types';
 export { hydrateApp } from './entry/hydrateApp.util';
 export { useNotifyOnError } from './hooks/useNotifyOnError.hook';
 export { useTableRoutePage } from './hooks/useTableRoutePage.hook';
