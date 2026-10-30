@@ -1,3 +1,4 @@
-import { useMetaStore } from '#ui/components/Table/contexts/TableConfig/meta/useMetaStore.hook';
+import { useTableDensityStore } from '#ui/components/Table/contexts/TableConfig/meta/useTableDensityStore.hook';
 
-export const useGetTableDensity = () => useMetaStore((state) => state.density);
+export const useGetTableDensity = () =>
+  useTableDensityStore((resolved) => resolved.density);

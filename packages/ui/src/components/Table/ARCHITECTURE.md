@@ -173,6 +173,18 @@ was when it could only mean one thing. `defaultFold` is the one part of
 expansion that does cross the loader boundary — it is a Global Settings answer,
 read off the settings cookie.
 
+Density is resolved in one place, `resolveTableDensity`, from three sources in
+order: the `metaStore`'s `density`/`headerDensity`, then the `Table`'s own
+`density`/`headerDensity` props, then `compact`. The props are not written to the
+store; `TableGridContent` provides them through `TableDensityContext`, so they
+reach the rows on the first render, on the server as on the client, and a level
+the settings drawer writes to the store still wins over them. The resolved level
+gives the default row height, which `TableBody`'s virtualizer, `TableRow` and the
+focus and fold handlers all read; a `rowHeight` set in the meta state wins over
+it. `TableBase` sets the body and header font size and inline padding as CSS
+variables on `<table>`, and every cell reads its padding and font from them
+([ADR-146](../../../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (a)).
+
 ## Data Flow
 
 ```mermaid

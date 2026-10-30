@@ -1,18 +1,15 @@
-import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFocus/useTableFocusContextValue.hook';
 import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 import { resolveRowKey } from '#ui/components/Table/TableBodyRows/utils/resolveRowKey.util';
 
 import type { EnterTableGridArgs } from './useEnterTableGrid.types';
 
-import { commitTableFocusTarget, resolveGridFocusContext } from './utils';
+import { useReadGridFocusContext } from './useReadGridFocusContext.hook';
+import { commitTableFocusTarget } from './utils';
 
 export const useEnterTableGrid = <TData extends Record<string, unknown>>() => {
   const { focusStore } = useTableFocusContextValue();
-  const { columnsStore, expansionStore, groupingStore, metaStore } =
-    useTableConfigContextValue<TData>();
-  const { dataStore } = useTableDataContextValue<TData>();
+  const readGridFocusContext = useReadGridFocusContext<TData>();
   const containerRef = useTableContainerRef();
 
   return ({ isGridElement }: EnterTableGridArgs) => {
@@ -34,14 +31,7 @@ export const useEnterTableGrid = <TData extends Record<string, unknown>>() => {
       data,
       focusedRowIndex: rowIndex = 0,
       rowHeight,
-    } = resolveGridFocusContext({
-      columnsState: columnsStore.get(),
-      dataState: dataStore.get(),
-      expansionState: expansionStore.get(),
-      focusState,
-      groupingState: groupingStore.get(),
-      metaState: metaStore.get(),
-    });
+    } = readGridFocusContext(focusState);
 
     const targetRow = data[rowIndex];
     const columnKey =

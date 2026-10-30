@@ -206,8 +206,11 @@ export type TableChromeState = {
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
   readonly defaultGroupFold?: TableGroupFold;
-  readonly density: TableDensity;
+  /** Unset falls back to the `Table`'s `density` prop, then to `compact`. */
+  readonly density?: TableDensity;
   readonly drawersSyncNonce?: number;
+  /** Unset falls back to the `Table`'s `headerDensity` prop, then to the density. */
+  readonly headerDensity?: TableDensity;
   readonly initialPageSize: number;
   readonly isBordered: boolean;
   readonly isColumnLayoutTransient?: boolean;
@@ -223,7 +226,8 @@ export type TableChromeState = {
   readonly persistenceKey: string;
   readonly placeholderRowCount: number;
   readonly preferredGroupingMode?: TableGroupingMode;
-  readonly rowHeight: number;
+  /** Unset takes the density's row height; a number set here wins over it. */
+  readonly rowHeight?: number;
   /** Width the settings drawers open at, clamped to the panel's own band. */
   readonly settingsPanelWidth?: number;
   /** The reader's tab order, applied to both settings drawers. */
@@ -338,7 +342,12 @@ export type TableDataState<TData> = {
   readonly totalRows: number;
 };
 
-export type TableDensity = 'comfortable' | 'compact';
+export type TableDensity = 'comfortable' | 'compact' | 'dense' | 'spacious';
+
+export type TableDensityDefaults = Pick<
+  TableChromeState,
+  'density' | 'headerDensity'
+>;
 
 export type TableFocusState = {
   readonly columnKey: string | undefined;
@@ -468,6 +477,10 @@ export type TableProps<
   ) & {
     /** Seeds the providers the Table mounts when none are above it. */
     readonly columns: readonly TableColumn<TData>[];
+    /** The level when the meta state holds none. */
+    readonly density?: TableDensity;
+    /** The header row's level when the meta state holds none; defaults to the density. */
+    readonly headerDensity?: TableDensity;
     readonly isFlexWrapperEnabled?: boolean;
     readonly isLoading?: boolean;
     /** Read only when the Table mounts its own providers. */

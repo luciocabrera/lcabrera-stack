@@ -16,7 +16,7 @@ export const tableGroupKeyCellStyles = stylex.create({
     alignItems: 'center',
     color: colors.brandPrimaryCardText,
     display: 'flex',
-    fontSize: typography.fontSizeSm,
+    fontSize: 'var(--table-body-font-size)',
     fontWeight: typography.fontWeightSemibold,
     // Inherited, never chosen here: this container fills the cell, so the cell's own
     // type-derived alignment would otherwise stop at its edge (#1018).

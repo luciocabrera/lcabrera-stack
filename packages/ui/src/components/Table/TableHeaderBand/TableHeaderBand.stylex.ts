@@ -5,7 +5,7 @@ import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 export const tableHeaderBandStyles = stylex.create({
   base: (width: number | string) => ({
-    paddingInline: '6px',
+    paddingInline: 'var(--table-header-padding-inline)',
     alignItems: 'flex-end',
     boxSizing: 'border-box',
     color: colors.textTertiary,

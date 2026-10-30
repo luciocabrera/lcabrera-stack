@@ -3,6 +3,7 @@ import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
 import type {
   TableAggregateFn,
   TableColumnLayoutLock,
+  TableDensity,
   TableGroupFold,
   TableGroupingMode,
   TableGroupKeyRefusalReason,
@@ -27,6 +28,29 @@ export const COLUMN_RESIZE_KEYBOARD_COARSE_STEP = 40;
 export const DEFAULT_PLACEHOLDER_ROW_COUNT = 50;
 
 export const DEFAULT_ROW_HEIGHT = 32;
+
+export const DEFAULT_TABLE_DENSITY = 'compact' satisfies TableDensity;
+
+export const TABLE_DENSITY_LEVELS = [
+  'dense',
+  'compact',
+  'comfortable',
+  'spacious',
+] as const satisfies readonly TableDensity[];
+
+export const TABLE_DENSITY_LABELS: Readonly<Record<TableDensity, string>> = {
+  comfortable: 'Comfortable',
+  compact: 'Compact',
+  dense: 'Dense',
+  spacious: 'Spacious',
+};
+
+export const TABLE_DENSITY_ROW_HEIGHT = {
+  comfortable: 40,
+  compact: DEFAULT_ROW_HEIGHT,
+  dense: 24,
+  spacious: 48,
+} as const satisfies Readonly<Record<TableDensity, number>>;
 
 export const INITIAL_PAGE_SIZE = 50;
 export const LOAD_MORE_PAGE_SIZE = 150;

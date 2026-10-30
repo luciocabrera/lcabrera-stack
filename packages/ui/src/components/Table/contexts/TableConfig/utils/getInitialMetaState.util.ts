@@ -2,7 +2,6 @@ import type { TableMetaState } from '#ui/components/Table/Table.types';
 
 import {
   DEFAULT_OVERSCAN,
-  DEFAULT_ROW_HEIGHT,
   INFINITE_SCROLL_THRESHOLD,
   INITIAL_PAGE_SIZE,
   IS_PREFETCH_ENABLED,
@@ -14,7 +13,6 @@ type GetInitialMetaStateArgs = Partial<TableMetaState>;
 export const getInitialMetaState = ({
   appId,
   columnSettingsSelectedTab = 'general',
-  density = 'compact',
   drawersSyncNonce = 0,
   enablePrefetch = IS_PREFETCH_ENABLED,
   initialPageSize = INITIAL_PAGE_SIZE,
@@ -29,7 +27,6 @@ export const getInitialMetaState = ({
   overscan = DEFAULT_OVERSCAN,
   persistenceKey = '',
   placeholderRowCount = INITIAL_PAGE_SIZE,
-  rowHeight = DEFAULT_ROW_HEIGHT,
   tableSettingsExpandedFilters = [],
   tableSettingsSelectedTab = 'general',
   threshold = INFINITE_SCROLL_THRESHOLD,
@@ -39,7 +36,6 @@ export const getInitialMetaState = ({
   return {
     appId,
     columnSettingsSelectedTab,
-    density,
     drawersSyncNonce,
     enablePrefetch,
     initialPageSize,
@@ -54,7 +50,6 @@ export const getInitialMetaState = ({
     overscan,
     persistenceKey,
     placeholderRowCount,
-    rowHeight,
     tableSettingsExpandedFilters,
     tableSettingsSelectedTab,
     threshold,

@@ -5,13 +5,13 @@ import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 export const tableHeaderCellStyles = stylex.create({
   base: (minWidth?: number | string, width?: number | string) => ({
-    paddingInline: '6px',
+    paddingInline: 'var(--table-header-padding-inline)',
     alignItems: 'center',
     boxSizing: 'border-box',
     color: colors.textSecondary,
     display: 'flex',
     flexShrink: 0,
-    fontSize: typography.fontSizeSm,
+    fontSize: 'var(--table-header-font-size)',
     fontWeight: typography.fontWeightSemibold,
     justifyContent: 'flex-start',
     position: 'sticky',

@@ -19,7 +19,7 @@ export const styles = stylex.create({
     overflow: 'hidden',
     paddingBlock: '2px',
     paddingInline: spacing.xs,
-    fontSize: typography.fontSizeSm,
+    fontSize: 'var(--table-body-font-size)',
     fontWeight: typography.fontWeightSemibold,
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',
