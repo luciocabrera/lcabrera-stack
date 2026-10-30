@@ -3,9 +3,10 @@
  * whole run is testable without spawning fallow. Governed by
  * .claude/rules/scripts.md.
  */
-import { spawnSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';
-import { join } from 'node:path';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
 
 import { readWorkspaceGraph } from './affected-tests.mjs';
 import { readChangedFiles, REPO_ROOT } from './changed-runner.mjs';
@@ -28,6 +29,7 @@ import {
   toRepoPath,
   verdictSource,
 } from './fallow-gate.mjs';
+import { runGitStatus } from './git-exec.mjs';
 
 export const COULD_NOT_RUN = 2;
 
@@ -171,23 +173,41 @@ export const runGate = ({ argv, base, effects }) => {
   }
 };
 
+const fallowEntry = () =>
+  join(
+    dirname(
+      createRequire(join(REPO_ROOT, 'package.json')).resolve(
+        'fallow/package.json',
+      ),
+    ),
+    'bin',
+    'fallow',
+  );
+
+const runNode = (args, stdout) => {
+  try {
+    return {
+      status: 0,
+      stdout: execFileSync(process.execPath, args, {
+        cwd: REPO_ROOT,
+        encoding: 'utf8',
+        maxBuffer: 2 ** 29,
+        stdio: ['ignore', stdout, 'inherit'],
+      }),
+    };
+  } catch (error) {
+    return typeof error.status === 'number' || error.signal
+      ? { status: error.status, stdout: error.stdout }
+      : { error };
+  }
+};
+
 const processEffects = (proc) => ({
   exists: (file) => existsSync(join(REPO_ROOT, file)),
-  git: (args) =>
-    spawnSync('git', args, {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-      maxBuffer: 2 ** 29,
-    }),
+  git: (args) => runGitStatus({ args, cwd: REPO_ROOT }),
   readStdinFiles: () => (proc.stdin.isTTY ? [] : readChangedFiles()),
   root: REPO_ROOT,
-  spawn: (args, stdout) =>
-    spawnSync('fallow', args, {
-      cwd: REPO_ROOT,
-      encoding: 'utf8',
-      maxBuffer: 2 ** 29,
-      stdio: ['ignore', stdout, 'inherit'],
-    }),
+  spawn: (args, stdout) => runNode([fallowEntry(), ...args], stdout),
   workspaceDirs: () => readWorkspaceGraph(REPO_ROOT).map(({ dir }) => dir),
   write: (text) => proc.stdout.write(text),
   writeError: (text) => proc.stderr.write(text),

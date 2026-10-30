@@ -419,12 +419,12 @@ policy — entry rules, the CRAP/coverage trap, output conventions — is in
 | `vp run fallow:refresh-report`   | regenerate the complexity threshold report                                                                                                                       |
 | `vp run fallow:report`           | full scan + `fallow.raw.json` in a timestamped run dir; echoes the dir                                                                                           |
 | `vp run fallow:preflight`        | the audit exactly as CI runs it: `coverage:merge -- --changed`, then the gate against `TEST_CHANGED_BASE` (default `origin/main`). The `pre-push` hook runs this |
-| `vp run fallow:guard`            | prints the architecture rules that bind each changed source file. Advisory: it never fails                                                                       |
+| `vp run fallow:guard`            | prints the architecture rules that bind each changed source file. It reports and cannot fail until boundary zones are configured in `.fallowrc.json`             |
 | `vp run fallow:architecture`     | fails on an import cycle or a boundary violation in a changed source file                                                                                        |
 | `vp run fallow:suppressions`     | fails when a changed source file carries a `fallow-ignore` marker                                                                                                |
 | `vp run fallow:security`         | fails (exit 8) on a security candidate that the diff's changed lines introduce                                                                                   |
 | `vp run fallow:coverage-gaps`    | fails on a coverage gap the diff introduced: a new source file, or an export on a changed line, that no test reaches. Static: reads imports, not coverage data   |
-| `vp run fallow:mutation`         | mutates the changed lines, one workspace at a time, and fails on any mutant the tests let survive                                                                |
+| `vp run fallow:mutation`         | mutates the changed lines, one workspace at a time, and fails on any mutant the tests let survive. Runs with `--allow-dirty`, so uncommitted work is mutated too |
 | `vp run fallow:similar-code`     | fails on a similar-code candidate touching a changed file, and refuses to run until `fallow similar-code setup --local` has installed its model. In no gate yet  |
 
 Always feed the audit real coverage:

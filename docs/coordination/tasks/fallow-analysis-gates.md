@@ -9,6 +9,7 @@ area:
   - COMMANDS.md
   - vite.config.ts
   - .github/workflows/check-safe.yml
+  - .gitignore
   - scripts/changed-files.sh
   - scripts/verify-suppressions.mjs
   - .changeset/fallow-gate-bin.md
@@ -34,6 +35,6 @@ Add the fallow analysis scripts and wire them into hooks and CI
 
 ## Status / next
 
-- Current step: just claimed
-- Blockers: none
-- Next:
+- Current step: round 2 of review on #1572: Sonar findings, the `.fallow/` ignore and the review-body notes addressed
+- Blockers: none. `fallow:similar-code` stays ungated until its follow-up issue lands
+- Next: re-review and merge

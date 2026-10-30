@@ -6,7 +6,9 @@
 const suppressionFindings = ({ report }) =>
   (report.files ?? []).flatMap(({ path, suppressions }) =>
     suppressions.map(({ kind, line, reason }) => ({
-      detail: `fallow-ignore ${kind}${reason ? ` (${reason})` : ''}`,
+      detail: reason
+        ? `fallow-ignore ${kind} (${reason})`
+        : `fallow-ignore ${kind}`,
       line,
       path,
     })),
@@ -102,7 +104,7 @@ export const incompleteReason = ({ analysis, report }) => {
 };
 
 export const formatFinding = ({ detail, line, path }) =>
-  `${line === undefined ? path : `${path}:${line}`}  ${detail}`;
+  line === undefined ? `${path}  ${detail}` : `${path}:${line}  ${detail}`;
 
 export const parseReport = (stdout) => {
   const start = stdout.indexOf('{');

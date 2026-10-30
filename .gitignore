@@ -58,6 +58,9 @@ reports/skills/*.md
 # Fallow per-run artifacts (canonical root: reports/fallow/ — see AGENTS.md)
 reports/fallow/runs/
 
+# fallow's own run state and cache, written into whichever root it analyses
+.fallow/
+
 # PR queue operator decision logs — one directory per pass, produced on demand
 # by `vp run pr:queue` (ADR-049).
 reports/pr-queue/runs/
