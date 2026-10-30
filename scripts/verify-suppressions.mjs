@@ -27,13 +27,16 @@
  *               keeping its own copy, which is how three different rosters
  *               ended up in circulation and the narrowest one governed a merge.
  */
-import { readdirSync } from 'node:fs';
+import { toCurrentAdjudication } from '@repo/eval-history/envelope/toCurrentAdjudication.util';
+import { existsSync, readdirSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import process from 'node:process';
 
 import { publicPackageDirs } from '../packages/repo-standards/scripts/public-package-dirs.mjs';
 import { parseJsonc } from '../packages/repo-standards/scripts/jsonc.mjs';
 import { readTextWithin } from '../packages/repo-standards/scripts/safe-read.mjs';
+import { findClaimedMarkers } from './lib/false-positive-markers.mjs';
+import { checkFalsePositives } from './lib/false-positives.mjs';
 import { findReactDoctorSuppressions } from './lib/suppressions-react-doctor.mjs';
 import {
   DECLARABLE_STATUSES,
@@ -49,6 +52,8 @@ import {
 
 const REPO_ROOT = process.cwd();
 const REGISTER_PATH = 'docs/agents/public-package-suppressions.json';
+const FALSE_POSITIVES_PATH = 'docs/agents/false-positives.json';
+const PANEL_DIRECTIVE = /^(?:eslint|oxlint|biome|react-doctor)-/u;
 const BASELINE_DIR = 'reports/fallow/baselines';
 
 const SKIP_DIRS = new Set([
@@ -109,6 +114,45 @@ const report = (label, rows, render) => {
   process.stdout.write(`\n${label}\n`);
   for (const row of rows) process.stdout.write(`  ${render(row)}\n`);
   return rows.length;
+};
+
+const readFalsePositives = () => {
+  if (!existsSync(join(REPO_ROOT, FALSE_POSITIVES_PATH))) return [];
+  const list = readJson(FALSE_POSITIVES_PATH);
+  if (!Array.isArray(list)) {
+    throw new TypeError(`${FALSE_POSITIVES_PATH} is not a JSON array`);
+  }
+  return list;
+};
+
+const readCase = (path) => {
+  if (!existsSync(join(REPO_ROOT, path))) return { missing: true };
+  return toCurrentAdjudication({ input: readJson(path) });
+};
+
+const reportFalsePositives = ({ markers, readText }) =>
+  report(
+    `False-positive marker(s) that do not match a live, unanimous panel case in ${FALSE_POSITIVES_PATH}:`,
+    checkFalsePositives({
+      entries: readFalsePositives(),
+      markers,
+      readCase,
+      readText,
+      today: new Date().toISOString().slice(0, 10),
+    }),
+    (row) => `${row.where}  [${row.kind}] ${row.message}`,
+  );
+
+const reportUnadjudicated = (rows) =>
+  report(
+    'Suppression(s) outside the public packages that no panel adjudicated — fix the finding, or open a case with `vp run adjudicate`:',
+    rows,
+    (row) => `${row.file}:${row.line}  ${row.rule}`,
+  );
+
+const atMarker = (markers) => {
+  const lines = new Set(markers.map(({ file, line }) => `${file}:${line}`));
+  return (row) => lines.has(`${row.file}:${row.line}`);
 };
 
 const reportLane = (lane) => {
@@ -190,8 +234,21 @@ const main = () => {
     ),
   ];
 
+  const readText = (file) => readTextWithin(join(REPO_ROOT, file), REPO_ROOT);
+  const markers = allFiles.flatMap((file) =>
+    findClaimedMarkers({ file, text: readText(file) }),
+  );
+  const isAdjudicated = atMarker(markers);
+  const unadjudicated = otherFiles
+    .flatMap((file) => findInlineSuppressions({ file, text: readText(file) }))
+    .filter(
+      (row) => PANEL_DIRECTIVE.test(row.directive) && !isAdjudicated(row),
+    );
+
   const found = tally([
-    ...publicFiles.flatMap((file) => findInlineSuppressions(readPublic(file))),
+    ...publicFiles
+      .flatMap((file) => findInlineSuppressions(readPublic(file)))
+      .filter((row) => !isAdjudicated(row)),
     ...publicFiles.flatMap((file) => findConfigSuppressions(readPublic(file))),
     ...findBiomeSuppressions({
       config: readJson('biome.jsonc'),
@@ -239,7 +296,10 @@ const main = () => {
     },
   ];
 
-  const failures = lanes.reduce((total, lane) => total + reportLane(lane), 0);
+  const failures =
+    lanes.reduce((total, lane) => total + reportLane(lane), 0) +
+    reportFalsePositives({ markers, readText }) +
+    reportUnadjudicated(unadjudicated);
 
   if (failures > 0) {
     process.stdout.write(`\n${failures} problem(s).\n`);
@@ -248,7 +308,8 @@ const main = () => {
   }
   process.stdout.write(
     `${packageDirs.length} public package(s): ${own.length} scoped suppression(s), ` +
-      `${inherited.length} inherited from repo-wide policy. All listed, documented and settled.\n`,
+      `${inherited.length} inherited from repo-wide policy. All listed, documented and settled. ` +
+      `${markers.length} false-positive marker(s), each matching a unanimous panel case.\n`,
   );
 };
 

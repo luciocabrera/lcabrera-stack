@@ -131,6 +131,17 @@ describe('resolveRegisters', () => {
     expect(resolved.coordinationTasksDir).toBe('ops/claims');
     expect(resolved.adrTemplateHome).toBe(DEFAULT_REGISTERS.adrTemplateHome);
   });
+
+  it('reads the false-positive list from the default path unless one is declared', () => {
+    expect(resolveRegisters('{}').falsePositives).toBe(
+      'docs/agents/false-positives.json',
+    );
+    expect(
+      resolveRegisters(
+        JSON.stringify({ registers: { falsePositives: 'ops/fp.json' } }),
+      ).falsePositives,
+    ).toBe('ops/fp.json');
+  });
 });
 const publishing = (block) => resolvePublishing(JSON.stringify(block));
 

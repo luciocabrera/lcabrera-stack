@@ -1,17 +1,42 @@
 /**
  * How `repo-fallow-gate` reads what fallow reported. Several analyses exit 0
- * on a finding by design, so their verdict comes from the JSON report, and a
- * coverage gap counts only when the diff introduced it. Pure: no I/O.
+ * on a finding by design, so their verdict comes from the JSON report, a
+ * coverage gap counts only when the diff introduced it, and a suppression
+ * passes only when a live entry of the false-positive list names its case.
+ * Pure: no I/O.
  */
-const suppressionFindings = ({ report }) =>
+const ADJUDICATED_REASON = /^false positive, case (FP-\d{4,}): \S/u;
+
+const isAdjudicated = ({ adjudicated, kind, path, reason = '', today }) => {
+  const caseId = ADJUDICATED_REASON.exec(reason)?.[1];
+  return (
+    caseId !== undefined &&
+    adjudicated.some(
+      (entry) =>
+        entry.case === caseId &&
+        entry.analyzer === 'fallow' &&
+        entry.rule === kind &&
+        entry.file === path &&
+        typeof entry.expires === 'string' &&
+        entry.expires >= today,
+    )
+  );
+};
+
+const suppressionFindings = ({ adjudicated = [], report, today = '' }) =>
   (report.files ?? []).flatMap(({ path, suppressions }) =>
-    (suppressions ?? []).map(({ kind, line, reason }) => ({
-      detail: reason
-        ? `fallow-ignore ${kind} (${reason})`
-        : `fallow-ignore ${kind}`,
-      line,
-      path,
-    })),
+    (suppressions ?? [])
+      .filter(
+        ({ kind, reason }) =>
+          !isAdjudicated({ adjudicated, kind, path, reason, today }),
+      )
+      .map(({ kind, line, reason }) => ({
+        detail: reason
+          ? `fallow-ignore ${kind} (${reason})`
+          : `fallow-ignore ${kind}`,
+        line,
+        path,
+      })),
   );
 
 const isIntroduced = ({ introduced, line, path }) => {
@@ -52,8 +77,14 @@ const FINDINGS_BY_ANALYSIS = {
   suppressions: suppressionFindings,
 };
 
-export const reportFindings = ({ analysis, introduced, report }) =>
-  FINDINGS_BY_ANALYSIS[analysis]({ introduced, report });
+export const reportFindings = ({
+  adjudicated,
+  analysis,
+  introduced,
+  report,
+  today,
+}) =>
+  FINDINGS_BY_ANALYSIS[analysis]({ adjudicated, introduced, report, today });
 
 export const incompleteReason = ({ analysis, report }) => {
   if (analysis !== 'similar-code') return;

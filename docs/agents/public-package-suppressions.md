@@ -2,7 +2,9 @@
 
 The public packages ship to consumers outside this repo, and AGENTS.md §1 holds
 them to a single rule: **every finding gets fixed — never baselined, never
-scoped off, never inline-disabled.** Which packages those are is not written
+scoped off, never inline-disabled**, unless a blind panel confirmed a false
+positive ([below](#panel-confirmed-false-positives)). That exception holds in
+every package and app alike, and it is the only one. Which packages those are is not written
 here and is not written there: `vp run suppressions:packages` prints the roster,
 resolved from the workspaces that gitignore `eslint-suppressions.json`, so a new
 package joins the day its manifest and gitignore change.
@@ -81,6 +83,48 @@ never chose that policy, so it has no per-package deferral to declare — and ar
 never asked for one.
 
 `vp run suppressions:list` prints everything found, approved or not.
+
+## Panel-confirmed false positives
+
+A finding the builder believes is wrong is decided by three blind verifiers on
+three different models, never by the builder
+([ADR-147](../decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md)).
+It applies to fallow, ESLint, Oxlint, Biome and React Doctor, in the public
+packages as everywhere else.
+
+1. Try a fix first. A small restructure that clears the finding without making
+   the code worse ends here.
+2. `vp run adjudicate -- <analyzer> <file>:<line>[-<end line>]:<rule>` opens a
+   case under `docs/agents/adjudications/`, in a directory named after the
+   case, from what the analyzer reports. It takes no free text.
+3. `vp run adjudicate:panel -- FP-nnnn --builder-model <id>` runs `fp-judge`
+   twice and `fp-adversary` once, in parallel, on three distinct models.
+4. All three FALSE_POSITIVE: the command records the case, writes an upstream
+   draft, and adds the entry to
+   [`false-positives.json`](false-positives.json). Add the analyzer's next-line
+   marker it prints:
+
+   ```ts
+   // fallow-ignore-next-line security/sql-concat -- false positive, case FP-0007: the identifier comes from a fixed allow-list
+   // biome-ignore lint/a11y/useButtonType: false positive, case FP-0012: <one-line reason>
+   ```
+
+   All REAL: fix the code. A split: stop and ask the repository owner.
+
+5. Never post the upstream draft without the owner's explicit yes.
+
+`vp run suppressions:verify` reads every marker that claims a false positive
+and fails unless it names a case and a reason, one live entry has the same
+analyzer, rule and file, every entry has exactly one marker, the case file is a
+valid envelope with three distinct models ruling FALSE_POSITIVE unanimously,
+the hash of the lines under the marker still matches, and the entry has not
+expired. An entry lasts six months at most. Any edit to the flagged lines voids
+it. A matched marker in a public package needs no register entry here.
+
+The same gate fails an ESLint, Oxlint, Biome or React Doctor marker outside the
+public packages that names no case. A fallow marker there is caught by
+`vp run fallow:suppressions` when its file changes, and passes that gate only
+when a live entry names its case.
 
 ## Targeted vs repo-wide
 

@@ -67,6 +67,15 @@ describe('findInlineSuppressions', () => {
     expect(inline('  eslint-disable no-console')).toHaveLength(1);
   });
 
+  it('ignores a directive spelled inside a string literal', () => {
+    expect(inline("const fixture = '// NOSONAR';")).toHaveLength(0);
+    expect(inline('const fixture = `/* eslint-disable x */`;')).toHaveLength(0);
+    expect(inline(String.raw`const fixture = "a \" // NOSONAR";`)).toHaveLength(
+      0,
+    );
+    expect(inline('call("done"); // NOSONAR')).toHaveLength(1);
+  });
+
   it('counts each occurrence, so a second copy cannot hide behind the first', () => {
     const rows = inline('// @ts-expect-error one\n// @ts-expect-error two');
     expect(rows).toHaveLength(2);

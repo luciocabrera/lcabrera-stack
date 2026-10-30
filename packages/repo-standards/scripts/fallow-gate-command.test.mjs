@@ -2,47 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { runGate } from './fallow-gate-command.mjs';
 import { gitDiffArgs } from './fallow-gate-diff.mjs';
+import { fakeEffects, json } from './fallow-gate-fixtures.mjs';
 import { COULD_NOT_RUN } from './fallow-gate.mjs';
-
-const fakeEffects = ({
-  diff = { status: 0, stdout: '' },
-  existing = ['a.ts', 'b.ts', 'packages/ui/src/c.ts', 'scripts/d.mjs', 'e.ts'],
-  replies = [],
-  stdinFiles = [],
-  workspaceDirs = ['packages/ui'],
-} = {}) => {
-  const calls = [];
-  const out = [];
-  const err = [];
-  const queue = [...replies];
-  return {
-    calls,
-    effects: {
-      exists: (file) => existing.includes(file),
-      git: (args) => {
-        calls.push({ git: args });
-        return diff;
-      },
-      readStdinFiles: () => stdinFiles,
-      root: '/repo',
-      spawn: (args, stdout) => {
-        calls.push({ args, stdout });
-        return queue.shift() ?? { status: 0, stdout: '' };
-      },
-      workspaceDirs: () => workspaceDirs,
-      write: (text) => {
-        out.push(text);
-      },
-      writeError: (text) => {
-        err.push(text);
-      },
-    },
-    err,
-    out,
-  };
-};
-
-const json = (value) => ({ status: 0, stdout: JSON.stringify(value) });
 
 describe('runGate — input', () => {
   it('refuses an analysis it does not know', () => {
