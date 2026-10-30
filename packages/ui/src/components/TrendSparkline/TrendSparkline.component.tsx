@@ -50,12 +50,8 @@ export const TrendSparkline = ({
       {line !== '' && (
         <path d={line} {...stylex.props(styles.line, styles.tone[tone])} />
       )}
-      {dots.map((dot) => (
-        <TrendSparklineDot
-          key={dot.position}
-          {...dot}
-          tone={dot.tone ?? tone}
-        />
+      {dots.map(({ position, ...dot }) => (
+        <TrendSparklineDot key={position} {...dot} tone={dot.tone ?? tone} />
       ))}
     </svg>
   );

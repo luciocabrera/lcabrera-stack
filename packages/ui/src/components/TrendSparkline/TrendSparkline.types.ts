@@ -19,7 +19,6 @@ export type TrendSparklineTone =
 
 type TrendSparklineChartProps = {
   readonly height?: number;
-  readonly isConnected?: boolean;
   readonly label: string;
   readonly max?: number;
   readonly tone?: TrendSparklineTone;
@@ -27,11 +26,13 @@ type TrendSparklineChartProps = {
 };
 
 type TrendSparklinePointsProps = {
+  readonly isConnected?: boolean;
   readonly points: readonly TrendPoint[];
   readonly values?: never;
 };
 
 type TrendSparklineValuesProps = {
+  readonly isConnected?: never;
   readonly points?: never;
   readonly values: readonly number[];
 };

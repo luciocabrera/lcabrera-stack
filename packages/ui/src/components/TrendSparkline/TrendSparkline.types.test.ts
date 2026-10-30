@@ -12,6 +12,19 @@ describe('TrendSparklineProps', () => {
       readonly label: string;
       readonly points: readonly [{ readonly value: 1 }];
     }>().toExtend<TrendSparklineProps>();
+    expectTypeOf<{
+      readonly isConnected: false;
+      readonly label: string;
+      readonly points: readonly [{ readonly value: 1 }];
+    }>().toExtend<TrendSparklineProps>();
+  });
+
+  it('refuses isConnected on a values chart', () => {
+    expectTypeOf<{
+      readonly isConnected: false;
+      readonly label: string;
+      readonly values: readonly number[];
+    }>().not.toExtend<TrendSparklineProps>();
   });
 
   it('refuses values and points together, and neither', () => {
