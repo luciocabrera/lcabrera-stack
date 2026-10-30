@@ -6,7 +6,8 @@
  * a writable PATH entry cannot shadow it, and with every inherited GIT_*
  * variable dropped, so GIT_DIR cannot point it at another repository's
  * user.email.
- * Usage: imported by `annotate.mjs`, `grade.mjs` and `retain.mjs`.
+ * Usage: imported by `annotate.mjs`, `grade.mjs`, `grade-adjudication.mjs` and
+ * `retain.mjs`.
  */
 import { execFileSync } from 'node:child_process';
 import { existsSync } from 'node:fs';

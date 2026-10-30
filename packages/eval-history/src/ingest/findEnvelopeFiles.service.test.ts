@@ -6,17 +6,27 @@ import { memoryFileSystem } from './memoryFileSystem.util.ts';
 const RUN_ID = '4e5aa14f-79b7-452d-be7c-66bdff258a25';
 const ENVELOPE = `/results/skills/${RUN_ID}.json`;
 
+const CASE_FILE = '/results/adjudications/FP-0007.json';
+
 const fileSystem = memoryFileSystem({
+  '/results/adjudications/FP-7.json': '{}',
   '/results/notes.json': '{}',
   [`/results/skills/${RUN_ID}/react-19-trigger-1.json`]: '[]',
+  [CASE_FILE]: '{}',
   [ENVELOPE]: '{}',
 });
 
 describe('findEnvelopeFiles', () => {
   it('finds envelopes under a directory and skips the transcripts beside them', async () => {
     expect(
-      await findEnvelopeFiles({ fileSystem, paths: ['/results'] }),
+      await findEnvelopeFiles({ fileSystem, paths: ['/results/skills'] }),
     ).toEqual({ files: [ENVELOPE], missing: [] });
+  });
+
+  it('finds adjudication case files by their case id, beside the run envelopes', async () => {
+    expect(
+      await findEnvelopeFiles({ fileSystem, paths: ['/results'] }),
+    ).toEqual({ files: [CASE_FILE, ENVELOPE], missing: [] });
   });
 
   it('takes a named file as it is, once', async () => {

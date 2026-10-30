@@ -3,7 +3,10 @@ import path from 'node:path';
 import type { IngestFileSystem } from './ingest.types.ts';
 
 import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
-import { ENVELOPE_FILE_PATTERN } from './ingest.constants.ts';
+import {
+  ADJUDICATION_FILE_PATTERN,
+  ENVELOPE_FILE_PATTERN,
+} from './ingest.constants.ts';
 
 type FindArgs = {
   readonly fileSystem: Pick<IngestFileSystem, 'readdir' | 'stat'>;
@@ -21,7 +24,12 @@ const envelopesUnder = async ({ fileSystem, target }: FindArgs) => {
   });
 
   return entries
-    .filter((entry) => entry.isFile() && ENVELOPE_FILE_PATTERN.test(entry.name))
+    .filter(
+      (entry) =>
+        entry.isFile() &&
+        (ENVELOPE_FILE_PATTERN.test(entry.name) ||
+          ADJUDICATION_FILE_PATTERN.test(entry.name)),
+    )
     .map((entry) => path.join(entry.parentPath, entry.name))
     .toSorted(compareCodeUnits);
 };

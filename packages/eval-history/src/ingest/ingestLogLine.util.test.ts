@@ -29,4 +29,29 @@ describe('ingestLogLine', () => {
       suite: 'skills',
     });
   });
+
+  it('names the case, and its case and verdict rows, for an adjudication', () => {
+    const line = ingestLogLine({
+      database: 'localhost:5432/eval_history',
+      report: {
+        caseId: 'FP-0001',
+        durationMs: 3,
+        file: 'FP-0001.json',
+        problems: [],
+        result: 'inserted',
+        rows: { cases: 1, verdicts: 3 },
+      },
+    });
+
+    expect(JSON.parse(line) as unknown).toEqual({
+      case_id: 'FP-0001',
+      database: 'localhost:5432/eval_history',
+      duration_ms: 3,
+      event: 'evals.ingest',
+      file: 'FP-0001.json',
+      problems: [],
+      result: 'inserted',
+      rows: { cases: 1, verdicts: 3 },
+    });
+  });
 });

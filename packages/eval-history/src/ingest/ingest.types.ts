@@ -1,3 +1,8 @@
+export type AdjudicationRows = {
+  readonly cases: number;
+  readonly verdicts: number;
+};
+
 export type IngestClient = {
   readonly query: (config: IngestQuery) => Promise<{
     readonly rows: readonly unknown[];
@@ -24,11 +29,12 @@ export type IngestQuery = {
 };
 
 export type IngestReport = {
+  readonly caseId?: string;
   readonly durationMs: number;
   readonly file: string;
   readonly problems: readonly string[];
   readonly result: IngestResult;
-  readonly rows: IngestRows;
+  readonly rows: AdjudicationRows | IngestRows;
   readonly runId?: string;
   readonly suite?: string;
 };

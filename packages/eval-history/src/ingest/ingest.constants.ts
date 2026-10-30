@@ -89,3 +89,31 @@ insert into evals.eval_judge_score (trial_id, dimension, score)
 select trial.id, judged.dimension, judged.score
 from trial
 cross join unnest($26::text[], $27::smallint[]) as judged (dimension, score)`;
+
+export const ADJUDICATION_FILE_PATTERN = /^FP-\d{4,}\.json$/u;
+
+export const INSERT_ADJUDICATION_CASE_SQL = `
+insert into evals.adjudication_case (
+  case_id, finding_id, analyzer, rule, file, content_hash, base_sha, head_sha,
+  pr, outcome, created_at, schema_version, envelope_sha256
+) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+on conflict (case_id) do nothing
+returning case_id`;
+
+export const SELECT_ADJUDICATION_SHA_SQL = `
+select envelope_sha256 from evals.adjudication_case where case_id = $1`;
+
+export const INSERT_ADJUDICATION_VERDICTS_SQL = `
+insert into evals.adjudication_verdict (
+  case_id, verifier_role, model, agent_prompt_hash, verdict, evidence,
+  duration_ms, tokens_in, tokens_out, cost_usd
+)
+select $1, verifier.*
+from unnest(
+  $2::text[]::evals.verifier_role[], $3::text[], $4::text[],
+  $5::text[]::evals.finding_verdict[], $6::text[], $7::integer[],
+  $8::integer[], $9::integer[], $10::numeric[]
+) as verifier (
+  verifier_role, model, agent_prompt_hash, verdict, evidence, duration_ms,
+  tokens_in, tokens_out, cost_usd
+)`;

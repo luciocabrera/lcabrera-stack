@@ -13,6 +13,8 @@ const fixtures = await readJsonFiles({
   directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),
 });
 const SKILLS_ENVELOPE = JSON.stringify(fixtures.get('skills.json'));
+const CASE_FILE = '/results/adjudications/FP-0001.json';
+const CASE_ENVELOPE = JSON.stringify(fixtures.get('adjudication.json'));
 
 describe('ingestPaths', () => {
   it('warns and exits 0 without a database when told to stay quiet', async () => {
@@ -95,5 +97,64 @@ describe('ingestPaths', () => {
     expect(summary.stderr.join('\n')).toContain('localhost:5434/eval_history');
     expect(output).not.toContain('secret');
     expect(output).not.toContain(URL_);
+  });
+
+  it('sends a run envelope to the run tables and a case file to the case tables', async () => {
+    const statements: string[] = [];
+    const summary = await ingestPaths({
+      connect: async () => ({
+        client: {
+          query: async ({ text, values }) => {
+            statements.push(/evals\.\w+/u.exec(text)?.[0] ?? text.trim());
+
+            if (text.includes('insert into evals.eval_run')) {
+              return { rows: [{ run_id: values?.[0] }] };
+            }
+
+            if (text.includes('evals.eval_subject_version')) {
+              return { rows: [{ id: 1, subject_id: 1 }] };
+            }
+
+            if (text.includes('evals.eval_task_version')) {
+              return { rows: [{ id: 1 }] };
+            }
+
+            return {
+              rows: text.includes('insert into evals.adjudication_case')
+                ? [{ case_id: values?.[0] }]
+                : [],
+            };
+          },
+        },
+        end: async () => {},
+      }),
+      connectionString: URL_,
+      fileSystem: memoryFileSystem({
+        [CASE_FILE]: CASE_ENVELOPE,
+        [ENVELOPE_FILE]: SKILLS_ENVELOPE,
+      }),
+      paths: ['/results'],
+      quietUnreachable: false,
+    });
+    const lines = summary.stdout.map(
+      (line) =>
+        JSON.parse(line) as {
+          readonly case_id?: string;
+          readonly result: string;
+          readonly run_id?: string;
+        },
+    );
+
+    expect(summary.exitCode).toBe(0);
+    expect(
+      lines.map(({ case_id, result, run_id = case_id }) => [result, run_id]),
+    ).toEqual([
+      ['inserted', '4e5aa14f-79b7-452d-be7c-66bdff258a25'],
+      ['inserted', 'FP-0001'],
+    ]);
+    expect(statements).toContain('evals.adjudication_verdict');
+    expect(
+      statements.filter((statement) => statement === 'commit'),
+    ).toHaveLength(2);
   });
 });

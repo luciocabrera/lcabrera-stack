@@ -9,6 +9,8 @@ area:
   - package.json
   - COMMANDS.md
   - docs/agents/adjudications/**
+  - evals/ingest-envelopes.mjs
+  - apps/showcase/src/routes/evals/.server/evalsPublicPayload.test.ts
 started: 2026-10-30
 updated: 2026-10-30
 plan: (none)
@@ -22,6 +24,6 @@ Keep the history of false-positive panel verdicts
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; running the gate
 - Blockers: none
 - Next:

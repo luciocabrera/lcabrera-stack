@@ -6,6 +6,11 @@ import {
 export const EXCLUDED_TABLES = ['schema_migration'] as const;
 
 export const EXCLUDED_COLUMNS = [
+  'adjudication_case.envelope_sha256',
+  'adjudication_case.file',
+  'adjudication_case.finding_id',
+  'adjudication_ground_truth.note',
+  'adjudication_verdict.evidence',
   'eval_annotation.author',
   'eval_annotation.text',
   'eval_human_grade.grader',
@@ -24,12 +29,23 @@ export const EXCLUDED_COLUMNS = [
 export const REPORTING_RELATIONS = [
   'flaky_tasks',
   'run_compare',
+  'v_adjudication_accuracy',
   'v_judge_agreement',
   'v_subject_trend',
   'v_task_pass_rate',
 ] as const;
 
 export const ALLOWED_TEXT_COLUMNS = [
+  'adjudication_case.analyzer',
+  'adjudication_case.base_sha',
+  'adjudication_case.case_id',
+  'adjudication_case.content_hash',
+  'adjudication_case.head_sha',
+  'adjudication_case.rule',
+  'adjudication_ground_truth.case_id',
+  'adjudication_verdict.agent_prompt_hash',
+  'adjudication_verdict.case_id',
+  'adjudication_verdict.model',
   'eval_baseline.git_sha',
   'eval_baseline.metric',
   'eval_baseline.model_id',

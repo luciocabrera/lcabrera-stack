@@ -7,6 +7,7 @@ type IngestLogLineArgs = {
 
 export const ingestLogLine = ({ database, report }: IngestLogLineArgs) =>
   JSON.stringify({
+    case_id: report.caseId,
     database,
     duration_ms: report.durationMs,
     event: 'evals.ingest',

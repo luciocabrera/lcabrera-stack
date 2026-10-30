@@ -11,6 +11,7 @@ import {
   UPSERT_SUBJECT_SQL,
   UPSERT_TASK_SQL,
 } from './ingest.constants.ts';
+import { inIngestTransaction } from './inIngestTransaction.service.ts';
 import { inSequence } from './inSequence.service.ts';
 import { judgeColumns } from './judgeColumns.util.ts';
 
@@ -259,19 +260,5 @@ const writeRun = async (args: IngestEnvelopeArgs) => {
     : ({ result: 'inserted', rows: await writeRows(args) } as const);
 };
 
-export const ingestEnvelope = async (args: IngestEnvelopeArgs) => {
-  await args.client.query({ text: 'begin' });
-
-  try {
-    const outcome = await writeRun(args);
-
-    await args.client.query({
-      text: outcome.result === 'inserted' ? 'commit' : 'rollback',
-    });
-
-    return outcome;
-  } catch (error) {
-    await args.client.query({ text: 'rollback' });
-    throw error;
-  }
-};
+export const ingestEnvelope = (args: IngestEnvelopeArgs) =>
+  inIngestTransaction({ client: args.client, write: () => writeRun(args) });

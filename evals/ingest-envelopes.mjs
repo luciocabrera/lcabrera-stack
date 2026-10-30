@@ -1,10 +1,11 @@
 #!/usr/bin/env node
 /**
- * Loads run envelopes into the eval-history database, one transaction per run
- * keyed on run_id, so ingesting a file twice changes nothing. This is how a
- * run that could not reach the database, or a CI artifact, reaches history.
+ * Loads run envelopes and adjudication case files into the eval-history
+ * database, one transaction per run keyed on run_id and per case keyed on
+ * case_id, so ingesting a file twice changes nothing. This is how a run that
+ * could not reach the database, or a CI artifact, reaches history.
  * Usage (from the repo root): vp run evals:ingest [-- <file or directory> ...]
- *   with no path it reads .tmp/eval-results/
+ *   with no path it reads .tmp/eval-results/ and docs/agents/adjudications/
  *   [--quiet-unreachable]  an unset or unreachable database warns and exits 0
  * Exit codes: 0 = every envelope stored or already present, 1 = otherwise.
  */
@@ -17,7 +18,10 @@ import { withoutSeparator } from './agent-sessions.mjs';
 import { RESULTS_DIR } from './run-record.mjs';
 import { runSummaryCommand } from './summary-command.mjs';
 
-const defaultPaths = () => (existsSync(RESULTS_DIR) ? [RESULTS_DIR] : []);
+const ADJUDICATIONS_DIR = 'docs/agents/adjudications';
+
+const defaultPaths = () =>
+  [RESULTS_DIR, ADJUDICATIONS_DIR].filter((directory) => existsSync(directory));
 
 const summarize = () => {
   const { positionals, values } = parseArgs({

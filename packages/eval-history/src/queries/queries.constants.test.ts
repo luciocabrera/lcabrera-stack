@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { adjudicationAccuracyQuery } from '../adjudications/adjudicationAccuracyQuery.util.ts';
 import { judgeAgreementQuery } from '../grades/judgeAgreementQuery.util.ts';
 import { columnsNamed } from './columnsNamed.util.ts';
 import { flakyTasksQuery } from './flakyTasksQuery.util.ts';
@@ -19,6 +20,7 @@ const GENERATED = [
   flakyTasksQuery({ disagreeFraction: 0.2, window: 10 }),
   runCompareQuery({ a: 'run-a', b: 'run-b' }),
   judgeAgreementQuery(),
+  adjudicationAccuracyQuery(),
 ].map(({ text }) => text);
 
 describe('the generated reporting SQL', () => {

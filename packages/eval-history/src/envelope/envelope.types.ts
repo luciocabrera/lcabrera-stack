@@ -1,10 +1,22 @@
 import type { z } from 'zod';
 
 import type {
+  adjudicationEnvelopeSchema,
+  adjudicationShapeSchema,
+} from './adjudicationEnvelope.schema.ts';
+import type {
   envelopeShapeSchema,
   runEnvelopeSchema,
   trialDetailSchema,
 } from './envelope.schema.ts';
+
+export type AdjudicationEnvelope = DeepReadonly<
+  z.output<typeof adjudicationEnvelopeSchema>
+>;
+
+export type AdjudicationShape = DeepReadonly<
+  z.output<typeof adjudicationShapeSchema>
+>;
 
 export type EnvelopeShape = DeepReadonly<z.output<typeof envelopeShapeSchema>>;
 
