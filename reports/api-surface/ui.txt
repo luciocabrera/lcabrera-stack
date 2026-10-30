@@ -28,8 +28,7 @@ TableRouteView [const] <TData extends Record<string, unknown>, TResponse extends
 Tabs [const] ({ defaultSelectedTab, isBusy, label, onSelectTab, selectedTab, tabs, ...props }: TabsProps) => JSX.Element
 Text [const] <TElement extends TextElement = "p">({ as: tagName, children, customStylex, isMono, isTabular, size, tone, weight, ...props }: TextProps<TElement>) => JSX.Element
 TextElement [type] | 'dd' | 'div' | 'dt' | 'figcaption' | 'label' | 'p' | 'span'
-TextOwnProps [type] { readonly as?: 'p' | TElement; readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly isMono?: boolean; readonly isTabular?: boolean; readonly size?: TextSize; readonly tone?: TextTone; readonly weight?: TextWeight; }
-TextProps [type] Omit< ComponentPropsWithoutRef<TElement>, keyof TextOwnProps<TElement> > & TextOwnProps<TElement>
+TextProps [type] Omit< ComponentPropsWithoutRef<TElement>, 'children' > & { readonly as?: 'p' | TElement; readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly isMono?: boolean; readonly isTabular?: boolean; readonly size?: TextSize; readonly tone?: TextTone; readonly weight?: TextWeight; }
 TextSize [type] 'lg' | 'md' | 'sm' | 'xs'
 TextTone [type] | 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning'
 TextWeight [type] 'bold' | 'medium' | 'normal' | 'semibold'
@@ -378,8 +377,7 @@ inferTableColumnsFromJson [const] ({ rows, }: InferTableColumnsFromJsonArgs) => 
 ## ./components/Text
 Text [const] <TElement extends TextElement = "p">({ as: tagName, children, customStylex, isMono, isTabular, size, tone, weight, ...props }: TextProps<TElement>) => JSX.Element
 TextElement [type] | 'dd' | 'div' | 'dt' | 'figcaption' | 'label' | 'p' | 'span'
-TextOwnProps [type] { readonly as?: 'p' | TElement; readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly isMono?: boolean; readonly isTabular?: boolean; readonly size?: TextSize; readonly tone?: TextTone; readonly weight?: TextWeight; }
-TextProps [type] Omit< ComponentPropsWithoutRef<TElement>, keyof TextOwnProps<TElement> > & TextOwnProps<TElement>
+TextProps [type] Omit< ComponentPropsWithoutRef<TElement>, 'children' > & { readonly as?: 'p' | TElement; readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly isMono?: boolean; readonly isTabular?: boolean; readonly size?: TextSize; readonly tone?: TextTone; readonly weight?: TextWeight; }
 TextSize [type] 'lg' | 'md' | 'sm' | 'xs'
 TextTone [type] | 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning'
 TextWeight [type] 'bold' | 'medium' | 'normal' | 'semibold'

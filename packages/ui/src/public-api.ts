@@ -20,7 +20,6 @@ export { Tabs } from './components/Tabs/Tabs.component';
 export { Text } from './components/Text/Text.component';
 export type {
   TextElement,
-  TextOwnProps,
   TextProps,
   TextSize,
   TextTone,

@@ -10,7 +10,10 @@ export type TextElement =
   | 'p'
   | 'span';
 
-export type TextOwnProps<TElement extends TextElement> = {
+export type TextProps<TElement extends TextElement = 'p'> = Omit<
+  ComponentPropsWithoutRef<TElement>,
+  'children'
+> & {
   readonly as?: 'p' | TElement;
   readonly children: ReactNode;
   readonly customStylex?: StyleXStyles;
@@ -20,12 +23,6 @@ export type TextOwnProps<TElement extends TextElement> = {
   readonly tone?: TextTone;
   readonly weight?: TextWeight;
 };
-
-export type TextProps<TElement extends TextElement = 'p'> = Omit<
-  ComponentPropsWithoutRef<TElement>,
-  keyof TextOwnProps<TElement>
-> &
-  TextOwnProps<TElement>;
 
 export type TextSize = 'lg' | 'md' | 'sm' | 'xs';
 
