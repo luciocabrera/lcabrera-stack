@@ -26,18 +26,16 @@ export const migratedScratch = ({
     await applyMigrations({ client, migrations: await readMigrations() });
   };
 
-  const empty = () =>
-    client.query(
-      `truncate ${tables.map((table) => `evals.${table}`).join(', ')} cascade`,
-    );
+  const qualified = tables.map((table) => `evals.${table}`).join(', ');
+  const countColumns = tables
+    .map((table) => `'${table}', (select count(*)::int from evals.${table})`)
+    .join(', ');
+
+  const empty = () => client.query(`truncate ${qualified} cascade`);
 
   const counts = async () => {
     const { rows } = await client.query<{ readonly counts: object }>(
-      `select json_build_object(${tables
-        .map(
-          (table) => `'${table}', (select count(*)::int from evals.${table})`,
-        )
-        .join(', ')}) as counts`,
+      `select json_build_object(${countColumns}) as counts`,
     );
 
     return rows[0]?.counts;

@@ -11,14 +11,12 @@ export const scriptedIngestClient = ({
 }: ScriptedIngestClientArgs) => {
   const queries: IngestQuery[] = [];
   const client: IngestClient = {
-    query: async (config) => {
+    query: (config) => {
       queries.push(config);
 
-      if (failOn && config.text.includes(failOn)) {
-        throw new Error(`failed on ${failOn}`);
-      }
-
-      return { rows: rowsFor(config.text) };
+      return failOn && config.text.includes(failOn)
+        ? Promise.reject(new Error(`failed on ${failOn}`))
+        : Promise.resolve({ rows: rowsFor(config.text) });
     },
   };
   const statements = () =>
