@@ -128,6 +128,7 @@ const explanation = ({ analyzer, effects, finding }) => {
 export const openCase = ({ argv, effects }) => {
   const { analyzer, findingId, pr, trace } = readInput(argv);
   const finding = parseFindingId(findingId);
+  const text = effects.readText(finding.file);
   const issue =
     analyzer === 'fallow'
       ? fallowIssue({ effects, rule: finding.rule })
@@ -149,7 +150,7 @@ export const openCase = ({ argv, effects }) => {
   const body = buildCase({
     analyzer,
     caseId,
-    code: flaggedCode({ ...finding, text: effects.readText(finding.file) }),
+    code: flaggedCode({ ...finding, text }),
     createdAt: effects.now(),
     explain: explanation({ analyzer, effects, finding }),
     finding,
