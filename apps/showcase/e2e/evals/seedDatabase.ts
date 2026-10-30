@@ -10,9 +10,9 @@ import { readMigrations } from '@repo/eval-history/migrate/readMigrations.servic
 import { readModelPrices } from '@repo/eval-history/prices/readModelPrices.service';
 import pg from 'pg';
 
-import type { EVALS_E2E_DATABASES, evalsE2eServer } from './evalsDatabase';
+import type { evalsE2eServer } from './evalsDatabase';
 
-import { EVALS_E2E_READER } from './evalsDatabase';
+import { EVALS_E2E_DATABASES, EVALS_E2E_READER } from './evalsDatabase';
 import { seedEnvelope, seedGitSha } from './seedEnvelope';
 import {
   SEED_ANNOTATION,
@@ -46,33 +46,51 @@ const withClient = async <T>(
   }
 };
 
-const RESET_STATEMENTS = [
-  'drop database if exists "eval_history_e2e" with (force)',
-  'drop database if exists "eval_history_e2e_empty" with (force)',
-  'drop database if exists "eval_history_e2e_missing" with (force)',
-  'create database "eval_history_e2e"',
-  'create database "eval_history_e2e_empty"',
+const CREATED_DATABASES = [
+  EVALS_E2E_DATABASES.seeded,
+  EVALS_E2E_DATABASES.empty,
 ] as const;
 
+const RESET_STATEMENTS = [
+  ...Object.values(EVALS_E2E_DATABASES).map(
+    (name) =>
+      `drop database if exists ${pg.escapeIdentifier(name)} with (force)`,
+  ),
+  ...CREATED_DATABASES.map(
+    (name) => `create database ${pg.escapeIdentifier(name)}`,
+  ),
+];
+
+const READER_SETTINGS_SQL = `select
+  set_config('evals_e2e.reader_role', $1, false),
+  set_config('evals_e2e.reader_password', $2, false)`;
+
 const READER_ROLE_SQL = `do $$
+declare
+  role_name text := current_setting('evals_e2e.reader_role');
+  secret text := current_setting('evals_e2e.reader_password');
 begin
-  if exists (select from pg_roles where rolname = 'eval_history_e2e_reader') then
-    execute format('alter role eval_history_e2e_reader login password %L', current_setting('evals_e2e.reader_password'));
+  if exists (select from pg_roles where rolname = role_name) then
+    execute format('alter role %I login password %L', role_name, secret);
   else
-    execute format('create role eval_history_e2e_reader login password %L', current_setting('evals_e2e.reader_password'));
+    execute format('create role %I login password %L', role_name, secret);
   end if;
 end
 $$`;
 
 const resetServer = (server: Server) =>
   withClient(server.adminUrl, async (admin) => {
-    for (const statement of RESET_STATEMENTS) {
-      await admin.query(statement);
-    }
+    await RESET_STATEMENTS.reduce<Promise<unknown>>(
+      async (previous, statement) => {
+        await previous;
 
+        return admin.query(statement);
+      },
+      Promise.resolve(),
+    );
     await admin.query({
-      text: "select set_config('evals_e2e.reader_password', $1, false)",
-      values: [server.readerPassword],
+      text: READER_SETTINGS_SQL,
+      values: [EVALS_E2E_READER, server.readerPassword],
     });
     await admin.query(READER_ROLE_SQL);
   });

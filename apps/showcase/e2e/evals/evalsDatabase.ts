@@ -1,5 +1,3 @@
-import { createHash } from 'node:crypto';
-
 export const EVALS_E2E_READER = 'eval_history_e2e_reader';
 
 export const EVALS_E2E_DATABASES = {
@@ -18,8 +16,14 @@ const requireEnv = (name: string, value: string | undefined) => {
   return value;
 };
 
+export const EVALS_E2E_READER_PASSWORD = 'EVALS_E2E_READER_PASSWORD';
+
 export const evalsE2eServer = (env: NodeJS.ProcessEnv = process.env) => {
   const password = requireEnv('DB_PASSWORD', env.DB_PASSWORD);
+  const readerPassword = requireEnv(
+    EVALS_E2E_READER_PASSWORD,
+    env[EVALS_E2E_READER_PASSWORD],
+  );
   const admin = new URL('postgres://localhost');
 
   admin.hostname = requireEnv('DB_HOST', env.DB_HOST);
@@ -28,9 +32,6 @@ export const evalsE2eServer = (env: NodeJS.ProcessEnv = process.env) => {
   admin.password = password;
   admin.pathname = `/${requireEnv('DB_NAME', env.DB_NAME)}`;
 
-  const readerPassword = createHash('sha256')
-    .update(`${EVALS_E2E_READER}:${password}`)
-    .digest('hex');
   const urlOf = (database: EvalsE2eDatabase) => {
     const url = new URL(admin.href);
 
