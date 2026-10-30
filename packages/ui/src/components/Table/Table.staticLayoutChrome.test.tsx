@@ -30,7 +30,7 @@ import { TableFocusProvider } from './contexts/TableFocus';
 import { Table } from './Table.component';
 import { styles as flexWrapperStyles } from './Table.stylex';
 import { tableHeaderCellStyles } from './TableHeaderCell/TableHeaderCell.stylex';
-import { styles as staticContentStyles } from './TableStaticContent/TableStaticContent.stylex';
+import { tableStaticContentStyles as staticContentStyles } from './TableStaticContent/TableStaticContent.stylex';
 
 type Score = {
   readonly id: number;
