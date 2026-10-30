@@ -7,8 +7,6 @@ import { isAbsolute, relative, sep } from 'node:path';
 
 const SOURCE_FILE = /\.(?:[cm]?[jt]sx?|vue|svelte|astro)$/u;
 
-const STYLE_MODULE = /\.stylex\.ts$/u;
-
 const byName = (left, right) => left.localeCompare(right);
 
 const EXIT_CODE_ANALYSES = new Set(['architecture', 'guard', 'security']);
@@ -119,7 +117,7 @@ export const mutationArgs = ({ base, diffFile, root }) => [
   '--quiet',
 ];
 
-export const isStyleModule = (file) => STYLE_MODULE.test(file);
+export const isStyleModule = (file) => file.endsWith('.stylex.ts');
 
 export const mutationRoots = ({ files, workspaceDirs }) => {
   const byLength = workspaceDirs.toSorted(
