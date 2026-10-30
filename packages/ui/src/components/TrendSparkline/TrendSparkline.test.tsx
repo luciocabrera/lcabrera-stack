@@ -219,7 +219,7 @@ describe('TrendSparkline', () => {
         dots.map(
           (dot) => `${dot.getAttribute('cx')},${dot.getAttribute('cy')}`,
         ),
-      ).not.toContain(expect.stringContaining('NaN'));
+      ).not.toContainEqual(expect.stringContaining('NaN'));
       expect(container.querySelector('path')?.getAttribute('d')).not.toContain(
         'NaN',
       );

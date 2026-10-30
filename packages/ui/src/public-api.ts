@@ -35,6 +35,7 @@ export { TrendSparkline } from './components/TrendSparkline/TrendSparkline.compo
 export type {
   TrendPoint,
   TrendSparklineProps,
+  TrendSparklineTone,
 } from './components/TrendSparkline/TrendSparkline.types';
 export { hydrateApp } from './entry/hydrateApp.util';
 export { useNotifyOnError } from './hooks/useNotifyOnError.hook';

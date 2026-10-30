@@ -18,5 +18,6 @@ and so is `isConnected` on a values chart.
 
 A `values` chart draws the same line as before, but as a `<path>` rather than a
 `<polyline>`, so a stylesheet that targets `polyline` inside the chart no longer
-matches. `TrendSparkline` and its `TrendPoint` and `TrendSparklineProps` types
+matches. `TrendSparkline` and its `TrendPoint`, `TrendSparklineProps` and
+`TrendSparklineTone` types
 are also exported from the package root.

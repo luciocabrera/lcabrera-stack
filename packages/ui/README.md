@@ -118,7 +118,7 @@ section above.
 `StatusBadge`, `Table`, `TableLayout`, `Tabs`, `Text`, `Title`, `TrendSparkline`,
 `hydrateApp`, `useNotifyOnError`, plus the `FieldNode`, `LayoutProps`, `Pagination`,
 `TextElement`, `TextProps`, `TextSize`, `TextTone`, `TextWeight`, `TitleLevel`,
-`TitleProps`, `TitleVariant`, `TrendPoint` and `TrendSparklineProps` types.
+`TitleProps`, `TitleVariant`, `TrendPoint`, `TrendSparklineProps` and `TrendSparklineTone` types.
 
 ### Subpaths
 

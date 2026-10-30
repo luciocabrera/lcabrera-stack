@@ -1,2 +1,6 @@
 export { TrendSparkline } from './TrendSparkline.component';
-export type { TrendPoint, TrendSparklineProps } from './TrendSparkline.types';
+export type {
+  TrendPoint,
+  TrendSparklineProps,
+  TrendSparklineTone,
+} from './TrendSparkline.types';
