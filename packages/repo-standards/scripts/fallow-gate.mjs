@@ -7,6 +7,8 @@ import { isAbsolute, relative, sep } from 'node:path';
 
 const SOURCE_FILE = /\.(?:[cm]?[jt]sx?|vue|svelte|astro)$/u;
 
+const STYLE_MODULE = /\.stylex\.ts$/u;
+
 const byName = (left, right) => left.localeCompare(right);
 
 const EXIT_CODE_ANALYSES = new Set(['architecture', 'guard', 'security']);
@@ -109,12 +111,15 @@ export const mutationArgs = ({ base, diffFile, root }) => [
   root,
   '--changed-since',
   base,
-  ...(diffFile === undefined ? [] : ['--diff-file', diffFile]),
+  '--diff-file',
+  diffFile,
   '--min-score',
   '100',
   '--allow-dirty',
   '--quiet',
 ];
+
+export const isStyleModule = (file) => STYLE_MODULE.test(file);
 
 export const mutationRoots = ({ files, workspaceDirs }) => {
   const byLength = workspaceDirs.toSorted(
@@ -132,7 +137,14 @@ export const mutationRoots = ({ files, workspaceDirs }) => {
       ...new Set(
         owners.map(({ root }) => root).filter((root) => root !== undefined),
       ),
-    ].toSorted(byName),
+    ]
+      .toSorted(byName)
+      .map((root) => ({
+        files: owners
+          .filter((owner) => owner.root === root)
+          .map(({ file }) => file),
+        root,
+      })),
   };
 };
 
