@@ -29,6 +29,7 @@ area:
   - packages/repo-standards/scripts/fallow-gate*
   - packages/repo-standards/scripts/false-positive-list*
   - packages/repo-standards/ARCHITECTURE.md
+  - reports/api-surface/repo-standards.txt
   - packages/repo-standards/scripts/config*
   - packages/repo-standards/README.md
   - packages/eval-history/package.json
