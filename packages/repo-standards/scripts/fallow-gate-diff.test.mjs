@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  diffOfFiles,
   gitDiffArgs,
   introducedChanges,
   joinDiffs,
@@ -188,6 +189,42 @@ describe('joinDiffs', () => {
   });
 });
 
+describe('diffOfFiles', () => {
+  const component =
+    'diff --git a/src/Button.tsx b/src/Button.tsx\n--- a/src/Button.tsx\n+++ b/src/Button.tsx\n@@ -3 +3 @@\n-old\n+new';
+  const styles =
+    'diff --git a/src/Button.stylex.ts b/src/Button.stylex.ts\n--- a/src/Button.stylex.ts\n+++ b/src/Button.stylex.ts\n@@ -1 +1,2 @@\n-a\n+b\n+c';
+  const renamed =
+    'diff --git a/src/old.ts b/src/new.ts\nsimilarity index 90%\nrename from src/old.ts\nrename to src/new.ts\n--- a/src/old.ts\n+++ b/src/new.ts\n@@ -2 +2 @@\n-x\n+y';
+  const diff = `${styles}\n${component}\n${renamed}\n`;
+
+  it('keeps only the sections of the named files, hunks included', () => {
+    expect(diffOfFiles({ diff, files: ['src/Button.tsx', 'src/new.ts'] })).toBe(
+      `${component}\n${renamed}\n`,
+    );
+  });
+
+  it('drops a file that is not named, leaving nothing of its hunks', () => {
+    const kept = diffOfFiles({ diff, files: ['src/Button.tsx'] });
+    expect(kept).not.toContain('stylex');
+    expect(parseDiff(kept)).toEqual(
+      new Map([['src/Button.tsx', { isNew: false, ranges: [[3, 3]] }]]),
+    );
+  });
+
+  it('splits only at a section header, not at the same text inside a changed line', () => {
+    const quoting =
+      "diff --git a/src/quote.ts b/src/quote.ts\n--- a/src/quote.ts\n+++ b/src/quote.ts\n@@ -1 +1 @@\n-x\n+const header = 'diff --git a/src/Button.tsx b/src/Button.tsx';";
+    expect(
+      diffOfFiles({ diff: `${quoting}\n${styles}\n`, files: ['src/quote.ts'] }),
+    ).toBe(`${quoting}\n`);
+  });
+
+  it('returns an empty diff when no named file is in it', () => {
+    expect(diffOfFiles({ diff, files: ['src/other.ts'] })).toBe('');
+  });
+});
+
 describe('untrackedFileDiff', () => {
   it('writes a new file as one hunk adding every line', () => {
     expect(untrackedFileDiff({ content: 'one\ntwo\n', path: 'n.mjs' })).toBe(
@@ -238,7 +275,7 @@ describe('gitDiffArgs against a user config that reshapes diffs', () => {
       writeFileSync(join(root, 'src', 'added.mjs'), 'new\n');
       writeFileSync(join(root, 'src', 'café.mjs'), 'accent\n');
       git(root, 'add', 'src/added.mjs', 'src/café.mjs');
-      const diff = git(root, ...gitDiffArgs({ base: 'HEAD', files: [] }));
+      const diff = git(root, ...gitDiffArgs('HEAD'));
       expect(diff.status).toBe(0);
       expect(parseDiff(diff.stdout)).toEqual(
         new Map([
