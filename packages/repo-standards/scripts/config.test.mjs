@@ -141,6 +141,11 @@ describe('resolveRegisters', () => {
         JSON.stringify({ registers: { falsePositives: 'ops/fp.json' } }),
       ).falsePositives,
     ).toBe('ops/fp.json');
+    expect(() =>
+      resolveRegisters(
+        JSON.stringify({ registers: { falsePositives: '../fp.json' } }),
+      ),
+    ).toThrow('registers.falsePositives');
   });
 });
 const publishing = (block) => resolvePublishing(JSON.stringify(block));

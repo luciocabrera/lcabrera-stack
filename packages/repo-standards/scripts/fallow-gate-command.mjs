@@ -18,7 +18,6 @@ import { dirname, join } from 'node:path';
 import { readWorkspaceGraph } from './affected-tests.mjs';
 import { REPO_ROOT } from './changed-runner.mjs';
 import { withoutSeparator } from './cli-input.mjs';
-import { readRegisters } from './config.mjs';
 import { errorMessage } from './error-message.mjs';
 import {
   gitDiffArgs,
@@ -48,6 +47,7 @@ import {
   toRepoPath,
   verdictSource,
 } from './fallow-gate.mjs';
+import { isoDay, readFalsePositiveList } from './false-positive-list.mjs';
 import { runGitStatus } from './git-exec.mjs';
 
 const readInput = ({ argv, effects }) => {
@@ -260,22 +260,10 @@ const runNode = (args, stdout) => {
   }
 };
 
-const readFalsePositives = () => {
-  const path = join(REPO_ROOT, readRegisters(REPO_ROOT).falsePositives);
-  if (!existsSync(path)) return [];
-  const list = JSON.parse(readFileSync(path, 'utf8'));
-  if (!Array.isArray(list)) {
-    throw new TypeError(
-      `${path} is not a JSON array of false-positive entries.`,
-    );
-  }
-  return list;
-};
-
 export const processEffects = (proc) => ({
   exists: (file) => existsSync(join(REPO_ROOT, file)),
   git: (args) => runGitStatus({ args, cwd: REPO_ROOT, maxBuffer: 2 ** 29 }),
-  readFalsePositives,
+  readFalsePositives: () => readFalsePositiveList(REPO_ROOT),
   readFile: (file) => readFileSync(join(REPO_ROOT, file), 'utf8'),
   readStdinFiles: () => {
     if (proc.stdin.isTTY) {
@@ -290,7 +278,7 @@ export const processEffects = (proc) => ({
   },
   root: REPO_ROOT,
   spawn: (args, stdout) => runNode([fallowEntry(), ...args], stdout),
-  today: () => new Date().toISOString().slice(0, 10),
+  today: () => isoDay(new Date()),
   withTempFile: (content, use) => {
     const directory = mkdtempSync(join(tmpdir(), 'repo-fallow-gate-'));
     const path = join(directory, 'changes.diff');

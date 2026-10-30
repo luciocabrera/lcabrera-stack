@@ -6,7 +6,7 @@
  */
 import { hashLines } from './false-positive-markers.mjs';
 
-const FINDING_ID = /^(?<file>.+?):(?<start>\d+)(?:-(?<end>\d+))?:(?<rule>.+)$/u;
+const FINDING_ID = /(?<file>.+?):(?<start>\d+)(?:-(?<end>\d+))?:(?<rule>.+)/u;
 
 const CASE_NAME = /^FP-(\d{4,})(?:\.json)?$/u;
 
@@ -21,7 +21,7 @@ export const ADJUDICATED_ANALYZERS = [
 ];
 
 export const parseFindingId = (findingId) => {
-  const match = FINDING_ID.exec(findingId ?? '');
+  const match = FINDING_ID.exec(findingId);
   if (match === null) {
     throw new Error(
       `the finding id "${findingId}" is not <file>:<line>[-<end line>]:<rule>`,
@@ -108,7 +108,7 @@ const collect = ({ context, finding, value }) => {
       value: child.value,
     }),
   );
-  if (deeper.length > 0) return deeper;
+  if (deeper.length !== 0) return deeper;
   if (!isMatch({ context: here, finding, value })) return [];
   return [finding.whole && here.record !== undefined ? here.record : value];
 };
