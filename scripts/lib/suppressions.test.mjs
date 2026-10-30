@@ -78,6 +78,14 @@ describe('findInlineSuppressions', () => {
     expect(inline("x(); // don't // NOSONAR")).toHaveLength(1);
     expect(inline("const s = a / b + '// NOSONAR';")).toHaveLength(0);
     expect(inline("'// NOSONAR';")).toHaveLength(0);
+  });
+
+  it('fails closed when a quote on the line never closes', () => {
+    expect(inline("const pattern = /don't/; // NOSONAR")).toHaveLength(1);
+    expect(
+      inline("<p>don't</p> {/* biome-ignore lint/a11y/x: reason */}"),
+    ).toHaveLength(1);
+    expect(inline('const t = `open // NOSONAR')).toHaveLength(1);
     expect(inline('x(); /* "quoted" */ // NOSONAR')).toHaveLength(1);
   });
 

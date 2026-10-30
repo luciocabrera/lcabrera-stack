@@ -82,31 +82,48 @@ const stringStep = (state, character) => {
     : { ...state, previous: character };
 };
 
-const endsInsideString = (text) =>
-  [...text].reduce(stringStep, {
-    comment: false,
-    escaped: false,
-    quote: undefined,
-  }).quote !== undefined;
+const LINE_START = { comment: false, escaped: false, quote: undefined };
 
-export const opensComment = (before) => {
-  const trimmed = before.trimEnd();
+const scanStep = ({ character, index, position, scan }) => {
+  const quoteAt = position === index ? scan.state.quote : scan.quoteAt;
+  const state = stringStep(scan.state, character);
+  const closes =
+    position >= index &&
+    quoteAt !== undefined &&
+    scan.state.quote !== undefined &&
+    state.quote === undefined;
+  return { closed: scan.closed || closes, quoteAt, state };
+};
+
+const insideClosedString = ({ index, line }) =>
+  [...line].reduce(
+    (scan, character, position) =>
+      scanStep({ character, index, position, scan }),
+    {
+      closed: false,
+      quoteAt: undefined,
+      state: LINE_START,
+    },
+  ).closed;
+
+export const opensComment = ({ index, line }) => {
+  const trimmed = line.slice(0, index).trimEnd();
   return (
     (trimmed.endsWith('//') || trimmed.endsWith('/*')) &&
-    !endsInsideString(trimmed)
+    !insideClosedString({ index, line })
   );
 };
 
-const isDirectivePosition = (before) => {
-  if (opensComment(before)) return true;
-  const leading = before.trim();
+const isDirectivePosition = ({ index, line }) => {
+  if (opensComment({ index, line })) return true;
+  const leading = line.slice(0, index).trim();
   return leading === '' || leading === '*';
 };
 
 export const findInlineSuppressions = ({ file, text }) =>
   text.split('\n').flatMap((line, index) =>
     [...line.matchAll(DIRECTIVE_PATTERN)]
-      .filter((match) => isDirectivePosition(line.slice(0, match.index)))
+      .filter((match) => isDirectivePosition({ index: match.index, line }))
       .map((match) => ({
         directive: match[0],
         file,

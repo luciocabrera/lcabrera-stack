@@ -21,10 +21,12 @@ export const UNTRACKED_CASES_DIR = '.tmp/eval-results/adjudications';
 const USAGE =
   'usage: vp run adjudicate -- <analyzer> <file>:<line>[-<end line>]:<rule> [--trace <target>] [--pr <number>]';
 
+const TRACE_TARGET = /^[\w@.][\w@./:-]*$/u;
+
 const readInput = (argv) => {
   const { positionals, values } = parseArgs({
     allowPositionals: true,
-    args: argv,
+    args: argv[0] === '--' ? argv.slice(1) : argv,
     options: { pr: { type: 'string' }, trace: { type: 'string' } },
     strict: true,
   });
@@ -35,6 +37,11 @@ const readInput = (argv) => {
   const pr = values.pr === undefined ? null : Number(values.pr);
   if (pr !== null && !(Number.isSafeInteger(pr) && pr > 0)) {
     throw new Error(`--pr must be a pull request number; got "${values.pr}"`);
+  }
+  if (values.trace !== undefined && !TRACE_TARGET.test(values.trace)) {
+    throw new Error(
+      `--trace takes a fallow trace target such as dup:<fingerprint> or <file>:<export>; got "${values.trace}"`,
+    );
   }
   return { analyzer, findingId, pr, trace: values.trace };
 };
@@ -57,45 +64,34 @@ const TRACEABLE = new Set(['dead-code', 'dupes']);
 
 const fallowTrace = ({ command, effects, records, trace }) => {
   const target =
-    trace ??
-    records.map(({ fingerprint }) => fingerprint).find((value) => value);
+    trace ?? records.map(({ fingerprint }) => fingerprint).find(Boolean);
   if (!TRACEABLE.has(command) || target === undefined) return;
   return effects.run({
-    args: [
-      'exec',
-      'fallow',
-      command,
-      '--trace',
-      target,
-      '--format',
-      'json',
-      '--quiet',
-    ],
+    args: [command, `--trace=${target}`, '--format', 'json', '--quiet'],
+    tool: 'fallow',
   }).stdout;
 };
 
 const ANALYZER_REPORTS = {
   biome: ({ finding }) => ({
-    args: ['exec', 'biome', 'lint', '--reporter=json', finding.file],
+    args: ['lint', '--reporter=json', '--', finding.file],
+    tool: 'biome',
   }),
   eslint: ({ effects, finding }) => {
     const cwd = effects.workspaceOf(finding.file);
     return {
-      args: [
-        'exec',
-        'eslint',
-        '--format',
-        'json',
-        finding.file.slice(cwd.length + 1),
-      ],
+      args: ['--format', 'json', '--', finding.file.slice(cwd.length + 1)],
       cwd,
+      tool: 'eslint',
     };
   },
   fallow: ({ issue }) => ({
-    args: ['exec', 'fallow', issue.command, '--format', 'json', '--quiet'],
+    args: [issue.command, '--format', 'json', '--quiet'],
+    tool: 'fallow',
   }),
   oxlint: ({ finding }) => ({
-    args: ['lint', '--format', 'json', finding.file],
+    args: ['lint', '--format', 'json', '--', finding.file],
+    tool: 'vp',
   }),
 };
 
@@ -115,18 +111,21 @@ const analyzerReport = ({ analyzer, effects, finding, issue }) =>
 
 const explanation = ({ analyzer, effects, finding }) => {
   if (analyzer === 'fallow') {
-    return effects.run({ args: ['exec', 'fallow', 'explain', finding.rule] })
+    return effects.run({ args: ['explain', finding.rule], tool: 'fallow' })
       .stdout;
   }
   if (analyzer === 'biome') {
     const name = finding.rule.split('/').at(-1);
-    return effects.run({ args: ['exec', 'biome', 'explain', name] }).stdout;
+    return effects.run({ args: ['explain', name], tool: 'biome' }).stdout;
   }
 };
 
 export const openCase = ({ argv, effects }) => {
   const { analyzer, findingId, pr, trace } = readInput(argv);
   const finding = parseFindingId(findingId);
+  if (!effects.isRepoFile(finding.file)) {
+    throw new Error(`${finding.file} is not a file inside this repository`);
+  }
   const text = effects.readText(finding.file);
   const issue =
     analyzer === 'fallow'

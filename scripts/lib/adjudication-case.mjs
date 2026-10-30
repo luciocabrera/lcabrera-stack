@@ -6,7 +6,16 @@
  */
 import { hashLines } from './false-positive-markers.mjs';
 
-const FINDING_ID = /(?<file>.+?):(?<start>\d+)(?:-(?<end>\d+))?:(?<rule>.+)/u;
+const LINE_RANGE = /^(\d+)(?:-(\d+))?$/u;
+
+const RULE_NAME = /^[\w@][\w@/:.-]*$/u;
+
+const isRepoRelative = (file) =>
+  file !== '' &&
+  !file.startsWith('/') &&
+  !file.startsWith('-') &&
+  !file.includes('\\') &&
+  file.split('/').every((segment) => !['', '.', '..'].includes(segment));
 
 const CASE_NAME = /^FP-(\d{4,})(?:\.json)?$/u;
 
@@ -20,19 +29,41 @@ export const ADJUDICATED_ANALYZERS = [
   'react-doctor',
 ];
 
+const splitFindingId = (findingId) => {
+  const parts = String(findingId).split(':');
+  const at = parts.findIndex(
+    (part, index) =>
+      index > 0 && index < parts.length - 1 && LINE_RANGE.test(part),
+  );
+  if (at === -1) return;
+  const [, start, end = start] = LINE_RANGE.exec(parts[at]);
+  return {
+    end: Number(end),
+    file: parts.slice(0, at).join(':'),
+    rule: parts.slice(at + 1).join(':'),
+    start: Number(start),
+  };
+};
+
 export const parseFindingId = (findingId) => {
-  const match = FINDING_ID.exec(findingId);
-  if (match === null) {
+  const parsed = splitFindingId(findingId);
+  if (parsed === undefined) {
     throw new Error(
       `the finding id "${findingId}" is not <file>:<line>[-<end line>]:<rule>`,
     );
   }
-  const start = Number(match.groups.start);
-  const end = Number(match.groups.end ?? match.groups.start);
-  if (start < 1 || end < start) {
+  if (parsed.start < 1 || parsed.end < parsed.start) {
     throw new Error(`the finding id "${findingId}" names no line range`);
   }
-  return { end, file: match.groups.file, rule: match.groups.rule, start };
+  if (!RULE_NAME.test(parsed.rule)) {
+    throw new Error(`the finding id "${findingId}" names no rule`);
+  }
+  if (!isRepoRelative(parsed.file)) {
+    throw new Error(
+      `the finding id "${findingId}" names no repository-relative file`,
+    );
+  }
+  return parsed;
 };
 
 export const nextCaseId = (names) => {

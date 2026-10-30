@@ -30,11 +30,10 @@ const DIRECTIVES = [
   },
   { analyzer: 'react-doctor', directive: 'react-doctor-disable', next: false },
   { analyzer: 'fallow', directive: 'fallow-ignore-next-line', next: true },
-  { analyzer: 'fallow', directive: 'fallow-ignore-file', next: true },
+  { analyzer: 'fallow', directive: 'fallow-ignore-file', next: false },
 ];
 
-const DIRECTIVE_PATTERN =
-  /(?<![\w-])((?:eslint|oxlint)-disable(?:-next-line|-line)?|biome-ignore(?:-all|-start)?|react-doctor-disable(?:-next-line|-line)?|fallow-ignore-(?:next-line|file))(?![\w-])/u;
+const DIRECTIVE_TOKEN = /(?:eslint|oxlint|biome|react-doctor|fallow)-[a-z-]+/u;
 
 const BY_DIRECTIVE = new Map(
   DIRECTIVES.map((entry) => [entry.directive, entry]),
@@ -65,14 +64,24 @@ const parseExplanation = (explanation) => {
   return { caseId: match[1], reason: match[2].trim() };
 };
 
+const directiveAt = (line) => {
+  const match = DIRECTIVE_TOKEN.exec(line);
+  if (match === null) return;
+  const entry = BY_DIRECTIVE.get(match[0]);
+  const joined = /[\w-]/u.test(line[match.index - 1] ?? '');
+  return entry === undefined || joined
+    ? undefined
+    : { entry, index: match.index, length: match[0].length };
+};
+
 const markerOn = ({ file, index, line }) => {
-  const match = DIRECTIVE_PATTERN.exec(line);
-  if (match === null || !opensComment(line.slice(0, match.index))) {
+  const found = directiveAt(line);
+  if (found === undefined || !opensComment({ index: found.index, line })) {
     return [];
   }
-  const rest = line.slice(match.index + match[0].length);
+  const rest = line.slice(found.index + found.length);
   if (!CLAIM.test(rest)) return [];
-  const { analyzer, directive, next } = BY_DIRECTIVE.get(match[1]);
+  const { analyzer, directive, next } = found.entry;
   const { explanation, rule } = splitRest({ analyzer, rest });
   return [
     {

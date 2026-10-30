@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { UNTRACKED_CASES_DIR } from './adjudicate-command.mjs';
 import {
   DEFAULT_SEATS,
   dispatchPrompt,
@@ -237,5 +238,11 @@ describe('records', () => {
         '### judge (a)\n\nE\n',
       ].join('\n'),
     );
+  });
+});
+
+describe('case directories', () => {
+  it('keeps a case that was not dismissed under the gitignored .tmp tree', () => {
+    expect(UNTRACKED_CASES_DIR.startsWith('.tmp/')).toBe(true);
   });
 });

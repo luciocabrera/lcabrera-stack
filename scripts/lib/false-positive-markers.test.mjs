@@ -71,7 +71,7 @@ describe('findClaimedMarkers — every directive', () => {
     ['react-doctor', 'react-doctor-disable-line', false],
     ['react-doctor', 'react-doctor-disable', false],
     ['fallow', 'fallow-ignore-next-line', true],
-    ['fallow', 'fallow-ignore-file', true],
+    ['fallow', 'fallow-ignore-file', false],
   ])(
     'reads %s %s, covering the next line: %s',
     (analyzer, directive, nextLine) => {
@@ -92,6 +92,25 @@ describe('findClaimedMarkers — every directive', () => {
       });
     },
   );
+});
+
+describe('findClaimedMarkers — what is not a directive', () => {
+  it.each([
+    '// eslint-disable-next-lines r -- false positive, case FP-0001: why',
+    '// my-eslint-disable-next-line r -- false positive, case FP-0001: why',
+    '// fallow-unknown r -- false positive, case FP-0001: why',
+  ])('ignores "%s"', (text) => {
+    expect(findClaimedMarkers({ file: FILE, text })).toEqual([]);
+  });
+
+  it('still reads a JSX marker after an apostrophe in the text', () => {
+    expect(
+      findClaimedMarkers({
+        file: FILE,
+        text: "<p>don't</p> {/* biome-ignore x/y: false positive, case FP-0003: why */}",
+      })[0],
+    ).toMatchObject({ caseId: 'FP-0003', reason: 'why', rule: 'x/y' });
+  });
 });
 
 describe('findClaimedMarkers — the explanation', () => {

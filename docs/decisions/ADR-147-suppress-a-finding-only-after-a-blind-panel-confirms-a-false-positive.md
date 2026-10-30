@@ -49,8 +49,9 @@ baseline and no marker the panel did not confirm.
    starts three sessions in parallel through the Claude subscription, each on
    its own model, each given only the case file path: `fp-judge` twice and
    `fp-adversary` once (`.claude/agents/`). At least one model differs from the
-   builder's, and the three are distinct. The sessions are read-only, and the
-   command voids the panel if the working tree changed while they ran.
+   builder's, and the three are distinct. Each session runs in a `git archive`
+   export of the case's commit, never in the repository, and the command voids
+   the panel if the repository's working tree changed while they ran.
 4. **Read the verdicts.** Each verdict file starts with `REAL` or
    `FALSE_POSITIVE` on line one. A REAL carries a `Fix:`. A FALSE_POSITIVE
    carries a `Check:` that could have shown the finding real (Rule 14).
@@ -83,6 +84,38 @@ kind. The pre-commit hook, `check:push`, `check:safe` and CI run both.
 false-positive marker. It is the only comment the gate requires, and it says
 which case confirmed the dismissal. The rationale belongs in the case file and
 the verdicts, not in that line.
+
+### What the blindness rests on
+
+The agent definitions tell a seat not to look for the builder's argument, but
+nothing depends on a seat obeying that. Four mechanisms decide what it can
+reach:
+
+1. **The case file has no free-text input.** `vp run adjudicate` builds it
+   from the analyzer's own output, the analyzer's explanation and trace, and
+   the code. It refuses any option or positional that could carry prose.
+2. **The tree has no history.** The sessions run in a temporary directory
+   holding `git archive` of the case's `head_sha`, so there is no `.git`, no
+   commit message, no branch name and no reflog to read. The coordination
+   claims (`docs/coordination/tasks/`, `docs/coordination/branches/`) are
+   deleted from the export. The command refuses to start if the flagged
+   lines at that commit do not hash as the case recorded them, so the code
+   the panel reads is the code the case names.
+3. **The tools cannot leave the tree.** A seat gets Read, Glob and Grep and
+   nothing else: no Bash, no network, no MCP server, and no project settings
+   or hooks (`settingSources` is empty). A PreToolUse hook
+   (`scripts/lib/panel-scope.mjs`) refuses any other tool, and any path or
+   pattern that resolves outside the export, symlinks included. Claude Code's
+   working-directory rule alone does not do this: a `dontAsk` session read a
+   file outside its working directory by absolute path until the hook was in
+   place.
+4. **The pull request is not on disk.** Its body and comments live on GitHub,
+   which no seat can reach without a network tool.
+
+What this does not cover: the repository's own files at that commit, which a
+seat should read, can still hold prose a builder wrote in an earlier commit.
+The case's commit should be the finding's code, not the argument for
+dismissing it.
 
 ## Consequences
 

@@ -1,7 +1,8 @@
 /**
  * Runs the blind false-positive panel on an open case: two fp-judge sessions
  * and one fp-adversary, in parallel, each on its own model through the Claude
- * subscription, each given only the case file path. A unanimous
+ * subscription, each given only the case file path and run in a git-archive
+ * export of the case's commit, which holds no history. A unanimous
  * FALSE_POSITIVE is recorded; anything else is left for a fix or the owner.
  * Policy: docs/agents/public-package-suppressions.md.
  *
@@ -13,15 +14,15 @@
 import { query } from '@anthropic-ai/claude-agent-sdk';
 import { toCurrentAdjudication } from '@repo/eval-history/envelope/toCurrentAdjudication.util';
 import { contentHash } from '@repo/eval-history/hashing/contentHash.util';
-import { spawnSync } from 'node:child_process';
 import {
   existsSync,
   mkdirSync,
   readFileSync,
   renameSync,
+  rmSync,
   writeFileSync,
 } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname } from 'node:path';
 import process from 'node:process';
 import { parseArgs } from 'node:util';
 
@@ -32,6 +33,7 @@ import {
   timedDrain,
 } from '../evals/agent-sessions.mjs';
 import { agentBody } from '../evals/verifier-fixtures/verifier-fixtures.mjs';
+import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
 import { CASES_DIR, UNTRACKED_CASES_DIR } from './lib/adjudicate-command.mjs';
 import {
   dispatchPrompt,
@@ -45,42 +47,28 @@ import {
   verdictFileName,
 } from './lib/adjudication-panel.mjs';
 import { markerSpelling } from './lib/false-positive-markers.mjs';
+import { PANEL_TOOLS, scopeHook } from './lib/panel-scope.mjs';
+import { exportCaseTree } from './lib/panel-tree.mjs';
+import { caseIdFrom, repoPath } from './lib/tool-paths.mjs';
 
 const ROOT = process.cwd();
 const LIST = 'docs/agents/false-positives.json';
-const TOOLS = ['Read', 'Glob', 'Grep', 'Bash'];
-const READ_ONLY_BASH = [
-  'git log',
-  'git show',
-  'git diff',
-  'git grep',
-  'git blame',
-  'grep',
-  'rg',
-  'ls',
-  'cat',
-  'head',
-  'wc',
-  'vp exec fallow explain',
-  'vp exec fallow dead-code',
-  'vp exec fallow dupes',
-  'vp exec fallow health',
-  'vp exec fallow security',
-].map((command) => `Bash(${command}:*)`);
-const ALLOWED = ['Read', 'Glob', 'Grep', ...READ_ONLY_BASH];
 const MAX_TURNS = 80;
 
-const read = (path) => readFileSync(join(ROOT, path), 'utf8');
+const inRepo = (path) => repoPath({ path, root: ROOT });
+
+const read = (path) => readFileSync(inRepo(path), 'utf8');
 
 const write = (path, text) => {
-  mkdirSync(dirname(join(ROOT, path)), { recursive: true });
-  writeFileSync(join(ROOT, path), text);
+  const target = inRepo(path);
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, text);
 };
 
 const treeState = () =>
-  spawnSync('git', ['status', '--porcelain', '--untracked-files=all'], {
+  runGitStatus({
+    args: ['status', '--porcelain', '--untracked-files=all'],
     cwd: ROOT,
-    encoding: 'utf8',
   }).stdout;
 
 const readInput = () => {
@@ -96,35 +84,40 @@ const readInput = () => {
     },
     strict: true,
   });
-  const [caseId] = positionals;
+  const [named] = positionals;
   const seats = seatsFrom({
     adversary: values.adversary,
     judges: values.judge,
   });
-  const problems = [
-    ...seatProblems({ builderModel: values['builder-model'], seats }),
-    ...(/^FP-\d{4,}$/u.test(caseId ?? '') ? [] : ['name the case, FP-nnnn']),
-  ];
-  return { builderModel: values['builder-model'], caseId, problems, seats };
+  const problems = seatProblems({
+    builderModel: values['builder-model'],
+    seats,
+  });
+  return {
+    builderModel: values['builder-model'],
+    caseId: caseIdFrom(named),
+    problems,
+    seats,
+  };
 };
 
-const sit = async ({ casePath, seat }) => {
+const sit = async ({ casePath, seat, tree }) => {
   const definition = read(`.claude/agents/fp-${seat.role}.md`);
   const { error, messages, timestamps } = await timedDrain({
     open: () =>
       query({
         options: {
-          allowedTools: ALLOWED,
-          cwd: ROOT,
+          cwd: tree,
+          hooks: { PreToolUse: [{ hooks: [scopeHook({ tree })] }] },
           maxTurns: MAX_TURNS,
           mcpServers: {},
           model: seat.model,
           permissionMode: 'dontAsk',
           persistSession: false,
-          settingSources: ['project'],
+          settingSources: [],
           strictMcpConfig: true,
           systemPrompt: agentBody(definition),
-          tools: TOOLS,
+          tools: PANEL_TOOLS,
         },
         prompt: dispatchPrompt(casePath),
       }),
@@ -135,7 +128,7 @@ const sit = async ({ casePath, seat }) => {
     (message) => message.type === 'system' && message.subtype === 'init',
   );
   return {
-    error: error ?? sessionProblem(messages, TOOLS),
+    error: error ?? sessionProblem(messages, PANEL_TOOLS),
     hash: contentHash(definition),
     metrics,
     model: init?.model ?? seat.model,
@@ -163,7 +156,7 @@ const recordDismissal = ({ caseDir, caseFile, envelope }) => {
     `${caseDir}/upstream.md`,
     upstreamDraft({ caseFile, verifiers: envelope.verifiers }),
   );
-  const list = existsSync(join(ROOT, LIST)) ? JSON.parse(read(LIST)) : [];
+  const list = existsSync(inRepo(LIST)) ? JSON.parse(read(LIST)) : [];
   write(
     LIST,
     `${JSON.stringify([...list, listEntryFor({ caseFile, evidence })], null, 2)}\n`,
@@ -177,7 +170,7 @@ const recordOther = ({ caseDir, caseFile, envelope }) => {
     `${UNTRACKED_CASES_DIR}/${caseId}.json`,
     `${JSON.stringify(envelope, null, 2)}\n`,
   );
-  renameSync(join(ROOT, caseDir), join(ROOT, UNTRACKED_CASES_DIR, caseId));
+  renameSync(inRepo(caseDir), inRepo(`${UNTRACKED_CASES_DIR}/${caseId}`));
   const next =
     envelope.outcome === 'fixed'
       ? 'The panel ruled REAL. Apply a fix from the verdicts; no marker.'
@@ -192,9 +185,10 @@ const main = async () => {
   const casePath = `${caseDir}/case.json`;
   const caseFile = JSON.parse(read(casePath));
   const before = treeState();
+  const tree = exportCaseTree({ caseFile, casePath, root: ROOT });
   const sessions = await Promise.all(
-    seats.map((seat) => sit({ casePath, seat })),
-  );
+    seats.map((seat) => sit({ casePath, seat, tree })),
+  ).finally(() => rmSync(tree, { force: true, recursive: true }));
   if (treeState() !== before)
     throw new Error('a verifier changed the working tree; the panel is void');
   const failed = sessions.filter(({ error }) => error !== undefined);

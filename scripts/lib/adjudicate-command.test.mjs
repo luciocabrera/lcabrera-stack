@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import {
-  CASES_DIR,
-  openCase,
-  UNTRACKED_CASES_DIR,
-} from './adjudicate-command.mjs';
+import { CASES_DIR, openCase } from './adjudicate-command.mjs';
 
 const BUILDER_NOTES =
   'BUILDER-NOTE: I am sure this is fine because the table name is trusted';
@@ -59,10 +55,13 @@ const fakeEffects = ({
     return report;
   },
   readText: () => SOURCE,
-  run: ({ args, cwd }) => {
-    calls.push({ args, cwd });
+  isRepoFile: (file) => file === FILE,
+  run: ({ args, cwd, tool }) => {
+    calls.push({ args, cwd, tool });
     if (args.includes('explain')) return { status: 0, stdout: 'Rule docs.' };
-    if (args.includes('--trace')) return { status: 0, stdout: 'Trace.' };
+    if (args.some((arg) => arg.startsWith('--trace='))) {
+      return { status: 0, stdout: 'Trace.' };
+    }
     return { status: 1, stdout: stdout ?? `noise\n${JSON.stringify(report)}` };
   },
   shas: () => ({ base: '1'.repeat(40), head: '2'.repeat(40) }),
@@ -99,8 +98,9 @@ describe('openCase — the analyzer it runs', () => {
     expect(status).toBe(0);
     expect(calls).toEqual([
       {
-        args: ['exec', 'eslint', '--format', 'json', 'src/query.util.ts'],
+        args: ['--format', 'json', '--', 'src/query.util.ts'],
         cwd: 'packages/x',
+        tool: 'eslint',
       },
     ]);
     expect(out).toEqual([
@@ -119,7 +119,11 @@ describe('openCase — the analyzer it runs', () => {
       report: { diagnostics: [diagnostic] },
     });
     expect(calls).toEqual([
-      { args: ['lint', '--format', 'json', FILE], cwd: undefined },
+      {
+        args: ['lint', '--format', 'json', '--', FILE],
+        cwd: undefined,
+        tool: 'vp',
+      },
     ]);
     expect(value.finding).toEqual([diagnostic]);
     expect(value.explain).toBeNull();
@@ -136,10 +140,11 @@ describe('openCase — the analyzer it runs', () => {
     });
     expect(calls).toEqual([
       {
-        args: ['exec', 'biome', 'lint', '--reporter=json', FILE],
+        args: ['lint', '--reporter=json', '--', FILE],
         cwd: undefined,
+        tool: 'biome',
       },
-      { args: ['exec', 'biome', 'explain', 'noDebugger'], cwd: undefined },
+      { args: ['explain', 'noDebugger'], cwd: undefined, tool: 'biome' },
     ]);
     expect(value.explain).toBe('Rule docs.');
     expect(value.trace).toBeNull();
@@ -164,12 +169,14 @@ describe('openCase — the analyzer it runs', () => {
     });
     expect(calls).toEqual([
       {
-        args: ['exec', 'fallow', 'health', '--format', 'json', '--quiet'],
+        args: ['health', '--format', 'json', '--quiet'],
         cwd: undefined,
+        tool: 'fallow',
       },
       {
-        args: ['exec', 'fallow', 'explain', 'complexity-both'],
+        args: ['explain', 'complexity-both'],
         cwd: undefined,
+        tool: 'fallow',
       },
     ]);
     expect(value.case.rule).toBe('complexity');
@@ -186,17 +193,9 @@ describe('openCase — the analyzer it runs', () => {
       report: { clone_groups: [group] },
     });
     expect(calls.at(-1)).toEqual({
-      args: [
-        'exec',
-        'fallow',
-        'dupes',
-        '--trace',
-        'dup:1',
-        '--format',
-        'json',
-        '--quiet',
-      ],
+      args: ['dupes', '--trace=dup:1', '--format', 'json', '--quiet'],
       cwd: undefined,
+      tool: 'fallow',
     });
     expect(value.finding).toEqual([group]);
     expect(value.trace).toBe('Trace.');
@@ -207,8 +206,8 @@ describe('openCase — the analyzer it runs', () => {
       argv: ['fallow', `${FILE}:3:unused-file`, '--trace', `${FILE}:query`],
       report: { unused_files: [{ line: 3, path: FILE }] },
     });
-    expect(calls[0].args[2]).toBe('dead-code');
-    expect(calls.at(-1).args).toContain(`${FILE}:query`);
+    expect(calls[0].args[0]).toBe('dead-code');
+    expect(calls.at(-1).args).toContain(`--trace=${FILE}:query`);
   });
 
   it('records no trace for a dead-code finding with no target', () => {
@@ -231,10 +230,44 @@ describe('openCase — the analyzer it runs', () => {
         argv: ['fallow', `${FILE}:3:${rule}`],
         report: { items: [{ line: 3, path: FILE }] },
       });
-      expect(calls[0].args[2]).toBe(command);
+      expect(calls[0].args[0]).toBe(command);
       expect(value.case.rule).toBe(rule);
     },
   );
+
+  it('reads --trace and --pr after the -- that vp run forwards', () => {
+    const { calls, value } = open({
+      argv: [
+        '--',
+        'fallow',
+        `${FILE}:3:unused-file`,
+        '--trace',
+        `${FILE}:query`,
+        '--pr',
+        '7',
+      ],
+      report: { unused_files: [{ line: 3, path: FILE }] },
+    });
+    expect(calls.at(-1).args).toContain(`--trace=${FILE}:query`);
+    expect(value.case.pr).toBe(7);
+  });
+
+  it.each([['--flag'], ['a b'], ['$(x)']])(
+    'refuses the trace target %j',
+    (target) => {
+      expect(() =>
+        open({
+          argv: ['fallow', `${FILE}:3:unused-file`, `--trace=${target}`],
+        }),
+      ).toThrow('--trace takes a fallow trace target');
+    },
+  );
+
+  it('refuses a file that is not inside the repository', () => {
+    expect(() =>
+      open({ argv: ['eslint', 'packages/x/src/other.ts:3:no-sql-concat'] }),
+    ).toThrow('packages/x/src/other.ts is not a file inside this repository');
+  });
 
   it('refuses an analyzer that printed no JSON', () => {
     expect(() =>
@@ -336,11 +369,5 @@ describe('openCase — what reaches the panel', () => {
     expect(() =>
       openCase({ argv: ['sonar', `${FILE}:3:x`], effects: fakeEffects() }),
     ).toThrow('analyzers: biome, eslint, fallow, oxlint, react-doctor');
-  });
-});
-
-describe('case directories', () => {
-  it('keeps a case that was not dismissed under the gitignored .tmp tree', () => {
-    expect(UNTRACKED_CASES_DIR.startsWith('.tmp/')).toBe(true);
   });
 });

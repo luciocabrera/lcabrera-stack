@@ -271,6 +271,19 @@ describe('parseFindingId', () => {
     });
   });
 
+  it.each([
+    ['packages/a.ts:3:', 'names no rule'],
+    ['packages/a.ts:3:-rule', 'names no rule'],
+    ['../outside.ts:3:r', 'no repository-relative file'],
+    ['/etc/passwd:3:r', 'no repository-relative file'],
+    ['-x.ts:3:r', 'no repository-relative file'],
+    ['a//b.ts:3:r', 'no repository-relative file'],
+    ['a\\b.ts:3:r', 'no repository-relative file'],
+    ['./a.ts:3:r', 'no repository-relative file'],
+  ])('refuses "%s"', (id, message) => {
+    expect(() => parseFindingId(id)).toThrow(message);
+  });
+
   it.each(['packages/a.ts', 'packages/a.ts:9-4:x', 'packages/a.ts:0:x'])(
     'refuses "%s"',
     (id) => {

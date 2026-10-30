@@ -256,4 +256,15 @@ describe('verify-suppressions — panel-confirmed false positives', () => {
     expect(result.status).not.toBe(0);
     expect(result.stdout).toContain(`${OUTSIDE_FILE}:1  no-console`);
   });
+
+  it('leaves TypeScript and Sonar directives outside the public packages to their own owners', () => {
+    const root = settledRoot();
+    writeIn(root)(
+      OUTSIDE_FILE,
+      '// @ts-expect-error fixture\nconst a: number = "x";\nconst b = 1; // NOSONAR\n',
+    );
+    const result = runGate(root);
+    expect(result.stdout).not.toContain(OUTSIDE_FILE);
+    expect(result.status).toBe(0);
+  });
 });
