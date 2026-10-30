@@ -284,6 +284,27 @@ describe('parseFindingId', () => {
     expect(() => parseFindingId(id)).toThrow(message);
   });
 
+  it.each([
+    ['3:4:r', { end: 4, file: '3', rule: 'r', start: 4 }],
+    ['a:b.ts:3:r', { end: 3, file: 'a:b.ts', rule: 'r', start: 3 }],
+    ['a.ts:3:4:r', { end: 3, file: 'a.ts', rule: '4:r', start: 3 }],
+  ])('reads "%s"', (id, parsed) => {
+    expect(parseFindingId(id)).toEqual(parsed);
+  });
+
+  it.each(['a.ts:3', 'a.ts:3x:r', 'a.ts:x3:r', 'a.ts:3-:r'])(
+    'refuses "%s" as no line range',
+    (id) => {
+      expect(() => parseFindingId(id)).toThrow(
+        `the finding id "${id}" is not <file>:<line>[-<end line>]:<rule>`,
+      );
+    },
+  );
+
+  it('refuses a rule with a space in it', () => {
+    expect(() => parseFindingId('a.ts:3:r x')).toThrow('names no rule');
+  });
+
   it.each(['packages/a.ts', 'packages/a.ts:9-4:x', 'packages/a.ts:0:x'])(
     'refuses "%s"',
     (id) => {

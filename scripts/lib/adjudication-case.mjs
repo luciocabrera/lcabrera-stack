@@ -11,8 +11,6 @@ const LINE_RANGE = /^(\d+)(?:-(\d+))?$/u;
 const RULE_NAME = /^[\w@][\w@/:.-]*$/u;
 
 const isRepoRelative = (file) =>
-  file !== '' &&
-  !file.startsWith('/') &&
   !file.startsWith('-') &&
   !file.includes('\\') &&
   file.split('/').every((segment) => !['', '.', '..'].includes(segment));
@@ -33,7 +31,7 @@ const splitFindingId = (findingId) => {
   const parts = String(findingId).split(':');
   const at = parts.findIndex(
     (part, index) =>
-      index > 0 && index < parts.length - 1 && LINE_RANGE.test(part),
+      index !== 0 && index !== parts.length - 1 && LINE_RANGE.test(part),
   );
   if (at === -1) return;
   const [, start, end = start] = LINE_RANGE.exec(parts[at]);

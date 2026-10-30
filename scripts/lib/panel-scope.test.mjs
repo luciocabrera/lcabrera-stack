@@ -33,13 +33,14 @@ describe('scopeDecision', () => {
   });
 
   it.each([
+    ['Read', { file_path: join(tree, 'src/missing.ts') }],
     ['Read', { file_path: join(tree, 'src/a.ts') }],
     ['Read', { file_path: 'src/a.ts' }],
     ['Glob', { pattern: 'src/**/*.ts' }],
     ['Glob', { path: tree, pattern: '**/*' }],
     ['Grep', { glob: '*.ts', path: join(tree, 'src'), pattern: 'a' }],
     ['Grep', { pattern: 'a' }],
-  ])('allows %s %j inside the tree', (toolName, input) => {
+  ])('allows %s call %# inside the tree', (toolName, input) => {
     expect(decide(toolName, input)).toEqual({ allow: true });
   });
 
@@ -54,7 +55,7 @@ describe('scopeDecision', () => {
     ['Glob', { path: outside, pattern: '*' }],
     ['Grep', { path: outside, pattern: 'secret' }],
     ['Grep', { glob: '../*', pattern: 'secret' }],
-  ])('refuses %s %j', (toolName, input) => {
+  ])('refuses %s call %# outside the tree', (toolName, input) => {
     expect(decide(toolName, input)).toMatchObject({ allow: false });
     expect(decide(toolName, input).reason).toContain(
       'is outside the case tree',
@@ -72,12 +73,23 @@ describe('scopeDecision', () => {
   );
 });
 
+describe('scopeDecision — the reason', () => {
+  it('names every path that leaves the tree', () => {
+    expect(
+      decide('Grep', { glob: '../*', path: outside, pattern: 'secret' }),
+    ).toEqual({
+      allow: false,
+      reason: `${outside}, ../* is outside the case tree`,
+    });
+  });
+});
+
 describe('scopeHook', () => {
   it('answers a PreToolUse call with the decision', async () => {
     const hook = scopeHook({ tree });
     expect(
       await hook({ tool_input: { file_path: 'src/a.ts' }, tool_name: 'Read' }),
-    ).toEqual({
+    ).toStrictEqual({
       hookSpecificOutput: {
         hookEventName: 'PreToolUse',
         permissionDecision: 'allow',

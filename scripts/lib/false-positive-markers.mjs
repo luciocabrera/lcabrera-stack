@@ -68,7 +68,7 @@ const directiveAt = (line) => {
   const match = DIRECTIVE_TOKEN.exec(line);
   if (match === null) return;
   const entry = BY_DIRECTIVE.get(match[0]);
-  const joined = /[\w-]/u.test(line[match.index - 1] ?? '');
+  const joined = /[\w-]/u.test(line.charAt(match.index - 1));
   return entry === undefined || joined
     ? undefined
     : { entry, index: match.index, length: match[0].length };

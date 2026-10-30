@@ -38,11 +38,6 @@ const readInput = (argv) => {
   if (pr !== null && !(Number.isSafeInteger(pr) && pr > 0)) {
     throw new Error(`--pr must be a pull request number; got "${values.pr}"`);
   }
-  if (values.trace !== undefined && !TRACE_TARGET.test(values.trace)) {
-    throw new Error(
-      `--trace takes a fallow trace target such as dup:<fingerprint> or <file>:<export>; got "${values.trace}"`,
-    );
-  }
   return { analyzer, findingId, pr, trace: values.trace };
 };
 
@@ -66,6 +61,11 @@ const fallowTrace = ({ command, effects, records, trace }) => {
   const target =
     trace ?? records.map(({ fingerprint }) => fingerprint).find(Boolean);
   if (!TRACEABLE.has(command) || target === undefined) return;
+  if (!TRACE_TARGET.test(target)) {
+    throw new Error(
+      `--trace takes a fallow trace target such as dup:<fingerprint> or <file>:<export>; got "${target}"`,
+    );
+  }
   return effects.run({
     args: [command, `--trace=${target}`, '--format', 'json', '--quiet'],
     tool: 'fallow',

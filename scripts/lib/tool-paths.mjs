@@ -3,7 +3,6 @@
  * only when it resolves inside the repository root, and a tool runs as its
  * own JavaScript entry under the running Node, never through a PATH lookup.
  */
-import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, resolve, sep } from 'node:path';
 
@@ -18,7 +17,7 @@ export const repoPath = ({ path, root }) => {
 export const CASE_ID = /^FP-\d{4}$/u;
 
 export const caseIdFrom = (value) => {
-  if (!CASE_ID.test(value ?? '')) {
+  if (!CASE_ID.test(value)) {
     throw new Error(`"${value}" is not a case id of the form FP-nnnn`);
   }
   return value;
@@ -34,12 +33,7 @@ const TOOL_PACKAGES = {
 export const toolEntry = ({ from, tool }) => {
   const known = TOOL_PACKAGES[tool];
   if (known === undefined) throw new Error(`no tool named "${tool}"`);
-  const manifestPath = createRequire(join(from, 'package.json')).resolve(
-    `${known.name}/package.json`,
-  );
-  const { bin } = JSON.parse(readFileSync(manifestPath, 'utf8'));
-  return join(
-    dirname(manifestPath),
-    typeof bin === 'string' ? bin : bin[known.bin],
-  );
+  const load = createRequire(join(from, 'package.json'));
+  const manifest = `${known.name}/package.json`;
+  return join(dirname(load.resolve(manifest)), load(manifest).bin[known.bin]);
 };

@@ -86,6 +86,17 @@ describe('findInlineSuppressions', () => {
       inline("<p>don't</p> {/* biome-ignore lint/a11y/x: reason */}"),
     ).toHaveLength(1);
     expect(inline('const t = `open // NOSONAR')).toHaveLength(1);
+  });
+
+  it('reads a quote after a comment as comment text, not as a string', () => {
+    expect(inline("x(); // it's a // NOSONAR 'y'")).toHaveLength(1);
+    expect(inline("x(); /'/ // NOSONAR 'y'")).toHaveLength(0);
+  });
+
+  it('closes a string only on an unescaped quote of its own kind', () => {
+    expect(inline(String.raw`'// NOSONAR \' still open`)).toHaveLength(1);
+    expect(inline(String.raw`'// NOSONAR \' closed'`)).toHaveLength(0);
+    expect(inline(`'// NOSONAR " still open`)).toHaveLength(1);
     expect(inline('x(); /* "quoted" */ // NOSONAR')).toHaveLength(1);
   });
 

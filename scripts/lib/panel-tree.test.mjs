@@ -16,7 +16,12 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { runGitStatus } from '../../packages/repo-standards/scripts/git-exec.mjs';
 import { hashLines } from './false-positive-markers.mjs';
-import { exportCaseTree, STRIPPED_FROM_EXPORT } from './panel-tree.mjs';
+import {
+  exportCaseTree,
+  STRIPPED_FROM_EXPORT,
+  SYSTEM_DIRECTORIES,
+  systemBinary,
+} from './panel-tree.mjs';
 
 const NOTE = 'BUILDER-NOTE the finding is wrong because I say so';
 
@@ -78,7 +83,56 @@ const allText = (directory) =>
       : [readFileSync(path, 'utf8')];
   });
 
+describe('the fixed lists', () => {
+  it('strips the coordination claims and looks for tar in the system directories', () => {
+    expect(STRIPPED_FROM_EXPORT).toEqual([
+      'docs/coordination/tasks',
+      'docs/coordination/branches',
+    ]);
+    expect(SYSTEM_DIRECTORIES).toEqual(['/usr/local/bin', '/usr/bin', '/bin']);
+  });
+});
+
+describe('systemBinary', () => {
+  it('finds tar in a system directory and refuses a name it cannot find', () => {
+    expect(
+      SYSTEM_DIRECTORIES.some((directory) =>
+        systemBinary('tar').startsWith(directory),
+      ),
+    ).toBe(true);
+    expect(() => systemBinary('no-such-binary-here')).toThrow(
+      'no no-such-binary-here in /usr/local/bin, /usr/bin, /bin',
+    );
+  });
+});
+
 describe('exportCaseTree', () => {
+  it.each([`x${'a'.repeat(40)}`, `${'a'.repeat(40)}x`])(
+    'refuses the head %s',
+    (head) => {
+      const { root } = repository();
+      expect(() =>
+        exportCaseTree({
+          caseFile: caseFile({ head }),
+          casePath: 'x.json',
+          root,
+        }),
+      ).toThrow(`"${head}" is not a commit sha`);
+    },
+  );
+
+  it('names the commit git could not archive', () => {
+    const { root } = repository();
+    const head = 'a'.repeat(40);
+    expect(() =>
+      exportCaseTree({
+        caseFile: caseFile({ head }),
+        casePath: 'x.json',
+        root,
+      }),
+    ).toThrow(`git archive ${head} failed`);
+  });
+
   it('exports the commit with no .git, no claims and no trace of the commit message', () => {
     const { head, root } = repository();
     const into = exportCaseTree({

@@ -24,7 +24,7 @@ import {
 import { hashLines } from './false-positive-markers.mjs';
 import { repoPath } from './tool-paths.mjs';
 
-const SYSTEM_DIRECTORIES = ['/usr/local/bin', '/usr/bin', '/bin'];
+export const SYSTEM_DIRECTORIES = ['/usr/local/bin', '/usr/bin', '/bin'];
 
 const COMMIT = /^[0-9a-f]{40}$/u;
 
@@ -33,12 +33,13 @@ export const STRIPPED_FROM_EXPORT = [
   'docs/coordination/branches',
 ];
 
-const systemBinary = (name) => {
+export const systemBinary = (name) => {
   const found = SYSTEM_DIRECTORIES.map((directory) =>
     join(directory, name),
   ).find((path) => existsSync(path));
-  if (found === undefined)
-    throw new Error(`no ${name} in the system directories`);
+  if (found === undefined) {
+    throw new Error(`no ${name} in ${SYSTEM_DIRECTORIES.join(', ')}`);
+  }
   return found;
 };
 
@@ -51,9 +52,9 @@ const extract = ({ into, root, sha }) => {
   if (archived.status !== 0) {
     throw new Error(`git archive ${sha} failed: ${archived.stderr}`);
   }
-  execFileSync(systemBinary('tar'), ['-xf', archive, '-C', into], {
+  execFileSync(systemBinary('tar'), [`--file=${archive}`, '--extract'], {
+    cwd: into,
     env: buildGitEnv(process.env),
-    stdio: 'ignore',
   });
   rmSync(archive);
 };

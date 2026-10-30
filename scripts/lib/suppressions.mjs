@@ -84,27 +84,21 @@ const stringStep = (state, character) => {
 
 const LINE_START = { comment: false, escaped: false, quote: undefined };
 
-const scanStep = ({ character, index, position, scan }) => {
-  const quoteAt = position === index ? scan.state.quote : scan.quoteAt;
-  const state = stringStep(scan.state, character);
-  const closes =
-    position >= index &&
-    quoteAt !== undefined &&
-    scan.state.quote !== undefined &&
-    state.quote === undefined;
-  return { closed: scan.closed || closes, quoteAt, state };
-};
+const stateAfter = (text) =>
+  [...text].reduce(
+    (state, character) => stringStep(state, character),
+    LINE_START,
+  );
 
-const insideClosedString = ({ index, line }) =>
-  [...line].reduce(
-    (scan, character, position) =>
-      scanStep({ character, index, position, scan }),
-    {
-      closed: false,
-      quoteAt: undefined,
-      state: LINE_START,
-    },
-  ).closed;
+const insideClosedString = ({ index, line }) => {
+  let state = stateAfter(line.slice(0, index));
+  if (state.quote === undefined) return false;
+  for (const character of line.slice(index)) {
+    state = stringStep(state, character);
+    if (state.quote === undefined) return true;
+  }
+  return false;
+};
 
 export const opensComment = ({ index, line }) => {
   const trimmed = line.slice(0, index).trimEnd();
