@@ -4,7 +4,6 @@ import type {
   TableFocusState,
   TableGroupExpansionState,
   TableGroupingState,
-  TableMetaState,
 } from '#ui/components/Table/Table.types';
 
 import { resolveTableGroupTree } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
@@ -18,7 +17,7 @@ type ResolveGridFocusContextArgs<TData extends Record<string, unknown>> = {
   readonly expansionState: TableGroupExpansionState;
   readonly focusState: TableFocusState;
   readonly groupingState: TableGroupingState;
-  readonly metaState: TableMetaState;
+  readonly rowHeight: number;
 };
 
 export const resolveGridFocusContext = <TData extends Record<string, unknown>>({
@@ -26,7 +25,7 @@ export const resolveGridFocusContext = <TData extends Record<string, unknown>>({
   dataState,
   expansionState,
   focusState,
-  metaState,
+  rowHeight,
 }: ResolveGridFocusContextArgs<TData>) => {
   const { columns, pinnedColumnPartition } = columnsState;
   const { rowMeta, rows } = resolveTableGroupTree({
@@ -45,7 +44,7 @@ export const resolveGridFocusContext = <TData extends Record<string, unknown>>({
       rowIndex: focusState.rowIndex,
       rowKey: focusState.rowKey,
     }),
-    rowHeight: metaState.rowHeight,
+    rowHeight,
     rowMeta,
   };
 };

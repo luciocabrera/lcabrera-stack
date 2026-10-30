@@ -1,17 +1,18 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { tableDensityVars } from '#ui/components/Table/TableBase/tableDensity.stylex';
 import { typography, zIndex } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 export const tableHeaderBandStyles = stylex.create({
   base: (width: number | string) => ({
-    paddingInline: '6px',
+    paddingInline: tableDensityVars.headerPaddingInline,
     alignItems: 'flex-end',
     boxSizing: 'border-box',
     color: colors.textTertiary,
     display: 'flex',
     flexShrink: 0,
-    fontSize: typography.fontSizeXs,
+    fontSize: tableDensityVars.headerBandFontSize,
     fontWeight: typography.fontWeightSemibold,
     justifyContent: 'flex-start',
     paddingBlockEnd: '2px',

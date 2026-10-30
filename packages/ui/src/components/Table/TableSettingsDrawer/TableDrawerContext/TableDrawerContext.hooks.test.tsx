@@ -17,12 +17,14 @@ import { createMockStore } from '#ui/utils/tests/createMockStore.util';
 
 import type {
   TableDrawerContextValue,
+  TableDrawerDensityState,
   TableDrawerTotalsPlacementState,
 } from './TableDrawerContext.types';
 
 import { useAddColumnAggregate } from './actions/useAddColumnAggregate.hook';
 import { useClearGrouping } from './actions/useClearGrouping.hook';
 import { useSetColumnsOrder } from './actions/useSetColumnsOrder.hook';
+import { useSetDensity } from './actions/useSetDensity.hook';
 import { useSetGroupKeys } from './actions/useSetGroupKeys.hook';
 import { useToggleGroupKey } from './actions/useToggleGroupKey.hook';
 import { useGetColumnFilters } from './selectors/useGetColumnFilters.hook';
@@ -30,6 +32,7 @@ import { useGetColumnOrder } from './selectors/useGetColumnOrder.hook';
 import { useGetColumnPinning } from './selectors/useGetColumnPinning.hook';
 import { useGetColumnsSorting } from './selectors/useGetColumnsSorting.hook';
 import { useGetColumnVisibility } from './selectors/useGetColumnVisibility.hook';
+import { useGetDensity } from './selectors/useGetDensity.hook';
 import { useGetGroupingAggregates } from './selectors/useGetGroupingAggregates.hook';
 import { useGetGroupingKeys } from './selectors/useGetGroupingKeys.hook';
 import { TableDrawerContext } from './TableDrawerContext.context';
@@ -67,8 +70,13 @@ const totalsPlacementStore = createMockStore<TableDrawerTotalsPlacementState>({
   totalsPlacement: 'last',
 });
 
+const densityStore = createMockStore<TableDrawerDensityState>({
+  density: 'compact',
+});
+
 const contextValue: TableDrawerContextValue = {
   columnsStore: columnsStore as never,
+  densityStore: densityStore as never,
   groupingStore: groupingStore as never,
   totalsPlacementStore: totalsPlacementStore as never,
 };
@@ -83,11 +91,13 @@ const Wrapper = ({ children }: WrapperProps) =>
   );
 
 describe('TableDrawerContext hooks', () => {
-  it('returns the drawer context value', () => {
-    expect(
-      renderHook(() => useTableDrawerContextValue(), { wrapper: Wrapper })
-        .result.current,
-    ).toBe(contextValue);
+  it('returns the drawer context value, density draft included', () => {
+    const { current } = renderHook(() => useTableDrawerContextValue(), {
+      wrapper: Wrapper,
+    }).result;
+
+    expect(current).toBe(contextValue);
+    expect(current.densityStore).toBe(densityStore);
   });
 
   it('subscribes to the drawer store and exposes selector hooks', () => {
@@ -141,6 +151,22 @@ describe('TableDrawerContext hooks', () => {
     });
 
     expect(columnsStore.get().columnOrder).toEqual(['status', 'id']);
+  });
+
+  it('stages a density level and reads it back', () => {
+    const { result } = renderHook(
+      () => ({ density: useGetDensity(), setDensity: useSetDensity() }),
+      { wrapper: Wrapper },
+    );
+
+    expect(result.current.density).toBe('compact');
+
+    act(() => {
+      result.current.setDensity('spacious');
+    });
+
+    expect(result.current.density).toBe('spacious');
+    expect(densityStore.get()).toStrictEqual({ density: 'spacious' });
   });
 });
 
@@ -297,6 +323,18 @@ describe('TableDrawerContext grouping draft hooks', () => {
   });
 });
 
+const toggleStatusKey = () => {
+  const { result } = renderHook(() => useToggleGroupKey(), {
+    wrapper: Wrapper,
+  });
+
+  act(() => {
+    result.current({ columnKey: 'status' });
+  });
+
+  return result;
+};
+
 describe("the reader's preferred grouping mode", () => {
   beforeEach(() => {
     groupingStore.reset({
@@ -311,25 +349,13 @@ describe("the reader's preferred grouping mode", () => {
   });
 
   it('starts a grouping the first staged key creates', () => {
-    const { result } = renderHook(() => useToggleGroupKey(), {
-      wrapper: Wrapper,
-    });
-
-    act(() => {
-      result.current({ columnKey: 'status' });
-    });
+    toggleStatusKey();
 
     expect(groupingStore.get().mode).toBe('rollup');
   });
 
   it('leaves a second key alone, so switching the mode back sticks', () => {
-    const { result } = renderHook(() => useToggleGroupKey(), {
-      wrapper: Wrapper,
-    });
-
-    act(() => {
-      result.current({ columnKey: 'status' });
-    });
+    const result = toggleStatusKey();
 
     act(() => {
       groupingStore.set({ mode: 'flat' });
@@ -354,13 +380,7 @@ describe("the reader's preferred grouping mode", () => {
   it('leaves the mode alone when the reader expressed no preference', () => {
     metaStore.reset({});
 
-    const { result } = renderHook(() => useToggleGroupKey(), {
-      wrapper: Wrapper,
-    });
-
-    act(() => {
-      result.current({ columnKey: 'status' });
-    });
+    toggleStatusKey();
 
     expect(groupingStore.get().mode).toBe('flat');
   });

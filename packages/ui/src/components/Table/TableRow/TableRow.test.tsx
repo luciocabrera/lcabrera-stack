@@ -5,6 +5,8 @@ import type { ReactNode } from 'react';
 import { render, screen } from '@testing-library/react';
 import { describe, expect, it } from 'vite-plus/test';
 
+import type { TableMetaState } from '#ui/components/Table/Table.types';
+
 import { TableConfigProvider } from '#ui/components/Table/contexts';
 import { DEFAULT_ROW_HEIGHT } from '#ui/components/Table/Table.constants';
 
@@ -12,14 +14,19 @@ import { TableRow } from './TableRow.component';
 
 type RenderInTableArgs = {
   readonly children: ReactNode;
+  readonly metaState?: Partial<TableMetaState>;
   readonly rowHeight?: number;
 };
 
-const renderInTable = ({ children, rowHeight }: RenderInTableArgs) => {
+const renderInTable = ({
+  children,
+  metaState,
+  rowHeight,
+}: RenderInTableArgs) => {
   return render(
     <TableConfigProvider
       columnsState={{ columns: [] }}
-      metaState={{ rowHeight }}
+      metaState={{ rowHeight, ...metaState }}
     >
       <table>
         <tbody>{children}</tbody>
@@ -100,6 +107,30 @@ describe('TableRow', () => {
 
     expect(getInlineStyle(screen.getByTitle('header-row'))).toContain('48px');
   });
+
+  it('sizes the header row from the header density and a body row from the density', () => {
+    renderInTable({
+      children: (
+        <>
+          <TableRow isHeader title='dense-header-row'>
+            <td>Header</td>
+          </TableRow>
+          <TableRow title='spacious-body-row'>
+            <td>Body</td>
+          </TableRow>
+        </>
+      ),
+      metaState: { density: 'spacious', headerDensity: 'dense' },
+    });
+
+    expect(getInlineStyle(screen.getByTitle('dense-header-row'))).toContain(
+      '24px',
+    );
+    expect(getInlineStyle(screen.getByTitle('spacious-body-row'))).toContain(
+      '48px',
+    );
+  });
+
   it('declares role=row, because the flex display removed the implicit one', () => {
     const { container } = renderInTable({
       children: (

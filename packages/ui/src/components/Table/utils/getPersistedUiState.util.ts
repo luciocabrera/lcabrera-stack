@@ -10,6 +10,7 @@ export const getPersistedUiState = ({
   totalsPlacement,
 }: GetPersistedUiStateArgs = {}) => ({
   columnSettingsSelectedTab: chrome?.columnSettingsSelectedTab,
+  density: chrome?.density,
   isColumnSettingsOpen: chrome?.isColumnSettingsOpen,
   isColumnSettingsPinned: chrome?.isColumnSettingsPinned,
   isTableSettingsOpen: chrome?.isTableSettingsOpen,

@@ -17,6 +17,7 @@ import { GroupingSectionToolbar } from '../GroupingSection/GroupingSectionToolba
 import { SortingSectionToolbar } from '../SortingSection/SortingSectionToolbar';
 import { AllSettingsSection } from './AllSettingsSection/AllSettingsSection.component';
 import { ColumnWidthsSection } from './ColumnWidthsSection/ColumnWidthsSection.component';
+import { DensitySection } from './DensitySection/DensitySection.component';
 
 export const GeneralSettingsSection = ({
   isBusy = false,
@@ -33,6 +34,8 @@ export const GeneralSettingsSection = ({
         Select a preset to adjust all column widths at once. Changes will be
         reflected after clicking Accept.
       </InfoBox>
+
+      <DensitySection isBusy={isBusy} />
 
       <SidePanelSection>
         <SidePanelSectionHeader title='Filters' />

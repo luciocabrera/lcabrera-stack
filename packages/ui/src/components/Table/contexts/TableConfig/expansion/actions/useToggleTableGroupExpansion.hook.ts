@@ -6,21 +6,21 @@ import {
   toggleCollapsedGroupPath,
 } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
-import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
-import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFocus/useTableFocusContextValue.hook';
-import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 
+import { useGroupFoldStores } from './useGroupFoldStores.hook';
 import { applyGroupFoldFocus } from './utils';
 
 export const useToggleTableGroupExpansion = <
   TData extends Record<string, unknown>,
 >() => {
-  const { columnsStore, expansionStore, metaStore } =
-    useTableConfigContextValue<TData>();
-  const { dataStore } = useTableDataContextValue<TData>();
-  const { focusStore } = useTableFocusContextValue();
-  const containerRef = useTableContainerRef();
+  const {
+    columnsStore,
+    containerRef,
+    dataStore,
+    expansionStore,
+    focusStore,
+    readRowHeight,
+  } = useGroupFoldStores<TData>();
 
   return (path: readonly TableGroupKeyValue[]) => {
     const { defaultFold, toggledGroupPaths } = expansionStore.get();
@@ -50,7 +50,7 @@ export const useToggleTableGroupExpansion = <
         focusState,
         focusStore,
         groupPathKey,
-        rowHeight: metaStore.get().rowHeight,
+        rowHeight: readRowHeight(),
         rows,
       });
     }

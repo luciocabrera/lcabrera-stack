@@ -7,7 +7,6 @@ import type {
   TableFocusState,
   TableGroupExpansionState,
   TableGroupingState,
-  TableMetaState,
 } from '#ui/components/Table/Table.types';
 
 import { resolveGroupPathKey } from '#ui/components/Table/contexts/TableConfig/grouping/utils/resolveGroupPathKey.util';
@@ -15,7 +14,6 @@ import {
   getInitialColumnsState,
   getInitialExpansionState,
   getInitialGroupingState,
-  getInitialMetaState,
 } from '#ui/components/Table/contexts/TableConfig/utils';
 import { getInitialDataState } from '#ui/components/Table/contexts/TableData/utils';
 import { getInitialFocusState } from '#ui/components/Table/contexts/TableFocus/focus/utils';
@@ -65,7 +63,7 @@ const dataState = getInitialDataState<Row>({
   totalRows: rows.length,
 }) as TableDataState<Row>;
 
-const metaState = getInitialMetaState({ rowHeight: 44 }) as TableMetaState;
+const rowHeight = 44;
 
 const focusStateFor = (
   overrides: Partial<TableFocusState>,
@@ -85,7 +83,7 @@ describe('resolveGridFocusContext', () => {
       expansionState,
       focusState: focusStateFor({}),
       groupingState,
-      metaState,
+      rowHeight,
     });
 
     expect(context.columnKeys).toEqual(['id', 'city']);
@@ -102,7 +100,7 @@ describe('resolveGridFocusContext', () => {
       expansionState,
       focusState: focusStateFor({}),
       groupingState,
-      metaState,
+      rowHeight,
     });
 
     expect(context.focusedRowIndex).toBeUndefined();
@@ -119,7 +117,7 @@ describe('resolveGridFocusContext', () => {
         rowKey: rowKeyAt(2),
       }),
       groupingState,
-      metaState,
+      rowHeight,
     });
 
     expect(context.focusedRowIndex).toBe(2);
@@ -141,7 +139,7 @@ describe('resolveGridFocusContext', () => {
       expansionState,
       focusState: focusStateFor({}),
       groupingState,
-      metaState,
+      rowHeight,
     });
     const context = resolveGridFocusContext({
       columnsState,
@@ -149,7 +147,7 @@ describe('resolveGridFocusContext', () => {
       expansionState: collapsed,
       focusState: focusStateFor({}),
       groupingState,
-      metaState,
+      rowHeight,
     });
 
     expect(expanded.data).toHaveLength(3);

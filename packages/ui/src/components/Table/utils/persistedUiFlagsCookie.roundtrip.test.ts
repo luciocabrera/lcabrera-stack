@@ -67,6 +67,23 @@ describe('persisted UI flags cookie round trip', () => {
     ).toEqual(uiFlags);
   });
 
+  it('reads back the density level', () => {
+    const uiFlags = {
+      density: 'spacious',
+      isTableSettingsOpen: false,
+    } as const satisfies PersistedUiState;
+
+    const cookieString = captureCookieHeader(uiFlags);
+
+    expect(
+      readPersistedUiFlagsFromCookie({
+        appId: 'react-router',
+        cookieString,
+        persistenceKey: 'orders',
+      }),
+    ).toEqual(uiFlags);
+  });
+
   it('survives a value that percent-encodes, rather than double-encoding it', () => {
     const cookieString = captureCookieHeader({ isTableSettingsOpen: true });
 

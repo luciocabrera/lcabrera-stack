@@ -1,5 +1,6 @@
 import type {
   TableColumnsState,
+  TableDensity,
   TableGroupingState,
   TableMetaState,
   TableTotalsPlacement,
@@ -20,6 +21,7 @@ type ResolveBatchSettingsPlanArgs<TData> = {
   readonly columnsState: Partial<TableColumnsState<TData>> | undefined;
   readonly currentGrouping: TableGroupingState;
   readonly data: readonly unknown[];
+  readonly density?: TableDensity;
   readonly grouping: TableGroupingState;
   readonly metaState: Partial<TableMetaState> | undefined;
   readonly settings: BatchTableSettingsUpdate<TData>;
@@ -30,6 +32,7 @@ export const resolveBatchSettingsPlan = <TData>({
   columnsState,
   currentGrouping,
   data,
+  density,
   grouping,
   metaState,
   settings,
@@ -80,6 +83,7 @@ export const resolveBatchSettingsPlan = <TData>({
     resolvedUpdate,
     ...resolveBatchSettingsWrite({
       currentGrouping,
+      density,
       groupingUpdate,
       hasLiveQueryChanged,
       hasPlacementChanged,

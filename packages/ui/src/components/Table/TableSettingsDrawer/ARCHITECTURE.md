@@ -70,10 +70,11 @@ TableSettingsDrawer/
 │       ├── useGetGroupingAggregates
 │       └── useGetGroupingKeys
 │
-├── GeneralSettingsSection/                → Width presets + cross-section toolbars
+├── GeneralSettingsSection/                → Width presets, density + cross-section toolbars
 │   ├── GeneralSettingsSection.component.tsx → Thin composition
 │   ├── GeneralSettingsSection.types.ts
 │   ├── ColumnWidthsSection/               → Width preset toggles (owns preset state)
+│   ├── DensitySection/                    → The four density levels, staged until Accept
 │   ├── AllSettingsSection/                → Clear/reset-all buttons
 │   ├── utils/                             → buildPresetColumnSizing
 │   └── index.ts

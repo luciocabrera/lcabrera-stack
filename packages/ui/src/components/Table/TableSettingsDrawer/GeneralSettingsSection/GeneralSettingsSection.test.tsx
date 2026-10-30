@@ -75,6 +75,12 @@ vi.mock('./ColumnWidthsSection/ColumnWidthsSection.component', () => ({
   ),
 }));
 
+vi.mock('./DensitySection/DensitySection.component', () => ({
+  DensitySection: ({ isBusy }: MockToolbarProps) => (
+    <div data-busy={String(isBusy)}>Density section</div>
+  ),
+}));
+
 import { GeneralSettingsSection } from './GeneralSettingsSection.component';
 
 afterEach(() => {
@@ -91,6 +97,7 @@ describe('GeneralSettingsSection', () => {
     render(<GeneralSettingsSection />);
 
     expect(screen.getByText('Column widths section')).not.toBeNull();
+    expect(screen.getByText('Density section')).not.toBeNull();
     expect(screen.getByRole('heading', { name: 'Filters' })).not.toBeNull();
     expect(screen.getByText('Filters toolbar')).not.toBeNull();
     expect(screen.getByRole('heading', { name: 'Sorting' })).not.toBeNull();
@@ -110,6 +117,7 @@ describe('GeneralSettingsSection', () => {
 
     const busyNodes = [
       'Column widths section',
+      'Density section',
       'Filters toolbar',
       'Sorting toolbar',
       'Column order toolbar',

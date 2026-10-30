@@ -1,6 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { useGetTableRowHeight } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import {
+  useGetTableHeaderRowHeight,
+  useGetTableRowHeight,
+} from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 
 import type { TableRowProps } from './TableRow.types';
 
@@ -13,7 +16,9 @@ export const TableRow = ({
   isStriped = true,
   ...rest
 }: TableRowProps) => {
-  const rowHeight = useGetTableRowHeight();
+  const bodyRowHeight = useGetTableRowHeight();
+  const headerRowHeight = useGetTableHeaderRowHeight();
+  const rowHeight = isHeader ? headerRowHeight : bodyRowHeight;
 
   return (
     <tr

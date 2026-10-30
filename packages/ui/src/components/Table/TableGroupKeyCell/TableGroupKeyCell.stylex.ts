@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { tableDensityVars } from '#ui/components/Table/TableBase/tableDensity.stylex';
 import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
@@ -16,7 +17,7 @@ export const tableGroupKeyCellStyles = stylex.create({
     alignItems: 'center',
     color: colors.brandPrimaryCardText,
     display: 'flex',
-    fontSize: typography.fontSizeSm,
+    fontSize: tableDensityVars.bodyFontSize,
     fontWeight: typography.fontWeightSemibold,
     // Inherited, never chosen here: this container fills the cell, so the cell's own
     // type-derived alignment would otherwise stop at its edge (#1018).

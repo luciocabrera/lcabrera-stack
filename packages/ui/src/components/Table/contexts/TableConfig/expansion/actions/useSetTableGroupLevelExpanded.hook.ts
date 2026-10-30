@@ -3,11 +3,8 @@ import {
   resolveTableGroupTree,
   setCollapsedGroupLevel,
 } from '#ui/components/Table/contexts/TableConfig/expansion/utils';
-import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
-import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFocus/useTableFocusContextValue.hook';
-import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 
+import { useGroupFoldStores } from './useGroupFoldStores.hook';
 import { applyGroupFoldFocus, resolveFoldedAncestorPathKey } from './utils';
 
 type SetTableGroupLevelExpandedArgs = {
@@ -18,11 +15,14 @@ type SetTableGroupLevelExpandedArgs = {
 export const useSetTableGroupLevelExpanded = <
   TData extends Record<string, unknown>,
 >() => {
-  const { columnsStore, expansionStore, metaStore } =
-    useTableConfigContextValue<TData>();
-  const { dataStore } = useTableDataContextValue<TData>();
-  const { focusStore } = useTableFocusContextValue();
-  const containerRef = useTableContainerRef();
+  const {
+    columnsStore,
+    containerRef,
+    dataStore,
+    expansionStore,
+    focusStore,
+    readRowHeight,
+  } = useGroupFoldStores<TData>();
 
   return ({ columnKey, isExpanded }: SetTableGroupLevelExpandedArgs) => {
     const { defaultFold, toggledGroupPaths } = expansionStore.get();
@@ -57,7 +57,7 @@ export const useSetTableGroupLevelExpanded = <
         focusState,
         focusStore,
         groupPathKey,
-        rowHeight: metaStore.get().rowHeight,
+        rowHeight: readRowHeight(),
         rows: resolveTableGroupTree({
           ...treeArgs,
           toggledGroupPaths: nextCollapsed,

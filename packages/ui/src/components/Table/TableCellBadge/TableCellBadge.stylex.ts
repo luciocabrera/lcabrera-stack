@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { tableDensityVars } from '#ui/components/Table/TableBase/tableDensity.stylex';
 import {
   borderRadius,
   spacing,
@@ -19,7 +20,7 @@ export const styles = stylex.create({
     overflow: 'hidden',
     paddingBlock: '2px',
     paddingInline: spacing.xs,
-    fontSize: typography.fontSizeSm,
+    fontSize: tableDensityVars.bodyFontSize,
     fontWeight: typography.fontWeightSemibold,
     textOverflow: 'ellipsis',
     whiteSpace: 'nowrap',

@@ -3,6 +3,7 @@ export { useGetColumnOrder } from './useGetColumnOrder.hook';
 export { useGetColumnPinning } from './useGetColumnPinning.hook';
 export { useGetColumnsSorting } from './useGetColumnsSorting.hook';
 export { useGetColumnVisibility } from './useGetColumnVisibility.hook';
+export { useGetDensity } from './useGetDensity.hook';
 export { useGetGroupingAggregates } from './useGetGroupingAggregates.hook';
 export { useGetGroupingColumnAxis } from './useGetGroupingColumnAxis.hook';
 export { useGetGroupingKeys } from './useGetGroupingKeys.hook';

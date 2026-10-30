@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 
+import type { ComponentProps } from 'react';
+
 import { cleanup, render, screen } from '@testing-library/react';
 import {
   afterEach,
@@ -10,10 +12,14 @@ import {
   vi,
 } from 'vite-plus/test';
 
+import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
+
 import { TableBase } from './TableBase.component';
+import { tableDensityVars } from './tableDensity.stylex';
 
 const {
   useGetTableDensityMock,
+  useGetTableHeaderDensityMock,
   useGetTableIsBorderedMock,
   useGetTableIsLoadingMock,
   useGetTableIsStripedMock,
@@ -23,6 +29,7 @@ const {
   useTableGroupTreeMock,
 } = vi.hoisted(() => ({
   useGetTableDensityMock: vi.fn(),
+  useGetTableHeaderDensityMock: vi.fn(),
   useGetTableIsBorderedMock: vi.fn(),
   useGetTableIsLoadingMock: vi.fn(),
   useGetTableIsStripedMock: vi.fn(),
@@ -34,6 +41,7 @@ const {
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableDensity: useGetTableDensityMock,
+  useGetTableHeaderDensity: useGetTableHeaderDensityMock,
   useGetTableIsBordered: useGetTableIsBorderedMock,
   useGetTableIsStriped: useGetTableIsStripedMock,
 }));
@@ -56,9 +64,47 @@ afterEach(() => {
   cleanup();
 });
 
+type DensityVariable =
+  | 'bodyFontSize'
+  | 'bodyPaddingInline'
+  | 'headerBandFontSize'
+  | 'headerFontSize'
+  | 'headerPaddingInline';
+
+const toInlineVariableName = (reference: string) =>
+  `--x---${reference.slice('var(--'.length, -1)}`;
+
+type ReadDensityVariableArgs = {
+  readonly name: DensityVariable;
+  readonly style: CSSStyleDeclaration;
+};
+
+type RenderTableBaseArgs = {
+  readonly cellText?: string;
+  readonly props?: ComponentProps<typeof TableBase>;
+};
+
+const readDensityVariable = ({ name, style }: ReadDensityVariableArgs) =>
+  style.getPropertyValue(toInlineVariableName(tableDensityVars[name]));
+
+const renderTableBase = ({
+  cellText = 'Orders',
+  props = {},
+}: RenderTableBaseArgs = {}) =>
+  render(
+    <TableBase {...props}>
+      <tbody>
+        <tr>
+          <td>{cellText}</td>
+        </tr>
+      </tbody>
+    </TableBase>,
+  );
+
 describe('TableBase', () => {
   beforeEach(() => {
     useGetTableDensityMock.mockReturnValue('comfortable');
+    useGetTableHeaderDensityMock.mockReturnValue('comfortable');
     useGetTableIsBorderedMock.mockReturnValue(true);
     useGetTableIsStripedMock.mockReturnValue(false);
     useGetTableIsLoadingMock.mockReturnValue(false);
@@ -72,15 +118,7 @@ describe('TableBase', () => {
   });
 
   it('renders children inside a table element', () => {
-    render(
-      <TableBase>
-        <tbody>
-          <tr>
-            <td>Orders</td>
-          </tr>
-        </tbody>
-      </TableBase>,
-    );
+    renderTableBase();
 
     const table = screen.getByTestId('table');
     expect(table.tagName).toBe('TABLE');
@@ -90,30 +128,14 @@ describe('TableBase', () => {
   it('reflects striped state via data attribute', () => {
     useGetTableIsStripedMock.mockReturnValue(true);
 
-    render(
-      <TableBase>
-        <tbody>
-          <tr>
-            <td>Striped</td>
-          </tr>
-        </tbody>
-      </TableBase>,
-    );
+    renderTableBase({ cellText: 'Striped' });
 
     const table = screen.getByTestId('table');
     expect(table.dataset.striped).toBe('true');
   });
 
   it('declares role=grid, because the display overrides removed the implicit one', () => {
-    render(
-      <TableBase>
-        <tbody>
-          <tr>
-            <td>Orders</td>
-          </tr>
-        </tbody>
-      </TableBase>,
-    );
+    renderTableBase();
 
     expect(screen.getByRole('grid')).toBe(screen.getByTestId('table'));
   });
@@ -121,15 +143,7 @@ describe('TableBase', () => {
   it('reports aria-rowcount as the dataset plus its header row', () => {
     useGetTableTotalRowsMock.mockReturnValue(120);
 
-    render(
-      <TableBase>
-        <tbody>
-          <tr>
-            <td>Orders</td>
-          </tr>
-        </tbody>
-      </TableBase>,
-    );
+    renderTableBase();
 
     expect(screen.getByRole('grid').getAttribute('aria-rowcount')).toBe('121');
   });
@@ -138,15 +152,7 @@ describe('TableBase', () => {
     useGetTableTotalRowsMock.mockReturnValue(0);
     useGetTableIsLoadingMock.mockReturnValue(false);
 
-    render(
-      <TableBase>
-        <tbody>
-          <tr>
-            <td>Orders</td>
-          </tr>
-        </tbody>
-      </TableBase>,
-    );
+    renderTableBase();
 
     expect(screen.getByRole('grid').getAttribute('aria-rowcount')).toBe('1');
   });
@@ -155,15 +161,7 @@ describe('TableBase', () => {
     useGetTableTotalRowsMock.mockReturnValue(0);
     useGetTableIsLoadingMock.mockReturnValue(true);
 
-    render(
-      <TableBase>
-        <tbody>
-          <tr>
-            <td>Orders</td>
-          </tr>
-        </tbody>
-      </TableBase>,
-    );
+    renderTableBase();
 
     expect(screen.getByRole('grid').getAttribute('aria-rowcount')).toBe('-1');
   });
@@ -171,15 +169,7 @@ describe('TableBase', () => {
   it('keeps its ARIA contract when a caller passes conflicting props', () => {
     useGetTableTotalRowsMock.mockReturnValue(120);
 
-    render(
-      <TableBase aria-rowcount={7} role='table'>
-        <tbody>
-          <tr>
-            <td>Orders</td>
-          </tr>
-        </tbody>
-      </TableBase>,
-    );
+    renderTableBase({ props: { 'aria-rowcount': 7, role: 'table' } });
 
     const grid = screen.getByTestId('table');
     expect(grid.getAttribute('role')).toBe('grid');
@@ -194,15 +184,7 @@ describe('TableBase', () => {
       rows: [{}, {}, {}],
     });
 
-    render(
-      <TableBase>
-        <tbody>
-          <tr>
-            <td>Orders</td>
-          </tr>
-        </tbody>
-      </TableBase>,
-    );
+    renderTableBase();
 
     const grid = screen.getByTestId('table');
     expect(grid.getAttribute('role')).toBe('treegrid');
@@ -210,17 +192,33 @@ describe('TableBase', () => {
   });
 
   it('forwards native table attributes', () => {
-    render(
-      <TableBase title='orders-table'>
-        <tbody>
-          <tr>
-            <td>Summary</td>
-          </tr>
-        </tbody>
-      </TableBase>,
-    );
+    renderTableBase({ cellText: 'Summary', props: { title: 'orders-table' } });
 
     const table = screen.getByTitle('orders-table');
     expect(table.tagName).toBe('TABLE');
+  });
+
+  it('sets the body variables from the density and the header variables from the header density', () => {
+    useGetTableDensityMock.mockReturnValue('dense');
+    useGetTableHeaderDensityMock.mockReturnValue('spacious');
+
+    renderTableBase();
+
+    const { style } = screen.getByTestId('table');
+    expect(readDensityVariable({ name: 'bodyFontSize', style }).trim()).toBe(
+      typography.fontSizeXs,
+    );
+    expect(
+      readDensityVariable({ name: 'bodyPaddingInline', style }).trim(),
+    ).toBe(spacing.xxs);
+    expect(readDensityVariable({ name: 'headerFontSize', style }).trim()).toBe(
+      typography.fontSizeSm,
+    );
+    expect(
+      readDensityVariable({ name: 'headerPaddingInline', style }).trim(),
+    ).toBe(spacing.md);
+    expect(
+      readDensityVariable({ name: 'headerBandFontSize', style }).trim(),
+    ).toBe(typography.fontSizeXs);
   });
 });

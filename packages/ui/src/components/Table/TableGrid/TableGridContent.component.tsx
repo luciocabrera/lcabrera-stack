@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import type { TableGridContentProps } from './TableGrid.types';
 
 import { TableCellRenderingProvider, TableDataProvider } from '../contexts';
+import { TableDensityContext } from '../contexts/TableConfig/TableDensityContext.context';
 import { TableOwnStackContext } from '../contexts/TableConfig/TableOwnStackContext.context';
 import { styles } from '../Table.stylex';
 import { TableContent } from '../TableContent';
@@ -20,6 +21,8 @@ export const TableGridContent = <
     cellRenderers,
     dataSelector,
     dataTotalSelector,
+    density,
+    headerDensity,
     icon,
     isFlexWrapperEnabled = true,
     onLoadMore,
@@ -31,13 +34,15 @@ export const TableGridContent = <
         cellRenderers={cellRenderers}
       >
         <TableDataProvider<TData> dataState={dataState}>
-          <TableContent
-            actions={actions}
-            dataSelector={dataSelector}
-            dataTotalSelector={dataTotalSelector}
-            icon={icon}
-            onLoadMore={onLoadMore}
-          />
+          <TableDensityContext value={{ density, headerDensity }}>
+            <TableContent
+              actions={actions}
+              dataSelector={dataSelector}
+              dataTotalSelector={dataTotalSelector}
+              icon={icon}
+              onLoadMore={onLoadMore}
+            />
+          </TableDensityContext>
         </TableDataProvider>
       </TableCellRenderingProvider>
     </TableOwnStackContext>

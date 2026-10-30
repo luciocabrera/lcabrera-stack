@@ -3,6 +3,8 @@ import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
 import type {
   TableAggregateFn,
   TableColumnLayoutLock,
+  TableDensity,
+  TableDensityStep,
   TableGroupFold,
   TableGroupingMode,
   TableGroupKeyRefusalReason,
@@ -27,6 +29,53 @@ export const COLUMN_RESIZE_KEYBOARD_COARSE_STEP = 40;
 export const DEFAULT_PLACEHOLDER_ROW_COUNT = 50;
 
 export const DEFAULT_ROW_HEIGHT = 32;
+
+export const DEFAULT_TABLE_DENSITY = 'compact' satisfies TableDensity;
+
+export const TABLE_DENSITY_LEVELS = [
+  'dense',
+  'compact',
+  'comfortable',
+  'spacious',
+] as const satisfies readonly TableDensity[];
+
+export const TABLE_DENSITY_LABELS: Readonly<Record<TableDensity, string>> = {
+  comfortable: 'Comfortable',
+  compact: 'Compact',
+  dense: 'Dense',
+  spacious: 'Spacious',
+};
+
+export const TABLE_DENSITY_SCALE = {
+  comfortable: {
+    bodyFontSize: 'fontSizeSm',
+    headerBandFontSize: 'fontSizeXs',
+    headerFontSize: 'fontSizeSm',
+    paddingInline: 'sm',
+    rowHeight: 40,
+  },
+  compact: {
+    bodyFontSize: 'fontSizeSm',
+    headerBandFontSize: 'fontSizeXs',
+    headerFontSize: 'fontSizeSm',
+    paddingInline: 'xs',
+    rowHeight: DEFAULT_ROW_HEIGHT,
+  },
+  dense: {
+    bodyFontSize: 'fontSizeXs',
+    headerBandFontSize: 'fontSizeXs',
+    headerFontSize: 'fontSizeXs',
+    paddingInline: 'xxs',
+    rowHeight: 24,
+  },
+  spacious: {
+    bodyFontSize: 'fontSizeMd',
+    headerBandFontSize: 'fontSizeXs',
+    headerFontSize: 'fontSizeSm',
+    paddingInline: 'md',
+    rowHeight: 48,
+  },
+} as const satisfies Readonly<Record<TableDensity, TableDensityStep>>;
 
 export const INITIAL_PAGE_SIZE = 50;
 export const LOAD_MORE_PAGE_SIZE = 150;

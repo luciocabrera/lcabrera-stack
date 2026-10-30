@@ -72,7 +72,9 @@ TableConfig/
 │   └── selectors/
 │       ├── useGetTableColumnSelectedKey.hook.ts          → Selected column key
 │       ├── useGetTableAdditionalMetadata.hook.ts         → Optional custom metadata map
-│       ├── useGetTableDensity.hook.ts                    → Table density setting
+│       ├── useGetTableDensity.hook.ts                    → Resolved body density level
+│       ├── useGetTableHeaderDensity.hook.ts              → Resolved header density level
+│       ├── useGetTableHeaderRowHeight.hook.ts            → Resolved header row height
 │       ├── useGetTableInitialPageSize.hook.ts            → Initial page size value
 │       ├── useGetTableIsBordered.hook.ts                 → Border toggle
 │       ├── useGetTableIsColumnSettingsOpen.hook.ts       → Column settings open state
@@ -82,7 +84,7 @@ TableConfig/
 │       ├── useGetTableOverscan.hook.ts                   → Virtual scroll overscan
 │       ├── useGetTablePersistenceKey.hook.ts             → Persistence key
 │       ├── useGetTablePlaceholderRowCount.hook.ts        → Placeholder row count
-│       ├── useGetTableRowHeight.hook.ts                  → Row height value
+│       ├── useGetTableRowHeight.hook.ts                  → Resolved body row height
 │       ├── useGetTableSchemaName.hook.ts                 → Optional schema name
 │       ├── useGetTableTableName.hook.ts                  → Optional table name
 │       ├── useGetTableThreshold.hook.ts                  → Fetch-more threshold
@@ -486,7 +488,9 @@ a subscription effect in the provider.
 | ------------------------------------ | ---------------------------------------------------------------------- | ----------------------------------- |
 | `useGetTableAdditionalMetadata`      | `Record<string, TableMetadataValue \| null \| undefined> \| undefined` | Optional custom metadata map        |
 | `useGetTableColumnSelectedKey`       | `string \| null`                                                       | Currently selected column key       |
-| `useGetTableDensity`                 | `TableDensity`                                                         | Table density setting               |
+| `useGetTableDensity`                 | `TableDensity`                                                         | Resolved body density level         |
+| `useGetTableHeaderDensity`           | `TableDensity`                                                         | Resolved header density level       |
+| `useGetTableHeaderRowHeight`         | `number`                                                               | Resolved header row height          |
 | `useGetTableDrawersSyncNonce`        | `number`                                                               | Drawer remount nonce for panel sync |
 | `useGetTableEnablePrefetch`          | `boolean`                                                              | Whether prefetch buffer is active   |
 | `useGetTableInitialPageSize`         | `number`                                                               | Initial page row count              |
@@ -500,7 +504,7 @@ a subscription effect in the provider.
 | `useGetTableOverscan`                | `number`                                                               | Virtual scroll overscan count       |
 | `useGetTablePersistenceKey`          | `string`                                                               | Persistence key for URL/cookie sync |
 | `useGetTablePlaceholderRowCount`     | `number`                                                               | Skeleton row count                  |
-| `useGetTableRowHeight`               | `number`                                                               | Row height in px                    |
+| `useGetTableRowHeight`               | `number`                                                               | Resolved body row height in px      |
 | `useGetTableSchemaName`              | `string \| undefined`                                                  | Optional schema name                |
 | `useGetTableSettingsExpandedFilters` | `string[]`                                                             | Persisted expanded filter keys      |
 | `useGetTableSettingsSelectedTab`     | `string`                                                               | Persisted table settings tab key    |

@@ -1,18 +1,16 @@
 import { useToggleTableGroupExpansion } from '#ui/components/Table/contexts/TableConfig/expansion/actions';
-import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
-import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 import { useTableFocusContextValue } from '#ui/components/Table/contexts/TableFocus/useTableFocusContextValue.hook';
 import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 import { resolveRowKey } from '#ui/components/Table/TableBodyRows/utils/resolveRowKey.util';
 
 import type { MoveTableGridFocusArgs } from './useMoveTableGridFocus.types';
 
+import { useReadGridFocusContext } from './useReadGridFocusContext.hook';
 import {
   commitTableFocusTarget,
   getGridPageRows,
   resolveFocusedGridCell,
   resolveFocusedGroupFold,
-  resolveGridFocusContext,
   resolveGridFocusMove,
   resolveGroupExpansionKey,
 } from './utils';
@@ -21,23 +19,14 @@ export const useMoveTableGridFocus = <
   TData extends Record<string, unknown>,
 >() => {
   const { focusStore } = useTableFocusContextValue();
-  const { columnsStore, expansionStore, groupingStore, metaStore } =
-    useTableConfigContextValue<TData>();
-  const { dataStore } = useTableDataContextValue<TData>();
+  const readGridFocusContext = useReadGridFocusContext<TData>();
   const containerRef = useTableContainerRef();
   const toggleGroupExpansion = useToggleTableGroupExpansion<TData>();
 
   return ({ isRangeModifier, key }: MoveTableGridFocusArgs) => {
     const focusState = focusStore.get();
     const { columnKeys, columns, data, focusedRowIndex, rowHeight, rowMeta } =
-      resolveGridFocusContext({
-        columnsState: columnsStore.get(),
-        dataState: dataStore.get(),
-        expansionState: expansionStore.get(),
-        focusState,
-        groupingState: groupingStore.get(),
-        metaState: metaStore.get(),
-      });
+      readGridFocusContext(focusState);
 
     const {
       columnIndex: currentColumnIndex,

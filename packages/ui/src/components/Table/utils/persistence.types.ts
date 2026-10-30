@@ -5,6 +5,7 @@ import type {
   ColumnSizingState,
   ColumnVisibilityState,
   SortingState,
+  TableDensity,
   TableTotalsPlacement,
 } from '../Table.types';
 
@@ -20,6 +21,7 @@ export type PersistedState<TData = Record<string, unknown>> = {
 
 export type PersistedUiState = {
   readonly columnSettingsSelectedTab?: string;
+  readonly density?: TableDensity;
   readonly isColumnSettingsOpen?: boolean;
   readonly isColumnSettingsPinned?: boolean;
   readonly isTableSettingsOpen?: boolean;

@@ -1,5 +1,6 @@
 import type {
   TableColumnsState,
+  TableDensity,
   TableGroupingState,
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
@@ -17,8 +18,13 @@ export type TableDrawerColumnsState<TData> = Pick<
 
 export type TableDrawerContextValue<TData = Record<string, unknown>> = {
   readonly columnsStore: TStore<TableDrawerColumnsState<TData>>;
+  readonly densityStore: TStore<TableDrawerDensityState>;
   readonly groupingStore: TStore<TableGroupingState>;
   readonly totalsPlacementStore: TStore<TableDrawerTotalsPlacementState>;
+};
+
+export type TableDrawerDensityState = {
+  readonly density: TableDensity;
 };
 
 export type TableDrawerProviderProps = {
