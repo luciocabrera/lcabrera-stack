@@ -1,6 +1,12 @@
 import { defineConfig, devices } from '@playwright/test';
+import { randomBytes } from 'node:crypto';
 
-import { evalsE2eServer } from './e2e/evals/evalsDatabase';
+import {
+  EVALS_E2E_READER_PASSWORD,
+  evalsE2eServer,
+} from './e2e/evals/evalsDatabase';
+
+process.env[EVALS_E2E_READER_PASSWORD] ??= randomBytes(24).toString('hex');
 
 const isCi = process.env.CI === 'true' || process.env.CI === '1';
 const port = isCi ? 3000 : 4173;

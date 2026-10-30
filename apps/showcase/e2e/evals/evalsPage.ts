@@ -1,6 +1,6 @@
 import type { Locator, Page, TestInfo } from '@playwright/test';
 
-import { expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 type Fact = readonly [term: string, value: string];
 
@@ -65,11 +65,13 @@ export const expectRouteErrorBoundary = async ({
   await expect(mainOf(page).getByRole('heading', { level: 1 })).toHaveCount(0);
   await expect(message).toBeVisible();
 
-  for (const name of ['Home', 'Retry']) {
-    await expect(
-      mainOf(page).getByRole('button', { exact: true, name }),
-    ).toBeVisible();
-  }
+  await Promise.all(
+    ['Home', 'Retry'].map((name) =>
+      expect(
+        mainOf(page).getByRole('button', { exact: true, name }),
+      ).toBeVisible(),
+    ),
+  );
 };
 
 type TrialHrefArgs = {
@@ -80,7 +82,7 @@ type TrialHrefArgs = {
 export const expectTrialHref = async ({ runId, target }: TrialHrefArgs) => {
   const url = new URL(
     (await target.getAttribute('href')) ?? '',
-    'http://evals.invalid',
+    test.info().project.use.baseURL,
   );
 
   expect(url.pathname).toBe(`/evals/runs/${runId}`);
