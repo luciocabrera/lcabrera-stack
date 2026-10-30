@@ -6,6 +6,10 @@ decides why it exists and why it never ships, and
 [ADR-131](../../docs/decisions/ADR-131-version-the-eval-run-envelope-and-accept-the-previous-version.md)
 decides how the envelope is versioned.
 
+- `src/adjudications/` — the true answers to false-positive panel cases:
+  the argument parser and the insert behind `evals:grade-adjudication`, and
+  the read of `evals.v_adjudication_accuracy` with the accuracy lines it
+  prints. See [Recording the false-positive panel](#recording-the-false-positive-panel).
 - `src/annotations/` — a timeline note in `evals.eval_annotation`: its kinds,
   its schema and the insert `evals:annotate` runs.
 - `src/baseline/` — the A/A baseline behind `vp run evals:baseline`:
@@ -23,6 +27,8 @@ decides how the envelope is versioned.
   `fixtures/`. A skill-quality trial whose detail names no `judge_model`,
   whose task carries no `judge_prompt_hash`, or whose dimension scores are not
   whole numbers from 1 to 5 on distinct dimensions, fails the run schema.
+  Beside it, the adjudication case envelope: its Zod schema, the emitted
+  `adjudication.schema.json` and the example `fixtures/adjudication.json`.
 - `src/grades/` — hand grades of the quality judge: recording one against the
   dimensions the judge scored on that trial, reading
   `evals.v_judge_agreement`, and the agreement rate `evals:grade` prints.
@@ -39,7 +45,9 @@ decides how the envelope is versioned.
   other version by name (ADR-131), and stores each run in one transaction keyed
   on `run_id`, so a run already stored is left alone. A skill-quality trial's
   judge model and dimension scores go into their own columns in the statement
-  that inserts the trial.
+  that inserts the trial. A file named `FP-<number>.json` is an adjudication
+  case instead, read against its own schema and version window and stored in
+  one transaction keyed on `case_id`.
 - `src/prices/` — the schema of `model-prices.json` and its upsert into
   `evals.model_price`.
 - `src/queries/` — the read functions the dashboard calls, one per reporting
@@ -118,7 +126,9 @@ decides how the envelope is versioned.
   `EVALS_TEST_DATABASE_URL` names and drops them, and the roles a test
   created, afterwards. `integrationDatabase` reads that variable, says when a
   test file skips for want of it, and fails under `CI` without it.
-  `markedEnvelopes` builds one schema-valid envelope per suite with a marker in
+  `migratedScratch` creates and migrates one such database for a test file,
+  empties the tables it names before each test, counts their rows, and drops
+  it afterwards. `markedEnvelopes` builds one schema-valid envelope per suite with a marker in
   every field the allow-list leaves out, for the showcase's `/evals`
   public-payload test. No command imports any of them.
 
@@ -183,7 +193,7 @@ that is down only warns, and the file waits on disk for the next
 
 The migrator's integration test needs `EVALS_TEST_DATABASE_URL` pointing at a
 scratch database, because it drops schema `evals` there before every test.
-The ingest, baseline, reporting, reader boundary, grade and retention tests each create
+The ingest, adjudication, baseline, reporting, reader boundary, grade and retention tests each create
 and drop a database of their own on the same server. The reader boundary test
 replaces a reporting view or function with one that reads excluded data, in a
 transaction it rolls back, and asserts that Postgres refuses it to the reader
@@ -256,5 +266,52 @@ recorded hand grade rather than only the two runs it compares.
 The source is TypeScript with erasable syntax only, so a plain `.mjs` runner
 imports it through `exports` with no build and no loader.
 
-After changing the schema, run `vp run --filter @repo/eval-history schema:write`
-and then `vp fmt .`.
+After changing either envelope schema, run
+`vp run --filter @repo/eval-history schema:write` and then `vp fmt .`.
+
+## Recording the false-positive panel
+
+Every case the false-positive panel adjudicates is one JSON file named
+`<case_id>.json`, such as `FP-0001.json`, whatever its outcome. It names the
+finding (`finding_id`, `analyzer`, `rule`, `file`, `content_hash`), the commits
+it was judged at (`base_sha`, `head_sha`) and the pull request, then one entry
+per verifier with its role (`judge` or `adversary`), model,
+`agent_prompt_hash`, verdict (`REAL` or `FALSE_POSITIVE`), evidence, duration,
+tokens and cost, and last the case's outcome: `dismissed`, `fixed`, `split` or
+`escalated`. The schema refuses a dismissed case that any verifier called
+`REAL`, a split case on which every verifier agreed, and a model sitting twice
+in one role. It is versioned by ADR-131's rules, with its own
+`schema_version` and its own upcaster map, `ADJUDICATION_UPCASTERS`.
+
+A dismissed case is a confirmed false positive, and the gate compares against
+it, so its file is tracked under `docs/agents/adjudications/`
+([ADR-049](../../docs/decisions/ADR-049-findings-reports-are-produced-on-demand.md)).
+Every case file is ingested: `vp run evals:ingest` with no path reads
+`docs/agents/adjudications/` as well as `.tmp/eval-results/`, and a file kept on
+disk can be ingested into another database later by naming it.
+
+`migrations/0006-adjudications.sql` stores a case in `evals.adjudication_case`
+and its verdicts in `evals.adjudication_verdict`, one row per role and model.
+`evals.adjudication_ground_truth` holds the true answers, which come from
+Lucio's decision on a split case or a spot-check, from a fix released
+upstream, or from a dismissal reopened because a later gate run showed the
+finding to be a real problem. Each answer is a new row, so a case keeps every
+answer it was given. `evals.v_adjudication_accuracy` scores each verdict
+against the newest answer for its case and gives, per model and verifier role,
+the verdicts with an answer, how many were correct, how many called a real
+problem `FALSE_POSITIVE` (`missed_real`) and how many called a false positive
+`REAL` (`false_alarms`), and the accuracy. A case with no answer is left out.
+
+`vp run evals:grade-adjudication -- <case_id> <REAL|FALSE_POSITIVE>` records
+an answer, from `--source lucio` unless another source is named, with an
+optional `--note`. Record a reopened dismissal with `--source reopened`: it
+accepts only `REAL`, and only for a case whose outcome was `dismissed`, and
+the database refuses a reopened row that is not `REAL`. The command then
+prints the accuracy per model and role with n and its Wilson interval, at the
+`z` and `minTrialsForRate` that judge agreement uses, and says "insufficient
+data" below that floor; `-- --accuracy` prints it alone. It reads
+`EVALS_DATABASE_URL` and connects as `evals_writer`.
+
+The reader role can select the view and every column of the three tables
+except `file`, `finding_id`, `envelope_sha256` and the free text: a verdict's `evidence` and a
+true answer's `note`.

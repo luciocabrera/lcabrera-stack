@@ -8,7 +8,6 @@
  * Exit codes: 0 recorded or printed; 1 on an invalid env or argument, a trial
  * or dimension the judge never scored, or a failed statement.
  */
-import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
@@ -18,13 +17,7 @@ import { judgeAgreementLines } from '../src/grades/judgeAgreementLines.util.ts';
 import { readJudgeAgreement } from '../src/grades/readJudgeAgreement.service.ts';
 import { recordHumanGrades } from '../src/grades/recordHumanGrades.service.ts';
 import { loadRegressionConfig } from '../src/stats/loadRegressionConfig.service.ts';
-import {
-  cliArguments,
-  currentAuthor,
-  databaseUrl,
-  errorText,
-  withEvalsClient,
-} from './lib/evals-cli.mjs';
+import { currentAuthor, runGradeCommand } from './lib/evals-cli.mjs';
 
 const REGRESSION_CONFIG = fileURLToPath(
   new URL('../../../evals/regression.config.json', import.meta.url),
@@ -64,24 +57,22 @@ const agreementLines = async (client) => {
   return judgeAgreementLines({ judges, minN: minTrialsForRate, z });
 };
 
-const run = async (client, request) => {
-  if (request.kind === 'grade') {
-    const result = await recordHumanGrades({ client, ...request });
-    if (result.kind === 'rejected') {
-      throw new Error(result.problems.join('\n'));
-    }
-    console.log(
-      `evals:grade: recorded ${request.grader}'s grade of trial ${request.trialId} on ${result.dimensions.join(', ')}`,
-    );
+const record = async (client, request) => {
+  if (request.kind !== 'grade') {
+    return;
   }
-  const lines = await agreementLines(client);
-  console.log(lines.join('\n'));
+  const result = await recordHumanGrades({ client, ...request });
+  if (result.kind === 'rejected') {
+    throw new Error(result.problems.join('\n'));
+  }
+  console.log(
+    `evals:grade: recorded ${request.grader}'s grade of trial ${request.trialId} on ${result.dimensions.join(', ')}`,
+  );
 };
 
-try {
-  const request = requestFrom(cliArguments());
-  await withEvalsClient(databaseUrl(), (client) => run(client, request));
-} catch (error) {
-  console.error(`evals:grade: ${errorText(error)}`);
-  process.exitCode = 1;
-}
+await runGradeCommand({
+  name: 'evals:grade',
+  report: agreementLines,
+  requestFrom,
+  run: record,
+});

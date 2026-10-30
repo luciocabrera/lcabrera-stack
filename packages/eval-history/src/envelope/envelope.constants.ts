@@ -35,3 +35,20 @@ export const ENVELOPE_UPCASTERS: EnvelopeUpcasters = {};
 export const RATE_LIMIT_ERROR_CLASS = 'rate_limit';
 
 export const SESSION_LIMIT_ERROR_CLASS = 'session_limit';
+
+export const ADJUDICATION_SCHEMA_VERSION = 1;
+
+export const ADJUDICATION_CASE_ID = /^FP-\d{4,}$/u;
+
+export const ADJUDICATION_OUTCOMES = [
+  'dismissed',
+  'fixed',
+  'split',
+  'escalated',
+] as const;
+
+export const ADJUDICATION_VERDICTS = ['REAL', 'FALSE_POSITIVE'] as const;
+
+export const VERIFIER_ROLES = ['judge', 'adversary'] as const;
+
+export const ADJUDICATION_UPCASTERS: EnvelopeUpcasters = {};

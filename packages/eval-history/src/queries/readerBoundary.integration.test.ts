@@ -15,6 +15,7 @@ import { randomUUID } from 'node:crypto';
 import { afterAll, beforeAll, describe, expect, it } from 'vite-plus/test';
 import { z } from 'zod';
 
+import { readAdjudicationAccuracy } from '../adjudications/readAdjudicationAccuracy.service.ts';
 import { readBaseline } from '../baseline/readBaseline.service.ts';
 import { readJudgeAgreement } from '../grades/readJudgeAgreement.service.ts';
 import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
@@ -313,11 +314,17 @@ values ($1, 'skills/1', jsonb_build_object(
         'evals.eval_trial.outcome',
         'evals.eval_trial_detail.detail_public',
         'evals.v_judge_agreement.judge_model',
+        'evals.adjudication_verdict.verdict',
+        'evals.v_adjudication_accuracy.model',
       ]),
     );
     expect(
       readable.filter((name) =>
         [
+          'evals.adjudication_case.file',
+          'evals.adjudication_case.finding_id',
+          'evals.adjudication_ground_truth.note',
+          'evals.adjudication_verdict.evidence',
           'evals.eval_annotation.text',
           'evals.eval_human_grade.grader',
           'evals.eval_run.actor',
@@ -519,6 +526,7 @@ values ($1, 'skills/1', jsonb_build_object(
         name: 'synthetic-skill-01',
       }),
       await readFlakyTasks({ client, disagreeFraction: 0, window: 10 }),
+      await readAdjudicationAccuracy({ client }),
       await readAnnotations({
         client,
         from: new Date('2025-01-01T00:00:00Z'),

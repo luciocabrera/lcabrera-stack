@@ -50,6 +50,7 @@
     "evals:annotate": "vp run --fail-if-no-match --filter @repo/eval-history annotate",
     "evals:baseline": "node evals/run-baseline.mjs",
     "evals:grade": "vp run --fail-if-no-match --filter @repo/eval-history grade",
+    "evals:grade-adjudication": "vp run --fail-if-no-match --filter @repo/eval-history grade-adjudication",
     "evals:ingest": "node evals/ingest-envelopes.mjs",
     "evals:migrate": "vp run --fail-if-no-match --filter @repo/eval-history migrate",
     "evals:report": "node evals/report-runs.mjs",

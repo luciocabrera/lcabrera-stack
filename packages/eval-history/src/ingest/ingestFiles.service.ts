@@ -8,6 +8,7 @@ import { compareCodeUnits } from '../hashing/compareCodeUnits.util.ts';
 import { errorReason } from './errorReason.util.ts';
 import { ingestEnvelope } from './ingestEnvelope.service.ts';
 import { inSequence } from './inSequence.service.ts';
+import { overConnection } from './overConnection.service.ts';
 import { readEnvelopeFile } from './readEnvelopeFile.service.ts';
 
 type Indexed = {
@@ -108,44 +109,18 @@ const send = async ({ clock, connection, indexed, read }: SendArgs) => {
   }
 };
 
-const openConnection = async (connect: IngestFilesArgs['connect']) => {
-  try {
-    return { connection: await connect(), ok: true } as const;
-  } catch (error) {
-    return { ok: false, reason: errorReason(error) } as const;
-  }
-};
-
 type SendIndexedArgs = Omit<SendArgs, 'connection' | 'indexed'> &
   Pick<IngestFilesArgs, 'connect'> & { readonly indexed: readonly Indexed[] };
 
-const sendIndexed = async ({ connect, indexed, ...args }: SendIndexedArgs) => {
-  if (indexed.length === 0) {
-    return [];
-  }
-
-  const opened = await openConnection(connect);
-
-  if (!opened.ok) {
-    return indexed.map((item) =>
-      report({
-        ...item,
-        problems: [`could not connect: ${opened.reason}`],
-        result: 'unsent',
-      }),
-    );
-  }
-
-  try {
-    return await inSequence({
-      items: indexed,
-      step: (item) =>
-        send({ ...args, connection: opened.connection, indexed: item }),
-    });
-  } finally {
-    await opened.connection.end();
-  }
-};
+const sendIndexed = ({ connect, indexed, ...args }: SendIndexedArgs) =>
+  overConnection({
+    connect,
+    items: indexed,
+    step: ({ connection, item }) =>
+      send({ ...args, connection, indexed: item }),
+    unsent: ({ item, problem }) =>
+      report({ ...item, problems: [problem], result: 'unsent' }),
+  });
 
 export const ingestFiles = async ({
   clock = Date.now,

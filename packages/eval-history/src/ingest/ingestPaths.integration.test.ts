@@ -10,7 +10,6 @@
 
 import { randomUUID } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import pg from 'pg';
 import {
   afterAll,
   beforeAll,
@@ -24,9 +23,8 @@ import type { RunEnvelope } from '../envelope/envelope.types.ts';
 
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
-import { applyMigrations } from '../migrate/applyMigrations.service.ts';
-import { readMigrations } from '../migrate/readMigrations.service.ts';
 import { integrationDatabase } from '../testing/integrationDatabase.service.ts';
+import { migratedScratch } from '../testing/migratedScratch.service.ts';
 import { envelopeFileSystem } from './envelopeFileSystem.util.ts';
 import { ingestPaths } from './ingestPaths.service.ts';
 
@@ -86,8 +84,12 @@ const skillsRun = (runId = randomUUID()): RunEnvelope => {
 };
 
 describe.skipIf(!DATABASE_URL)('ingestPaths against Postgres', () => {
-  const admin = new pg.Client({ connectionString: DATABASE_URL });
-  const client = new pg.Client({ connectionString });
+  const { client, close, counts, empty, open } = migratedScratch({
+    scratch: SCRATCH,
+    scratchUrl: connectionString,
+    tables: TABLES,
+    url: DATABASE_URL,
+  });
   type IngestArgs = {
     readonly envelopes: readonly RunEnvelope[];
     readonly url?: string;
@@ -113,34 +115,11 @@ describe.skipIf(!DATABASE_URL)('ingestPaths against Postgres', () => {
     };
   };
 
-  const counts = async () => {
-    const { rows } = await client.query<{ readonly counts: object }>(
-      `select json_build_object(${TABLES.map(
-        (table) => `'${table}', (select count(*)::int from evals.${table})`,
-      ).join(', ')}) as counts`,
-    );
+  beforeAll(open);
 
-    return rows[0]?.counts;
-  };
+  beforeEach(empty);
 
-  beforeAll(async () => {
-    await admin.connect();
-    await admin.query(`create database ${SCRATCH}`);
-    await client.connect();
-    await applyMigrations({ client, migrations: await readMigrations() });
-  });
-
-  beforeEach(async () => {
-    await client.query(
-      `truncate ${TABLES.map((table) => `evals.${table}`).join(', ')} cascade`,
-    );
-  });
-
-  afterAll(async () => {
-    await client.end();
-    await admin.query(`drop database if exists ${SCRATCH} with (force)`);
-    await admin.end();
-  });
+  afterAll(close);
 
   it('stores one run row and one trial row per trial, with tokens, cost, durations and hashes', async () => {
     const envelope = skillsRun();

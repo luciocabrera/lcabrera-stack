@@ -236,6 +236,28 @@ values ($1, 'skills', 'synthetic-model-b', 'pass_rate', $2, 3, 0.5, 0.1)`,
 select trial_id, dimension, 3, 'placeholder' from evals.eval_judge_score`,
       values: [],
     });
+    await client.query({
+      text: `insert into evals.adjudication_case
+  (case_id, finding_id, analyzer, rule, file, content_hash, base_sha, head_sha,
+   pr, outcome, created_at, schema_version, envelope_sha256)
+values ('FP-0001', 'placeholder', 'placeholder', 'placeholder', 'placeholder',
+  $1, $2, $2, 1, 'split', now(), 1, $1)`,
+      values: ['0'.repeat(64), '0'.repeat(40)],
+    });
+    await client.query({
+      text: `insert into evals.adjudication_verdict
+  (case_id, verifier_role, model, agent_prompt_hash, verdict, evidence,
+   duration_ms, tokens_in, tokens_out)
+values
+  ('FP-0001', 'judge', 'placeholder', $1, 'REAL', 'placeholder', 0, 0, 0),
+  ('FP-0001', 'adversary', 'placeholder', $1, 'FALSE_POSITIVE', 'placeholder', 0, 0, 0)`,
+      values: ['0'.repeat(64)],
+    });
+    await client.query({
+      text: `insert into evals.adjudication_ground_truth (case_id, truth, source, note)
+values ('FP-0001', 'REAL', 'lucio', 'placeholder')`,
+      values: [],
+    });
   };
 
   const answer = async (path: string) => {

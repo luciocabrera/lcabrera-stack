@@ -6,8 +6,11 @@ import { connectIngest } from './connectIngest.service.ts';
 import { databaseLabel } from './databaseLabel.util.ts';
 import { evalsDatabaseUrl } from './evalsDatabaseUrl.util.ts';
 import { findEnvelopeFiles } from './findEnvelopeFiles.service.ts';
+import { ingestAdjudicationFiles } from './ingestAdjudicationFiles.service.ts';
 import { ingestFiles } from './ingestFiles.service.ts';
 import { ingestSummary } from './ingestSummary.util.ts';
+import { isAdjudicationFile } from './isAdjudicationFile.util.ts';
+import { readAdjudicationFile } from './readAdjudicationFile.service.ts';
 import { readEnvelopeFile } from './readEnvelopeFile.service.ts';
 
 type IngestPathsArgs = {
@@ -43,17 +46,23 @@ export const ingestPaths = async ({
 
   const { url } = database;
   const { files, missing } = await findEnvelopeFiles({ fileSystem, paths });
-  const reports = await ingestFiles({
+  const runs = await ingestFiles({
     connect: () => connect(url),
-    files,
+    files: files.filter((file) => !isAdjudicationFile(file)),
     read: (args) =>
       readEnvelopeFile({ ...args, readBytes: fileSystem.readFile }),
+  });
+  const cases = await ingestAdjudicationFiles({
+    connect: () => connect(url),
+    files: files.filter((file) => isAdjudicationFile(file)),
+    read: (args) =>
+      readAdjudicationFile({ ...args, readBytes: fileSystem.readFile }),
   });
 
   return ingestSummary({
     database: databaseLabel(url),
     missing,
     quietUnreachable,
-    reports,
+    reports: [...runs, ...cases],
   });
 };
