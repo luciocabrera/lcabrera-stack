@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import { borderRadius } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
-export const styles = stylex.create({
+export const tableStaticContentStyles = stylex.create({
   container: {
     scrollbarColor: `${colors.borderSecondary} transparent`,
     scrollbarWidth: 'thin',

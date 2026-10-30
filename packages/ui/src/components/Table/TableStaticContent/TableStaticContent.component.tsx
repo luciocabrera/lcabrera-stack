@@ -13,7 +13,7 @@ import { TableDrawersSection } from '../TableDrawersSection';
 import { TableHeader } from '../TableHeader';
 import { TableStaticBody } from '../TableStaticBody/TableStaticBody.component';
 import { TableTitle } from '../TableTitle';
-import { styles } from './TableStaticContent.stylex';
+import { tableStaticContentStyles as styles } from './TableStaticContent.stylex';
 
 export const TableStaticContent = <
   TData extends Record<string, unknown>,
