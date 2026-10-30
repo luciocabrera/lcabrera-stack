@@ -33,13 +33,8 @@ const DIRECTIVES = [
   { analyzer: 'fallow', directive: 'fallow-ignore-file', next: true },
 ];
 
-const escaped = (text) =>
-  text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
-
-const DIRECTIVE_PATTERN = new RegExp(
-  `(?<![\\w-])(${DIRECTIVES.map(({ directive }) => escaped(directive)).join('|')})(?![\\w-])`,
-  'u',
-);
+const DIRECTIVE_PATTERN =
+  /(?<![\w-])((?:eslint|oxlint)-disable(?:-next-line|-line)?|biome-ignore(?:-all|-start)?|react-doctor-disable(?:-next-line|-line)?|fallow-ignore-(?:next-line|file))(?![\w-])/u;
 
 const BY_DIRECTIVE = new Map(
   DIRECTIVES.map((entry) => [entry.directive, entry]),
