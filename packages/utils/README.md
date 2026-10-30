@@ -48,6 +48,7 @@ export for each helper:
 | `forms`      | `readFormString`                                                                        | `@lcabrera/utils/forms/read-form-string.util`                  |
 | `guards`     | `isObject`                                                                              | `@lcabrera/utils/guards/is-object.util`                        |
 | `guards`     | `isFiniteNumber`                                                                        | `@lcabrera/utils/guards/is-finite-number.util`                 |
+| `guards`     | `isNonEmptyArray`                                                                       | `@lcabrera/utils/guards/is-non-empty-array.util`               |
 | `guards`     | `isStringList`                                                                          | `@lcabrera/utils/guards/is-string-list.util`                   |
 | `json`       | `safeJsonParse`                                                                         | `@lcabrera/utils/json/safe-json-parse.util`                    |
 | `numbers`    | `parsePositiveInteger`                                                                  | `@lcabrera/utils/numbers/parse-positive-integer.util`          |
@@ -77,6 +78,12 @@ A point with a gap on both sides stays visible. `linePath` draws it as a
 zero-length segment (`M3,4L3,4`), which a stroke with a round line cap renders
 as a dot, and `bandPath` draws it as a stroke from its upper bound to its lower
 one. Draw markers yourself only if you want them on every point.
+
+`decimate` takes the same points `linePath` does and returns the same type, so
+its output feeds `linePath` directly. A point whose `x` or `y` is missing,
+`null` or not finite is a gap: it passes through unchanged and does not count
+against `threshold`, so the drawn line still breaks there. Only the finite
+points are thinned.
 
 ```ts
 import { linePath } from '@lcabrera/utils/chart/line-path.util';

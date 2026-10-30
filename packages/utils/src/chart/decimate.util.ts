@@ -1,53 +1,76 @@
-import type { ChartValue } from './chart.types';
+import { isFiniteNumber } from '@lcabrera/utils/guards/is-finite-number.util';
+import { isNonEmptyArray } from '@lcabrera/utils/guards/is-non-empty-array.util';
 
-type DecimateArgs<T extends DecimatePoint> = {
+import type { ChartPoint, ChartValue } from './chart.types';
+
+type DecimateArgs<T extends ChartPoint<ChartValue>> = {
   readonly points: readonly T[];
   readonly threshold: number;
 };
 
-type DecimatePoint = {
-  readonly x: ChartValue;
+type DecimateCoordinate = {
+  readonly index: number;
+  readonly x: number;
   readonly y: number;
 };
 
-export const decimate = <T extends DecimatePoint>({
+export const decimate = <T extends ChartPoint<ChartValue>>({
   points,
   threshold,
 }: DecimateArgs<T>) => {
-  if (threshold < 3 || threshold >= points.length) return points;
+  const coordinates = points
+    .map(({ x, y }, index) => ({ index, x: Number(x), y }))
+    .filter(
+      (coordinate): coordinate is DecimateCoordinate =>
+        isFiniteNumber(coordinate.x) && isFiniteNumber(coordinate.y),
+    );
 
-  const coordinates = points.map(({ x, y }) => ({ x: Number(x), y }));
-  const xs = coordinates.map(({ x }) => x);
-  const ys = coordinates.map(({ y }) => y);
+  if (
+    !isNonEmptyArray(coordinates) ||
+    threshold < 3 ||
+    threshold >= coordinates.length
+  )
+    return points;
+
+  const [head] = coordinates;
+
   const buckets = threshold - 2;
-  const bucketSize = (points.length - 2) / buckets;
+  const bucketSize = (coordinates.length - 2) / buckets;
   const bucketStart = (bucket: number) => Math.floor(bucket * bucketSize) + 1;
-
   const bucketIndexes = Array.from({ length: buckets }).keys();
-  const kept = new Set([0, points.length - 1]);
-  let anchor = 0;
+  const kept = new Set([head, ...coordinates.slice(-1)]);
+  let anchor = head;
 
   for (const bucket of bucketIndexes) {
-    const anchorX = xs[anchor] ?? 0;
-    const anchorY = ys[anchor] ?? 0;
-    const start = bucketStart(bucket);
     const end = bucketStart(bucket + 1);
     const next = coordinates.slice(end, bucketStart(bucket + 2));
     const averageX = next.reduce((sum, { x }) => sum + x, 0) / next.length;
     const averageY = next.reduce((sum, { y }) => sum + y, 0) / next.length;
-    const areas = coordinates
-      .slice(start, end)
-      .map(({ x, y }) =>
-        Math.abs(
-          (anchorX - averageX) * (y - anchorY) -
-            (anchorX - x) * (averageY - anchorY),
-        ),
-      );
-    const largest = areas.reduce((max, area) => Math.max(max, area), 0);
+    const candidates = coordinates.slice(bucketStart(bucket), end);
+    let winner = anchor;
+    let largest = -1;
 
-    anchor = start + areas.indexOf(largest);
-    kept.add(anchor);
+    for (const candidate of candidates) {
+      const area = Math.abs(
+        (anchor.x - averageX) * (candidate.y - anchor.y) -
+          (anchor.x - candidate.x) * (averageY - anchor.y),
+      );
+
+      if (area <= largest) continue;
+
+      winner = candidate;
+      largest = area;
+    }
+
+    kept.add(winner);
+    anchor = winner;
   }
 
-  return points.filter((_, index) => kept.has(index));
+  const dropped = new Set(
+    coordinates
+      .filter((coordinate) => !kept.has(coordinate))
+      .map(({ index }) => index),
+  );
+
+  return points.filter((_, index) => !dropped.has(index));
 };

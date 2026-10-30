@@ -17,7 +17,7 @@ ChartScale [type] (value: T) => number
 ChartValue [type] Date | number
 
 ## ./chart/decimate.util
-decimate [const] <T extends DecimatePoint>({ points, threshold }: DecimateArgs<T>) => readonly T[]
+decimate [const] <T extends ChartPoint<ChartValue>>({ points, threshold }: DecimateArgs<T>) => readonly T[]
 
 ## ./chart/format-path-point.util
 formatPathPoint [const] ({ x, y }: FormatPathPointArgs) => string
@@ -86,6 +86,9 @@ readFormString [const] ({ formData, name }: ReadFormStringArgs) => string
 
 ## ./guards/is-finite-number.util
 isFiniteNumber [const] (value: unknown) => value is number
+
+## ./guards/is-non-empty-array.util
+isNonEmptyArray [const] <T>(values: readonly T[]) => values is readonly [T, ...T[]]
 
 ## ./guards/is-object.util
 isObject [const] (value: unknown) => value is Record<string, unknown>

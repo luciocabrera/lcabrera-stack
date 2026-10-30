@@ -70,6 +70,7 @@ its own gate, not a shared value.
 - `./forms/is-checkbox-checked.util` — strict `'on'` checkbox read from `FormData`
 - `./forms/read-form-string.util` — read a named `FormData` text value (or `''`)
 - `./guards/is-object.util` — narrow `unknown` to a plain object record
+- `./guards/is-non-empty-array.util` — narrow an array to a tuple with a first element
 - `./json/safe-json-parse.util` — parse JSON, returning `undefined` instead of throwing
 - `./numbers/parse-positive-integer.util` — parse a non-negative integer with a fallback
 - `./numbers/round-to-cents.util` — round a monetary amount to two decimal places

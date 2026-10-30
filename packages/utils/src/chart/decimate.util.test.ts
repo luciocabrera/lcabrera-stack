@@ -1,6 +1,9 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
+
+import type { ChartPoint } from './chart.types';
 
 import { decimate } from './decimate.util';
+import { linePath } from './line-path.util';
 
 const series = (values: readonly number[]) => values.map((y, x) => ({ x, y }));
 
@@ -75,6 +78,79 @@ describe('decimate', () => {
     const points = xs.map((x, index) => ({ x, y: ys[index] ?? 0 }));
 
     expect(decimate({ points, threshold: 6 }).map(({ x }) => x)).toEqual(kept);
+  });
+
+  it.each([
+    { bucket: 'the first bucket', gap: 1, kept: [0, 1, 3, 7, 9, 13] },
+    { bucket: 'a middle bucket', gap: 6, kept: [0, 3, 6, 7, 9, 13] },
+    {
+      bucket: 'the bucket before the last point',
+      gap: 12,
+      kept: [0, 3, 7, 9, 12, 13],
+    },
+  ])(
+    'passes a non-finite value in $bucket through as a gap',
+    ({ gap, kept }) => {
+      const ys = [3, 7, 2, 9, 4, 4, 8, 1, 6, 12, 5, 5, 0, 7];
+      const points = ys.map((y, x) => ({
+        x,
+        y: x === gap ? Number('NaN') : y,
+      }));
+
+      expect(decimate({ points, threshold: 5 }).map(({ x }) => x)).toEqual(
+        kept,
+      );
+    },
+  );
+
+  it('passes missing values and invalid dates through as gaps', () => {
+    const points = [
+      { x: new Date(Date.UTC(2026, 0, 1)), y: 0 },
+      { x: new Date(Date.UTC(2026, 0, 2)) },
+      { x: new Date(Date.UTC(2026, 0, 3)), y: 50 },
+      { x: new Date(Number('NaN')), y: 99 },
+      { x: new Date(Date.UTC(2026, 0, 5)), y: 2 },
+      { x: new Date(Date.UTC(2026, 0, 6)), y: 1 },
+      { x: new Date(Date.UTC(2026, 0, 7)), y: 3 },
+    ];
+
+    expect(decimate({ points, threshold: 3 }).map(({ y }) => y)).toEqual([
+      0,
+      undefined,
+      50,
+      99,
+      3,
+    ]);
+  });
+
+  it('counts only finite values against the threshold', () => {
+    const points = [
+      { x: 0, y: 1 },
+      { x: 1 },
+      { x: 2, y: 3 },
+      { x: 3 },
+      { x: 4, y: 5 },
+    ];
+
+    expect(decimate({ points, threshold: 3 })).toBe(points);
+  });
+
+  it('keeps the first point of each bucket when every value is equal', () => {
+    const points = series([4, 4, 4, 4, 4, 4, 4, 4, 4, 4]);
+
+    expect(decimate({ points, threshold: 4 }).map(({ x }) => x)).toEqual([
+      0, 1, 5, 9,
+    ]);
+  });
+
+  it('feeds its output to linePath without a cast', () => {
+    const points: readonly ChartPoint[] = series([1, 3, 2, 8, 4]);
+    const thinned = decimate({ points, threshold: 3 });
+
+    expectTypeOf(thinned).toEqualTypeOf<readonly ChartPoint[]>();
+    expect(
+      linePath({ points: thinned, x: (value) => value, y: (value) => value }),
+    ).toBe('M0,1L3,8L4,4');
   });
 
   it('keeps the fields of each point it returns', () => {

@@ -44,8 +44,9 @@ describe('TrendSparklineDot', () => {
       </MemoryRouter>,
     );
 
-    expect(
-      screen.getByRole('link', { name: 'Week 3' }).getAttribute('href'),
-    ).toBe('/weeks/3');
+    const link = screen.getByRole('link', { name: 'Week 3' });
+
+    expect(link.getAttribute('href')).toBe('/weeks/3');
+    expect(link.getAttribute('class')).toBeTruthy();
   });
 });

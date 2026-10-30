@@ -7,6 +7,14 @@ const base = stylex.create({
     stroke: colors.surfacePrimary,
     strokeWidth: 1,
   },
+  link: {
+    outline: {
+      default: 'none',
+      ':focus-visible': `2px solid ${colors.borderFocus}`,
+    },
+    cursor: 'pointer',
+    outlineOffset: '1px',
+  },
 });
 
 const toneVariants = stylex.create({
@@ -19,5 +27,6 @@ const toneVariants = stylex.create({
 
 export const styles = {
   dot: base.dot,
+  link: base.link,
   tone: toneVariants,
 };

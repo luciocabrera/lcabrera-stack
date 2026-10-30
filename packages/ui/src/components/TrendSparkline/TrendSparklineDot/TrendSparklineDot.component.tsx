@@ -30,7 +30,7 @@ export const TrendSparklineDot = ({
   if (to === undefined) return circle;
 
   return (
-    <Link aria-label={name} to={to}>
+    <Link aria-label={name} to={to} {...stylex.props(styles.link)}>
       {circle}
     </Link>
   );

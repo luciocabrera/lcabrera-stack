@@ -55,6 +55,7 @@
     "./forms/read-form-string.util": "./src/forms/read-form-string.util.ts",
     "./guards/is-object.util": "./src/guards/is-object.util.ts",
     "./guards/is-finite-number.util": "./src/guards/is-finite-number.util.ts",
+    "./guards/is-non-empty-array.util": "./src/guards/is-non-empty-array.util.ts",
     "./guards/is-string-list.util": "./src/guards/is-string-list.util.ts",
     "./json/safe-json-parse.util": "./src/json/safe-json-parse.util.ts",
     "./numbers/parse-positive-integer.util": "./src/numbers/parse-positive-integer.util.ts",
@@ -168,6 +169,10 @@
       "./guards/is-finite-number.util": {
         "types": "./dist/guards/is-finite-number.util.d.mts",
         "default": "./dist/guards/is-finite-number.util.mjs"
+      },
+      "./guards/is-non-empty-array.util": {
+        "types": "./dist/guards/is-non-empty-array.util.d.mts",
+        "default": "./dist/guards/is-non-empty-array.util.mjs"
       },
       "./guards/is-string-list.util": {
         "types": "./dist/guards/is-string-list.util.d.mts",
