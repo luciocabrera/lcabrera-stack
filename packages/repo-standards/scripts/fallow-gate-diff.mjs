@@ -80,6 +80,8 @@ export const introducedChanges = ({ diff, files }) => {
 };
 
 export const gitDiffArgs = ({ base, files }) => [
+  '-c',
+  'core.quotePath=false',
   'diff',
   '-U0',
   '--no-color',

@@ -92,13 +92,13 @@ fi
 # Each half is captured and checked separately rather than piped from a group:
 # `{ a; b; } | c` exits with b's status, which would hide a failing `git diff` —
 # the exact fail-open shape this script exists to prevent.
-if ! tracked=$(GIT_EXTERNAL_DIFF= git diff --no-ext-diff --no-relative --name-only "$base"); then
+if ! tracked=$(GIT_EXTERNAL_DIFF= git -c core.quotePath=false diff --no-ext-diff --no-relative --name-only "$base"); then
   echo "changed-files: 'git diff' against '$base' failed." >&2
   echo "  Refusing to continue: a partial file list would check less than it seems." >&2
   exit 1
 fi
 
-if ! untracked=$(git ls-files --others --exclude-standard); then
+if ! untracked=$(git -c core.quotePath=false ls-files --others --exclude-standard); then
   echo "changed-files: 'git ls-files --others' failed." >&2
   echo "  Refusing to continue: new files would be silently skipped." >&2
   exit 1

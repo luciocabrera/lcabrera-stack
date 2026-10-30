@@ -94,6 +94,34 @@ describe('reportFindings', () => {
     },
   );
 
+  it.each([
+    [
+      { files: [{ path: 'new.ts' }] },
+      [{ detail: 'no test reaches this file', path: 'new.ts' }],
+    ],
+    [
+      { exports: [{ export_name: 'fresh', line: 1, path: 'new.ts' }] },
+      [
+        {
+          detail: 'no test reaches the export `fresh`',
+          line: 1,
+          path: 'new.ts',
+        },
+      ],
+    ],
+  ])(
+    'reads a coverage section that carries only one of its lists: %o',
+    (section, expected) => {
+      expect(
+        reportFindings({
+          analysis: 'coverage-gaps',
+          introduced,
+          report: { coverage_gaps: section },
+        }),
+      ).toEqual(expected);
+    },
+  );
+
   it('reads a health report without a coverage section as clean', () => {
     expect(
       reportFindings({ analysis: 'coverage-gaps', introduced, report: {} }),

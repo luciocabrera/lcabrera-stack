@@ -1335,13 +1335,16 @@ root `vite.config.ts`:
 
 The four fixers write, and that is safe in this hook and nowhere else in the flow:
 lint-staged re-stages what a task changes, so a fix lands in the commit being
-made rather than in the working tree behind it. They share one glob deliberately
-— the reason is in the `staged` block's own comment. Biome sat here check-only
+made rather than in the working tree behind it. They share one glob deliberately:
+lint-staged runs separate entries concurrently, so a second entry that also
+writes would race the first over the same file, while commands inside one entry
+run in sequence. `vp fmt` is the last writer because a lint fixer only edits its
+own range and can leave a line the formatter would print differently. Biome sat here check-only
 until #1116, which left its gate first failing in CI, after the commit it was
 meant to block.
 
 The two `repo-fallow-gate` commands come after the formatter because they only
-read. A staged file that carries a `fallow-ignore` marker or closes an import
+read: a read-only gate may follow the formatter, and a writer may not. A staged file that carries a `fallow-ignore` marker or closes an import
 cycle fails the commit. The bin drops staged files fallow does not analyse, so a
 commit with none passes. `fallow:guard` is not in this hook while no boundary
 zones are configured, because until then it prints the same "none apply" for

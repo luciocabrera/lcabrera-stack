@@ -72,6 +72,8 @@ describe('runGate — mutation', () => {
     expect(status).toBe(1);
     expect(log.git).toEqual([
       [
+        '-c',
+        'core.quotePath=false',
         'diff',
         '-U0',
         '--no-color',
@@ -107,5 +109,31 @@ describe('runGate — mutation', () => {
         '\nfallow mutation: 2 changed file(s) outside every workspace, from the repository root: scripts/b.mjs, scripts/new.mjs\n' +
         '\nfallow mutation: .\n',
     );
+  });
+
+  it.each([
+    [[1, 2], '.'],
+    [[2, 1], 'packages/ui'],
+  ])(
+    'lets a finding win over a root that could not run (statuses %j, failing root %s)',
+    (statuses, failing) => {
+      const { log, status } = mutationRun({
+        statuses,
+        stdinFiles: ['packages/ui/src/a.ts', 'scripts/b.mjs'],
+      });
+      expect(status).toBe(1);
+      expect(log.written).toContain(
+        `repo-fallow-gate: fallow mutation could not run in ${failing}.\n`,
+      );
+    },
+  );
+
+  it('reports could-not-run when no root found a survivor', () => {
+    const { log, status } = mutationRun({
+      statuses: [0, 2],
+      stdinFiles: ['packages/ui/src/a.ts', 'scripts/b.mjs'],
+    });
+    expect(status).toBe(COULD_NOT_RUN);
+    expect(log.written).toContain('could not run in .');
   });
 });

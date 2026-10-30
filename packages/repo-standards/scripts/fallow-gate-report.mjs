@@ -24,12 +24,12 @@ const isIntroduced = ({ introduced, line, path }) => {
 };
 
 const coverageGapFindings = ({ introduced, report }) => {
-  const gaps = report.coverage_gaps ?? { exports: [], files: [] };
+  const gaps = report.coverage_gaps ?? {};
   return [
-    ...gaps.files
+    ...(gaps.files ?? [])
       .filter(({ path }) => isIntroduced({ introduced, path }))
       .map(({ path }) => ({ detail: 'no test reaches this file', path })),
-    ...gaps.exports
+    ...(gaps.exports ?? [])
       .filter(({ line, path }) => isIntroduced({ introduced, line, path }))
       .map(({ export_name: name, line, path }) => ({
         detail: `no test reaches the export \`${name}\``,

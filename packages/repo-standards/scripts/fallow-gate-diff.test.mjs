@@ -220,7 +220,7 @@ describe('untrackedFileDiff', () => {
 const git = (cwd, ...args) => runGitStatus({ args, cwd });
 
 describe('gitDiffArgs against a user config that reshapes diffs', () => {
-  it('still reads the right paths with diff.noprefix and diff.mnemonicPrefix set', () => {
+  it('still reads the right paths, a non-ASCII one included, with diff.noprefix, diff.mnemonicPrefix and core.quotePath set', () => {
     const root = mkdtempSync(join(tmpdir(), 'fallow-gate-diff-'));
     try {
       git(root, 'init', '-q');
@@ -229,18 +229,21 @@ describe('gitDiffArgs against a user config that reshapes diffs', () => {
       git(root, 'config', 'diff.noprefix', 'true');
       git(root, 'config', 'diff.mnemonicPrefix', 'true');
       git(root, 'config', 'diff.relative', 'true');
+      git(root, 'config', 'core.quotePath', 'true');
       mkdirSync(join(root, 'src'));
       writeFileSync(join(root, 'src', 'kept.mjs'), 'one\n');
       git(root, 'add', '.');
       git(root, 'commit', '-q', '-m', 'base');
       writeFileSync(join(root, 'src', 'kept.mjs'), 'one\ntwo\n');
       writeFileSync(join(root, 'src', 'added.mjs'), 'new\n');
-      git(root, 'add', 'src/added.mjs');
+      writeFileSync(join(root, 'src', 'café.mjs'), 'accent\n');
+      git(root, 'add', 'src/added.mjs', 'src/café.mjs');
       const diff = git(root, ...gitDiffArgs({ base: 'HEAD', files: [] }));
       expect(diff.status).toBe(0);
       expect(parseDiff(diff.stdout)).toEqual(
         new Map([
           ['src/added.mjs', { isNew: true, ranges: [[1, 1]] }],
+          ['src/café.mjs', { isNew: true, ranges: [[1, 1]] }],
           ['src/kept.mjs', { isNew: false, ranges: [[2, 2]] }],
         ]),
       );

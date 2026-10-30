@@ -11,3 +11,5 @@ The workspace graph the change-scoped runners read (`repo-test-changed`, `repo-r
 `runGitStatus` takes an optional `maxBuffer`, and its result carries `exceeded` when the output overran it.
 
 `workspacesForFiles` matches a file against each workspace's real directory, so `repo-test-changed` and `repo-run-changed` select a workspace under `tools/*` or a nested `packages/group/*` instead of running nothing. Every `git diff` the gate parses pins its output format (`--no-ext-diff`, `--no-relative`, `--src-prefix=a/`, `--dst-prefix=b/`), so `diff.noprefix`, `diff.mnemonicPrefix` or `diff.relative` in a user's config cannot change the paths it reads. `buildGitEnv` also drops `GIT_EXTERNAL_DIFF` and `GIT_DIFF_OPTS`.
+
+The diffs also run with `core.quotePath=false`, so a non-ASCII path is read as written. When one mutation root finds a surviving mutant and another could not run, the bin exits 1 and still names the root that could not run.

@@ -163,11 +163,17 @@ const gateOnExitCode = ({ analysis, base, effects, files }) =>
 
 const mutateRoot = ({ base, diffFile, effects, root }) => {
   effects.write(`\nfallow mutation: ${root}\n`);
-  return gateExit({
+  const status = gateExit({
     analysis: 'mutation',
     status: runFallow({ args: mutationArgs({ base, diffFile, root }), effects })
       .status,
   });
+  if (status === COULD_NOT_RUN) {
+    effects.writeError(
+      `repo-fallow-gate: fallow mutation could not run in ${root}.\n`,
+    );
+  }
+  return status;
 };
 
 const mutateOutside = ({ base, effects, outside }) => {
@@ -192,7 +198,7 @@ const gateOnMutation = ({ base, effects, files }) => {
       ? []
       : [mutateOutside({ base, effects, outside })]),
   ];
-  return Math.max(0, ...statuses);
+  return statuses.includes(1) ? 1 : Math.max(0, ...statuses);
 };
 
 const GATES = {
