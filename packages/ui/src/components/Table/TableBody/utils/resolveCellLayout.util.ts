@@ -19,7 +19,7 @@ type ResolveCellLayoutArgs<TData> = {
 export const resolveCellLayout = <TData>({
   col,
   isSized,
-  layout = 'virtual',
+  layout,
   pinInfo,
 }: ResolveCellLayoutArgs<TData>) => {
   if (layout === 'static')
