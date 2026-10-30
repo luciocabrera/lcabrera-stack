@@ -1,3 +1,5 @@
+import type { ComponentPropsWithRef } from 'react';
+
 import type { TableProps } from '../Table.types';
 
 export type TableContentProps<
@@ -5,5 +7,14 @@ export type TableContentProps<
   TResponse,
 > = Pick<
   TableProps<TData, TResponse>,
-  'actions' | 'dataSelector' | 'dataTotalSelector' | 'icon' | 'onLoadMore'
->;
+  | 'actions'
+  | 'caption'
+  | 'customStylex'
+  | 'dataSelector'
+  | 'dataTotalSelector'
+  | 'footer'
+  | 'icon'
+  | 'onLoadMore'
+> & {
+  readonly tableProps?: ComponentPropsWithRef<'table'>;
+};

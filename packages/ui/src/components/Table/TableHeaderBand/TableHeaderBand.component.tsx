@@ -4,7 +4,7 @@ import {
   useGetColumnSizing,
   useGetPinnedColumnOffsets,
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+import { resolveColumnStartWidth } from '#ui/components/Table/utils/resolveColumnStartWidth.util';
 
 import type { TableHeaderBandProps } from './TableHeaderBand.types';
 
@@ -20,8 +20,7 @@ export const TableHeaderBand = <TData extends Record<string, unknown>>({
 
   const width = columns.reduce(
     (total, column) =>
-      total +
-      (columnSizing[column.key] ?? column.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH),
+      total + (columnSizing[column.key] ?? resolveColumnStartWidth(column)),
     0,
   );
 

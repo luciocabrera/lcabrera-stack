@@ -12,10 +12,14 @@ area:
   - reports/api-surface/ui.txt
   - docs/product/requirements/render-a-small-read-only-table-that-sizes-to-its-rows.md
   - .changeset/table-static-layout.md
+  - packages/ui/src/benchmarks/tableLayouts.bench.tsx
+  - packages/ui/src/benchmarks/ARCHITECTURE.md
+  - packages/ui/src/stylex-module-paths.test.json
+  - packages/ui/README.md
 started: 2026-10-30
 updated: 2026-10-30
 plan: (none)
-pr: (none)
+pr: #1578
 issue: #1560
 ---
 

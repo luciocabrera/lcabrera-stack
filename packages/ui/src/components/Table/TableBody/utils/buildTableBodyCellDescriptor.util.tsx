@@ -5,13 +5,16 @@ import type {
   PinnedColumnInfo,
   TableColumn,
   TableGroupRowSummary,
+  TableLayoutMode,
 } from '#ui/components/Table/Table.types';
 import type { TableBodyCellProps } from '#ui/components/Table/TableBodyCell/TableBodyCell.types';
 import type { TableGroupDisclosureState } from '#ui/components/Table/TableGroupDisclosure';
 
 import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { TableRowActionsMenu } from '#ui/components/Table/TableRowActionsMenu';
+import { resolveColumnStartWidth } from '#ui/components/Table/utils/resolveColumnStartWidth.util';
 
+import { resolveCellLayout } from './resolveCellLayout.util';
 import { resolveOwnCellChildren } from './resolveOwnCellChildren.util';
 import { resolveStructuralCellChildren } from './resolveStructuralCellChildren.util';
 
@@ -29,6 +32,7 @@ type BuildTableBodyCellDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly groupSummary?: TableGroupRowSummary;
   readonly hasStructuralMarker: boolean;
   readonly isLoadingState: boolean;
+  readonly layout?: TableLayoutMode;
   readonly pinnedOffsets: Partial<Record<DataKey<TData>, PinnedColumnInfo>>;
   readonly row: TData;
   readonly rowIndex: number;
@@ -51,7 +55,9 @@ type TableBodyCellDefaultFields<TData extends Record<string, unknown>> = {
 };
 
 type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
+  readonly align?: TableBodyCellProps<TData>['align'];
   readonly columnKey: TableBodyCellProps<TData>['columnKey'];
+  readonly isFill?: TableBodyCellProps<TData>['isFill'];
   readonly isLoadingState: NonNullable<
     TableBodyCellProps<TData>['isLoadingState']
   >;
@@ -60,6 +66,7 @@ type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
   readonly pinInfo: TableBodyCellProps<TData>['pinInfo'];
   readonly rowIndex: TableBodyCellProps<TData>['rowIndex'];
   readonly rowKey: TableBodyCellProps<TData>['rowKey'];
+  readonly staticWidths?: TableBodyCellProps<TData>['staticWidths'];
   readonly width: NonNullable<TableBodyCellProps<TData>['width']>;
 };
 
@@ -75,22 +82,29 @@ export const buildTableBodyCellDescriptor = <
   groupSummary,
   hasStructuralMarker,
   isLoadingState,
+  layout,
   pinnedOffsets,
   row,
   rowIndex,
   rowKey,
 }: BuildTableBodyCellDescriptorArgs<TData>): TableBodyCellDescriptor<TData> => {
-  const minWidth = col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
-  const width = columnSizing[col.key] ?? minWidth;
+  const sized = columnSizing[col.key];
+  const width = sized ?? resolveColumnStartWidth(col);
   const pinInfo = pinnedOffsets[col.key];
   const columnKey = col.key as string;
   const shared = {
+    ...resolveCellLayout({
+      col,
+      isSized: sized !== undefined,
+      layout,
+      pinInfo,
+    }),
     columnKey,
     isLoadingState,
     key: col.key,
     kind: 'custom',
     label: '',
-    minWidth,
+    minWidth: col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH,
     pinInfo,
     rowIndex,
     rowKey,
