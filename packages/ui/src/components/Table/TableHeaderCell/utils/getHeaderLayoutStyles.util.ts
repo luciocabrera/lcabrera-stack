@@ -54,8 +54,8 @@ export const getHeaderLayoutStyles = <TData>(
   return {
     cell: [
       resolveSizeStyle(args),
-      align === undefined ? undefined : CELL_ALIGN_STYLES[align],
+      ...(align === undefined ? [] : [CELL_ALIGN_STYLES[align]]),
     ],
-    label: align === undefined ? undefined : LABEL_ALIGN_STYLES[align],
+    label: align === undefined ? [] : [LABEL_ALIGN_STYLES[align]],
   };
 };
