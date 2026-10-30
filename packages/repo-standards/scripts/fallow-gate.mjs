@@ -85,21 +85,20 @@ export const fallowArgs = ({ analysis, base, files }) => {
   return build({ base, files });
 };
 
-export const mutationArgs = ({ base, root }) => [
+export const REPOSITORY_ROOT = '.';
+
+export const mutationArgs = ({ base, diffFile, root }) => [
   'mutation',
   '--root',
   root,
   '--changed-since',
   base,
+  ...(diffFile === undefined ? [] : ['--diff-file', diffFile]),
   '--min-score',
   '100',
   '--allow-dirty',
   '--quiet',
 ];
-
-const owningDir = ({ file, workspaceDirs }) =>
-  workspaceDirs.find((dir) => file.startsWith(`${dir}/`)) ??
-  (file.includes('/') ? file.slice(0, file.indexOf('/')) : undefined);
 
 export const mutationRoots = ({ files, workspaceDirs }) => {
   const byLength = workspaceDirs.toSorted(
@@ -107,16 +106,19 @@ export const mutationRoots = ({ files, workspaceDirs }) => {
   );
   const owners = files.map((file) => ({
     file,
-    root: owningDir({ file, workspaceDirs: byLength }),
+    root: byLength.find((dir) => file.startsWith(`${dir}/`)),
   }));
   return {
+    outside: owners
+      .filter(({ root }) => root === undefined)
+      .map(({ file }) => file),
     roots: [
       ...new Set(
         owners.map(({ root }) => root).filter((root) => root !== undefined),
       ),
     ].toSorted(byName),
-    unrooted: owners
-      .filter(({ root }) => root === undefined)
-      .map(({ file }) => file),
   };
 };
+
+export const binOf = ({ manifest, name }) =>
+  typeof manifest.bin === 'string' ? manifest.bin : manifest.bin?.[name];

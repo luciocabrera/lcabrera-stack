@@ -7,6 +7,7 @@ import {
   parseDiff,
   parseReport,
   reportFindings,
+  untrackedFileDiff,
 } from './fallow-gate-report.mjs';
 
 describe('reportFindings', () => {
@@ -166,16 +167,78 @@ describe('parseDiff', () => {
     );
   });
 
-  it('reads a file as changed when its header carries no source line', () => {
-    expect(parseDiff('+++ b/a.ts\n@@ -1 +1 @@')).toEqual(
-      new Map([['a.ts', { isNew: false, ranges: [[1, 1]] }]]),
+  it('reads a hunk header only at the start of a line', () => {
+    expect(
+      parseDiff(
+        'diff --git a/a.ts b/a.ts\n--- a/a.ts\n+++ b/a.ts\n@@ -1 +1 @@\n+text @@ -1 +5 @@',
+      ),
+    ).toEqual(new Map([['a.ts', { isNew: false, ranges: [[1, 1]] }]]));
+  });
+
+  it('reads an added line that looks like a file header as content', () => {
+    expect(
+      parseDiff(
+        [
+          'diff --git a/a.ts b/a.ts',
+          '--- a/a.ts',
+          '+++ b/a.ts',
+          '@@ -1 +1,2 @@',
+          '+++ b/evil.ts',
+          '+-- a/evil.ts',
+          '@@ -9 +10 @@',
+        ].join('\n'),
+      ),
+    ).toEqual(
+      new Map([
+        [
+          'a.ts',
+          {
+            isNew: false,
+            ranges: [
+              [1, 2],
+              [10, 10],
+            ],
+          },
+        ],
+      ]),
     );
   });
 
-  it('reads a hunk header only at the start of a line', () => {
+  it('records a file whose change has no hunk, such as a mode change', () => {
     expect(
-      parseDiff('--- a/a.ts\n+++ b/a.ts\n@@ -1 +1 @@\n+text @@ -1 +5 @@'),
-    ).toEqual(new Map([['a.ts', { isNew: false, ranges: [[1, 1]] }]]));
+      parseDiff(
+        'diff --git a/run.mjs b/run.mjs\nold mode 100644\nnew mode 100755',
+      ),
+    ).toEqual(new Map([['run.mjs', { isNew: false, ranges: [] }]]));
+  });
+
+  it('ignores header-shaped lines that come before any file', () => {
+    expect(parseDiff('+++ b/stray.ts\n@@ -1 +1 @@')).toEqual(new Map());
+  });
+
+  it('reads a renamed file under its new path, as not new', () => {
+    expect(
+      parseDiff(
+        [
+          'diff --git a/old.ts b/moved.ts',
+          'similarity index 100%',
+          'rename from old.ts',
+          'rename to moved.ts',
+          'diff --git a/was.ts b/edited.ts',
+          'similarity index 90%',
+          'rename from was.ts',
+          'rename to edited.ts',
+          '--- a/was.ts',
+          '+++ b/edited.ts',
+          '@@ -4 +4 @@',
+        ].join('\n'),
+      ),
+    ).toEqual(
+      new Map([
+        ['edited.ts', { isNew: false, ranges: [[4, 4]] }],
+        ['moved.ts', { isNew: false, ranges: [] }],
+      ]),
+    );
   });
 
   it('reads an empty diff as no change', () => {
@@ -187,7 +250,7 @@ describe('introducedChanges', () => {
   it('treats a changed file the diff does not list as wholly new', () => {
     expect(
       introducedChanges({
-        diff: '--- a/a.ts\n+++ b/a.ts\n@@ -1 +1 @@',
+        diff: 'diff --git a/a.ts b/a.ts\n--- a/a.ts\n+++ b/a.ts\n@@ -1 +1 @@',
         files: ['a.ts', 'untracked.ts'],
       }),
     ).toEqual(
@@ -196,6 +259,35 @@ describe('introducedChanges', () => {
         ['untracked.ts', { isNew: true, ranges: [] }],
       ]),
     );
+  });
+});
+
+describe('untrackedFileDiff', () => {
+  it('writes a new file as one hunk adding every line', () => {
+    expect(untrackedFileDiff({ content: 'one\ntwo\n', path: 'n.mjs' })).toBe(
+      [
+        'diff --git a/n.mjs b/n.mjs',
+        'new file mode 100644',
+        '--- /dev/null',
+        '+++ b/n.mjs',
+        '@@ -0,0 +1,2 @@',
+        '+one',
+        '+two',
+        '',
+      ].join('\n'),
+    );
+  });
+
+  it('counts a last line with no newline', () => {
+    expect(untrackedFileDiff({ content: 'one\ntwo', path: 'n.mjs' })).toContain(
+      '@@ -0,0 +1,2 @@\n+one\n+two\n',
+    );
+  });
+
+  it('reads back as a new file covering every line', () => {
+    expect(
+      parseDiff(untrackedFileDiff({ content: 'a\nb\nc\n', path: 'n.mjs' })),
+    ).toEqual(new Map([['n.mjs', { isNew: true, ranges: [[1, 3]] }]]));
   });
 });
 

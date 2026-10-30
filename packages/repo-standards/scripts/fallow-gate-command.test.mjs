@@ -186,7 +186,10 @@ describe('runGate — analyses judged by their report', () => {
 
   it('fails on a coverage gap the diff introduced, and not on an inherited one', () => {
     const fake = fakeEffects({
-      diff: { status: 0, stdout: '--- a/a.ts\n+++ b/a.ts\n@@ -1 +2 @@' },
+      diff: {
+        status: 0,
+        stdout: 'diff --git a/a.ts b/a.ts\n--- a/a.ts\n+++ b/a.ts\n@@ -1 +2 @@',
+      },
       replies: [gapReport],
       stdinFiles: ['a.ts'],
     });
@@ -194,12 +197,34 @@ describe('runGate — analyses judged by their report', () => {
       runGate({ argv: ['coverage-gaps'], base: 'abc', effects: fake.effects }),
     ).toBe(1);
     expect(fake.calls[1]).toEqual({
-      git: ['diff', '-U0', '--no-color', '--no-renames', 'abc', '--'],
+      git: ['diff', '-U0', '--no-color', '--find-renames', 'abc', '--'],
     });
     expect(fake.out.join('')).toBe(
       'fallow coverage-gaps: 1 finding(s) in the changed files:\n\n' +
         '  a.ts:2  no test reaches the export `added`\n',
     );
+  });
+
+  it('does not fail on a gap a renamed file inherited', () => {
+    const fake = fakeEffects({
+      diff: {
+        status: 0,
+        stdout:
+          'diff --git a/old.ts b/a.ts\nsimilarity index 100%\nrename from old.ts\nrename to a.ts',
+      },
+      replies: [
+        json({
+          coverage_gaps: {
+            exports: [{ export_name: 'inherited', line: 9, path: 'a.ts' }],
+            files: [{ path: 'a.ts' }],
+          },
+        }),
+      ],
+      stdinFiles: ['a.ts'],
+    });
+    expect(
+      runGate({ argv: ['coverage-gaps'], base: 'abc', effects: fake.effects }),
+    ).toBe(0);
   });
 
   it.each([
@@ -303,43 +328,5 @@ describe('runGate — analyses judged by their report', () => {
       stdinFiles: ['a.ts'],
     });
     expect(runGate({ argv: ['similar-code'], effects: fake.effects })).toBe(1);
-  });
-});
-
-describe('runGate — mutation', () => {
-  it('runs each root once and returns the worst status', () => {
-    const fake = fakeEffects({
-      replies: [{ status: 1 }, { status: 0 }],
-      stdinFiles: ['packages/ui/src/c.ts', 'scripts/d.mjs', 'e.ts'],
-    });
-    expect(
-      runGate({ argv: ['mutation'], base: 'abc', effects: fake.effects }),
-    ).toBe(1);
-    expect(fake.calls.map(({ args }) => args[2])).toEqual([
-      'packages/ui',
-      'scripts',
-    ]);
-    expect(fake.out.join('')).toBe(
-      'fallow mutation: e.ts sits in no directory with tests, so it is not mutated.\n' +
-        '\nfallow mutation: packages/ui\n' +
-        '\nfallow mutation: scripts\n',
-    );
-  });
-
-  it('passes when every root passes', () => {
-    const fake = fakeEffects({ stdinFiles: ['packages/ui/src/c.ts'] });
-    expect(
-      runGate({ argv: ['mutation'], base: 'abc', effects: fake.effects }),
-    ).toBe(0);
-  });
-
-  it('treats a root whose run was killed as unable to run', () => {
-    const fake = fakeEffects({
-      replies: [{ status: null }],
-      stdinFiles: ['packages/ui/src/c.ts'],
-    });
-    expect(
-      runGate({ argv: ['mutation'], base: 'abc', effects: fake.effects }),
-    ).toBe(COULD_NOT_RUN);
   });
 });

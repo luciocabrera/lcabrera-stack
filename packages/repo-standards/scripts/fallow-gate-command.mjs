@@ -4,27 +4,38 @@
  * .claude/rules/scripts.md.
  */
 import { execFileSync } from 'node:child_process';
-import { existsSync } from 'node:fs';
+import {
+  existsSync,
+  mkdtempSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
 import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
 import { readWorkspaceGraph } from './affected-tests.mjs';
-import { readChangedFiles, REPO_ROOT } from './changed-runner.mjs';
+import { REPO_ROOT } from './changed-runner.mjs';
 import { withoutSeparator } from './cli-input.mjs';
 import { errorMessage } from './error-message.mjs';
 import {
   formatFinding,
   incompleteReason,
   introducedChanges,
+  parseDiff,
   parseReport,
   reportFindings,
+  untrackedFileDiff,
 } from './fallow-gate-report.mjs';
 import {
   ANALYSES,
+  binOf,
   fallowArgs,
   mutationArgs,
   mutationRoots,
   NEEDS_BASE,
+  REPOSITORY_ROOT,
   sourceFiles,
   toRepoPath,
   verdictSource,
@@ -86,14 +97,15 @@ const assertModelReady = (effects) => {
   }
 };
 
-const readDiff = ({ base, effects }) => {
+const readDiff = ({ base, effects, files = [] }) => {
   const child = effects.git([
     'diff',
     '-U0',
     '--no-color',
-    '--no-renames',
+    '--find-renames',
     base,
     '--',
+    ...files,
   ]);
   if (child.error !== undefined || child.status !== 0) {
     throw new Error(
@@ -101,6 +113,19 @@ const readDiff = ({ base, effects }) => {
     );
   }
   return child.stdout;
+};
+
+const outsideDiff = ({ base, effects, files }) => {
+  const tracked = readDiff({ base, effects, files });
+  const listed = parseDiff(tracked);
+  return [
+    tracked,
+    ...files
+      .filter((file) => !listed.has(file))
+      .map((path) =>
+        untrackedFileDiff({ content: effects.readFile(path), path }),
+      ),
+  ].join('\n');
 };
 
 const gateOnReport = ({ analysis, base, effects, files }) => {
@@ -131,23 +156,37 @@ const gateOnExitCode = ({ analysis, base, effects, files }) =>
   runFallow({ args: fallowArgs({ analysis, base, files }), effects }).status ??
   COULD_NOT_RUN;
 
+const mutateRoot = ({ base, diffFile, effects, root }) => {
+  effects.write(`\nfallow mutation: ${root}\n`);
+  return (
+    runFallow({ args: mutationArgs({ base, diffFile, root }), effects })
+      .status ?? COULD_NOT_RUN
+  );
+};
+
+const mutateOutside = ({ base, effects, outside }) => {
+  effects.write(
+    `\nfallow mutation: ${outside.length} changed file(s) outside every workspace, from the repository root: ${outside.join(', ')}\n`,
+  );
+  return effects.withTempFile(
+    outsideDiff({ base, effects, files: outside }),
+    (diffFile) =>
+      mutateRoot({ base, diffFile, effects, root: REPOSITORY_ROOT }),
+  );
+};
+
 const gateOnMutation = ({ base, effects, files }) => {
-  const { roots, unrooted } = mutationRoots({
+  const { outside, roots } = mutationRoots({
     files,
     workspaceDirs: effects.workspaceDirs(),
   });
-  for (const file of unrooted) {
-    effects.write(
-      `fallow mutation: ${file} sits in no directory with tests, so it is not mutated.\n`,
-    );
-  }
-  return roots.reduce((worst, root) => {
-    effects.write(`\nfallow mutation: ${root}\n`);
-    const status =
-      runFallow({ args: mutationArgs({ base, root }), effects }).status ??
-      COULD_NOT_RUN;
-    return Math.max(worst, status);
-  }, 0);
+  const statuses = [
+    ...roots.map((root) => mutateRoot({ base, effects, root })),
+    ...(outside.length === 0
+      ? []
+      : [mutateOutside({ base, effects, outside })]),
+  ];
+  return Math.max(0, ...statuses);
 };
 
 const GATES = {
@@ -173,16 +212,13 @@ export const runGate = ({ argv, base, effects }) => {
   }
 };
 
-const fallowEntry = () =>
-  join(
-    dirname(
-      createRequire(join(REPO_ROOT, 'package.json')).resolve(
-        'fallow/package.json',
-      ),
-    ),
-    'bin',
-    'fallow',
+const fallowEntry = () => {
+  const manifestPath = createRequire(join(REPO_ROOT, 'package.json')).resolve(
+    'fallow/package.json',
   );
+  const manifest = JSON.parse(readFileSync(manifestPath, 'utf8'));
+  return join(dirname(manifestPath), binOf({ manifest, name: 'fallow' }));
+};
 
 const runNode = (args, stdout) => {
   try {
@@ -202,12 +238,33 @@ const runNode = (args, stdout) => {
   }
 };
 
-const processEffects = (proc) => ({
+export const processEffects = (proc) => ({
   exists: (file) => existsSync(join(REPO_ROOT, file)),
   git: (args) => runGitStatus({ args, cwd: REPO_ROOT }),
-  readStdinFiles: () => (proc.stdin.isTTY ? [] : readChangedFiles()),
+  readFile: (file) => readFileSync(join(REPO_ROOT, file), 'utf8'),
+  readStdinFiles: () => {
+    if (proc.stdin.isTTY) {
+      throw new Error(
+        'no files were named and stdin is a terminal, so there is nothing to read. Pipe the changed files in, or name them after --.',
+      );
+    }
+    return readFileSync(proc.stdin.fd, 'utf8')
+      .split('\n')
+      .map((line) => line.trim())
+      .filter(Boolean);
+  },
   root: REPO_ROOT,
   spawn: (args, stdout) => runNode([fallowEntry(), ...args], stdout),
+  withTempFile: (content, use) => {
+    const directory = mkdtempSync(join(tmpdir(), 'repo-fallow-gate-'));
+    const path = join(directory, 'changes.diff');
+    try {
+      writeFileSync(path, content);
+      return use(path);
+    } finally {
+      rmSync(directory, { force: true, recursive: true });
+    }
+  },
   workspaceDirs: () => readWorkspaceGraph(REPO_ROOT).map(({ dir }) => dir),
   write: (text) => proc.stdout.write(text),
   writeError: (text) => proc.stderr.write(text),

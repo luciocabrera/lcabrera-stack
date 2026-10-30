@@ -21,28 +21,57 @@ const hunkRange = (line) => {
   return [Number(start), Number(start) + Number(count) - 1];
 };
 
+const track = ({ changes, isNew, path }) => {
+  changes.current = path;
+  changes.byPath.set(path, { isNew, ranges: [] });
+};
+
+const readHeaderLine = ({ changes, line }) => {
+  if (line.startsWith('--- ')) {
+    changes.isNew = line === '--- /dev/null';
+  } else if (line.startsWith('+++ b/')) {
+    track({ changes, isNew: changes.isNew, path: line.slice('+++ b/'.length) });
+  } else if (line === '+++ /dev/null') {
+    changes.byPath.delete(changes.current);
+    changes.current = undefined;
+  }
+};
+
 export const parseDiff = (diff) =>
   diff.split('\n').reduce(
     (changes, line) => {
-      if (line.startsWith('--- ')) {
-        changes.isNew = line === '--- /dev/null';
-      } else if (line.startsWith('+++ ')) {
-        changes.current = line.startsWith('+++ b/')
-          ? line.slice('+++ b/'.length)
-          : undefined;
-        if (changes.current !== undefined) {
-          changes.byPath.set(changes.current, {
-            isNew: changes.isNew,
-            ranges: [],
-          });
-        }
+      if (line.startsWith('diff --git ')) {
+        changes.inHeader = true;
+        track({
+          changes,
+          isNew: false,
+          path: line.slice(line.lastIndexOf(' b/') + ' b/'.length),
+        });
       } else if (HUNK.test(line)) {
+        changes.inHeader = false;
         changes.byPath.get(changes.current)?.ranges.push(hunkRange(line));
+      } else if (changes.inHeader) {
+        readHeaderLine({ changes, line });
       }
       return changes;
     },
-    { byPath: new Map(), current: undefined, isNew: false },
+    { byPath: new Map(), inHeader: false },
   ).byPath;
+
+export const untrackedFileDiff = ({ content, path }) => {
+  const lines = content.endsWith('\n')
+    ? content.slice(0, -1).split('\n')
+    : content.split('\n');
+  return [
+    `diff --git a/${path} b/${path}`,
+    'new file mode 100644',
+    '--- /dev/null',
+    `+++ b/${path}`,
+    `@@ -0,0 +1,${lines.length} @@`,
+    ...lines.map((line) => `+${line}`),
+    '',
+  ].join('\n');
+};
 
 export const introducedChanges = ({ diff, files }) => {
   const byPath = parseDiff(diff);

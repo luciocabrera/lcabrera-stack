@@ -1,8 +1,21 @@
 import { spawnSync } from 'node:child_process';
+import {
+  closeSync,
+  mkdtempSync,
+  openSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
-import { COULD_NOT_RUN, runFallowGateCommand } from './fallow-gate-command.mjs';
+import {
+  COULD_NOT_RUN,
+  processEffects,
+  runFallowGateCommand,
+} from './fallow-gate-command.mjs';
 
 const BIN = fileURLToPath(new URL('run-fallow-gate.mjs', import.meta.url));
 
@@ -82,6 +95,32 @@ describe('runFallowGateCommand', () => {
     expect(proc.out.join('')).toBe(
       'fallow guard: no changed source file, so there is nothing to check.\n',
     );
+  });
+
+  it('refuses to run when no file is named and stdin is a terminal', () => {
+    const proc = fakeProcess({ argv: ['architecture'] });
+    expect(runFallowGateCommand(proc)).toBe(COULD_NOT_RUN);
+    expect(proc.err.join('')).toContain(
+      'no files were named and stdin is a terminal',
+    );
+  });
+
+  it('reads the changed files from stdin when it is not a terminal', () => {
+    const directory = mkdtempSync(join(tmpdir(), 'fallow-gate-stdin-'));
+    const listing = join(directory, 'files.txt');
+    writeFileSync(listing, '  one.ts \n\ntwo.ts\n');
+    const fd = openSync(listing, 'r');
+    try {
+      const proc = fakeProcess({ argv: [] });
+      proc.stdin = { fd, isTTY: false };
+      expect(processEffects(proc).readStdinFiles()).toEqual([
+        'one.ts',
+        'two.ts',
+      ]);
+    } finally {
+      closeSync(fd);
+      rmSync(directory, { force: true, recursive: true });
+    }
   });
 
   it('reads the merge base from the environment', () => {

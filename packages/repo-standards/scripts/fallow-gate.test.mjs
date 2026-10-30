@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   ANALYSES,
+  binOf,
   fallowArgs,
   mutationArgs,
   mutationRoots,
@@ -180,6 +181,24 @@ describe('mutationArgs', () => {
       '--quiet',
     ]);
   });
+
+  it('narrows a run to the lines of a diff file when given one', () => {
+    expect(
+      mutationArgs({ base: 'abc', diffFile: '/tmp/x.diff', root: '.' }),
+    ).toEqual([
+      'mutation',
+      '--root',
+      '.',
+      '--changed-since',
+      'abc',
+      '--diff-file',
+      '/tmp/x.diff',
+      '--min-score',
+      '100',
+      '--allow-dirty',
+      '--quiet',
+    ]);
+  });
 });
 
 describe('mutationRoots', () => {
@@ -193,7 +212,7 @@ describe('mutationRoots', () => {
         ],
         workspaceDirs: ['packages/ui', 'packages/ui-kit'],
       }),
-    ).toEqual({ roots: ['packages/ui', 'packages/ui-kit'], unrooted: [] });
+    ).toEqual({ outside: [], roots: ['packages/ui', 'packages/ui-kit'] });
   });
 
   it('prefers the deepest workspace when two contain the file', () => {
@@ -205,18 +224,43 @@ describe('mutationRoots', () => {
     ).toEqual(['packages/outer/inner']);
   });
 
-  it('roots a file outside every workspace at its top directory', () => {
+  it('keeps every file outside the workspaces for the repository-root run', () => {
     expect(
       mutationRoots({
-        files: ['scripts/lib/a.mjs', 'scripts/b.mjs'],
+        files: ['scripts/lib/a.mjs', 'evals/b.mjs', 'vite.config.ts'],
         workspaceDirs: ['packages/ui'],
       }),
-    ).toEqual({ roots: ['scripts'], unrooted: [] });
+    ).toEqual({
+      outside: ['scripts/lib/a.mjs', 'evals/b.mjs', 'vite.config.ts'],
+      roots: [],
+    });
   });
 
-  it('leaves a file at the repository root unrooted', () => {
+  it('sends everything to the repository root in a repository with no workspaces', () => {
+    expect(mutationRoots({ files: ['src/a.mjs'], workspaceDirs: [] })).toEqual({
+      outside: ['src/a.mjs'],
+      roots: [],
+    });
+  });
+});
+
+describe('binOf', () => {
+  it('reads a named bin from a bin map', () => {
     expect(
-      mutationRoots({ files: ['vite.config.ts'], workspaceDirs: [] }),
-    ).toEqual({ roots: [], unrooted: ['vite.config.ts'] });
+      binOf({
+        manifest: { bin: { fallow: 'bin/fallow', other: 'bin/other' } },
+        name: 'fallow',
+      }),
+    ).toBe('bin/fallow');
+  });
+
+  it('reads a bin given as a single path', () => {
+    expect(binOf({ manifest: { bin: 'cli.js' }, name: 'fallow' })).toBe(
+      'cli.js',
+    );
+  });
+
+  it('finds nothing in a manifest without a bin', () => {
+    expect(binOf({ manifest: {}, name: 'fallow' })).toBeUndefined();
   });
 });
