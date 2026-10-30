@@ -1,12 +1,12 @@
 // @vitest-environment jsdom
 
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
-import type { TitleLevel } from './Title.types';
+import type { TitleLevel, TitleProps } from './Title.types';
 
 import { Title } from './Title.component';
 import { styles } from './Title.stylex';
@@ -175,4 +175,13 @@ describe('Title', () => {
       );
     },
   );
+});
+
+describe('TitleProps', () => {
+  it('takes div attributes but no className or style, which customStylex replaces', () => {
+    expectTypeOf<TitleProps>().toHaveProperty('id');
+    expectTypeOf<TitleProps>().toHaveProperty('customStylex');
+    expectTypeOf<TitleProps>().not.toHaveProperty('className');
+    expectTypeOf<TitleProps>().not.toHaveProperty('style');
+  });
 });

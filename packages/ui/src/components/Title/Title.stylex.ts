@@ -68,6 +68,12 @@ const plainLevelVariants = stylex.create({
 });
 
 export const styles = {
-  ...base,
+  actions: base.actions,
+  container: base.container,
+  icon: base.icon,
   plainLevel: plainLevelVariants,
+  plainTitle: base.plainTitle,
+  title: base.title,
+  titleSection: base.titleSection,
+  toolbar: base.toolbar,
 };

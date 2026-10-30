@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from 'react';
+import type { HTMLAttributes, JSX } from 'react';
 
 import * as stylex from '@stylexjs/stylex';
 
@@ -6,8 +6,10 @@ import type { TextElement, TextProps } from './Text.types';
 
 import { styles } from './Text.stylex';
 
-export const Text = <TElement extends TextElement = 'p'>({
-  as: tagName = 'p',
+export const Text: <TElement extends TextElement = 'p'>(
+  props: TextProps<TElement>,
+) => JSX.Element = ({
+  as: Tag = 'p',
   children,
   customStylex,
   isMono = false,
@@ -16,8 +18,7 @@ export const Text = <TElement extends TextElement = 'p'>({
   tone = 'primary',
   weight,
   ...props
-}: TextProps<TElement>) => {
-  const Tag: TextElement = tagName;
+}: TextProps<TextElement>) => {
   const elementProps: HTMLAttributes<HTMLElement> = props;
 
   return (

@@ -3,7 +3,7 @@ import type { ComponentProps, ReactNode } from 'react';
 
 export type TitleLevel = 1 | 2 | 3;
 
-export type TitleProps = ComponentProps<'div'> & {
+export type TitleProps = Omit<ComponentProps<'div'>, 'className' | 'style'> & {
   readonly actions?: ReactNode;
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;

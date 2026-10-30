@@ -12,9 +12,9 @@ export type TextElement =
 
 export type TextProps<TElement extends TextElement = 'p'> = Omit<
   ComponentPropsWithoutRef<TElement>,
-  'children'
+  'children' | 'className' | 'style'
 > & {
-  readonly as?: 'p' | TElement;
+  readonly as?: TElement;
   readonly children: ReactNode;
   readonly customStylex?: StyleXStyles;
   readonly isMono?: boolean;

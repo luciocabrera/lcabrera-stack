@@ -1,12 +1,18 @@
 // @vitest-environment jsdom
 
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
-import type { TextElement, TextSize, TextTone, TextWeight } from './Text.types';
+import type {
+  TextElement,
+  TextProps,
+  TextSize,
+  TextTone,
+  TextWeight,
+} from './Text.types';
 
 import { Text } from './Text.component';
 import { styles } from './Text.stylex';
@@ -154,20 +160,40 @@ describe('Text', () => {
     );
   });
 
-  it('keeps its own classes over a className attribute', () => {
-    render(<Text className='caller-class'>Classed</Text>);
-
-    const element = screen.getByText('Classed');
-
-    expect(element.classList.contains('caller-class')).toBe(false);
-    expect(hasStylexStyle({ element, style: styles.text })).toBe(true);
-  });
-
   it('renders the same markup on the server as on the client', () => {
     expectServerMarkupMatchesClient(
       <Text as='span' isMono isTabular size='sm' tone='error' weight='bold'>
         Server
       </Text>,
     );
+  });
+});
+
+describe('TextProps', () => {
+  it('resolves to a paragraph when no element is named', () => {
+    expectTypeOf<TextProps>().toEqualTypeOf<TextProps<'p'>>();
+  });
+
+  it('accepts only the element it is instantiated for', () => {
+    expectTypeOf<TextProps<'label'>['as']>().toEqualTypeOf<
+      'label' | undefined
+    >();
+    expectTypeOf<{
+      readonly as: 'p';
+      readonly children: string;
+      readonly htmlFor: string;
+    }>().not.toExtend<TextProps<'label'>>();
+    expectTypeOf<{
+      readonly as: 'label';
+      readonly children: string;
+      readonly htmlFor: string;
+    }>().toExtend<TextProps<'label'>>();
+  });
+
+  it('takes no className or style, which customStylex replaces', () => {
+    expectTypeOf<TextProps>().not.toHaveProperty('className');
+    expectTypeOf<TextProps>().not.toHaveProperty('style');
+    expectTypeOf<TextProps<'label'>>().not.toHaveProperty('className');
+    expectTypeOf<TextProps>().toHaveProperty('customStylex');
   });
 });
