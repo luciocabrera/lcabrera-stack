@@ -2,7 +2,7 @@
 '@lcabrera/ui': minor
 ---
 
-`Table` density now has four levels: `'dense' | 'compact' | 'comfortable' | 'spacious'`. Each level sets the row height (24, 32, 40 and 48px), the body font (`fontSizeXs`, `fontSizeSm`, `fontSizeSm`, `fontSizeMd`) and the cell inline padding (`spacing.xxs`, `spacing.xs`, `spacing.sm`, `spacing.md`). The header font is `fontSizeXs` at `dense` and `fontSizeSm` at every other level.
+`Table` density now has four levels: `'dense' | 'compact' | 'comfortable' | 'spacious'`. Each level sets the row height (24, 32, 40 and 48px), the body font (`fontSizeXs`, `fontSizeSm`, `fontSizeSm`, `fontSizeMd`) and the cell inline padding (`spacing.xxs`, `spacing.xs`, `spacing.sm`, `spacing.md`). The header font is `fontSizeXs` at `dense` and `fontSizeSm` at every other level, and the header band stays one step below the header: `fontSizeXs` at every level, the smallest size there is, so at `dense` it matches the header. `TABLE_DENSITY_SCALE` holds each level's row height and token names in one exported table.
 
 - `Table` takes `density` and `headerDensity` props for both data sources. They set the level when the meta state holds none. A level in the meta state, whether passed in or chosen in the settings drawer, wins over them.
 - `headerDensity` sets the header row's level on its own and defaults to `density`. A named header level sets the header row's height even when the meta state holds a `rowHeight`.

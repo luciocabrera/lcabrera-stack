@@ -198,5 +198,8 @@ describe('TableBase', () => {
     expect(
       style.getPropertyValue('--x---table-header-padding-inline').trim(),
     ).toBe(spacing.md);
+    expect(
+      style.getPropertyValue('--x---table-header-band-font-size').trim(),
+    ).toBe(typography.fontSizeXs);
   });
 });

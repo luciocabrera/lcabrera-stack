@@ -5,7 +5,7 @@ import type {
 
 import {
   DEFAULT_TABLE_DENSITY,
-  TABLE_DENSITY_ROW_HEIGHT,
+  TABLE_DENSITY_SCALE,
 } from '#ui/components/Table/Table.constants';
 
 import { isTableDensity } from './isTableDensity.util';
@@ -28,7 +28,7 @@ export const resolveTableDensity = ({
   const namedHeaderDensity = [state.headerDensity, defaults.headerDensity].find(
     isTableDensity,
   );
-  const rowHeight = state.rowHeight ?? TABLE_DENSITY_ROW_HEIGHT[density];
+  const rowHeight = state.rowHeight ?? TABLE_DENSITY_SCALE[density].rowHeight;
 
   return {
     density,
@@ -36,7 +36,7 @@ export const resolveTableDensity = ({
     headerRowHeight:
       namedHeaderDensity === undefined
         ? rowHeight
-        : TABLE_DENSITY_ROW_HEIGHT[namedHeaderDensity],
+        : TABLE_DENSITY_SCALE[namedHeaderDensity].rowHeight,
     rowHeight,
   };
 };

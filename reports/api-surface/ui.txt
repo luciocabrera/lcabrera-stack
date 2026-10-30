@@ -244,7 +244,7 @@ TABLE_AGGREGATE_LABELS [const] Record<TableAggregateFn, string>
 TABLE_COLUMN_LAYOUT_LOCK_LABELS [const] Record<TableColumnLayoutLock, string>
 TABLE_DENSITY_LABELS [const] Readonly<Record<TableDensity, string>>
 TABLE_DENSITY_LEVELS [const] readonly ["dense", "compact", "comfortable", "spacious"]
-TABLE_DENSITY_ROW_HEIGHT [const] { readonly comfortable: 40; readonly compact: 32; readonly dense: 24; readonly spacious: 48; }
+TABLE_DENSITY_SCALE [const] { readonly comfortable: { readonly bodyFontSize: "fontSizeSm"; readonly headerBandFontSize: "fontSizeXs"; readonly headerFontSize: "fontSizeSm"; readonly paddingInline: "sm"; readonly rowHeight: 40; }; readonly compact: { readonly bodyFontSize: "fontSizeSm"; readonly headerBandFontSize: "fontSizeXs"; readonly headerFontSize: "fontSizeSm"; readonly paddingInline: "xs"; readonly rowHeight: 32; }; readonly dense: { readonly bodyFontSize: "fontSizeXs"; readonly headerBandFontSize: "fontSizeXs"; readonly headerFontSize: "fontSizeXs"; readonly paddingInline: "xxs"; readonly rowHeight: 24; }; readonly spacious: { readonly bodyFontSize: "fontSizeMd"; readonly headerBandFontSize: "fontSizeXs"; readonly headerFontSize: "fontSizeSm"; readonly paddingInline: "md"; readonly rowHeight: 48; }; }
 TABLE_GROUP_FILTERED_AGGREGATE_LABEL [const] "Filtered — this total covers the filtered rows only"
 TABLE_GROUP_FOLD_LABELS [const] Record<TableGroupFold, string>
 TABLE_GROUP_FOLDS [const] readonly TableGroupFold[]
@@ -318,6 +318,9 @@ TableCrudConfig [type] { readonly create?: boolean; readonly delete?: boolean; r
 TableDataState [type] { readonly data: readonly TData[]; readonly error: TableResponseError | undefined; readonly hasMore: boolean; readonly isLoading: boolean; readonly isLoadingMore: boolean; readonly totalLoadedRows: number; readonly totalRows: number; }
 TableDensity [type] 'comfortable' | 'compact' | 'dense' | 'spacious'
 TableDensityDefaults [type] Pick< TableChromeState, 'density' | 'headerDensity' >
+TableDensityFontSize [type] 'fontSizeMd' | 'fontSizeSm' | 'fontSizeXs'
+TableDensitySpacing [type] 'md' | 'sm' | 'xs' | 'xxs'
+TableDensityStep [type] { /** A `typography` token name. */ readonly bodyFontSize: TableDensityFontSize; readonly headerBandFontSize: TableDensityFontSize; readonly headerFontSize: TableDensityFontSize; /** A `spacing` token name. */ readonly paddingInline: TableDensitySpacing; readonly rowHeight: number; }
 TableFocusState [type] { readonly columnKey: string | undefined; /** Bumped so re-entering the cell that already holds focus is still a change. */ readonly focusRequestId: number; /** Written from the container's focus/blur, not inferred from the DOM. */ readonly isGridFocused: boolean; readonly rowIndex: number | undefined; readonly rowKey: string | undefined; }
 TableGroupAggregateValue [type] { readonly alias?: string; readonly axis?: { readonly value: unknown }; readonly columnKey: string; readonly fn: TableAggregateFn; readonly value: unknown; }
 TableGroupExpansionState [type] { readonly defaultFold: TableGroupFold; /** The groups folded the other way from `defaultFold`, and only those; path keys, never row indexes. */ readonly toggledGroupPaths: ReadonlySet<string>; }

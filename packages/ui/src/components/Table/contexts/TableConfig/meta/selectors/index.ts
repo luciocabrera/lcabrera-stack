@@ -9,6 +9,7 @@ export { useGetTableDrawersSyncNonce } from './useGetTableDrawersSyncNonce.hook'
 export { useGetTableEnablePrefetch } from './useGetTableEnablePrefetch.hook';
 export { useGetTableGroupDetailsPath } from './useGetTableGroupDetailsPath.hook';
 export { useGetTableGroupingCapabilities } from './useGetTableGroupingCapabilities.hook';
+export { useGetTableHasExplicitRowHeight } from './useGetTableHasExplicitRowHeight.hook';
 export { useGetTableHeaderDensity } from './useGetTableHeaderDensity.hook';
 export { useGetTableHeaderRowHeight } from './useGetTableHeaderRowHeight.hook';
 export { useGetTableInitialPageSize } from './useGetTableInitialPageSize.hook';

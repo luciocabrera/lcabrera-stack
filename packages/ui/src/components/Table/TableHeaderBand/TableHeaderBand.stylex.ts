@@ -11,7 +11,7 @@ export const tableHeaderBandStyles = stylex.create({
     color: colors.textTertiary,
     display: 'flex',
     flexShrink: 0,
-    fontSize: typography.fontSizeXs,
+    fontSize: 'var(--table-header-band-font-size)',
     fontWeight: typography.fontWeightSemibold,
     justifyContent: 'flex-start',
     paddingBlockEnd: '2px',

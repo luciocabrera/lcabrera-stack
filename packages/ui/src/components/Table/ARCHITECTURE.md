@@ -182,8 +182,10 @@ the settings drawer commits on Accept, which it also writes to the UI-flags
 cookie, still wins over them. The resolved level gives the default row height,
 which `TableBody`'s virtualizer, `TableRow` and the focus and fold handlers all
 read; a `rowHeight` set in the meta state wins over it for the body, and for the
-header unless a header level is named. `TableBase` sets the body and header font size and inline padding as CSS
-variables on `<table>`, and every cell reads its padding and font from them
+header unless a header level is named. `TableBase` reads each level's step from `TABLE_DENSITY_SCALE`, the one table of
+row heights and token names, and sets the body font, the header font, the header
+band's font and the inline padding as CSS variables on `<table>`; every cell reads
+its padding and font from them
 ([ADR-146](../../../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (a)).
 
 ## Data Flow

@@ -5,6 +5,8 @@ import {
   MAX_TABLE_GROUP_KEYS,
   TABLE_AGGREGATE_FNS,
   TABLE_AGGREGATE_LABELS,
+  TABLE_DENSITY_LEVELS,
+  TABLE_DENSITY_SCALE,
 } from './Table.constants';
 
 describe('table aggregate vocabulary', () => {
@@ -32,5 +34,26 @@ describe('countDistinct budget', () => {
     expect(Number.isSafeInteger(MAX_TABLE_COUNT_DISTINCT_AGGREGATES)).toBe(
       true,
     );
+  });
+});
+
+describe('TABLE_DENSITY_SCALE', () => {
+  const FONT_ORDER = ['fontSizeXs', 'fontSizeSm', 'fontSizeMd'];
+
+  it.each(TABLE_DENSITY_LEVELS)(
+    'keeps the %s header band no larger than its header, and below it wherever a smaller size exists',
+    (level) => {
+      const { headerBandFontSize, headerFontSize } = TABLE_DENSITY_SCALE[level];
+      const band = FONT_ORDER.indexOf(headerBandFontSize);
+      const header = FONT_ORDER.indexOf(headerFontSize);
+
+      expect(band).toBe(Math.max(header - 1, 0));
+    },
+  );
+
+  it('grows the row height with each level, tightest first', () => {
+    expect(
+      TABLE_DENSITY_LEVELS.map((level) => TABLE_DENSITY_SCALE[level].rowHeight),
+    ).toStrictEqual([24, 32, 40, 48]);
   });
 });

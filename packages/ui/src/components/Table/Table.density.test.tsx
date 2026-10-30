@@ -43,6 +43,7 @@ const LEVELS = [
   {
     bodyFont: typography.fontSizeXs,
     density: 'dense',
+    headerBandFont: typography.fontSizeXs,
     headerFont: typography.fontSizeXs,
     padding: spacing.xxs,
     rowHeight: 24,
@@ -50,6 +51,7 @@ const LEVELS = [
   {
     bodyFont: typography.fontSizeSm,
     density: 'compact',
+    headerBandFont: typography.fontSizeXs,
     headerFont: typography.fontSizeSm,
     padding: spacing.xs,
     rowHeight: 32,
@@ -57,6 +59,7 @@ const LEVELS = [
   {
     bodyFont: typography.fontSizeSm,
     density: 'comfortable',
+    headerBandFont: typography.fontSizeXs,
     headerFont: typography.fontSizeSm,
     padding: spacing.sm,
     rowHeight: 40,
@@ -64,6 +67,7 @@ const LEVELS = [
   {
     bodyFont: typography.fontSizeMd,
     density: 'spacious',
+    headerBandFont: typography.fontSizeXs,
     headerFont: typography.fontSizeSm,
     padding: spacing.md,
     rowHeight: 48,
@@ -144,7 +148,7 @@ const renderSelected = ({
 describe('Table density', () => {
   it.each(LEVELS)(
     'renders $density at $rowHeight px with its own font and padding',
-    ({ bodyFont, density, headerFont, padding, rowHeight }) => {
+    ({ bodyFont, density, headerBandFont, headerFont, padding, rowHeight }) => {
       render(<Table columns={COLUMNS} density={density} response={ROWS} />);
 
       expect(rowHeightOf(firstBodyRow())).toBe(`${rowHeight}px`);
@@ -152,6 +156,7 @@ describe('Table density', () => {
       expect(readTableVariable('body-font-size')).toBe(bodyFont);
       expect(readTableVariable('body-padding-inline')).toBe(padding);
       expect(readTableVariable('header-font-size')).toBe(headerFont);
+      expect(readTableVariable('header-band-font-size')).toBe(headerBandFont);
       expect(readTableVariable('header-padding-inline')).toBe(padding);
     },
   );

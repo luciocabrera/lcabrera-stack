@@ -108,4 +108,11 @@ describe('DensitySection', () => {
         .every((radio) => radio.matches(':disabled')),
     ).toBe(true);
   });
+
+  it('names each level with no row height when the meta state sets its own rowHeight', () => {
+    renderSection({ metaState: { rowHeight: 36 } });
+
+    expect(screen.getByRole('radio', { name: 'Spacious' })).not.toBeNull();
+    expect(screen.queryByText(/px rows/)).toBeNull();
+  });
 });

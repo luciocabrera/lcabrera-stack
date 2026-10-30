@@ -19,15 +19,16 @@ import {
   useGetTableIsLoading,
   useGetTableTotalRows,
 } from '../contexts/TableData/data/selectors';
-import { tableDensityTokens, tableStyles } from './TableBase.stylex';
+import { TABLE_DENSITY_SCALE } from '../Table.constants';
+import { tableStyles } from './TableBase.stylex';
 
 export const TableBase = <TData extends Record<string, unknown>, TResponse>({
   children,
   customStylex,
   ...rest
 }: TableBaseProps<TData, TResponse>) => {
-  const body = tableDensityTokens[useGetTableDensity()];
-  const header = tableDensityTokens[useGetTableHeaderDensity()];
+  const body = TABLE_DENSITY_SCALE[useGetTableDensity()];
+  const header = TABLE_DENSITY_SCALE[useGetTableHeaderDensity()];
   const isBordered = useGetTableIsBordered();
   const isStriped = useGetTableIsStriped();
   const totalRows = useGetTableTotalRows();
@@ -50,12 +51,7 @@ export const TableBase = <TData extends Record<string, unknown>, TResponse>({
       {...gridFocusProps}
       {...stylex.props(
         tableStyles.base,
-        tableStyles.density(
-          body.bodyFontSize,
-          body.paddingInline,
-          header.headerFontSize,
-          header.paddingInline,
-        ),
+        tableStyles.density({ body, header }),
         !isBordered && tableStyles.variants.borderless,
         customStylex,
       )}

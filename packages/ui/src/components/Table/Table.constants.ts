@@ -4,6 +4,7 @@ import type {
   TableAggregateFn,
   TableColumnLayoutLock,
   TableDensity,
+  TableDensityStep,
   TableGroupFold,
   TableGroupingMode,
   TableGroupKeyRefusalReason,
@@ -45,12 +46,36 @@ export const TABLE_DENSITY_LABELS: Readonly<Record<TableDensity, string>> = {
   spacious: 'Spacious',
 };
 
-export const TABLE_DENSITY_ROW_HEIGHT = {
-  comfortable: 40,
-  compact: DEFAULT_ROW_HEIGHT,
-  dense: 24,
-  spacious: 48,
-} as const satisfies Readonly<Record<TableDensity, number>>;
+export const TABLE_DENSITY_SCALE = {
+  comfortable: {
+    bodyFontSize: 'fontSizeSm',
+    headerBandFontSize: 'fontSizeXs',
+    headerFontSize: 'fontSizeSm',
+    paddingInline: 'sm',
+    rowHeight: 40,
+  },
+  compact: {
+    bodyFontSize: 'fontSizeSm',
+    headerBandFontSize: 'fontSizeXs',
+    headerFontSize: 'fontSizeSm',
+    paddingInline: 'xs',
+    rowHeight: DEFAULT_ROW_HEIGHT,
+  },
+  dense: {
+    bodyFontSize: 'fontSizeXs',
+    headerBandFontSize: 'fontSizeXs',
+    headerFontSize: 'fontSizeXs',
+    paddingInline: 'xxs',
+    rowHeight: 24,
+  },
+  spacious: {
+    bodyFontSize: 'fontSizeMd',
+    headerBandFontSize: 'fontSizeXs',
+    headerFontSize: 'fontSizeSm',
+    paddingInline: 'md',
+    rowHeight: 48,
+  },
+} as const satisfies Readonly<Record<TableDensity, TableDensityStep>>;
 
 export const INITIAL_PAGE_SIZE = 50;
 export const LOAD_MORE_PAGE_SIZE = 150;

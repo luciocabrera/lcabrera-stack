@@ -1,6 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { TableDensity } from '#ui/components/Table/Table.types';
+import type { TableDensityStep } from '#ui/components/Table/Table.types';
 
 import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
@@ -24,54 +24,43 @@ const tableVariants = stylex.create({
   },
 });
 
+type TableDensityVariables = {
+  readonly bodyFontSize: string;
+  readonly bodyPaddingInline: string;
+  readonly headerBandFontSize: string;
+  readonly headerFontSize: string;
+  readonly headerPaddingInline: string;
+};
+
 const densityVariables = stylex.create({
-  levels: (
-    bodyFontSize: string,
-    bodyPaddingInline: string,
-    headerFontSize: string,
-    headerPaddingInline: string,
-  ) => ({
-    '--table-body-font-size': bodyFontSize,
-    '--table-body-padding-inline': bodyPaddingInline,
-    '--table-header-font-size': headerFontSize,
-    '--table-header-padding-inline': headerPaddingInline,
+  levels: (variables: TableDensityVariables) => ({
+    '--table-body-font-size': variables.bodyFontSize,
+    '--table-body-padding-inline': variables.bodyPaddingInline,
+    '--table-header-band-font-size': variables.headerBandFontSize,
+    '--table-header-font-size': variables.headerFontSize,
+    '--table-header-padding-inline': variables.headerPaddingInline,
   }),
 });
 
-export const tableDensityTokens = {
-  comfortable: {
-    bodyFontSize: typography.fontSizeSm,
-    headerFontSize: typography.fontSizeSm,
-    paddingInline: spacing.sm,
-  },
-  compact: {
-    bodyFontSize: typography.fontSizeSm,
-    headerFontSize: typography.fontSizeSm,
-    paddingInline: spacing.xs,
-  },
-  dense: {
-    bodyFontSize: typography.fontSizeXs,
-    headerFontSize: typography.fontSizeXs,
-    paddingInline: spacing.xxs,
-  },
-  spacious: {
-    bodyFontSize: typography.fontSizeMd,
-    headerFontSize: typography.fontSizeSm,
-    paddingInline: spacing.md,
-  },
-} satisfies Readonly<
-  Record<
-    TableDensity,
-    {
-      readonly bodyFontSize: string;
-      readonly headerFontSize: string;
-      readonly paddingInline: string;
-    }
-  >
->;
+type ResolveDensityVariablesArgs = {
+  readonly body: TableDensityStep;
+  readonly header: TableDensityStep;
+};
+
+const resolveDensityVariables = ({
+  body,
+  header,
+}: ResolveDensityVariablesArgs) =>
+  densityVariables.levels({
+    bodyFontSize: typography[body.bodyFontSize],
+    bodyPaddingInline: spacing[body.paddingInline],
+    headerBandFontSize: typography[header.headerBandFontSize],
+    headerFontSize: typography[header.headerFontSize],
+    headerPaddingInline: spacing[header.paddingInline],
+  });
 
 export const tableStyles = {
   base: baseStyles.table,
-  density: densityVariables.levels,
+  density: resolveDensityVariables,
   variants: tableVariants,
 };

@@ -349,6 +349,20 @@ export type TableDensityDefaults = Pick<
   'density' | 'headerDensity'
 >;
 
+export type TableDensityFontSize = 'fontSizeMd' | 'fontSizeSm' | 'fontSizeXs';
+
+export type TableDensitySpacing = 'md' | 'sm' | 'xs' | 'xxs';
+
+export type TableDensityStep = {
+  /** A `typography` token name. */
+  readonly bodyFontSize: TableDensityFontSize;
+  readonly headerBandFontSize: TableDensityFontSize;
+  readonly headerFontSize: TableDensityFontSize;
+  /** A `spacing` token name. */
+  readonly paddingInline: TableDensitySpacing;
+  readonly rowHeight: number;
+};
+
 export type TableFocusState = {
   readonly columnKey: string | undefined;
   /** Bumped so re-entering the cell that already holds focus is still a change. */
