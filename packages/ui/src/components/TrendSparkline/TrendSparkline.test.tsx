@@ -193,6 +193,39 @@ describe('TrendSparkline', () => {
     });
   });
 
+  describe('non-finite values', () => {
+    it('leaves NaN out of a values chart', () => {
+      const { container } = render(
+        <TrendSparkline label='Trend' values={[1, Number('NaN'), 3, 2]} />,
+      );
+
+      expect(container.querySelector('path')?.getAttribute('d')).not.toContain(
+        'NaN',
+      );
+    });
+
+    it('draws no dot and no NaN coordinate for a non-finite point', () => {
+      const { container } = render(
+        <TrendSparkline
+          label='Weekly results'
+          points={[{ value: 1 }, { value: Number('NaN') }, { value: 3 }]}
+        />,
+      );
+
+      const dots = [...container.querySelectorAll('circle')];
+
+      expect(dots).toHaveLength(2);
+      expect(
+        dots.map(
+          (dot) => `${dot.getAttribute('cx')},${dot.getAttribute('cy')}`,
+        ),
+      ).not.toContain(expect.stringContaining('NaN'));
+      expect(container.querySelector('path')?.getAttribute('d')).not.toContain(
+        'NaN',
+      );
+    });
+  });
+
   describe('server render', () => {
     it.each([
       {

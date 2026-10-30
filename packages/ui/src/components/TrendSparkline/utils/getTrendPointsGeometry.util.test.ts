@@ -109,4 +109,17 @@ describe('getTrendPointsGeometry', () => {
     expect(line).toBe('');
     expect(dots).toHaveLength(2);
   });
+
+  it('draws no dot for a non-finite value and scales from the finite ones', () => {
+    const { dots, line } = getTrendPointsGeometry({
+      ...SIZE,
+      points: [{ value: 2 }, { value: Number('NaN') }, { value: 4 }],
+    });
+
+    expect(dots.map(({ cx, cy, position }) => [position, cx, cy])).toEqual([
+      [0, 4, 24],
+      [2, 104, 4],
+    ]);
+    expect(line).toBe('M4,24L4,24M104,4L104,4');
+  });
 });

@@ -1,5 +1,6 @@
 import { linePath } from '@lcabrera/utils/chart/line-path.util';
 import { scaleLinear } from '@lcabrera/utils/chart/scale-linear.util';
+import { isFiniteNumber } from '@lcabrera/utils/guards/is-finite-number.util';
 import { roundToCents } from '@lcabrera/utils/numbers/round-to-cents.util';
 
 import type { TrendPoint } from '#ui/components/TrendSparkline/TrendSparkline.types';
@@ -22,8 +23,9 @@ export const getTrendPointsGeometry = ({
   width,
 }: GetTrendPointsGeometryArgs) => {
   const values = points.map(({ value }) => value);
-  const bottom = Math.min(0, ...values);
-  const top = max ?? Math.max(0, ...values);
+  const finiteValues = values.filter((value) => isFiniteNumber(value));
+  const bottom = Math.min(0, ...finiteValues);
+  const top = max ?? Math.max(0, ...finiteValues);
   const x = scaleLinear({
     domain: [0, points.length - 1],
     range: [TREND_SPARKLINE_DOT.inset, width - TREND_SPARKLINE_DOT.inset],
@@ -42,12 +44,14 @@ export const getTrendPointsGeometry = ({
     : '';
 
   return {
-    dots: points.map((point, index) => ({
-      ...point,
-      cx: roundToCents(x(index)),
-      cy: roundToCents(y(point.value)),
-      position: index,
-    })),
+    dots: points
+      .map((point, index) => ({
+        ...point,
+        cx: roundToCents(x(index)),
+        cy: roundToCents(y(point.value)),
+        position: index,
+      }))
+      .filter(({ value }) => isFiniteNumber(value)),
     line,
   };
 };

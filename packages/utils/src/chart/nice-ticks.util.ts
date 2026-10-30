@@ -24,11 +24,14 @@ export const niceTicks = ({ count, max, min }: NiceTicksArgs) => {
     NICE_STEP_MULTIPLES.find(({ below }) => normalised < below)?.multiple ??
     NICE_STEP_MULTIPLE_CEILING;
   const step = multiple * 10 ** power;
-  const first = Math.ceil(low / step);
-  const last = Math.floor(high / step);
   const digits = Math.max(0, -power);
+  const tick = (steps: number) => Number((steps * step).toFixed(digits));
+  const nearestFirst = Math.round(low / step);
+  const nearestLast = Math.round(high / step);
+  const first = tick(nearestFirst) < low ? nearestFirst + 1 : nearestFirst;
+  const last = tick(nearestLast) > high ? nearestLast - 1 : nearestLast;
 
   return Array.from({ length: last - first + 1 }, (_, offset) =>
-    Number(((first + offset) * step).toFixed(digits)),
+    tick(first + offset),
   );
 };

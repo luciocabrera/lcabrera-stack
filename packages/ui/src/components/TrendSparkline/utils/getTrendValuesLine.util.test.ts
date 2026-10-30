@@ -41,4 +41,15 @@ describe('getTrendValuesLine', () => {
       }),
     ).toBe('M0,10L50,5L100,0');
   });
+
+  it('scales from the finite values and breaks the line at a non-finite one', () => {
+    const line = getTrendValuesLine({
+      height: 10,
+      values: [0, Number('NaN'), 10, 5, Number('Infinity'), 0],
+      width: 100,
+    });
+
+    expect(line).toBe('M0,10L0,10M40,0L60,5M100,10L100,10');
+    expect(line).not.toContain('NaN');
+  });
 });

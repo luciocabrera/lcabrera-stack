@@ -36,6 +36,9 @@ Title [const] ({ actions, children, customStylex, icon, level, variant, ...props
 TitleLevel [type] 1 | 2 | 3
 TitleProps [type] Omit<ComponentProps<'div'>, 'className' | 'style'> & { readonly actions?: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly level?: TitleLevel; readonly variant?: TitleVariant; }
 TitleVariant [type] 'plain' | 'toolbar'
+TrendPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: TrendSparklineTone; readonly value: number; }
+TrendSparkline [const] ({ height, isConnected, label, max, tone, width, ...series }: TrendSparklineProps) => JSX.Element
+TrendSparklineProps [type] TrendSparklineChartProps & (TrendSparklinePointsProps | TrendSparklineValuesProps)
 useNotifyOnError [const] (error: unknown) => void
 useTableRoutePage [const] <TData extends Record<string, unknown>, TResponse extends TablePageResponse<TData>>({ fetchPage }?: UseTableRoutePageArgs<TResponse>) => { columnsState: { columnFilters: ColumnFiltersState<TData>; columnOrder: ColumnOrderState<TData>; columnPinning: ColumnPinningState<TData>; columns: TableColumn<TData>[]; columnSizing: ColumnSizingState<TData>; columnVisibility: ColumnVisibilityState<TData>; sorting: { columnKey: keyof TData & string; direction: "asc" | "desc"; }[]; cellPalette?: Readonly<Record<string, TableCellPaletteEntry>> | undefined; }; dataPromise: Promise<TResponse>; groupingState: { totalsPlacement: TableTotalsPlacement; aggregates: readonly TableColumnAggregate[]; columnAxis?: string; keys: readonly string[]; mode: TableGroupingMode; periods: Readonly<Record<string, TableGroupPeriod>>; shares: readonly TableColumnAggregate[]; }; metaState: { isGroupingEnabled: boolean; isGroupingLocked: boolean; isKeysetEnabled: boolean; isServerFilterEnabled: boolean; defaultGroupFold: TableGroupFold | undefined; groupDetailsPath: string | undefined; groupingCapabilities: Readonly<Record<string, TableColumnGroupingCapability>>; hasDefaultGrouping: boolean; isColumnLayoutTransient: boolean; isUrlStateNested: boolean; lockedFilters: TableLockedFilters | undefined; preferredGroupingMode: TableGroupingMode | undefined; settingsTabOrder: readonly TableSettingsTabRole[] | undefined; additionalMetadata?: Readonly<Record<string, null | TableMetadataValue | undefined>>; crud?: TableCrudConfig; deleteActionPath?: string; enablePrefetch?: boolean | undefined; locale?: string; pagePath?: string; schemaName?: string; tableName: string; title: TableTitle; appId: string; columnSelectedKey?: string; columnSettingsSelectedTab?: string; density?: TableDensity; drawersSyncNonce?: number; headerDensity?: TableDensity; initialPageSize?: number | undefined; isBordered?: boolean | undefined; isColumnSettingsOpen?: boolean; isColumnSettingsPinned?: boolean; isRounded?: boolean | undefined; isStriped?: boolean | undefined; isTableSettingsOpen?: boolean; isTableSettingsPinned?: boolean; loadMorePageSize?: number | undefined; overscan?: number | undefined; persistenceKey: string; placeholderRowCount?: number | undefined; rowHeight?: number; settingsPanelWidth?: number; tableSettingsExpandedFilters?: readonly string[]; tableSettingsSelectedTab?: string; threshold?: number | undefined; wasTableSettingsOpenBeforeColumnSettings?: boolean; }; onLoadMore: (({ lastRow, limit, skip }: Pagination<TData>) => Promise<TResponse>) | undefined; }
 
@@ -397,7 +400,9 @@ TitleProps [type] Omit<ComponentProps<'div'>, 'className' | 'style'> & { readonl
 TitleVariant [type] 'plain' | 'toolbar'
 
 ## ./components/TrendSparkline
-TrendSparkline [const] ({ height, label, tone, values, width, }: TrendSparklineProps) => JSX.Element
+TrendPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: TrendSparklineTone; readonly value: number; }
+TrendSparkline [const] ({ height, isConnected, label, max, tone, width, ...series }: TrendSparklineProps) => JSX.Element
+TrendSparklineProps [type] TrendSparklineChartProps & (TrendSparklinePointsProps | TrendSparklineValuesProps)
 
 ## ./components/VirtualList
 VirtualList [const] ({ dataState, filter, ...listState }: VirtualListProps) => JSX.Element

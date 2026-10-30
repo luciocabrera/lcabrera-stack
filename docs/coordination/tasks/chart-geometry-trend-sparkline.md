@@ -28,7 +28,7 @@ Add chart geometry to utils and redraw TrendSparkline on it
 
 ## Status / next
 
-- Current step: round 4 pushed, rebased on main (decimate gaps pass through,
-  ChartPoint in and out, focus outline on linked dots)
+- Current step: round 5 pushed (niceTicks bounds, non-finite values in
+  TrendSparkline)
 - Blockers: none
 - Next: review

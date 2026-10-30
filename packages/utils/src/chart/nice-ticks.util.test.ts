@@ -41,6 +41,26 @@ describe('niceTicks', () => {
     ]);
   });
 
+  it('moves a nearest multiple that falls outside the bounds back inside them', () => {
+    expect(niceTicks({ count: 3, max: 9.4, min: 2.6 })).toEqual([4, 6, 8]);
+  });
+
+  it('keeps a tick on a bound that binary cannot represent exactly', () => {
+    expect(niceTicks({ count: 3, max: 0.3, min: 0 })).toEqual([
+      0, 0.1, 0.2, 0.3,
+    ]);
+    expect(niceTicks({ count: 7, max: 0.7, min: 0 })).toEqual([
+      0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7,
+    ]);
+    expect(niceTicks({ count: 1, max: 1.2, min: 1.1 })).toEqual([1.1, 1.2]);
+    expect(niceTicks({ count: 3, max: 0.0007, min: 0.0001 })).toEqual([
+      0.0002, 0.0004, 0.0006,
+    ]);
+    expect(niceTicks({ count: 3, max: 0.0009, min: 0.0003 })).toEqual([
+      0.0004, 0.0006, 0.0008,
+    ]);
+  });
+
   it('gives exact ticks at a scale of 1e-3', () => {
     expect(niceTicks({ count: 5, max: 0.001, min: 0 })).toEqual([
       0, 0.0002, 0.0004, 0.0006, 0.0008, 0.001,
