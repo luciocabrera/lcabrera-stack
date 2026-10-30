@@ -14,7 +14,7 @@ export const repoPath = ({ path, root }) => {
   return resolved;
 };
 
-export const CASE_ID = /^FP-\d{4}$/u;
+const CASE_ID = /^FP-\d{4}$/u;
 
 export const caseIdFrom = (value) => {
   if (!CASE_ID.test(value)) {
