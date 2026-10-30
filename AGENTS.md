@@ -92,7 +92,8 @@ _package_ relies on into an app.
 the listing cannot tell you is below.
 
 **The public packages are held strictest: never baseline, scope, or
-inline-disable a finding in any of them.** Which packages those are is stated in
+inline-disable a finding in any of them** — the one exception is Rule 11's, a
+panel-confirmed false positive, and it applies here as it does everywhere. Which packages those are is stated in
 exactly one place — the workspaces whose `.gitignore` covers
 `eslint-suppressions.json` — and **`vp run suppressions:packages` prints that
 roster**. Cite the command; do not copy its output into a second document. Every
@@ -294,8 +295,9 @@ reporting — is the **`lint-toolchain` skill**. One rule from it belongs here
 because it governs every engine: **a rule that is not loaded reports exactly the
 same clean pass as code that is correct**, so confirm any lint change with a
 deliberate violation (Rule 14). Handling a _finding_ is Non-Negotiable Rule 11 —
-verify, then fix; never suppress. The public packages (§1) take no
-suppressions at all, enforced by `vp run suppressions:verify`.
+verify, then fix; never suppress, unless a blind panel has confirmed a false
+positive. The public packages (§1) take no other suppression, enforced by
+`vp run suppressions:verify`.
 
 **`test:all` vs `test:ci`.** Neither needs a database locally — the DB-bound smoke suites in `apps/showcase` gate on `SMOKE_DB`, and only `vp run --filter showcase test:smoke` sets it; `@repo/eval-history`'s migrator, ingest and reporting tests and the showcase's `/evals` public-payload test run when `EVALS_TEST_DATABASE_URL` names a scratch database, skip without it, and fail without it under CI, where the `unit-tests` job sets it against a Postgres service — so the two differ only in ordering: `test:ci` runs `showcase` last, via its own `test:ci`, so the coverage summary the PR comment reads is the fresh one. Keep using `test:ci` before pushing — it is what CI runs on a push to `main`; on a pull request CI runs `test:changed -- --ci` instead, and `check-safe.yml` picks between them by event.
 
@@ -356,7 +358,7 @@ The headline rules every agent must know regardless of which files are open. Ful
 8. **Use `@/` alias for `src/`** — relative imports only within the same directory.
 9. **No explicit return types on functions/hooks/components — let TypeScript infer** — annotate only when inference genuinely fails (recursion, overloads, complex conditional types) or must be widened. (`.claude/rules/typescript.md`)
 10. **Never use workaround-only fixes** — always address and solve the underlying issue. If there is any doubt about intent, trade-offs, or risk, ask the user before applying a workaround or partial fix.
-11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). If it is a genuine false positive, explain why rather than disabling. The public packages (§1) are held strictest — each one's `eslint-suppressions.json` is gitignored, so none is ever committed and none of them baselines.
+11. **Never ignore, suppress, or omit a lint finding — verify, then fix.** Oxlint/eslint violations (including stylistic `unicorn/*` rules like `prefer-simple-condition-first` / `no-nested-ternary`) are real until you have read the flagged code and confirmed otherwise. Do **not** dismiss one as a false positive without checking, and do **not** silence a new one — no inline `// eslint-disable`/`oxlint-disable`, no rule-off in config, no hand-added `eslint-suppressions.json` entry. Fix the code (reorder operands, restructure logic, wire up/delete the export). **One exception, and nothing else:** a false positive that a blind panel of three distinct models confirmed unanimously, opened with `vp run adjudicate` and ruled by `vp run adjudicate:panel`. It gets an entry in `docs/agents/false-positives.json` and the analyzer's own next-line marker, `<marker> <rule> -- false positive, case FP-nnnn: <one-line reason>`, and `vp run suppressions:verify` matches the two one to one. The builder never rules on its own finding; a split goes to the repository owner ([ADR-147](docs/decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md)). The public packages (§1) are held strictest — each one's `eslint-suppressions.json` is gitignored, so none is ever committed and none of them baselines; the panel exception reaches them too.
 12. **Claim shared work before you touch it.** Multiple agents and humans work this repo in parallel. Before non-trivial work, register it in [`docs/coordination/`](docs/coordination/README.md): check for an area overlap, then create a task file (`tasks/_TEMPLATE.md`) with the `area` globs you own, branch, and keep `status`/`updated` current until it merges. Never edit files inside another active task's `area` without coordinating. The register — not `~/.claude/plans/` scratch, which is invisible to everyone else — is the shared record. `vp run coordination:verify` (CI) keeps it honest. (See "Multi-Agent Coordination" in §7.)
 13. **Commits and PRs follow the enforced format.** Every commit message is a Conventional Commit (`type(scope): subject`) and every PR has a conforming title plus every section of [`.github/pull_request_template.md`](.github/pull_request_template.md) — checked by the `commit-msg` git hook locally and the `pr-standards.yml` gate in CI. Do not restate the template's section list here or anywhere else; open the template. The one spec is `packages/repo-standards/scripts/commit-convention.mjs`; don't restate its type list elsewhere, and (Rule 11) fix a failing message/description rather than weakening the check. (See "Commit & PR Standards" in §7 and the `commit-and-pr` skill.)
 14. **A claim needs evidence that could have disproved it, and steps someone else can re-run.** Before writing a finding into a doc, comment, issue or PR, ask **what else would produce the same observation** — if anything would, the probe is not evidence, so change the probe. Then state the **preconditions** the steps depend on (config state, branch, whether a fix has landed); if the same change alters those preconditions, say so explicitly, or the steps stop reproducing the moment they merge. A written claim is load-bearing: someone will act on it without re-deriving it. (See "Verifying a claim" in §7.)
@@ -457,7 +459,9 @@ which is also why `@deprecated` and `@internal` stay in a `.ts` file, where the
 rest of the annotations do not. And a **one-line note on a member of an exported
 type** stays: that member is a published surface, so state the precondition, the
 default or the encoding there and nothing else — not the rationale, and not a
-pointer to a record an installer cannot open.
+pointer to a record an installer cannot open. And the **one-line reason on a
+false-positive marker** stays: it names the panel case that confirmed the
+dismissal, and the gate requires it ([ADR-147](docs/decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md)).
 
 **The explanation still has to live somewhere, and there are two homes.** A
 decision — why this approach and not the one that looks equally reasonable —
@@ -474,7 +478,7 @@ amended by
 for the third position,
 which also states what the rule costs and which paragraph of
 [ADR-088](docs/decisions/ADR-088-keep-living-architecture-docs-on-systems-not-on-every-folder.md)
-it corrects.
+it corrects. [ADR-147](docs/decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md) adds the marker-reason exemption.
 
 **Nothing enforces this mechanically, and that is deliberate.** A lint rule for
 it was built and removed: deciding whether a given comment carries something no

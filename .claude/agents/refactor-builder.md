@@ -34,7 +34,8 @@ repo are the only channel you have to it.
   [`.claude/rules/package-rationale.md`](../rules/package-rationale.md) is the
   rule and the two tests for a sentence.
 - **Never suppress a finding** (Rule 11). No inline disables, no baseline entries,
-  no rule-offs. Fix the code, or explain in your report why the engine is wrong.
+  no rule-offs. Fix the code. If you think the engine is wrong, open a case with
+  `vp run adjudicate` and let the blind panel rule; never rule on it yourself.
 - Documentation updates land in the **same commit** as the code they describe.
 - **A throwaway container you start is labelled, and removed by you.** A test
   database or any other container you run for the gate gets

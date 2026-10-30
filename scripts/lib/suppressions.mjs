@@ -67,9 +67,35 @@ const ruleFrom = ({ directive, rest }) => {
     : `${directive} (unscoped)`;
 };
 
-const isDirectivePosition = (before) => {
+const QUOTES = new Set(["'", '"', '`']);
+
+const endsInsideString = (text) => {
+  let quote;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (quote === undefined && QUOTES.has(character)) {
+      quote = character;
+    } else if (character === '\\') {
+      index += 1;
+    } else if (character === quote) {
+      quote = undefined;
+    } else if (quote === undefined && text.startsWith('//', index)) {
+      return false;
+    }
+  }
+  return quote !== undefined;
+};
+
+export const opensComment = (before) => {
   const trimmed = before.trimEnd();
-  if (trimmed.endsWith('//') || trimmed.endsWith('/*')) return true;
+  return (
+    (trimmed.endsWith('//') || trimmed.endsWith('/*')) &&
+    !endsInsideString(trimmed)
+  );
+};
+
+const isDirectivePosition = (before) => {
+  if (opensComment(before)) return true;
   const leading = before.trim();
   return leading === '' || leading === '*';
 };

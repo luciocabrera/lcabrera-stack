@@ -18,6 +18,7 @@ import { dirname, join } from 'node:path';
 import { readWorkspaceGraph } from './affected-tests.mjs';
 import { REPO_ROOT } from './changed-runner.mjs';
 import { withoutSeparator } from './cli-input.mjs';
+import { readRegisters } from './config.mjs';
 import { errorMessage } from './error-message.mjs';
 import {
   gitDiffArgs,
@@ -139,7 +140,14 @@ const gateOnReport = ({ analysis, base, effects, files }) => {
     analysis === 'coverage-gaps'
       ? introducedChanges({ diff: readDiff({ base, effects }), files })
       : undefined;
-  const findings = reportFindings({ analysis, introduced, report });
+  const findings = reportFindings({
+    adjudicated:
+      analysis === 'suppressions' ? effects.readFalsePositives() : [],
+    analysis,
+    introduced,
+    report,
+    today: effects.today(),
+  });
   if (findings.length === 0) {
     effects.write(
       `fallow ${analysis}: no finding in ${files.length} changed source file(s).\n`,
@@ -252,9 +260,22 @@ const runNode = (args, stdout) => {
   }
 };
 
+const readFalsePositives = () => {
+  const path = join(REPO_ROOT, readRegisters(REPO_ROOT).falsePositives);
+  if (!existsSync(path)) return [];
+  const list = JSON.parse(readFileSync(path, 'utf8'));
+  if (!Array.isArray(list)) {
+    throw new TypeError(
+      `${path} is not a JSON array of false-positive entries.`,
+    );
+  }
+  return list;
+};
+
 export const processEffects = (proc) => ({
   exists: (file) => existsSync(join(REPO_ROOT, file)),
   git: (args) => runGitStatus({ args, cwd: REPO_ROOT, maxBuffer: 2 ** 29 }),
+  readFalsePositives,
   readFile: (file) => readFileSync(join(REPO_ROOT, file), 'utf8'),
   readStdinFiles: () => {
     if (proc.stdin.isTTY) {
@@ -269,6 +290,7 @@ export const processEffects = (proc) => ({
   },
   root: REPO_ROOT,
   spawn: (args, stdout) => runNode([fallowEntry(), ...args], stdout),
+  today: () => new Date().toISOString().slice(0, 10),
   withTempFile: (content, use) => {
     const directory = mkdtempSync(join(tmpdir(), 'repo-fallow-gate-'));
     const path = join(directory, 'changes.diff');

@@ -166,6 +166,7 @@ export default defineConfig({
       'vp fmt --no-error-on-unmatched-pattern',
       'repo-fallow-gate suppressions --',
       'repo-fallow-gate architecture --',
+      'vp run suppressions:verify --',
     ],
   },
 });

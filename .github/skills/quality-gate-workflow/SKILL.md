@@ -147,16 +147,18 @@ Do not copy the same fact into an architecture file, a JSDoc essay, and an ADR.
   sits inside a type declaration
   ([ADR-095](../../../docs/decisions/ADR-095-move-explanations-out-of-functions-and-into-the-record-that-owns-them.md),
   amended for the third position by
-  [ADR-104](../../../docs/decisions/ADR-104-the-no-comment-rule-covers-a-type-declaration.md)).
+  [ADR-104](../../../docs/decisions/ADR-104-the-no-comment-rule-covers-a-type-declaration.md),
+  and for the marker reason by [ADR-147](../../../docs/decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md)).
   No linter reports this — ADR-104 says why — so it is yours to apply, and when a
   comment is the only thing in dispute, delete it rather than debate it.
   A decision goes in the ADR that owns it; investigation and measurement go in
-  the pull request or the issue. Three exemptions: the short file-level "why"
+  the pull request or the issue. Four exemptions: the short file-level "why"
   header, mandatory on a script per
   [`.claude/rules/scripts.md`](../../../.claude/rules/scripts.md) and permitted
   anywhere; JSDoc a build reads (`@param`, `@returns`, …) — the annotations, not
-  prose sharing their block; and a one-line note on a member of an exported
-  type, which is a published surface.
+  prose sharing their block; a one-line note on a member of an exported
+  type, which is a published surface; and the one-line reason on a
+  false-positive marker, which names the panel case.
 
 ### Where a new ADR goes
 
@@ -183,7 +185,10 @@ branch to conflict with
 - Re-run the full gate after non-trivial fixes.
 - Run a workspace's tests with `vp run test`, which runs its `test` task (`vp test run` plus any arguments the task adds); stage 8 stays `vp run test:changed` from the root.
 - Never silence a finding to get a stage green (CLAUDE.md rule 11) — fix the code.
-  This covers `// biome-ignore` exactly as it covers `// eslint-disable`.
+  This covers `// biome-ignore` exactly as it covers `// eslint-disable`. The
+  only exception is a false positive a blind panel confirmed: open a case with
+  `vp run adjudicate` and let `vp run adjudicate:panel` rule
+  ([ADR-147](../../../docs/decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md)).
 - Never trust a green Biome run on a rule you just enabled — a disabled rule and
   correct code report identically. Confirm with a deliberate violation first.
 

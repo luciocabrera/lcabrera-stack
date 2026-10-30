@@ -15,6 +15,7 @@
     "./envelope/envelope.types": "./src/envelope/envelope.types.ts",
     "./envelope/envelopeJsonSchema.util": "./src/envelope/envelopeJsonSchema.util.ts",
     "./envelope/parseEnvelope.util": "./src/envelope/parseEnvelope.util.ts",
+    "./envelope/toCurrentAdjudication.util": "./src/envelope/toCurrentAdjudication.util.ts",
     "./hashing/canonicalHash.util": "./src/hashing/canonicalHash.util.ts",
     "./hashing/canonicalJson.util": "./src/hashing/canonicalJson.util.ts",
     "./hashing/catalogHash.util": "./src/hashing/catalogHash.util.ts",
