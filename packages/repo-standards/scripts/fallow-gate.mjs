@@ -25,6 +25,8 @@ export const ANALYSES = [
 
 export const NEEDS_BASE = new Set(['coverage-gaps', 'mutation', 'security']);
 
+export const RUNS_ON_ANY_CHANGE = new Set(['security']);
+
 const VERDICT_SOURCES = new Map([
   ...[...EXIT_CODE_ANALYSES].map((analysis) => [analysis, 'exit-code']),
   ...[...REPORT_ANALYSES].map((analysis) => [analysis, 'report']),

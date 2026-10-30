@@ -91,6 +91,40 @@ describe('runGate — input', () => {
 });
 
 describe('runGate — analyses judged by their exit code', () => {
+  it('runs security on a change that touches no source file', () => {
+    const fake = fakeEffects({
+      existing: ['.github/workflows/check.yml', 'scripts/run.sh'],
+      replies: [{ status: 8 }],
+      stdinFiles: ['.github/workflows/check.yml', 'scripts/run.sh'],
+    });
+    expect(
+      runGate({ argv: ['security'], base: 'abc', effects: fake.effects }),
+    ).toBe(8);
+    expect(fake.calls[0].args[0]).toBe('security');
+  });
+
+  it('skips security only when nothing changed at all', () => {
+    const fake = fakeEffects({ stdinFiles: ['deleted.yml'] });
+    expect(
+      runGate({ argv: ['security'], base: 'abc', effects: fake.effects }),
+    ).toBe(0);
+    expect(fake.out.join('')).toBe(
+      'fallow security: no changed file, so there is nothing to check.\n',
+    );
+    expect(fake.calls).toEqual([]);
+  });
+
+  it('skips architecture when no changed file is a source file', () => {
+    const fake = fakeEffects({
+      existing: ['scripts/run.sh'],
+      stdinFiles: ['scripts/run.sh'],
+    });
+    expect(runGate({ argv: ['architecture'], effects: fake.effects })).toBe(0);
+    expect(fake.out.join('')).toBe(
+      'fallow architecture: no changed source file, so there is nothing to check.\n',
+    );
+  });
+
   it('returns the code fallow returned', () => {
     const fake = fakeEffects({
       replies: [{ status: 8 }],

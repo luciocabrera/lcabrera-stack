@@ -438,7 +438,8 @@ with `TEST_CHANGED_BASE` (default `origin/main`), untracked files included. Pass
 files after `--` to check those instead. `suppressions`, `coverage-gaps` and
 `similar-code` exit 0 on a finding when fallow runs them bare, so the bin reads
 their JSON report and decides. `check:safe` chains every gate except
-`fallow:similar-code`; `check:push` chains the four that need no test run.
+`fallow:similar-code`; `check:push` chains guard, architecture, suppressions
+and security, and leaves coverage-gaps and mutation to `check:safe` and CI.
 
 `fallow:dead-code:verify` runs with `--no-cache`. Fallow's incremental cache
 keeps an import it recorded as unresolved, so a scan that ran before

@@ -20,13 +20,16 @@ import { REPO_ROOT } from './changed-runner.mjs';
 import { withoutSeparator } from './cli-input.mjs';
 import { errorMessage } from './error-message.mjs';
 import {
+  introducedChanges,
+  joinDiffs,
+  parseDiff,
+  untrackedFileDiff,
+} from './fallow-gate-diff.mjs';
+import {
   formatFinding,
   incompleteReason,
-  introducedChanges,
-  parseDiff,
   parseReport,
   reportFindings,
-  untrackedFileDiff,
 } from './fallow-gate-report.mjs';
 import {
   ANALYSES,
@@ -36,6 +39,7 @@ import {
   mutationRoots,
   NEEDS_BASE,
   REPOSITORY_ROOT,
+  RUNS_ON_ANY_CHANGE,
   sourceFiles,
   toRepoPath,
   verdictSource,
@@ -52,10 +56,10 @@ const readInput = ({ argv, effects }) => {
     );
   }
   const listed = given.length === 0 ? effects.readStdinFiles() : given;
-  const files = sourceFiles(
-    listed.map((file) => toRepoPath({ file, root: effects.root })),
-  ).filter((file) => effects.exists(file));
-  return { analysis, files };
+  const existing = listed
+    .map((file) => toRepoPath({ file, root: effects.root }))
+    .filter((file) => effects.exists(file));
+  return { analysis, existing, files: sourceFiles(existing) };
 };
 
 const requireBase = ({ analysis, base }) => {
@@ -118,14 +122,14 @@ const readDiff = ({ base, effects, files = [] }) => {
 const outsideDiff = ({ base, effects, files }) => {
   const tracked = readDiff({ base, effects, files });
   const listed = parseDiff(tracked);
-  return [
+  return joinDiffs([
     tracked,
     ...files
       .filter((file) => !listed.has(file))
       .map((path) =>
         untrackedFileDiff({ content: effects.readFile(path), path }),
       ),
-  ].join('\n');
+  ]);
 };
 
 const gateOnReport = ({ analysis, base, effects, files }) => {
@@ -197,11 +201,13 @@ const GATES = {
 
 export const runGate = ({ argv, base, effects }) => {
   try {
-    const { analysis, files } = readInput({ argv, effects });
+    const { analysis, existing, files } = readInput({ argv, effects });
     requireBase({ analysis, base });
-    if (files.length === 0) {
+    const anyChange = RUNS_ON_ANY_CHANGE.has(analysis);
+    if ((anyChange ? existing : files).length === 0) {
+      const noun = anyChange ? 'file' : 'source file';
       effects.write(
-        `fallow ${analysis}: no changed source file, so there is nothing to check.\n`,
+        `fallow ${analysis}: no changed ${noun}, so there is nothing to check.\n`,
       );
       return 0;
     }

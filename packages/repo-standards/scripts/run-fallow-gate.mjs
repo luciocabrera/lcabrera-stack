@@ -8,7 +8,8 @@
  * Usage:
  *   … | repo-fallow-gate <analysis>             changed files on stdin
  *   repo-fallow-gate <analysis> [--] <file>…    the files to check, as from a hook
- * `security` and `mutation` also read the merge base from CHANGED_FILES_BASE.
+ * `coverage-gaps`, `security` and `mutation` also read the merge base from
+ * CHANGED_FILES_BASE.
  *
  * Exit codes: 0 = no finding, 1 = a finding, 2 = the analysis could not run;
  * an analysis gated on fallow's own exit code returns that code instead.
