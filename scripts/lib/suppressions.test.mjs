@@ -74,6 +74,11 @@ describe('findInlineSuppressions', () => {
       0,
     );
     expect(inline('call("done"); // NOSONAR')).toHaveLength(1);
+    expect(inline(String.raw`const s = 'it\'s'; // NOSONAR`)).toHaveLength(1);
+    expect(inline("x(); // don't // NOSONAR")).toHaveLength(1);
+    expect(inline("const s = a / b + '// NOSONAR';")).toHaveLength(0);
+    expect(inline("'// NOSONAR';")).toHaveLength(0);
+    expect(inline('x(); /* "quoted" */ // NOSONAR')).toHaveLength(1);
   });
 
   it('counts each occurrence, so a second copy cannot hide behind the first', () => {

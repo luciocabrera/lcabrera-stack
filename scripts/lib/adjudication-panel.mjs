@@ -55,7 +55,7 @@ export const resolvedModelProblems = ({ builderModel, verifiers }) => {
 };
 
 export const parseVerdict = (text) => {
-  const [first = '', ...rest] = text.trim().split('\n');
+  const [first, ...rest] = text.trim().split('\n');
   const verdict = first.trim();
   if (!VERDICTS.has(verdict)) {
     return {
@@ -74,7 +74,7 @@ export const parseVerdict = (text) => {
 
 export const outcomeOf = (verifiers) => {
   const verdicts = new Set(verifiers.map(({ verdict }) => verdict));
-  if (verdicts.size > 1) return 'split';
+  if (verdicts.size === 2) return 'split';
   return verdicts.has('FALSE_POSITIVE') ? 'dismissed' : 'fixed';
 };
 

@@ -24,12 +24,12 @@ const USAGE =
 const readInput = (argv) => {
   const { positionals, values } = parseArgs({
     allowPositionals: true,
-    args: argv[0] === '--' ? argv.slice(1) : argv,
+    args: argv,
     options: { pr: { type: 'string' }, trace: { type: 'string' } },
     strict: true,
   });
   const [analyzer, findingId, ...extra] = positionals;
-  if (!ADJUDICATED_ANALYZERS.includes(analyzer) || extra.length > 0) {
+  if (!ADJUDICATED_ANALYZERS.includes(analyzer) || extra.length !== 0) {
     throw new Error(`${USAGE}\nanalyzers: ${ADJUDICATED_ANALYZERS.join(', ')}`);
   }
   const pr = values.pr === undefined ? null : Number(values.pr);
@@ -39,17 +39,17 @@ const readInput = (argv) => {
   return { analyzer, findingId, pr, trace: values.trace };
 };
 
+const SUPPRESS_TOKEN = /fallow-ignore-(?:next-line|file) (\S+)/u;
+
 const fallowIssue = ({ effects, rule }) => {
-  const types = effects.fallowRegistry().issue_types ?? [];
-  const issue = types.find(
-    ({ aliases = [], id }) => id === rule || aliases.includes(rule),
-  );
+  const issue = effects
+    .fallowRegistry()
+    .issue_types.find(
+      ({ aliases = [], id }) => id === rule || aliases.includes(rule),
+    );
   const command =
     issue?.command ?? (rule.startsWith('security') ? 'security' : 'dead-code');
-  const token =
-    /fallow-ignore-(?:next-line|file) (\S+)/u.exec(
-      issue?.suppress_comment ?? '',
-    )?.[1] ?? rule;
+  const token = SUPPRESS_TOKEN.exec(issue?.suppress_comment)?.[1] ?? rule;
   return { command, token };
 };
 
@@ -59,7 +59,7 @@ const fallowTrace = ({ command, effects, records, trace }) => {
   const target =
     trace ??
     records.map(({ fingerprint }) => fingerprint).find((value) => value);
-  if (!TRACEABLE.has(command) || target === undefined) return null;
+  if (!TRACEABLE.has(command) || target === undefined) return;
   return effects.run({
     args: [
       'exec',
@@ -122,7 +122,6 @@ const explanation = ({ analyzer, effects, finding }) => {
     const name = finding.rule.split('/').at(-1);
     return effects.run({ args: ['exec', 'biome', 'explain', name] }).stdout;
   }
-  return null;
 };
 
 export const openCase = ({ argv, effects }) => {
@@ -162,7 +161,7 @@ export const openCase = ({ argv, effects }) => {
     trace:
       analyzer === 'fallow'
         ? fallowTrace({ command: issue.command, effects, records, trace })
-        : null,
+        : undefined,
   });
   const path = `${CASES_DIR}/${caseId}/case.json`;
   effects.writeJson(path, body);

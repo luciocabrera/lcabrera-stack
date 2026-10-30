@@ -42,25 +42,19 @@ const BY_DIRECTIVE = new Map(
 
 const CLAIM = /false positive|\bFP-\d/iu;
 
-const EXPLANATION = /^false positive, case (FP-\d{4,}): (.*)$/u;
+const EXPLANATION = /^false positive, case (FP-\d{4,}): (.*)/u;
 
 const CASE_ID = /\bFP-\d{4,}\b/u;
 
-const COMMENT_END = /\s*\*\/\s*\}?\s*$/u;
-
 const splitRest = ({ analyzer, rest }) => {
-  const body = rest.replace(COMMENT_END, '').trim();
-  if (analyzer === 'biome') {
-    const colon = body.indexOf(':');
-    return colon === -1
-      ? { explanation: '', rule: body }
-      : {
-          explanation: body.slice(colon + 1).trim(),
-          rule: body.slice(0, colon).trim(),
-        };
-  }
-  const [rule = '', ...explanation] = body.split(' -- ');
-  return { explanation: explanation.join(' -- ').trim(), rule: rule.trim() };
+  const end = rest.indexOf('*/');
+  const body = (end === -1 ? rest : rest.slice(0, end)).trim();
+  const separator = analyzer === 'biome' ? ':' : ' -- ';
+  const [rule, ...explanation] = body.split(separator);
+  return {
+    explanation: explanation.join(separator).trim(),
+    rule: rule.trim(),
+  };
 };
 
 const parseExplanation = (explanation) => {
@@ -102,11 +96,17 @@ export const hashLines = (lines) =>
 export const coveredLines = ({ line, lines, text }) =>
   text.split('\n').slice(line, line + lines);
 
+const NEXT_LINE_DIRECTIVES = {
+  biome: 'biome-ignore',
+  eslint: 'eslint-disable-next-line',
+  fallow: 'fallow-ignore-next-line',
+  oxlint: 'oxlint-disable-next-line',
+  'react-doctor': 'react-doctor-disable-next-line',
+};
+
 export const markerSpelling = ({ analyzer, caseId, reason, rule }) => {
   const explanation = `false positive, case ${caseId}: ${reason}`;
-  const directive = DIRECTIVES.find(
-    (entry) => entry.analyzer === analyzer && entry.next,
-  )?.directive;
+  const directive = NEXT_LINE_DIRECTIVES[analyzer];
   return analyzer === 'biome'
     ? `// ${directive} ${rule}: ${explanation}`
     : `// ${directive} ${rule} -- ${explanation}`;

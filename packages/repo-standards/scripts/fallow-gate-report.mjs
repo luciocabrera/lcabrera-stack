@@ -7,7 +7,7 @@
  */
 const ADJUDICATED_REASON = /^false positive, case (FP-\d{4,}): \S/u;
 
-const isAdjudicated = ({ adjudicated, kind, path, reason = '', today }) => {
+const isAdjudicated = ({ adjudicated, kind, path, reason, today }) => {
   const caseId = ADJUDICATED_REASON.exec(reason)?.[1];
   return (
     caseId !== undefined &&
@@ -23,7 +23,7 @@ const isAdjudicated = ({ adjudicated, kind, path, reason = '', today }) => {
   );
 };
 
-const suppressionFindings = ({ adjudicated = [], report, today = '' }) =>
+const suppressionFindings = ({ adjudicated = [], report, today }) =>
   (report.files ?? []).flatMap(({ path, suppressions }) =>
     (suppressions ?? [])
       .filter(

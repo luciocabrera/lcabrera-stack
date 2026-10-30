@@ -69,22 +69,25 @@ const ruleFrom = ({ directive, rest }) => {
 
 const QUOTES = new Set(["'", '"', '`']);
 
-const endsInsideString = (text) => {
-  let quote;
-  for (let index = 0; index < text.length; index += 1) {
-    const character = text[index];
-    if (quote === undefined && QUOTES.has(character)) {
-      quote = character;
-    } else if (character === '\\') {
-      index += 1;
-    } else if (character === quote) {
-      quote = undefined;
-    } else if (quote === undefined && text.startsWith('//', index)) {
-      return false;
-    }
+const stringStep = (state, character) => {
+  if (state.comment) return state;
+  if (state.escaped) return { ...state, escaped: false };
+  if (state.quote !== undefined) {
+    if (character === '\\') return { ...state, escaped: true };
+    return character === state.quote ? { ...state, quote: undefined } : state;
   }
-  return quote !== undefined;
+  if (QUOTES.has(character)) return { ...state, quote: character };
+  return character === '/' && state.previous === '/'
+    ? { ...state, comment: true }
+    : { ...state, previous: character };
 };
+
+const endsInsideString = (text) =>
+  [...text].reduce(stringStep, {
+    comment: false,
+    escaped: false,
+    quote: undefined,
+  }).quote !== undefined;
 
 export const opensComment = (before) => {
   const trimmed = before.trimEnd();

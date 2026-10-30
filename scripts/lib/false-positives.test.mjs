@@ -1,4 +1,6 @@
 import { toCurrentAdjudication } from '@repo/eval-history/envelope/toCurrentAdjudication.util';
+import { createHash } from 'node:crypto';
+
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
@@ -75,12 +77,13 @@ const ENTRY = {
 const check = ({
   cases = { [ENTRY.evidence]: envelope() },
   entries = [ENTRY],
+  file = FILE,
   text = source(),
   today = TODAY,
 } = {}) =>
   checkFalsePositives({
     entries,
-    markers: findClaimedMarkers({ file: FILE, text }),
+    markers: findClaimedMarkers({ file, text }),
     readCase: (path) =>
       path in cases
         ? toCurrentAdjudication({ input: cases[path] })
@@ -89,7 +92,15 @@ const check = ({
     today,
   });
 
-const kinds = (problems) => problems.map(({ kind }) => kind);
+const kinds = (problems) => {
+  for (const { message, where } of problems) {
+    expect(message.length).toBeGreaterThan(15);
+    expect(where).toMatch(/^(?:FP-0007|packages\/.+:\d+)$/u);
+  }
+  return problems.map(({ kind }) => kind);
+};
+
+const messages = (problems) => problems.map(({ message }) => message);
 
 describe('checkFalsePositives — the one passing shape', () => {
   it('passes a marker matched one to one by a live, unanimous entry', () => {
@@ -103,12 +114,18 @@ describe('checkFalsePositives — each condition fails on its own', () => {
   });
 
   it('fails a list entry with no marker in the code', () => {
-    expect(kinds(check({ text: FLAGGED.join('\n') }))).toEqual(['unmarked']);
+    const problems = check({ text: FLAGGED.join('\n') });
+    expect(kinds(problems)).toEqual(['unmarked']);
+    expect(messages(problems)).toEqual([`no marker in the code names ${CASE}`]);
   });
 
   it('fails a list entry with two markers', () => {
     const text = [marker(), ...FLAGGED, marker(), ...FLAGGED].join('\n');
-    expect(kinds(check({ text }))).toContain('duplicated');
+    const problems = check({ text });
+    expect(kinds(problems)).toEqual(['duplicated']);
+    expect(messages(problems)).toEqual([
+      `2 markers name ${CASE}; an entry has exactly one`,
+    ]);
   });
 
   it('fails a marker with no reason', () => {
@@ -211,7 +228,9 @@ describe('checkFalsePositives — each condition fails on its own', () => {
 
   it('fails a case file that is not a valid envelope', () => {
     const cases = { [ENTRY.evidence]: { schema_version: 1 } };
-    expect(kinds(check({ cases }))).toEqual(['case-invalid']);
+    const problems = check({ cases });
+    expect(kinds(problems)).toEqual(['case-invalid']);
+    expect(messages(problems)[0]).toMatch(/envelope: [^;]+; /u);
   });
 
   it('fails a case file that names another rule than its entry', () => {
@@ -249,6 +268,73 @@ describe('checkFalsePositives — each condition fails on its own', () => {
       `/* eslint-disable security/sql-concat -- false positive, case ${CASE}: block */`,
     );
     expect(kinds(check({ text }))).toEqual(['form', 'unmarked']);
+  });
+});
+
+describe('checkFalsePositives — the edges of each condition', () => {
+  it('passes an entry on its last day', () => {
+    expect(check({ entries: [{ ...ENTRY, expires: TODAY }] })).toEqual([]);
+  });
+
+  it('passes an entry that expires exactly six months after the case opened', () => {
+    expect(check({ entries: [{ ...ENTRY, expires: '2027-04-29' }] })).toEqual(
+      [],
+    );
+  });
+
+  it('hashes as many lines as the entry covers', () => {
+    const flagged = [...FLAGGED, 'export const other = 1;'];
+    const entries = [{ ...ENTRY, contentHash: hashLines(flagged), lines: 2 }];
+    const cases = {
+      [ENTRY.evidence]: envelope({
+        case: { ...envelope().case, content_hash: hashLines(flagged) },
+      }),
+    };
+    expect(check({ cases, entries, text: source(marker(), flagged) })).toEqual(
+      [],
+    );
+    expect(
+      kinds(
+        check({
+          cases,
+          entries,
+          text: source(marker(), [...FLAGGED, 'export const other = 2;']),
+        }),
+      ),
+    ).toEqual(['hash']);
+  });
+
+  it.each([
+    ['a blank field', { contentHash: '  ' }],
+    ['no lines', { lines: 0 }],
+    ['a fractional line count', { lines: 1.5 }],
+    ['a date with a prefix', { expires: 'x2027-04-29' }],
+    ['a date with a suffix', { expires: '2027-04-29x' }],
+  ])('fails an entry with %s, once', (_label, change) => {
+    expect(kinds(check({ entries: [{ ...ENTRY, ...change }] }))).toEqual([
+      'entry',
+    ]);
+  });
+
+  it('fails an entry missing its expiry once, not twice', () => {
+    const { expires: _dropped, ...partial } = ENTRY;
+    expect(kinds(check({ entries: [partial] }))).toEqual(['entry']);
+  });
+
+  it('fails an entry missing its evidence once, not twice', () => {
+    const { evidence: _dropped, ...partial } = ENTRY;
+    expect(kinds(check({ entries: [partial] }))).toEqual(['entry']);
+  });
+
+  it('fails a case recorded as fixed even when every verdict was FALSE_POSITIVE', () => {
+    const cases = { [ENTRY.evidence]: envelope({ outcome: 'fixed' }) };
+    expect(kinds(check({ cases }))).toEqual(['not-unanimous']);
+  });
+
+  it('fails a marker in another file than its entry', () => {
+    expect(kinds(check({ file: 'packages/x/src/other.util.ts' }))).toEqual([
+      'mismatch',
+    ]);
   });
 });
 
@@ -295,6 +381,125 @@ describe('findClaimedMarkers', () => {
         ].join('\n'),
       }),
     ).toEqual([]);
+  });
+});
+
+describe('findClaimedMarkers — every directive', () => {
+  it.each([
+    ['eslint', 'eslint-disable-next-line', true],
+    ['eslint', 'eslint-disable-line', false],
+    ['eslint', 'eslint-disable', false],
+    ['oxlint', 'oxlint-disable-next-line', true],
+    ['oxlint', 'oxlint-disable-line', false],
+    ['oxlint', 'oxlint-disable', false],
+    ['biome', 'biome-ignore-all', false],
+    ['biome', 'biome-ignore-start', false],
+    ['biome', 'biome-ignore', true],
+    ['react-doctor', 'react-doctor-disable-next-line', true],
+    ['react-doctor', 'react-doctor-disable-line', false],
+    ['react-doctor', 'react-doctor-disable', false],
+    ['fallow', 'fallow-ignore-next-line', true],
+    ['fallow', 'fallow-ignore-file', true],
+  ])(
+    'reads %s %s, covering the next line: %s',
+    (analyzer, directive, nextLine) => {
+      const separator = analyzer === 'biome' ? ':' : ' --';
+      const [found] = findClaimedMarkers({
+        file: FILE,
+        text: `// ${directive} x/y${separator} false positive, case FP-0001: why`,
+      });
+      expect(found).toEqual({
+        analyzer,
+        caseId: 'FP-0001',
+        directive,
+        file: FILE,
+        line: 1,
+        nextLine,
+        reason: 'why',
+        rule: 'x/y',
+      });
+    },
+  );
+});
+
+describe('findClaimedMarkers — the explanation', () => {
+  const read = (text) => findClaimedMarkers({ file: FILE, text })[0];
+
+  it('keeps a reason that itself holds the separator', () => {
+    expect(
+      read(
+        '// eslint-disable-next-line r -- false positive, case FP-0001: a -- b',
+      ).reason,
+    ).toBe('a -- b');
+  });
+
+  it('stops at the end of a block comment, and keeps the last character without one', () => {
+    expect(
+      read(
+        '/* eslint-disable-next-line r -- false positive, case FP-0001: why */',
+      ).reason,
+    ).toBe('why');
+    expect(
+      read('// eslint-disable-next-line r -- false positive, case FP-0001: why')
+        .reason,
+    ).toBe('why');
+  });
+
+  it('reads a Biome marker with no colon as one rule naming no case', () => {
+    expect(
+      read('// biome-ignore lint/x/y false positive FP-0004'),
+    ).toMatchObject({
+      caseId: undefined,
+      reason: '',
+      rule: 'lint/x/y false positive FP-0004',
+    });
+  });
+
+  it('claims a marker that names a case without the words', () => {
+    expect(read('// eslint-disable-next-line r -- see FP-0005')).toMatchObject({
+      caseId: 'FP-0005',
+      reason: '',
+    });
+  });
+
+  it('gives no reason when the explanation does not start with the claim', () => {
+    expect(
+      read(
+        '// eslint-disable-next-line r -- see false positive, case FP-0006: x',
+      ),
+    ).toMatchObject({ caseId: 'FP-0006', reason: '' });
+  });
+});
+
+describe('hashLines and markerSpelling', () => {
+  it('hashes the lines joined by newlines', () => {
+    expect(hashLines(['a', 'b'])).toBe(
+      createHash('sha256').update('a\nb').digest('hex'),
+    );
+  });
+
+  it.each([
+    [
+      'eslint',
+      '// eslint-disable-next-line r -- false positive, case FP-0001: why',
+    ],
+    [
+      'oxlint',
+      '// oxlint-disable-next-line r -- false positive, case FP-0001: why',
+    ],
+    [
+      'fallow',
+      '// fallow-ignore-next-line r -- false positive, case FP-0001: why',
+    ],
+    [
+      'react-doctor',
+      '// react-doctor-disable-next-line r -- false positive, case FP-0001: why',
+    ],
+    ['biome', '// biome-ignore r: false positive, case FP-0001: why'],
+  ])('spells the %s marker', (analyzer, spelling) => {
+    expect(
+      markerSpelling({ analyzer, caseId: 'FP-0001', reason: 'why', rule: 'r' }),
+    ).toBe(spelling);
   });
 });
 

@@ -82,7 +82,7 @@ const shapeProblems = (entry) => {
     (field) => typeof entry[field] !== 'string' || entry[field].trim() === '',
   );
   const badLines = !Number.isSafeInteger(entry.lines) || entry.lines < 1;
-  const badDate = !DATE.test(entry.expires ?? '');
+  const badDate = !DATE.test(entry.expires);
   const evidence = `docs/agents/adjudications/${entry.case}.json`;
   return [
     ...missing.map((field) =>
@@ -94,9 +94,9 @@ const shapeProblems = (entry) => {
     ...(badDate && !missing.includes('expires')
       ? [problem('entry', entry.case, '"expires" is not a YYYY-MM-DD date')]
       : []),
-    ...(entry.evidence !== undefined && entry.evidence !== evidence
-      ? [problem('entry', entry.case, `"evidence" is not ${evidence}`)]
-      : []),
+    ...(entry.evidence === evidence || missing.includes('evidence')
+      ? []
+      : [problem('entry', entry.case, `"evidence" is not ${evidence}`)]),
   ];
 };
 
@@ -225,7 +225,7 @@ const hashProblems = ({ entry, markers, readText }) => {
 
 const entryProblems = ({ entry, markers, readCase, readText, today }) => {
   const shape = shapeProblems(entry);
-  if (shape.length > 0) return shape;
+  if (shape.length !== 0) return shape;
   return [
     ...markerCountProblems({ entry, markers }),
     ...(entry.expires < today
