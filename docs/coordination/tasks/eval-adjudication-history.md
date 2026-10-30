@@ -2,7 +2,7 @@
 id: eval-adjudication-history
 title: Keep the history of false-positive panel verdicts
 owner: agent:claude
-status: active
+status: review
 branch: feat/1553-eval-adjudication-history
 area:
   - packages/eval-history/**
@@ -15,7 +15,7 @@ area:
 started: 2026-10-30
 updated: 2026-10-30
 plan: (none)
-pr: (none)
+pr: '#1573'
 issue: #1553
 ---
 
@@ -25,6 +25,6 @@ Keep the history of false-positive panel verdicts
 
 ## Status / next
 
-- Current step: implemented; running the gate
+- Current step: gate green; PR #1573 ready for review
 - Blockers: none
 - Next:
