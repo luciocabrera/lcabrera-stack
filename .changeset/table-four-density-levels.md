@@ -8,7 +8,7 @@
 - `headerDensity` sets the header row's level on its own and defaults to `density`. A named header level sets the header row's height even when the meta state holds a `rowHeight`.
 - The level gives the default row height, and the virtualizer and the rows read that same value. A `rowHeight` set in the meta state still wins.
 - The table settings drawer lists all four levels. A choice is staged with the drawer's other settings: Accept applies it and Cancel drops it. An accepted level is written to the UI-flags cookie, so a route table renders it again on reload.
-- Cells no longer set their own padding or font size. They read CSS variables that `<table>` sets from the level.
+- Cells no longer set their own padding or font size. They read StyleX variables that `<table>` sets from the level, and whose defaults are the `compact` values, so a cell rendered outside a table falls back to `compact` rather than to no size at all.
 
 The one visible change to a table that keeps the default `compact` level: cell inline padding goes from a fixed `6px` to `spacing.xs`. Row height, body font and the `fontSizeSm` header stay as they were.
 

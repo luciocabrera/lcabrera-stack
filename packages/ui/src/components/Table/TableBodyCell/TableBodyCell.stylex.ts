@@ -1,5 +1,6 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { tableDensityVars } from '#ui/components/Table/TableBase/tableDensity.stylex';
 import { typography, zIndex } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
@@ -13,13 +14,13 @@ export const tableBodyCellStyles = stylex.create({
     textAlign: 'right',
   },
   base: (minWidth?: number | string, width?: number | string) => ({
-    paddingInline: 'var(--table-body-padding-inline)',
+    paddingInline: tableDensityVars.bodyPaddingInline,
     alignItems: 'center',
     boxSizing: 'border-box',
     color: colors.textPrimary,
     display: 'flex',
     flexShrink: 0,
-    fontSize: 'var(--table-body-font-size)',
+    fontSize: tableDensityVars.bodyFontSize,
     fontWeight: typography.fontWeightNormal,
     position: 'relative',
     borderRightColor: colors.borderSecondary,

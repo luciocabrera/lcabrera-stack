@@ -184,8 +184,9 @@ which `TableBody`'s virtualizer, `TableRow` and the focus and fold handlers all
 read; a `rowHeight` set in the meta state wins over it for the body, and for the
 header unless a header level is named. `TableBase` reads each level's step from `TABLE_DENSITY_SCALE`, the one table of
 row heights and token names, and sets the body font, the header font, the header
-band's font and the inline padding as CSS variables on `<table>`; every cell reads
-its padding and font from them
+band's font and the inline padding on `<table>`, as values of `tableDensityVars`
+(`TableBase/tableDensity.stylex.ts`), whose defaults are the compact level; every
+cell reads its padding and font from those variables
 ([ADR-146](../../../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (a)).
 
 ## Data Flow

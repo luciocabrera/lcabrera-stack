@@ -5,6 +5,8 @@ import type { TableDensityStep } from '#ui/components/Table/Table.types';
 import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
+import { tableDensityVars } from './tableDensity.stylex';
+
 const baseStyles = stylex.create({
   table: {
     overflow: 'visible',
@@ -34,11 +36,11 @@ type TableDensityVariables = {
 
 const densityVariables = stylex.create({
   levels: (variables: TableDensityVariables) => ({
-    '--table-body-font-size': variables.bodyFontSize,
-    '--table-body-padding-inline': variables.bodyPaddingInline,
-    '--table-header-band-font-size': variables.headerBandFontSize,
-    '--table-header-font-size': variables.headerFontSize,
-    '--table-header-padding-inline': variables.headerPaddingInline,
+    [tableDensityVars.bodyFontSize]: variables.bodyFontSize,
+    [tableDensityVars.bodyPaddingInline]: variables.bodyPaddingInline,
+    [tableDensityVars.headerBandFontSize]: variables.headerBandFontSize,
+    [tableDensityVars.headerFontSize]: variables.headerFontSize,
+    [tableDensityVars.headerPaddingInline]: variables.headerPaddingInline,
   }),
 });
 

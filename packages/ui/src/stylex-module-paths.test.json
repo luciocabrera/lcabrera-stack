@@ -76,6 +76,7 @@
   "src/components/Table/Table.stylex.ts",
   "src/components/Table/TableActionsPopover/TableActionsPopover.stylex.ts",
   "src/components/Table/TableBase/TableBase.stylex.ts",
+  "src/components/Table/TableBase/tableDensity.stylex.ts",
   "src/components/Table/TableBody/TableBody.stylex.ts",
   "src/components/Table/TableBodyCell/TableBodyCell.stylex.ts",
   "src/components/Table/TableBodyRows/TableBodyRows.stylex.ts",

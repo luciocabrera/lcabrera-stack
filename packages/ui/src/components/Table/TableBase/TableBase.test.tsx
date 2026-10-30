@@ -15,6 +15,7 @@ import {
 import { spacing, typography } from '#ui/design-system/tokens/base.stylex';
 
 import { TableBase } from './TableBase.component';
+import { tableDensityVars } from './tableDensity.stylex';
 
 const {
   useGetTableDensityMock,
@@ -63,10 +64,28 @@ afterEach(() => {
   cleanup();
 });
 
+type DensityVariable =
+  | 'bodyFontSize'
+  | 'bodyPaddingInline'
+  | 'headerBandFontSize'
+  | 'headerFontSize'
+  | 'headerPaddingInline';
+
+const toInlineVariableName = (reference: string) =>
+  `--x---${reference.slice('var(--'.length, -1)}`;
+
+type ReadDensityVariableArgs = {
+  readonly name: DensityVariable;
+  readonly style: CSSStyleDeclaration;
+};
+
 type RenderTableBaseArgs = {
   readonly cellText?: string;
   readonly props?: ComponentProps<typeof TableBase>;
 };
+
+const readDensityVariable = ({ name, style }: ReadDensityVariableArgs) =>
+  style.getPropertyValue(toInlineVariableName(tableDensityVars[name]));
 
 const renderTableBase = ({
   cellText = 'Orders',
@@ -186,20 +205,20 @@ describe('TableBase', () => {
     renderTableBase();
 
     const { style } = screen.getByTestId('table');
-    expect(style.getPropertyValue('--x---table-body-font-size').trim()).toBe(
+    expect(readDensityVariable({ name: 'bodyFontSize', style }).trim()).toBe(
       typography.fontSizeXs,
     );
     expect(
-      style.getPropertyValue('--x---table-body-padding-inline').trim(),
+      readDensityVariable({ name: 'bodyPaddingInline', style }).trim(),
     ).toBe(spacing.xxs);
-    expect(style.getPropertyValue('--x---table-header-font-size').trim()).toBe(
+    expect(readDensityVariable({ name: 'headerFontSize', style }).trim()).toBe(
       typography.fontSizeSm,
     );
     expect(
-      style.getPropertyValue('--x---table-header-padding-inline').trim(),
+      readDensityVariable({ name: 'headerPaddingInline', style }).trim(),
     ).toBe(spacing.md);
     expect(
-      style.getPropertyValue('--x---table-header-band-font-size').trim(),
+      readDensityVariable({ name: 'headerBandFontSize', style }).trim(),
     ).toBe(typography.fontSizeXs);
   });
 });

@@ -13,6 +13,7 @@ import { TableConfigProvider } from './contexts/TableConfig';
 import { TableOwnStackContext } from './contexts/TableConfig/TableOwnStackContext.context';
 import { TableFocusProvider } from './contexts/TableFocus';
 import { Table } from './Table.component';
+import { tableDensityVars } from './TableBase/tableDensity.stylex';
 
 type Reading = {
   readonly id: number;
@@ -76,10 +77,20 @@ const LEVELS = [
 
 afterEach(cleanup);
 
-const readTableVariable = (name: string) =>
+type DensityVariable =
+  | 'bodyFontSize'
+  | 'bodyPaddingInline'
+  | 'headerBandFontSize'
+  | 'headerFontSize'
+  | 'headerPaddingInline';
+
+const toInlineVariableName = (reference: string) =>
+  `--x---${reference.slice('var(--'.length, -1)}`;
+
+const readTableVariable = (name: DensityVariable) =>
   screen
     .getByTestId('table')
-    .style.getPropertyValue(`--x---table-${name}`)
+    .style.getPropertyValue(toInlineVariableName(tableDensityVars[name]))
     .trim();
 
 const bodyRows = () =>
@@ -115,8 +126,8 @@ const readDensityMarkup = (root: ParentNode) => ({
 
 const expectCompactLook = () => {
   expect(rowHeightOf(firstBodyRow())).toBe('32px');
-  expect(readTableVariable('body-font-size')).toBe(typography.fontSizeSm);
-  expect(readTableVariable('header-font-size')).toBe(typography.fontSizeSm);
+  expect(readTableVariable('bodyFontSize')).toBe(typography.fontSizeSm);
+  expect(readTableVariable('headerFontSize')).toBe(typography.fontSizeSm);
 };
 
 const renderSelected = ({
@@ -153,11 +164,11 @@ describe('Table density', () => {
 
       expect(rowHeightOf(firstBodyRow())).toBe(`${rowHeight}px`);
       expect(rowHeightOf(headerRow())).toBe(`${rowHeight}px`);
-      expect(readTableVariable('body-font-size')).toBe(bodyFont);
-      expect(readTableVariable('body-padding-inline')).toBe(padding);
-      expect(readTableVariable('header-font-size')).toBe(headerFont);
-      expect(readTableVariable('header-band-font-size')).toBe(headerBandFont);
-      expect(readTableVariable('header-padding-inline')).toBe(padding);
+      expect(readTableVariable('bodyFontSize')).toBe(bodyFont);
+      expect(readTableVariable('bodyPaddingInline')).toBe(padding);
+      expect(readTableVariable('headerFontSize')).toBe(headerFont);
+      expect(readTableVariable('headerBandFontSize')).toBe(headerBandFont);
+      expect(readTableVariable('headerPaddingInline')).toBe(padding);
     },
   );
 
@@ -165,7 +176,7 @@ describe('Table density', () => {
     render(<Table columns={COLUMNS} response={ROWS} />);
 
     expectCompactLook();
-    expect(readTableVariable('body-padding-inline')).toBe(spacing.xs);
+    expect(readTableVariable('bodyPaddingInline')).toBe(spacing.xs);
   });
 
   it('gives the header row its own level when headerDensity differs', () => {
@@ -180,10 +191,10 @@ describe('Table density', () => {
 
     expect(rowHeightOf(firstBodyRow())).toBe('48px');
     expect(rowHeightOf(headerRow())).toBe('24px');
-    expect(readTableVariable('body-font-size')).toBe(typography.fontSizeMd);
-    expect(readTableVariable('body-padding-inline')).toBe(spacing.md);
-    expect(readTableVariable('header-font-size')).toBe(typography.fontSizeXs);
-    expect(readTableVariable('header-padding-inline')).toBe(spacing.xxs);
+    expect(readTableVariable('bodyFontSize')).toBe(typography.fontSizeMd);
+    expect(readTableVariable('bodyPaddingInline')).toBe(spacing.md);
+    expect(readTableVariable('headerFontSize')).toBe(typography.fontSizeXs);
+    expect(readTableVariable('headerPaddingInline')).toBe(spacing.xxs);
   });
 
   it('renders more virtualized rows in the same viewport at dense than at spacious', () => {
@@ -213,7 +224,9 @@ describe('Table density', () => {
 
     const { container } = render(element);
 
-    expect(readDensityMarkup(serverTree).table).toContain('--x---table-');
+    expect(readDensityMarkup(serverTree).table).toContain(
+      toInlineVariableName(tableDensityVars.bodyFontSize),
+    );
     expect(readDensityMarkup(container)).toStrictEqual(
       readDensityMarkup(serverTree),
     );
@@ -231,8 +244,8 @@ describe('Table density from a saved meta state', () => {
     renderSelected({ metaState: { density: 'comfortable' } });
 
     expect(rowHeightOf(firstBodyRow())).toBe('40px');
-    expect(readTableVariable('body-font-size')).toBe(typography.fontSizeSm);
-    expect(readTableVariable('body-padding-inline')).toBe(spacing.sm);
+    expect(readTableVariable('bodyFontSize')).toBe(typography.fontSizeSm);
+    expect(readTableVariable('bodyPaddingInline')).toBe(spacing.sm);
   });
 
   it('takes the density props on a selected source when the meta state holds none', () => {
@@ -257,7 +270,7 @@ describe('Table density from a saved meta state', () => {
     renderSelected({ metaState: { density: 'dense', rowHeight: 36 } });
 
     expect(rowHeightOf(firstBodyRow())).toBe('36px');
-    expect(readTableVariable('body-font-size')).toBe(typography.fontSizeXs);
+    expect(readTableVariable('bodyFontSize')).toBe(typography.fontSizeXs);
   });
 
   it('lets headerDensity set the header height even when rowHeight is set', () => {
