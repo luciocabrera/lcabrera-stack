@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import type { TableStaticColumnWidths } from '#ui/components/Table/utils/resolveStaticColumnWidths.util';
+
 import { tableDensityVars } from '#ui/components/Table/TableBase/tableDensity.stylex';
 import { typography, zIndex } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
@@ -13,6 +15,23 @@ export const tableBodyCellStyles = stylex.create({
     justifyContent: 'flex-end',
     textAlign: 'right',
   },
+  alignStart: {
+    justifyContent: 'flex-start',
+    textAlign: 'left',
+  },
+  fill: {
+    flexGrow: 1,
+  },
+  staticLayout: (widths: TableStaticColumnWidths) => ({
+    display: 'table-cell',
+    flexShrink: null,
+    verticalAlign: 'middle',
+    height: null,
+    maxHeight: null,
+    maxWidth: widths.maxWidth ?? null,
+    minWidth: widths.minWidth ?? null,
+    width: widths.width ?? null,
+  }),
   base: (minWidth?: number | string, width?: number | string) => ({
     paddingInline: tableDensityVars.bodyPaddingInline,
     alignItems: 'center',

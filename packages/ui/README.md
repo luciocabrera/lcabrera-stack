@@ -201,10 +201,42 @@ When no `TableLayout` sits above it, a `Table` keeps its rows in memory,
 whether it was given an array or a response read through `dataSelector`. Sorting, filtering, resizing, pinning
 and scrolling all run on them in the browser, and the table writes nothing back
 to a URL or a cookie. Such a table mounts its own table providers, so it renders
-the same inside another grid as on its own. It also adds the notification and
-global-settings providers if those are missing. Under `TableLayout`, the
-layout's providers and persistence are used instead. Grouping and drill-down
-need a server, so they belong to `TableLayout`.
+the same inside another grid as on its own. When it shows any settings, menu,
+resize or title-bar chrome, it also adds the notification and global-settings
+providers if those are missing. Under `TableLayout`, the layout's providers and
+persistence are used instead. Grouping and drill-down need a server, so they
+belong to `TableLayout`.
+
+### A small read-only table
+
+`layout='static'` renders every row, with no virtualization, and the table is as
+tall as its rows, so it needs no height from its parent. It renders
+`role="table"` with the normal tab order, so a link in a cell is one Tab stop.
+The title bar, the settings button, the column menus and the resize handles are
+off; `features` turns any of them back on, and turns them off in the virtual
+layout too.
+
+```tsx
+const columns: readonly TableColumn<Order>[] = [
+  { key: 'reference', label: 'Reference', width: 'fill' },
+  { align: 'end', dataType: 'currency', key: 'orderTotal', label: 'Total' },
+];
+
+<Table
+  caption='Latest orders'
+  columns={columns}
+  footer='Totals include tax'
+  layout='static'
+  response={orders}
+/>;
+```
+
+A column's `align` (`'start'`, `'center'` or `'end'`) wins over the alignment its
+`dataType` gives, and applies to a `render` cell too. `width` is a starting width
+in pixels, or `'fill'` for the width the other columns leave. `caption` renders as
+the table's `<caption>` and `footer` as one `<tfoot>` row across every column, in
+either layout. A static row is at least the density's row height and grows to fit
+its content.
 
 ### A full data table
 
