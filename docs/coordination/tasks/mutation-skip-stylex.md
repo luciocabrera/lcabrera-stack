@@ -2,7 +2,7 @@
 id: mutation-skip-stylex
 title: Leave StyleX modules out of the mutation gate
 owner: agent:claude
-status: active
+status: review
 branch: fix/1581-mutation-skip-stylex
 area:
   - packages/repo-standards/scripts/fallow-gate*.mjs
@@ -13,7 +13,7 @@ area:
 started: 2026-10-30
 updated: 2026-10-30
 plan: (none)
-pr: (none)
+pr: '#1582'
 issue: #1581
 ---
 
@@ -23,6 +23,6 @@ Leave StyleX modules out of the mutation gate
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: gate green, PR #1582 ready for review
 - Blockers: none
-- Next:
+- Next: review and merge
