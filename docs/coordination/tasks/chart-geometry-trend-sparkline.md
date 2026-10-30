@@ -1,0 +1,33 @@
+---
+id: chart-geometry-trend-sparkline
+title: Add chart geometry to utils and redraw TrendSparkline on it
+owner: agent:claude
+status: review
+branch: feat/1561-chart-geometry-trend-sparkline
+area:
+  - packages/utils/**
+  - packages/ui/src/components/TrendSparkline/**
+  - packages/ui/src/public-api.ts
+  - .changeset/**
+  - packages/ui/src/INVENTORY.md
+  - packages/ui/README.md
+  - reports/api-surface/ui.txt
+  - reports/api-surface/utils.txt
+  - scripts/inventory-drift-baseline.json
+  - packages/ui/src/stylex-module-paths.test.json
+started: 2026-10-30
+updated: 2026-10-30
+plan: (none)
+pr: https://github.com/luciocabrera/lcabrera-stack/pull/1577
+issue: #1561
+---
+
+## What
+
+Add chart geometry to utils and redraw TrendSparkline on it
+
+## Status / next
+
+- Current step: round 7 pushed (non-finite x is a gap in every chart helper)
+- Blockers: none
+- Next: review

@@ -141,6 +141,7 @@
   "src/components/Tooltip/TooltipContent/TooltipContent.stylex.ts",
   "src/components/Tooltip/TooltipTrigger/TooltipTrigger.stylex.ts",
   "src/components/TrendSparkline/TrendSparkline.stylex.ts",
+  "src/components/TrendSparkline/TrendSparklineDot/TrendSparklineDot.stylex.ts",
   "src/components/VirtualList/SkeletonOptions/SkeletonOptions.stylex.ts",
   "src/components/VirtualList/VirtualList.stylex.ts",
   "src/components/VirtualList/VirtualListBody/VirtualListBody.stylex.ts",

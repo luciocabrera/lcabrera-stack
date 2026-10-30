@@ -5,6 +5,38 @@
 ## ./arrays/merge-arrays.util
 mergeArrays [const] <T>({ baseValue, overrideValue }: MergeArraysArgs<T>) => T[] | undefined
 
+## ./chart/band-path.util
+bandPath [const] <X extends ChartValue>({ band, x, y }: BandPathArgs<X>) => string
+
+## ./chart/chart.types
+ChartBandPoint [type] { readonly lower?: null | number; readonly upper?: null | number; readonly x: X; }
+ChartDomain [type] readonly [T, T]
+ChartPoint [type] { readonly x: X; readonly y?: null | number; }
+ChartRange [type] readonly [number, number]
+ChartScale [type] (value: T) => number
+ChartValue [type] Date | number
+
+## ./chart/decimate.util
+decimate [const] <T extends ChartPoint<ChartValue>>({ points, threshold }: DecimateArgs<T>) => readonly T[]
+
+## ./chart/format-path-point.util
+formatPathPoint [const] ({ x, y }: FormatPathPointArgs) => string
+
+## ./chart/is-finite-chart-value.util
+isFiniteChartValue [const] (value: unknown) => value is ChartValue
+
+## ./chart/line-path.util
+linePath [const] <X extends ChartValue>({ points, x, y }: LinePathArgs<X>) => string
+
+## ./chart/nice-ticks.util
+niceTicks [const] ({ count, max, min }: NiceTicksArgs) => number[]
+
+## ./chart/scale-linear.util
+scaleLinear [const] ({ domain, isClamped, range }: ScaleLinearArgs) => (value: number) => number
+
+## ./chart/scale-time.util
+scaleTime [const] ({ domain, isClamped, range }: ScaleTimeArgs) => (value: Date) => number
+
 ## ./comparison/are-arrays-equal.util
 areArraysEqual [const] <T>({ left, right }: AreArraysEqualArgs<T>) => boolean
 
@@ -57,6 +89,9 @@ readFormString [const] ({ formData, name }: ReadFormStringArgs) => string
 
 ## ./guards/is-finite-number.util
 isFiniteNumber [const] (value: unknown) => value is number
+
+## ./guards/is-non-empty-array.util
+isNonEmptyArray [const] <T>(values: readonly T[]) => values is readonly [T, ...T[]]
 
 ## ./guards/is-object.util
 isObject [const] (value: unknown) => value is Record<string, unknown>

@@ -478,9 +478,6 @@
   "packages/ui/src/components/Tooltip/utils/getArrowOffset.util.ts": [
     "getArrowOffset"
   ],
-  "packages/ui/src/components/TrendSparkline/utils/getSparklinePoints.util.ts": [
-    "getSparklinePoints"
-  ],
   "packages/ui/src/components/VirtualList/contexts/data/actions/utils/resolveSelectAllFilter.util.ts": [
     "resolveSelectAllFilter"
   ],
