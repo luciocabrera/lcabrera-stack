@@ -239,7 +239,8 @@
             "^packages/repo-standards/scripts/((gh|git)-exec|safe-read)\\.mjs$",
             "^\\.claude/(agents|rules)/",
             "^\\.github/skills/",
-            "^docs/agents/refactor-verified-contract\\.md$"
+            "^docs/agents/refactor-verified-contract\\.md$",
+            "^docs/agents/adjudications/"
           ]
         }
       ]

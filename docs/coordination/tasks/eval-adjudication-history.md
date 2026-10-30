@@ -11,6 +11,7 @@ area:
   - docs/agents/adjudications/**
   - evals/ingest-envelopes.mjs
   - apps/showcase/src/routes/evals/.server/evalsPublicPayload.test.ts
+  - devkit.config.json
 started: 2026-10-30
 updated: 2026-10-30
 plan: (none)
