@@ -1,10 +1,12 @@
 import type { TableGroupingState } from '#ui/components/Table/Table.types';
 
+import { useReadTableDensity } from '#ui/components/Table/contexts/TableConfig/meta/useReadTableDensity.hook';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useStore } from '#ui/hooks';
 
 import type {
   TableDrawerColumnsState,
+  TableDrawerDensityState,
   TableDrawerProviderProps,
   TableDrawerTotalsPlacementState,
 } from './TableDrawerContext.types';
@@ -14,6 +16,7 @@ import { TableDrawerContext } from './TableDrawerContext.context';
 export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
   const { columnsStore: tableColumnsStore, groupingStore: tableGroupingStore } =
     useTableConfigContextValue();
+  const readDensity = useReadTableDensity();
 
   const tableColumnsState = tableColumnsStore.get();
   const grouping = tableGroupingStore.get();
@@ -37,13 +40,21 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     sorting,
   });
   const groupingStore = useStore<TableGroupingState>(grouping);
+  const densityStore = useStore<TableDrawerDensityState>({
+    density: readDensity().density,
+  });
   const totalsPlacementStore = useStore<TableDrawerTotalsPlacementState>({
     totalsPlacement: grouping.totalsPlacement,
   });
 
   return (
     <TableDrawerContext
-      value={{ columnsStore, groupingStore, totalsPlacementStore }}
+      value={{
+        columnsStore,
+        densityStore,
+        groupingStore,
+        totalsPlacementStore,
+      }}
     >
       {children}
     </TableDrawerContext>

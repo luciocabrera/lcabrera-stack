@@ -74,7 +74,7 @@ TableSettingsDrawer/
 │   ├── GeneralSettingsSection.component.tsx → Thin composition
 │   ├── GeneralSettingsSection.types.ts
 │   ├── ColumnWidthsSection/               → Width preset toggles (owns preset state)
-│   ├── DensitySection/                    → The four density levels, written to the meta state at once
+│   ├── DensitySection/                    → The four density levels, staged until Accept
 │   ├── AllSettingsSection/                → Clear/reset-all buttons
 │   ├── utils/                             → buildPresetColumnSizing
 │   └── index.ts

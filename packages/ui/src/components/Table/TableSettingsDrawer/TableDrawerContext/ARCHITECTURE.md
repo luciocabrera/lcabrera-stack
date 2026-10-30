@@ -3,13 +3,18 @@
 Store-based context that manages local table settings state within the drawer.
 Changes are held locally until the user explicitly accepts or cancels.
 
-Three stores, split by **where each one commits** rather than by how it is
+Four stores, split by **where each one commits** rather than by how it is
 edited: `columnsStore` commits to the cookie, `groupingStore` to the `grouping`
 search param ([ADR-061](../../../../../../../docs/decisions/ADR-061-grouping-config-in-url-expansion-in-store.md)),
 and `totalsPlacementStore` to the `totals` search param **and** the cookie —
 it has to reach the emitted `ORDER BY` and outlive the session, and no single
 channel does both ([ADR-085](../../../../../../../docs/decisions/ADR-085-a-preset-makes-ungrouped-a-real-state.md)).
-All three seed at mount — which is when the drawer opens, since `TableDrawersSection`
+`densityStore` commits to the meta state and the UI-flags cookie, and only when
+the staged level differs from the one the table renders; it seeds from the
+resolved level, so a level the `Table`'s own props supply reads as unchanged
+([ADR-146](../../../../../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (a)).
+Reset re-seeds it with the other drafts.
+All four seed at mount — which is when the drawer opens, since `TableDrawersSection`
 mounts the provider only while it is — so Cancel has a baseline to restore even
 when the user's first action is a removal.
 
@@ -191,7 +196,8 @@ and calls `set(partial)` on it — `columnsStore` for the column draft,
 | `useResetGroupKeys`                | `TableConfigContext` | `groupingStore`        | Restores keys and periods from the table through the reducer, leaving the staged aggregates; takes the mode too when the draft has no keys |
 | `useResetColumnAggregates`         | `TableConfigContext` | `groupingStore`        | Restores aggregates and shares from the table through the reducer, leaving the staged keys; a no-op while no key is staged                 |
 | `useSetTotalsPlacement`            | —                    | `totalsPlacementStore` | Stages where subtotals sit relative to the rows they total                                                                                 |
-| `useBatchSetTableDrawerSettings`   | every drawer store   | `TableConfig`          | Pushes all three drafts to the table in **one** commit — see below                                                                         |
+| `useSetDensity`                    | —                    | `densityStore`         | Stages a density level                                                                                                                     |
+| `useBatchSetTableDrawerSettings`   | every drawer store   | `TableConfig`          | Pushes every draft to the table in **one** commit — see below                                                                              |
 
 ## Selectors
 
@@ -207,6 +213,7 @@ and calls `set(partial)` on it — `columnsStore` for the column draft,
 | `useGetGroupingMode`       | `TableGroupingMode`                | Staged grouping mode              |
 | `useGetGroupingPeriods`    | `Record<string, TableGroupPeriod>` | Staged per-key granularity        |
 | `useGetTotalsPlacement`    | `TableTotalsPlacement`             | Staged totals position            |
+| `useGetDensity`            | `TableDensity`                     | Staged density level              |
 
 ## One commit, one navigation
 

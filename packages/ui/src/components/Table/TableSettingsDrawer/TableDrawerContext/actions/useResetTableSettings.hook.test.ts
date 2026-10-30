@@ -7,6 +7,7 @@ import { useResetTableSettings } from './useResetTableSettings.hook';
 
 const {
   drawerColumnsStore,
+  drawerDensityStore,
   drawerGroupingStore,
   setTableColumnsState,
   setTableGrouping,
@@ -55,6 +56,9 @@ const {
     drawerColumnsStore: {
       set: vi.fn(),
     },
+    drawerDensityStore: {
+      set: vi.fn(),
+    },
     drawerGroupingStore: {
       set: vi.fn(),
     },
@@ -87,9 +91,21 @@ vi.mock(
 vi.mock('../useTableDrawerContextValue.hook', () => ({
   useTableDrawerContextValue: () => ({
     columnsStore: drawerColumnsStore,
+    densityStore: drawerDensityStore,
     groupingStore: drawerGroupingStore,
   }),
 }));
+
+const { readDensityMock } = vi.hoisted(() => ({
+  readDensityMock: () => ({ density: 'comfortable' }),
+}));
+
+vi.mock(
+  '#ui/components/Table/contexts/TableConfig/meta/useReadTableDensity.hook',
+  () => ({
+    useReadTableDensity: () => readDensityMock,
+  }),
+);
 
 describe('useResetTableSettings', () => {
   beforeEach(() => {
@@ -167,5 +183,17 @@ describe('useResetTableSettings', () => {
     });
 
     expect(drawerGroupingStore.set).toHaveBeenCalledWith(grouping);
+  });
+
+  it('drops a staged density back to the level the table renders', () => {
+    const { result } = renderHook(() => useResetTableSettings());
+
+    act(() => {
+      result.current();
+    });
+
+    expect(drawerDensityStore.set).toHaveBeenCalledWith({
+      density: 'comfortable',
+    });
   });
 });

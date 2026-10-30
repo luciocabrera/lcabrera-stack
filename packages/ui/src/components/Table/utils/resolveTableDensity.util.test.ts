@@ -49,7 +49,21 @@ describe('resolveTableDensity', () => {
     ).toMatchObject({ headerDensity: 'spacious', headerRowHeight: 48 });
   });
 
-  it('lets an explicit rowHeight win over every level', () => {
+  it('lets an explicit rowHeight win over the levels of a header that follows the body', () => {
+    expect(
+      resolveTableDensity({
+        defaults: {},
+        state: { density: 'dense', rowHeight: 36 },
+      }),
+    ).toStrictEqual({
+      density: 'dense',
+      headerDensity: 'dense',
+      headerRowHeight: 36,
+      rowHeight: 36,
+    });
+  });
+
+  it('lets a named header density set the header height even when rowHeight is set', () => {
     expect(
       resolveTableDensity({
         defaults: { headerDensity: 'spacious' },
@@ -58,8 +72,31 @@ describe('resolveTableDensity', () => {
     ).toStrictEqual({
       density: 'dense',
       headerDensity: 'spacious',
-      headerRowHeight: 36,
+      headerRowHeight: 48,
       rowHeight: 36,
+    });
+    expect(
+      resolveTableDensity({
+        defaults: {},
+        state: { headerDensity: 'comfortable', rowHeight: 36 },
+      }),
+    ).toMatchObject({ headerRowHeight: 40, rowHeight: 36 });
+  });
+
+  it('skips a level that is not one of the four, as a stale cookie could hold', () => {
+    expect(
+      resolveTableDensity({
+        defaults: { density: 'spacious' },
+        state: {
+          density: 'tight' as never,
+          headerDensity: 'tiny' as never,
+        },
+      }),
+    ).toStrictEqual({
+      density: 'spacious',
+      headerDensity: 'spacious',
+      headerRowHeight: 48,
+      rowHeight: 48,
     });
   });
 });

@@ -254,4 +254,20 @@ describe('Table density from a saved meta state', () => {
     expect(rowHeightOf(firstBodyRow())).toBe('36px');
     expect(readTableVariable('body-font-size')).toBe(typography.fontSizeXs);
   });
+
+  it('lets headerDensity set the header height even when rowHeight is set', () => {
+    renderSelected({
+      headerDensity: 'spacious',
+      metaState: { density: 'dense', rowHeight: 36 },
+    });
+
+    expect(rowHeightOf(firstBodyRow())).toBe('36px');
+    expect(rowHeightOf(headerRow())).toBe('48px');
+  });
+
+  it('keeps the header on rowHeight when nothing names a header level', () => {
+    renderSelected({ metaState: { density: 'dense', rowHeight: 36 } });
+
+    expect(rowHeightOf(headerRow())).toBe('36px');
+  });
 });

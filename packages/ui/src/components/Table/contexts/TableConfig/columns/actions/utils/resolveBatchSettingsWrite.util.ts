@@ -1,5 +1,6 @@
 import type { resolveTableGroupingUpdate } from '#ui/components/Table/contexts/TableConfig/grouping/actions/utils';
 import type {
+  TableDensity,
   TableGroupingState,
   TableMetaState,
   TablePersistenceEntry,
@@ -9,9 +10,11 @@ import type {
 import { buildUiFlagsCookieEntry } from '#ui/components/Table/contexts/TableConfig/meta/actions/utils';
 
 import { resolveCommittedGroupingState } from './resolveCommittedGroupingState.util';
+import { resolveSettingsStatePatch } from './resolveSettingsStatePatch.util';
 
 type ResolveBatchSettingsWriteArgs = {
   readonly currentGrouping: TableGroupingState;
+  readonly density?: TableDensity;
   readonly groupingUpdate: ReturnType<typeof resolveTableGroupingUpdate>;
   readonly hasLiveQueryChanged: boolean;
   readonly hasPlacementChanged: boolean;
@@ -22,6 +25,7 @@ type ResolveBatchSettingsWriteArgs = {
 
 export const resolveBatchSettingsWrite = ({
   currentGrouping,
+  density,
   groupingUpdate,
   hasLiveQueryChanged,
   hasPlacementChanged,
@@ -29,11 +33,10 @@ export const resolveBatchSettingsWrite = ({
   stateEntries,
   totalsPlacement,
 }: ResolveBatchSettingsWriteArgs) => {
-  const isClosesSettings = metaState?.isTableSettingsPinned !== true;
-  const nextStatePatch = isClosesSettings
-    ? { isTableSettingsOpen: false as const }
-    : {};
-  const shouldPersistUiFlags = hasPlacementChanged || isClosesSettings;
+  const { closesSettings, hasDensityChanged, nextStatePatch } =
+    resolveSettingsStatePatch({ density, metaState });
+  const shouldPersistUiFlags =
+    hasPlacementChanged || closesSettings || hasDensityChanged;
   const uiFlagsEntry = shouldPersistUiFlags
     ? buildUiFlagsCookieEntry({
         currentState: metaState,
@@ -66,8 +69,9 @@ export const resolveBatchSettingsWrite = ({
       : undefined;
 
   return {
-    closesSettings: isClosesSettings,
+    closesSettings,
     committedGrouping,
+    hasDensityChanged,
     nextStatePatch,
     persistRequest,
     separateUiFlags,

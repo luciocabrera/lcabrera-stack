@@ -35,7 +35,7 @@ export const GeneralSettingsSection = ({
         reflected after clicking Accept.
       </InfoBox>
 
-      <DensitySection />
+      <DensitySection isBusy={isBusy} />
 
       <SidePanelSection>
         <SidePanelSectionHeader title='Filters' />

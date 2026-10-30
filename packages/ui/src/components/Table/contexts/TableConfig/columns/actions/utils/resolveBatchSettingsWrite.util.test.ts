@@ -41,4 +41,18 @@ describe('resolveBatchSettingsWrite', () => {
       expect.objectContaining({ entries: [] }),
     );
   });
+
+  it('writes a staged density into the patch and the flag cookie, even on a pinned panel', () => {
+    const result = write({
+      density: 'spacious',
+      hasLiveQueryChanged: false,
+      metaState: { isTableSettingsPinned: true, persistenceKey: 'orders' },
+    });
+
+    expect(result.hasDensityChanged).toBe(true);
+    expect(result.nextStatePatch).toStrictEqual({ density: 'spacious' });
+    expect(result.separateUiFlags).toStrictEqual(
+      expect.objectContaining({ nextStatePatch: { density: 'spacious' } }),
+    );
+  });
 });

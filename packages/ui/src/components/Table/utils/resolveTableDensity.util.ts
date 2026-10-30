@@ -8,6 +8,8 @@ import {
   TABLE_DENSITY_ROW_HEIGHT,
 } from '#ui/components/Table/Table.constants';
 
+import { isTableDensity } from './isTableDensity.util';
+
 type ResolveTableDensityArgs = {
   readonly defaults: TableDensityDefaults;
   readonly state: Pick<
@@ -20,14 +22,21 @@ export const resolveTableDensity = ({
   defaults,
   state,
 }: ResolveTableDensityArgs) => {
-  const density = state.density ?? defaults.density ?? DEFAULT_TABLE_DENSITY;
-  const headerDensity =
-    state.headerDensity ?? defaults.headerDensity ?? density;
+  const density =
+    [state.density, defaults.density].find(isTableDensity) ??
+    DEFAULT_TABLE_DENSITY;
+  const namedHeaderDensity = [state.headerDensity, defaults.headerDensity].find(
+    isTableDensity,
+  );
+  const rowHeight = state.rowHeight ?? TABLE_DENSITY_ROW_HEIGHT[density];
 
   return {
     density,
-    headerDensity,
-    headerRowHeight: state.rowHeight ?? TABLE_DENSITY_ROW_HEIGHT[headerDensity],
-    rowHeight: state.rowHeight ?? TABLE_DENSITY_ROW_HEIGHT[density],
+    headerDensity: namedHeaderDensity ?? density,
+    headerRowHeight:
+      namedHeaderDensity === undefined
+        ? rowHeight
+        : TABLE_DENSITY_ROW_HEIGHT[namedHeaderDensity],
+    rowHeight,
   };
 };

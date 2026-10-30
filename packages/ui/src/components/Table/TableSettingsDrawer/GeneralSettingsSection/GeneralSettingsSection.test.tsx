@@ -76,7 +76,9 @@ vi.mock('./ColumnWidthsSection/ColumnWidthsSection.component', () => ({
 }));
 
 vi.mock('./DensitySection/DensitySection.component', () => ({
-  DensitySection: () => <div>Density section</div>,
+  DensitySection: ({ isBusy }: MockToolbarProps) => (
+    <div data-busy={String(isBusy)}>Density section</div>
+  ),
 }));
 
 import { GeneralSettingsSection } from './GeneralSettingsSection.component';
@@ -115,6 +117,7 @@ describe('GeneralSettingsSection', () => {
 
     const busyNodes = [
       'Column widths section',
+      'Density section',
       'Filters toolbar',
       'Sorting toolbar',
       'Column order toolbar',

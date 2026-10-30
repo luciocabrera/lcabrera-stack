@@ -1,6 +1,6 @@
 import type { TableFocusState } from '#ui/components/Table/Table.types';
 
-import { useReadTableRowHeight } from '#ui/components/Table/contexts/TableConfig/meta/useReadTableRowHeight.hook';
+import { useReadTableDensity } from '#ui/components/Table/contexts/TableConfig/meta/useReadTableDensity.hook';
 import { useTableConfigContextValue } from '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook';
 import { useTableDataContextValue } from '#ui/components/Table/contexts/TableData/data/useTableDataContextValue.hook';
 
@@ -12,7 +12,7 @@ export const useReadGridFocusContext = <
   const { columnsStore, expansionStore, groupingStore } =
     useTableConfigContextValue<TData>();
   const { dataStore } = useTableDataContextValue<TData>();
-  const readRowHeight = useReadTableRowHeight();
+  const readDensity = useReadTableDensity();
 
   return (focusState: TableFocusState) =>
     resolveGridFocusContext({
@@ -21,6 +21,6 @@ export const useReadGridFocusContext = <
       expansionState: expansionStore.get(),
       focusState,
       groupingState: groupingStore.get(),
-      rowHeight: readRowHeight(),
+      rowHeight: readDensity().rowHeight,
     });
 };

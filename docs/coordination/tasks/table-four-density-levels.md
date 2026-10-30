@@ -9,6 +9,7 @@ area:
   - .changeset/table-four-density-levels.md
   - packages/ui/src/INVENTORY.md
   - reports/api-surface/ui.txt
+  - packages/ui/src/stylex-module-paths.test.json
 started: 2026-10-30
 updated: 2026-10-30
 plan: (none)

@@ -33,6 +33,7 @@ describe('getPersistedUiState', () => {
 
     expect(getPersistedUiState({ chrome, totalsPlacement: 'first' })).toEqual({
       columnSettingsSelectedTab: 'general',
+      density: 'compact',
       isColumnSettingsOpen: true,
       isColumnSettingsPinned: false,
       isTableSettingsOpen: false,
@@ -47,6 +48,7 @@ describe('getPersistedUiState', () => {
   it('returns an empty persisted slice when nothing is passed', () => {
     expect(getPersistedUiState()).toEqual({
       columnSettingsSelectedTab: undefined,
+      density: undefined,
       isColumnSettingsOpen: undefined,
       isColumnSettingsPinned: undefined,
       isTableSettingsOpen: undefined,

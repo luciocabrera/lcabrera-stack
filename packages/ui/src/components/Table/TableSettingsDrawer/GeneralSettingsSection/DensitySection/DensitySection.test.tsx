@@ -12,21 +12,26 @@ import type {
   TableMetaState,
 } from '../../../Table.types';
 
+import { TableDrawerProvider } from '../../TableDrawerContext/TableDrawerContext.provider';
 import { DensitySection } from './DensitySection.component';
 
 type RenderSectionArgs = {
   readonly defaults?: TableDensityDefaults;
+  readonly isBusy?: boolean;
   readonly metaState?: Partial<TableMetaState>;
 };
 
 const renderSection = ({
   defaults = {},
+  isBusy,
   metaState = {},
 }: RenderSectionArgs = {}) =>
   render(
     <TableConfigProvider columnsState={{ columns: [] }} metaState={metaState}>
       <TableDensityContext value={defaults}>
-        <DensitySection />
+        <TableDrawerProvider>
+          <DensitySection isBusy={isBusy} />
+        </TableDrawerProvider>
         <table>
           <tbody>
             <TableRow title='body-row'>
@@ -48,7 +53,7 @@ describe('DensitySection', () => {
   it('lists all four levels, tightest first, each with its row height', () => {
     renderSection();
 
-    expect(screen.getByRole('radiogroup', { name: 'Density' })).not.toBeNull();
+    expect(screen.getByRole('group', { name: 'Density' })).not.toBeNull();
     expect(
       screen
         .getAllByRole<HTMLInputElement>('radio')
@@ -83,7 +88,7 @@ describe('DensitySection', () => {
     expect(checkedLevel()).toBe('spacious');
   });
 
-  it('applies a chosen level to the rows straight away', () => {
+  it('stages a chosen level without touching the rows', () => {
     renderSection();
 
     fireEvent.click(screen.getByRole('radio', { name: 'Dense' }));
@@ -91,6 +96,16 @@ describe('DensitySection', () => {
     expect(checkedLevel()).toBe('dense');
     expect(
       screen.getByTitle('body-row').style.getPropertyValue('--x-height'),
-    ).toBe('24px');
+    ).toBe('32px');
+  });
+
+  it('disables every level while the table is busy', () => {
+    renderSection({ isBusy: true });
+
+    expect(
+      screen
+        .getAllByRole<HTMLInputElement>('radio')
+        .every((radio) => radio.matches(':disabled')),
+    ).toBe(true);
   });
 });

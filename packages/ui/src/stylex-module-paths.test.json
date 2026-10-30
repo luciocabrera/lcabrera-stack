@@ -120,6 +120,7 @@
   "src/components/Table/TableSettingsDrawer/SortingSection/ActiveSortList/ActiveSortList.stylex.ts",
   "src/components/Table/TableSettingsDrawer/SortingSection/ActiveSortList/SortItemContent/SortItemContent.stylex.ts",
   "src/components/Table/TableSettingsDrawer/SortingSection/AddSortSection/AddSortSection.stylex.ts",
+  "src/components/Table/TableSettingsDrawer/drawerFieldset.stylex.ts",
   "src/components/Table/filters/BooleanFilterInput/BooleanFilterInput.stylex.ts",
   "src/components/Table/filters/DateFilterInput/DateFilterInput.stylex.ts",
   "src/components/Table/filters/FilterInputs/FilterInputs.stylex.ts",
