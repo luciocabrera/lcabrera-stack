@@ -23,6 +23,6 @@ Leave StyleX modules out of the mutation gate
 
 ## Status / next
 
-- Current step: gate green, PR #1582 ready for review
-- Blockers: none
-- Next: review and merge
+- Current step: style-module check uses endsWith, waiting on CI for the new head
+- Blockers: the previous head failed Claude review and the Grok subscription review. Strict Sonar failed on S6557; this commit is that fix.
+- Next: CI on the new head, then review
