@@ -70,7 +70,7 @@ paths and decimation, which are pure arithmetic and worth testing on their own.
   | Level         | Row height | Body font    | Header font            | Inline padding |
   | ------------- | ---------- | ------------ | ---------------------- | -------------- |
   | `dense`       | 24px       | `fontSizeXs` | `fontSizeXs`, semibold | `spacing.xxs`  |
-  | `compact`     | 32px       | `fontSizeSm` | `fontSizeXs`, semibold | `spacing.xs`   |
+  | `compact`     | 32px       | `fontSizeSm` | `fontSizeSm`, semibold | `spacing.xs`   |
   | `comfortable` | 40px       | `fontSizeSm` | `fontSizeSm`, semibold | `spacing.sm`   |
   | `spacious`    | 48px       | `fontSizeMd` | `fontSizeSm`, semibold | `spacing.md`   |
 
@@ -158,12 +158,12 @@ paths and decimation, which are pure arithmetic and worth testing on their own.
   unchanged, but the table looks different. That is the cost of giving the
   existing name the meaning it already claimed instead of leaving it inert. A
   caller who wants the old look sets `compact`.
-- **A default table's header and padding change slightly.** Today every cell
-  sets a fixed `6px` inline padding and every header cell `fontSizeSm`. Under
-  `compact` the padding becomes `spacing.xs` and the header font
-  `fontSizeXs`, while the row height and body font stay as they are. The
-  change is visible in every table that keeps the default, and the changeset
-  that ships (a) says so.
+- **A default table's inline padding changes slightly.** Today every cell sets
+  a fixed `6px` inline padding. Under `compact` it becomes `spacing.xs`, while
+  the row height, the body font and the `fontSizeSm` header stay as they are.
+  That is the only visible change to a table that keeps the default, and the
+  changeset that ships (a) says so. A `fontSizeXs` header applies only at
+  `dense`.
 - `TableDensity` widens from two members to four. Code that switches on it
   exhaustively stops compiling until it handles the two new levels. The change is
   recorded in the API surface and needs a changeset.
