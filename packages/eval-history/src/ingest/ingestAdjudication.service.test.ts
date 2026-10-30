@@ -2,11 +2,11 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 
 import type { AdjudicationEnvelope } from '../envelope/envelope.types.ts';
-import type { IngestClient, IngestQuery } from './ingest.types.ts';
 
 import { adjudicationEnvelopeSchema } from '../envelope/adjudicationEnvelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { ingestAdjudication } from './ingestAdjudication.service.ts';
+import { scriptedIngestClient } from './scriptedIngestClient.util.ts';
 
 const fixtures = await readJsonFiles({
   directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),
@@ -24,46 +24,28 @@ type FakeArgs = {
   readonly storedSha?: string;
 };
 
-const fakeClient = ({ failOn, storedSha }: FakeArgs = {}) => {
-  const queries: IngestQuery[] = [];
-  const client: IngestClient = {
-    query: async (config) => {
-      queries.push(config);
-
-      if (failOn && config.text.includes(failOn)) {
-        throw new Error(`failed on ${failOn}`);
+const fakeClient = ({ failOn, storedSha }: FakeArgs = {}) =>
+  scriptedIngestClient({
+    failOn,
+    rowsFor: (text) => {
+      if (text.includes('insert into evals.adjudication_case')) {
+        return storedSha ? [] : [{ case_id: envelope.case.case_id }];
       }
 
-      if (config.text.includes('insert into evals.adjudication_case')) {
-        return { rows: storedSha ? [] : [{ case_id: envelope.case.case_id }] };
-      }
-
-      return {
-        rows: config.text.includes('select envelope_sha256')
-          ? [{ envelope_sha256: storedSha }]
-          : [],
-      };
+      return text.includes('select envelope_sha256')
+        ? [{ envelope_sha256: storedSha }]
+        : [];
     },
-  };
-
-  return { client, queries };
-};
-
-const statements = (queries: readonly IngestQuery[]) =>
-  queries.map(({ text }) => {
-    const [table] = /evals\.\w+/u.exec(text) ?? [text.trim()];
-
-    return table;
   });
 
 describe('ingestAdjudication', () => {
   it('writes the case and every verdict in one transaction', async () => {
-    const { client, queries } = fakeClient();
+    const { client, statements } = fakeClient();
 
     expect(await ingestAdjudication({ client, envelope, sha256: SHA })).toEqual(
       { result: 'inserted', rows: { cases: 1, verdicts: 3 } },
     );
-    expect(statements(queries)).toEqual([
+    expect(statements()).toEqual([
       'begin',
       'evals.adjudication_case',
       'evals.adjudication_verdict',
@@ -113,12 +95,12 @@ describe('ingestAdjudication', () => {
   });
 
   it('changes nothing when the same envelope is already stored', async () => {
-    const { client, queries } = fakeClient({ storedSha: SHA });
+    const { client, statements } = fakeClient({ storedSha: SHA });
 
     expect(await ingestAdjudication({ client, envelope, sha256: SHA })).toEqual(
       { result: 'present', rows: { cases: 0, verdicts: 0 } },
     );
-    expect(statements(queries)).toEqual([
+    expect(statements()).toEqual([
       'begin',
       'evals.adjudication_case',
       'evals.adjudication_case',

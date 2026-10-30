@@ -1,7 +1,8 @@
 /**
  * What the eval-history commands that write by hand share: the argument list
  * without the separator `vp run` passes through, the author a note or grade is
- * recorded under, and a client on the database EVALS_DATABASE_URL names. Git
+ * recorded under, a client on the database EVALS_DATABASE_URL names, and the
+ * shell both grade commands run in: record, then print the rate. Git
  * runs from a fixed system directory with PATH pinned to those directories, so
  * a writable PATH entry cannot shadow it, and with every inherited GIT_*
  * variable dropped, so GIT_DIR cannot point it at another repository's
@@ -77,5 +78,19 @@ export const withEvalsClient = async (connectionString, work) => {
     return await work(client);
   } finally {
     await client.end();
+  }
+};
+
+export const runGradeCommand = async ({ name, report, requestFrom, run }) => {
+  try {
+    const request = requestFrom(cliArguments());
+    await withEvalsClient(databaseUrl(), async (client) => {
+      await run(client, request);
+      const lines = await report(client);
+      console.log(lines.join('\n'));
+    });
+  } catch (error) {
+    console.error(`${name}: ${errorText(error)}`);
+    process.exitCode = 1;
   }
 };

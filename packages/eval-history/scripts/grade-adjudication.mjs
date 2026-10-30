@@ -8,7 +8,6 @@
  * Exit codes: 0 recorded or printed; 1 on an invalid env or argument, a case
  * not stored, a reopened case that was not dismissed, or a failed statement.
  */
-import process from 'node:process';
 import { fileURLToPath } from 'node:url';
 import { parseArgs } from 'node:util';
 
@@ -17,12 +16,7 @@ import { groundTruthRequest } from '../src/adjudications/groundTruthRequest.util
 import { readAdjudicationAccuracy } from '../src/adjudications/readAdjudicationAccuracy.service.ts';
 import { recordGroundTruth } from '../src/adjudications/recordGroundTruth.service.ts';
 import { loadRegressionConfig } from '../src/stats/loadRegressionConfig.service.ts';
-import {
-  cliArguments,
-  databaseUrl,
-  errorText,
-  withEvalsClient,
-} from './lib/evals-cli.mjs';
+import { runGradeCommand } from './lib/evals-cli.mjs';
 
 const REGRESSION_CONFIG = fileURLToPath(
   new URL('../../../evals/regression.config.json', import.meta.url),
@@ -61,31 +55,29 @@ const accuracyLines = async (client) => {
   });
 };
 
-const run = async (client, request) => {
-  if (request.kind === 'grade') {
-    const { caseId, note, source, truth } = request;
-    const result = await recordGroundTruth({
-      caseId,
-      client,
-      note,
-      source,
-      truth,
-    });
-    if (result.kind === 'rejected') {
-      throw new Error(result.problems.join('\n'));
-    }
-    console.log(
-      `evals:grade-adjudication: recorded ${truth} (${source}) for ${result.outcome} case ${caseId}`,
-    );
+const record = async (client, request) => {
+  if (request.kind !== 'grade') {
+    return;
   }
-  const lines = await accuracyLines(client);
-  console.log(lines.join('\n'));
+  const { caseId, note, source, truth } = request;
+  const result = await recordGroundTruth({
+    caseId,
+    client,
+    note,
+    source,
+    truth,
+  });
+  if (result.kind === 'rejected') {
+    throw new Error(result.problems.join('\n'));
+  }
+  console.log(
+    `evals:grade-adjudication: recorded ${truth} (${source}) for ${result.outcome} case ${caseId}`,
+  );
 };
 
-try {
-  const request = requestFrom(cliArguments());
-  await withEvalsClient(databaseUrl(), (client) => run(client, request));
-} catch (error) {
-  console.error(`evals:grade-adjudication: ${errorText(error)}`);
-  process.exitCode = 1;
-}
+await runGradeCommand({
+  name: 'evals:grade-adjudication',
+  report: accuracyLines,
+  requestFrom,
+  run: record,
+});

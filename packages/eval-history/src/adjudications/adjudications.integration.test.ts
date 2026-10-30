@@ -11,7 +11,6 @@
 
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
-import pg from 'pg';
 import {
   afterAll,
   beforeAll,
@@ -29,10 +28,9 @@ import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { ingestAdjudication } from '../ingest/ingestAdjudication.service.ts';
 import { ingestPaths } from '../ingest/ingestPaths.service.ts';
 import { memoryFileSystem } from '../ingest/memoryFileSystem.util.ts';
-import { applyMigrations } from '../migrate/applyMigrations.service.ts';
-import { readMigrations } from '../migrate/readMigrations.service.ts';
 import { loadRegressionConfig } from '../stats/loadRegressionConfig.service.ts';
 import { integrationDatabase } from '../testing/integrationDatabase.service.ts';
+import { migratedScratch } from '../testing/migratedScratch.service.ts';
 import { readAdjudicationAccuracy } from './readAdjudicationAccuracy.service.ts';
 import { recordGroundTruth } from './recordGroundTruth.service.ts';
 
@@ -103,8 +101,12 @@ const truthOf = ({ caseId, note, source = 'lucio', truth }: TruthOfArgs) =>
   ({ caseId, note, source, truth }) satisfies GroundTruth;
 
 describe.skipIf(!DATABASE_URL)('adjudication history against Postgres', () => {
-  const admin = new pg.Client({ connectionString: DATABASE_URL });
-  const client = new pg.Client({ connectionString });
+  const { client, close, counts, empty, open } = migratedScratch({
+    scratch: SCRATCH,
+    scratchUrl: connectionString,
+    tables: TABLES,
+    url: DATABASE_URL,
+  });
 
   const ingest = async (envelopes: readonly AdjudicationEnvelope[]) => {
     const summary = await ingestPaths({
@@ -122,34 +124,11 @@ describe.skipIf(!DATABASE_URL)('adjudication history against Postgres', () => {
     };
   };
 
-  const counts = async () => {
-    const { rows } = await client.query<{ readonly counts: object }>(
-      `select json_build_object(${TABLES.map(
-        (table) => `'${table}', (select count(*)::int from evals.${table})`,
-      ).join(', ')}) as counts`,
-    );
+  beforeAll(open);
 
-    return rows[0]?.counts;
-  };
+  beforeEach(empty);
 
-  beforeAll(async () => {
-    await admin.connect();
-    await admin.query(`create database ${SCRATCH}`);
-    await client.connect();
-    await applyMigrations({ client, migrations: await readMigrations() });
-  });
-
-  beforeEach(async () => {
-    await client.query(
-      `truncate ${TABLES.map((table) => `evals.${table}`).join(', ')} cascade`,
-    );
-  });
-
-  afterAll(async () => {
-    await client.end();
-    await admin.query(`drop database if exists ${SCRATCH} with (force)`);
-    await admin.end();
-  });
+  afterAll(close);
 
   it('stores a case and its verdicts, and stores nothing more the second time', async () => {
     const first = await ingest([fixture]);

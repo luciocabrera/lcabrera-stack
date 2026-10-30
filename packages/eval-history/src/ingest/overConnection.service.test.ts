@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from 'vite-plus/test';
 
-import type { IngestReport } from './ingest.types.ts';
+import type { IngestConnection, IngestReport } from './ingest.types.ts';
 
 import { overConnection } from './overConnection.service.ts';
 
@@ -18,6 +18,25 @@ const reportOf = ({ file, problems = [] }: ReportOfArgs) =>
     rows: { cases: 1, verdicts: 1 },
   }) satisfies IngestReport;
 
+type OverFilesArgs = {
+  readonly connect: () => Promise<IngestConnection>;
+  readonly items: readonly string[];
+  readonly step?: (args: { readonly item: string }) => Promise<IngestReport>;
+};
+
+const overFiles = ({
+  connect,
+  items,
+  step = async ({ item }) => reportOf({ file: item }),
+}: OverFilesArgs) =>
+  overConnection({
+    connect,
+    items,
+    step,
+    unsent: ({ item, problem }) =>
+      reportOf({ file: item, problems: [problem] }),
+  });
+
 const client = { query: async () => ({ rows: [] }) };
 
 describe('overConnection', () => {
@@ -25,15 +44,10 @@ describe('overConnection', () => {
     const end = vi.fn(async () => {});
     const connect = vi.fn(async () => ({ client, end }));
 
-    expect(
-      await overConnection({
-        connect,
-        items: ['a.json', 'b.json'],
-        step: async ({ item }) => reportOf({ file: item }),
-        unsent: ({ item, problem }) =>
-          reportOf({ file: item, problems: [problem] }),
-      }),
-    ).toEqual([reportOf({ file: 'a.json' }), reportOf({ file: 'b.json' })]);
+    expect(await overFiles({ connect, items: ['a.json', 'b.json'] })).toEqual([
+      reportOf({ file: 'a.json' }),
+      reportOf({ file: 'b.json' }),
+    ]);
     expect(connect).toHaveBeenCalledOnce();
     expect(end).toHaveBeenCalledOnce();
   });
@@ -42,14 +56,12 @@ describe('overConnection', () => {
     const end = vi.fn(async () => {});
 
     await expect(
-      overConnection({
+      overFiles({
         connect: async () => ({ client, end }),
         items: ['a.json'],
         step: async () => {
           throw new Error('socket hang up');
         },
-        unsent: ({ item, problem }) =>
-          reportOf({ file: item, problems: [problem] }),
       }),
     ).rejects.toThrow('socket hang up');
     expect(end).toHaveBeenCalledOnce();
@@ -57,40 +69,23 @@ describe('overConnection', () => {
 
   it('reports every item unsent when it cannot connect', async () => {
     expect(
-      await overConnection({
+      await overFiles({
         connect: async () => {
           throw new Error('ECONNREFUSED');
         },
         items: ['a.json', 'b.json'],
-        step: async ({ item }) => reportOf({ file: item }),
-        unsent: ({ item, problem }) =>
-          reportOf({ file: item, problems: [problem] }),
       }),
-    ).toEqual([
-      reportOf({
-        file: 'a.json',
-        problems: ['could not connect: ECONNREFUSED'],
-      }),
-      reportOf({
-        file: 'b.json',
-        problems: ['could not connect: ECONNREFUSED'],
-      }),
-    ]);
+    ).toEqual(
+      ['a.json', 'b.json'].map((file) =>
+        reportOf({ file, problems: ['could not connect: ECONNREFUSED'] }),
+      ),
+    );
   });
 
   it('does not connect for no items', async () => {
     const connect = vi.fn();
 
-    expect(
-      await overConnection({
-        connect,
-        items: [],
-        step: async ({ item }: { readonly item: string }) =>
-          reportOf({ file: item }),
-        unsent: ({ item, problem }) =>
-          reportOf({ file: item, problems: [problem] }),
-      }),
-    ).toEqual([]);
+    expect(await overFiles({ connect, items: [] })).toEqual([]);
     expect(connect).not.toHaveBeenCalled();
   });
 });

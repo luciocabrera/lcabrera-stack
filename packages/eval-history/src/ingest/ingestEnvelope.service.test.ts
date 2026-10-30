@@ -2,11 +2,11 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 
 import type { RunEnvelope } from '../envelope/envelope.types.ts';
-import type { IngestClient, IngestQuery } from './ingest.types.ts';
 
 import { runEnvelopeSchema } from '../envelope/envelope.schema.ts';
 import { readJsonFiles } from '../envelope/readJsonFiles.service.ts';
 import { ingestEnvelope } from './ingestEnvelope.service.ts';
+import { scriptedIngestClient } from './scriptedIngestClient.util.ts';
 
 const fixtures = await readJsonFiles({
   directory: fileURLToPath(new URL('../envelope/fixtures', import.meta.url)),
@@ -41,39 +41,21 @@ const rowsFor = ({ storedSha, text }: RowsForArgs) => {
   return responses.find(([marker]) => text.includes(marker))?.[1] ?? [];
 };
 
-const fakeClient = ({ failOn, storedSha }: FakeArgs = {}) => {
-  const queries: IngestQuery[] = [];
-  const client: IngestClient = {
-    query: async (config) => {
-      queries.push(config);
-
-      if (failOn && config.text.includes(failOn)) {
-        throw new Error(`failed on ${failOn}`);
-      }
-
-      return { rows: rowsFor({ storedSha, text: config.text }) };
-    },
-  };
-
-  return { client, queries };
-};
-
-const statements = (queries: readonly IngestQuery[]) =>
-  queries.map(({ text }) => {
-    const [table] = /evals\.\w+/u.exec(text) ?? [text.trim()];
-
-    return table;
+const fakeClient = ({ failOn, storedSha }: FakeArgs = {}) =>
+  scriptedIngestClient({
+    failOn,
+    rowsFor: (text) => rowsFor({ storedSha, text }),
   });
 
 describe('ingestEnvelope', () => {
   it('writes the run, its subject, task and trials in one transaction', async () => {
-    const { client, queries } = fakeClient();
+    const { client, statements } = fakeClient();
 
     expect(await ingestEnvelope({ client, envelope, sha256: SHA })).toEqual({
       result: 'inserted',
       rows: { subjects: 1, tasks: 1, trials: 3 },
     });
-    expect(statements(queries)).toEqual([
+    expect(statements()).toEqual([
       'begin',
       'evals.eval_run',
       'evals.eval_subject',
@@ -121,13 +103,13 @@ describe('ingestEnvelope', () => {
   });
 
   it('changes nothing when the same envelope is already stored', async () => {
-    const { client, queries } = fakeClient({ storedSha: SHA });
+    const { client, statements } = fakeClient({ storedSha: SHA });
 
     expect(await ingestEnvelope({ client, envelope, sha256: SHA })).toEqual({
       result: 'present',
       rows: { subjects: 0, tasks: 0, trials: 0 },
     });
-    expect(statements(queries)).toEqual([
+    expect(statements()).toEqual([
       'begin',
       'evals.eval_run',
       'evals.eval_run',

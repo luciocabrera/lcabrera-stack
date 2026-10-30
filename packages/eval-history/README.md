@@ -126,7 +126,9 @@ decides how the envelope is versioned.
   `EVALS_TEST_DATABASE_URL` names and drops them, and the roles a test
   created, afterwards. `integrationDatabase` reads that variable, says when a
   test file skips for want of it, and fails under `CI` without it.
-  `markedEnvelopes` builds one schema-valid envelope per suite with a marker in
+  `migratedScratch` creates and migrates one such database for a test file,
+  empties the tables it names before each test, counts their rows, and drops
+  it afterwards. `markedEnvelopes` builds one schema-valid envelope per suite with a marker in
   every field the allow-list leaves out, for the showcase's `/evals`
   public-payload test. No command imports any of them.
 
