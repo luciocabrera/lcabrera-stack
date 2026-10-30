@@ -1,2 +1,2 @@
 export { Title } from './Title.component';
-export type { TitleProps } from './Title.types';
+export type { TitleLevel, TitleProps, TitleVariant } from './Title.types';

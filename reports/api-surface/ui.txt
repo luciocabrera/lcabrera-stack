@@ -26,10 +26,17 @@ TableLayout [const] <TData extends Record<string, unknown>, TResponse = Record<s
 TablePageResponse [type] { readonly data: readonly TData[]; /** A refusal arrives as a successful response carrying data, not a rejected promise. */ readonly error?: TableResponseError; readonly hasMore?: boolean; readonly total?: number; }
 TableRouteView [const] <TData extends Record<string, unknown>, TResponse extends TablePageResponse<TData>>({ actions, dataErrorSelector, dataSelector, dataTotalSelector, fetchPage, }: TableRouteViewProps<TData, TResponse>) => JSX.Element
 Tabs [const] ({ defaultSelectedTab, isBusy, label, onSelectTab, selectedTab, tabs, ...props }: TabsProps) => JSX.Element
-Text [const] ({ as: Element, children, customStylex, isMono, isTabular, size, tone, weight, }: TextProps) => JSX.Element
-TextProps [type] { readonly as?: TextElement; readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly isMono?: boolean; readonly isTabular?: boolean; readonly size?: TextSize; readonly tone?: TextTone; readonly weight?: TextWeight; }
+Text [const] <TElement extends TextElement = "p">({ as: tagName, children, customStylex, isMono, isTabular, size, tone, weight, ...props }: TextProps<TElement>) => JSX.Element
+TextElement [type] | 'dd' | 'div' | 'dt' | 'figcaption' | 'label' | 'p' | 'span'
+TextOwnProps [type] { readonly as?: 'p' | TElement; readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly isMono?: boolean; readonly isTabular?: boolean; readonly size?: TextSize; readonly tone?: TextTone; readonly weight?: TextWeight; }
+TextProps [type] Omit< ComponentPropsWithoutRef<TElement>, keyof TextOwnProps<TElement> > & TextOwnProps<TElement>
+TextSize [type] 'lg' | 'md' | 'sm' | 'xs'
+TextTone [type] | 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning'
+TextWeight [type] 'bold' | 'medium' | 'normal' | 'semibold'
 Title [const] ({ actions, children, customStylex, icon, level, variant, ...props }: TitleProps) => JSX.Element | undefined
+TitleLevel [type] 1 | 2 | 3
 TitleProps [type] ComponentProps<'div'> & { readonly actions?: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly level?: TitleLevel; readonly variant?: TitleVariant; }
+TitleVariant [type] 'plain' | 'toolbar'
 useNotifyOnError [const] (error: unknown) => void
 useTableRoutePage [const] <TData extends Record<string, unknown>, TResponse extends TablePageResponse<TData>>({ fetchPage }?: UseTableRoutePageArgs<TResponse>) => { columnsState: { columnFilters: ColumnFiltersState<TData>; columnOrder: ColumnOrderState<TData>; columnPinning: ColumnPinningState<TData>; columns: TableColumn<TData>[]; columnSizing: ColumnSizingState<TData>; columnVisibility: ColumnVisibilityState<TData>; sorting: { columnKey: keyof TData & string; direction: "asc" | "desc"; }[]; cellPalette?: Readonly<Record<string, TableCellPaletteEntry>> | undefined; }; dataPromise: Promise<TResponse>; groupingState: { totalsPlacement: TableTotalsPlacement; aggregates: readonly TableColumnAggregate[]; columnAxis?: string; keys: readonly string[]; mode: TableGroupingMode; periods: Readonly<Record<string, TableGroupPeriod>>; shares: readonly TableColumnAggregate[]; }; metaState: { isGroupingEnabled: boolean; isGroupingLocked: boolean; isKeysetEnabled: boolean; isServerFilterEnabled: boolean; defaultGroupFold: TableGroupFold | undefined; groupDetailsPath: string | undefined; groupingCapabilities: Readonly<Record<string, TableColumnGroupingCapability>>; hasDefaultGrouping: boolean; isColumnLayoutTransient: boolean; isUrlStateNested: boolean; lockedFilters: TableLockedFilters | undefined; preferredGroupingMode: TableGroupingMode | undefined; settingsTabOrder: readonly TableSettingsTabRole[] | undefined; additionalMetadata?: Readonly<Record<string, null | TableMetadataValue | undefined>>; crud?: TableCrudConfig; deleteActionPath?: string; enablePrefetch?: boolean | undefined; locale?: string; pagePath?: string; schemaName?: string; tableName: string; title: TableTitle; appId: string; columnSelectedKey?: string; columnSettingsSelectedTab?: string; density?: TableDensity | undefined; drawersSyncNonce?: number; initialPageSize?: number | undefined; isBordered?: boolean | undefined; isColumnSettingsOpen?: boolean; isColumnSettingsPinned?: boolean; isRounded?: boolean | undefined; isStriped?: boolean | undefined; isTableSettingsOpen?: boolean; isTableSettingsPinned?: boolean; loadMorePageSize?: number | undefined; overscan?: number | undefined; persistenceKey: string; placeholderRowCount?: number | undefined; rowHeight?: number | undefined; settingsPanelWidth?: number; tableSettingsExpandedFilters?: readonly string[]; tableSettingsSelectedTab?: string; threshold?: number | undefined; wasTableSettingsOpenBeforeColumnSettings?: boolean; }; onLoadMore: (({ lastRow, limit, skip }: Pagination<TData>) => Promise<TResponse>) | undefined; }
 
@@ -369,12 +376,19 @@ createEmptyColumnsState [const] <TData extends Record<string, unknown>>({ column
 inferTableColumnsFromJson [const] ({ rows, }: InferTableColumnsFromJsonArgs) => readonly TableColumn<Record<string, unknown>>[]
 
 ## ./components/Text
-Text [const] ({ as: Element, children, customStylex, isMono, isTabular, size, tone, weight, }: TextProps) => JSX.Element
-TextProps [type] { readonly as?: TextElement; readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly isMono?: boolean; readonly isTabular?: boolean; readonly size?: TextSize; readonly tone?: TextTone; readonly weight?: TextWeight; }
+Text [const] <TElement extends TextElement = "p">({ as: tagName, children, customStylex, isMono, isTabular, size, tone, weight, ...props }: TextProps<TElement>) => JSX.Element
+TextElement [type] | 'dd' | 'div' | 'dt' | 'figcaption' | 'label' | 'p' | 'span'
+TextOwnProps [type] { readonly as?: 'p' | TElement; readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly isMono?: boolean; readonly isTabular?: boolean; readonly size?: TextSize; readonly tone?: TextTone; readonly weight?: TextWeight; }
+TextProps [type] Omit< ComponentPropsWithoutRef<TElement>, keyof TextOwnProps<TElement> > & TextOwnProps<TElement>
+TextSize [type] 'lg' | 'md' | 'sm' | 'xs'
+TextTone [type] | 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning'
+TextWeight [type] 'bold' | 'medium' | 'normal' | 'semibold'
 
 ## ./components/Title
 Title [const] ({ actions, children, customStylex, icon, level, variant, ...props }: TitleProps) => JSX.Element | undefined
+TitleLevel [type] 1 | 2 | 3
 TitleProps [type] ComponentProps<'div'> & { readonly actions?: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly level?: TitleLevel; readonly variant?: TitleVariant; }
+TitleVariant [type] 'plain' | 'toolbar'
 
 ## ./components/TrendSparkline
 TrendSparkline [const] ({ height, label, tone, values, width, }: TrendSparklineProps) => JSX.Element

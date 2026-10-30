@@ -1,5 +1,5 @@
 import type { StyleXStyles } from '@stylexjs/stylex';
-import type { ReactNode } from 'react';
+import type { ComponentPropsWithoutRef, ReactNode } from 'react';
 
 export type TextElement =
   | 'dd'
@@ -10,8 +10,8 @@ export type TextElement =
   | 'p'
   | 'span';
 
-export type TextProps = {
-  readonly as?: TextElement;
+export type TextOwnProps<TElement extends TextElement> = {
+  readonly as?: 'p' | TElement;
   readonly children: ReactNode;
   readonly customStylex?: StyleXStyles;
   readonly isMono?: boolean;
@@ -20,6 +20,12 @@ export type TextProps = {
   readonly tone?: TextTone;
   readonly weight?: TextWeight;
 };
+
+export type TextProps<TElement extends TextElement = 'p'> = Omit<
+  ComponentPropsWithoutRef<TElement>,
+  keyof TextOwnProps<TElement>
+> &
+  TextOwnProps<TElement>;
 
 export type TextSize = 'lg' | 'md' | 'sm' | 'xs';
 

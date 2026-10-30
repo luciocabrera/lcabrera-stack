@@ -1,11 +1,13 @@
+import type { HTMLAttributes } from 'react';
+
 import * as stylex from '@stylexjs/stylex';
 
-import type { TextProps } from './Text.types';
+import type { TextElement, TextProps } from './Text.types';
 
 import { styles } from './Text.stylex';
 
-export const Text = ({
-  as: Element = 'p',
+export const Text = <TElement extends TextElement = 'p'>({
+  as: tagName = 'p',
   children,
   customStylex,
   isMono = false,
@@ -13,18 +15,25 @@ export const Text = ({
   size = 'md',
   tone = 'primary',
   weight,
-}: TextProps) => (
-  <Element
-    {...stylex.props(
-      styles.text,
-      styles.size[size],
-      styles.tone[tone],
-      weight && styles.weight[weight],
-      isMono && styles.mono,
-      isTabular && styles.tabular,
-      customStylex,
-    )}
-  >
-    {children}
-  </Element>
-);
+  ...props
+}: TextProps<TElement>) => {
+  const Tag: TextElement = tagName;
+  const elementProps: HTMLAttributes<HTMLElement> = props;
+
+  return (
+    <Tag
+      {...elementProps}
+      {...stylex.props(
+        styles.text,
+        styles.size[size],
+        styles.tone[tone],
+        weight && styles.weight[weight],
+        isMono && styles.mono,
+        isTabular && styles.tabular,
+        customStylex,
+      )}
+    >
+      {children}
+    </Tag>
+  );
+};

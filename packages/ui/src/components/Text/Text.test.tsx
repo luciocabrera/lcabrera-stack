@@ -117,6 +117,52 @@ describe('Text', () => {
     expect(hasStylexStyle({ element, style: styles.size.md })).toBe(false);
   });
 
+  it('associates a label with its control through htmlFor', () => {
+    render(
+      <>
+        <Text as='label' htmlFor='quantity'>
+          Quantity
+        </Text>
+        <input id='quantity' />
+      </>,
+    );
+
+    const label = screen.getByText('Quantity');
+
+    expect(label.getAttribute('for')).toBe('quantity');
+    expect(screen.getByLabelText('Quantity').id).toBe('quantity');
+  });
+
+  it('passes an id to a description', () => {
+    render(
+      <dl>
+        <Text as='dt'>Term</Text>
+        <Text as='dd' id='term-description'>
+          Description
+        </Text>
+      </dl>,
+    );
+
+    expect(screen.getByText('Description').id).toBe('term-description');
+  });
+
+  it('passes aria attributes through', () => {
+    render(<Text aria-hidden>Decorative</Text>);
+
+    expect(screen.getByText('Decorative').getAttribute('aria-hidden')).toBe(
+      'true',
+    );
+  });
+
+  it('keeps its own classes over a className attribute', () => {
+    render(<Text className='caller-class'>Classed</Text>);
+
+    const element = screen.getByText('Classed');
+
+    expect(element.classList.contains('caller-class')).toBe(false);
+    expect(hasStylexStyle({ element, style: styles.text })).toBe(true);
+  });
+
   it('renders the same markup on the server as on the client', () => {
     expectServerMarkupMatchesClient(
       <Text as='span' isMono isTabular size='sm' tone='error' weight='bold'>

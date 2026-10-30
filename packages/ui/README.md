@@ -116,7 +116,8 @@ section above.
 `AppDocument`, `AppProviders`, `AppShell`, `Button`, `Form`, `JsonExplorer`,
 `NavLink`, `RootErrorBoundary`, `RouteErrorBoundary`, `SectionCard`,
 `StatusBadge`, `Table`, `TableLayout`, `Tabs`, `Text`, `Title`, `hydrateApp`, `useNotifyOnError`, plus the
-`FieldNode`, `LayoutProps`, `Pagination`, `TextProps` and `TitleProps` types.
+`FieldNode`, `LayoutProps`, `Pagination`, `TextElement`, `TextOwnProps`, `TextProps`, `TextSize`, `TextTone`,
+`TextWeight`, `TitleLevel`, `TitleProps` and `TitleVariant` types.
 
 ### Subpaths
 

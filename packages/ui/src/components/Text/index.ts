@@ -1,2 +1,9 @@
 export { Text } from './Text.component';
-export type { TextProps } from './Text.types';
+export type {
+  TextElement,
+  TextOwnProps,
+  TextProps,
+  TextSize,
+  TextTone,
+  TextWeight,
+} from './Text.types';
