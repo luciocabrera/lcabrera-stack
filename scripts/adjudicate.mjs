@@ -27,18 +27,20 @@ import {
 
 const ROOT = process.cwd();
 
-const run = ({ args, cwd = '.', command = 'vp' }) => {
-  const child = spawnSync(command, args, {
-    cwd: join(ROOT, cwd),
-    encoding: 'utf8',
-    maxBuffer: 2 ** 28,
-  });
+const SPAWN_OPTIONS = { encoding: 'utf8', maxBuffer: 2 ** 28 };
+
+const settled = (child) => {
   if (child.error !== undefined) throw child.error;
   return { status: child.status, stdout: child.stdout ?? '' };
 };
 
+const run = ({ args, cwd = '.' }) =>
+  settled(spawnSync('vp', args, { ...SPAWN_OPTIONS, cwd: join(ROOT, cwd) }));
+
 const git = (args) => {
-  const { status, stdout } = run({ args, command: 'git' });
+  const { status, stdout } = settled(
+    spawnSync('git', args, { ...SPAWN_OPTIONS, cwd: ROOT }),
+  );
   if (status !== 0) throw new Error(`git ${args.join(' ')} failed`);
   return stdout.trim();
 };
