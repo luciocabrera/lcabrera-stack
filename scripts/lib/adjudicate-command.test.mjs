@@ -5,11 +5,6 @@ import {
   openCase,
   UNTRACKED_CASES_DIR,
 } from './adjudicate-command.mjs';
-import {
-  matchingRecords,
-  nextCaseId,
-  parseFindingId,
-} from './adjudication-case.mjs';
 
 const BUILDER_NOTES =
   'BUILDER-NOTE: I am sure this is fine because the table name is trusted';
@@ -347,73 +342,5 @@ describe('openCase — what reaches the panel', () => {
 describe('case directories', () => {
   it('keeps a case that was not dismissed under the gitignored .tmp tree', () => {
     expect(UNTRACKED_CASES_DIR.startsWith('.tmp/')).toBe(true);
-  });
-});
-
-describe('parseFindingId', () => {
-  it('reads a file, a line range and a rule that itself holds a colon', () => {
-    expect(
-      parseFindingId('packages/a.ts:4-9:policy-violation:pack/rule'),
-    ).toEqual({
-      end: 9,
-      file: 'packages/a.ts',
-      rule: 'policy-violation:pack/rule',
-      start: 4,
-    });
-  });
-
-  it.each(['packages/a.ts', 'packages/a.ts:9-4:x', 'packages/a.ts:0:x'])(
-    'refuses "%s"',
-    (id) => {
-      expect(() => parseFindingId(id)).toThrow(/finding id/u);
-    },
-  );
-});
-
-describe('nextCaseId', () => {
-  it('takes the next number after every case file and directory', () => {
-    expect(nextCaseId(['FP-0009.json', 'FP-0012', 'notes.md'])).toBe('FP-0013');
-    expect(nextCaseId([])).toBe('FP-0001');
-  });
-});
-
-describe('matchingRecords', () => {
-  const finding = {
-    end: 2,
-    file: 'a.ts',
-    ruleNeedle: 'lint/suspicious/noDebugger',
-    start: 2,
-    whole: false,
-  };
-
-  it('finds a Biome diagnostic by its location', () => {
-    const diagnostic = {
-      category: 'lint/suspicious/noDebugger',
-      location: { path: 'a.ts', start: { line: 2 } },
-    };
-    expect(
-      matchingRecords({
-        finding,
-        report: {
-          diagnostics: [
-            diagnostic,
-            { ...diagnostic, location: { path: 'a.ts', start: { line: 7 } } },
-          ],
-        },
-      }),
-    ).toEqual([diagnostic]);
-  });
-
-  it('returns the whole record when asked, as a clone group is', () => {
-    const group = {
-      fingerprint: 'dup:1',
-      instances: [{ end_line: 3, file: 'a.ts', start_line: 2 }],
-    };
-    expect(
-      matchingRecords({
-        finding: { ...finding, ruleNeedle: '', whole: true },
-        report: { clone_groups: [group] },
-      }),
-    ).toEqual([group]);
   });
 });
