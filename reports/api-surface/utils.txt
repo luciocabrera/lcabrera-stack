@@ -22,6 +22,9 @@ decimate [const] <T extends ChartPoint<ChartValue>>({ points, threshold }: Decim
 ## ./chart/format-path-point.util
 formatPathPoint [const] ({ x, y }: FormatPathPointArgs) => string
 
+## ./chart/is-finite-chart-value.util
+isFiniteChartValue [const] (value: unknown) => value is ChartValue
+
 ## ./chart/line-path.util
 linePath [const] <X extends ChartValue>({ points, x, y }: LinePathArgs<X>) => string
 

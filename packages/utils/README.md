@@ -26,6 +26,7 @@ export for each helper:
 | `chart`      | `bandPath`                                                                              | `@lcabrera/utils/chart/band-path.util`                         |
 | `chart`      | `decimate`                                                                              | `@lcabrera/utils/chart/decimate.util`                          |
 | `chart`      | `formatPathPoint`                                                                       | `@lcabrera/utils/chart/format-path-point.util`                 |
+| `chart`      | `isFiniteChartValue`                                                                    | `@lcabrera/utils/chart/is-finite-chart-value.util`             |
 | `chart`      | `linePath`                                                                              | `@lcabrera/utils/chart/line-path.util`                         |
 | `chart`      | `niceTicks`                                                                             | `@lcabrera/utils/chart/nice-ticks.util`                        |
 | `chart`      | `scaleLinear`                                                                           | `@lcabrera/utils/chart/scale-linear.util`                      |
@@ -69,7 +70,8 @@ The `chart` helpers are the geometry of a chart and draw nothing themselves: a
 scale maps a value onto a pixel range (`scaleLinear`, or `scaleTime` for `Date`
 values, either one optionally clamped), `niceTicks` picks axis ticks at one, two,
 five or ten times a power of ten, `linePath` and `bandPath` return SVG path data
-that breaks at a missing, `null` or non-finite value, and `decimate` thins a long
+that breaks at a point whose `x` or `y` is missing, `null`, not finite or an
+invalid `Date`, and `decimate` thins a long
 series with largest-triangle-three-buckets in linear time. The helpers read no
 DOM, so a chart drawn with them renders the same markup on the server and the
 client.
@@ -81,7 +83,7 @@ one. Draw markers yourself only if you want them on every point.
 
 `decimate` takes the same points `linePath` does and returns the same type, so
 its output feeds `linePath` directly. A point whose `x` or `y` is missing,
-`null` or not finite is a gap: it passes through unchanged and does not count
+`null`, not finite or an invalid `Date` is a gap: it passes through unchanged and does not count
 against `threshold`, so the drawn line still breaks there. Only the finite
 points are thinned.
 

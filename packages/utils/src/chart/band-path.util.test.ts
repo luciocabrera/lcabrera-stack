@@ -64,6 +64,20 @@ describe('bandPath', () => {
     ).toBe('M0,3L0,1ZM2,6L2,2ZM4,1L4,-1Z');
   });
 
+  it('splits the band at a non-finite x', () => {
+    expect(
+      bandPath({
+        band: [
+          { lower: 1, upper: 3, x: 0 },
+          { lower: 1, upper: 3, x: Number('Infinity') },
+          { lower: 2, upper: 6, x: 2 },
+        ],
+        x: identity,
+        y: identity,
+      }),
+    ).toBe('M0,3L0,1ZM2,6L2,2Z');
+  });
+
   it('returns an empty path when no point has both bounds', () => {
     expect(
       bandPath({

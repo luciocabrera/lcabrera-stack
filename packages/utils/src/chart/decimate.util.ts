@@ -3,14 +3,16 @@ import { isNonEmptyArray } from '@lcabrera/utils/guards/is-non-empty-array.util'
 
 import type { ChartPoint, ChartValue } from './chart.types';
 
+import { isFiniteChartValue } from './is-finite-chart-value.util';
+
 type DecimateArgs<T extends ChartPoint<ChartValue>> = {
   readonly points: readonly T[];
   readonly threshold: number;
 };
 
-type DecimateCoordinate = {
+type DecimateValue = {
   readonly index: number;
-  readonly x: number;
+  readonly x: ChartValue;
   readonly y: number;
 };
 
@@ -19,11 +21,12 @@ export const decimate = <T extends ChartPoint<ChartValue>>({
   threshold,
 }: DecimateArgs<T>) => {
   const coordinates = points
-    .map(({ x, y }, index) => ({ index, x: Number(x), y }))
+    .map(({ x, y }, index) => ({ index, x, y }))
     .filter(
-      (coordinate): coordinate is DecimateCoordinate =>
-        isFiniteNumber(coordinate.x) && isFiniteNumber(coordinate.y),
-    );
+      (point): point is DecimateValue =>
+        isFiniteChartValue(point.x) && isFiniteNumber(point.y),
+    )
+    .map(({ index, x, y }) => ({ index, x: Number(x), y }));
 
   if (
     !isNonEmptyArray(coordinates) ||

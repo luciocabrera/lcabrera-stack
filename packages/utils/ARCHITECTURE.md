@@ -50,6 +50,7 @@ its own gate, not a shared value.
 - `./chart/chart.types` — point, band, domain, range and scale types shared by the chart helpers
 - `./chart/decimate.util` — thin a series to a threshold with largest-triangle-three-buckets
 - `./chart/format-path-point.util` — write an `x,y` pair rounded to two decimal places
+- `./chart/is-finite-chart-value.util` — whether an axis value is a finite number or a valid `Date`, the gap test every chart helper shares
 - `./chart/line-path.util` — SVG path data through a series, broken at each missing value
 - `./chart/nice-ticks.util` — axis ticks at one, two, five or ten times a power of ten
 - `./chart/scale-linear.util` — map a numeric domain onto a range, optionally clamped

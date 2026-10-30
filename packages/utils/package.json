@@ -34,6 +34,7 @@
     "./chart/chart.types": "./src/chart/chart.types.ts",
     "./chart/decimate.util": "./src/chart/decimate.util.ts",
     "./chart/format-path-point.util": "./src/chart/format-path-point.util.ts",
+    "./chart/is-finite-chart-value.util": "./src/chart/is-finite-chart-value.util.ts",
     "./chart/line-path.util": "./src/chart/line-path.util.ts",
     "./chart/nice-ticks.util": "./src/chart/nice-ticks.util.ts",
     "./chart/scale-linear.util": "./src/chart/scale-linear.util.ts",
@@ -85,6 +86,10 @@
       "./chart/format-path-point.util": {
         "types": "./dist/chart/format-path-point.util.d.mts",
         "default": "./dist/chart/format-path-point.util.mjs"
+      },
+      "./chart/is-finite-chart-value.util": {
+        "types": "./dist/chart/is-finite-chart-value.util.d.mts",
+        "default": "./dist/chart/is-finite-chart-value.util.mjs"
       },
       "./chart/line-path.util": {
         "types": "./dist/chart/line-path.util.d.mts",

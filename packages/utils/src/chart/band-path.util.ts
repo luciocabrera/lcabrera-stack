@@ -3,6 +3,7 @@ import { isFiniteNumber } from '@lcabrera/utils/guards/is-finite-number.util';
 import type { ChartBandPoint, ChartScale, ChartValue } from './chart.types';
 
 import { formatPathPoint } from './format-path-point.util';
+import { isFiniteChartValue } from './is-finite-chart-value.util';
 
 type BandPathArgs<X extends ChartValue> = {
   readonly band: readonly ChartBandPoint<X>[];
@@ -25,7 +26,11 @@ export const bandPath = <X extends ChartValue>({
   let current: DefinedBandPoint<X>[] = [];
 
   for (const { lower, upper, x: at } of band) {
-    if (!isFiniteNumber(lower) || !isFiniteNumber(upper)) {
+    if (
+      !isFiniteChartValue(at) ||
+      !isFiniteNumber(lower) ||
+      !isFiniteNumber(upper)
+    ) {
       current = [];
       continue;
     }

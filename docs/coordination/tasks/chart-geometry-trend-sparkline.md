@@ -28,6 +28,6 @@ Add chart geometry to utils and redraw TrendSparkline on it
 
 ## Status / next
 
-- Current step: round 6 pushed (one domain helper for both sparkline modes)
+- Current step: round 7 pushed (non-finite x is a gap in every chart helper)
 - Blockers: none
 - Next: review

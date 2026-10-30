@@ -3,6 +3,7 @@ import { isFiniteNumber } from '@lcabrera/utils/guards/is-finite-number.util';
 import type { ChartPoint, ChartScale, ChartValue } from './chart.types';
 
 import { formatPathPoint } from './format-path-point.util';
+import { isFiniteChartValue } from './is-finite-chart-value.util';
 
 type LinePathArgs<X extends ChartValue> = {
   readonly points: readonly ChartPoint<X>[];
@@ -16,12 +17,16 @@ export const linePath = <X extends ChartValue>({
   y,
 }: LinePathArgs<X>) => {
   const isDrawn = (point: ChartPoint<X> | undefined) =>
-    point !== undefined && isFiniteNumber(point.y);
+    point !== undefined &&
+    isFiniteChartValue(point.x) &&
+    isFiniteNumber(point.y);
 
   return points.reduce((path, point, index) => {
-    if (!isFiniteNumber(point.y)) return path;
+    const { x: position, y: value } = point;
 
-    const at = formatPathPoint({ x: x(point.x), y: y(point.y) });
+    if (!isFiniteChartValue(position) || !isFiniteNumber(value)) return path;
+
+    const at = formatPathPoint({ x: x(position), y: y(value) });
 
     if (isDrawn(points[index - 1])) return `${path}L${at}`;
 

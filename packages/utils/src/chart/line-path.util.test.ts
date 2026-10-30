@@ -81,6 +81,20 @@ describe('linePath', () => {
     ).toBe('M1,2L1,2M3,4L4,5');
   });
 
+  it('breaks the line at a non-finite or missing x', () => {
+    const points: readonly ChartPoint[] = JSON.parse(
+      '[{"x":0,"y":1},{"x":1,"y":2},{"x":null,"y":3},{"x":3,"y":4},{"x":4,"y":5}]',
+    );
+
+    expect(
+      linePath({
+        points: [...points, { x: Number('NaN'), y: 6 }, { x: 6, y: 7 }],
+        x: identity,
+        y: identity,
+      }),
+    ).toBe('M0,1L1,2M3,4L4,5M6,7L6,7');
+  });
+
   it('starts at the first value after a leading gap', () => {
     expect(
       linePath({

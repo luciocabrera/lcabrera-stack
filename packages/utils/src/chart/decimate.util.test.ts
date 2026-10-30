@@ -2,6 +2,7 @@ import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
 import type { ChartPoint } from './chart.types';
 
+import { bandPath } from './band-path.util';
 import { decimate } from './decimate.util';
 import { linePath } from './line-path.util';
 
@@ -151,6 +152,58 @@ describe('decimate', () => {
     expect(
       linePath({ points: thinned, x: (value) => value, y: (value) => value }),
     ).toBe('M0,1L3,8L4,4');
+  });
+
+  it('passes a null x through as a gap', () => {
+    const points: readonly ChartPoint[] = JSON.parse(
+      '[{"x":0,"y":0},{"x":null,"y":9},{"x":2,"y":50},{"x":3,"y":2},{"x":4,"y":1},{"x":5,"y":3}]',
+    );
+
+    expect(decimate({ points, threshold: 3 }).map(({ y }) => y)).toEqual([
+      0, 9, 50, 3,
+    ]);
+  });
+
+  it('breaks a drawn line at an invalid date and resumes after it', () => {
+    const day = (date: number) => new Date(Date.UTC(2026, 0, date));
+    const points = [
+      { x: day(1), y: 1 },
+      { x: day(2), y: 2 },
+      { x: new Date(Number('NaN')), y: 3 },
+      { x: day(4), y: 4 },
+      { x: day(5), y: 5 },
+    ];
+    const toPixel = (value: Date) =>
+      (value.getTime() - day(1).getTime()) / 86_400_000;
+    const line = linePath({
+      points: decimate({ points, threshold: 9 }),
+      x: toPixel,
+      y: (value) => value,
+    });
+
+    expect(line).toBe('M0,1L1,2M3,4L4,5');
+    expect(line).not.toContain('NaN');
+  });
+
+  it('breaks a drawn band at an invalid date and resumes after it', () => {
+    const day = (date: number) => new Date(Date.UTC(2026, 0, date));
+    const points = [
+      { lower: 0, upper: 2, x: day(1), y: 1 },
+      { lower: 1, upper: 3, x: day(2), y: 2 },
+      { lower: 2, upper: 4, x: new Date(Number('NaN')), y: 3 },
+      { lower: 3, upper: 5, x: day(4), y: 4 },
+      { lower: 4, upper: 6, x: day(5), y: 5 },
+    ];
+    const toPixel = (value: Date) =>
+      (value.getTime() - day(1).getTime()) / 86_400_000;
+    const band = bandPath({
+      band: decimate({ points, threshold: 9 }),
+      x: toPixel,
+      y: (value) => value,
+    });
+
+    expect(band).toBe('M0,2L1,3L1,1L0,0ZM3,5L4,6L4,4L3,3Z');
+    expect(band).not.toContain('NaN');
   });
 
   it('keeps the fields of each point it returns', () => {
