@@ -133,6 +133,7 @@
   "src/components/Tabs/TabsHeader/TabsHeaderButton/TabsHeaderButton.stylex.ts",
   "src/components/Tabs/TabsHeader/TabsHeaderScrollButton/TabsHeaderScrollButton.stylex.ts",
   "src/components/Tag/Tag.stylex.ts",
+  "src/components/Text/Text.stylex.ts",
   "src/components/Title/Title.stylex.ts",
   "src/components/ToggleSwitch/ToggleSwitch.stylex.ts",
   "src/components/Tooltip/TooltipContent/TooltipContent.stylex.ts",

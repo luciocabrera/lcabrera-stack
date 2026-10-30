@@ -9,15 +9,36 @@ export const Title = ({
   children,
   customStylex,
   icon,
+  level = 2,
+  variant = 'toolbar',
+  ...props
 }: TitleProps) => {
   if (!children && !icon && !actions) return;
 
+  const Heading = `h${level}` as const;
+  const isToolbar = variant === 'toolbar';
+
   return (
-    <div {...stylex.props(styles.container, customStylex)}>
+    <div
+      {...props}
+      {...stylex.props(
+        styles.container,
+        isToolbar && styles.toolbar,
+        customStylex,
+      )}
+    >
       <div {...stylex.props(styles.titleSection)}>
         {Boolean(icon) && <div {...stylex.props(styles.icon)}>{icon}</div>}
         {Boolean(children) && (
-          <h2 {...stylex.props(styles.title)}>{children}</h2>
+          <Heading
+            {...stylex.props(
+              isToolbar
+                ? styles.title
+                : [styles.plainTitle, styles.plainLevel[level]],
+            )}
+          >
+            {children}
+          </Heading>
         )}
       </div>
       {Boolean(actions) && (

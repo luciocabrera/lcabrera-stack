@@ -75,6 +75,8 @@
     "./components/Table/utils": "./src/components/Table/utils/index.ts",
     "./components/Table/utils/createEmptyColumnsState.util": "./src/components/Table/utils/createEmptyColumnsState.util.ts",
     "./components/Table/utils/inferTableColumnsFromJson.util": "./src/components/Table/utils/inferTableColumnsFromJson.util.ts",
+    "./components/Text": "./src/components/Text/index.ts",
+    "./components/Title": "./src/components/Title/index.ts",
     "./components/TrendSparkline": "./src/components/TrendSparkline/index.ts",
     "./components/VirtualList": "./src/components/VirtualList/index.ts",
     "./components/VirtualSelect": "./src/components/VirtualSelect/index.ts",
