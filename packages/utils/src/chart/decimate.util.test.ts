@@ -55,26 +55,26 @@ describe('decimate', () => {
     ]);
   });
 
-  it('picks by triangle area against the previous pick and the next bucket mean', () => {
-    const xs = [
-      1, 2, 4, 5, 9, 10, 11, 15, 16, 18, 21, 22, 25, 27, 28, 31, 32, 36, 37, 40,
-    ];
-    const ys = [3, 7, 2, 9, 4, 4, 8, 1, 6, 12, 5, 5, 0, 7, 3, 10, 2, 6, 9, 4];
+  it.each([
+    {
+      case: 'by triangle area against the previous pick and the next bucket mean',
+      kept: [1, 5, 18, 25, 31, 40],
+      xs: [
+        1, 2, 4, 5, 9, 10, 11, 15, 16, 18, 21, 22, 25, 27, 28, 31, 32, 36, 37,
+        40,
+      ],
+      ys: [3, 7, 2, 9, 4, 4, 8, 1, 6, 12, 5, 5, 0, 7, 3, 10, 2, 6, 9, 4],
+    },
+    {
+      case: 'measuring each bucket from the point kept in the bucket before',
+      kept: [1, 5, 25, 34, 43, 56],
+      xs: [1, 5, 10, 11, 15, 25, 34, 41, 43, 48, 50, 56],
+      ys: [18, 1, 9, 0, 8, 15, 19, 12, 13, 12, 18, 14],
+    },
+  ])('picks $case', ({ kept, xs, ys }) => {
     const points = xs.map((x, index) => ({ x, y: ys[index] ?? 0 }));
 
-    expect(decimate({ points, threshold: 6 }).map(({ x }) => x)).toEqual([
-      1, 5, 18, 25, 31, 40,
-    ]);
-  });
-
-  it('measures each bucket from the point it kept in the bucket before', () => {
-    const xs = [1, 5, 10, 11, 15, 25, 34, 41, 43, 48, 50, 56];
-    const ys = [18, 1, 9, 0, 8, 15, 19, 12, 13, 12, 18, 14];
-    const points = xs.map((x, index) => ({ x, y: ys[index] ?? 0 }));
-
-    expect(decimate({ points, threshold: 6 }).map(({ x }) => x)).toEqual([
-      1, 5, 25, 34, 43, 56,
-    ]);
+    expect(decimate({ points, threshold: 6 }).map(({ x }) => x)).toEqual(kept);
   });
 
   it('keeps the fields of each point it returns', () => {
