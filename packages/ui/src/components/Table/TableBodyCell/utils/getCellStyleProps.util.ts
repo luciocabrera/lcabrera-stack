@@ -37,13 +37,13 @@ const resolveLayoutStyles = ({
   align,
   isFill,
   staticWidths,
-}: Pick<GetCellStylePropsArgs, 'align' | 'isFill' | 'staticWidths'>) =>
-  [
-    staticWidths !== undefined &&
-      tableBodyCellStyles.staticLayout(staticWidths),
-    align !== undefined && ALIGN_STYLES[align],
-    isFill === true && tableBodyCellStyles.fill,
-  ].filter(Boolean);
+}: Pick<GetCellStylePropsArgs, 'align' | 'isFill' | 'staticWidths'>) => [
+  ...(staticWidths === undefined
+    ? []
+    : [tableBodyCellStyles.staticLayout(staticWidths)]),
+  ...(align === undefined ? [] : [ALIGN_STYLES[align]]),
+  ...(isFill === true ? [tableBodyCellStyles.fill] : []),
+];
 
 const resolveDataTypeAlignStyles = ({
   align,

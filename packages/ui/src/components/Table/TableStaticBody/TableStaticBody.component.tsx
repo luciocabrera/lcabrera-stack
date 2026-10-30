@@ -4,17 +4,12 @@ import { useTableGroupTree } from '#ui/components/Table/hooks';
 import { TableBodyRows } from '#ui/components/Table/TableBodyRows';
 import { TableEmptyState } from '#ui/components/Table/TableEmptyState';
 
-import {
-  useGetTableIsLoading,
-  useGetTableIsLoadingMore,
-} from '../contexts/TableData/data/selectors';
+import { useGetTableIsLoading } from '../contexts/TableData/data/selectors';
 import { styles } from './TableStaticBody.stylex';
 
 export const TableStaticBody = () => {
-  const isLoading = useGetTableIsLoading();
-  const isLoadingMore = useGetTableIsLoadingMore();
+  const isLoadingState = useGetTableIsLoading();
   const { rows } = useTableGroupTree();
-  const isLoadingState = isLoading || isLoadingMore;
 
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body)}>

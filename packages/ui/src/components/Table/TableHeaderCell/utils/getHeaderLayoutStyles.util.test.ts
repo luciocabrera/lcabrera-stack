@@ -14,7 +14,7 @@ describe('getHeaderLayoutStyles', () => {
   it('adds nothing for a plain virtual column', () => {
     expect(
       getHeaderLayoutStyles({ column: {}, isSized: false, layout: 'virtual' }),
-    ).toStrictEqual({ cell: [undefined, undefined], label: undefined });
+    ).toStrictEqual({ cell: [undefined], label: [] });
   });
 
   it('aligns the cell and its label as the column says', () => {
@@ -26,7 +26,7 @@ describe('getHeaderLayoutStyles', () => {
       }),
     ).toStrictEqual({
       cell: [undefined, tableHeaderCellStyles.alignEnd],
-      label: tableHeaderCellStyles.contentAlignEnd,
+      label: [tableHeaderCellStyles.contentAlignEnd],
     });
     expect(
       getHeaderLayoutStyles({
@@ -34,7 +34,7 @@ describe('getHeaderLayoutStyles', () => {
         isSized: false,
         layout: 'virtual',
       }).label,
-    ).toBe(tableHeaderCellStyles.contentAlignCenter);
+    ).toStrictEqual([tableHeaderCellStyles.contentAlignCenter]);
     expect(
       getHeaderLayoutStyles({
         column: { align: 'start' },
@@ -43,7 +43,7 @@ describe('getHeaderLayoutStyles', () => {
       }),
     ).toStrictEqual({
       cell: [undefined, tableHeaderCellStyles.alignStart],
-      label: undefined,
+      label: [undefined],
     });
   });
 
