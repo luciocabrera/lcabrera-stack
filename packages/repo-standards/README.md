@@ -118,6 +118,7 @@ until you acknowledge it.
 | `repo-housekeeping-prune [--apply] [--include-superseded] [--hint]` | — deletes merged branches, clean worktrees and stale throwaway containers, reporting anything that might be work; see [Housekeeping](#housekeeping)               |
 | `repo-worktree-env`                                                 | — links the primary checkout's gitignored env files into a linked worktree                                                                                        |
 | `repo-eslint-staged [--check] [--] <file>…`                         | — lints the files named with the flat config that governs each, fixing unless `--check`                                                                           |
+| `repo-fallow-gate <analysis> [--] [file…]`                          | — runs one fallow analysis over the changed files on stdin or the files named, failing on a finding even where fallow itself exits 0                              |
 
 In the repository this is published from they are the root `vp run` tasks of the
 same name — `commit:verify`, `pr:verify`, `coordination:verify`,

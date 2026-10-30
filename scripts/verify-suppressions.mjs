@@ -52,6 +52,7 @@ const REGISTER_PATH = 'docs/agents/public-package-suppressions.json';
 const BASELINE_DIR = 'reports/fallow/baselines';
 
 const SKIP_DIRS = new Set([
+  '.fallow',
   'node_modules',
   'dist',
   'build',

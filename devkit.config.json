@@ -1,7 +1,7 @@
 {
   "gates": {
     "scriptSize": {
-      "skipDirs": [".claude", ".react-router", "reports"],
+      "skipDirs": [".claude", ".fallow", ".react-router", "reports"],
       "guideDoc": ".claude/rules/scripts.md"
     },
     "strayConfigs": {

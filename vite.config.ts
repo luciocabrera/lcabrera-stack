@@ -159,36 +159,13 @@ export default defineConfig({
     },
   },
   staged: {
-    // Every autofixer the repo has, ordered, under ONE glob.
-    //
-    // One glob because lint-staged runs separate entries concurrently: a second
-    // entry that also writes would race the first over the same file, while
-    // commands inside one entry run in sequence. Biome sat here check-only for
-    // exactly that reason, which left its gate first failing in CI — after the
-    // commit it was meant to block.
-    //
-    // Writing is safe in this hook and nowhere else in the flow: lint-staged
-    // re-stages what a task changes, so a fix lands in the commit being made
-    // rather than in the working tree behind it.
-    //
-    // `vp check --fix` is Oxfmt + Oxlint + the tsgolint type pass. Biome writes
-    // its safe fixes only. `repo-eslint-staged` takes a trailing `--` because
-    // lint-staged appends the filenames, and a leading `-` is legal in one.
-    // It resolves each path to the
-    // workspace whose `eslint.config.mjs` governs it and fixes there — there is
-    // no root ESLint config to point a single invocation at. They all ignore
-    // what they cannot lint, so one glob can carry files of any type.
-    //
-    // `vp fmt` closes the chain because a lint fixer only edits its own range:
-    // deleting a `undefined,` argument can leave a call broken across lines that
-    // now fits on one, which the formatter — the first stage, already past —
-    // would print differently, so the commit succeeds and the push then fails on
-    // formatting. Nothing may write after the formatter.
     '*': [
       'vp check --fix',
       'biome lint --write --no-errors-on-unmatched',
       'repo-eslint-staged --',
       'vp fmt --no-error-on-unmatched-pattern',
+      'repo-fallow-gate suppressions --',
+      'repo-fallow-gate architecture --',
     ],
   },
 });

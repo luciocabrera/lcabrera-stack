@@ -17,6 +17,7 @@ import {
 } from './eslint.rules.shared.mjs';
 
 const GLOBAL_IGNORES = [
+  '.fallow/**',
   '.react-router/**',
   'build/**',
   'coverage/**',

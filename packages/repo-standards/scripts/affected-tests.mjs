@@ -78,11 +78,11 @@ const workspaceDeps = (manifest, packageNames) => {
 
 export const readWorkspaceGraph = (repoRoot) => {
   const located = deriveWorkspaces(repoRoot).map((workspace) => {
-    const dir = `${workspace.kind === 'app' ? 'apps' : 'packages'}/${workspace.name}`;
+    const { dir } = workspace;
     const manifest = JSON.parse(
       readFileSync(join(repoRoot, dir, 'package.json'), 'utf8'),
     );
-    return { ...workspace, dir, manifest, pkgName: manifest.name };
+    return { ...workspace, manifest, pkgName: manifest.name };
   });
   const packageNames = new Set(located.map((workspace) => workspace.pkgName));
   return located.map((workspace) => ({

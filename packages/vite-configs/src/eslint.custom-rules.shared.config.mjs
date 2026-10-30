@@ -86,6 +86,7 @@ const createTypescriptLanguageOptions = (tseslint, tsconfigRootDir) => ({
 });
 
 const GLOBAL_IGNORES = [
+  '.fallow/**',
   '.react-router/**',
   'build/**',
   'coverage/**',
