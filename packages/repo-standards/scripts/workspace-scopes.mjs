@@ -73,11 +73,7 @@ export const deriveWorkspaces = (repoRoot) => {
 export const deriveWorkspaceScopes = (repoRoot) =>
   new Set(deriveWorkspaces(repoRoot).map((workspace) => workspace.name));
 
-export const workspacesForFiles = (files, workspaces) => {
-  const dir = { app: 'apps', pkg: 'packages' };
-  return workspaces.filter((workspace) =>
-    files.some((file) =>
-      file.startsWith(`${dir[workspace.kind]}/${workspace.name}/`),
-    ),
+export const workspacesForFiles = (files, workspaces) =>
+  workspaces.filter((workspace) =>
+    files.some((file) => file.startsWith(`${workspace.dir}/`)),
   );
-};

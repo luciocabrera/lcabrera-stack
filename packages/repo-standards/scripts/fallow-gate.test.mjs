@@ -3,7 +3,9 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   ANALYSES,
   binOf,
+  COULD_NOT_RUN,
   fallowArgs,
+  gateExit,
   mutationArgs,
   mutationRoots,
   NEEDS_BASE,
@@ -262,5 +264,26 @@ describe('binOf', () => {
 
   it('finds nothing in a manifest without a bin', () => {
     expect(binOf({ manifest: {}, name: 'fallow' })).toBeUndefined();
+  });
+});
+
+describe('gateExit', () => {
+  it('reads could-not-run as a code fallow never uses', () => {
+    expect(COULD_NOT_RUN).toBe(4);
+  });
+
+  it.each([
+    ['architecture', 0, 0],
+    ['architecture', 1, 1],
+    ['architecture', 2, COULD_NOT_RUN],
+    ['security', 8, 8],
+    ['security', 1, COULD_NOT_RUN],
+    ['security', 2, COULD_NOT_RUN],
+    ['mutation', 1, 1],
+    ['mutation', 2, COULD_NOT_RUN],
+    ['guard', 1, COULD_NOT_RUN],
+    ['architecture', null, COULD_NOT_RUN],
+  ])('%s exiting %s gates as %s', (analysis, status, expected) => {
+    expect(gateExit({ analysis, status })).toBe(expected);
   });
 });

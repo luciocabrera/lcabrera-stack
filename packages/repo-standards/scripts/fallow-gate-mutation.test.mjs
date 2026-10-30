@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { COULD_NOT_RUN, runGate } from './fallow-gate-command.mjs';
+import { runGate } from './fallow-gate-command.mjs';
+import { COULD_NOT_RUN } from './fallow-gate.mjs';
 
 const mutationRun = ({ diff = '', statuses = [], stdinFiles }) => {
   const log = { git: [], runs: [], temp: [], written: '' };
@@ -74,6 +75,10 @@ describe('runGate — mutation', () => {
         'diff',
         '-U0',
         '--no-color',
+        '--no-ext-diff',
+        '--no-relative',
+        '--src-prefix=a/',
+        '--dst-prefix=b/',
         '--find-renames',
         'abc',
         '--',

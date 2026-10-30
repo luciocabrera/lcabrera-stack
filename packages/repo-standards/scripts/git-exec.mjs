@@ -46,10 +46,14 @@ export const GIT_REPOSITORY_VARIABLES = [
   'GIT_WORK_TREE',
 ];
 
+const GIT_OUTPUT_VARIABLES = new Set(['GIT_DIFF_OPTS', 'GIT_EXTERNAL_DIFF']);
+
 export const buildGitEnv = (env) => ({
   ...Object.fromEntries(
     Object.entries(env).filter(
-      ([name]) => !GIT_REPOSITORY_VARIABLES.includes(name),
+      ([name]) =>
+        !GIT_REPOSITORY_VARIABLES.includes(name) &&
+        !GIT_OUTPUT_VARIABLES.has(name),
     ),
   ),
   PATH: TRUSTED_PATH,

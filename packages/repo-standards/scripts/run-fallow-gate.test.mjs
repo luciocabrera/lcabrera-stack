@@ -12,10 +12,10 @@ import { fileURLToPath } from 'node:url';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import {
-  COULD_NOT_RUN,
   processEffects,
   runFallowGateCommand,
 } from './fallow-gate-command.mjs';
+import { COULD_NOT_RUN } from './fallow-gate.mjs';
 
 const BIN = fileURLToPath(new URL('run-fallow-gate.mjs', import.meta.url));
 
@@ -51,7 +51,7 @@ describe('repo-fallow-gate', () => {
     } finally {
       vi.unstubAllGlobals();
     }
-    expect(overrides.exitCode).toBe(2);
+    expect(overrides.exitCode).toBe(COULD_NOT_RUN);
     expect(written.join('')).toContain(
       'usage: repo-fallow-gate <architecture|',
     );
@@ -61,7 +61,7 @@ describe('repo-fallow-gate', () => {
     const child = spawnSync(process.execPath, [BIN, 'dupes'], {
       encoding: 'utf8',
     });
-    expect(child.status).toBe(2);
+    expect(child.status).toBe(COULD_NOT_RUN);
     expect(child.stderr).toContain('usage: repo-fallow-gate <architecture|');
   });
 });

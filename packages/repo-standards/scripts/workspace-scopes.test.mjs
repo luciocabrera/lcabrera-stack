@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
-import { readWorkspaceGraph } from './affected-tests.mjs';
+import { readWorkspaceGraph, resolveAffected } from './affected-tests.mjs';
 import { mutationRoots } from './fallow-gate.mjs';
 import { createFixtureRoots } from './repo-fixtures.mjs';
 import {
@@ -95,6 +95,33 @@ describe('readWorkspaceGraph over a layout outside apps/ and packages/', () => {
     ]);
   });
 
+  it('lets resolveAffected select a workspace under tools/ and a nested one', () => {
+    const graph = readWorkspaceGraph(layout());
+    expect(
+      resolveAffected({
+        files: ['tools/cli/src/a.ts'],
+        globalPackages: ['@scratch/none'],
+        graph,
+      }),
+    ).toMatchObject({ changed: ['@scratch/cli'], mode: 'scoped' });
+    expect(
+      resolveAffected({
+        files: ['packages/group/alpha/src/b.ts'],
+        globalPackages: ['@scratch/none'],
+        graph,
+      }),
+    ).toMatchObject({ changed: ['@scratch/alpha'], mode: 'scoped' });
+  });
+
+  it('labels the same workspaces from their real directories', () => {
+    expect(
+      workspacesForFiles(
+        ['tools/cli/src/a.ts', 'packages/group/alpha/src/b.ts'],
+        deriveWorkspaces(layout()),
+      ).map(({ name }) => name),
+    ).toEqual(['cli', 'alpha']);
+  });
+
   it('roots a mutation run in each of those directories, leaving nothing outside', () => {
     const workspaceDirs = readWorkspaceGraph(layout()).map(({ dir }) => dir);
     expect(
@@ -115,16 +142,16 @@ describe('deriveWorkspaceScopes', () => {
 
 describe('workspacesForFiles', () => {
   const workspaces = [
-    { kind: 'pkg', name: 'ui' },
-    { kind: 'app', name: 'site' },
+    { dir: 'packages/ui', kind: 'pkg', name: 'ui' },
+    { dir: 'apps/site', kind: 'app', name: 'site' },
   ];
 
   it('maps a changed file to the workspace whose directory holds it', () => {
     expect(workspacesForFiles(['packages/ui/src/x.ts'], workspaces)).toEqual([
-      { kind: 'pkg', name: 'ui' },
+      workspaces[0],
     ]);
     expect(workspacesForFiles(['apps/site/app.tsx'], workspaces)).toEqual([
-      { kind: 'app', name: 'site' },
+      workspaces[1],
     ]);
   });
 

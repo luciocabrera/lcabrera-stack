@@ -27,6 +27,20 @@ export const NEEDS_BASE = new Set(['coverage-gaps', 'mutation', 'security']);
 
 export const RUNS_ON_ANY_CHANGE = new Set(['security']);
 
+export const COULD_NOT_RUN = 4;
+
+const FINDING_EXITS = {
+  architecture: [1],
+  guard: [],
+  mutation: [1],
+  security: [8],
+};
+
+export const gateExit = ({ analysis, status }) => {
+  if (status === 0) return 0;
+  return FINDING_EXITS[analysis].includes(status) ? status : COULD_NOT_RUN;
+};
+
 const VERDICT_SOURCES = new Map([
   ...[...EXIT_CODE_ANALYSES].map((analysis) => [analysis, 'exit-code']),
   ...[...REPORT_ANALYSES].map((analysis) => [analysis, 'report']),

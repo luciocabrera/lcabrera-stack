@@ -20,6 +20,7 @@ import { REPO_ROOT } from './changed-runner.mjs';
 import { withoutSeparator } from './cli-input.mjs';
 import { errorMessage } from './error-message.mjs';
 import {
+  gitDiffArgs,
   introducedChanges,
   joinDiffs,
   parseDiff,
@@ -34,7 +35,9 @@ import {
 import {
   ANALYSES,
   binOf,
+  COULD_NOT_RUN,
   fallowArgs,
+  gateExit,
   mutationArgs,
   mutationRoots,
   NEEDS_BASE,
@@ -45,8 +48,6 @@ import {
   verdictSource,
 } from './fallow-gate.mjs';
 import { runGitStatus } from './git-exec.mjs';
-
-export const COULD_NOT_RUN = 2;
 
 const readInput = ({ argv, effects }) => {
   const [analysis, ...given] = withoutSeparator(argv);
@@ -102,15 +103,7 @@ const assertModelReady = (effects) => {
 };
 
 const readDiff = ({ base, effects, files = [] }) => {
-  const child = effects.git([
-    'diff',
-    '-U0',
-    '--no-color',
-    '--find-renames',
-    base,
-    '--',
-    ...files,
-  ]);
+  const child = effects.git(gitDiffArgs({ base, files }));
   if (child.exceeded !== undefined) {
     throw new Error(
       `git diff against ${base} is larger than the ${child.exceeded} bytes this gate reads, so no change can be attributed.`,
@@ -162,15 +155,19 @@ const gateOnReport = ({ analysis, base, effects, files }) => {
 };
 
 const gateOnExitCode = ({ analysis, base, effects, files }) =>
-  runFallow({ args: fallowArgs({ analysis, base, files }), effects }).status ??
-  COULD_NOT_RUN;
+  gateExit({
+    analysis,
+    status: runFallow({ args: fallowArgs({ analysis, base, files }), effects })
+      .status,
+  });
 
 const mutateRoot = ({ base, diffFile, effects, root }) => {
   effects.write(`\nfallow mutation: ${root}\n`);
-  return (
-    runFallow({ args: mutationArgs({ base, diffFile, root }), effects })
-      .status ?? COULD_NOT_RUN
-  );
+  return gateExit({
+    analysis: 'mutation',
+    status: runFallow({ args: mutationArgs({ base, diffFile, root }), effects })
+      .status,
+  });
 };
 
 const mutateOutside = ({ base, effects, outside }) => {

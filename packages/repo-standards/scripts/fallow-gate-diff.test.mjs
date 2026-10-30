@@ -1,11 +1,16 @@
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  gitDiffArgs,
   introducedChanges,
   joinDiffs,
   parseDiff,
   untrackedFileDiff,
 } from './fallow-gate-diff.mjs';
+import { runGitStatus } from './git-exec.mjs';
 
 describe('parseDiff', () => {
   const diff = [
@@ -209,5 +214,38 @@ describe('untrackedFileDiff', () => {
     expect(
       parseDiff(untrackedFileDiff({ content: 'a\nb\nc\n', path: 'n.mjs' })),
     ).toEqual(new Map([['n.mjs', { isNew: true, ranges: [[1, 3]] }]]));
+  });
+});
+
+const git = (cwd, ...args) => runGitStatus({ args, cwd });
+
+describe('gitDiffArgs against a user config that reshapes diffs', () => {
+  it('still reads the right paths with diff.noprefix and diff.mnemonicPrefix set', () => {
+    const root = mkdtempSync(join(tmpdir(), 'fallow-gate-diff-'));
+    try {
+      git(root, 'init', '-q');
+      git(root, 'config', 'user.email', 'gate@example.invalid');
+      git(root, 'config', 'user.name', 'gate');
+      git(root, 'config', 'diff.noprefix', 'true');
+      git(root, 'config', 'diff.mnemonicPrefix', 'true');
+      git(root, 'config', 'diff.relative', 'true');
+      mkdirSync(join(root, 'src'));
+      writeFileSync(join(root, 'src', 'kept.mjs'), 'one\n');
+      git(root, 'add', '.');
+      git(root, 'commit', '-q', '-m', 'base');
+      writeFileSync(join(root, 'src', 'kept.mjs'), 'one\ntwo\n');
+      writeFileSync(join(root, 'src', 'added.mjs'), 'new\n');
+      git(root, 'add', 'src/added.mjs');
+      const diff = git(root, ...gitDiffArgs({ base: 'HEAD', files: [] }));
+      expect(diff.status).toBe(0);
+      expect(parseDiff(diff.stdout)).toEqual(
+        new Map([
+          ['src/added.mjs', { isNew: true, ranges: [[1, 1]] }],
+          ['src/kept.mjs', { isNew: false, ranges: [[2, 2]] }],
+        ]),
+      );
+    } finally {
+      rmSync(root, { force: true, recursive: true });
+    }
   });
 });

@@ -21,6 +21,17 @@ describe('buildGitEnv', () => {
     }
   });
 
+  it('removes the variables that reshape diff output', () => {
+    const env = buildGitEnv({
+      GIT_DIFF_OPTS: '--unified=9',
+      GIT_EXTERNAL_DIFF: '/tmp/evil-diff',
+      HOME: '/home/dev',
+    });
+    expect(env.GIT_EXTERNAL_DIFF).toBeUndefined();
+    expect(env.GIT_DIFF_OPTS).toBeUndefined();
+    expect(env.HOME).toBe('/home/dev');
+  });
+
   it('keeps the rest of the environment', () => {
     expect(buildGitEnv({ HOME: '/home/dev', LANG: 'C' })).toMatchObject({
       HOME: '/home/dev',

@@ -11,8 +11,9 @@
  * `coverage-gaps`, `security` and `mutation` also read the merge base from
  * CHANGED_FILES_BASE.
  *
- * Exit codes: 0 = no finding, 1 = a finding, 2 = the analysis could not run;
- * an analysis gated on fallow's own exit code returns that code instead.
+ * Exit codes: 0 = no finding; 1 = a finding (8 for a new security candidate,
+ * fallow's own code); 4 = the analysis could not run, which covers every
+ * other exit fallow gives.
  */
 import { runFallowGateCommand } from './fallow-gate-command.mjs';
 

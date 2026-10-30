@@ -78,3 +78,17 @@ export const introducedChanges = ({ diff, files }) => {
     ]),
   );
 };
+
+export const gitDiffArgs = ({ base, files }) => [
+  'diff',
+  '-U0',
+  '--no-color',
+  '--no-ext-diff',
+  '--no-relative',
+  '--src-prefix=a/',
+  '--dst-prefix=b/',
+  '--find-renames',
+  base,
+  '--',
+  ...files,
+];

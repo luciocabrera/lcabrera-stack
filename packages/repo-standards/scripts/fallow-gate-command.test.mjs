@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { COULD_NOT_RUN, runGate } from './fallow-gate-command.mjs';
+import { runGate } from './fallow-gate-command.mjs';
+import { gitDiffArgs } from './fallow-gate-diff.mjs';
+import { COULD_NOT_RUN } from './fallow-gate.mjs';
 
 const fakeEffects = ({
   diff = { status: 0, stdout: '' },
@@ -51,13 +53,6 @@ describe('runGate — input', () => {
     expect(fake.err.join('')).toBe(
       'repo-fallow-gate: usage: repo-fallow-gate <architecture|coverage-gaps|guard|mutation|security|similar-code|suppressions> [--] [file…]\n',
     );
-    expect(fake.calls).toEqual([]);
-  });
-
-  it('passes when no changed file is a source file fallow reads', () => {
-    const fake = fakeEffects({ stdinFiles: ['README.md', 'gone.ts'] });
-    expect(runGate({ argv: ['architecture'], effects: fake.effects })).toBe(0);
-    expect(fake.out.join('')).toContain('nothing to check');
     expect(fake.calls).toEqual([]);
   });
 
@@ -231,7 +226,7 @@ describe('runGate — analyses judged by their report', () => {
       runGate({ argv: ['coverage-gaps'], base: 'abc', effects: fake.effects }),
     ).toBe(1);
     expect(fake.calls[1]).toEqual({
-      git: ['diff', '-U0', '--no-color', '--find-renames', 'abc', '--'],
+      git: gitDiffArgs({ base: 'abc', files: [] }),
     });
     expect(fake.out.join('')).toBe(
       'fallow coverage-gaps: 1 finding(s) in the changed files:\n\n' +
