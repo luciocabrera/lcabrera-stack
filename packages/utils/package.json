@@ -30,6 +30,14 @@
   "sideEffects": false,
   "exports": {
     "./arrays/merge-arrays.util": "./src/arrays/merge-arrays.util.ts",
+    "./chart/band-path.util": "./src/chart/band-path.util.ts",
+    "./chart/chart.types": "./src/chart/chart.types.ts",
+    "./chart/decimate.util": "./src/chart/decimate.util.ts",
+    "./chart/format-path-point.util": "./src/chart/format-path-point.util.ts",
+    "./chart/line-path.util": "./src/chart/line-path.util.ts",
+    "./chart/nice-ticks.util": "./src/chart/nice-ticks.util.ts",
+    "./chart/scale-linear.util": "./src/chart/scale-linear.util.ts",
+    "./chart/scale-time.util": "./src/chart/scale-time.util.ts",
     "./comparison/are-arrays-equal.util": "./src/comparison/are-arrays-equal.util.ts",
     "./comparison/are-equal-by-json.util": "./src/comparison/are-equal-by-json.util.ts",
     "./comparison/is-shallow-equal.util": "./src/comparison/is-shallow-equal.util.ts",
@@ -60,6 +68,38 @@
       "./arrays/merge-arrays.util": {
         "types": "./dist/arrays/merge-arrays.util.d.mts",
         "default": "./dist/arrays/merge-arrays.util.mjs"
+      },
+      "./chart/band-path.util": {
+        "types": "./dist/chart/band-path.util.d.mts",
+        "default": "./dist/chart/band-path.util.mjs"
+      },
+      "./chart/chart.types": {
+        "types": "./dist/chart/chart.types.d.mts",
+        "default": "./dist/chart/chart.types.mjs"
+      },
+      "./chart/decimate.util": {
+        "types": "./dist/chart/decimate.util.d.mts",
+        "default": "./dist/chart/decimate.util.mjs"
+      },
+      "./chart/format-path-point.util": {
+        "types": "./dist/chart/format-path-point.util.d.mts",
+        "default": "./dist/chart/format-path-point.util.mjs"
+      },
+      "./chart/line-path.util": {
+        "types": "./dist/chart/line-path.util.d.mts",
+        "default": "./dist/chart/line-path.util.mjs"
+      },
+      "./chart/nice-ticks.util": {
+        "types": "./dist/chart/nice-ticks.util.d.mts",
+        "default": "./dist/chart/nice-ticks.util.mjs"
+      },
+      "./chart/scale-linear.util": {
+        "types": "./dist/chart/scale-linear.util.d.mts",
+        "default": "./dist/chart/scale-linear.util.mjs"
+      },
+      "./chart/scale-time.util": {
+        "types": "./dist/chart/scale-time.util.d.mts",
+        "default": "./dist/chart/scale-time.util.mjs"
       },
       "./comparison/are-arrays-equal.util": {
         "types": "./dist/comparison/are-arrays-equal.util.d.mts",

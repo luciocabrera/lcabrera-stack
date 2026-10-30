@@ -23,6 +23,14 @@ export for each helper:
 | Domain       | Helper                                                                                  | Import                                                         |
 | ------------ | --------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
 | `arrays`     | `mergeArrays`                                                                           | `@lcabrera/utils/arrays/merge-arrays.util`                     |
+| `chart`      | `bandPath`                                                                              | `@lcabrera/utils/chart/band-path.util`                         |
+| `chart`      | `decimate`                                                                              | `@lcabrera/utils/chart/decimate.util`                          |
+| `chart`      | `formatPathPoint`                                                                       | `@lcabrera/utils/chart/format-path-point.util`                 |
+| `chart`      | `linePath`                                                                              | `@lcabrera/utils/chart/line-path.util`                         |
+| `chart`      | `niceTicks`                                                                             | `@lcabrera/utils/chart/nice-ticks.util`                        |
+| `chart`      | `scaleLinear`                                                                           | `@lcabrera/utils/chart/scale-linear.util`                      |
+| `chart`      | `scaleTime`                                                                             | `@lcabrera/utils/chart/scale-time.util`                        |
+| `chart`      | `ChartBandPoint`, `ChartDomain`, `ChartPoint`, `ChartRange`, `ChartScale`, `ChartValue` | `@lcabrera/utils/chart/chart.types`                            |
 | `comparison` | `areArraysEqual`                                                                        | `@lcabrera/utils/comparison/are-arrays-equal.util`             |
 | `comparison` | `areEqualByJson`                                                                        | `@lcabrera/utils/comparison/are-equal-by-json.util`            |
 | `comparison` | `isShallowEqual`                                                                        | `@lcabrera/utils/comparison/is-shallow-equal.util`             |
@@ -55,6 +63,32 @@ import { isShallowEqual } from '@lcabrera/utils/comparison/is-shallow-equal.util
 
 `@lcabrera/utils` is side-effect free (`"sideEffects": false`) to keep tree-shaking
 effective; each helper is a standalone subpath so consumers pull in exactly one.
+The `chart` helpers are the geometry of a chart and draw nothing themselves: a
+scale maps a value onto a pixel range (`scaleLinear`, or `scaleTime` for `Date`
+values, either one optionally clamped), `niceTicks` picks axis ticks at one, two
+or five times a power of ten, `linePath` and `bandPath` return SVG path data
+that breaks at a missing, `null` or non-finite value, and `decimate` thins a long
+series with largest-triangle-three-buckets. They read no DOM, so a chart drawn
+with them renders the same markup on the server and the client.
+
+```ts
+import { linePath } from '@lcabrera/utils/chart/line-path.util';
+import { scaleLinear } from '@lcabrera/utils/chart/scale-linear.util';
+
+const x = scaleLinear({ domain: [0, 2], range: [0, 80] });
+const y = scaleLinear({ domain: [1, 5], range: [20, 0] });
+
+linePath({
+  points: [
+    { x: 0, y: 1 },
+    { x: 1, y: 5 },
+    { x: 2, y: 2 },
+  ],
+  x,
+  y,
+}); // 'M0,20L40,0L80,15'
+```
+
 It is published as compiled ESM (`.mjs` + `.d.mts`) with source maps, mirroring
 the source tree one file per module.
 

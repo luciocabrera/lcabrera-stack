@@ -31,6 +31,11 @@ export type {
   TitleProps,
   TitleVariant,
 } from './components/Title/Title.types';
+export { TrendSparkline } from './components/TrendSparkline/TrendSparkline.component';
+export type {
+  TrendPoint,
+  TrendSparklineProps,
+} from './components/TrendSparkline/TrendSparkline.types';
 export { hydrateApp } from './entry/hydrateApp.util';
 export { useNotifyOnError } from './hooks/useNotifyOnError.hook';
 export { useTableRoutePage } from './hooks/useTableRoutePage.hook';

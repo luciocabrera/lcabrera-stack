@@ -3,32 +3,43 @@ import * as stylex from '@stylexjs/stylex';
 import type { TrendSparklineProps } from './TrendSparkline.types';
 
 import { styles } from './TrendSparkline.stylex';
-import { getSparklinePoints } from './utils';
+import { TrendSparklineDot } from './TrendSparklineDot/TrendSparklineDot.component';
+import { getTrendPointsGeometry, getTrendValuesLine } from './utils';
 
 export const TrendSparkline = ({
   height = 24,
+  isConnected = true,
   label,
+  max,
+  points,
   tone = 'neutral',
-  values,
+  values = [],
   width = 100,
 }: TrendSparklineProps) => {
-  const points = getSparklinePoints({ height, values, width });
+  const { dots, line } =
+    points === undefined
+      ? { dots: [], line: getTrendValuesLine({ height, max, values, width }) }
+      : getTrendPointsGeometry({ height, isConnected, max, points, width });
+  const isEmpty = line === '' && dots.length === 0;
+  const populatedRole = dots.some(({ to }) => to !== undefined)
+    ? 'group'
+    : 'img';
 
   return (
     <svg
-      aria-hidden={values.length === 0}
+      aria-hidden={isEmpty}
       height={height}
-      role={values.length > 0 ? 'img' : undefined}
-      viewBox={`0 0 ${width} ${height}`}
+      role={isEmpty ? undefined : populatedRole}
+      viewBox={`0 0 ${String(width)} ${String(height)}`}
       width={width}
     >
       <title>{label}</title>
-      {points && (
-        <polyline
-          points={points}
-          {...stylex.props(styles.line, styles.tone[tone])}
-        />
+      {line !== '' && (
+        <path d={line} {...stylex.props(styles.line, styles.tone[tone])} />
       )}
+      {dots.map((dot) => (
+        <TrendSparklineDot key={dot.cx} {...dot} tone={dot.tone ?? tone} />
+      ))}
     </svg>
   );
 };

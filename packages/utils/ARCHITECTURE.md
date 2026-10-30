@@ -46,6 +46,14 @@ its own gate, not a shared value.
 ## Current Exports
 
 - `./arrays/merge-arrays.util`
+- `./chart/band-path.util` — SVG path data for a band between a lower and an upper bound
+- `./chart/chart.types` — point, band, domain, range and scale types shared by the chart helpers
+- `./chart/decimate.util` — thin a series to a threshold with largest-triangle-three-buckets
+- `./chart/format-path-point.util` — write an `x,y` pair rounded to two decimal places
+- `./chart/line-path.util` — SVG path data through a series, broken at each missing value
+- `./chart/nice-ticks.util` — axis ticks at one, two or five times a power of ten
+- `./chart/scale-linear.util` — map a numeric domain onto a range, optionally clamped
+- `./chart/scale-time.util` — map a `Date` domain onto a range, optionally clamped
 - `./comparison/are-arrays-equal.util` — ordered strict array equality
 - `./comparison/are-equal-by-json.util` — deep structural equality via JSON
 - `./comparison/is-shallow-equal.util` — one-level key/value equality
