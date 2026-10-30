@@ -129,6 +129,12 @@ const ProviderProbe = () => (
   </span>
 );
 
+const expectNoChrome = () => {
+  expect(screen.queryByRole('button', { name: 'Table settings' })).toBeNull();
+  expect(screen.queryByRole('button', { name: /column actions/ })).toBeNull();
+  expect(screen.queryByRole('separator')).toBeNull();
+};
+
 type GroupRowArgs = {
   readonly count: number;
   readonly label: string;
@@ -217,9 +223,7 @@ describe('Table static layout', () => {
   it('renders no settings button, column menu or resize handle by default', () => {
     renderScores();
 
-    expect(screen.queryByRole('button', { name: 'Table settings' })).toBeNull();
-    expect(screen.queryByRole('button', { name: /column actions/ })).toBeNull();
-    expect(screen.queryByRole('separator')).toBeNull();
+    expectNoChrome();
     expect(screen.queryByRole('heading')).toBeNull();
   });
 
@@ -261,9 +265,7 @@ describe('Table static layout', () => {
     );
 
     expect(screen.getByText('Scores')).toBeDefined();
-    expect(screen.queryByRole('button', { name: 'Table settings' })).toBeNull();
-    expect(screen.queryByRole('button', { name: /column actions/ })).toBeNull();
-    expect(screen.queryByRole('separator')).toBeNull();
+    expectNoChrome();
   });
 
   it('drops the title bar when the toolbar is off', () => {

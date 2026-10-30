@@ -1,27 +1,24 @@
 import * as stylex from '@stylexjs/stylex';
-import { use } from 'react';
 
-import { TablePresentationContext } from '#ui/components/Table/contexts/TableConfig/TablePresentationContext.context';
-import { useTableCellFocus } from '#ui/components/Table/hooks';
 import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TableBodyCellProps } from './TableBodyCell.types';
 
+import { useTableBodyCellSemantics } from './useTableBodyCellSemantics.hook';
 import {
   detectDataType,
   getCellStyleProps,
-  renderCellContent,
   renderDisplayedContent,
+  resolveCellContent,
 } from './utils';
 
 export const TableBodyCell = <TData extends Record<string, unknown>>({
-  align,
+  cellLayout,
   children,
   columnKey,
   customStylex,
   dataType: dataTypeProp,
   format,
-  isFill,
   isLoadingState = false,
   label,
   locale,
@@ -29,49 +26,42 @@ export const TableBodyCell = <TData extends Record<string, unknown>>({
   pinInfo,
   rowIndex,
   rowKey,
-  staticWidths,
   value,
   width,
   ...rest
 }: TableBodyCellProps<TData>) => {
-  const isStatic = use(TablePresentationContext).layout === 'static';
   const hasCustomContent = children !== undefined;
   const dataType = dataTypeProp ?? detectDataType(value);
   const isAlignedByDataType = !hasCustomContent || dataTypeProp !== undefined;
-  const { cellRef, onFocus, tabIndex } = useTableCellFocus({
+  const { cellProps, cellRef } = useTableBodyCellSemantics({
     columnKey,
     rowIndex,
     rowKey,
   });
 
-  const content = hasCustomContent
-    ? children
-    : renderCellContent({
-        dataType,
-        format,
-        label,
-        locale,
-        value,
-      });
+  const content = resolveCellContent({
+    children,
+    dataType,
+    format,
+    label,
+    locale,
+    value,
+  });
 
   return (
     <td
       data-column-key={String(columnKey)}
       data-testid='table-body-cell'
       {...rest}
-      onFocus={isStatic ? undefined : onFocus}
+      {...cellProps}
       ref={cellRef}
-      role={isStatic ? undefined : 'gridcell'}
-      tabIndex={isStatic ? undefined : tabIndex}
       {...getCellStyleProps({
-        align,
+        ...cellLayout,
         customStylex,
         dataType,
         isAlignedByDataType,
-        isFill,
         minWidth,
         pinInfo,
-        staticWidths,
         width,
       })}
     >

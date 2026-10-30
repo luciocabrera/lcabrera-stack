@@ -8,6 +8,12 @@ type RenderFromDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly descriptor: TableBodyCellDescriptor<TData>;
 };
 
+const toCellLayout = <TData extends Record<string, unknown>>({
+  align,
+  isFill,
+  staticWidths,
+}: TableBodyCellDescriptor<TData>) => ({ align, isFill, staticWidths });
+
 export const renderFromDescriptor = <TData extends Record<string, unknown>>({
   descriptor,
 }: RenderFromDescriptorArgs<TData>) => {
@@ -15,10 +21,9 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
     return createElement(
       TableBodyCell,
       {
-        align: descriptor.align,
+        cellLayout: toCellLayout(descriptor),
         columnKey: descriptor.columnKey,
         dataType: descriptor.dataType,
-        isFill: descriptor.isFill,
         isLoadingState: descriptor.isLoadingState,
         key: descriptor.key,
         label: descriptor.label,
@@ -26,7 +31,6 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
         pinInfo: descriptor.pinInfo,
         rowIndex: descriptor.rowIndex,
         rowKey: descriptor.rowKey,
-        staticWidths: descriptor.staticWidths,
         width: descriptor.width,
       },
       descriptor.children,
@@ -34,11 +38,10 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
   }
 
   return createElement(TableBodyCell, {
-    align: descriptor.align,
+    cellLayout: toCellLayout(descriptor),
     columnKey: descriptor.columnKey,
     dataType: descriptor.dataType,
     format: descriptor.format,
-    isFill: descriptor.isFill,
     isLoadingState: descriptor.isLoadingState,
     key: descriptor.key,
     label: descriptor.label,
@@ -46,7 +49,6 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
     pinInfo: descriptor.pinInfo,
     rowIndex: descriptor.rowIndex,
     rowKey: descriptor.rowKey,
-    staticWidths: descriptor.staticWidths,
     value: descriptor.value,
     width: descriptor.width,
   });

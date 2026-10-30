@@ -14,9 +14,8 @@ import {
   useGetNormalizedColumn,
   useGetPinnedColumnInfo,
 } from '../contexts/TableConfig/columns/selectors';
-import { ResizeHandle } from './ResizeHandle';
-import { TableHeaderActionsMenu } from './TableHeaderActionsMenu';
 import { tableHeaderCellStyles } from './TableHeaderCell.stylex';
+import { TableHeaderCellControls } from './TableHeaderCellControls.component';
 import {
   getHeaderLayoutStyles,
   getPinnedStyle,
@@ -34,7 +33,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const column = useGetNormalizedColumn<TData>(columnKey);
   const width = useGetColumnWidth<TData>(columnKey);
   const pinInfo = useGetPinnedColumnInfo<TData>(columnKey);
-  const { features, layout } = use(TablePresentationContext);
+  const { layout } = use(TablePresentationContext);
 
   const { isHeaderHidden, label, minWidth } = column;
   const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
@@ -84,20 +83,16 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
           >
             {label}
           </span>
-          {Boolean(isResizable) && features.resize && (
-            <ResizeHandle columnKey={columnKey} columnLabel={label} />
-          )}
-          {features.columnMenu !== false && (
-            <TableHeaderActionsMenu
-              columnKey={columnKey}
-              columnLabel={label}
-              hasSettings={hasSettings && features.settings}
-              isSortable={isSortable}
-              isStatic={isStatic}
-              pinSide={pinInfo?.side}
-              sortDirection={sortDirection}
-            />
-          )}
+          <TableHeaderCellControls<TData>
+            columnKey={columnKey}
+            columnLabel={label}
+            hasSettings={hasSettings}
+            isResizable={Boolean(isResizable)}
+            isSortable={isSortable}
+            isStatic={isStatic}
+            pinSide={pinInfo?.side}
+            sortDirection={sortDirection}
+          />
         </>
       )}
     </th>
