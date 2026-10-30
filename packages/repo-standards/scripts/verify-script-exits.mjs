@@ -32,6 +32,7 @@ const REPO_ROOT = resolveHostRoot({
   moduleDirectory: dirname(fileURLToPath(import.meta.url)),
 });
 const SKIP_DIRS = new Set([
+  '.fallow',
   '.git',
   '.tmp',
   'build',

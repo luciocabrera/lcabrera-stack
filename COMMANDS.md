@@ -95,7 +95,9 @@ The **`pre-push` git hook** (`.vite-hooks/pre-push`) runs `vp run check:push` �
 `registers:verify`, `package-refs:verify`, `departed:verify`,
 `renames:verify`, `changesets:verify`, `route-names:verify`,
 `inventory:verify`, `adr:verify`, `viteplus:verify`, `configs:verify`,
-`conflict-markers:verify` and `fallow:dead-code:verify`, mirroring the
+`conflict-markers:verify`, `fallow:dead-code:verify` and the changed-file fallow
+gates `fallow:guard`, `fallow:architecture`, `fallow:suppressions` and
+`fallow:security`, mirroring the
 "Quality Gate (Format · Lint · Types)" job in
 `check-safe.yml`) — then `vp run test:changed`, and finally
 `vp run fallow:preflight`. This closes the gap the pre-commit hook leaves: `vp
@@ -141,34 +143,34 @@ project-specific belongs in that project's own `package.json`.
 
 ### Gate & CI
 
-| Command                               | Does                                                                                                                                                                                           |
-| ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                                                                                                                  |
-| `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                                                                                                                      |
-| `vp run check:push`                   | the DB-free CI Quality Gate (no tests; of fallow, only the whole-tree dead-code check) — the `pre-push` hook runs this, `test:changed`, then `fallow:preflight`                                |
-| `vp run typecheck:all`                | real tsc in all 14 workspaces, dependency order                                                                                                                                                |
-| `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                                                                                                              |
-| `vp run typegen:all`                  | route types for both React Router apps                                                                                                                                                         |
-| `vp run fix`                          | `lint:all` then `format:all` — one command for everything a tool can fix itself; the formatter writes last                                                                                     |
-| `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                                                                                                                      |
-| `vp run lint:biome`                   | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                                                                                                                  |
-| `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                                                                                                                     |
-| `vp run lint:eslint:check`            | eslint over `evals/`, which is not a workspace: the root package carries the script, so `vp run -r lint:eslint:check` reaches it with the workspaces. `vp run lint:eslint` is the autofix form |
-| `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)                                                                                                       |
-| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails where `react-doctor --blocking` would; writes the report too                                                                                   |
-| `vp run react-doctor:report`          | the same scan, never failing on findings — writes `reports/react-doctor/full-latest.json` (gitignored)                                                                                         |
-| `vp run mutation:report`              | mutation-test `packages/utils` (ADR-119) — writes `reports/mutation/full-latest.json` (gitignored — produced on demand); never fails                                                           |
-| `vp run format:all`                   | `vp fmt .` across the tree                                                                                                                                                                     |
-| `vp run build:all`                    | build every workspace                                                                                                                                                                          |
-| `vp run test:all`                     | every workspace suite plus the root `scripts/` and `evals/` suites — no database needed                                                                                                        |
-| `vp run test:ci`                      | the same suites, `showcase` last so its coverage summary is fresh — run before pushing                                                                                                         |
-| `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below                                                                                             |
-| `vp run test:evals`                   | the `evals/` suites — not a workspace and outside `scripts/`, so neither `-r` nor `test:scripts` reaches them; chained into `test:all` and `test:ci`, and run in `agent-evals.yml`             |
-| `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                                                                                                             |
-| `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                                                                                                                      |
-| `vp run --filter showcase test:e2e`   | the browser suite for the grid — Postgres, opt-in, and not part of `test:ci` or `check:safe`                                                                                                   |
-| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                                                                                                                      |
-| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                                                                                                                       |
+| Command                               | Does                                                                                                                                                                                                                       |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `vp run ready`                        | `check:safe` + `build:all` — the full "is it shippable" check                                                                                                                                                              |
+| `vp run check:safe`                   | typegen → `vp check` → typecheck → eslint → biome → tests                                                                                                                                                                  |
+| `vp run check:push`                   | the DB-free CI Quality Gate (no tests; of fallow, the whole-tree dead-code check plus guard, architecture, suppressions and security on the diff) — the `pre-push` hook runs this, `test:changed`, then `fallow:preflight` |
+| `vp run typecheck:all`                | real tsc in all 14 workspaces, dependency order                                                                                                                                                                            |
+| `vp run typecheck:changed`            | real tsc for the changed workspaces + dependents only — see below                                                                                                                                                          |
+| `vp run typegen:all`                  | route types for both React Router apps                                                                                                                                                                                     |
+| `vp run fix`                          | `lint:all` then `format:all` — one command for everything a tool can fix itself; the formatter writes last                                                                                                                 |
+| `vp run lint:all`                     | Oxlint + eslint + Biome **with autofix**, every workspace                                                                                                                                                                  |
+| `vp run lint:biome`                   | Biome repo-wide **with autofix** (`--write`, safe fixes only)                                                                                                                                                              |
+| `vp run lint:biome:check`             | Biome repo-wide, check only — what CI runs                                                                                                                                                                                 |
+| `vp run lint:eslint:check`            | eslint over `evals/`, which is not a workspace: the root package carries the script, so `vp run -r lint:eslint:check` reaches it with the workspaces. `vp run lint:eslint` is the autofix form                             |
+| `vp run lint:report`                  | write `reports/{oxlint,eslint,biome}/full-latest.json` (gitignored — produced on demand)                                                                                                                                   |
+| `vp run react-doctor:verify`          | React Doctor gate (ADR-055) — full scope, fails where `react-doctor --blocking` would; writes the report too                                                                                                               |
+| `vp run react-doctor:report`          | the same scan, never failing on findings — writes `reports/react-doctor/full-latest.json` (gitignored)                                                                                                                     |
+| `vp run mutation:report`              | mutation-test `packages/utils` (ADR-119) — writes `reports/mutation/full-latest.json` (gitignored — produced on demand); never fails                                                                                       |
+| `vp run format:all`                   | `vp fmt .` across the tree                                                                                                                                                                                                 |
+| `vp run build:all`                    | build every workspace                                                                                                                                                                                                      |
+| `vp run test:all`                     | every workspace suite plus the root `scripts/` and `evals/` suites — no database needed                                                                                                                                    |
+| `vp run test:ci`                      | the same suites, `showcase` last so its coverage summary is fresh — run before pushing                                                                                                                                     |
+| `vp run test:changed`                 | only the suites a diff touched (changed workspaces + dependents, plus root `scripts/`) — see below                                                                                                                         |
+| `vp run test:evals`                   | the `evals/` suites — not a workspace and outside `scripts/`, so neither `-r` nor `test:scripts` reaches them; chained into `test:all` and `test:ci`, and run in `agent-evals.yml`                                         |
+| `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                                                                                                                                         |
+| `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                                                                                                                                                  |
+| `vp run --filter showcase test:e2e`   | the browser suite for the grid — Postgres, opt-in, and not part of `test:ci` or `check:safe`                                                                                                                               |
+| `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                                                                                                                                                  |
+| `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                                                                                                                                                   |
 
 `test:all` vs `test:ci`: neither needs a database locally, so the two
 differ only in ordering — `test:ci` runs `showcase` last so the PR's coverage
@@ -417,11 +419,26 @@ policy — entry rules, the CRAP/coverage trap, output conventions — is in
 | `vp run fallow:refresh-report`   | regenerate the complexity threshold report                                                                                                                       |
 | `vp run fallow:report`           | full scan + `fallow.raw.json` in a timestamped run dir; echoes the dir                                                                                           |
 | `vp run fallow:preflight`        | the audit exactly as CI runs it: `coverage:merge -- --changed`, then the gate against `TEST_CHANGED_BASE` (default `origin/main`). The `pre-push` hook runs this |
+| `vp run fallow:guard`            | prints the architecture rules that bind each changed source file. Advisory: it never fails                                                                       |
+| `vp run fallow:architecture`     | fails on an import cycle or a boundary violation in a changed source file                                                                                        |
+| `vp run fallow:suppressions`     | fails when a changed source file carries a `fallow-ignore` marker                                                                                                |
+| `vp run fallow:security`         | fails (exit 8) on a security candidate that the diff's changed lines introduce                                                                                   |
+| `vp run fallow:coverage-gaps`    | fails on a coverage gap the diff introduced: a new source file, or an export on a changed line, that no test reaches. Static: reads imports, not coverage data   |
+| `vp run fallow:mutation`         | mutates the changed lines, one workspace at a time, and fails on any mutant the tests let survive                                                                |
+| `vp run fallow:similar-code`     | fails on a similar-code candidate touching a changed file, and refuses to run until `fallow similar-code setup --local` has installed its model. In no gate yet  |
 
 Always feed the audit real coverage:
 `vp run fallow:audit --base main --coverage reports/fallow/coverage/coverage-final.json`
 (produce it with `vp run coverage:merge`). Without it fallow _estimates_ coverage
 and reports trivially simple code as `critical`.
+
+The seven gates from `fallow:guard` down run `repo-fallow-gate` over
+`scripts/changed-files.sh`, so they read the files changed since the merge base
+with `TEST_CHANGED_BASE` (default `origin/main`), untracked files included. Pass
+files after `--` to check those instead. `suppressions`, `coverage-gaps` and
+`similar-code` exit 0 on a finding when fallow runs them bare, so the bin reads
+their JSON report and decides. `check:safe` chains every gate except
+`fallow:similar-code`; `check:push` chains the four that need no test run.
 
 `fallow:dead-code:verify` runs with `--no-cache`. Fallow's incremental cache
 keeps an import it recorded as unresolved, so a scan that ran before
@@ -1111,11 +1128,11 @@ Notes on the non-obvious ones:
 
 [`.github/workflows/check-safe.yml`](.github/workflows/check-safe.yml) — three jobs:
 
-| Job              | Steps                                                                                                                                            |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check`                                  |
-| **Fallow Audit** | `typegen:all` → `coverage:merge -- --changed` → `fallow:audit --base $DIFF_BASE --coverage …` → `fallow:dead-code:verify` (anywhere with a base) |
-| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR                                         |
+| Job              | Steps                                                                                                                                                                                                                                                          |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Quality Gate** | `typegen:all` → `vp check` → `vp run typecheck:all` → `vp run -r lint:eslint:check` → `vp run lint:biome:check`                                                                                                                                                |
+| **Fallow Audit** | `typegen:all` → `coverage:merge -- --changed` → `fallow:audit --base $DIFF_BASE --coverage …` → `fallow:dead-code:verify` → `fallow:guard` → `fallow:architecture` → `fallow:suppressions` → `fallow:security` → `fallow:coverage-gaps` (anywhere with a base) |
+| **Unit Tests**   | `vp run test:ci` → `vp run coverage:report` → per-workspace + monorepo coverage matrix comment on the PR; on a base, `fallow:mutation` after the suites                                                                                                        |
 
 Each pass is a **separate step on purpose** so a failure names itself instead of
 hiding behind a neighbour. `vp check` does not run the eslint pass, it does not run
@@ -1311,16 +1328,21 @@ Vite+ owns the git hooks — `core.hooksPath` points at `.vite-hooks/`, installe
 `.vite-hooks/pre-commit` runs `vp staged`, which reads the `staged` block in the
 root `vite.config.ts`:
 
-| Glob | Commands, in order                                                                                                                    |
-| ---- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `*`  | `vp check --fix` → `biome lint --write --no-errors-on-unmatched` → `repo-eslint-staged --` → `vp fmt --no-error-on-unmatched-pattern` |
+| Glob | Commands, in order                                                                                                                                                                                                                            |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `*`  | `vp check --fix` → `biome lint --write --no-errors-on-unmatched` → `repo-eslint-staged --` → `vp fmt --no-error-on-unmatched-pattern` → `repo-fallow-gate guard --` → `repo-fallow-gate suppressions --` → `repo-fallow-gate architecture --` |
 
-They all write, and that is safe in this hook and nowhere else in the flow:
+The four fixers write, and that is safe in this hook and nowhere else in the flow:
 lint-staged re-stages what a task changes, so a fix lands in the commit being
 made rather than in the working tree behind it. They share one glob deliberately
 — the reason is in the `staged` block's own comment. Biome sat here check-only
 until #1116, which left its gate first failing in CI, after the commit it was
 meant to block.
+
+The three `repo-fallow-gate` commands come after the formatter because they only
+read. A staged file that carries a `fallow-ignore` marker or closes an import
+cycle fails the commit; guard only prints the rules that bind each file. The bin
+drops staged files fallow does not analyse, so a commit with none passes.
 
 The two `unmatched` flags are what let a commit through when no staged file is
 one that tool reads — a commit of only `reports/api-surface/*.txt`, say. Without

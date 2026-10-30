@@ -189,6 +189,9 @@ export default defineConfig({
       'biome lint --write --no-errors-on-unmatched',
       'repo-eslint-staged --',
       'vp fmt --no-error-on-unmatched-pattern',
+      'repo-fallow-gate guard --',
+      'repo-fallow-gate suppressions --',
+      'repo-fallow-gate architecture --',
     ],
   },
 });

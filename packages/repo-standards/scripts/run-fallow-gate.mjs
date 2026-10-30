@@ -1,0 +1,18 @@
+#!/usr/bin/env node
+/**
+ * Runs one fallow analysis as a gate over the source files a change touched.
+ * fallow reports several of these analyses with exit 0 whatever it finds, so a
+ * hook or CI step that ran them bare would pass on every finding. The run is
+ * `./fallow-gate-command.mjs`; the verdicts are `./fallow-gate.mjs`.
+ *
+ * Usage:
+ *   … | repo-fallow-gate <analysis>             changed files on stdin
+ *   repo-fallow-gate <analysis> [--] <file>…    the files to check, as from a hook
+ * `security` and `mutation` also read the merge base from CHANGED_FILES_BASE.
+ *
+ * Exit codes: 0 = no finding, 1 = a finding, 2 = the analysis could not run;
+ * an analysis gated on fallow's own exit code returns that code instead.
+ */
+import { runFallowGateCommand } from './fallow-gate-command.mjs';
+
+process.exitCode = runFallowGateCommand(process);

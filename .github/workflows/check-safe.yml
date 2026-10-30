@@ -686,6 +686,36 @@ jobs:
         if: ${{ !cancelled() }}
         run: vp run fallow:dead-code:verify
 
+      - name: Fallow guard (changed files)
+        if: ${{ !cancelled() }}
+        env:
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
+        run: vp run fallow:guard
+
+      - name: Fallow architecture (changed files)
+        if: ${{ !cancelled() }}
+        env:
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
+        run: vp run fallow:architecture
+
+      - name: No fallow suppression marker in a changed file
+        if: ${{ !cancelled() }}
+        env:
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
+        run: vp run fallow:suppressions
+
+      - name: Fallow security (changed lines)
+        if: ${{ !cancelled() }}
+        env:
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
+        run: vp run fallow:security
+
+      - name: Fallow coverage gaps (changed files)
+        if: ${{ !cancelled() }}
+        env:
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
+        run: vp run fallow:coverage-gaps
+
       - name: Write fallow summary
         if: always()
         run: |
@@ -776,6 +806,15 @@ jobs:
           else
             vp run test:changed -- --ci
           fi
+
+      - name: Mutation testing (changed lines)
+        # Here rather than in the Fallow Audit job: mutation runs the suites, and
+        # this is the job with the Postgres the DB-gated suites need under CI.
+        if: github.event_name != 'push'
+        env:
+          TEST_CHANGED_BASE: ${{ env.DIFF_BASE }}
+          EVALS_TEST_DATABASE_URL: postgres://evals_test@localhost:5432/eval_history_test
+        run: vp run fallow:mutation
 
       - name: Test selection summary
         # Make the change-based selection visible instead of buried in the test

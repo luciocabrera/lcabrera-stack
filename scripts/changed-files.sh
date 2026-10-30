@@ -20,6 +20,8 @@
 #
 # It feeds the runner tracked changes since the merge base AND untracked,
 # non-ignored files, because the gate that uses it runs before a commit.
+# The merge base itself reaches the runner as CHANGED_FILES_BASE, for a runner
+# that gates changed lines rather than changed files.
 #
 # A task that has both a full mode and a changed-only mode cannot be wrapped
 # unconditionally: the full mode needs no merge base, and resolving one it will
@@ -102,4 +104,4 @@ if ! untracked=$(git ls-files --others --exclude-standard); then
   exit 1
 fi
 
-printf '%s\n%s\n' "$tracked" "$untracked" | sed '/^$/d' | sort -u | "$@"
+printf '%s\n%s\n' "$tracked" "$untracked" | sed '/^$/d' | sort -u | CHANGED_FILES_BASE="$base" "$@"
