@@ -111,6 +111,11 @@ const readDiff = ({ base, effects, files = [] }) => {
     '--',
     ...files,
   ]);
+  if (child.exceeded !== undefined) {
+    throw new Error(
+      `git diff against ${base} is larger than the ${child.exceeded} bytes this gate reads, so no change can be attributed.`,
+    );
+  }
   if (child.error !== undefined || child.status !== 0) {
     throw new Error(
       `git diff against ${base} failed, so no change can be attributed.`,
@@ -246,7 +251,7 @@ const runNode = (args, stdout) => {
 
 export const processEffects = (proc) => ({
   exists: (file) => existsSync(join(REPO_ROOT, file)),
-  git: (args) => runGitStatus({ args, cwd: REPO_ROOT }),
+  git: (args) => runGitStatus({ args, cwd: REPO_ROOT, maxBuffer: 2 ** 29 }),
   readFile: (file) => readFileSync(join(REPO_ROOT, file), 'utf8'),
   readStdinFiles: () => {
     if (proc.stdin.isTTY) {

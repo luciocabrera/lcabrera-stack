@@ -30,6 +30,15 @@ describe('reportFindings', () => {
     ]);
   });
 
+  it('reads a file entry with no suppressions key as clean', () => {
+    expect(
+      reportFindings({
+        analysis: 'suppressions',
+        report: { files: [{ path: 'a.ts' }] },
+      }),
+    ).toEqual([]);
+  });
+
   it('reads a suppression report with no files as clean', () => {
     expect(reportFindings({ analysis: 'suppressions', report: {} })).toEqual(
       [],

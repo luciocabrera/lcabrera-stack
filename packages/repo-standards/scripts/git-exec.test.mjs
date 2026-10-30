@@ -73,6 +73,22 @@ describe('runGitStatus', () => {
     expect(bad.status).not.toBe(0);
   });
 
+  it('names the buffer it overflowed, and only when it overflowed', () => {
+    const tooBig = runGitStatus({
+      args: ['--version'],
+      cwd: process.cwd(),
+      maxBuffer: 4,
+    });
+    expect(tooBig.exceeded).toBe(4);
+    expect(
+      runGitStatus({ args: ['--version'], cwd: process.cwd() }).exceeded,
+    ).toBeUndefined();
+    expect(
+      runGitStatus({ args: ['not-a-git-command'], cwd: process.cwd() })
+        .exceeded,
+    ).toBeUndefined();
+  });
+
   it('returns what git wrote to stderr, so a caller can say why it failed', () => {
     const bad = runGitStatus({
       args: ['not-a-git-command'],

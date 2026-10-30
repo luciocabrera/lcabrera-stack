@@ -55,12 +55,16 @@ export const deriveWorkspaces = (repoRoot) => {
   for (const glob of globs) {
     const kind = kindOf(glob);
     if (glob.endsWith('/*')) {
-      const expanded = expandStarGlob(repoRoot, glob.slice(0, -2));
-      for (const name of expanded) {
-        workspaces.push({ kind, name });
+      const prefix = glob.slice(0, -2);
+      for (const name of expandStarGlob(repoRoot, prefix)) {
+        workspaces.push({ dir: `${prefix}/${name}`, kind, name });
       }
     } else if (existsSync(join(repoRoot, glob, 'package.json'))) {
-      workspaces.push({ kind, name: basename(glob) });
+      workspaces.push({
+        dir: glob.replace(/\/$/u, ''),
+        kind,
+        name: basename(glob),
+      });
     }
   }
   return workspaces;

@@ -5,7 +5,7 @@
  */
 const suppressionFindings = ({ report }) =>
   (report.files ?? []).flatMap(({ path, suppressions }) =>
-    suppressions.map(({ kind, line, reason }) => ({
+    (suppressions ?? []).map(({ kind, line, reason }) => ({
       detail: reason
         ? `fallow-ignore ${kind} (${reason})`
         : `fallow-ignore ${kind}`,

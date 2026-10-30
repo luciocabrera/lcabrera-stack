@@ -281,6 +281,13 @@ describe('runGate — analyses judged by their report', () => {
       reply: gapReport,
     },
     {
+      diff: { exceeded: 536_870_912, status: null, stdout: '' },
+      error:
+        'git diff against abc is larger than the 536870912 bytes this gate reads, so no change can be attributed.',
+      printed: '',
+      reply: gapReport,
+    },
+    {
       diff: { error: new Error('spawn git ENOENT'), stdout: '' },
       error: 'git diff against abc failed, so no change can be attributed.',
       printed: '',

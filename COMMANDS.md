@@ -1329,9 +1329,9 @@ Vite+ owns the git hooks — `core.hooksPath` points at `.vite-hooks/`, installe
 `.vite-hooks/pre-commit` runs `vp staged`, which reads the `staged` block in the
 root `vite.config.ts`:
 
-| Glob | Commands, in order                                                                                                                                                                                                                            |
-| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `*`  | `vp check --fix` → `biome lint --write --no-errors-on-unmatched` → `repo-eslint-staged --` → `vp fmt --no-error-on-unmatched-pattern` → `repo-fallow-gate guard --` → `repo-fallow-gate suppressions --` → `repo-fallow-gate architecture --` |
+| Glob | Commands, in order                                                                                                                                                                                              |
+| ---- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `*`  | `vp check --fix` → `biome lint --write --no-errors-on-unmatched` → `repo-eslint-staged --` → `vp fmt --no-error-on-unmatched-pattern` → `repo-fallow-gate suppressions --` → `repo-fallow-gate architecture --` |
 
 The four fixers write, and that is safe in this hook and nowhere else in the flow:
 lint-staged re-stages what a task changes, so a fix lands in the commit being
@@ -1340,10 +1340,12 @@ made rather than in the working tree behind it. They share one glob deliberately
 until #1116, which left its gate first failing in CI, after the commit it was
 meant to block.
 
-The three `repo-fallow-gate` commands come after the formatter because they only
+The two `repo-fallow-gate` commands come after the formatter because they only
 read. A staged file that carries a `fallow-ignore` marker or closes an import
-cycle fails the commit; guard only prints the rules that bind each file. The bin
-drops staged files fallow does not analyse, so a commit with none passes.
+cycle fails the commit. The bin drops staged files fallow does not analyse, so a
+commit with none passes. `fallow:guard` is not in this hook while no boundary
+zones are configured, because until then it prints the same "none apply" for
+every file; it stays in `check:push`, `check:safe` and CI.
 
 The two `unmatched` flags are what let a commit through when no staged file is
 one that tool reads — a commit of only `reports/api-surface/*.txt`, say. Without

@@ -239,6 +239,6 @@ routeArtifactReport [const] (trackedPaths: any) => { checked: number; findings: 
 readTextWithin [const] (path: any, repoRoot: any, extraRoots?: any[]) => string
 
 ## ./workspace-scopes
-deriveWorkspaces [const] (repoRoot: any) => { kind: string; name: string; }[]
+deriveWorkspaces [const] (repoRoot: any) => { dir: string; kind: string; name: string; }[]
 deriveWorkspaceScopes [const] (repoRoot: any) => Set<string>
 workspacesForFiles [const] (files: any, workspaces: any) => any

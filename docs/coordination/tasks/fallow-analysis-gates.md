@@ -20,6 +20,10 @@ area:
   - packages/repo-standards/scripts/*fallow-gate*
   - packages/repo-standards/scripts/verify-script-exits.mjs
   - devkit.config.json
+  - reports/api-surface/repo-standards.txt
+  - packages/repo-standards/scripts/workspace-scopes*
+  - packages/repo-standards/scripts/affected-tests.mjs
+  - packages/repo-standards/scripts/git-exec*
   - packages/vite-configs/src/eslint.*
   - packages/devkit/CLASSIFICATION.md
 started: 2026-10-30

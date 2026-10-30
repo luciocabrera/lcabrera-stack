@@ -73,7 +73,7 @@ export const runGit = ({ args, cwd }) => {
   }
 };
 
-export const runGitStatus = ({ args, cwd }) => {
+export const runGitStatus = ({ args, cwd, maxBuffer = 8 * 1024 * 1024 }) => {
   const binary = gitBinary();
   if (binary === undefined) {
     return { status: null, stderr: '', stdout: '' };
@@ -83,12 +83,13 @@ export const runGitStatus = ({ args, cwd }) => {
       cwd,
       encoding: 'utf8',
       env: buildGitEnv(process.env),
-      maxBuffer: 8 * 1024 * 1024,
+      maxBuffer,
       stdio: ['ignore', 'pipe', 'pipe'],
     });
     return { status: 0, stderr: '', stdout: stdout.trim() };
   } catch (error) {
     return {
+      ...(error.code === 'ENOBUFS' && { exceeded: maxBuffer }),
       status: typeof error.status === 'number' ? error.status : null,
       stderr: String(error.stderr ?? '').trim(),
       stdout: String(error.stdout ?? '').trim(),
