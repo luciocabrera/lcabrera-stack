@@ -31,12 +31,6 @@ describe('TrendSparkline', () => {
       expect(container.querySelector('svg')?.getAttribute('role')).toBeNull();
     });
 
-    it('renders no line when neither values nor points are given', () => {
-      const { container } = render(<TrendSparkline label='Trend' />);
-
-      expect(container.querySelector('path')).toBeNull();
-    });
-
     it('renders a line spanning the given width and height', () => {
       const { container } = render(
         <TrendSparkline

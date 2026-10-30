@@ -9,6 +9,7 @@ describe('niceTicks', () => {
 
   it('returns no ticks when no ticks are asked for', () => {
     expect(niceTicks({ count: 0, max: 10, min: 0 })).toEqual([]);
+    expect(niceTicks({ count: 0, max: 4, min: 4 })).toEqual([]);
   });
 
   it('steps by one, two, five or ten times a power of ten', () => {

@@ -13,10 +13,10 @@ describe('linePath', () => {
     expect(linePath({ points: [], x: identity, y: identity })).toBe('');
   });
 
-  it('moves to a single point', () => {
+  it('draws a single point as a zero-length segment', () => {
     expect(
       linePath({ points: [{ x: 5, y: 10 }], x: identity, y: identity }),
-    ).toBe('M5,10');
+    ).toBe('M5,10L5,10');
   });
 
   it('draws a line through the points through both scales', () => {
@@ -41,7 +41,9 @@ describe('linePath', () => {
       '[{"x":0,"y":1},{"x":1,"y":null},{"x":2,"y":3},{"x":3,"y":4}]',
     );
 
-    expect(linePath({ points, x: identity, y: identity })).toBe('M0,1M2,3L3,4');
+    expect(linePath({ points, x: identity, y: identity })).toBe(
+      'M0,1L0,1M2,3L3,4',
+    );
   });
 
   it('breaks the line at a missing or non-finite value', () => {
@@ -60,7 +62,23 @@ describe('linePath', () => {
         x: identity,
         y: identity,
       }),
-    ).toBe('M0,1M2,3M4,5M6,7L7,8');
+    ).toBe('M0,1L0,1M2,3L2,3M4,5L4,5M6,7L7,8');
+  });
+
+  it('draws a lone point between gaps as a zero-length segment', () => {
+    expect(
+      linePath({
+        points: [
+          { x: 0 },
+          { x: 1, y: 2 },
+          { x: 2 },
+          { x: 3, y: 4 },
+          { x: 4, y: 5 },
+        ],
+        x: identity,
+        y: identity,
+      }),
+    ).toBe('M1,2L1,2M3,4L4,5');
   });
 
   it('starts at the first value after a leading gap', () => {

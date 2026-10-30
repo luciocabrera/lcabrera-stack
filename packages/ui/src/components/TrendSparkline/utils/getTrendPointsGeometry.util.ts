@@ -46,6 +46,7 @@ export const getTrendPointsGeometry = ({
       ...point,
       cx: roundToCents(x(index)),
       cy: roundToCents(y(point.value)),
+      position: index,
     })),
     line,
   };

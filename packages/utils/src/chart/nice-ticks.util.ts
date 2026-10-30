@@ -10,12 +10,12 @@ type NiceTicksArgs = {
 };
 
 export const niceTicks = ({ count, max, min }: NiceTicksArgs) => {
+  if (count < 1) return [];
+
   const low = Math.min(min, max);
   const high = Math.max(min, max);
 
   if (low === high) return [low];
-
-  if (count < 1) return [];
 
   const rawStep = (high - low) / count;
   const power = Math.floor(Math.log10(rawStep));

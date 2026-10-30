@@ -68,7 +68,12 @@ scale maps a value onto a pixel range (`scaleLinear`, or `scaleTime` for `Date`
 values, either one optionally clamped), `niceTicks` picks axis ticks at one, two
 or five times a power of ten, `linePath` and `bandPath` return SVG path data
 that breaks at a missing, `null` or non-finite value, and `decimate` thins a long
-series with largest-triangle-three-buckets. They read no DOM, so a chart drawn
+series with largest-triangle-three-buckets in linear time.
+
+A point with a gap on both sides stays visible. `linePath` draws it as a
+zero-length segment (`M3,4L3,4`), which a stroke with a round line cap renders
+as a dot, and `bandPath` draws it as a stroke from its upper bound to its lower
+one. Draw markers yourself only if you want them on every point. They read no DOM, so a chart drawn
 with them renders the same markup on the server and the client.
 
 ```ts

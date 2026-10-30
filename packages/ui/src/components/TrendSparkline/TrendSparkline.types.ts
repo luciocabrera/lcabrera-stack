@@ -7,16 +7,8 @@ export type TrendPoint = {
   readonly value: number;
 };
 
-export type TrendSparklineProps = {
-  readonly height?: number;
-  readonly isConnected?: boolean;
-  readonly label: string;
-  readonly max?: number;
-  readonly points?: readonly TrendPoint[];
-  readonly tone?: TrendSparklineTone;
-  readonly values?: readonly number[];
-  readonly width?: number;
-};
+export type TrendSparklineProps = TrendSparklineChartProps &
+  (TrendSparklinePointsProps | TrendSparklineValuesProps);
 
 export type TrendSparklineTone =
   | 'error'
@@ -24,3 +16,22 @@ export type TrendSparklineTone =
   | 'neutral'
   | 'success'
   | 'warning';
+
+type TrendSparklineChartProps = {
+  readonly height?: number;
+  readonly isConnected?: boolean;
+  readonly label: string;
+  readonly max?: number;
+  readonly tone?: TrendSparklineTone;
+  readonly width?: number;
+};
+
+type TrendSparklinePointsProps = {
+  readonly points: readonly TrendPoint[];
+  readonly values?: never;
+};
+
+type TrendSparklineValuesProps = {
+  readonly points?: never;
+  readonly values: readonly number[];
+};

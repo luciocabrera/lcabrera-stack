@@ -67,6 +67,16 @@ describe('decimate', () => {
     ]);
   });
 
+  it('measures each bucket from the point it kept in the bucket before', () => {
+    const xs = [1, 5, 10, 11, 15, 25, 34, 41, 43, 48, 50, 56];
+    const ys = [18, 1, 9, 0, 8, 15, 19, 12, 13, 12, 18, 14];
+    const points = xs.map((x, index) => ({ x, y: ys[index] ?? 0 }));
+
+    expect(decimate({ points, threshold: 6 }).map(({ x }) => x)).toEqual([
+      1, 5, 25, 34, 43, 56,
+    ]);
+  });
+
   it('keeps the fields of each point it returns', () => {
     const points = [0, 8, 1, 2].map((y, x) => ({
       label: `p${String(x)}`,
@@ -77,6 +87,21 @@ describe('decimate', () => {
     expect(
       decimate({ points, threshold: 3 }).map(({ label }) => label),
     ).toEqual(['p0', 'p1', 'p3']);
+  });
+
+  it('thins a long series in linear time', () => {
+    const points = Array.from({ length: 200_000 }, (_, x) => ({
+      x,
+      y: Math.sin(x / 50) * 100 + (x % 7),
+    }));
+    const started = performance.now();
+    const coarse = decimate({ points, threshold: 1000 });
+    const fine = decimate({ points, threshold: 50_000 });
+    const elapsed = performance.now() - started;
+
+    expect(coarse).toHaveLength(1000);
+    expect(fine).toHaveLength(50_000);
+    expect(elapsed).toBeLessThan(2000);
   });
 
   it('reads dates on the x axis', () => {

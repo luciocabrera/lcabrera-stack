@@ -28,6 +28,7 @@ Add chart geometry to utils and redraw TrendSparkline on it
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: round 2 review fixes pushed (Sonar findings in decimate,
+  linear-time decimate, props union, lone-point segments, niceTicks count 0)
 - Blockers: none
-- Next:
+- Next: rebase on main after #1572 merges, then re-run the gate
