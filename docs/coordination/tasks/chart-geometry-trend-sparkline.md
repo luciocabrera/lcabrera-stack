@@ -28,7 +28,6 @@ Add chart geometry to utils and redraw TrendSparkline on it
 
 ## Status / next
 
-- Current step: round 5 pushed (niceTicks bounds, non-finite values in
-  TrendSparkline)
+- Current step: round 6 pushed (one domain helper for both sparkline modes)
 - Blockers: none
 - Next: review

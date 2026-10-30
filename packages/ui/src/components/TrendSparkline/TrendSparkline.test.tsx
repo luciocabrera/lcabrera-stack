@@ -226,6 +226,34 @@ describe('TrendSparkline', () => {
     });
   });
 
+  describe('a maximum below the lowest value', () => {
+    it('pins the lowest value to the bottom edge and the higher one to the top in both modes', () => {
+      const { container: valuesChart } = render(
+        <TrendSparkline height={48} label='Trend' max={-1} values={[0, 3]} />,
+      );
+      const { container: pointsChart } = render(
+        <TrendSparkline
+          height={48}
+          label='Trend'
+          max={-1}
+          points={[{ value: 0 }, { value: 3 }]}
+        />,
+      );
+      const valuesYs = (
+        valuesChart.querySelector('path')?.getAttribute('d') ?? ''
+      )
+        .split(/[ML]/u)
+        .filter((pair) => pair !== '')
+        .map((pair) => Number(pair.split(',', 2)[1]));
+      const pointsYs = [...pointsChart.querySelectorAll('circle')].map((dot) =>
+        Number(dot.getAttribute('cy')),
+      );
+
+      expect(valuesYs).toEqual([48, 0]);
+      expect(pointsYs).toEqual([44, 4]);
+    });
+  });
+
   describe('server render', () => {
     it.each([
       {

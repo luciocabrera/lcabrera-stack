@@ -52,4 +52,16 @@ describe('getTrendValuesLine', () => {
     expect(line).toBe('M0,10L0,10M40,0L60,5M100,10L100,10');
     expect(line).not.toContain('NaN');
   });
+
+  it('falls back to a one-unit scale above the lowest value when the maximum is below it', () => {
+    expect(
+      getTrendValuesLine({ height: 10, max: -1, values: [0, 3], width: 100 }),
+    ).toBe('M0,10L100,0');
+  });
+
+  it('sets a flat series on the baseline when the maximum equals it', () => {
+    expect(
+      getTrendValuesLine({ height: 10, max: 2, values: [2, 2], width: 100 }),
+    ).toBe('M0,10L100,10');
+  });
 });

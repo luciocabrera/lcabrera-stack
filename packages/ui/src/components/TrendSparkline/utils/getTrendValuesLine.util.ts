@@ -2,6 +2,8 @@ import { linePath } from '@lcabrera/utils/chart/line-path.util';
 import { scaleLinear } from '@lcabrera/utils/chart/scale-linear.util';
 import { isFiniteNumber } from '@lcabrera/utils/guards/is-finite-number.util';
 
+import { getTrendDomain } from './getTrendDomain.util';
+
 type GetTrendValuesLineArgs = {
   readonly height: number;
   readonly max?: number;
@@ -22,7 +24,11 @@ export const getTrendValuesLine = ({
     range: [0, width],
   });
   const y = scaleLinear({
-    domain: [Math.min(...finiteValues), max ?? Math.max(...finiteValues)],
+    domain: getTrendDomain({
+      bottom: Math.min(...finiteValues),
+      isFlatOnBaseline: max !== undefined,
+      top: max ?? Math.max(...finiteValues),
+    }),
     isClamped: true,
     range: [height, 0],
   });

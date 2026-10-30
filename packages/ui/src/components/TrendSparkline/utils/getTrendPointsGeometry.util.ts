@@ -7,6 +7,8 @@ import type { TrendPoint } from '#ui/components/TrendSparkline/TrendSparkline.ty
 
 import { TREND_SPARKLINE_DOT } from '#ui/components/TrendSparkline/TrendSparkline.constants';
 
+import { getTrendDomain } from './getTrendDomain.util';
+
 type GetTrendPointsGeometryArgs = {
   readonly height: number;
   readonly isConnected: boolean;
@@ -31,7 +33,7 @@ export const getTrendPointsGeometry = ({
     range: [TREND_SPARKLINE_DOT.inset, width - TREND_SPARKLINE_DOT.inset],
   });
   const y = scaleLinear({
-    domain: [bottom, top > bottom ? top : bottom + 1],
+    domain: getTrendDomain({ bottom, isFlatOnBaseline: true, top }),
     isClamped: true,
     range: [height - TREND_SPARKLINE_DOT.inset, TREND_SPARKLINE_DOT.inset],
   });

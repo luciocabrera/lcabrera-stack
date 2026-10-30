@@ -182,10 +182,11 @@ Covers `packages/ui` only. Two sibling packages own what used to be listed here,
 
 ### `src/components/TrendSparkline/utils/` _(private delegates)_
 
-| Function                 | Location                                                         | Description                                                                                                            |
-| ------------------------ | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `getTrendPointsGeometry` | `components/TrendSparkline/utils/getTrendPointsGeometry.util.ts` | Places one dot per point on a zero-based, clamped scale inset from the edges, and the line through them when connected |
-| `getTrendValuesLine`     | `components/TrendSparkline/utils/getTrendValuesLine.util.ts`     | Draws a value series as a path across the full width, scaled from its lowest value to `max` or its highest             |
+| Function                 | Location                                                         | Description                                                                                                                                                                     |
+| ------------------------ | ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getTrendDomain`         | `components/TrendSparkline/utils/getTrendDomain.util.ts`         | The y domain both sparkline modes share: bottom to top, or one unit above the bottom when the top is not above it (a flat values series without `max` stays flat in the middle) |
+| `getTrendPointsGeometry` | `components/TrendSparkline/utils/getTrendPointsGeometry.util.ts` | Places one dot per point on a zero-based, clamped scale inset from the edges, and the line through them when connected                                                          |
+| `getTrendValuesLine`     | `components/TrendSparkline/utils/getTrendValuesLine.util.ts`     | Draws a value series as a path across the full width, scaled from its lowest value to `max` or its highest                                                                      |
 
 ### `src/components/Form/builders/` _(public — field-tree DSL)_
 

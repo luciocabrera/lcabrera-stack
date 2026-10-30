@@ -122,4 +122,14 @@ describe('getTrendPointsGeometry', () => {
     ]);
     expect(line).toBe('M4,24L4,24M104,4L104,4');
   });
+
+  it('falls back to a one-unit scale above the lowest value when the maximum is below it', () => {
+    const { dots } = getTrendPointsGeometry({
+      ...SIZE,
+      max: -1,
+      points: [{ value: 0 }, { value: 3 }],
+    });
+
+    expect(dots.map(({ cy }) => cy)).toEqual([44, 4]);
+  });
 });
