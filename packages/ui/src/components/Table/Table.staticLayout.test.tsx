@@ -1,8 +1,5 @@
 // @vitest-environment jsdom
 
-import type { StyleXStyles } from '@stylexjs/stylex';
-
-import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen, within } from '@testing-library/react';
 import { createRef, use } from 'react';
 import { renderToString } from 'react-dom/server';
@@ -10,6 +7,7 @@ import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import { GlobalSettingsContext } from '#ui/contexts/GlobalSettingsContext/GlobalSettingsContext.context';
 import { NotificationContext } from '#ui/contexts/NotificationContext/NotificationContext.context';
+import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
 import type {
   TableColumn,
@@ -52,23 +50,6 @@ beforeAll(() => {
 });
 
 afterEach(cleanup);
-
-const classesOf = (element: Element) =>
-  new Set(element.className.split(' ').filter(Boolean));
-
-const classesOfStyle = (style: StyleXStyles) =>
-  (stylex.props(style).className ?? '').split(' ').filter(Boolean);
-
-type HasEveryClassArgs = {
-  readonly element: Element;
-  readonly style: StyleXStyles;
-};
-
-const hasEveryClass = ({ element, style }: HasEveryClassArgs) => {
-  const applied = classesOf(element);
-
-  return classesOfStyle(style).every((name) => applied.has(name));
-};
 
 const bodyRows = () =>
   [...screen.getByTestId('table-body').querySelectorAll('tr')].filter(
@@ -193,16 +174,19 @@ describe('Table static layout', () => {
 
     for (const element of chain) {
       expect(
-        hasEveryClass({ element, style: virtualContentStyles.wrapper }),
+        hasStylexStyle({ element, style: virtualContentStyles.wrapper }),
       ).toBe(false);
       expect(
-        hasEveryClass({ element, style: virtualContentStyles.outerContainer }),
+        hasStylexStyle({ element, style: virtualContentStyles.outerContainer }),
       ).toBe(false);
     }
 
     for (const row of bodyRows()) {
       expect(
-        hasEveryClass({ element: row, style: tableRowStyles.staticLayout(32) }),
+        hasStylexStyle({
+          element: row,
+          style: tableRowStyles.staticLayout(32),
+        }),
       ).toBe(true);
       expect(row.style.getPropertyValue('--x-height')).toBe('32px');
     }
@@ -215,7 +199,7 @@ describe('Table static layout', () => {
 
     expect(
       chain.some((element) =>
-        hasEveryClass({ element, style: virtualContentStyles.wrapper }),
+        hasStylexStyle({ element, style: virtualContentStyles.wrapper }),
       ),
     ).toBe(true);
   });
@@ -350,7 +334,7 @@ describe('Table element props', () => {
       expect(table.id).toBe('weekly-scores');
       expect(ref.current).toBe(table);
       expect(
-        hasEveryClass({
+        hasStylexStyle({
           element: table,
           style: tableBodyCellStyles.alignCenter,
         }),
@@ -425,25 +409,25 @@ describe('Table column alignment', () => {
       );
 
       expect(
-        hasEveryClass({
+        hasStylexStyle({
           element: cellOf('name'),
           style: tableBodyCellStyles.alignRight,
         }),
       ).toBe(true);
       expect(
-        hasEveryClass({
+        hasStylexStyle({
           element: cellOf('score'),
           style: tableBodyCellStyles.alignStart,
         }),
       ).toBe(true);
       expect(
-        hasEveryClass({
+        hasStylexStyle({
           element: cellOf('score'),
           style: tableBodyCellStyles.alignRight,
         }),
       ).toBe(false);
       expect(
-        hasEveryClass({
+        hasStylexStyle({
           element: headerOf('Name'),
           style: tableHeaderCellStyles.alignEnd,
         }),
@@ -457,19 +441,19 @@ describe('Table column alignment', () => {
     );
 
     expect(
-      hasEveryClass({
+      hasStylexStyle({
         element: cellOf('score'),
         style: tableBodyCellStyles.alignRight,
       }),
     ).toBe(true);
     expect(
-      hasEveryClass({
+      hasStylexStyle({
         element: cellOf('name'),
         style: tableBodyCellStyles.alignRight,
       }),
     ).toBe(false);
     expect(
-      hasEveryClass({
+      hasStylexStyle({
         element: headerOf('Score'),
         style: tableHeaderCellStyles.alignEnd,
       }),
@@ -494,7 +478,7 @@ describe('Table column alignment', () => {
     );
 
     expect(
-      hasEveryClass({
+      hasStylexStyle({
         element: cellOf('name'),
         style: tableBodyCellStyles.alignCenter,
       }),
