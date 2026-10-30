@@ -2,15 +2,15 @@
 id: ui-density-static-charts-adr
 title: Record density, static Table, framework-first and charts in an ADR
 owner: agent:claude
-status: active
+status: review
 branch: docs/1550-ui-density-static-charts-adr
 area:
-  - docs/decisions/**
-  - docs/product/**
+  - docs/decisions/ADR-146-build-application-ui-from-the-component-library.md
+  - docs/product/requirements/render-a-small-read-only-table-that-sizes-to-its-rows.md
 started: 2026-10-30
 updated: 2026-10-30
 plan: (none)
-pr: (none)
+pr: '#1571'
 issue: #1550
 ---
 
