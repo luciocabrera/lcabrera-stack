@@ -54,6 +54,19 @@ export const joinDiffs = (chunks) =>
     .map((chunk) => `${chunk}\n`)
     .join('');
 
+const FILE_SECTION = /^(?=diff --git )/mu;
+
+export const diffOfFiles = ({ diff, files }) => {
+  const wanted = new Set(files);
+  return joinDiffs(
+    diff.split(FILE_SECTION).filter((section) =>
+      parseDiff(section)
+        .keys()
+        .some((path) => wanted.has(path)),
+    ),
+  );
+};
+
 export const untrackedFileDiff = ({ content, path }) => {
   const lines = content.endsWith('\n')
     ? content.slice(0, -1).split('\n')
@@ -79,7 +92,7 @@ export const introducedChanges = ({ diff, files }) => {
   );
 };
 
-export const gitDiffArgs = ({ base, files }) => [
+export const gitDiffArgs = (base) => [
   '-c',
   'core.quotePath=false',
   'diff',
@@ -92,5 +105,4 @@ export const gitDiffArgs = ({ base, files }) => [
   '--find-renames',
   base,
   '--',
-  ...files,
 ];

@@ -226,7 +226,7 @@ describe('runGate — analyses judged by their report', () => {
       runGate({ argv: ['coverage-gaps'], base: 'abc', effects: fake.effects }),
     ).toBe(1);
     expect(fake.calls[1]).toEqual({
-      git: gitDiffArgs({ base: 'abc', files: [] }),
+      git: gitDiffArgs('abc'),
     });
     expect(fake.out.join('')).toBe(
       'fallow coverage-gaps: 1 finding(s) in the changed files:\n\n' +

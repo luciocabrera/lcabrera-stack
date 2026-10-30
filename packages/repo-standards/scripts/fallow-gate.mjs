@@ -109,12 +109,15 @@ export const mutationArgs = ({ base, diffFile, root }) => [
   root,
   '--changed-since',
   base,
-  ...(diffFile === undefined ? [] : ['--diff-file', diffFile]),
+  '--diff-file',
+  diffFile,
   '--min-score',
   '100',
   '--allow-dirty',
   '--quiet',
 ];
+
+export const isStyleModule = (file) => file.endsWith('.stylex.ts');
 
 export const mutationRoots = ({ files, workspaceDirs }) => {
   const byLength = workspaceDirs.toSorted(
@@ -132,7 +135,14 @@ export const mutationRoots = ({ files, workspaceDirs }) => {
       ...new Set(
         owners.map(({ root }) => root).filter((root) => root !== undefined),
       ),
-    ].toSorted(byName),
+    ]
+      .toSorted(byName)
+      .map((root) => ({
+        files: owners
+          .filter((owner) => owner.root === root)
+          .map(({ file }) => file),
+        root,
+      })),
   };
 };
 
