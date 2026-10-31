@@ -24,7 +24,9 @@ This document describes every layer of the AI config for this project — what e
     ├── architecture-guard.md
     ├── fallow-scan.md
     ├── refactor-builder.md   ← the developer role, for /refactor-verified and /epic
-    └── refactor-verifier.md  ← the blind reviewer role, for the same two
+    ├── refactor-verifier.md  ← the blind reviewer role, for the same two
+    ├── fp-judge.md           ← a blind false-positive judge, for `vp run adjudicate:panel`
+    └── fp-adversary.md       ← the panel seat that tries to prove the finding real
 
 .github/
 ├── ARCHITECTURE.md
@@ -142,8 +144,10 @@ Agents are sub-agents spawned explicitly by Claude (or by you) for isolated, hea
 | `fallow-scan`        | Runs full fallow pipeline in background, saves JSON + report                          | Bash, Read, Write                   | Before large refactors or after big merges                             |
 | `refactor-builder`   | Implements one issue in its own worktree; never certifies or merges it                | Bash, Read, Write, Edit, Glob, Grep | Dispatched by `/refactor-verified` and `/epic`                         |
 | `refactor-verifier`  | Certifies a diff against acceptance criteria, blind to the builder's reasoning        | Bash, Read, Write, Edit, Glob, Grep | Dispatched by the same two                                             |
+| `fp-judge`           | Rules one finding REAL or FALSE_POSITIVE from the case file alone                     | Read, Glob, Grep, Bash              | Two seats on each false-positive panel, `vp run adjudicate:panel`      |
+| `fp-adversary`       | Tries to prove one finding real from the case file alone                              | Read, Glob, Grep, Bash              | The third seat on each false-positive panel                            |
 
-The last two take **dispatch parameters** — whether to ready the PR, whether to
+`refactor-builder` and `refactor-verifier` take **dispatch parameters** — whether to ready the PR, whether to
 post findings to GitHub — because `/refactor-verified` and `/epic` want opposite
 answers and one agent with a parameter beats two agents that drift apart.
 

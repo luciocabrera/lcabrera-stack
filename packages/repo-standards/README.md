@@ -320,6 +320,7 @@ Claude Code:
     "adrTemplateHome": "docs/decisions",
     "coordinationBoardDoc": "docs/coordination/BOARD.md",
     "coordinationTasksDir": "docs/coordination/tasks",
+    "falsePositives": "docs/agents/false-positives.json",
     "planningDir": "docs/agents/planning",
     "requirementsDir": "docs/product/requirements"
   },
@@ -341,6 +342,13 @@ from: a runner that runs manifest scripts and nothing else is read from the
 manifests, while a toolchain that also resolves a config's own tasks is asked for
 its list. It defaults to the spelling that gate assumed before the key existed,
 so a repository that has never set it is read exactly as it was.
+
+`falsePositives` is the JSON array `repo-fallow-gate suppressions` reads. A
+`fallow-ignore` marker in a changed file passes only when its reason reads
+`false positive, case FP-nnnn: <reason>` and an entry for that case names
+`fallow` as `analyzer`, the marker's kind as `rule`, its file as `file`, and an
+`expires` date not yet past. A repository with no such file gets the gate as it
+was: every marker fails.
 
 `adrContentBaseline` is where the ADR gate keeps the records it grandfathers.
 It is held to the same containment rule as every other path here, and its default

@@ -111,8 +111,11 @@ gate skips what `gates.scriptSize.skipDirs` adds in `devkit.config.json`, the
 exits gate has its own fixed list, and a file under a directory only one of them
 skips is read by only one of them.
 
-Rule 11 applies here too: never silence a finding — fix the code. `packages/ui`
-scripts are held to the same never-baseline bar as the rest of that package.
+Rule 11 applies here too: never silence a finding — fix the code. The one
+exception is a false positive a blind panel confirmed
+([ADR-147](../../docs/decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md)).
+`packages/ui` scripts are held to the same never-baseline bar as the rest of
+that package.
 
 ## Config files
 

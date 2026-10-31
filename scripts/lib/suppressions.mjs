@@ -67,9 +67,38 @@ const ruleFrom = ({ directive, rest }) => {
     : `${directive} (unscoped)`;
 };
 
-const isDirectivePosition = (before) => {
+const QUOTES = new Set(["'", '"', '`']);
+
+const stringStep = (state, character) => {
+  if (state.comment) return state;
+  if (state.escaped) return { ...state, escaped: false };
+  if (state.quote !== undefined) {
+    if (character === '\\') return { ...state, escaped: true };
+    return character === state.quote ? { ...state, quote: undefined } : state;
+  }
+  if (QUOTES.has(character)) return { ...state, quote: character };
+  return character === '/' && state.previous === '/'
+    ? { ...state, comment: true }
+    : { ...state, previous: character };
+};
+
+const endsInsideString = (text) =>
+  [...text].reduce(stringStep, {
+    comment: false,
+    escaped: false,
+    quote: undefined,
+  }).quote !== undefined;
+
+export const opensComment = (before) => {
   const trimmed = before.trimEnd();
-  if (trimmed.endsWith('//') || trimmed.endsWith('/*')) return true;
+  return (
+    (trimmed.endsWith('//') || trimmed.endsWith('/*')) &&
+    !endsInsideString(trimmed)
+  );
+};
+
+const isDirectivePosition = (before) => {
+  if (opensComment(before)) return true;
   const leading = before.trim();
   return leading === '' || leading === '*';
 };
