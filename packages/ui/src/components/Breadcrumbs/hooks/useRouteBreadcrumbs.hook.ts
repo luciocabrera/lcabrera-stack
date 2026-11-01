@@ -10,7 +10,8 @@ const hasBreadcrumb = (match: UIMatch): match is BreadcrumbMatch => {
   const { handle } = match;
 
   return (
-    handle instanceof Object &&
+    typeof handle === 'object' &&
+    handle !== null &&
     'breadcrumb' in handle &&
     typeof handle.breadcrumb === 'function'
   );

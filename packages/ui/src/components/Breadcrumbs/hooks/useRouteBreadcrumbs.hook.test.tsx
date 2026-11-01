@@ -24,6 +24,11 @@ const rootHandle: BreadcrumbHandle = {
   breadcrumb: () => ({ label: 'Home', to: '/' }),
 };
 
+const nullPrototypeHandle: BreadcrumbHandle = Object.assign(
+  Object.create(null) as BreadcrumbHandle,
+  { breadcrumb: () => ({ label: 'Archive' }) },
+);
+
 const projectHandle: BreadcrumbHandle<ProjectData> = {
   breadcrumb: (match: UIMatch<ProjectData>) => ({
     label: match.loaderData?.name ?? 'Project',
@@ -49,8 +54,18 @@ const renderTrail = async (path: string) => {
                 { Component: TrailProbe, path: 'raw' },
                 {
                   Component: TrailProbe,
+                  handle: nullPrototypeHandle,
+                  path: 'archive',
+                },
+                {
+                  Component: TrailProbe,
                   handle: { breadcrumb: 'Not a function' },
                   path: 'malformed',
+                },
+                {
+                  Component: TrailProbe,
+                  handle: Reflect.getPrototypeOf(Object.prototype),
+                  path: 'null-handle',
                 },
               ],
               Component: Outlet,
@@ -105,6 +120,27 @@ describe('useRouteBreadcrumbs', () => {
     ];
 
     expect(await renderTrail('/projects/9/malformed')).toEqual(expected);
+  });
+
+  it('reads a handle created without a prototype', async () => {
+    const expected: readonly BreadcrumbItem[] = [
+      { label: 'Home', to: '/' },
+      { label: 'Project 5', to: '/projects/5' },
+      { label: 'Archive' },
+    ];
+
+    expect(Object.getPrototypeOf(nullPrototypeHandle)).toBeNull();
+    expect(await renderTrail('/projects/5/archive')).toEqual(expected);
+  });
+
+  it('skips a null handle', async () => {
+    const expected: readonly BreadcrumbItem[] = [
+      { label: 'Home', to: '/' },
+      { label: 'Project 3', to: '/projects/3' },
+    ];
+
+    expect(Reflect.getPrototypeOf(Object.prototype)).toBeNull();
+    expect(await renderTrail('/projects/3/null-handle')).toEqual(expected);
   });
 
   it('returns no items when no matched route declares a breadcrumb', async () => {
