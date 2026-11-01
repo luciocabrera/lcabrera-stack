@@ -4,6 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  diffOfFiles,
   gitDiffArgs,
   introducedChanges,
   joinDiffs,
@@ -188,6 +189,42 @@ describe('joinDiffs', () => {
   });
 });
 
+describe('diffOfFiles', () => {
+  const component =
+    'diff --git a/src/Button.tsx b/src/Button.tsx\n--- a/src/Button.tsx\n+++ b/src/Button.tsx\n@@ -3 +3 @@\n-old\n+new';
+  const styles =
+    'diff --git a/src/Button.stylex.ts b/src/Button.stylex.ts\n--- a/src/Button.stylex.ts\n+++ b/src/Button.stylex.ts\n@@ -1 +1,2 @@\n-a\n+b\n+c';
+  const renamed =
+    'diff --git a/src/old.ts b/src/new.ts\nsimilarity index 90%\nrename from src/old.ts\nrename to src/new.ts\n--- a/src/old.ts\n+++ b/src/new.ts\n@@ -2 +2 @@\n-x\n+y';
+  const diff = `${styles}\n${component}\n${renamed}\n`;
+
+  it('keeps only the sections of the named files, hunks included', () => {
+    expect(diffOfFiles({ diff, files: ['src/Button.tsx', 'src/new.ts'] })).toBe(
+      `${component}\n${renamed}\n`,
+    );
+  });
+
+  it('drops a file that is not named, leaving nothing of its hunks', () => {
+    const kept = diffOfFiles({ diff, files: ['src/Button.tsx'] });
+    expect(kept).not.toContain('stylex');
+    expect(parseDiff(kept)).toEqual(
+      new Map([['src/Button.tsx', { isNew: false, ranges: [[3, 3]] }]]),
+    );
+  });
+
+  it('splits only at a section header, not at the same text inside a changed line', () => {
+    const quoting =
+      "diff --git a/src/quote.ts b/src/quote.ts\n--- a/src/quote.ts\n+++ b/src/quote.ts\n@@ -1 +1 @@\n-x\n+const header = 'diff --git a/src/Button.tsx b/src/Button.tsx';";
+    expect(
+      diffOfFiles({ diff: `${quoting}\n${styles}\n`, files: ['src/quote.ts'] }),
+    ).toBe(`${quoting}\n`);
+  });
+
+  it('returns an empty diff when no named file is in it', () => {
+    expect(diffOfFiles({ diff, files: ['src/other.ts'] })).toBe('');
+  });
+});
+
 describe('untrackedFileDiff', () => {
   it('writes a new file as one hunk adding every line', () => {
     expect(untrackedFileDiff({ content: 'one\ntwo\n', path: 'n.mjs' })).toBe(
@@ -219,36 +256,69 @@ describe('untrackedFileDiff', () => {
 
 const git = (cwd, ...args) => runGitStatus({ args, cwd });
 
+const diffAfter = ({ base, change, config = [] }) => {
+  const root = mkdtempSync(join(tmpdir(), 'fallow-gate-diff-'));
+  try {
+    git(root, 'init', '-q');
+    git(root, 'config', 'user.email', 'gate@example.invalid');
+    git(root, 'config', 'user.name', 'gate');
+    for (const [key, value] of config) git(root, 'config', key, value);
+    mkdirSync(join(root, 'src'));
+    for (const [path, content] of base) {
+      writeFileSync(join(root, path), content);
+    }
+    git(root, 'add', '.');
+    git(root, 'commit', '-q', '-m', 'base');
+    change({ git: (...args) => git(root, ...args), root });
+    const diff = git(root, ...gitDiffArgs('HEAD'));
+    expect(diff.status).toBe(0);
+    return parseDiff(diff.stdout);
+  } finally {
+    rmSync(root, { force: true, recursive: true });
+  }
+};
+
 describe('gitDiffArgs against a user config that reshapes diffs', () => {
   it('still reads the right paths, a non-ASCII one included, with diff.noprefix, diff.mnemonicPrefix and core.quotePath set', () => {
-    const root = mkdtempSync(join(tmpdir(), 'fallow-gate-diff-'));
-    try {
-      git(root, 'init', '-q');
-      git(root, 'config', 'user.email', 'gate@example.invalid');
-      git(root, 'config', 'user.name', 'gate');
-      git(root, 'config', 'diff.noprefix', 'true');
-      git(root, 'config', 'diff.mnemonicPrefix', 'true');
-      git(root, 'config', 'diff.relative', 'true');
-      git(root, 'config', 'core.quotePath', 'true');
-      mkdirSync(join(root, 'src'));
-      writeFileSync(join(root, 'src', 'kept.mjs'), 'one\n');
-      git(root, 'add', '.');
-      git(root, 'commit', '-q', '-m', 'base');
-      writeFileSync(join(root, 'src', 'kept.mjs'), 'one\ntwo\n');
-      writeFileSync(join(root, 'src', 'added.mjs'), 'new\n');
-      writeFileSync(join(root, 'src', 'café.mjs'), 'accent\n');
-      git(root, 'add', 'src/added.mjs', 'src/café.mjs');
-      const diff = git(root, ...gitDiffArgs({ base: 'HEAD', files: [] }));
-      expect(diff.status).toBe(0);
-      expect(parseDiff(diff.stdout)).toEqual(
-        new Map([
-          ['src/added.mjs', { isNew: true, ranges: [[1, 1]] }],
-          ['src/café.mjs', { isNew: true, ranges: [[1, 1]] }],
-          ['src/kept.mjs', { isNew: false, ranges: [[2, 2]] }],
-        ]),
-      );
-    } finally {
-      rmSync(root, { force: true, recursive: true });
-    }
+    expect(
+      diffAfter({
+        base: [['src/kept.mjs', 'one\n']],
+        change: ({ git: run, root }) => {
+          writeFileSync(join(root, 'src', 'kept.mjs'), 'one\ntwo\n');
+          writeFileSync(join(root, 'src', 'added.mjs'), 'new\n');
+          writeFileSync(join(root, 'src', 'café.mjs'), 'accent\n');
+          run('add', 'src/added.mjs', 'src/café.mjs');
+        },
+        config: [
+          ['diff.noprefix', 'true'],
+          ['diff.mnemonicPrefix', 'true'],
+          ['diff.relative', 'true'],
+          ['core.quotePath', 'true'],
+        ],
+      }),
+    ).toEqual(
+      new Map([
+        ['src/added.mjs', { isNew: true, ranges: [[1, 1]] }],
+        ['src/café.mjs', { isNew: true, ranges: [[1, 1]] }],
+        ['src/kept.mjs', { isNew: false, ranges: [[2, 2]] }],
+      ]),
+    );
+  });
+
+  it('reads a renamed and edited file under its new path, as not new', () => {
+    const body = Array.from({ length: 20 }, (_, index) => `line ${index}`);
+    expect(
+      diffAfter({
+        base: [['src/old.mjs', `${body.join('\n')}\n`]],
+        change: ({ git: run, root }) => {
+          run('mv', 'src/old.mjs', 'src/new.mjs');
+          writeFileSync(
+            join(root, 'src', 'new.mjs'),
+            `${[...body, 'added'].join('\n')}\n`,
+          );
+          run('add', '.');
+        },
+      }),
+    ).toEqual(new Map([['src/new.mjs', { isNew: false, ranges: [[21, 21]] }]]));
   });
 });

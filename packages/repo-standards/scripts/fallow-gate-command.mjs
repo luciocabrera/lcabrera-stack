@@ -20,6 +20,7 @@ import { REPO_ROOT } from './changed-runner.mjs';
 import { withoutSeparator } from './cli-input.mjs';
 import { errorMessage } from './error-message.mjs';
 import {
+  diffOfFiles,
   gitDiffArgs,
   introducedChanges,
   joinDiffs,
@@ -38,6 +39,7 @@ import {
   COULD_NOT_RUN,
   fallowArgs,
   gateExit,
+  isStyleModule,
   mutationArgs,
   mutationRoots,
   NEEDS_BASE,
@@ -102,8 +104,8 @@ const assertModelReady = (effects) => {
   }
 };
 
-const readDiff = ({ base, effects, files = [] }) => {
-  const child = effects.git(gitDiffArgs({ base, files }));
+const readDiff = ({ base, effects }) => {
+  const child = effects.git(gitDiffArgs(base));
   if (child.exceeded !== undefined) {
     throw new Error(
       `git diff against ${base} is larger than the ${child.exceeded} bytes this gate reads, so no change can be attributed.`,
@@ -117,11 +119,10 @@ const readDiff = ({ base, effects, files = [] }) => {
   return child.stdout;
 };
 
-const outsideDiff = ({ base, effects, files }) => {
-  const tracked = readDiff({ base, effects, files });
-  const listed = parseDiff(tracked);
+const changesDiff = ({ diff, effects, files }) => {
+  const listed = parseDiff(diff);
   return joinDiffs([
-    tracked,
+    diffOfFiles({ diff, files }),
     ...files
       .filter((file) => !listed.has(file))
       .map((path) =>
@@ -161,13 +162,19 @@ const gateOnExitCode = ({ analysis, base, effects, files }) =>
       .status,
   });
 
-const mutateRoot = ({ base, diffFile, effects, root }) => {
+const mutateRoot = ({ base, diff, effects, files, root }) => {
   effects.write(`\nfallow mutation: ${root}\n`);
-  const status = gateExit({
-    analysis: 'mutation',
-    status: runFallow({ args: mutationArgs({ base, diffFile, root }), effects })
-      .status,
-  });
+  const status = effects.withTempFile(
+    changesDiff({ diff, effects, files }),
+    (diffFile) =>
+      gateExit({
+        analysis: 'mutation',
+        status: runFallow({
+          args: mutationArgs({ base, diffFile, root }),
+          effects,
+        }).status,
+      }),
+  );
   if (status === COULD_NOT_RUN) {
     effects.writeError(
       `repo-fallow-gate: fallow mutation could not run in ${root}.\n`,
@@ -176,29 +183,49 @@ const mutateRoot = ({ base, diffFile, effects, root }) => {
   return status;
 };
 
-const mutateOutside = ({ base, effects, outside }) => {
+const mutateOutside = ({ base, diff, effects, outside }) => {
   effects.write(
     `\nfallow mutation: ${outside.length} changed file(s) outside every workspace, from the repository root: ${outside.join(', ')}\n`,
   );
-  return effects.withTempFile(
-    outsideDiff({ base, effects, files: outside }),
-    (diffFile) =>
-      mutateRoot({ base, diffFile, effects, root: REPOSITORY_ROOT }),
-  );
+  return mutateRoot({
+    base,
+    diff,
+    effects,
+    files: outside,
+    root: REPOSITORY_ROOT,
+  });
 };
 
-const gateOnMutation = ({ base, effects, files }) => {
+const mutateFiles = ({ base, effects, files }) => {
+  const diff = readDiff({ base, effects });
   const { outside, roots } = mutationRoots({
     files,
     workspaceDirs: effects.workspaceDirs(),
   });
   const statuses = [
-    ...roots.map((root) => mutateRoot({ base, effects, root })),
+    ...roots.map(({ files: owned, root }) =>
+      mutateRoot({ base, diff, effects, files: owned, root }),
+    ),
     ...(outside.length === 0
       ? []
-      : [mutateOutside({ base, effects, outside })]),
+      : [mutateOutside({ base, diff, effects, outside })]),
   ];
   return statuses.includes(1) ? 1 : Math.max(0, ...statuses);
+};
+
+const gateOnMutation = ({ base, effects, files }) => {
+  const styleModules = files.filter(isStyleModule);
+  const mutable = files.filter((file) => !isStyleModule(file));
+  for (const file of styleModules) {
+    effects.write(`fallow mutation: not mutated (style module): ${file}\n`);
+  }
+  if (mutable.length === 0) {
+    effects.write(
+      'fallow mutation: no changed source file besides style modules, so there is nothing to mutate.\n',
+    );
+    return 0;
+  }
+  return mutateFiles({ base, effects, files: mutable });
 };
 
 const GATES = {

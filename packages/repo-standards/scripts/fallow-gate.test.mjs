@@ -6,6 +6,7 @@ import {
   COULD_NOT_RUN,
   fallowArgs,
   gateExit,
+  isStyleModule,
   mutationArgs,
   mutationRoots,
   NEEDS_BASE,
@@ -170,27 +171,17 @@ describe('fallowArgs', () => {
 });
 
 describe('mutationArgs', () => {
-  it('mutates the changed code of one root and fails below a full score', () => {
-    expect(mutationArgs({ base: 'abc', root: 'packages/utils' })).toEqual([
-      'mutation',
-      '--root',
-      'packages/utils',
-      '--changed-since',
-      'abc',
-      '--min-score',
-      '100',
-      '--allow-dirty',
-      '--quiet',
-    ]);
-  });
-
-  it('narrows a run to the lines of a diff file when given one', () => {
+  it('mutates the lines of a diff file in one root and fails below a full score', () => {
     expect(
-      mutationArgs({ base: 'abc', diffFile: '/tmp/x.diff', root: '.' }),
+      mutationArgs({
+        base: 'abc',
+        diffFile: '/tmp/x.diff',
+        root: 'packages/utils',
+      }),
     ).toEqual([
       'mutation',
       '--root',
-      '.',
+      'packages/utils',
       '--changed-since',
       'abc',
       '--diff-file',
@@ -214,7 +205,16 @@ describe('mutationRoots', () => {
         ],
         workspaceDirs: ['packages/ui', 'packages/ui-kit'],
       }),
-    ).toEqual({ outside: [], roots: ['packages/ui', 'packages/ui-kit'] });
+    ).toEqual({
+      outside: [],
+      roots: [
+        {
+          files: ['packages/ui/src/a.ts', 'packages/ui/src/c.ts'],
+          root: 'packages/ui',
+        },
+        { files: ['packages/ui-kit/src/b.ts'], root: 'packages/ui-kit' },
+      ],
+    });
   });
 
   it('prefers the deepest workspace when two contain the file', () => {
@@ -223,7 +223,12 @@ describe('mutationRoots', () => {
         files: ['packages/outer/inner/src/a.ts'],
         workspaceDirs: ['packages/outer', 'packages/outer/inner'],
       }).roots,
-    ).toEqual(['packages/outer/inner']);
+    ).toEqual([
+      {
+        files: ['packages/outer/inner/src/a.ts'],
+        root: 'packages/outer/inner',
+      },
+    ]);
   });
 
   it('keeps every file outside the workspaces for the repository-root run', () => {
@@ -243,6 +248,19 @@ describe('mutationRoots', () => {
       outside: ['src/a.mjs'],
       roots: [],
     });
+  });
+});
+
+describe('isStyleModule', () => {
+  it.each([
+    ['packages/ui/src/Button/Button.stylex.ts', true],
+    ['packages/ui/src/tokens.stylex.ts', true],
+    ['packages/ui/src/Button/Button.tsx', false],
+    ['packages/ui/src/stylex.ts', false],
+    ['packages/ui/src/Button/Button.stylex.tsx', false],
+    ['packages/ui/src/Button/Button.stylex.test.ts', false],
+  ])('%s is a style module: %s', (file, expected) => {
+    expect(isStyleModule(file)).toBe(expected);
   });
 });
 

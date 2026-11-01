@@ -129,7 +129,16 @@ describe('readWorkspaceGraph over a layout outside apps/ and packages/', () => {
         files: ['tools/cli/src/a.ts', 'packages/group/alpha/src/b.ts'],
         workspaceDirs,
       }),
-    ).toEqual({ outside: [], roots: ['packages/group/alpha', 'tools/cli'] });
+    ).toEqual({
+      outside: [],
+      roots: [
+        {
+          files: ['packages/group/alpha/src/b.ts'],
+          root: 'packages/group/alpha',
+        },
+        { files: ['tools/cli/src/a.ts'], root: 'tools/cli' },
+      ],
+    });
   });
 });
 
