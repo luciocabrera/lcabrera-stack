@@ -25,4 +25,4 @@ export const getInlineClassName = ({
     isPending && styles.inline.pending,
     isBusy && styles.busyLink,
     customStylex,
-  ).className ?? '';
+  ).className;

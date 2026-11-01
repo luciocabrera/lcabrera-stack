@@ -108,6 +108,21 @@ describe('NavLink', () => {
     );
     expect(screen.getByText('icon-element').textContent).toBe('icon-element');
     expect(screen.getByText('Settings').textContent).toBe('Settings');
+
+    const iconSlot = screen.getByText('icon-element').parentElement;
+
+    expect(
+      hasStylexStyle({
+        element: iconSlot as Element,
+        style: linkItemStyles.icon,
+      }),
+    ).toBe(true);
+    expect(
+      hasStylexStyle({
+        element: iconSlot as Element,
+        style: linkItemStyles.inline.icon,
+      }),
+    ).toBe(false);
   });
 
   it('renders the busy shimmer overlay and disables the link when isBusy is true', () => {

@@ -17,7 +17,7 @@ const getClasses = (
     isPending: false,
     styles: linkItemStyles,
     ...args,
-  }).split(' ');
+  })?.split(' ');
 
 describe('getInlineClassName', () => {
   it('applies only the inline link style when idle', () => {
