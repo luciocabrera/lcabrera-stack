@@ -21,7 +21,7 @@ const exists = (path) => {
 };
 
 const nearestEntry = (path) =>
-  exists(path) || dirname(path) === path ? path : nearestEntry(dirname(path));
+  exists(path) ? path : nearestEntry(dirname(path));
 
 const realOf = (path) => {
   try {

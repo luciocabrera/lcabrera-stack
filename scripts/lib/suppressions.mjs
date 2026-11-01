@@ -79,42 +79,24 @@ const inString = (state, character) => {
     : state;
 };
 
-const inBlock = (state, character) =>
-  state.previous === '*' && character === '/'
-    ? { ...state, block: false, previous: '' }
-    : { ...state, previous: character };
-
-const afterSlash = (state, character) => {
-  if (character === '/') return { ...state, comment: true };
-  if (character === '*') return { ...state, block: true, previous: '' };
-  return { ...state, uncertain: true };
-};
-
 const inCode = (state, character) => {
-  if (state.previous === '/') return afterSlash(state, character);
+  if (character === '/') return { ...state, uncertain: true };
   if (QUOTES.has(character)) {
     return PRECEDES_VALUE.test(state.significant)
       ? { ...state, uncertain: true }
       : { ...state, quote: character };
   }
-  return {
-    ...state,
-    previous: character,
-    significant: character.trim() === '' ? state.significant : character,
-  };
+  return character.trim() === '' ? state : { ...state, significant: character };
 };
 
 const stringStep = (state, character) => {
-  if (state.comment || state.uncertain) return state;
-  if (state.quote !== undefined) return inString(state, character);
-  return state.block ? inBlock(state, character) : inCode(state, character);
+  if (state.uncertain) return state;
+  return state.quote === undefined
+    ? inCode(state, character)
+    : inString(state, character);
 };
 
 const LINE_START = {
-  block: false,
-  comment: false,
-  escaped: false,
-  previous: '',
   quote: undefined,
   significant: '',
   uncertain: false,

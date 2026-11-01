@@ -104,6 +104,8 @@ describe('findInlineSuppressions', () => {
     ).toHaveLength(1);
     expect(inline("x(); /* it's */ // NOSONAR 'y'")).toHaveLength(1);
     expect(inline("const f = g('a', '// NOSONAR');")).toHaveLength(0);
+    expect(inline("It's ('// NOSONAR')")).toHaveLength(1);
+    expect(inline("x '// NOSONAR'")).toHaveLength(1);
     expect(inline("const f = ['a', 'b'] + '// NOSONAR';")).toHaveLength(0);
   });
 
