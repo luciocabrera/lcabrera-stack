@@ -156,21 +156,8 @@ const namesFileWithin = ({ file, value }) =>
     namesFileWithin({ file, value: child.value }),
   );
 
-const isRecordList = (field) =>
-  Array.isArray(field) &&
-  field.some(
-    (item) =>
-      isPlainObject(item) &&
-      Object.values(item).some((entry) => typeof entry === 'string'),
-  );
-
-const ownFields = (value) =>
-  Object.fromEntries(
-    Object.entries(value).filter(([, field]) => !isRecordList(field)),
-  );
-
 const isMatch = ({ context, finding, value }) => {
-  const own = ownFields(value);
+  const own = value;
   return (
     (context.fileSeen || namesFileWithin({ file: finding.file, value: own })) &&
     (finding.ruleNeedle === '' ||

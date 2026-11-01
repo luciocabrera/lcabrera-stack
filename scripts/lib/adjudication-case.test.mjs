@@ -83,6 +83,23 @@ describe('matchingRecords — the shapes each analyzer prints', () => {
   });
 
   it.each([
+    ['no-console', { code: 'eslint(no-console) and more' }],
+    ['no-console', { code: 'see eslint(no-console)' }],
+    ['7/r', { plugin: 7, rule: 'r' }],
+  ])(
+    'does not read the rule %s from a record spelled %j',
+    (ruleNeedle, fields) => {
+      const record = { ...fields, file: 'packages/a/src/a.ts', line: 3 };
+      expect(
+        matchingRecords({
+          finding: finding({ ruleNeedle }),
+          report: { items: [record] },
+        }),
+      ).toEqual([]);
+    },
+  );
+
+  it.each([
     [
       'typescript-eslint/no-unused-vars',
       { code: 'typescript-eslint(no-unused-vars)' },
