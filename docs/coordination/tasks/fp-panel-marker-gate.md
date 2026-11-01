@@ -10,6 +10,10 @@ area:
   - scripts/lib/*suppression*
   - scripts/lib/*adjudicat*
   - scripts/lib/false-positive*
+  - scripts/lib/panel-tree*
+  - scripts/lib/panel-scope*
+  - scripts/lib/tool-paths*
+  - scripts/lib/comment-directives*
   - scripts/lib/suppressions*
   - docs/agents/adjudications/**
   - docs/agents/false-positives.json

@@ -109,6 +109,11 @@ describe('findInlineSuppressions', () => {
   it('finds a comment inside a template interpolation', () => {
     expect(inline('const t = `a ${/* NOSONAR */ b} c`;')).toHaveLength(1);
     expect(
+      inline(
+        "const s = `${/* eslint-disable no-console */ console.log('x')}`;",
+      ),
+    ).toHaveLength(1);
+    expect(
       inline('const t = `a ${b // eslint-disable-line no-console\n} c`;'),
     ).toHaveLength(1);
   });
