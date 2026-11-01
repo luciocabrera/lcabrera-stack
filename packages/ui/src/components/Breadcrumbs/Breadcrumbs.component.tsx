@@ -4,7 +4,7 @@ import type { BreadcrumbsProps } from './Breadcrumbs.types';
 
 import { styles } from './Breadcrumbs.stylex';
 import { BreadcrumbsItem } from './BreadcrumbsItem/BreadcrumbsItem.component';
-import { getBreadcrumbKey } from './utils/getBreadcrumbKey.util';
+import { toBreadcrumbEntries } from './utils/toBreadcrumbEntries.util';
 
 export const Breadcrumbs = ({
   items,
@@ -12,17 +12,11 @@ export const Breadcrumbs = ({
 }: BreadcrumbsProps) => {
   if (items.length === 0) return;
 
-  const lastIndex = items.length - 1;
-
   return (
     <nav aria-label={label}>
       <ol {...stylex.props(styles.list)}>
-        {items.map((item, index) => (
-          <BreadcrumbsItem
-            isCurrent={index === lastIndex}
-            item={item}
-            key={getBreadcrumbKey(item)}
-          />
+        {toBreadcrumbEntries(items).map(({ identity, isCurrent, item }) => (
+          <BreadcrumbsItem isCurrent={isCurrent} item={item} key={identity} />
         ))}
       </ol>
     </nav>

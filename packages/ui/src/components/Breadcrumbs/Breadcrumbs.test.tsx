@@ -125,6 +125,14 @@ describe('Breadcrumbs', () => {
     expect(container.firstChild).toBeNull();
   });
 
+  it('keeps label-only items that share a label apart', () => {
+    renderInMemoryRouter({
+      items: [{ label: 'Section' }, { label: 'Section' }, { label: 'End' }],
+    });
+
+    expect(screen.getAllByText('Section')).toHaveLength(2);
+  });
+
   it('keeps items that share a label apart', () => {
     renderInMemoryRouter({
       items: [
