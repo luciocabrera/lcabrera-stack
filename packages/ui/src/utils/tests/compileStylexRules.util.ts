@@ -7,7 +7,7 @@ import stylexUnplugin from '@stylexjs/unplugin';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-export type CompiledStylexRule = {
+type CompiledStylexRule = {
   readonly className: string;
   readonly property: string;
   readonly pseudo: string;

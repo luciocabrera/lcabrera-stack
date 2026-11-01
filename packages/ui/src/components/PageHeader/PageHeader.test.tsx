@@ -6,14 +6,14 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import type { BreadcrumbHandle } from '#ui/components/Breadcrumbs';
 
-import { styles as textStyles } from '#ui/components/Text/Text.stylex';
+import { Text } from '#ui/components/Text';
 import { styles as titleStyles } from '#ui/components/Title/Title.stylex';
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
 import type { PageHeaderProps } from './PageHeader.types';
 
-import { PageHeader } from './PageHeader.component';
+import { PageHeader } from '.';
 
 afterEach(cleanup);
 
@@ -85,12 +85,13 @@ describe('PageHeader', () => {
     const description = screen.getByText('Filed this quarter').parentElement;
 
     expect(description?.tagName).toBe('DIV');
-    expect(
-      hasStylexStyle({
-        element: description as Element,
-        style: textStyles.tone.secondary,
-      }),
-    ).toBe(true);
+    expect(description?.className).toBe(
+      render(
+        <Text as='div' tone='secondary'>
+          Reference
+        </Text>,
+      ).getByText('Reference').className,
+    );
   });
 
   it('omits the description when none is given', () => {
