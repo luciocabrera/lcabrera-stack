@@ -105,6 +105,44 @@ describe('PageHeader', () => {
     expect(header?.childElementCount).toBe(1);
   });
 
+  it.each([
+    { description: 0, text: '0' },
+    { description: 0n, text: '0' },
+  ])('keeps a description of $description', ({ description, text }) => {
+    const { container } = renderInMemoryRouter({
+      breadcrumbs: [],
+      description,
+      title: 'Reports',
+    });
+
+    const header = container.querySelector('header');
+
+    expect(header?.childElementCount).toBe(2);
+    expect(header?.lastElementChild?.textContent).toBe(text);
+  });
+
+  it.each([false, ''])('omits a description of %j', (description) => {
+    const { container } = renderInMemoryRouter({
+      breadcrumbs: [],
+      description,
+      title: 'Reports',
+    });
+
+    expect(container.querySelector('header')?.childElementCount).toBe(1);
+  });
+
+  it('names the breadcrumb landmark from breadcrumbLabel', () => {
+    renderInMemoryRouter({
+      breadcrumbLabel: 'You are here',
+      breadcrumbs: BREADCRUMBS,
+      title: 'Reports',
+    });
+
+    expect(
+      screen.getByRole('navigation', { name: 'You are here' }),
+    ).not.toBeNull();
+  });
+
   it('renders the actions beside the heading', () => {
     renderInMemoryRouter({
       actions: <button type='button'>Export</button>,
@@ -157,6 +195,31 @@ describe('PageHeader', () => {
     expect(within(nav).getByText('Reports').getAttribute('aria-current')).toBe(
       'page',
     );
+  });
+
+  it('names the route-derived breadcrumb landmark from breadcrumbLabel', async () => {
+    const Stub = createRoutesStub([
+      {
+        children: [
+          {
+            Component: () => (
+              <PageHeader breadcrumbLabel='Trail' title='Reports' />
+            ),
+            handle: reportsHandle,
+            path: 'reports',
+          },
+        ],
+        Component: Outlet,
+        handle: rootHandle,
+        path: '/',
+      },
+    ]);
+
+    render(<Stub initialEntries={['/reports']} />);
+
+    expect(
+      await screen.findByRole('navigation', { name: 'Trail' }),
+    ).not.toBeNull();
   });
 
   it('throws without a data router when no breadcrumbs are given', () => {
