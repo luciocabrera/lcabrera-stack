@@ -62,7 +62,13 @@ baseline and no marker the panel did not confirm.
    analyzer's own next-line marker, in the form
    `<marker> <rule> -- false positive, case FP-nnnn: <one-line reason>`
    (`<marker> <rule>: false positive, …` for Biome). All REAL: fix it, no
-   marker. A split: stop and ask the repository owner.
+   marker. A split: stop and ask the repository owner. Every outcome's
+   envelope is committed under `docs/agents/adjudications/`, so the history
+   keeps each verdict, and a new case takes the next number after every case
+   in the working tree and on the default branch. Two branches opening a case
+   at once can pick the same number. Git then refuses the second merge as an
+   add/add conflict on `FP-nnnn.json`, which is the collision showing itself
+   rather than a silent overwrite.
 6. **The upstream draft is never posted** to the analyzer's tracker without the
    owner's explicit yes.
 

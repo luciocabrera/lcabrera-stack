@@ -347,7 +347,7 @@ so a repository that has never set it is read exactly as it was.
 `fallow-ignore` marker in a changed file passes only when its reason reads
 `false positive, case FP-nnnn: <reason>` and an entry for that case names
 `fallow` as `analyzer`, the marker's kind as `rule`, its file as `file`, and an
-`expires` date not yet past. A repository with no such file gets the gate as it
+`expires` that is a real `YYYY-MM-DD` calendar day not yet past. A repository with no such file gets the gate as it
 was: every marker fails.
 
 `adrContentBaseline` is where the ADR gate keeps the records it grandfathers.

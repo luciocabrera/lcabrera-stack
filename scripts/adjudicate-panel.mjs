@@ -18,7 +18,6 @@ import {
   existsSync,
   mkdirSync,
   readFileSync,
-  renameSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
@@ -33,8 +32,9 @@ import {
   timedDrain,
 } from '../evals/agent-sessions.mjs';
 import { agentBody } from '../evals/verifier-fixtures/verifier-fixtures.mjs';
+import { readRegisters } from '../packages/repo-standards/scripts/config.mjs';
 import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
-import { CASES_DIR, UNTRACKED_CASES_DIR } from './lib/adjudicate-command.mjs';
+import { CASES_DIR } from './lib/adjudicate-command.mjs';
 import {
   dispatchPrompt,
   envelopeFor,
@@ -52,7 +52,7 @@ import { exportCaseTree } from './lib/panel-tree.mjs';
 import { caseIdFrom, repoPath } from './lib/tool-paths.mjs';
 
 const ROOT = process.cwd();
-const LIST = 'docs/agents/false-positives.json';
+const LIST = readRegisters(ROOT).falsePositives;
 const MAX_TURNS = 80;
 
 const inRepo = (path) => repoPath({ path, root: ROOT });
@@ -164,18 +164,14 @@ const recordDismissal = ({ caseDir, caseFile, envelope }) => {
   return `Dismissed unanimously. Recorded ${evidence} and the ${LIST} entry. Add this marker above line ${caseFile.code.start} of ${caseFile.case.file}:\n  ${markerSpelling({ analyzer: caseFile.case.analyzer, caseId: caseFile.case.case_id, reason: '<one-line reason>', rule: caseFile.case.rule })}\nThe upstream draft is ${caseDir}/upstream.md; never post it without the owner's explicit yes.\n`;
 };
 
-const recordOther = ({ caseDir, caseFile, envelope }) => {
-  const caseId = caseFile.case.case_id;
-  write(
-    `${UNTRACKED_CASES_DIR}/${caseId}.json`,
-    `${JSON.stringify(envelope, null, 2)}\n`,
-  );
-  renameSync(inRepo(caseDir), inRepo(`${UNTRACKED_CASES_DIR}/${caseId}`));
+const recordOther = ({ caseFile, envelope }) => {
+  const record = `${CASES_DIR}/${caseFile.case.case_id}.json`;
+  write(record, `${JSON.stringify(envelope, null, 2)}\n`);
   const next =
     envelope.outcome === 'fixed'
       ? 'The panel ruled REAL. Apply a fix from the verdicts; no marker.'
       : 'The panel split. Stop and ask the repository owner; do not mark or dismiss it.';
-  return `${next}\nThe record is ${UNTRACKED_CASES_DIR}/${caseId}.json, for vp run evals:ingest.\n`;
+  return `${next}\nCommit the record ${record} and its case directory: every verdict is kept, and the number stays taken.\n`;
 };
 
 const main = async () => {

@@ -1,17 +1,48 @@
 /**
  * Where the adjudication commands may read, write and spawn: a path is kept
- * only when it resolves inside the repository root, and a tool runs as its
- * own JavaScript entry under the running Node, never through a PATH lookup.
+ * only when it resolves inside the repository root with symlinks followed,
+ * and a tool runs as its own JavaScript entry under the running Node, never
+ * through a PATH lookup.
  */
+import { lstatSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
-import { dirname, join, resolve, sep } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
+
+const within = ({ path, root }) =>
+  path === root || path.startsWith(`${root}${sep}`);
+
+const exists = (path) => {
+  try {
+    lstatSync(path);
+    return true;
+  } catch {
+    return false;
+  }
+};
+
+const nearestEntry = (path) =>
+  exists(path) || dirname(path) === path ? path : nearestEntry(dirname(path));
+
+const realOf = (path) => {
+  try {
+    return realpathSync(path);
+  } catch {
+    return undefined;
+  }
+};
 
 export const repoPath = ({ path, root }) => {
   const resolved = resolve(root, path);
-  if (resolved !== root && !resolved.startsWith(`${root}${sep}`)) {
+  const entry = nearestEntry(resolved);
+  const real = realOf(entry);
+  if (
+    !within({ path: resolved, root: resolve(root) }) ||
+    real === undefined ||
+    !within({ path: real, root: realpathSync(root) })
+  ) {
     throw new Error(`${path} resolves outside the repository`);
   }
-  return resolved;
+  return join(real, relative(entry, resolved));
 };
 
 const CASE_ID = /^FP-\d{4}$/u;

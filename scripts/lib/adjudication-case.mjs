@@ -64,6 +64,11 @@ export const parseFindingId = (findingId) => {
   return parsed;
 };
 
+export const takenCaseNames = ({ committed, local }) => [
+  ...local,
+  ...committed.map((path) => path.split('/').at(-1)),
+];
+
 export const nextCaseId = (names) => {
   const highest = Math.max(
     0,
@@ -112,14 +117,31 @@ const namesFileWithin = ({ file, value }) =>
     namesFileWithin({ file, value: child.value }),
   );
 
-const isMatch = ({ context, finding, value }) =>
-  (context.fileSeen || namesFileWithin({ file: finding.file, value })) &&
-  normalized(`${context.keys} ${JSON.stringify(value)}`).includes(
-    normalized(finding.ruleNeedle),
-  ) &&
-  lineNumbers(value).some(
-    (line) => line >= finding.start && line <= finding.end,
+const isRecordList = (field) =>
+  Array.isArray(field) &&
+  field.some(
+    (item) =>
+      isPlainObject(item) &&
+      Object.values(item).some((entry) => typeof entry === 'string'),
   );
+
+const ownFields = (value) =>
+  Object.fromEntries(
+    Object.entries(value).filter(([, field]) => !isRecordList(field)),
+  );
+
+const isMatch = ({ context, finding, value }) => {
+  const own = ownFields(value);
+  return (
+    (context.fileSeen || namesFileWithin({ file: finding.file, value: own })) &&
+    normalized(`${context.keys} ${JSON.stringify(own)}`).includes(
+      normalized(finding.ruleNeedle),
+    ) &&
+    lineNumbers(own).some(
+      (line) => line >= finding.start && line <= finding.end,
+    )
+  );
+};
 
 const collect = ({ context, finding, value }) => {
   const here = {

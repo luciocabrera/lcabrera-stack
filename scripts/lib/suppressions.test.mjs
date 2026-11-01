@@ -76,7 +76,7 @@ describe('findInlineSuppressions', () => {
     expect(inline('call("done"); // NOSONAR')).toHaveLength(1);
     expect(inline(String.raw`const s = 'it\'s'; // NOSONAR`)).toHaveLength(1);
     expect(inline("x(); // don't // NOSONAR")).toHaveLength(1);
-    expect(inline("const s = a / b + '// NOSONAR';")).toHaveLength(0);
+    expect(inline("const s = a / b + '// NOSONAR';")).toHaveLength(1);
     expect(inline("'// NOSONAR';")).toHaveLength(0);
   });
 
@@ -90,7 +90,21 @@ describe('findInlineSuppressions', () => {
 
   it('reads a quote after a comment as comment text, not as a string', () => {
     expect(inline("x(); // it's a // NOSONAR 'y'")).toHaveLength(1);
-    expect(inline("x(); /'/ // NOSONAR 'y'")).toHaveLength(0);
+    expect(inline("x(); /'/ // NOSONAR 'y'")).toHaveLength(1);
+  });
+
+  it('fails closed on a regex literal and on JSX text, whatever follows', () => {
+    expect(
+      inline(
+        "const re = /don't/; // eslint-disable-next-line no-console -- don't warn",
+      ),
+    ).toHaveLength(1);
+    expect(
+      inline("<p>It's {/* biome-ignore lint/a11y/x: why */} and don't</p>"),
+    ).toHaveLength(1);
+    expect(inline("x(); /* it's */ // NOSONAR 'y'")).toHaveLength(1);
+    expect(inline("const f = g('a', '// NOSONAR');")).toHaveLength(0);
+    expect(inline("const f = ['a', 'b'] + '// NOSONAR';")).toHaveLength(0);
   });
 
   it('closes a string only on an unescaped quote of its own kind', () => {

@@ -5,6 +5,8 @@
  * passes only when a live entry of the false-positive list names its case.
  * Pure: no I/O.
  */
+import { isCalendarDate } from './calendar-date.mjs';
+
 const ADJUDICATED_REASON = /^false positive, case (FP-\d{4,}): \S/u;
 
 const isAdjudicated = ({ adjudicated, kind, path, reason, today }) => {
@@ -17,7 +19,7 @@ const isAdjudicated = ({ adjudicated, kind, path, reason, today }) => {
         entry.analyzer === 'fallow' &&
         entry.rule === kind &&
         entry.file === path &&
-        typeof entry.expires === 'string' &&
+        isCalendarDate(entry.expires) &&
         entry.expires >= today,
     )
   );

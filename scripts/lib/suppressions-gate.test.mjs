@@ -227,6 +227,17 @@ describe('verify-suppressions — panel-confirmed false positives', () => {
     expect(result.status).toBe(0);
   });
 
+  it('still counts a second directive on the line of a confirmed marker', () => {
+    const root = settledRoot();
+    writeFalsePositiveCase(root, {
+      marker: `${FP_MARKER} /* oxlint-disable no-console */`,
+    });
+    const result = runGate(root);
+    expect(result.status).not.toBe(0);
+    expect(result.stdout).toContain(`inline ${FP_FILE} no-console`);
+    expect(result.stdout).not.toContain('some/rule');
+  });
+
   it('fails the same marker once its entry has expired', () => {
     const root = settledRoot();
     writeFalsePositiveCase(root, { expires: '2020-01-01' });

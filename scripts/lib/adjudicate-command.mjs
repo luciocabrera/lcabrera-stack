@@ -16,8 +16,6 @@ import {
 
 export const CASES_DIR = 'docs/agents/adjudications';
 
-export const UNTRACKED_CASES_DIR = '.tmp/eval-results/adjudications';
-
 const USAGE =
   'usage: vp run adjudicate -- <analyzer> <file>:<line>[-<end line>]:<rule> [--trace <target>] [--pr <number>]';
 

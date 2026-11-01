@@ -69,20 +69,56 @@ const ruleFrom = ({ directive, rest }) => {
 
 const QUOTES = new Set(["'", '"', '`']);
 
-const stringStep = (state, character) => {
-  if (state.comment) return state;
+const PRECEDES_VALUE = /[\w)\]'"`]/u;
+
+const inString = (state, character) => {
   if (state.escaped) return { ...state, escaped: false };
-  if (state.quote !== undefined) {
-    if (character === '\\') return { ...state, escaped: true };
-    return character === state.quote ? { ...state, quote: undefined } : state;
-  }
-  if (QUOTES.has(character)) return { ...state, quote: character };
-  return character === '/' && state.previous === '/'
-    ? { ...state, comment: true }
-    : { ...state, previous: character };
+  if (character === '\\') return { ...state, escaped: true };
+  return character === state.quote
+    ? { ...state, quote: undefined, significant: character }
+    : state;
 };
 
-const LINE_START = { comment: false, escaped: false, quote: undefined };
+const inBlock = (state, character) =>
+  state.previous === '*' && character === '/'
+    ? { ...state, block: false, previous: '' }
+    : { ...state, previous: character };
+
+const afterSlash = (state, character) => {
+  if (character === '/') return { ...state, comment: true };
+  if (character === '*') return { ...state, block: true, previous: '' };
+  return { ...state, uncertain: true };
+};
+
+const inCode = (state, character) => {
+  if (state.previous === '/') return afterSlash(state, character);
+  if (QUOTES.has(character)) {
+    return PRECEDES_VALUE.test(state.significant)
+      ? { ...state, uncertain: true }
+      : { ...state, quote: character };
+  }
+  return {
+    ...state,
+    previous: character,
+    significant: character.trim() === '' ? state.significant : character,
+  };
+};
+
+const stringStep = (state, character) => {
+  if (state.comment || state.uncertain) return state;
+  if (state.quote !== undefined) return inString(state, character);
+  return state.block ? inBlock(state, character) : inCode(state, character);
+};
+
+const LINE_START = {
+  block: false,
+  comment: false,
+  escaped: false,
+  previous: '',
+  quote: undefined,
+  significant: '',
+  uncertain: false,
+};
 
 const stateAfter = (text) =>
   [...text].reduce(
@@ -119,6 +155,7 @@ export const findInlineSuppressions = ({ file, text }) =>
     [...line.matchAll(DIRECTIVE_PATTERN)]
       .filter((match) => isDirectivePosition({ index: match.index, line }))
       .map((match) => ({
+        column: match.index,
         directive: match[0],
         file,
         kind: 'inline',

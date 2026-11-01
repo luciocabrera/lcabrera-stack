@@ -2,7 +2,7 @@
 id: fp-panel-marker-gate
 title: Add the blind false-positive panel and the marker gate
 owner: agent:claude
-status: active
+status: review
 branch: feat/1554-fp-panel-marker-gate
 area:
   - scripts/adjudicate*
@@ -28,6 +28,7 @@ area:
   - COMMANDS.md
   - packages/repo-standards/scripts/fallow-gate*
   - packages/repo-standards/scripts/false-positive-list*
+  - packages/repo-standards/scripts/calendar-date*
   - packages/repo-standards/ARCHITECTURE.md
   - reports/api-surface/repo-standards.txt
   - packages/repo-standards/scripts/config*
@@ -36,7 +37,7 @@ area:
   - packages/devkit/CLASSIFICATION.md
   - .changeset/fallow-gate-false-positives.md
 started: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-01
 plan: (none)
 pr: #1580
 issue: #1554

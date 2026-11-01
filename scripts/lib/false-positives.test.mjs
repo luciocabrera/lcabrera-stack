@@ -132,11 +132,11 @@ describe('checkFalsePositives — each condition fails on its own', () => {
     ]);
   });
 
-  it('fails a marker that claims a false positive but names no case', () => {
+  it('reads prose that is not the claim form as no marker at all', () => {
     const text = source(
       '// fallow-ignore-next-line security/sql-concat -- false positive: trust me',
     );
-    expect(kinds(check({ text }))).toEqual(['no-case', 'unmarked']);
+    expect(kinds(check({ text }))).toEqual(['unmarked']);
   });
 
   it('fails an edited line, because the hash no longer matches', () => {
@@ -144,6 +144,17 @@ describe('checkFalsePositives — each condition fails on its own', () => {
       'export const query = (table) => "select id from " + table;',
     ]);
     expect(kinds(check({ text }))).toEqual(['hash']);
+  });
+
+  it('tells a marker that moved away from unchanged lines apart from an edit', () => {
+    const text = [marker(), 'export const other = 1;', ...FLAGGED, ''].join(
+      '\n',
+    );
+    const problems = check({ text });
+    expect(kinds(problems)).toEqual(['misplaced']);
+    expect(messages(problems)).toEqual([
+      `the flagged lines start at line 3, not under the marker at ${FILE}:1; move the marker above them`,
+    ]);
   });
 
   it('fails an expired entry', () => {
@@ -308,6 +319,8 @@ describe('checkFalsePositives — the edges of each condition', () => {
     ['a fractional line count', { lines: 1.5 }],
     ['a date with a prefix', { expires: 'x2027-04-29' }],
     ['a date with a suffix', { expires: '2027-04-29x' }],
+    ['an expiry of never', { expires: 'never' }],
+    ['a day the calendar does not have', { expires: '2027-02-30' }],
   ])('fails an entry with %s, once', (_label, change) => {
     expect(kinds(check({ entries: [{ ...ENTRY, ...change }] }))).toEqual([
       'entry',

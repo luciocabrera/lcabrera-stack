@@ -83,6 +83,7 @@ describe('findClaimedMarkers — every directive', () => {
       expect(found).toEqual({
         analyzer,
         caseId: 'FP-0001',
+        column: 3,
         directive,
         file: FILE,
         line: 1,
@@ -136,29 +137,25 @@ describe('findClaimedMarkers — the explanation', () => {
     ).toBe('why');
   });
 
-  it('reads a Biome marker with no colon as one rule naming no case', () => {
-    expect(
-      read('// biome-ignore lint/x/y false positive FP-0004'),
-    ).toMatchObject({
-      caseId: undefined,
-      reason: '',
-      rule: 'lint/x/y false positive FP-0004',
-    });
+  it.each([
+    '// biome-ignore lint/x/y false positive FP-0004',
+    '// eslint-disable-next-line r -- see FP-0005',
+    '// eslint-disable-next-line r -- see false positive, case FP-0006: x',
+    '// eslint-disable-next-line r -- false positive, FP-0006: x',
+  ])('reads prose that is not the claim form as no marker: %s', (text) => {
+    expect(findClaimedMarkers({ file: FILE, text })).toEqual([]);
   });
 
-  it('claims a marker that names a case without the words', () => {
-    expect(read('// eslint-disable-next-line r -- see FP-0005')).toMatchObject({
-      caseId: 'FP-0005',
-      reason: '',
-    });
-  });
-
-  it('gives no reason when the explanation does not start with the claim', () => {
-    expect(
-      read(
-        '// eslint-disable-next-line r -- see false positive, case FP-0006: x',
-      ),
-    ).toMatchObject({ caseId: 'FP-0006', reason: '' });
+  it('reads each directive on a line on its own', () => {
+    const text =
+      '// eslint-disable-next-line r -- false positive, case FP-0001: why oxlint-disable no-console';
+    expect(findClaimedMarkers({ file: FILE, text })).toEqual([
+      expect.objectContaining({
+        column: 3,
+        directive: 'eslint-disable-next-line',
+        reason: 'why',
+      }),
+    ]);
   });
 });
 

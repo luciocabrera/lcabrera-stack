@@ -88,6 +88,12 @@ describe('runGate — a suppression a false-positive panel confirmed', () => {
       [{ ...ENTRY, expires: 20_270_101 }],
       REASON,
     ],
+    ['the expiry is "never"', [{ ...ENTRY, expires: 'never' }], REASON],
+    [
+      'the expiry is not a calendar day',
+      [{ ...ENTRY, expires: '2027-02-30' }],
+      REASON,
+    ],
   ])('still fails the marker when %s', (_label, falsePositives, reason) => {
     expect(gate({ falsePositives, reason })).toBe(1);
   });

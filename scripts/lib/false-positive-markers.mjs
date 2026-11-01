@@ -33,17 +33,13 @@ const DIRECTIVES = [
   { analyzer: 'fallow', directive: 'fallow-ignore-file', next: false },
 ];
 
-const DIRECTIVE_TOKEN = /(?:eslint|oxlint|biome|react-doctor|fallow)-[a-z-]+/u;
+const DIRECTIVE_TOKEN = /(?:eslint|oxlint|biome|react-doctor|fallow)-[a-z-]+/gu;
 
 const BY_DIRECTIVE = new Map(
   DIRECTIVES.map((entry) => [entry.directive, entry]),
 );
 
-const CLAIM = /false positive|\bFP-\d/iu;
-
-const EXPLANATION = /^false positive, case (FP-\d{4,}): (.*)/u;
-
-const CASE_ID = /\bFP-\d{4,}\b/u;
+const CLAIM = /^false positive, case (FP-\d{4,}):(.*)/u;
 
 const splitRest = ({ analyzer, rest }) => {
   const end = rest.indexOf('*/');
@@ -56,48 +52,57 @@ const splitRest = ({ analyzer, rest }) => {
   };
 };
 
-const parseExplanation = (explanation) => {
-  const match = EXPLANATION.exec(explanation);
-  if (match === null) {
-    return { caseId: CASE_ID.exec(explanation)?.[0], reason: '' };
-  }
-  return { caseId: match[1], reason: match[2].trim() };
-};
+const tokensOn = (line) =>
+  [...line.matchAll(DIRECTIVE_TOKEN)].map((match) => ({
+    entry: BY_DIRECTIVE.get(match[0]),
+    index: match.index,
+    joined: /[\w-]/u.test(line.charAt(match.index - 1)),
+    length: match[0].length,
+  }));
 
-const directiveAt = (line) => {
-  const match = DIRECTIVE_TOKEN.exec(line);
-  if (match === null) return;
-  const entry = BY_DIRECTIVE.get(match[0]);
-  const joined = /[\w-]/u.test(line.charAt(match.index - 1));
-  return entry === undefined || joined
-    ? undefined
-    : { entry, index: match.index, length: match[0].length };
-};
-
-const markerOn = ({ file, index, line }) => {
-  const found = directiveAt(line);
-  if (found === undefined || !opensComment({ index: found.index, line })) {
-    return [];
-  }
-  const rest = line.slice(found.index + found.length);
-  if (!CLAIM.test(rest)) return [];
-  const { analyzer, directive, next } = found.entry;
-  const { explanation, rule } = splitRest({ analyzer, rest });
+const markerAt = ({ file, index, line, next, token }) => {
+  const rest = line.slice(token.index + token.length, next);
+  const { explanation, rule } = splitRest({
+    analyzer: token.entry.analyzer,
+    rest,
+  });
+  const claim = CLAIM.exec(explanation);
+  if (claim === null) return [];
+  const { analyzer, directive, next: nextLine } = token.entry;
   return [
     {
       analyzer,
+      caseId: claim[1],
+      column: token.index,
       directive,
       file,
       line: index + 1,
-      nextLine: next,
+      nextLine,
+      reason: claim[2].trim(),
       rule,
-      ...parseExplanation(explanation),
     },
   ];
 };
 
+const markersOn = ({ file, index, line }) => {
+  const tokens = tokensOn(line);
+  return tokens.flatMap((token, position) =>
+    token.entry === undefined ||
+    token.joined ||
+    !opensComment({ index: token.index, line })
+      ? []
+      : markerAt({
+          file,
+          index,
+          line,
+          next: tokens[position + 1]?.index,
+          token,
+        }),
+  );
+};
+
 export const findClaimedMarkers = ({ file, text }) =>
-  text.split('\n').flatMap((line, index) => markerOn({ file, index, line }));
+  text.split('\n').flatMap((line, index) => markersOn({ file, index, line }));
 
 export const hashLines = (lines) =>
   createHash('sha256').update(lines.join('\n')).digest('hex');

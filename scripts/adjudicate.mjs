@@ -21,11 +21,9 @@ import process from 'node:process';
 
 import { readWorkspaceGraph } from '../packages/repo-standards/scripts/affected-tests.mjs';
 import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
-import {
-  CASES_DIR,
-  openCase,
-  UNTRACKED_CASES_DIR,
-} from './lib/adjudicate-command.mjs';
+import { readConventions } from '../packages/repo-standards/scripts/config.mjs';
+import { CASES_DIR, openCase } from './lib/adjudicate-command.mjs';
+import { takenCaseNames } from './lib/adjudication-case.mjs';
 import { repoPath, toolEntry } from './lib/tool-paths.mjs';
 
 const ROOT = process.cwd();
@@ -70,9 +68,18 @@ const baseRef = () => {
 };
 
 const caseNames = () =>
-  [CASES_DIR, UNTRACKED_CASES_DIR].flatMap((dir) =>
-    existsSync(inRepo(dir)) ? readdirSync(inRepo(dir)) : [],
-  );
+  takenCaseNames({
+    committed: git([
+      'ls-tree',
+      '--name-only',
+      `origin/${readConventions(ROOT).defaultBranch}`,
+      '--',
+      `${CASES_DIR}/`,
+    ])
+      .split('\n')
+      .filter(Boolean),
+    local: existsSync(inRepo(CASES_DIR)) ? readdirSync(inRepo(CASES_DIR)) : [],
+  });
 
 const workspaceOf = (file) => {
   const owner = readWorkspaceGraph(ROOT)

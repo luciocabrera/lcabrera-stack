@@ -5,6 +5,7 @@
  * the files and validates each case envelope against its schema. Policy:
  * `docs/agents/public-package-suppressions.md`.
  */
+import { isCalendarDate } from '../../packages/repo-standards/scripts/calendar-date.mjs';
 import { coveredLines, hashLines } from './false-positive-markers.mjs';
 
 const ENTRY_FIELDS = [
@@ -21,8 +22,6 @@ const PANEL_SIZE = 3;
 
 const MAX_MONTHS = 6;
 
-const DATE = /^\d{4}-\d{2}-\d{2}$/u;
-
 const problem = (kind, where, message) => ({ kind, message, where });
 
 const markerWhere = ({ file, line }) => `${file}:${line}`;
@@ -37,9 +36,6 @@ const markerProblems = ({ entriesByCase, marker }) => {
         `${marker.directive} covers more than the next line; use the analyzer's next-line marker`,
       ),
     ];
-  }
-  if (marker.caseId === undefined) {
-    return [problem('no-case', where, 'the marker names no case FP-nnnn')];
   }
   if (marker.reason === '') {
     return [
@@ -82,7 +78,7 @@ const shapeProblems = (entry) => {
     (field) => typeof entry[field] !== 'string' || entry[field].trim() === '',
   );
   const badLines = !Number.isSafeInteger(entry.lines) || entry.lines < 1;
-  const badDate = !DATE.test(entry.expires);
+  const badDate = !isCalendarDate(entry.expires);
   const evidence = `docs/agents/adjudications/${entry.case}.json`;
   return [
     ...missing.map((field) =>
@@ -204,23 +200,35 @@ const evidenceProblems = ({ entry, readCase }) => {
   ];
 };
 
+const flaggedLineAt = ({ entry, text }) => {
+  const lines = text.split('\n');
+  const at = lines.findIndex(
+    (_, index) =>
+      hashLines(lines.slice(index, index + entry.lines)) === entry.contentHash,
+  );
+  return at === -1 ? undefined : at + 1;
+};
+
 const hashProblems = ({ entry, markers, readText }) => {
   const marker = markers.find(({ caseId }) => caseId === entry.case);
   if (marker === undefined) return [];
-  const lines = coveredLines({
-    line: marker.line,
-    lines: entry.lines,
-    text: readText(marker.file),
-  });
-  return hashLines(lines) === entry.contentHash
-    ? []
-    : [
-        problem(
+  const text = readText(marker.file);
+  const lines = coveredLines({ line: marker.line, lines: entry.lines, text });
+  if (hashLines(lines) === entry.contentHash) return [];
+  const moved = flaggedLineAt({ entry, text });
+  return [
+    moved === undefined
+      ? problem(
           'hash',
           entry.case,
           `the ${entry.lines} line(s) under the marker at ${markerWhere(marker)} changed since the panel ruled; the dismissal is void`,
+        )
+      : problem(
+          'misplaced',
+          entry.case,
+          `the flagged lines start at line ${moved}, not under the marker at ${markerWhere(marker)}; move the marker above them`,
         ),
-      ];
+  ];
 };
 
 const entryProblems = ({ entry, markers, readCase, readText, today }) => {

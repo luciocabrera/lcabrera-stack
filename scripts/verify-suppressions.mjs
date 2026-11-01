@@ -32,6 +32,8 @@ import { existsSync, readdirSync } from 'node:fs';
 import { join, relative, sep } from 'node:path';
 import process from 'node:process';
 
+import { readRegisters } from '../packages/repo-standards/scripts/config.mjs';
+import { readFalsePositiveList } from '../packages/repo-standards/scripts/false-positive-list.mjs';
 import { publicPackageDirs } from '../packages/repo-standards/scripts/public-package-dirs.mjs';
 import { parseJsonc } from '../packages/repo-standards/scripts/jsonc.mjs';
 import { readTextWithin } from '../packages/repo-standards/scripts/safe-read.mjs';
@@ -52,7 +54,7 @@ import {
 
 const REPO_ROOT = process.cwd();
 const REGISTER_PATH = 'docs/agents/public-package-suppressions.json';
-const FALSE_POSITIVES_PATH = 'docs/agents/false-positives.json';
+const FALSE_POSITIVES_PATH = readRegisters(REPO_ROOT).falsePositives;
 const PANEL_DIRECTIVE = /^(?:eslint|oxlint|biome|react-doctor)-/u;
 const BASELINE_DIR = 'reports/fallow/baselines';
 
@@ -116,15 +118,6 @@ const report = (label, rows, render) => {
   return rows.length;
 };
 
-const readFalsePositives = () => {
-  if (!existsSync(join(REPO_ROOT, FALSE_POSITIVES_PATH))) return [];
-  const list = readJson(FALSE_POSITIVES_PATH);
-  if (!Array.isArray(list)) {
-    throw new TypeError(`${FALSE_POSITIVES_PATH} is not a JSON array`);
-  }
-  return list;
-};
-
 const readCase = (path) => {
   if (!existsSync(join(REPO_ROOT, path))) return { missing: true };
   return toCurrentAdjudication({ input: readJson(path) });
@@ -134,7 +127,7 @@ const reportFalsePositives = ({ markers, readText }) =>
   report(
     `False-positive marker(s) that do not match a live, unanimous panel case in ${FALSE_POSITIVES_PATH}:`,
     checkFalsePositives({
-      entries: readFalsePositives(),
+      entries: readFalsePositiveList(REPO_ROOT),
       markers,
       readCase,
       readText,
@@ -150,9 +143,11 @@ const reportUnadjudicated = (rows) =>
     (row) => `${row.file}:${row.line}  ${row.rule}`,
   );
 
+const occurrence = ({ column, file, line }) => `${file}:${line}:${column}`;
+
 const atMarker = (markers) => {
-  const lines = new Set(markers.map(({ file, line }) => `${file}:${line}`));
-  return (row) => lines.has(`${row.file}:${row.line}`);
+  const claimed = new Set(markers.map((marker) => occurrence(marker)));
+  return (row) => claimed.has(occurrence(row));
 };
 
 const reportLane = (lane) => {
@@ -313,4 +308,11 @@ const main = () => {
   );
 };
 
-main();
+try {
+  main();
+} catch (error) {
+  process.stderr.write(
+    `verify-suppressions: ${error instanceof Error ? error.message : String(error)}\n`,
+  );
+  process.exitCode = 1;
+}
