@@ -17,7 +17,7 @@ area:
   - packages/ui/src/stylex-module-paths.test.json
   - packages/ui/src/utils/tests/themeTokenContrast.util*
 started: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-01
 plan: (none)
 pr: #1583
 issue: #1557
@@ -30,5 +30,5 @@ Add Breadcrumbs, PageHeader and an inline NavLink variant
 ## Status / next
 
 - Current step: just claimed
-- Blockers: none
+- Blockers: #1585 (advisories), #1581 (StyleX mutation baseline)
 - Next:
