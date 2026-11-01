@@ -6,6 +6,7 @@ status: review
 branch: fix/1587-mutation-setup-timeout
 area:
   - packages/repo-standards/scripts/fallow-gate*.mjs
+  - packages/repo-standards/scripts/run-fallow-gate.mjs
   - packages/repo-standards/scripts/*.test.mjs
   - .changeset/**
   - COMMANDS.md
