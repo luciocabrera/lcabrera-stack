@@ -68,9 +68,13 @@ const markerProblems = ({ entriesByCase, marker }) => {
 };
 
 const addMonths = (iso, months) => {
-  const date = new Date(`${iso.slice(0, 10)}T00:00:00Z`);
-  date.setUTCMonth(date.getUTCMonth() + months);
-  return date.toISOString().slice(0, 10);
+  const [year, month, day] = iso.slice(0, 10).split('-').map(Number);
+  const target = new Date(Date.UTC(year, month - 1 + months, 1));
+  const lastDay = new Date(
+    Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  target.setUTCDate(Math.min(day, lastDay));
+  return target.toISOString().slice(0, 10);
 };
 
 const shapeProblems = (entry) => {

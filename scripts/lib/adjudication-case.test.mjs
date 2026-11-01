@@ -61,14 +61,48 @@ describe('matchingRecords — the shapes each analyzer prints', () => {
     ).toEqual([]);
   });
 
-  it('matches a rule spelled with underscores in a key', () => {
-    const item = { line: 4, path: 'packages/a/src/a.ts' };
+  it('matches the rule id exactly, not as a substring', () => {
+    const diagnostic = {
+      code: 'eslint(no-shadow-restricted-names)',
+      filename: 'packages/a/src/a.ts',
+      labels: [{ span: { line: 3 } }],
+    };
+    const report = { diagnostics: [diagnostic] };
     expect(
       matchingRecords({
-        finding: finding({ ruleNeedle: 'unused-export' }),
-        report: { unused_exports: [item] },
+        finding: finding({ ruleNeedle: 'no-shadow' }),
+        report,
       }),
-    ).toEqual([item]);
+    ).toEqual([]);
+    expect(
+      matchingRecords({
+        finding: finding({ ruleNeedle: 'no-shadow-restricted-names' }),
+        report,
+      }),
+    ).toEqual([diagnostic]);
+  });
+
+  it.each([
+    [
+      'typescript-eslint/no-unused-vars',
+      { code: 'typescript-eslint(no-unused-vars)' },
+    ],
+    [
+      'react-doctor/no-redundant-roles',
+      { plugin: 'react-doctor', rule: 'no-redundant-roles' },
+    ],
+    [
+      'no-redundant-roles',
+      { plugin: 'react-doctor', rule: 'no-redundant-roles' },
+    ],
+  ])('reads the rule %s from a record spelled %j', (ruleNeedle, fields) => {
+    const record = { ...fields, file: 'packages/a/src/a.ts', line: 3 };
+    expect(
+      matchingRecords({
+        finding: finding({ ruleNeedle }),
+        report: { items: [record] },
+      }),
+    ).toEqual([record]);
   });
 
   it.each([

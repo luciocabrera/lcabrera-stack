@@ -40,6 +40,7 @@ import {
   dispatchPrompt,
   envelopeFor,
   listEntryFor,
+  nextStep,
   parseVerdict,
   resolvedModelProblems,
   seatProblems,
@@ -168,11 +169,7 @@ const recordDismissal = ({ caseDir, caseFile, envelope }) => {
 const recordOther = ({ caseFile, envelope }) => {
   const record = `${CASES_DIR}/${caseFile.case.case_id}.json`;
   write(record, `${JSON.stringify(envelope, null, 2)}\n`);
-  const next =
-    envelope.outcome === 'fixed'
-      ? 'The panel ruled REAL. Apply a fix from the verdicts; no marker.'
-      : 'The panel split. Stop and ask the repository owner; do not mark or dismiss it.';
-  return `${next}\nCommit the record ${record} and its case directory: every verdict is kept, and the number stays taken.\n`;
+  return `${nextStep(envelope.outcome)}\nCommit the record ${record} and its case directory: every verdict is kept, and the number stays taken.\n`;
 };
 
 const main = async () => {
@@ -223,7 +220,11 @@ const main = async () => {
   const verifiers = parsed.map((session) => toVerifier(session));
   const resolved = resolvedModelProblems({ builderModel, verifiers });
   if (resolved.length > 0) throw new Error(resolved.join('\n'));
-  const envelope = envelopeFor({ caseFile, verifiers });
+  const envelope = envelopeFor({
+    caseFile,
+    fixable: parsed.some(({ parsed: verdict }) => verdict.fixable),
+    verifiers,
+  });
   const checked = toCurrentAdjudication({ input: envelope });
   if (!checked.ok)
     throw new Error(

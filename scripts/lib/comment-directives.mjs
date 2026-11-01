@@ -38,7 +38,14 @@ export const commentRanges = ({ file, text }) => {
   const found = new Map();
   const jsxText = new Set();
   const visit = (node) => {
-    if (node.kind === ts.SyntaxKind.JsxText) jsxText.add(node.pos);
+    if (node.kind === ts.SyntaxKind.JsxText) {
+      for (const offset of Array.from(
+        { length: node.end - node.pos },
+        (_, index) => index,
+      )) {
+        jsxText.add(node.pos + offset);
+      }
+    }
     for (const range of rangesAround({ node, text })) {
       found.set(range.pos, range);
     }
@@ -71,24 +78,20 @@ const restOf = ({ comment, end, next }) => {
 };
 
 const directivesIn = ({ comment, pattern }) => {
-  const matches = [...comment.matchAll(pattern)];
-  return matches.flatMap((match, position) =>
+  const spots = [...comment.matchAll(pattern)].filter((match) =>
     isDirectiveSpot(
       comment.slice(lineStart({ comment, index: match.index }), match.index),
-    )
-      ? [
-          {
-            offset: match.index,
-            rest: restOf({
-              comment,
-              end: match.index + match[0].length,
-              next: matches[position + 1]?.index,
-            }),
-            token: match[0],
-          },
-        ]
-      : [],
+    ),
   );
+  return spots.map((match, position) => ({
+    offset: match.index,
+    rest: restOf({
+      comment,
+      end: match.index + match[0].length,
+      next: spots[position + 1]?.index,
+    }),
+    token: match[0],
+  }));
 };
 
 export const findCommentDirectives = ({ file, pattern, text }) => {

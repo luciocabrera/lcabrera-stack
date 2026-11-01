@@ -8,6 +8,8 @@ import { lstatSync, realpathSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 
+import { CASE_ID } from './case-id.mjs';
+
 const within = ({ path, root }) =>
   path === root || path.startsWith(`${root}${sep}`);
 
@@ -44,8 +46,6 @@ export const repoPath = ({ path, root }) => {
   }
   return join(real, relative(entry, resolved));
 };
-
-const CASE_ID = /^FP-\d{4}$/u;
 
 export const caseIdFrom = (value) => {
   if (!CASE_ID.test(value)) {

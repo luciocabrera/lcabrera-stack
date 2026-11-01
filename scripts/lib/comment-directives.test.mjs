@@ -60,6 +60,13 @@ describe('commentRanges', () => {
 
   it('reads no comment anywhere inside JSX text', () => {
     expect(comments('const p = <p>x // d</p>;', 'a.tsx')).toEqual([]);
+    expect(
+      comments(
+        'const p = (\n  <p>\n    // eslint-disable-next-line x\n    text\n  </p>\n);',
+        'a.tsx',
+      ),
+    ).toEqual([]);
+    expect(comments('const p = <p>\n// d</p>;', 'a.tsx')).toEqual([]);
   });
 });
 
@@ -96,6 +103,19 @@ describe('findCommentDirectives', () => {
         token: 'eslint-disable-next-line',
       },
       { column: 40, line: 1, rest: ' */', token: 'NOSONAR' },
+    ]);
+  });
+
+  it('keeps a reason that mentions a directive in prose', () => {
+    expect(
+      find('// eslint-disable-next-line a -- why not eslint-disable here'),
+    ).toEqual([
+      {
+        column: 3,
+        line: 1,
+        rest: ' a -- why not eslint-disable here',
+        token: 'eslint-disable-next-line',
+      },
     ]);
   });
 

@@ -46,7 +46,8 @@ files or notes to find it in.
 Your final message is the verdict and nothing else. Line one is exactly `REAL`
 or `FALSE_POSITIVE`, alone on the line. Then:
 
-- `Evidence:` what you read and ran, and what it showed.
-- For FALSE_POSITIVE, a line starting `Check:` listing each attack you tried
-  and why it failed.
-- For REAL, a line starting `Fix:` with the concrete change.
+- `Evidence:` what you read, and what it showed.
+- For FALSE_POSITIVE, one line starting `Check:` listing each attack you tried,
+  the files you searched for it by path, and why it failed.
+- For REAL, a line starting `Fix:` with the concrete change. A `Fix:` line
+  with nothing after it tells the command there is no fix to apply.

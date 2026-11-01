@@ -350,6 +350,11 @@ so a repository that has never set it is read exactly as it was.
 `expires` that is a real `YYYY-MM-DD` calendar day not yet past. A repository with no such file gets the gate as it
 was: every marker fails.
 
+The gate checks the list and nothing else. It does not open the case file the
+entry points at, so it does not check who ruled, whether the ruling was
+unanimous, or whether the flagged lines still hash as they did. A repository
+that wants those guarantees runs its own check over the same list.
+
 `adrContentBaseline` is where the ADR gate keeps the records it grandfathers.
 It is held to the same containment rule as every other path here, and its default
 sits beside the other two baselines this package writes rather than inside the

@@ -25,10 +25,12 @@ dismissed. Their argument is exactly what this panel exists to keep out.
    names. Read the callers, the tests and the rule's own documentation.
 2. Ask what the rule protects against, and whether this code can do that thing.
    Not whether it is inconvenient here: whether the analyzer is wrong.
-3. Before you rule FALSE_POSITIVE, name a check that would have shown the
-   finding was real, run it, and say what it showed. A ruling with no such check
-   is not evidence (the repository's Rule 14). A check that could only ever pass
-   proves nothing.
+3. Before you rule FALSE_POSITIVE, name the caller, input or configuration
+   under which the rule would fire on this code, point at where in the tree
+   you looked for it (the files, by path), and say that it is not there. That
+   search is the check that could have shown the finding was real (the
+   repository's Rule 14). A search that could only ever come up empty proves
+   nothing.
 4. Before you rule REAL, write the fix: what to change and where, concretely
    enough that someone else can apply it without asking you. A finding you
    think is real but cannot fix is still REAL; say what you tried.
@@ -49,7 +51,9 @@ dismissed. Their argument is exactly what this panel exists to keep out.
 Your final message is the verdict and nothing else. Line one is exactly `REAL`
 or `FALSE_POSITIVE`, alone on the line. Then:
 
-- `Evidence:` what you read and ran, and what it showed.
-- For FALSE_POSITIVE, a line starting `Check:` naming the check that could have
-  shown the finding was real, and its result.
-- For REAL, a line starting `Fix:` with the concrete change.
+- `Evidence:` what you read, and what it showed.
+- For FALSE_POSITIVE, one line starting `Check:` that names the caller, input
+  or configuration that would make the finding real, the files you searched for
+  it by path, and that it is not there.
+- For REAL, a line starting `Fix:` with the concrete change. A `Fix:` line
+  with nothing after it tells the command there is no fix to apply.

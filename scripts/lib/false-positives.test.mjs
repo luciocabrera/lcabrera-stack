@@ -353,4 +353,15 @@ describe('expiryFor', () => {
   it('is six calendar months after the case opened', () => {
     expect(expiryFor('2026-10-29T10:00:00.000Z')).toBe('2027-04-29');
   });
+
+  it.each([
+    ['2026-08-31T09:00:00.000Z', '2027-02-28'],
+    ['2027-08-31T09:00:00.000Z', '2028-02-29'],
+    ['2026-03-31T09:00:00.000Z', '2026-09-30'],
+    ['2026-12-31T09:00:00.000Z', '2027-06-30'],
+    ['2026-07-31T09:00:00.000Z', '2027-01-31'],
+    ['2028-02-29T09:00:00.000Z', '2028-08-29'],
+  ])('clamps %s to the last day of the target month: %s', (opened, expiry) => {
+    expect(expiryFor(opened)).toBe(expiry);
+  });
 });

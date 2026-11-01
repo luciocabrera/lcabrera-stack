@@ -6,6 +6,7 @@ import {
   dispatchPrompt,
   envelopeFor,
   listEntryFor,
+  nextStep,
   outcomeOf,
   parseVerdict,
   resolvedModelProblems,
@@ -137,17 +138,28 @@ describe('dispatchPrompt', () => {
 });
 
 describe('parseVerdict', () => {
-  it('reads a FALSE_POSITIVE that names its check', () => {
+  it('reads a FALSE_POSITIVE whose check names where it looked', () => {
     expect(
-      parseVerdict('FALSE_POSITIVE\nEvidence: read it.\nCheck: ran the trace.'),
+      parseVerdict(
+        'FALSE_POSITIVE\nEvidence: read it.\nCheck: no caller passes user input; searched packages/x/src for query(.',
+      ),
     ).toEqual({
-      evidence: 'Evidence: read it.\nCheck: ran the trace.',
+      evidence:
+        'Evidence: read it.\nCheck: no caller passes user input; searched packages/x/src for query(.',
+      fixable: false,
       verdict: 'FALSE_POSITIVE',
     });
   });
 
-  it('reads a REAL that names its fix', () => {
-    expect(parseVerdict('REAL\nFix: extract a helper.').verdict).toBe('REAL');
+  it('reads a REAL with a fix as fixable, and one with an empty fix as not', () => {
+    expect(parseVerdict('REAL\nFix: extract a helper.')).toMatchObject({
+      fixable: true,
+      verdict: 'REAL',
+    });
+    expect(parseVerdict('REAL\nEvidence: real.\nFix:')).toMatchObject({
+      fixable: false,
+      verdict: 'REAL',
+    });
   });
 
   it.each([
@@ -159,10 +171,15 @@ describe('parseVerdict', () => {
     [
       'a FALSE_POSITIVE with no check',
       'FALSE_POSITIVE\nEvidence: trust me',
-      'a FALSE_POSITIVE verdict needs a line starting "Check:"',
+      'a FALSE_POSITIVE verdict needs a "Check:" line naming the file it looked in, as a path',
     ],
     [
-      'a REAL with no fix',
+      'a FALSE_POSITIVE whose check names no location',
+      'FALSE_POSITIVE\nCheck: ran the trace and it was fine',
+      'a FALSE_POSITIVE verdict needs a "Check:" line naming the file it looked in, as a path',
+    ],
+    [
+      'a REAL with no fix line',
       'REAL\nEvidence: it is real',
       'a REAL verdict needs a line starting "Fix:"',
     ],
@@ -171,29 +188,39 @@ describe('parseVerdict', () => {
   });
 });
 
-describe('outcomeOf', () => {
-  it('dismisses only a unanimous FALSE_POSITIVE', () => {
-    expect(outcomeOf([verifier('a'), verifier('b'), verifier('c')])).toBe(
-      'dismissed',
+describe('outcomeOf and nextStep', () => {
+  const fp = verifier('a');
+  const real = verifier('b', 'REAL');
+
+  it.each([
+    ['dismissed', false, [fp, verifier('c'), verifier('d')]],
+    ['fixed', true, [real, fp, verifier('c')]],
+    ['fixed', true, [real, verifier('c', 'REAL'), verifier('d', 'REAL')]],
+    ['split', false, [real, fp, verifier('c')]],
+    ['escalated', false, [real, verifier('c', 'REAL'), verifier('d', 'REAL')]],
+  ])('rules %s when a fix is given: %s', (outcome, fixable, verifiers) => {
+    expect(outcomeOf({ fixable, verifiers })).toBe(outcome);
+  });
+
+  it('sends a fixable REAL to the builder and the rest to the owner', () => {
+    expect(nextStep('fixed')).toBe(
+      'A REAL verdict gives a fix. Apply it; there is no marker. If the fix cannot be applied, stop and ask the repository owner.',
     );
-    expect(outcomeOf([])).toBe('fixed');
-    expect(
-      outcomeOf([verifier('a', 'REAL'), verifier('b'), verifier('c')]),
-    ).toBe('split');
-    expect(
-      outcomeOf([
-        verifier('a', 'REAL'),
-        verifier('b', 'REAL'),
-        verifier('c', 'REAL'),
-      ]),
-    ).toBe('fixed');
+    expect(nextStep('split')).toBe(
+      'The panel split and no REAL verdict gives a fix. Stop and ask the repository owner; do not mark or dismiss it.',
+    );
+    expect(nextStep('escalated')).toBe(
+      'The panel ruled REAL and gave no fix. Stop and ask the repository owner; do not mark or dismiss it.',
+    );
   });
 });
 
 describe('records', () => {
   it('builds the envelope from the case and the verdicts', () => {
     const verifiers = [verifier('a'), verifier('b'), verifier('c')];
-    expect(envelopeFor({ caseFile: CASE_FILE, verifiers })).toEqual({
+    expect(
+      envelopeFor({ caseFile: CASE_FILE, fixable: false, verifiers }),
+    ).toEqual({
       case: CASE_FILE.case,
       outcome: 'dismissed',
       schema_version: 1,

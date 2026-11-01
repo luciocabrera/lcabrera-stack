@@ -14,8 +14,6 @@ export const DEFAULT_SEATS = [
 
 const VERDICTS = new Set(['REAL', 'FALSE_POSITIVE']);
 
-const REQUIRED_LINE = { FALSE_POSITIVE: 'Check:', REAL: 'Fix:' };
-
 export const seatsFrom = ({ adversary, judges }) => {
   const [firstJudge, secondJudge] = judges ?? [];
   return [
@@ -54,6 +52,27 @@ export const resolvedModelProblems = ({ builderModel, verifiers }) => {
   ];
 };
 
+const textAfter = ({ lines, prefix }) =>
+  lines
+    .map((line) => line.trim())
+    .find((line) => line.startsWith(prefix))
+    ?.slice(prefix.length)
+    .trim();
+
+const citesALocation = (text) =>
+  text.split(/\s+/u).some((word) => word.includes('/'));
+
+const verdictProblem = ({ check, fix, verdict }) => {
+  if (verdict === 'REAL') {
+    return fix === undefined
+      ? 'a REAL verdict needs a line starting "Fix:"'
+      : undefined;
+  }
+  return check === undefined || !citesALocation(check)
+    ? 'a FALSE_POSITIVE verdict needs a "Check:" line naming the file it looked in, as a path'
+    : undefined;
+};
+
 export const parseVerdict = (text) => {
   const [first, ...rest] = text.trim().split('\n');
   const verdict = first.trim();
@@ -62,21 +81,34 @@ export const parseVerdict = (text) => {
       problem: `line one is "${verdict}", not REAL or FALSE_POSITIVE`,
     };
   }
-  const evidence = rest.join('\n').trim();
-  const required = REQUIRED_LINE[verdict];
-  if (!rest.some((line) => line.trim().startsWith(required))) {
-    return {
-      problem: `a ${verdict} verdict needs a line starting "${required}"`,
-    };
-  }
-  return { evidence, verdict };
+  const fix = textAfter({ lines: rest, prefix: 'Fix:' });
+  const problem = verdictProblem({
+    check: textAfter({ lines: rest, prefix: 'Check:' }),
+    fix,
+    verdict,
+  });
+  return problem === undefined
+    ? { evidence: rest.join('\n').trim(), fixable: Boolean(fix), verdict }
+    : { problem };
 };
 
-export const outcomeOf = (verifiers) => {
+export const outcomeOf = ({ fixable, verifiers }) => {
   const verdicts = new Set(verifiers.map(({ verdict }) => verdict));
-  if (verdicts.size === 2) return 'split';
-  return verdicts.has('FALSE_POSITIVE') ? 'dismissed' : 'fixed';
+  if (!verdicts.has('REAL')) return 'dismissed';
+  if (fixable) return 'fixed';
+  return verdicts.size === 2 ? 'split' : 'escalated';
 };
+
+const NEXT_STEPS = {
+  escalated:
+    'The panel ruled REAL and gave no fix. Stop and ask the repository owner; do not mark or dismiss it.',
+  fixed:
+    'A REAL verdict gives a fix. Apply it; there is no marker. If the fix cannot be applied, stop and ask the repository owner.',
+  split:
+    'The panel split and no REAL verdict gives a fix. Stop and ask the repository owner; do not mark or dismiss it.',
+};
+
+export const nextStep = (outcome) => NEXT_STEPS[outcome];
 
 export const verdictFileName = ({ model, role }) =>
   `${role}-${model.replaceAll(/[^\w.-]/gu, '_')}.verdict.md`;
@@ -92,9 +124,9 @@ export const assertUnruled = ({ caseId, ruled }) => {
 export const dispatchPrompt = (casePath) =>
   `The case file is ${casePath}. Read it and the repository, then answer in the verdict format your instructions give.`;
 
-export const envelopeFor = ({ caseFile, verifiers }) => ({
+export const envelopeFor = ({ caseFile, fixable, verifiers }) => ({
   case: caseFile.case,
-  outcome: outcomeOf(verifiers),
+  outcome: outcomeOf({ fixable, verifiers }),
   schema_version: 1,
   verifiers,
 });

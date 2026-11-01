@@ -54,15 +54,22 @@ baseline and no marker the panel did not confirm.
    the panel if the repository's working tree changed while they ran.
 4. **Read the verdicts.** Each verdict file starts with `REAL` or
    `FALSE_POSITIVE` on line one. A REAL carries a `Fix:`. A FALSE_POSITIVE
-   carries a `Check:` that could have shown the finding real (Rule 14).
+   carries a `Check:` that could have shown the finding real (Rule 14): the
+   caller, input or configuration under which the rule would fire, and the
+   files, by path, searched for it. The command refuses a `Check:` that names
+   no path.
 5. **Decide.** Three FALSE_POSITIVE: the case is dismissed. The command writes
    the envelope to `docs/agents/adjudications/FP-nnnn.json`, an upstream draft
    beside the case, and an entry in `docs/agents/false-positives.json` that
    expires at most six months after the case opened. The builder adds the
    analyzer's own next-line marker, in the form
    `<marker> <rule> -- false positive, case FP-nnnn: <one-line reason>`
-   (`<marker> <rule>: false positive, …` for Biome). All REAL: fix it, no
-   marker. A split: stop and ask the repository owner. Every outcome's
+   (`<marker> <rule>: false positive, …` for Biome). Any REAL verdict with a
+   concrete `Fix:` is recorded `fixed`, and the builder applies that fix with
+   no marker. A fix is not a suppression, so it needs no owner decision. Only
+   when no REAL verdict gives a fix (`split`, or `escalated` when all three
+   ruled REAL), or the fix cannot be applied, does the case go to the
+   repository owner. Every outcome's
    envelope is committed under `docs/agents/adjudications/`, so the history
    keeps each verdict, and a new case takes the next number after every case
    in the working tree and on the default branch. Two branches opening a case

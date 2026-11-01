@@ -70,9 +70,10 @@ describe('repoPath', () => {
 describe('caseIdFrom', () => {
   it('keeps a case id', () => {
     expect(caseIdFrom('FP-0042')).toBe('FP-0042');
+    expect(caseIdFrom('FP-10000')).toBe('FP-10000');
   });
 
-  it.each(['FP-42', 'FP-00042', '../FP-0001', 'FP-0001/..', undefined])(
+  it.each(['FP-42', '../FP-0001', 'FP-0001/..', undefined])(
     'refuses %j',
     (value) => {
       expect(() => caseIdFrom(value)).toThrow(

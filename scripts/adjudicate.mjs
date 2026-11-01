@@ -60,7 +60,13 @@ const git = (args) => {
 
 const baseRef = () => {
   const named = process.env.CHANGED_FILES_BASE;
-  if (named === undefined) return git(['merge-base', 'HEAD', 'origin/main']);
+  if (named === undefined) {
+    return git([
+      'merge-base',
+      'HEAD',
+      `origin/${readConventions(ROOT).defaultBranch}`,
+    ]);
+  }
   if (named.startsWith('-')) {
     throw new Error(`CHANGED_FILES_BASE "${named}" is not a git ref`);
   }

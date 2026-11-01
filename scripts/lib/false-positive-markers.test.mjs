@@ -146,15 +146,29 @@ describe('findClaimedMarkers — the explanation', () => {
     expect(findClaimedMarkers({ file: FILE, text })).toEqual([]);
   });
 
-  it('reads each directive on a line on its own', () => {
+  it('keeps a directive the reason mentions as part of the reason', () => {
     const text =
       '// eslint-disable-next-line r -- false positive, case FP-0001: why oxlint-disable no-console';
     expect(findClaimedMarkers({ file: FILE, text })).toEqual([
       expect.objectContaining({
         column: 3,
         directive: 'eslint-disable-next-line',
-        reason: 'why',
+        reason: 'why oxlint-disable no-console',
       }),
+    ]);
+  });
+
+  it('reads a second directive after a nested opener on its own', () => {
+    const text =
+      '// eslint-disable-next-line r -- false positive, case FP-0001: why /* oxlint-disable-next-line q -- false positive, case FP-0002: other */';
+    expect(
+      findClaimedMarkers({ file: FILE, text }).map(({ caseId, reason }) => [
+        caseId,
+        reason,
+      ]),
+    ).toEqual([
+      ['FP-0001', 'why /*'],
+      ['FP-0002', 'other'],
     ]);
   });
 });

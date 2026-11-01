@@ -109,7 +109,11 @@ packages as everywhere else.
    // biome-ignore lint/a11y/useButtonType: false positive, case FP-0012: <one-line reason>
    ```
 
-   All REAL: fix the code. A split: stop and ask the repository owner.
+   Any REAL verdict with a concrete `Fix:`: apply that fix, even if the other
+   seats ruled FALSE_POSITIVE. That is not a suppression, so it needs no owner
+   decision. Ask the repository owner only when no REAL verdict gives a fix
+   (a split, or an escalation when all three ruled REAL), or when the fix
+   cannot be applied.
 
 5. Never post the upstream draft without the owner's explicit yes.
 

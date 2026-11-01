@@ -6,6 +6,7 @@
  */
 import { createHash } from 'node:crypto';
 
+import { CLAIM } from './case-id.mjs';
 import { findCommentDirectives } from './comment-directives.mjs';
 
 const DIRECTIVES = [
@@ -38,8 +39,6 @@ const DIRECTIVE_TOKEN = /(?:eslint|oxlint|biome|react-doctor|fallow)-[a-z-]+/gu;
 const BY_DIRECTIVE = new Map(
   DIRECTIVES.map((entry) => [entry.directive, entry]),
 );
-
-const CLAIM = /^false positive, case (FP-\d{4,}):(.*)/u;
 
 const splitRest = ({ analyzer, rest }) => {
   const end = rest.indexOf('*/');

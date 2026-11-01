@@ -4,6 +4,7 @@
  * them, and the flagged code. It takes no free text, so nothing the builder
  * argued can reach the panel. Pure: `scripts/adjudicate.mjs` runs the tools.
  */
+import { CASE_FILE } from './case-id.mjs';
 import { hashLines } from './false-positive-markers.mjs';
 
 const LINE_RANGE = /^(\d+)(?:-(\d+))?$/u;
@@ -14,8 +15,6 @@ const isRepoRelative = (file) =>
   !file.startsWith('-') &&
   !file.includes('\\') &&
   file.split('/').every((segment) => !['', '.', '..'].includes(segment));
-
-const CASE_NAME = /^FP-(\d{4,})(?:\.json)?$/u;
 
 const CONTEXT_LINES = 10;
 
@@ -98,14 +97,29 @@ export const nextCaseId = (names) => {
   const highest = Math.max(
     0,
     ...names.flatMap((name) => {
-      const match = CASE_NAME.exec(name);
+      const match = CASE_FILE.exec(name);
       return match === null ? [] : [Number(match[1])];
     }),
   );
   return `FP-${String(highest + 1).padStart(4, '0')}`;
 };
 
-const normalized = (text) => text.toLowerCase().replaceAll('_', '-');
+const PLUGIN_RULE = /^([\w@/-]+)\(([^()]+)\)$/u;
+
+const ruleNames = (value) => {
+  const strings = Object.values(value).filter(
+    (field) => typeof field === 'string',
+  );
+  const wrapped = strings.flatMap((field) => {
+    const match = PLUGIN_RULE.exec(field);
+    return match === null ? [] : [match[2], `${match[1]}/${match[2]}`];
+  });
+  const split =
+    typeof value.plugin === 'string' && typeof value.rule === 'string'
+      ? [`${value.plugin}/${value.rule}`]
+      : [];
+  return [...strings, ...wrapped, ...split];
+};
 
 const isPlainObject = (value) =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
@@ -159,9 +173,8 @@ const isMatch = ({ context, finding, value }) => {
   const own = ownFields(value);
   return (
     (context.fileSeen || namesFileWithin({ file: finding.file, value: own })) &&
-    normalized(`${context.keys} ${JSON.stringify(own)}`).includes(
-      normalized(finding.ruleNeedle),
-    ) &&
+    (finding.ruleNeedle === '' ||
+      ruleNames(own).includes(finding.ruleNeedle)) &&
     lineNumbers(own).some(
       (line) => line >= finding.start && line <= finding.end,
     )
