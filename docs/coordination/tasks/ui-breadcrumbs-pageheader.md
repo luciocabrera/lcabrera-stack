@@ -12,11 +12,14 @@ area:
   - packages/ui/package.json
   - packages/ui/src/INVENTORY.md
   - .changeset/ui-breadcrumbs-pageheader.md
-  - packages/ui/api-surface/**
+  - reports/api-surface/ui.txt
+  - packages/ui/README.md
+  - packages/ui/src/stylex-module-paths.test.json
+  - packages/ui/src/utils/tests/themeTokenContrast.util*
 started: 2026-10-30
 updated: 2026-10-30
 plan: (none)
-pr: (none)
+pr: #1583
 issue: #1557
 ---
 

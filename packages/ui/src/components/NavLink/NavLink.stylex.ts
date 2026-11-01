@@ -1,6 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { borderRadius } from '#ui/design-system/tokens/base.stylex';
+import {
+  borderRadius,
+  spacing,
+  typography,
+} from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 import {
   baseInteractiveStyles,
@@ -35,6 +39,40 @@ const styles = stylex.create({
   },
 });
 
+const inlineStyles = stylex.create({
+  link: {
+    borderRadius: borderRadius.sm,
+    outline: {
+      default: 'none',
+      ':focus-visible': `2px solid ${colors.brandPrimaryCardText}`,
+    },
+    color: colors.brandPrimaryCardText,
+    cursor: 'pointer',
+    outlineOffset: '2px',
+    position: 'relative',
+    textDecorationLine: {
+      default: 'none',
+      ':focus-visible': 'underline',
+      ':hover': 'underline',
+    },
+    textUnderlineOffset: '0.2em',
+  },
+  active: {
+    fontWeight: typography.fontWeightSemibold,
+    textDecorationLine: 'underline',
+  },
+  pending: {
+    cursor: 'progress',
+    textDecorationLine: 'underline',
+    textDecorationStyle: 'dotted',
+  },
+  icon: {
+    display: 'inline-flex',
+    marginInlineEnd: spacing.xxs,
+    verticalAlign: 'middle',
+  },
+});
+
 const loadingStyles = stylex.create({
   overlay: {
     borderRadius: borderRadius.md,
@@ -57,6 +95,7 @@ export const linkItemStyles = {
   fullWidth: styles.itemFullWidth,
   icon: baseInteractiveStyles.icon,
   iconOnly: styles.itemIconOnly,
+  inline: inlineStyles,
   label: baseInteractiveStyles.label,
   labelHidden: styles.labelHidden,
   orientation: orientationVariants,

@@ -15,9 +15,13 @@ export type NavLinkProps = Omit<RouterNavLinkProps, 'children' | 'color'> & {
   readonly isActive?: boolean;
   readonly isBusy?: boolean;
   readonly isIconOnly?: boolean;
+  /** Ignored by the `inline` variant, which flows with the surrounding text. */
   readonly orientation?: DesignSystemOrientation;
+  /** Ignored by the `inline` variant, which takes the surrounding font size. */
   readonly size?: DesignSystemSize;
   readonly tooltipContent?: ReactNode;
   readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top';
-  readonly variant?: DesignSystemColor;
+  readonly variant?: NavLinkVariant;
 };
+
+export type NavLinkVariant = 'inline' | DesignSystemColor;
