@@ -19,8 +19,8 @@ LayoutProps [type] { readonly children: ReactNode; }
 NavLink [const] ({ children, customStylex, icon, isBusy, isIconOnly, orientation, prefetch, size, tooltipContent, tooltipPlacement, variant, ...props }: NavLinkProps) => JSX.Element
 NavLinkProps [type] Omit<RouterNavLinkProps, 'children' | 'color'> & { readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly isActive?: boolean; readonly isBusy?: boolean; readonly isIconOnly?: boolean; /** Ignored by the `inline` variant, which flows with the surrounding text. */ readonly orientation?: DesignSystemOrientation; /** Ignored by the `inline` variant, which takes the surrounding font size. */ readonly size?: DesignSystemSize; readonly tooltipContent?: ReactNode; readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top'; readonly variant?: NavLinkVariant; }
 NavLinkVariant [type] 'inline' | DesignSystemColor
-PageHeader [const] ({ actions, breadcrumbs, description, title, }: PageHeaderProps) => JSX.Element
-PageHeaderProps [type] { readonly actions?: ReactNode; /** Defaults to the matched routes' `handle.breadcrumb` entries, which needs a data router. */ readonly breadcrumbs?: readonly BreadcrumbItem[]; readonly description?: ReactNode; readonly title: string; }
+PageHeader [const] ({ actions, breadcrumbLabel, breadcrumbs, description, title, }: PageHeaderProps) => JSX.Element
+PageHeaderProps [type] { readonly actions?: ReactNode; /** The accessible name of the breadcrumb `nav`. Defaults to `Breadcrumbs`' own `'Breadcrumb'`. */ readonly breadcrumbLabel?: string; /** Defaults to the matched routes' `handle.breadcrumb` entries, which needs a data router. */ readonly breadcrumbs?: readonly BreadcrumbItem[]; readonly description?: ReactNode; readonly title: string; }
 Pagination [type] { /** The anchor a keyset data source resumes from. */ readonly lastRow?: TData; readonly limit: number; readonly skip: number; }
 RootComponent [const] ({ appId, defaultTheme, getNavigationItems, isAuthEnabled, logoutRoute, }: RootComponentProps) => JSX.Element
 RootComponentProps [type] { readonly appId?: string; readonly defaultTheme?: ThemeMode; readonly getNavigationItems: GetNavigationItems; readonly isAuthEnabled?: boolean; readonly logoutRoute?: string; }
@@ -188,8 +188,8 @@ NavLinkProps [type] Omit<RouterNavLinkProps, 'children' | 'color'> & { readonly 
 NavLinkVariant [type] 'inline' | DesignSystemColor
 
 ## ./components/PageHeader
-PageHeader [const] ({ actions, breadcrumbs, description, title, }: PageHeaderProps) => JSX.Element
-PageHeaderProps [type] { readonly actions?: ReactNode; /** Defaults to the matched routes' `handle.breadcrumb` entries, which needs a data router. */ readonly breadcrumbs?: readonly BreadcrumbItem[]; readonly description?: ReactNode; readonly title: string; }
+PageHeader [const] ({ actions, breadcrumbLabel, breadcrumbs, description, title, }: PageHeaderProps) => JSX.Element
+PageHeaderProps [type] { readonly actions?: ReactNode; /** The accessible name of the breadcrumb `nav`. Defaults to `Breadcrumbs`' own `'Breadcrumb'`. */ readonly breadcrumbLabel?: string; /** Defaults to the matched routes' `handle.breadcrumb` entries, which needs a data router. */ readonly breadcrumbs?: readonly BreadcrumbItem[]; readonly description?: ReactNode; readonly title: string; }
 
 ## ./components/RootErrorBoundary
 RootErrorBoundary [const] ({ error }: RootErrorBoundaryProps) => JSX.Element

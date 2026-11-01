@@ -26,7 +26,9 @@
     "!src/**/*.test.*",
     "!src/**/*.fixtures.*",
     "!src/benchmarks",
-    "!src/**/*.md"
+    "!src/**/*.md",
+    "!src/utils/tests",
+    "src/utils/tests/mockDialogElement.util.ts"
   ],
   "type": "module",
   "sideEffects": false,
