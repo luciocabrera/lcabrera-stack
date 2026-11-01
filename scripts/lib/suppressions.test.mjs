@@ -11,8 +11,8 @@ import {
   targeted,
 } from './suppressions.mjs';
 
-const inline = (text) =>
-  findInlineSuppressions({ file: 'packages/ui/a.ts', text });
+const inline = (text, file = 'packages/ui/a.ts') =>
+  findInlineSuppressions({ file, text });
 
 describe('findInlineSuppressions', () => {
   it('reads the rule off a lint directive, stripping the -- trailer', () => {
@@ -60,60 +60,62 @@ describe('findInlineSuppressions', () => {
     );
   });
 
-  it('still finds a directive issued after code or on a continuation line', () => {
+  it('still finds a directive issued after code or on a block-comment line', () => {
     expect(inline('const x = compute(); // NOSONAR')).toHaveLength(1);
     expect(inline('/* eslint-disable no-console */')).toHaveLength(1);
-    expect(inline(' * eslint-disable no-console')).toHaveLength(1);
-    expect(inline('  eslint-disable no-console')).toHaveLength(1);
+    expect(inline('/**\n * eslint-disable no-console\n */')).toHaveLength(1);
+    expect(inline('/*\n  eslint-disable no-console\n*/')).toHaveLength(1);
   });
 
-  it('ignores a directive spelled inside a string literal', () => {
+  it('reads the line and column of each directive', () => {
+    expect(inline('const a = 1;\n  /* eslint-disable no-console */')).toEqual([
+      expect.objectContaining({
+        column: 5,
+        kind: 'inline',
+        line: 2,
+        rule: 'no-console',
+      }),
+    ]);
+  });
+
+  it('ignores a directive spelled inside a string, template or JSX text', () => {
     expect(inline("const fixture = '// NOSONAR';")).toHaveLength(0);
     expect(inline('const fixture = `/* eslint-disable x */`;')).toHaveLength(0);
     expect(inline(String.raw`const fixture = "a \" // NOSONAR";`)).toHaveLength(
       0,
     );
+    expect(
+      inline('const p = <p>// eslint-disable-next-line x</p>;', 'a.tsx'),
+    ).toHaveLength(0);
+  });
+
+  it('finds a real comment wherever the lexer puts one', () => {
     expect(inline('call("done"); // NOSONAR')).toHaveLength(1);
     expect(inline(String.raw`const s = 'it\'s'; // NOSONAR`)).toHaveLength(1);
-    expect(inline("x(); // don't // NOSONAR")).toHaveLength(1);
-    expect(inline("const s = a / b + '// NOSONAR';")).toHaveLength(1);
-    expect(inline("'// NOSONAR';")).toHaveLength(0);
-  });
-
-  it('fails closed when a quote on the line never closes', () => {
-    expect(inline("const pattern = /don't/; // NOSONAR")).toHaveLength(1);
-    expect(
-      inline("<p>don't</p> {/* biome-ignore lint/a11y/x: reason */}"),
-    ).toHaveLength(1);
-    expect(inline('const t = `open // NOSONAR')).toHaveLength(1);
-  });
-
-  it('reads a quote after a comment as comment text, not as a string', () => {
-    expect(inline("x(); // it's a // NOSONAR 'y'")).toHaveLength(1);
-    expect(inline("x(); /'/ // NOSONAR 'y'")).toHaveLength(1);
-  });
-
-  it('fails closed on a regex literal and on JSX text, whatever follows', () => {
     expect(
       inline(
         "const re = /don't/; // eslint-disable-next-line no-console -- don't warn",
       ),
     ).toHaveLength(1);
     expect(
-      inline("<p>It's {/* biome-ignore lint/a11y/x: why */} and don't</p>"),
+      inline(
+        "const p = <p>It's {/* biome-ignore lint/a11y/x: why */} and don't</p>;",
+        'a.tsx',
+      ),
     ).toHaveLength(1);
     expect(inline("x(); /* it's */ // NOSONAR 'y'")).toHaveLength(1);
-    expect(inline("const f = g('a', '// NOSONAR');")).toHaveLength(0);
-    expect(inline("It's ('// NOSONAR')")).toHaveLength(1);
-    expect(inline("x '// NOSONAR'")).toHaveLength(1);
-    expect(inline("const f = ['a', 'b'] + '// NOSONAR';")).toHaveLength(0);
   });
 
-  it('closes a string only on an unescaped quote of its own kind', () => {
-    expect(inline(String.raw`'// NOSONAR \' still open`)).toHaveLength(1);
-    expect(inline(String.raw`'// NOSONAR \' closed'`)).toHaveLength(0);
-    expect(inline(`'// NOSONAR " still open`)).toHaveLength(1);
-    expect(inline('x(); /* "quoted" */ // NOSONAR')).toHaveLength(1);
+  it('finds a comment inside a template interpolation', () => {
+    expect(inline('const t = `a ${/* NOSONAR */ b} c`;')).toHaveLength(1);
+    expect(
+      inline('const t = `a ${b // eslint-disable-line no-console\n} c`;'),
+    ).toHaveLength(1);
+  });
+
+  it('reads prose that mentions a directive as prose', () => {
+    expect(inline('// people reach for eslint-disable here')).toHaveLength(0);
+    expect(inline('// see the `@ts-expect-error` rule')).toHaveLength(0);
   });
 
   it('counts each occurrence, so a second copy cannot hide behind the first', () => {

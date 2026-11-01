@@ -29,7 +29,15 @@ const REGISTRY = {
       id: 'code-duplication',
       suppress_comment: '// fallow-ignore-next-line code-duplication',
     },
-    { command: 'dead-code', id: 'unused-file' },
+    { command: 'dead-code', id: 'unused-file', result_key: 'unused_files' },
+    {
+      command: 'dead-code',
+      id: 'unused-export',
+      result_key: 'unused_exports',
+      suppress_comment: '// fallow-ignore-next-line unused-export',
+    },
+    { command: 'security', id: 'sql-injection' },
+    { command: 'health', id: 'css-dead-surface' },
   ],
 };
 
@@ -165,7 +173,7 @@ describe('openCase — the analyzer it runs', () => {
   it('runs the fallow command the registry names, explains the rule, and traces nothing it cannot', () => {
     const { calls, value } = open({
       argv: ['fallow', `${FILE}:3:complexity-both`],
-      report: { findings: [{ line: 3, path: FILE }] },
+      report: { findings: [{ exceeded: 'both', line: 3, path: FILE }] },
     });
     expect(calls).toEqual([
       {
@@ -220,18 +228,23 @@ describe('openCase — the analyzer it runs', () => {
     expect(value.trace).toBeNull();
   });
 
-  it.each([
-    ['security/sql-concat', 'security'],
-    ['unused-export', 'dead-code'],
-  ])(
-    'falls back for %s, which the registry does not name, to %s',
-    (rule, command) => {
-      const { calls, value } = open({
-        argv: ['fallow', `${FILE}:3:${rule}`],
-        report: { items: [{ line: 3, path: FILE }] },
-      });
-      expect(calls[0].args[0]).toBe(command);
-      expect(value.case.rule).toBe(rule);
+  it('does not open an unused-file case on an unused-export record', () => {
+    expect(() =>
+      open({
+        argv: ['fallow', `${FILE}:3:unused-file`],
+        report: { unused_exports: [{ line: 3, path: FILE }] },
+      }),
+    ).toThrow('fallow does not report unused-file');
+  });
+
+  it.each(['unknown-rule', 'css-dead-surface'])(
+    'refuses %s, for which the registry gives no report section',
+    (rule) => {
+      expect(() =>
+        open({ argv: ['fallow', `${FILE}:3:${rule}`], report: {} }),
+      ).toThrow(
+        `fallow's issue registry gives no report section for "${rule}"`,
+      );
     },
   );
 
@@ -258,21 +271,27 @@ describe('openCase — the analyzer it runs', () => {
       expect(() =>
         open({
           argv: ['fallow', `${FILE}:3:unused-file`, `--trace=${target}`],
+          report: { unused_files: [{ line: 3, path: FILE }] },
         }),
       ).toThrow('--trace takes a fallow trace target');
     },
   );
 
-  it('refuses a file that is not inside the repository', () => {
-    expect(() =>
-      open({ argv: ['eslint', 'packages/x/src/other.ts:3:no-sql-concat'] }),
-    ).toThrow('packages/x/src/other.ts is not a file inside this repository');
-  });
-
-  it('refuses an analyzer that printed no JSON', () => {
-    expect(() =>
-      open({ argv: ['eslint', `${FILE}:3:no-sql-concat`], stdout: 'oops' }),
-    ).toThrow('the analyzer printed no JSON report');
+  it.each([
+    [
+      ['eslint', 'packages/x/src/other.ts:3:no-sql-concat'],
+      {},
+      'packages/x/src/other.ts is not a file inside this repository',
+    ],
+    [
+      ['eslint', `${FILE}:3:no-sql-concat`],
+      { stdout: 'oops' },
+      'the analyzer printed no JSON report',
+    ],
+    [['eslint', `${FILE}:3:no-sql-concat`, BUILDER_NOTES], {}, 'usage'],
+    [['eslint', `${FILE}:1:no-sql-concat`], {}, 'nothing to adjudicate'],
+  ])('refuses %j', (argv, options, message) => {
+    expect(() => open({ argv, ...options })).toThrow(message);
   });
 
   it('records the pull request it is given', () => {
@@ -334,30 +353,12 @@ describe('openCase — what reaches the panel', () => {
     },
   );
 
-  it('refuses a trailing free-text positional', () => {
-    expect(() =>
-      openCase({
-        argv: ['eslint', `${FILE}:3:no-sql-concat`, BUILDER_NOTES],
-        effects: fakeEffects(),
-      }),
-    ).toThrow(/usage/u);
-  });
-
-  it('refuses a finding the analyzer does not report now', () => {
-    expect(() =>
-      openCase({
-        argv: ['eslint', `${FILE}:1:no-sql-concat`],
-        effects: fakeEffects(),
-      }),
-    ).toThrow(/nothing to adjudicate/u);
-  });
-
   it("names a fallow case by the marker token the analyzer's registry gives", () => {
     const written = [];
     openCase({
       argv: ['fallow', `${FILE}:3:high-complexity`],
       effects: fakeEffects({
-        report: { findings: [{ line: 3, path: FILE, value: 30 }] },
+        report: { findings: [{ exceeded: 'both', line: 3, path: FILE }] },
         written,
       }),
     });

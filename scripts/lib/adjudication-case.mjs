@@ -43,6 +43,31 @@ const splitFindingId = (findingId) => {
   };
 };
 
+const HEALTH_EXCEEDED = {
+  'high-complexity': 'both',
+  'high-crap-score': 'crap',
+  'high-cyclomatic-complexity': 'cyclomatic',
+  'high-cognitive-complexity': 'cognitive',
+};
+
+export const fallowScope = ({ command, id, result_key: resultKey }) => {
+  if (resultKey) return { section: resultKey };
+  if (command === 'dupes') return { section: 'clone_groups' };
+  if (command === 'security') {
+    return {
+      matches: [
+        ['category', id],
+        ['kind', id],
+      ],
+      section: 'security_findings',
+    };
+  }
+  const exceeded = HEALTH_EXCEEDED[id];
+  if (command === 'health' && exceeded !== undefined) {
+    return { matches: [['exceeded', exceeded]], section: 'findings' };
+  }
+};
+
 export const parseFindingId = (findingId) => {
   const parsed = splitFindingId(findingId);
   if (parsed === undefined) {
@@ -143,6 +168,12 @@ const isMatch = ({ context, finding, value }) => {
   );
 };
 
+const inScope = ({ context, scope, value }) =>
+  scope === undefined ||
+  (context.keys.trim().split(' ')[0] === scope.section &&
+    (scope.matches === undefined ||
+      scope.matches.some(([field, expected]) => value[field] === expected)));
+
 const collect = ({ context, finding, value }) => {
   const here = {
     ...context,
@@ -160,7 +191,12 @@ const collect = ({ context, finding, value }) => {
     }),
   );
   if (deeper.length !== 0) return deeper;
-  if (!isMatch({ context: here, finding, value })) return [];
+  if (
+    !isMatch({ context: here, finding, value }) ||
+    !inScope({ context: here, scope: finding.scope, value })
+  ) {
+    return [];
+  }
   return [finding.whole && here.record !== undefined ? here.record : value];
 };
 

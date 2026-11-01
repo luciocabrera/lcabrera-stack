@@ -7,6 +7,7 @@ import { parseArgs } from 'node:util';
 
 import {
   ADJUDICATED_ANALYZERS,
+  fallowScope,
   buildCase,
   flaggedCode,
   matchingRecords,
@@ -47,10 +48,14 @@ const fallowIssue = ({ effects, rule }) => {
     .issue_types.find(
       ({ aliases = [], id }) => id === rule || aliases.includes(rule),
     );
-  const command =
-    issue?.command ?? (rule.startsWith('security') ? 'security' : 'dead-code');
-  const token = SUPPRESS_TOKEN.exec(issue?.suppress_comment)?.[1] ?? rule;
-  return { command, token };
+  const scope = issue === undefined ? undefined : fallowScope(issue);
+  if (scope === undefined) {
+    throw new Error(
+      `fallow's issue registry gives no report section for "${rule}", so its finding cannot be matched exactly`,
+    );
+  }
+  const token = SUPPRESS_TOKEN.exec(issue.suppress_comment)?.[1] ?? rule;
+  return { command: issue.command, scope, token };
 };
 
 const TRACEABLE = new Set(['dead-code', 'dupes']);
@@ -133,6 +138,7 @@ export const openCase = ({ argv, effects }) => {
     finding: {
       ...finding,
       ruleNeedle: analyzer === 'fallow' ? '' : finding.rule,
+      scope: issue.scope,
       whole: analyzer === 'fallow',
     },
     report: analyzerReport({ analyzer, effects, finding, issue }),

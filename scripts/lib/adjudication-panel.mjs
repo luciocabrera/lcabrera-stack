@@ -81,6 +81,14 @@ export const outcomeOf = (verifiers) => {
 export const verdictFileName = ({ model, role }) =>
   `${role}-${model.replaceAll(/[^\w.-]/gu, '_')}.verdict.md`;
 
+export const assertUnruled = ({ caseId, ruled }) => {
+  if (ruled) {
+    throw new Error(
+      `${caseId} already has a panel record; open a new case with vp run adjudicate to adjudicate it again`,
+    );
+  }
+};
+
 export const dispatchPrompt = (casePath) =>
   `The case file is ${casePath}. Read it and the repository, then answer in the verdict format your instructions give.`;
 

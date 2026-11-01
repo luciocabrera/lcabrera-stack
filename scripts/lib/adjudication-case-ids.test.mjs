@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  fallowScope,
   nextCaseId,
   parseFindingId,
   takenCaseNames,
@@ -86,5 +87,53 @@ describe('nextCaseId — numbering', () => {
   it('takes the next number after every case file and directory', () => {
     expect(nextCaseId(['FP-0009.json', 'FP-0012', 'notes.md'])).toBe('FP-0013');
     expect(nextCaseId([])).toBe('FP-0001');
+  });
+});
+
+describe('fallowScope', () => {
+  it.each([
+    [
+      { command: 'dead-code', id: 'unused-file', result_key: 'unused_files' },
+      { section: 'unused_files' },
+    ],
+    [
+      { command: 'dupes', id: 'code-duplication', result_key: null },
+      { section: 'clone_groups' },
+    ],
+    [
+      { command: 'security', id: 'sql-injection' },
+      {
+        matches: [
+          ['category', 'sql-injection'],
+          ['kind', 'sql-injection'],
+        ],
+        section: 'security_findings',
+      },
+    ],
+    [
+      { command: 'health', id: 'high-complexity' },
+      { matches: [['exceeded', 'both']], section: 'findings' },
+    ],
+    [
+      { command: 'health', id: 'high-crap-score' },
+      { matches: [['exceeded', 'crap']], section: 'findings' },
+    ],
+    [
+      { command: 'health', id: 'high-cyclomatic-complexity' },
+      { matches: [['exceeded', 'cyclomatic']], section: 'findings' },
+    ],
+    [
+      { command: 'health', id: 'high-cognitive-complexity' },
+      { matches: [['exceeded', 'cognitive']], section: 'findings' },
+    ],
+  ])('scopes %j to its report section', (issue, scope) => {
+    expect(fallowScope(issue)).toEqual(scope);
+  });
+
+  it.each([
+    { command: 'health', id: 'css-dead-surface' },
+    { command: 'flags', id: 'feature-flag' },
+  ])('gives no section for %j', (issue) => {
+    expect(fallowScope(issue)).toBeUndefined();
   });
 });

@@ -55,6 +55,8 @@ import {
 const REPO_ROOT = process.cwd();
 const REGISTER_PATH = 'docs/agents/public-package-suppressions.json';
 const FALSE_POSITIVES_PATH = readRegisters(REPO_ROOT).falsePositives;
+const DIRECTIVE_TEXT =
+  /eslint-disable|oxlint-disable|biome-ignore|react-doctor-disable|fallow-ignore|@ts-|NOSONAR/u;
 const PANEL_DIRECTIVE = /^(?:eslint|oxlint|biome|react-doctor)-/u;
 const BASELINE_DIR = 'reports/fallow/baselines';
 
@@ -229,12 +231,20 @@ const main = () => {
     ),
   ];
 
-  const readText = (file) => readTextWithin(join(REPO_ROOT, file), REPO_ROOT);
-  const markers = allFiles.flatMap((file) =>
-    findClaimedMarkers({ file, text: readText(file) }),
-  );
+  const texts = new Map();
+  const readText = (file) => {
+    if (!texts.has(file)) {
+      texts.set(file, readTextWithin(join(REPO_ROOT, file), REPO_ROOT));
+    }
+    return texts.get(file);
+  };
+  const mayHold = (file) => DIRECTIVE_TEXT.test(readText(file));
+  const markers = allFiles
+    .filter(mayHold)
+    .flatMap((file) => findClaimedMarkers({ file, text: readText(file) }));
   const isAdjudicated = atMarker(markers);
   const unadjudicated = otherFiles
+    .filter(mayHold)
     .flatMap((file) => findInlineSuppressions({ file, text: readText(file) }))
     .filter(
       (row) => PANEL_DIRECTIVE.test(row.directive) && !isAdjudicated(row),
@@ -242,6 +252,7 @@ const main = () => {
 
   const found = tally([
     ...publicFiles
+      .filter(mayHold)
       .flatMap((file) => findInlineSuppressions(readPublic(file)))
       .filter((row) => !isAdjudicated(row)),
     ...publicFiles.flatMap((file) => findConfigSuppressions(readPublic(file))),

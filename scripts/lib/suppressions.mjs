@@ -17,6 +17,8 @@
  * so `eslint-disable-next-line` is not reported as a bare `eslint-disable`.
  */
 
+import { findCommentDirectives } from './comment-directives.mjs';
+
 const INLINE_DIRECTIVES = [
   'eslint-disable-next-line',
   'eslint-disable',
@@ -67,86 +69,16 @@ const ruleFrom = ({ directive, rest }) => {
     : `${directive} (unscoped)`;
 };
 
-const QUOTES = new Set(["'", '"', '`']);
-
-const PRECEDES_VALUE = /[\w)\]'"`]/u;
-
-const inString = (state, character) => {
-  if (state.escaped) return { ...state, escaped: false };
-  if (character === '\\') return { ...state, escaped: true };
-  return character === state.quote
-    ? { ...state, quote: undefined, significant: character }
-    : state;
-};
-
-const inCode = (state, character) => {
-  if (character === '/') return { ...state, uncertain: true };
-  if (QUOTES.has(character)) {
-    return PRECEDES_VALUE.test(state.significant)
-      ? { ...state, uncertain: true }
-      : { ...state, quote: character };
-  }
-  return character.trim() === '' ? state : { ...state, significant: character };
-};
-
-const stringStep = (state, character) => {
-  if (state.uncertain) return state;
-  return state.quote === undefined
-    ? inCode(state, character)
-    : inString(state, character);
-};
-
-const LINE_START = {
-  quote: undefined,
-  significant: '',
-  uncertain: false,
-};
-
-const stateAfter = (text) =>
-  [...text].reduce(
-    (state, character) => stringStep(state, character),
-    LINE_START,
-  );
-
-const insideClosedString = ({ index, line }) => {
-  let state = stateAfter(line.slice(0, index));
-  if (state.quote === undefined) return false;
-  for (const character of line.slice(index)) {
-    state = stringStep(state, character);
-    if (state.quote === undefined) return true;
-  }
-  return false;
-};
-
-export const opensComment = ({ index, line }) => {
-  const trimmed = line.slice(0, index).trimEnd();
-  return (
-    (trimmed.endsWith('//') || trimmed.endsWith('/*')) &&
-    !insideClosedString({ index, line })
-  );
-};
-
-const isDirectivePosition = ({ index, line }) => {
-  if (opensComment({ index, line })) return true;
-  const leading = line.slice(0, index).trim();
-  return leading === '' || leading === '*';
-};
-
 export const findInlineSuppressions = ({ file, text }) =>
-  text.split('\n').flatMap((line, index) =>
-    [...line.matchAll(DIRECTIVE_PATTERN)]
-      .filter((match) => isDirectivePosition({ index: match.index, line }))
-      .map((match) => ({
-        column: match.index,
-        directive: match[0],
-        file,
-        kind: 'inline',
-        line: index + 1,
-        rule: ruleFrom({
-          directive: match[0],
-          rest: line.slice(match.index + match[0].length),
-        }),
-      })),
+  findCommentDirectives({ file, pattern: DIRECTIVE_PATTERN, text }).map(
+    ({ column, line, rest, token }) => ({
+      column,
+      directive: token,
+      file,
+      kind: 'inline',
+      line,
+      rule: ruleFrom({ directive: token, rest }),
+    }),
   );
 
 const GLOB_TOKENS = new Map([

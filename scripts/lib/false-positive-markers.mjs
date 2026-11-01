@@ -6,7 +6,7 @@
  */
 import { createHash } from 'node:crypto';
 
-import { opensComment } from './suppressions.mjs';
+import { findCommentDirectives } from './comment-directives.mjs';
 
 const DIRECTIVES = [
   { analyzer: 'eslint', directive: 'eslint-disable-next-line', next: true },
@@ -52,57 +52,32 @@ const splitRest = ({ analyzer, rest }) => {
   };
 };
 
-const tokensOn = (line) =>
-  [...line.matchAll(DIRECTIVE_TOKEN)].map((match) => ({
-    entry: BY_DIRECTIVE.get(match[0]),
-    index: match.index,
-    joined: /[\w-]/u.test(line.charAt(match.index - 1)),
-    length: match[0].length,
-  }));
-
-const markerAt = ({ file, index, line, next, token }) => {
-  const rest = line.slice(token.index + token.length, next);
-  const { explanation, rule } = splitRest({
-    analyzer: token.entry.analyzer,
-    rest,
-  });
+const markerFrom = ({ column, file, line, rest, token }) => {
+  const entry = BY_DIRECTIVE.get(token);
+  if (entry === undefined) return [];
+  const { explanation, rule } = splitRest({ analyzer: entry.analyzer, rest });
   const claim = CLAIM.exec(explanation);
-  if (claim === null) return [];
-  const { analyzer, directive, next: nextLine } = token.entry;
-  return [
-    {
-      analyzer,
-      caseId: claim[1],
-      column: token.index,
-      directive,
-      file,
-      line: index + 1,
-      nextLine,
-      reason: claim[2].trim(),
-      rule,
-    },
-  ];
-};
-
-const markersOn = ({ file, index, line }) => {
-  const tokens = tokensOn(line);
-  return tokens.flatMap((token, position) =>
-    token.entry === undefined ||
-    token.joined ||
-    !opensComment({ index: token.index, line })
-      ? []
-      : markerAt({
+  return claim === null
+    ? []
+    : [
+        {
+          analyzer: entry.analyzer,
+          caseId: claim[1],
+          column,
+          directive: entry.directive,
           file,
-          index,
           line,
-          next: tokens[position + 1]?.index,
-          token,
-        }),
-  );
+          nextLine: entry.next,
+          reason: claim[2].trim(),
+          rule,
+        },
+      ];
 };
 
 export const findClaimedMarkers = ({ file, text }) =>
-  text.split('\n').flatMap((line, index) => markersOn({ file, index, line }));
+  findCommentDirectives({ file, pattern: DIRECTIVE_TOKEN, text }).flatMap(
+    (found) => markerFrom({ ...found, file }),
+  );
 
 export const hashLines = (lines) =>
   createHash('sha256').update(lines.join('\n')).digest('hex');

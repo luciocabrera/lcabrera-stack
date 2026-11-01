@@ -107,8 +107,8 @@ describe('findClaimedMarkers — what is not a directive', () => {
   it('still reads a JSX marker after an apostrophe in the text', () => {
     expect(
       findClaimedMarkers({
-        file: FILE,
-        text: "<p>don't</p> {/* biome-ignore x/y: false positive, case FP-0003: why */}",
+        file: 'packages/x/src/a.tsx',
+        text: "const p = <p>don't {/* biome-ignore x/y: false positive, case FP-0003: why */}</p>;",
       })[0],
     ).toMatchObject({ caseId: 'FP-0003', reason: 'why', rule: 'x/y' });
   });

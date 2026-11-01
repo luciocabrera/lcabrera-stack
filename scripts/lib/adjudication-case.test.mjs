@@ -170,6 +170,44 @@ describe('matchingRecords — the shapes each analyzer prints', () => {
   });
 });
 
+describe('matchingRecords — a fallow issue scope', () => {
+  const scoped = (scope) => finding({ ruleNeedle: '', scope, whole: true });
+
+  it('keeps only the record under the issue section', () => {
+    const item = { line: 3, path: 'packages/a/src/a.ts' };
+    const report = { unused_exports: [item], unused_files: [{ ...item }] };
+    expect(
+      matchingRecords({ finding: scoped({ section: 'unused_files' }), report }),
+    ).toEqual([report.unused_files[0]]);
+    expect(
+      matchingRecords({ finding: scoped({ section: 'unused_types' }), report }),
+    ).toEqual([]);
+  });
+
+  it('keeps only the record whose field names the issue', () => {
+    const record = {
+      category: 'sql-injection',
+      line: 3,
+      path: 'packages/a/src/a.ts',
+    };
+    const report = {
+      security_findings: [{ ...record, category: 'ssrf' }, record],
+    };
+    expect(
+      matchingRecords({
+        finding: scoped({
+          matches: [
+            ['category', 'sql-injection'],
+            ['kind', 'sql-injection'],
+          ],
+          section: 'security_findings',
+        }),
+        report,
+      }),
+    ).toEqual([record]);
+  });
+});
+
 describe('matchingRecords — whole records', () => {
   const group = {
     instances: [{ end_line: 9, file: 'packages/a/src/a.ts', start_line: 3 }],

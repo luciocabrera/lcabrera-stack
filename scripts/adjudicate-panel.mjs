@@ -36,6 +36,7 @@ import { readRegisters } from '../packages/repo-standards/scripts/config.mjs';
 import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
 import { CASES_DIR } from './lib/adjudicate-command.mjs';
 import {
+  assertUnruled,
   dispatchPrompt,
   envelopeFor,
   listEntryFor,
@@ -177,6 +178,10 @@ const recordOther = ({ caseFile, envelope }) => {
 const main = async () => {
   const { builderModel, caseId, problems, seats } = readInput();
   if (problems.length > 0) throw new Error(problems.join('\n'));
+  assertUnruled({
+    caseId,
+    ruled: existsSync(inRepo(`${CASES_DIR}/${caseId}.json`)),
+  });
   const caseDir = `${CASES_DIR}/${caseId}`;
   const casePath = `${caseDir}/case.json`;
   const caseFile = JSON.parse(read(casePath));

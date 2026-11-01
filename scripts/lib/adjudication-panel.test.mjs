@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  assertUnruled,
   DEFAULT_SEATS,
   dispatchPrompt,
   envelopeFor,
@@ -108,6 +109,18 @@ describe('seats', () => {
         verifiers: [verifier('m'), verifier('n'), verifier('o')],
       }),
     ).toEqual([]);
+  });
+});
+
+describe('assertUnruled', () => {
+  it('refuses a case the panel already ruled on, so its record is never overwritten', () => {
+    expect(() => assertUnruled({ caseId: 'FP-0002', ruled: true })).toThrow(
+      'FP-0002 already has a panel record; open a new case with vp run adjudicate to adjudicate it again',
+    );
+  });
+
+  it('lets an open case through', () => {
+    expect(assertUnruled({ caseId: 'FP-0002', ruled: false })).toBeUndefined();
   });
 });
 
