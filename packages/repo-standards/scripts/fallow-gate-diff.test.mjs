@@ -288,4 +288,31 @@ describe('gitDiffArgs against a user config that reshapes diffs', () => {
       rmSync(root, { force: true, recursive: true });
     }
   });
+
+  it('reads a renamed and edited file under its new path, as not new', () => {
+    const root = mkdtempSync(join(tmpdir(), 'fallow-gate-diff-'));
+    try {
+      git(root, 'init', '-q');
+      git(root, 'config', 'user.email', 'gate@example.invalid');
+      git(root, 'config', 'user.name', 'gate');
+      mkdirSync(join(root, 'src'));
+      const body = Array.from({ length: 20 }, (_, i) => `line ${i}`);
+      writeFileSync(join(root, 'src', 'old.mjs'), `${body.join('\n')}\n`);
+      git(root, 'add', '.');
+      git(root, 'commit', '-q', '-m', 'base');
+      git(root, 'mv', 'src/old.mjs', 'src/new.mjs');
+      writeFileSync(
+        join(root, 'src', 'new.mjs'),
+        `${[...body, 'added'].join('\n')}\n`,
+      );
+      git(root, 'add', '.');
+      const diff = git(root, ...gitDiffArgs('HEAD'));
+      expect(diff.status).toBe(0);
+      expect(parseDiff(diff.stdout)).toEqual(
+        new Map([['src/new.mjs', { isNew: false, ranges: [[21, 21]] }]]),
+      );
+    } finally {
+      rmSync(root, { force: true, recursive: true });
+    }
+  });
 });
