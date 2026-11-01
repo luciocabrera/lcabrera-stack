@@ -34,42 +34,34 @@ describe('matchingRecords — the rule id', () => {
   });
 
   it.each([
-    ['no-console', { code: 'eslint(no-console) and more' }],
-    ['no-console', { code: 'see eslint(no-console)' }],
-    ['7/r', { plugin: 7, rule: 'r' }],
+    ['no-console', { code: 'eslint(no-console) and more' }, false],
+    ['no-console', { code: 'see eslint(no-console)' }, false],
+    ['7/r', { plugin: 7, rule: 'r' }, false],
+    [
+      'typescript-eslint/no-unused-vars',
+      { code: 'typescript-eslint(no-unused-vars)' },
+      true,
+    ],
+    [
+      'react-doctor/no-redundant-roles',
+      { plugin: 'react-doctor', rule: 'no-redundant-roles' },
+      true,
+    ],
+    [
+      'no-redundant-roles',
+      { plugin: 'react-doctor', rule: 'no-redundant-roles' },
+      true,
+    ],
   ])(
-    'does not read the rule %s from a record spelled %j',
-    (ruleNeedle, fields) => {
+    'reads the rule %s from a record spelled %j: %s',
+    (ruleNeedle, fields, matches) => {
       const record = { ...fields, file: 'packages/a/src/a.ts', line: 3 };
       expect(
         matchingRecords({
           finding: finding({ ruleNeedle }),
           report: { items: [record] },
         }),
-      ).toEqual([]);
+      ).toEqual(matches ? [record] : []);
     },
   );
-
-  it.each([
-    [
-      'typescript-eslint/no-unused-vars',
-      { code: 'typescript-eslint(no-unused-vars)' },
-    ],
-    [
-      'react-doctor/no-redundant-roles',
-      { plugin: 'react-doctor', rule: 'no-redundant-roles' },
-    ],
-    [
-      'no-redundant-roles',
-      { plugin: 'react-doctor', rule: 'no-redundant-roles' },
-    ],
-  ])('reads the rule %s from a record spelled %j', (ruleNeedle, fields) => {
-    const record = { ...fields, file: 'packages/a/src/a.ts', line: 3 };
-    expect(
-      matchingRecords({
-        finding: finding({ ruleNeedle }),
-        report: { items: [record] },
-      }),
-    ).toEqual([record]);
-  });
 });
