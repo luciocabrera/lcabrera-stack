@@ -97,6 +97,13 @@ catalogMode: prefer
 # `vitest@*`, because a bare key also matches a `catalog:` reference and an
 # upgrade rewrites that reference to a concrete version.
 overrides:
+  # GHSA-g3hv-75wg-m249: denial of service through globparts amplification in
+  # minimatch, patched in 11.0.1 with no 10.x backport. It reaches this tree
+  # through eslint, typescript-eslint and ts-morph, whose ranges all stop at
+  # 10.x, so this crosses a major for each of them. Keyed `minimatch@10` so a
+  # parent that moves to 11 on its own is left alone. Drop once those parents
+  # accept 11.
+  minimatch@10: ^11.0.1
   vite@*: catalog:build
   vitest@*: catalog:test
 
