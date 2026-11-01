@@ -131,4 +131,17 @@ describe('runFallowGateCommand', () => {
     expect(runFallowGateCommand(withoutBase)).toBe(COULD_NOT_RUN);
     expect(withoutBase.err.join('')).toContain('CHANGED_FILES_BASE');
   });
+
+  it.each([
+    [{ REPO_FALLOW_GATE_MUTATION_SETUP_TIMEOUT: '45m' }, '45m'],
+    [{ REPO_FALLOW_GATE_MUTATION_SETUP_TIMEOUT: '' }, undefined],
+    [{}, undefined],
+  ])(
+    'reads the mutation setup timeout from the environment (%j)',
+    (env, expected) => {
+      expect(
+        processEffects(fakeProcess({ argv: [], env })).mutationSetupTimeout,
+      ).toBe(expected);
+    },
+  );
 });
