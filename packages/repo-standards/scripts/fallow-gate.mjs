@@ -103,7 +103,7 @@ export const fallowArgs = ({ analysis, base, files }) => {
 
 export const REPOSITORY_ROOT = '.';
 
-export const MUTATION_SETUP_TIMEOUT = '30m';
+const MUTATION_SETUP_TIMEOUT = '30m';
 
 export const SETUP_TIMEOUT_VARIABLE = 'REPO_FALLOW_GATE_MUTATION_SETUP_TIMEOUT';
 
