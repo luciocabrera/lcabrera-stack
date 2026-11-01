@@ -50,20 +50,20 @@ const inlineStyles = stylex.create({
     cursor: 'pointer',
     outlineOffset: '2px',
     position: 'relative',
-    textDecorationLine: {
-      default: 'none',
-      ':focus-visible': 'underline',
-      ':hover': 'underline',
+    textDecorationLine: 'underline',
+    textDecorationThickness: {
+      default: '1px',
+      ':focus-visible': '2px',
+      ':hover': '2px',
     },
     textUnderlineOffset: '0.2em',
   },
   active: {
     fontWeight: typography.fontWeightSemibold,
-    textDecorationLine: 'underline',
+    textDecorationThickness: '2px',
   },
   pending: {
     cursor: 'progress',
-    textDecorationLine: 'underline',
     textDecorationStyle: 'dotted',
   },
   icon: {
