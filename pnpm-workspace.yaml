@@ -189,6 +189,22 @@ overrides:
   # express and body-parser resolve the same qs this override names, so it is
   # proven in this install. Drop once typed-rest-client repins.
   qs@6: ^6.17.0
+  # GHSA-g3hv-75wg-m249 — denial of service through globparts amplification in
+  # minimatch, patched in 11.0.1 with no 10.x backport, and reached on a
+  # production path. Every parent stops short of the patched major: `eslint`
+  # (`^10.2.6`), `@eslint/config-array` (`^10.2.4`),
+  # `@typescript-eslint/typescript-estree` (`^10.2.2`), `@ts-morph/common`
+  # (`^10.0.1`), `@stryker-mutator/core` (`~10.2.4`) and `glob` 13. So unlike
+  # the entries above this crosses a major for each of them; the lint,
+  # API-surface and mutation passes running on it are what prove it. Keyed
+  # `minimatch@10`, the only line in the tree. Drop once those parents accept 11.
+  minimatch@10: ^11.0.1
+  # GHSA-3g3m-2fjr-6pw4 — an aborted glob walk keeps traversing the filesystem
+  # after its timeout, patched in 14.0.2 with no 13.x backport. Reached only
+  # through `@sentry/bundler-plugins`, which asks for `^13.0.6`, so this crosses
+  # a major for it as well. Keyed `glob@13`, the only line in the tree. Drop once
+  # that plugin accepts 14.
+  glob@13: ^14.0.2
   vite@*: catalog:build
   vitest@*: catalog:test
 peerDependencyRules:
