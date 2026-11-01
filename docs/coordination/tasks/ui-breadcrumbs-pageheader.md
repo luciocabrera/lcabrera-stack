@@ -2,7 +2,7 @@
 id: ui-breadcrumbs-pageheader
 title: Add Breadcrumbs, PageHeader and an inline NavLink variant
 owner: agent:claude
-status: active
+status: review
 branch: feat/1557-ui-breadcrumbs-pageheader
 area:
   - packages/ui/src/components/Breadcrumbs/**
@@ -29,6 +29,6 @@ Add Breadcrumbs, PageHeader and an inline NavLink variant
 
 ## Status / next
 
-- Current step: just claimed
-- Blockers: #1585 (advisories), #1581 (StyleX mutation baseline)
+- Current step: gate green, PR ready for review
+- Blockers: none
 - Next:
