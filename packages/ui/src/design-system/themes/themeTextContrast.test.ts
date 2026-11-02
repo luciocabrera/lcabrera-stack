@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { getContrastRatio } from '#ui/utils/tests/getContrastRatio.util';
-import { readThemeTokenValue } from '#ui/utils/tests/readThemeTokenValue.util';
+import { colors } from '#ui/design-system/tokens/colors.stylex';
+import { getThemeTokenContrast } from '#ui/utils/tests/getThemeTokenContrast.util';
 
 const WCAG_AA_BODY_TEXT = 4.5;
 
@@ -25,12 +25,13 @@ describe('theme text contrast', () => {
   it.each(PAIRS)(
     '$theme $text on $background meets WCAG AA for body text',
     ({ background, text, theme }) => {
-      const ratio = getContrastRatio({
-        background: readThemeTokenValue({ theme, token: background }),
-        foreground: readThemeTokenValue({ theme, token: text }),
-      });
-
-      expect(ratio).toBeGreaterThanOrEqual(WCAG_AA_BODY_TEXT);
+      expect(
+        getThemeTokenContrast({
+          background: colors[background],
+          foreground: colors[text],
+          theme,
+        }),
+      ).toBeGreaterThanOrEqual(WCAG_AA_BODY_TEXT);
     },
   );
 });
