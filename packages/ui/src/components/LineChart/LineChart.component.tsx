@@ -4,12 +4,13 @@ import type { LineChartProps } from './LineChart.types';
 
 import { LINE_CHART } from './LineChart.constants';
 import { lineChartLayout } from './LineChart.stylex';
+import { LineChartAxisLabel } from './LineChartAxisLabel/LineChartAxisLabel.component';
 import { LineChartDataTable } from './LineChartDataTable/LineChartDataTable.component';
 import { LineChartLegend } from './LineChartLegend/LineChartLegend.component';
 import { LineChartMarkerLabels } from './LineChartMarkerLabels/LineChartMarkerLabels.component';
 import { LineChartPlot } from './LineChartPlot/LineChartPlot.component';
 import { LineChartTicks } from './LineChartTicks/LineChartTicks.component';
-import { formatChartValue } from './utils/formatChartValue.util';
+import { getLineChartFormatters } from './utils/getLineChartFormatters.util';
 import { getLineChartGeometry } from './utils/getLineChartGeometry.util';
 
 export const LineChart = ({
@@ -20,13 +21,10 @@ export const LineChart = ({
   points = 'auto',
   series,
   title,
-  xAxis,
-  yAxis,
+  xAxis = {},
+  yAxis = {},
 }: LineChartProps) => {
-  const formatters = {
-    x: xAxis?.format ?? formatChartValue,
-    y: yAxis?.format ?? formatChartValue,
-  };
+  const formatters = getLineChartFormatters({ xAxis, yAxis });
   const geometry = getLineChartGeometry({
     formatters,
     markers,
@@ -38,13 +36,7 @@ export const LineChart = ({
 
   return (
     <div {...stylex.props(lineChartLayout.root)}>
-      {yAxis?.label !== undefined && (
-        <span
-          {...stylex.props(lineChartLayout.axisLabel, lineChartLayout.yLabel)}
-        >
-          {yAxis.label}
-        </span>
-      )}
+      <LineChartAxisLabel axis='y' label={yAxis.label} />
       <LineChartMarkerLabels markers={geometry.markers} />
       <LineChartTicks axis='y' ticks={geometry.yTicks} />
       <LineChartPlot
@@ -54,23 +46,15 @@ export const LineChart = ({
         title={title}
       />
       <LineChartTicks axis='x' ticks={geometry.xTicks} />
-      {xAxis?.label !== undefined && (
-        <span
-          {...stylex.props(lineChartLayout.axisLabel, lineChartLayout.xLabel)}
-        >
-          {xAxis.label}
-        </span>
-      )}
-      {geometry.series.length > 1 && (
-        <LineChartLegend series={geometry.series} />
-      )}
+      <LineChartAxisLabel axis='x' label={xAxis.label} />
+      <LineChartLegend series={geometry.series} />
       {hasDataTable === true && (
         <LineChartDataTable
           formatters={formatters}
           series={series}
           title={title}
-          xLabel={xAxis?.label}
-          yLabel={yAxis?.label}
+          xLabel={xAxis.label}
+          yLabel={yAxis.label}
         />
       )}
     </div>

@@ -17,6 +17,7 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import type { LineChartProps, LineSeries } from './LineChart.types';
 
 import { LineChart } from './LineChart.component';
+import { lineChartLayout } from './LineChart.stylex';
 import { lineChartLegendStyles } from './LineChartLegend/LineChartLegend.stylex';
 
 const GAP: null = JSON.parse('null');
@@ -532,6 +533,14 @@ describe('LineChart', () => {
 
       expect(screen.getByText('Request').tagName).toBe('SPAN');
       expect(screen.getByText('Milliseconds').tagName).toBe('SPAN');
+      expect(screen.getByText('Request').getAttribute('class')).toBe(
+        stylex.props(lineChartLayout.axisLabel, lineChartLayout.xLabel)
+          .className,
+      );
+      expect(screen.getByText('Milliseconds').getAttribute('class')).toBe(
+        stylex.props(lineChartLayout.axisLabel, lineChartLayout.yLabel)
+          .className,
+      );
     });
 
     it('places nice ticks on both axes, with a gridline per value tick', () => {
