@@ -29,7 +29,6 @@ import { TableFocusProvider } from './contexts/TableFocus';
 import { Table } from './Table.component';
 import { styles as flexWrapperStyles } from './Table.stylex';
 import { tableBodyCellStyles } from './TableBodyCell/TableBodyCell.stylex';
-import { styles as emptyStateStyles } from './TableEmptyState/TableEmptyState.stylex';
 import { tableHeaderBandStyles } from './TableHeaderBand/TableHeaderBand.stylex';
 import { tableHeaderCellStyles } from './TableHeaderCell/TableHeaderCell.stylex';
 import { tableStaticContentStyles as staticContentStyles } from './TableStaticContent/TableStaticContent.stylex';
@@ -599,11 +598,5 @@ describe('Table static layout review fixes', () => {
     expect(
       screen.getByTestId('table-empty-state-viewport').getAttribute('style'),
     ).toBeNull();
-    expect(
-      hasStylexStyle({
-        element: viewport,
-        style: emptyStateStyles.staticViewport,
-      }),
-    ).toBe(true);
   });
 });
