@@ -18,6 +18,18 @@ const requireEnv = (name: string, value: string | undefined) => {
 
 export const EVALS_E2E_READER_PASSWORD = 'EVALS_E2E_READER_PASSWORD';
 
+const SETTINGS = [
+  'DB_HOST',
+  'DB_NAME',
+  'DB_PASSWORD',
+  'DB_PORT',
+  'DB_USER',
+  EVALS_E2E_READER_PASSWORD,
+] as const;
+
+export const hasEvalsE2eServer = (env: NodeJS.ProcessEnv = process.env) =>
+  SETTINGS.every((name) => (env[name] ?? '') !== '');
+
 export const evalsE2eServer = (env: NodeJS.ProcessEnv = process.env) => {
   const password = requireEnv('DB_PASSWORD', env.DB_PASSWORD);
   const readerPassword = requireEnv(

@@ -1,4 +1,4 @@
-name: Grid browser suite
+name: Browser suite (grid and evals)
 
 on:
   pull_request:

@@ -141,6 +141,13 @@ const recordHistory = (server: Server) =>
       text: SELECT_SUBJECT_ID_SQL,
       values: ['skill', 'react-19'],
     });
+    const [subject] = rows;
+
+    if (subject === undefined) {
+      throw new Error(
+        'the seeded history holds no skill react-19 to hang its quality baseline on',
+      );
+    }
 
     await client.query({
       text: INSERT_BASELINE_SQL,
@@ -162,7 +169,7 @@ const recordHistory = (server: Server) =>
         SEED_QUALITY_BASELINE,
         'skill-quality',
         SEED_MODEL,
-        rows[0]?.id,
+        subject.id,
         'quality_overall',
         seedGitSha(SEED_RUNS.qualityBaselineThird),
         3,

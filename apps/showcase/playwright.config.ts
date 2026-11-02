@@ -4,6 +4,7 @@ import { randomBytes } from 'node:crypto';
 import {
   EVALS_E2E_READER_PASSWORD,
   evalsE2eServer,
+  hasEvalsE2eServer,
 } from './e2e/evals/evalsDatabase';
 
 process.env[EVALS_E2E_READER_PASSWORD] ??= randomBytes(24).toString('hex');
@@ -13,7 +14,7 @@ const port = isCi ? 3000 : 4173;
 const emptyPort = isCi ? 3100 : 4174;
 const brokenPort = isCi ? 3200 : 4175;
 const reportRoot = '../../.tmp/playwright';
-const evalsServer = evalsE2eServer();
+const evalsServer = hasEvalsE2eServer() ? evalsE2eServer() : undefined;
 const EMPTY_EVALS_SPEC = /evals\/empty\.spec\.ts$/u;
 const BROKEN_EVALS_SPEC = /evals\/broken\.spec\.ts$/u;
 
@@ -25,9 +26,11 @@ const webServer = (args: {
     ? 'vp exec react-router-serve build/server/index.js'
     : `vp exec react-router dev --host 127.0.0.1 --port ${String(args.port)} --strictPort`,
   env: {
-    EVALS_DASHBOARD: '1',
-    EVALS_READER_DATABASE_URL: evalsServer.readerUrlOf(args.database),
     PORT: String(args.port),
+    ...(evalsServer !== undefined && {
+      EVALS_DASHBOARD: '1',
+      EVALS_READER_DATABASE_URL: evalsServer.readerUrlOf(args.database),
+    }),
   },
   reuseExistingServer: false,
   timeout: 180_000,

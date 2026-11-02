@@ -235,13 +235,9 @@ const captureTheme = async ({
 };
 
 export const captureThemes = async (args: ThemesArgs) => {
-  const [light, dark] = await THEMES.reduce<Promise<readonly string[]>>(
-    async (previous, theme) => [
-      ...(await previous),
-      await captureTheme({ ...args, ...theme }),
-    ],
-    Promise.resolve([]),
-  );
+  const [lightTheme, darkTheme] = THEMES;
+  const light = await captureTheme({ ...args, ...lightTheme });
+  const dark = await captureTheme({ ...args, ...darkTheme });
 
   expect(dark).not.toBe(light);
 };

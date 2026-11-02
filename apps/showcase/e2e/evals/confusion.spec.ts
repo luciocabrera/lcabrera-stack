@@ -30,18 +30,19 @@ type CurrentArgs = {
 };
 
 const expectCurrentEntry = async ({ name, scope }: CurrentArgs) => {
-  await expect(scope.getByText(name, { exact: true })).toBeVisible();
-  await expect
-    .poll(() =>
-      scope
-        .getByRole('link', { exact: true, name })
-        .evaluateAll(
-          (links) =>
-            links.filter((link) => link.getAttribute('aria-current') !== 'page')
-              .length,
-        ),
-    )
-    .toBe(0);
+  const matches = scope.getByText(name, { exact: true });
+
+  await expect(matches).toHaveCount(1);
+  expect(
+    await matches.evaluateAll(
+      (entries) =>
+        entries.filter((entry) => {
+          const link = entry.closest('[href]');
+
+          return link === null || link.getAttribute('aria-current') === 'page';
+        }).length,
+    ),
+  ).toBe(1);
 };
 
 const TRIGGERED = 'react-19 38 · 7 · 45';

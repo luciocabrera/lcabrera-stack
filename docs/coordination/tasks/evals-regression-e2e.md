@@ -11,7 +11,7 @@ area:
   - .github/workflows/e2e.yml
   - COMMANDS.md
 started: 2026-10-30
-updated: 2026-10-30
+updated: 2026-11-02
 plan: (none)
 pr: '#1579'
 issue: #1551
@@ -23,6 +23,7 @@ Pin the evals pages with regression e2e specs on a fixed seed
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review on #1579; the specs, the fixed seed and the three
+  servers are in, and every review thread so far is answered
 - Blockers: none
-- Next:
+- Next: merge, then #1564–#1566 run these specs unchanged
