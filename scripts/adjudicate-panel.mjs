@@ -7,6 +7,8 @@
  * Policy: docs/agents/public-package-suppressions.md.
  *
  * Usage: vp run adjudicate:panel -- <FP-nnnn> --builder-model <model> [--judge <model> --judge <model>] [--adversary <model>]
+ * --builder-model is recorded in the envelope as builder_model, for the
+ * verdict history; it does not bar that model from a seat.
  * Exit codes: 0 = the panel ruled and its record is written; 1 = bad
  * arguments, a session failed, a verdict was malformed, or a verifier changed
  * the working tree.
@@ -227,9 +229,10 @@ const main = async () => {
         .join('\n'),
     );
   const verifiers = parsed.map((session) => toVerifier(session));
-  const resolved = resolvedModelProblems({ builderModel, verifiers });
+  const resolved = resolvedModelProblems({ verifiers });
   if (resolved.length > 0) throw new Error(resolved.join('\n'));
   const envelope = envelopeFor({
+    builderModel,
     caseFile,
     fixable: anyFixable(parsed.map(({ parsed: verdict }) => verdict)),
     verifiers,

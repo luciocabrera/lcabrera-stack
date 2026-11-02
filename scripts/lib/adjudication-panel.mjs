@@ -37,16 +37,11 @@ export const seatProblems = ({ builderModel, seats }) => {
   ];
 };
 
-export const resolvedModelProblems = ({ builderModel, verifiers }) => {
+export const resolvedModelProblems = ({ verifiers }) => {
   const models = verifiers.map(({ model }) => model);
-  return [
-    ...(new Set(models).size === models.length
-      ? []
-      : [`two seats resolved to the same model: ${models.join(', ')}`]),
-    ...(models.some((model) => model !== builderModel)
-      ? []
-      : [`every seat resolved to the builder's model ${builderModel}`]),
-  ];
+  return new Set(models).size === models.length
+    ? []
+    : [`two seats resolved to the same model: ${models.join(', ')}`];
 };
 
 const LABELS = ['Evidence:', 'Check:', 'Fix:'];
@@ -172,7 +167,13 @@ export const assertUnruled = ({ caseId, ruled }) => {
 export const dispatchPrompt = (casePath) =>
   `The case file is ${casePath}. Read it and the repository, then answer in the verdict format your instructions give.`;
 
-export const envelopeFor = ({ caseFile, fixable, verifiers }) => ({
+export const envelopeFor = ({
+  builderModel,
+  caseFile,
+  fixable,
+  verifiers,
+}) => ({
+  builder_model: builderModel,
   case: caseFile.case,
   outcome: outcomeOf({ fixable, verifiers }),
   schema_version: 1,

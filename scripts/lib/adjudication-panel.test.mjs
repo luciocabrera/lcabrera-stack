@@ -51,7 +51,7 @@ describe('seats', () => {
     ]);
   });
 
-  it('passes three distinct models with one differing from the builder', () => {
+  it('passes three distinct models with the builder model named', () => {
     expect(
       seatProblems({ builderModel: 'opus', seats: DEFAULT_SEATS }),
     ).toEqual([]);
@@ -77,25 +77,14 @@ describe('seats', () => {
     },
   );
 
-  it('refuses resolved models that collide, or all match the builder', () => {
+  it('refuses resolved models that collide', () => {
     expect(
       resolvedModelProblems({
-        builderModel: 'm',
         verifiers: [verifier('x'), verifier('x'), verifier('y')],
       }),
     ).toEqual(['two seats resolved to the same model: x, x, y']);
     expect(
       resolvedModelProblems({
-        builderModel: 'm',
-        verifiers: [verifier('m'), verifier('m'), verifier('m')],
-      }),
-    ).toEqual([
-      'two seats resolved to the same model: m, m, m',
-      "every seat resolved to the builder's model m",
-    ]);
-    expect(
-      resolvedModelProblems({
-        builderModel: 'm',
         verifiers: [verifier('m'), verifier('n'), verifier('o')],
       }),
     ).toEqual([]);
@@ -298,8 +287,14 @@ describe('records', () => {
   it('builds the envelope from the case and the verdicts', () => {
     const verifiers = [verifier('a'), verifier('b'), verifier('c')];
     expect(
-      envelopeFor({ caseFile: CASE_FILE, fixable: false, verifiers }),
+      envelopeFor({
+        builderModel: 'claude-opus-5-5',
+        caseFile: CASE_FILE,
+        fixable: false,
+        verifiers,
+      }),
     ).toEqual({
+      builder_model: 'claude-opus-5-5',
       case: CASE_FILE.case,
       outcome: 'dismissed',
       schema_version: 1,

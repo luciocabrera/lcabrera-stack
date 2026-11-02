@@ -48,8 +48,13 @@ baseline and no marker the panel did not confirm.
 3. **Run the panel.** `vp run adjudicate:panel -- FP-nnnn --builder-model <id>`
    starts three sessions in parallel through the Claude subscription, each on
    its own model, each given only the case file path: `fp-judge` twice and
-   `fp-adversary` once (`.claude/agents/`). At least one model differs from the
-   builder's, and the three are distinct. Each session runs in a `git archive`
+   `fp-adversary` once (`.claude/agents/`). The three are distinct models, so at
+   least two of them differ from the builder's. The builder's model cannot be
+   kept off the panel outright: there are only three model families, and the
+   panel needs three distinct seats. `--builder-model` is recorded in the
+   envelope as `builder_model`, so the verdict history shows when the builder's
+   model sat; the history database does not store that field yet. Each session
+   runs in a `git archive`
    export of the case's commit, never in the repository, and the command voids
    the panel if the repository's working tree changed while they ran.
 4. **Read the verdicts.** Each verdict file starts with `REAL` or
