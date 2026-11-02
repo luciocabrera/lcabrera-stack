@@ -114,9 +114,11 @@ section above.
 ### Root barrel — `@lcabrera/ui`
 
 `AppDocument`, `AppProviders`, `AppShell`, `Button`, `Form`, `JsonExplorer`,
-`NavLink`, `RootErrorBoundary`, `RouteErrorBoundary`, `SectionCard`,
+`LineChart`, `NavLink`, `RootErrorBoundary`, `RouteErrorBoundary`, `SectionCard`,
 `StatusBadge`, `Table`, `TableLayout`, `Tabs`, `Text`, `Title`, `TrendSparkline`,
-`hydrateApp`, `useNotifyOnError`, plus the `FieldNode`, `LayoutProps`, `Pagination`,
+`hydrateApp`, `useNotifyOnError`, plus the `ChartAxis`, `ChartMarker`,
+`ChartPoint`, `ChartTone`, `ChartX`, `FieldNode`, `LayoutProps`, `LineBandPoint`,
+`LineChartPointsMode`, `LineChartProps`, `LineSeries`, `Pagination`,
 `TextElement`, `TextProps`, `TextSize`, `TextTone`, `TextWeight`, `TitleLevel`,
 `TitleProps`, `TitleVariant`, `TrendPoint`, `TrendSparklineProps` and `TrendSparklineTone` types.
 

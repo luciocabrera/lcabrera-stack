@@ -676,6 +676,35 @@ null-safe — `{Boolean(data?.err) && <p>{data?.err}</p>}`.) See ADR-035 §7.
 
 ---
 
+## A Chart Measures Nothing
+
+`LineChart` and `TrendSparkline` render the same markup on the server and the
+client because neither reads a size. Follow the same shape in any chart
+([ADR-146](../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (e)):
+
+- **Geometry is `@lcabrera/utils/chart/*`.** Scales, nice ticks, line and band
+  paths and decimation are pure functions there; a component's `utils/` only
+  arranges them. Do not reimplement a path or a scale inside `ui`.
+- **One plot, two layers.** Scale every position onto a fixed `viewBox` with
+  `preserveAspectRatio="none"`, and give each stroke
+  `vectorEffect: 'non-scaling-stroke'` so it keeps its width while the plot
+  stretches. Text never goes in that SVG: an axis, tick or marker label is HTML,
+  placed with a StyleX dynamic style at the same position written as a
+  percentage, so it never stretches either.
+- **A dot is a zero-length segment, not a `<circle>`.** A circle stretches into
+  an ellipse in a plot that does not keep its aspect ratio; a round line cap on
+  a non-scaling stroke stays round. `linePath` of a single point draws one.
+- **One path per series and per band.** Draw a dot only where it means
+  something (a link, a tone, a series short enough to read); never one
+  component per point.
+- **Every mark has an accessible name.** A line, a dot and a marker each carry
+  a `<title>`; a linked dot is a router `Link` with the same `aria-label`. The
+  SVG is `role="img"` named by its title, and `role="group"` once it holds a
+  link, because an image's children leave the accessibility tree.
+- **Prove it with a server render.** A chart's tests compare `renderToString`
+  with the client render, hydrate the server markup with no recoverable error,
+  and render once in the `node` environment, where any read of `window` throws.
+
 ## Naming Conventions
 
 | Thing                  | Convention                                     | Example                      |

@@ -5,6 +5,18 @@ export { Button } from './components/Button/Button.component';
 export { Form } from './components/Form/Form.component';
 export type { FieldNode } from './components/Form/Form.types';
 export { JsonExplorer } from './components/JsonExplorer/JsonExplorer.component';
+export { LineChart } from './components/LineChart/LineChart.component';
+export type {
+  ChartAxis,
+  ChartMarker,
+  ChartPoint,
+  ChartTone,
+  ChartX,
+  LineBandPoint,
+  LineChartPointsMode,
+  LineChartProps,
+  LineSeries,
+} from './components/LineChart/LineChart.types';
 export { NavLink } from './components/NavLink/NavLink.component';
 export { RootComponent } from './components/RootComponent/RootComponent.component';
 export type { RootComponentProps } from './components/RootComponent/RootComponent.types';
