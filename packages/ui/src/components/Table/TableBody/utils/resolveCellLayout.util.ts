@@ -26,7 +26,11 @@ export const resolveCellLayout = <TData>({
     return {
       align: col.align,
       isFill: undefined,
-      staticWidths: resolveStaticColumnWidths({ ...col, sizedWidth }),
+      staticWidths: resolveStaticColumnWidths({
+        ...col,
+        isPinned: pinInfo !== undefined,
+        sizedWidth,
+      }),
     };
 
   const isFill =

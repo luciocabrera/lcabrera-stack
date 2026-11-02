@@ -26,7 +26,11 @@ export const resolveHeaderSizeStyle = <TData>({
 }: ResolveHeaderSizeStyleArgs<TData>) => {
   if (layout === 'static')
     return tableHeaderCellStyles.staticLayout(
-      resolveStaticColumnWidths({ ...column, sizedWidth }),
+      resolveStaticColumnWidths({
+        ...column,
+        isPinned: pinInfo !== undefined,
+        sizedWidth,
+      }),
     );
 
   const isFill =

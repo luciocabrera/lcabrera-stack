@@ -27,6 +27,7 @@ import { TableOwnStackContext } from './contexts/TableConfig/TableOwnStackContex
 import { TablePresentationContext } from './contexts/TableConfig/TablePresentationContext.context';
 import { TableFocusProvider } from './contexts/TableFocus';
 import { Table } from './Table.component';
+import { DEFAULT_MIN_COLUMN_WIDTH } from './Table.constants';
 import { styles as flexWrapperStyles } from './Table.stylex';
 import { tableBodyCellStyles } from './TableBodyCell/TableBodyCell.stylex';
 import { tableHeaderBandStyles } from './TableHeaderBand/TableHeaderBand.stylex';
@@ -722,5 +723,134 @@ describe('Table footer row in a virtual grid', () => {
         .querySelector('tr')
         ?.getAttribute('aria-rowindex'),
     ).toBe(String(grouped.length + 2));
+  });
+});
+
+type PinnedStackArgs = {
+  readonly columnPinning: {
+    readonly left: readonly string[];
+    readonly right: readonly string[];
+  };
+};
+
+const PINNABLE: readonly TableColumn<Record<string, unknown>>[] = [
+  { isPrimaryKey: true, key: 'id', label: 'Id' },
+  { key: 'name', label: 'Name' },
+  { key: 'team', label: 'Team' },
+  { key: 'notes', label: 'Notes' },
+];
+
+const renderPinnedStatic = ({ columnPinning }: PinnedStackArgs) =>
+  render(
+    <NotificationProvider>
+      <TableConfigProvider<Record<string, unknown>>
+        columnsState={{
+          columnPinning: {
+            left: [...columnPinning.left],
+            right: [...columnPinning.right],
+          },
+          columns: [...PINNABLE],
+        }}
+      >
+        <TableFocusProvider>
+          <FiltersDataProvider<Record<string, unknown>> columns={[...PINNABLE]}>
+            <TableOwnStackContext value>
+              <Table<
+                Record<string, unknown>,
+                readonly Record<string, unknown>[]
+              >
+                columns={PINNABLE}
+                dataSelector={(response) => response}
+                layout='static'
+                response={[{ id: 1, name: 'Ada', notes: 'n', team: 'Blue' }]}
+              />
+            </TableOwnStackContext>
+          </FiltersDataProvider>
+        </TableFocusProvider>
+      </TableConfigProvider>
+    </NotificationProvider>,
+  );
+
+const FIXED_START_WIDTHS = {
+  maxWidth: DEFAULT_MIN_COLUMN_WIDTH,
+  minWidth: DEFAULT_MIN_COLUMN_WIDTH,
+  width: DEFAULT_MIN_COLUMN_WIDTH,
+};
+
+type InlineVarArgs = {
+  readonly element: Element;
+  readonly name: string;
+};
+
+const inlineVar = ({ element, name }: InlineVarArgs) =>
+  (element as HTMLElement).style.getPropertyValue(name);
+
+describe('Table static layout pinned offsets', () => {
+  it('fixes unsized left-pinned columns at the width the next offset assumes', () => {
+    renderPinnedStatic({ columnPinning: { left: ['id', 'name'], right: [] } });
+
+    const first = bodyCellOf('id');
+    const second = bodyCellOf('name');
+
+    expect(inlineVar({ element: first, name: '--x-width' })).toBe(
+      `${DEFAULT_MIN_COLUMN_WIDTH}px`,
+    );
+    expect(
+      hasStylexStyle({
+        element: first,
+        style: tableBodyCellStyles.staticLayout(FIXED_START_WIDTHS),
+      }),
+    ).toBe(true);
+    expect(inlineVar({ element: second, name: '--x-left' })).toBe(
+      inlineVar({ element: first, name: '--x-width' }),
+    );
+    expect(
+      hasStylexStyle({
+        element: headerOf('Id'),
+        style: tableHeaderCellStyles.staticLayout(FIXED_START_WIDTHS),
+      }),
+    ).toBe(true);
+    expect(inlineVar({ element: headerOf('Name'), name: '--x-left' })).toBe(
+      `${DEFAULT_MIN_COLUMN_WIDTH}px`,
+    );
+  });
+
+  it('fixes unsized right-pinned columns the same way', () => {
+    renderPinnedStatic({
+      columnPinning: { left: [], right: ['team', 'notes'] },
+    });
+
+    const outer = bodyCellOf('notes');
+    const inner = bodyCellOf('team');
+
+    expect(
+      hasStylexStyle({
+        element: outer,
+        style: tableBodyCellStyles.staticLayout(FIXED_START_WIDTHS),
+      }),
+    ).toBe(true);
+    expect(inlineVar({ element: inner, name: '--x-right' })).toBe(
+      inlineVar({ element: outer, name: '--x-width' }),
+    );
+    expect(inlineVar({ element: headerOf('Team'), name: '--x-right' })).toBe(
+      `${DEFAULT_MIN_COLUMN_WIDTH}px`,
+    );
+  });
+
+  it('leaves an unpinned unsized column sized by its content', () => {
+    renderPinnedStatic({ columnPinning: { left: ['id', 'name'], right: [] } });
+
+    expect(
+      hasStylexStyle({
+        element: bodyCellOf('team'),
+        style: tableBodyCellStyles.staticLayout(FIXED_START_WIDTHS),
+      }),
+    ).toBe(false);
+    expect(
+      hasStylexStyle({
+        element: headerOf('Team'),
+        style: tableHeaderCellStyles.staticLayout(FIXED_START_WIDTHS),
+      }),
+    ).toBe(false);
   });
 });

@@ -77,7 +77,10 @@ it there, so neither prop is drilled and neither is written to a store.
 - A column's `width` is unset unless it is declared or resized, so a static
   column sizes to its content; `'fill'` is `100%`, which in an auto table layout
   takes what the other columns leave. A stored size from the resize handle wins
-  over both, in the header and the body alike.
+  over both, in the header and the body alike. A pinned column is the exception: it
+  is fixed at its stored size or its start width, the numbers
+  `getPinnedColumnOffsets` computes the sticky offsets from, so the offsets
+  match the widths the browser renders.
 - A header cell stays `position: sticky` in the static layout, so a pinned
   column's header pins with its body cells. A header band spans its columns
   with `colSpan` and is sized by the table, not by summed widths.

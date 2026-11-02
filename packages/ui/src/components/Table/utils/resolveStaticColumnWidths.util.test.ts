@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.constants';
 import { resolveStaticColumnWidths } from './resolveStaticColumnWidths.util';
 
 describe('resolveStaticColumnWidths', () => {
@@ -28,5 +29,21 @@ describe('resolveStaticColumnWidths', () => {
     expect(
       resolveStaticColumnWidths({ sizedWidth: 90, width: 120 }).width,
     ).toBe(90);
+  });
+
+  it('fixes a pinned column at the width its sticky offsets are computed from', () => {
+    expect(resolveStaticColumnWidths({ isPinned: true })).toStrictEqual({
+      maxWidth: DEFAULT_MIN_COLUMN_WIDTH,
+      minWidth: DEFAULT_MIN_COLUMN_WIDTH,
+      width: DEFAULT_MIN_COLUMN_WIDTH,
+    });
+    expect(
+      resolveStaticColumnWidths({ isPinned: true, minWidth: 90, width: 'fill' })
+        .width,
+    ).toBe(90);
+    expect(
+      resolveStaticColumnWidths({ isPinned: true, sizedWidth: 150, width: 120 })
+        .width,
+    ).toBe(150);
   });
 });
