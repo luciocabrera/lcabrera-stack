@@ -8,8 +8,8 @@ export const formatChartValue = (value: ChartX) => {
   if (!(value instanceof Date) || !isFiniteChartValue(value))
     return String(value);
 
-  const iso = value.toISOString();
-  const time = formatUtcTime(iso);
+  const day = value.toISOString().slice(0, 10);
+  const time = formatUtcTime(value);
 
-  return time === '' ? iso.slice(0, 10) : `${iso.slice(0, 10)} ${time}`;
+  return time === '' ? day : `${day} ${time}`;
 };

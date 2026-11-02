@@ -42,6 +42,35 @@ describe('getMonthTicks', () => {
     ]);
   });
 
+  it('takes the coarser step when the finer one gives one tick too many', () => {
+    expect(
+      days({ end: '2026-09-01T00:00:00Z', start: '2026-01-01T00:00:00Z' }),
+    ).toEqual([
+      '2026-01-01',
+      '2026-03-01',
+      '2026-05-01',
+      '2026-07-01',
+      '2026-09-01',
+    ]);
+  });
+
+  it.each([1, 2, 3, 6, 12])(
+    'steps by %i months across seven of its steps',
+    (step) => {
+      const ticks = getMonthTicks({
+        end: Date.UTC(2000, 7 * step, 1),
+        start: Date.UTC(2000, 0, 1),
+      });
+
+      expect(ticks).toEqual(
+        Array.from(
+          { length: 8 },
+          (_, index) => new Date(Date.UTC(2000, index * step, 1)),
+        ),
+      );
+    },
+  );
+
   it('has no ticks for a span too long for any month step', () => {
     expect(
       days({ end: '2020-01-01T00:00:00Z', start: '2000-01-01T00:00:00Z' }),

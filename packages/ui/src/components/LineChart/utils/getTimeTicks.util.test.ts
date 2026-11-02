@@ -30,6 +30,42 @@ describe('getTimeTicks', () => {
     expect(getTimeTicks({ end: 7 * HOUR, start: 0 })).toHaveLength(8);
   });
 
+  it.each([
+    1,
+    10,
+    100,
+    1000,
+    5000,
+    15_000,
+    30_000,
+    60_000,
+    300_000,
+    900_000,
+    1_800_000,
+    HOUR,
+    3 * HOUR,
+    6 * HOUR,
+    12 * HOUR,
+    DAY,
+    2 * DAY,
+    7 * DAY,
+    14 * DAY,
+  ])('steps by %i ms across seven of its steps', (step) => {
+    const ticks = getTimeTicks({ end: 7 * step, start: 0 }).map(Number);
+
+    expect(ticks).toEqual(
+      Array.from({ length: 8 }, (_, index) => index * step),
+    );
+  });
+
+  it('takes the coarser step when the finer one gives one tick too many', () => {
+    expect(getTimeTicks({ end: 8 * HOUR, start: 0 }).map(Number)).toEqual([
+      0,
+      3 * HOUR,
+      6 * HOUR,
+    ]);
+  });
+
   it('places quarter days across a day and a half', () => {
     expect(getTimeTicks({ end: 1.5 * DAY, start: 0 }).map(Number)).toEqual(
       [0, 6, 12, 18, 24, 30, 36].map((hours) => hours * HOUR),

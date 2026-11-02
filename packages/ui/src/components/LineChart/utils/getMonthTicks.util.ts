@@ -12,9 +12,7 @@ type GetMonthTicksArgs = {
 };
 
 export const getMonthTicks = ({ end, start }: GetMonthTicksArgs) => {
-  const startMonth = getMonthIndex(start);
-  const firstMonth =
-    getMonthStart(startMonth).getTime() < start ? startMonth + 1 : startMonth;
+  const firstMonth = getMonthIndex(start - 1) + 1;
   const lastMonth = getMonthIndex(end);
   const step = LINE_CHART_MONTH_STEPS.find(
     (candidate) =>

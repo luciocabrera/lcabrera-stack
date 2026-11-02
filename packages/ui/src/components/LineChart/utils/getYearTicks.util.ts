@@ -11,9 +11,7 @@ type GetYearTicksArgs = {
 };
 
 export const getYearTicks = ({ end, start }: GetYearTicksArgs) => {
-  const startYear = Math.ceil(getMonthIndex(start) / 12);
-  const firstYear =
-    getMonthStart(startYear * 12).getTime() < start ? startYear + 1 : startYear;
+  const firstYear = Math.floor(getMonthIndex(start - 1) / 12) + 1;
 
   return niceTicks({
     count: LINE_CHART.tickCount,
