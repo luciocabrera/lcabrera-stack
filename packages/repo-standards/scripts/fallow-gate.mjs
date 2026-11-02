@@ -103,7 +103,16 @@ export const fallowArgs = ({ analysis, base, files }) => {
 
 export const REPOSITORY_ROOT = '.';
 
-export const mutationArgs = ({ base, diffFile, root }) => [
+const MUTATION_SETUP_TIMEOUT = '30m';
+
+export const SETUP_TIMEOUT_VARIABLE = 'REPO_FALLOW_GATE_MUTATION_SETUP_TIMEOUT';
+
+export const mutationArgs = ({
+  base,
+  diffFile,
+  root,
+  setupTimeout = MUTATION_SETUP_TIMEOUT,
+}) => [
   'mutation',
   '--root',
   root,
@@ -113,6 +122,8 @@ export const mutationArgs = ({ base, diffFile, root }) => [
   diffFile,
   '--min-score',
   '100',
+  '--setup-timeout',
+  setupTimeout,
   '--allow-dirty',
   '--quiet',
 ];

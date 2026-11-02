@@ -424,7 +424,7 @@ policy — entry rules, the CRAP/coverage trap, output conventions — is in
 | `vp run fallow:suppressions`     | fails when a changed source file carries a `fallow-ignore` marker                                                                                                                                                                                                                                         |
 | `vp run fallow:security`         | fails (exit 8) on a security candidate that the diff's changed lines introduce                                                                                                                                                                                                                            |
 | `vp run fallow:coverage-gaps`    | fails on a coverage gap the diff introduced: a new source file, or an export on a changed line, that no test reaches. Static: reads imports, not coverage data                                                                                                                                            |
-| `vp run fallow:mutation`         | mutates the changed lines, one workspace at a time, and fails on any mutant the tests let survive. Files outside every workspace (`scripts/`, `evals/`, root configs) get one run from the repository root. Skips every `*.stylex.ts` file. Runs with `--allow-dirty`, so uncommitted work is mutated too |
+| `vp run fallow:mutation`         | mutates the changed lines, one workspace at a time, and fails on any mutant the tests let survive. Files outside every workspace get one run from the repository root. Skips every `*.stylex.ts` file. Passes `--allow-dirty`, so uncommitted work is mutated too, and `--setup-timeout 30m` (note below) |
 | `vp run fallow:similar-code`     | fails on a similar-code candidate touching a changed file, and refuses to run until `fallow similar-code setup --local` has installed its model. In no gate yet                                                                                                                                           |
 
 Always feed the audit real coverage:
@@ -437,7 +437,10 @@ The seven gates from `fallow:guard` down run `repo-fallow-gate` over
 with `TEST_CHANGED_BASE` (default `origin/main`), untracked files included. Pass
 files after `--` to check those instead. `suppressions`, `coverage-gaps` and
 `similar-code` exit 0 on a finding when fallow runs them bare, so the bin reads
-their JSON report and decides. `check:safe` chains every gate except
+their JSON report and decides. `fallow:mutation` waits up to 30 minutes for
+each test-runner process to start and finish its baseline run, against fallow's
+default of 2; set `REPO_FALLOW_GATE_MUTATION_SETUP_TIMEOUT` (`10m`, `1h`) to
+change it. `check:safe` chains every gate except
 `fallow:similar-code`; `check:push` chains guard, architecture, suppressions
 and security, and leaves coverage-gaps and mutation to `check:safe` and CI.
 
