@@ -19,14 +19,11 @@ export const oklchToLinearSrgb = (value: string) => {
   const { alpha, channels } = readColorChannels(value);
   const [lightness, chroma, hue] = channels;
   const l = lightness.isPercent ? lightness.number / 100 : lightness.number;
+  const c = chroma.isPercent ? chroma.number * 0.004 : chroma.number;
   const radians = (hue.number * Math.PI) / 180;
   const [long, medium, short] = multiplyColorMatrix({
     matrix: OKLAB_TO_LMS,
-    vector: [
-      l,
-      chroma.number * Math.cos(radians),
-      chroma.number * Math.sin(radians),
-    ],
+    vector: [l, c * Math.cos(radians), c * Math.sin(radians)],
   });
 
   return {

@@ -17,8 +17,9 @@ const LAB_KAPPA = 24_389 / 27;
 
 export const labToLinearSrgb = (value: string) => {
   const { alpha, channels } = readColorChannels(value);
-  const [{ number: lightness }, { number: greenRed }, { number: blueYellow }] =
-    channels;
+  const [{ number: lightness }, a, b] = channels;
+  const greenRed = a.isPercent ? a.number * 1.25 : a.number;
+  const blueYellow = b.isPercent ? b.number * 1.25 : b.number;
   const fy = (lightness + 16) / 116;
   const fromCubeRoot = (f: number) =>
     f ** 3 > LAB_EPSILON ? f ** 3 : (116 * f - 16) / LAB_KAPPA;

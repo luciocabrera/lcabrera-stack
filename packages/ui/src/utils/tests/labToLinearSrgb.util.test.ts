@@ -21,6 +21,15 @@ describe('labToLinearSrgb', () => {
     expect(labToLinearSrgb(value).rgb).toEqual(closeTo(rgb));
   });
 
+  it('reads percentage a and b axes, where 100% is 125', () => {
+    expect(labToLinearSrgb('lab(50 20% -20%)').rgb).toEqual(
+      closeTo(labToLinearSrgb('lab(50 25 -25)').rgb),
+    );
+    expect(labToLinearSrgb('lab(50 20% -20%)').rgb).not.toEqual(
+      closeTo(labToLinearSrgb('lab(50 20 -20)').rgb),
+    );
+  });
+
   it('keeps the alpha', () => {
     expect(labToLinearSrgb('lab(12 34.23 -54.75 / 0.76)').alpha).toBe(0.76);
   });

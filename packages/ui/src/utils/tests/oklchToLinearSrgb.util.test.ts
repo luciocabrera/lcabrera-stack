@@ -19,6 +19,12 @@ describe('oklchToLinearSrgb', () => {
     expect(oklchToLinearSrgb(value).rgb).toEqual(closeTo(rgb));
   });
 
+  it('reads a percentage chroma, where 100% is 0.4', () => {
+    expect(oklchToLinearSrgb('oklch(50% 25% 120)').rgb).toEqual(
+      closeTo(oklchToLinearSrgb('oklch(50% 0.1 120)').rgb),
+    );
+  });
+
   it('keeps the alpha', () => {
     expect(oklchToLinearSrgb('oklch(92% 0.03 25 / 0.32)').alpha).toBe(0.32);
   });
