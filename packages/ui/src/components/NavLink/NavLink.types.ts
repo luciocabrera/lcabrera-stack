@@ -33,4 +33,4 @@ export type NavLinkProps = Omit<RouterNavLinkProps, 'children' | 'color'> &
     readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top';
   };
 
-export type NavLinkVariant = 'inline' | DesignSystemColor;
+export type NavLinkVariant = NonNullable<NavLinkProps['variant']>;

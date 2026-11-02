@@ -54,7 +54,7 @@ vi.mock('react-router', () => ({
 
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
-import type { NavLinkProps } from './NavLink.types';
+import type { NavLinkProps, NavLinkVariant } from './NavLink.types';
 
 import { NavLink } from './NavLink.component';
 import { linkItemStyles } from './NavLink.stylex';
@@ -378,5 +378,21 @@ describe('NavLinkProps', () => {
       readonly isIconOnly: true;
       readonly to: string;
     }>().toExtend<NavLinkProps>();
+  });
+});
+
+describe('NavLinkVariant', () => {
+  it('is every variant NavLinkProps accepts', () => {
+    expectTypeOf<NavLinkVariant>().toEqualTypeOf<
+      | 'danger-ghost'
+      | 'error'
+      | 'ghost'
+      | 'inline'
+      | 'outline'
+      | 'primary'
+      | 'secondary'
+      | 'success'
+      | 'warning'
+    >();
   });
 });
