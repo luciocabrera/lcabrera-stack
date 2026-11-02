@@ -1,9 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
-import { use } from 'react';
 
 import type { TableContentProps } from './TableContent.types';
 
-import { TablePresentationContext } from '../contexts/TableConfig/TablePresentationContext.context';
 import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
 import { TableBase } from '../TableBase';
 import { TableBody } from '../TableBody';
@@ -25,7 +23,6 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   onLoadMore,
   tableProps,
 }: TableContentProps<TData, TResponse>) => {
-  const { features } = use(TablePresentationContext);
   const { containerRef, isLoading, isRounded, sentinelRef, wrapperRef } =
     useTableContentRuntime<TData, TResponse>({
       dataSelector,
@@ -41,12 +38,10 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
           data-rounded={String(isRounded)}
           {...stylex.props(styles.outerContainer, isRounded && styles.rounded)}
         >
-          {features.toolbar !== false && (
-            <TableTitle
-              actions={<TableTitleActions actions={actions} />}
-              icon={icon}
-            />
-          )}
+          <TableTitle
+            actions={<TableTitleActions actions={actions} />}
+            icon={icon}
+          />
           <div
             data-scroll-locked={String(isLoading)}
             ref={containerRef}
@@ -73,7 +68,7 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
             />
           </div>
         </div>
-        {features.settings !== false && <TableDrawersSection />}
+        <TableDrawersSection />
       </div>
     </TableWrapperContext>
   );

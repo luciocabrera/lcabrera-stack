@@ -2,7 +2,7 @@
 id: table-static-layout
 title: feat(ui): add a static layout to Table
 owner: agent:claude
-status: active
+status: review
 branch: feat/1560-table-static-layout
 area:
   - packages/ui/src/components/Table/**

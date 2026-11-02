@@ -13,9 +13,9 @@ type GetHeaderLayoutStylesArgs<TData> = {
     TableColumn<TData>,
     'align' | 'maxWidth' | 'minWidth' | 'width'
   >;
-  readonly isSized: boolean;
   readonly layout: TableLayoutMode;
   readonly pinInfo?: PinnedColumnInfo;
+  readonly sizedWidth?: number;
 };
 
 const CELL_ALIGN_STYLES = {
@@ -32,16 +32,19 @@ const LABEL_ALIGN_STYLES = {
 
 const resolveSizeStyle = <TData>({
   column,
-  isSized,
   layout,
   pinInfo,
+  sizedWidth,
 }: GetHeaderLayoutStylesArgs<TData>) => {
   if (layout === 'static')
     return tableHeaderCellStyles.staticLayout(
-      resolveStaticColumnWidths(column),
+      resolveStaticColumnWidths({ ...column, sizedWidth }),
     );
 
-  const isFill = column.width === 'fill' && !isSized && pinInfo === undefined;
+  const isFill =
+    column.width === 'fill' &&
+    sizedWidth === undefined &&
+    pinInfo === undefined;
 
   return isFill ? tableHeaderCellStyles.fill : undefined;
 };

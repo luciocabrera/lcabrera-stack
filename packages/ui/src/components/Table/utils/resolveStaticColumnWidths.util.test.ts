@@ -20,4 +20,13 @@ describe('resolveStaticColumnWidths', () => {
   it('gives a fill column the whole width the others leave', () => {
     expect(resolveStaticColumnWidths({ width: 'fill' }).width).toBe('100%');
   });
+
+  it('prefers a stored size over the declared width', () => {
+    expect(
+      resolveStaticColumnWidths({ sizedWidth: 180, width: 'fill' }).width,
+    ).toBe(180);
+    expect(
+      resolveStaticColumnWidths({ sizedWidth: 90, width: 120 }).width,
+    ).toBe(90);
+  });
 });

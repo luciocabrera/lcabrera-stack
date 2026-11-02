@@ -11,25 +11,26 @@ type ResolveCellLayoutArgs<TData> = {
     TableColumn<TData>,
     'align' | 'maxWidth' | 'minWidth' | 'width'
   >;
-  readonly isSized: boolean;
   readonly layout?: TableLayoutMode;
   readonly pinInfo?: PinnedColumnInfo;
+  readonly sizedWidth?: number;
 };
 
 export const resolveCellLayout = <TData>({
   col,
-  isSized,
   layout,
   pinInfo,
+  sizedWidth,
 }: ResolveCellLayoutArgs<TData>) => {
   if (layout === 'static')
     return {
       align: col.align,
       isFill: undefined,
-      staticWidths: resolveStaticColumnWidths(col),
+      staticWidths: resolveStaticColumnWidths({ ...col, sizedWidth }),
     };
 
-  const isFill = col.width === 'fill' && !isSized && pinInfo === undefined;
+  const isFill =
+    col.width === 'fill' && sizedWidth === undefined && pinInfo === undefined;
 
   return {
     align: col.align,

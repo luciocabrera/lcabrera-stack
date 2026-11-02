@@ -14,20 +14,24 @@ export const TableHeaderCellControls = <TData,>({
 }: TableHeaderCellControlsProps<TData>) => {
   const { features } = use(TablePresentationContext);
 
+  const resizeHandle =
+    isResizable && features.resize ? (
+      <ResizeHandle
+        columnKey={menuProps.columnKey}
+        columnLabel={menuProps.columnLabel}
+      />
+    ) : undefined;
+  const actionsMenu = features.columnMenu ? (
+    <TableHeaderActionsMenu
+      {...menuProps}
+      hasSettings={hasSettings && features.settings}
+    />
+  ) : undefined;
+
   return (
     <>
-      {features.resize !== false && isResizable !== false && (
-        <ResizeHandle
-          columnKey={menuProps.columnKey}
-          columnLabel={menuProps.columnLabel}
-        />
-      )}
-      {features.columnMenu !== false && (
-        <TableHeaderActionsMenu
-          {...menuProps}
-          hasSettings={hasSettings && features.settings}
-        />
-      )}
+      {resizeHandle}
+      {actionsMenu}
     </>
   );
 };

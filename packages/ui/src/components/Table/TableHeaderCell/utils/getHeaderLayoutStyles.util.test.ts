@@ -13,7 +13,7 @@ const PIN = {
 describe('getHeaderLayoutStyles', () => {
   it('adds nothing for a plain virtual column', () => {
     expect(
-      getHeaderLayoutStyles({ column: {}, isSized: false, layout: 'virtual' }),
+      getHeaderLayoutStyles({ column: {}, layout: 'virtual' }),
     ).toStrictEqual({ cell: [undefined], label: [] });
   });
 
@@ -21,7 +21,7 @@ describe('getHeaderLayoutStyles', () => {
     expect(
       getHeaderLayoutStyles({
         column: { align: 'end' },
-        isSized: false,
+
         layout: 'virtual',
       }),
     ).toStrictEqual({
@@ -31,14 +31,14 @@ describe('getHeaderLayoutStyles', () => {
     expect(
       getHeaderLayoutStyles({
         column: { align: 'center' },
-        isSized: false,
+
         layout: 'virtual',
       }).label,
     ).toStrictEqual([tableHeaderCellStyles.contentAlignCenter]);
     expect(
       getHeaderLayoutStyles({
         column: { align: 'start' },
-        isSized: false,
+
         layout: 'virtual',
       }),
     ).toStrictEqual({
@@ -51,17 +51,16 @@ describe('getHeaderLayoutStyles', () => {
     const fill = { width: 'fill' } as const;
 
     expect(
-      getHeaderLayoutStyles({ column: fill, isSized: false, layout: 'virtual' })
-        .cell[0],
+      getHeaderLayoutStyles({ column: fill, layout: 'virtual' }).cell[0],
     ).toBe(tableHeaderCellStyles.fill);
     expect(
-      getHeaderLayoutStyles({ column: fill, isSized: true, layout: 'virtual' })
+      getHeaderLayoutStyles({ column: fill, layout: 'virtual', sizedWidth: 90 })
         .cell[0],
     ).toBeUndefined();
     expect(
       getHeaderLayoutStyles({
         column: fill,
-        isSized: false,
+
         layout: 'virtual',
         pinInfo: PIN,
       }).cell[0],
@@ -72,7 +71,7 @@ describe('getHeaderLayoutStyles', () => {
     expect(
       getHeaderLayoutStyles({
         column: { width: 'fill' },
-        isSized: false,
+
         layout: 'static',
       }).cell[0],
     ).toStrictEqual(
@@ -80,6 +79,22 @@ describe('getHeaderLayoutStyles', () => {
         maxWidth: undefined,
         minWidth: undefined,
         width: '100%',
+      }),
+    );
+  });
+
+  it('gives a resized static header its stored width over the declared one', () => {
+    expect(
+      getHeaderLayoutStyles({
+        column: { width: 'fill' },
+        layout: 'static',
+        sizedWidth: 180,
+      }).cell[0],
+    ).toStrictEqual(
+      tableHeaderCellStyles.staticLayout({
+        maxWidth: undefined,
+        minWidth: undefined,
+        width: 180,
       }),
     );
   });

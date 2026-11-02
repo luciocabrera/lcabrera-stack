@@ -2,7 +2,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import { useTableGroupTree } from '#ui/components/Table/hooks';
 import { TableBodyRows } from '#ui/components/Table/TableBodyRows';
-import { TableEmptyState } from '#ui/components/Table/TableEmptyState';
+import { TableStaticEmptyState } from '#ui/components/Table/TableEmptyState/TableStaticEmptyState.component';
 
 import { useGetTableIsLoading } from '../contexts/TableData/data/selectors';
 import { styles } from './TableStaticBody.stylex';
@@ -14,7 +14,7 @@ export const TableStaticBody = () => {
   return (
     <tbody data-testid='table-body' {...stylex.props(styles.body)}>
       {!isLoadingState && rows.length === 0 ? (
-        <TableEmptyState />
+        <TableStaticEmptyState />
       ) : (
         <TableBodyRows
           endIndex={rows.length}

@@ -74,13 +74,20 @@ it there, so neither prop is drilled and neither is written to a store.
 - `useTableGroupTree` returns `toStaticGroupTree` in the static layout: every row
   as given and no row metadata. A tree of group rows therefore renders flat,
   with no `aria-level`, no disclosure and nothing that folds.
-- A column's `width` is unset unless it is declared, so a static column sizes to
-  its content; `'fill'` is `100%`, which in an auto table layout takes what the
-  other columns leave.
+- A column's `width` is unset unless it is declared or resized, so a static
+  column sizes to its content; `'fill'` is `100%`, which in an auto table layout
+  takes what the other columns leave. A stored size from the resize handle wins
+  over both, in the header and the body alike.
+- A header cell stays `position: sticky` in the static layout, so a pinned
+  column's header pins with its body cells. A header band spans its columns
+  with `colSpan` and is sized by the table, not by summed widths.
+- An empty static body renders `TableStaticEmptyState`, whose height comes from
+  its content. The virtual `TableEmptyState` measures the scroll container
+  instead, which an auto-height container would feed back into.
 
-`features` also governs the virtual layout. `toolbar` gates `TableTitle`,
-`settings` gates the gear in `TableTitleActions`, `TableDrawersSection` and the
-column menu's manage action, `columnMenu` gates `TableHeaderActionsMenu`, and
+`features` also governs the virtual layout. Each gate sits in the component it
+hides: `toolbar` gates `TableTitle`, `settings` gates the gear in
+`TableTitleActions`, `TableDrawersSection` and the column menu's manage action, `columnMenu` gates `TableHeaderActionsMenu`, and
 `resize` gates `ResizeHandle`. `Table` passes `hasTableChrome` to `TableOwnStack`:
 with every switch off, the own stack mounts no `FiltersDataProvider`,
 `GlobalSettingsProvider` or `NotificationProvider`, because only the menus,
@@ -89,7 +96,10 @@ drawers and resize write paths read them.
 `caption` and `footer` render inside `TableBase` in both layouts: a `<caption>`
 first, and `TableFooter`'s single `<tfoot>` row spanning every rendered column
 last. The `<table>` props and `customStylex` a `Table` is given are split off by
-`splitTableProps` and reach `TableBase` in both layouts.
+`splitTableProps`, whose list of the `Table`'s own keys is checked against
+`TableProps` by type, and reach `TableBase` in both layouts. `className` and
+`style` are replaced by the table's own styles; `customStylex` is the way to
+style it.
 
 ## Component Hierarchy
 

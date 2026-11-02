@@ -27,6 +27,16 @@ export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
 
   const isBusy = isLoading || isLoadingMore;
   const resolvedTitleSingular = titleSingular ?? 'Record';
+  const settingsButton = features.settings ? (
+    <Button
+      aria-label='Table settings'
+      icon={<SettingsIcon size={16} />}
+      isBusy={isBusy}
+      onClick={toggleTableIsTableSettingsOpen}
+      size='mini'
+      variant='ghost'
+    />
+  ) : undefined;
 
   return (
     <>
@@ -38,16 +48,7 @@ export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
           to='new'
         />
       )}
-      {features.settings !== false && (
-        <Button
-          aria-label='Table settings'
-          icon={<SettingsIcon size={16} />}
-          isBusy={isBusy}
-          onClick={toggleTableIsTableSettingsOpen}
-          size='mini'
-          variant='ghost'
-        />
-      )}
+      {settingsButton}
     </>
   );
 };

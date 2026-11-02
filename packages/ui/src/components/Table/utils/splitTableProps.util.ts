@@ -1,4 +1,14 @@
+import type { ComponentPropsWithRef } from 'react';
+
+import type { TableProps } from '../Table.types';
 import type { TableGridContentProps } from '../TableGrid/TableGrid.types';
+
+type OwnTablePropKey =
+  | 'title'
+  | Exclude<
+      keyof TableProps<Record<string, unknown>, unknown>,
+      keyof ComponentPropsWithRef<'table'>
+    >;
 
 type SplitTablePropsArgs<
   TData extends Record<string, unknown>,
@@ -54,6 +64,6 @@ export const splitTableProps = <
     onLoadMore,
     response,
     title,
-  },
+  } satisfies Record<OwnTablePropKey, unknown>,
   tableProps,
 });

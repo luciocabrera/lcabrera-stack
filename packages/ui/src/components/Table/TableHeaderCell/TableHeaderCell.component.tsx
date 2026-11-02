@@ -46,9 +46,9 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const shadowStylex = getShadowStyle(pinInfo);
   const layoutStylex = getHeaderLayoutStyles({
     column,
-    isSized: width !== undefined,
     layout,
     pinInfo,
+    sizedWidth: width,
   });
 
   return (

@@ -1,11 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
-import { use, useRef } from 'react';
+import { useRef } from 'react';
 
 import type { TableStaticContentProps } from './TableStaticContent.types';
 
 import { useSyncColumnAxisColumns } from '../contexts/TableConfig/grouping/actions';
 import { useGetTableIsRounded } from '../contexts/TableConfig/meta/selectors';
-import { TablePresentationContext } from '../contexts/TableConfig/TablePresentationContext.context';
 import { TableWrapperContext } from '../contexts/TableWrapper/TableWrapperContext.context';
 import { TableBase } from '../TableBase';
 import { TableTitleActions } from '../TableContent/TableTitleActions/TableTitleActions.component';
@@ -26,7 +25,6 @@ export const TableStaticContent = <
   icon,
   tableProps,
 }: TableStaticContentProps<TData, TResponse>) => {
-  const { features } = use(TablePresentationContext);
   const isRounded = useGetTableIsRounded();
   const containerRef = useRef<HTMLDivElement>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -40,12 +38,10 @@ export const TableStaticContent = <
         ref={wrapperRef}
         {...stylex.props(styles.wrapper, isRounded && styles.rounded)}
       >
-        {features.toolbar !== false && (
-          <TableTitle
-            actions={<TableTitleActions actions={actions} />}
-            icon={icon}
-          />
-        )}
+        <TableTitle
+          actions={<TableTitleActions actions={actions} />}
+          icon={icon}
+        />
         <div
           data-testid='table-scroll-container'
           ref={containerRef}
@@ -61,7 +57,7 @@ export const TableStaticContent = <
             <TableStaticBody />
           </TableBase>
         </div>
-        {features.settings !== false && <TableDrawersSection />}
+        <TableDrawersSection />
       </div>
     </TableWrapperContext>
   );

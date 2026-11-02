@@ -1,13 +1,21 @@
 import type { TableColumn } from '../Table.types';
 
+type ResolveStaticColumnWidthsArgs<TData> = Pick<
+  TableColumn<TData>,
+  'maxWidth' | 'minWidth' | 'width'
+> & {
+  readonly sizedWidth?: number;
+};
+
 export const resolveStaticColumnWidths = <TData>({
   maxWidth,
   minWidth,
+  sizedWidth,
   width,
-}: Pick<TableColumn<TData>, 'maxWidth' | 'minWidth' | 'width'>) => ({
+}: ResolveStaticColumnWidthsArgs<TData>) => ({
   maxWidth,
   minWidth,
-  width: width === 'fill' ? '100%' : width,
+  width: sizedWidth ?? (width === 'fill' ? '100%' : width),
 });
 
 export type TableStaticColumnWidths = ReturnType<

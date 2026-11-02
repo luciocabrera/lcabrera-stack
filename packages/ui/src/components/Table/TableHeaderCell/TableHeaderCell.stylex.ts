@@ -49,17 +49,16 @@ export const tableHeaderCellStyles = stylex.create({
   },
   fill: {
     flexGrow: 1,
+    maxWidth: 'none',
   },
   staticLayout: (widths: TableStaticColumnWidths) => ({
     display: 'table-cell',
     flexShrink: null,
-    position: 'relative',
     verticalAlign: 'middle',
     height: null,
     maxHeight: null,
     maxWidth: widths.maxWidth ?? null,
     minWidth: widths.minWidth ?? null,
-    top: null,
     width: widths.width ?? null,
   }),
   pinnedLeft: (offset: number) => ({

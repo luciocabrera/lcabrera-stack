@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { use } from 'react';
 import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
@@ -27,6 +28,9 @@ import { TablePresentationContext } from './contexts/TableConfig/TablePresentati
 import { TableFocusProvider } from './contexts/TableFocus';
 import { Table } from './Table.component';
 import { styles as flexWrapperStyles } from './Table.stylex';
+import { tableBodyCellStyles } from './TableBodyCell/TableBodyCell.stylex';
+import { styles as emptyStateStyles } from './TableEmptyState/TableEmptyState.stylex';
+import { tableHeaderBandStyles } from './TableHeaderBand/TableHeaderBand.stylex';
 import { tableHeaderCellStyles } from './TableHeaderCell/TableHeaderCell.stylex';
 import { tableStaticContentStyles as staticContentStyles } from './TableStaticContent/TableStaticContent.stylex';
 
@@ -389,5 +393,217 @@ describe('TablePresentationContext', () => {
     expect(TablePresentationContext.displayName).toBe(
       'TablePresentationContext',
     );
+  });
+});
+
+const bodyCellOf = (columnKey: string) => {
+  const cell = screen
+    .getByTestId('table-body')
+    .querySelector(`td[data-column-key="${CSS.escape(columnKey)}"]`);
+
+  if (cell === null) throw new Error(`no ${columnKey} cell`);
+
+  return cell;
+};
+
+const classSet = (className = '') =>
+  new Set(className.split(' ').filter(Boolean));
+
+describe('Table static layout review fixes', () => {
+  it('keeps a pinned static header sticky, like its body cells', () => {
+    const wide: readonly TableColumn<Score>[] = [
+      { isPrimaryKey: true, key: 'id', label: 'Id', width: 2000 },
+      { key: 'name', label: 'Name', width: 2000 },
+    ];
+    const stickyClasses = [
+      ...classSet(stylex.props(tableBodyCellStyles.pinnedLeft(0)).className),
+    ].filter((name) =>
+      classSet(stylex.props(tableHeaderCellStyles.base(60, 60)).className).has(
+        name,
+      ),
+    );
+
+    render(
+      <NotificationProvider>
+        <TableConfigProvider<Score>
+          columnsState={{
+            columnPinning: { left: ['id'], right: [] },
+            columns: [...wide],
+          }}
+        >
+          <TableFocusProvider>
+            <FiltersDataProvider<Score> columns={[...wide]}>
+              <TableOwnStackContext value>
+                <Table<Score, readonly Score[]>
+                  columns={wide}
+                  dataSelector={(response) => response}
+                  layout='static'
+                  response={ROWS}
+                />
+              </TableOwnStackContext>
+            </FiltersDataProvider>
+          </TableFocusProvider>
+        </TableConfigProvider>
+      </NotificationProvider>,
+    );
+
+    const header = headerOf('Id');
+
+    expect(stickyClasses.length).toBeGreaterThan(0);
+    expect(stickyClasses.every((name) => header.classList.contains(name))).toBe(
+      true,
+    );
+    const headerPin = classSet(
+      stylex.props(tableHeaderCellStyles.pinnedLeft(0)).className,
+    );
+    const bodyPin = classSet(
+      stylex.props(tableBodyCellStyles.pinnedLeft(0)).className,
+    );
+    const bodyCell = bodyCellOf('id');
+
+    expect(
+      [...headerPin].every((name) => header.classList.contains(name)),
+    ).toBe(true);
+    expect(
+      [...bodyPin].every((name) => bodyCell.classList.contains(name)),
+    ).toBe(true);
+  });
+
+  it('resizes a static column from its handle, header and body together', () => {
+    render(
+      <Table
+        columns={COLUMNS}
+        features={{ resize: true }}
+        layout='static'
+        response={ROWS}
+      />,
+    );
+
+    expect(bodyCellOf('name').getAttribute('style') ?? '').not.toContain(
+      '68px',
+    );
+
+    fireEvent.keyDown(
+      screen.getByRole('separator', { name: 'Resize Name column' }),
+      { key: 'ArrowRight' },
+    );
+
+    const sizedWidths = {
+      maxWidth: undefined,
+      minWidth: undefined,
+      width: 68,
+    };
+
+    expect(headerOf('Name').style.getPropertyValue('--x-width')).toBe('68px');
+    expect(
+      (bodyCellOf('name') as HTMLElement).style.getPropertyValue('--x-width'),
+    ).toBe('68px');
+    expect(
+      hasStylexStyle({
+        element: headerOf('Name'),
+        style: tableHeaderCellStyles.staticLayout(sizedWidths),
+      }),
+    ).toBe(true);
+    expect(
+      hasStylexStyle({
+        element: bodyCellOf('name'),
+        style: tableBodyCellStyles.staticLayout(sizedWidths),
+      }),
+    ).toBe(true);
+  });
+
+  it('lets an unsized fill column grow past its starting width, header and body', () => {
+    render(
+      <Table
+        columns={[
+          { isPrimaryKey: true, key: 'id', label: 'Id' },
+          { key: 'name', label: 'Name', width: 'fill' },
+        ]}
+        response={ROWS}
+      />,
+    );
+
+    const baseCapClasses = [
+      ...classSet(stylex.props(tableBodyCellStyles.base(60, 60)).className),
+    ].filter(
+      (name) =>
+        !classSet(
+          stylex.props(
+            tableBodyCellStyles.base(60, 60),
+            tableBodyCellStyles.fill,
+          ).className,
+        ).has(name),
+    );
+
+    expect(baseCapClasses.length).toBeGreaterThan(0);
+    expect(
+      baseCapClasses.some((name) =>
+        bodyCellOf('name').classList.contains(name),
+      ),
+    ).toBe(false);
+    expect(
+      hasStylexStyle({
+        element: bodyCellOf('name'),
+        style: tableBodyCellStyles.fill,
+      }),
+    ).toBe(true);
+    expect(
+      hasStylexStyle({
+        element: headerOf('Name'),
+        style: tableHeaderCellStyles.fill,
+      }),
+    ).toBe(true);
+  });
+
+  it('spans a static header band across its columns, sized by the table', () => {
+    render(
+      <Table
+        columns={[
+          { isPrimaryKey: true, key: 'id', label: 'Id' },
+          { headerGroupLabel: 'Totals', key: 'name', label: 'Name' },
+          { headerGroupLabel: 'Totals', key: 'score', label: 'Score' },
+        ]}
+        layout='static'
+        response={[{ id: 1, name: 'Ada', score: 3 }]}
+      />,
+    );
+
+    const band = screen.getByText('Totals').closest('th');
+
+    expect(band?.getAttribute('colspan')).toBe('2');
+    expect(
+      hasStylexStyle({
+        element: band ?? document.body,
+        style: tableHeaderBandStyles.staticLayout,
+      }),
+    ).toBe(true);
+  });
+
+  it('keeps a static empty state at its content height across renders', () => {
+    const element = (
+      <Table
+        caption='Nothing yet'
+        columns={COLUMNS}
+        footer='No rows to total'
+        layout='static'
+        response={[]}
+      />
+    );
+    const view = render(element);
+    const viewport = screen.getByTestId('table-empty-state-viewport');
+    const firstStyle = viewport.getAttribute('style');
+
+    view.rerender(element);
+
+    expect(firstStyle).toBeNull();
+    expect(
+      screen.getByTestId('table-empty-state-viewport').getAttribute('style'),
+    ).toBeNull();
+    expect(
+      hasStylexStyle({
+        element: viewport,
+        style: emptyStateStyles.staticViewport,
+      }),
+    ).toBe(true);
   });
 });

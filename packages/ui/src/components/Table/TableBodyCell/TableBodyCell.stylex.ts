@@ -21,6 +21,7 @@ export const tableBodyCellStyles = stylex.create({
   },
   fill: {
     flexGrow: 1,
+    maxWidth: 'none',
   },
   staticLayout: (widths: TableStaticColumnWidths) => ({
     display: 'table-cell',

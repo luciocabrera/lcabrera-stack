@@ -35,12 +35,7 @@ export const resolveSharedCellFields = <TData extends Record<string, unknown>>({
   const pinInfo = pinnedOffsets[key];
 
   return {
-    ...resolveCellLayout({
-      col,
-      isSized: sized !== undefined,
-      layout,
-      pinInfo,
-    }),
+    ...resolveCellLayout({ col, layout, pinInfo, sizedWidth: sized }),
     columnKey: key as string,
     isLoadingState,
     key,
