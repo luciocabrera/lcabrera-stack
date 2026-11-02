@@ -8,7 +8,14 @@ import type {
 
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  describe,
+  expect,
+  expectTypeOf,
+  it,
+  vi,
+} from 'vite-plus/test';
 
 const { mockRouterNavLink } = vi.hoisted(() => {
   const mockRenderProps: NavLinkRenderProps = {
@@ -46,6 +53,8 @@ vi.mock('react-router', () => ({
 }));
 
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
+
+import type { NavLinkProps } from './NavLink.types';
 
 import { NavLink } from './NavLink.component';
 import { linkItemStyles } from './NavLink.stylex';
@@ -333,5 +342,41 @@ describe('NavLink variants', () => {
     );
 
     expect(getRouterProps().prefetch).toBe('render');
+  });
+});
+
+describe('NavLinkProps', () => {
+  it('rejects an icon-only inline link, which would have no accessible name', () => {
+    expectTypeOf<{
+      readonly children: string;
+      readonly isIconOnly: true;
+      readonly to: string;
+      readonly variant: 'inline';
+    }>().not.toExtend<NavLinkProps>();
+  });
+
+  it('accepts an inline link with text, and an icon-only button variant', () => {
+    expectTypeOf<{
+      readonly children: string;
+      readonly to: string;
+      readonly variant: 'inline';
+    }>().toExtend<NavLinkProps>();
+    expectTypeOf<{
+      readonly children: string;
+      readonly isIconOnly: false;
+      readonly to: string;
+      readonly variant: 'inline';
+    }>().toExtend<NavLinkProps>();
+    expectTypeOf<{
+      readonly children: string;
+      readonly isIconOnly: true;
+      readonly to: string;
+      readonly variant: 'ghost';
+    }>().toExtend<NavLinkProps>();
+    expectTypeOf<{
+      readonly children: string;
+      readonly isIconOnly: true;
+      readonly to: string;
+    }>().toExtend<NavLinkProps>();
   });
 });
