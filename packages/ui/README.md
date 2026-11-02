@@ -38,7 +38,10 @@ to install it.
 `react-router` stays a required peer because the package's modules import it:
 the app shell, the route views, `Form`, `NavLink` and the table's route-level
 layout all run inside a data router. A `Table` given an array of rows does not
-need one mounted; see [A table from rows](#a-table-from-rows).
+need one mounted; see [A table from rows](#a-table-from-rows). `NavLink` and
+`Breadcrumbs` need a mounted router of any kind. `useRouteBreadcrumbs()`, and a
+`PageHeader` given no `breadcrumbs`, need a data router: they read each matched
+route's `handle.breadcrumb` through `useMatches()`.
 
 ## Before you install: this package ships TypeScript source
 
@@ -113,14 +116,17 @@ section above.
 
 ### Root barrel — `@lcabrera/ui`
 
-`AppDocument`, `AppProviders`, `AppShell`, `Button`, `Form`, `JsonExplorer`,
-`LineChart`, `NavLink`, `RootErrorBoundary`, `RouteErrorBoundary`, `SectionCard`,
-`StatusBadge`, `Table`, `TableLayout`, `Tabs`, `Text`, `Title`, `TrendSparkline`,
-`hydrateApp`, `useNotifyOnError`, plus the `ChartAxis`, `ChartMarker`,
-`ChartPoint`, `ChartTone`, `ChartX`, `FieldNode`, `LayoutProps`, `LineBandPoint`,
-`LineChartPointsMode`, `LineChartProps`, `LineSeries`, `Pagination`,
-`TextElement`, `TextProps`, `TextSize`, `TextTone`, `TextWeight`, `TitleLevel`,
-`TitleProps`, `TitleVariant`, `TrendPoint`, `TrendSparklineProps` and `TrendSparklineTone` types.
+`AppDocument`, `AppProviders`, `AppShell`, `Breadcrumbs`, `Button`, `Form`,
+`JsonExplorer`, `LineChart`, `NavLink`, `PageHeader`, `RootErrorBoundary`,
+`RouteErrorBoundary`, `SectionCard`, `StatusBadge`, `Table`, `TableLayout`,
+`Tabs`, `Text`, `Title`, `TrendSparkline`, `hydrateApp`, `useNotifyOnError`,
+`useRouteBreadcrumbs`, plus the `BreadcrumbHandle`, `BreadcrumbItem`,
+`BreadcrumbsProps`, `ChartAxis`, `ChartMarker`, `ChartPoint`, `ChartTone`,
+`ChartX`, `FieldNode`, `LayoutProps`, `LineBandPoint`, `LineChartPointsMode`,
+`LineChartProps`, `LineSeries`, `NavLinkProps`, `NavLinkVariant`,
+`PageHeaderProps`, `Pagination`, `TextElement`, `TextProps`, `TextSize`,
+`TextTone`, `TextWeight`, `TitleLevel`, `TitleProps`, `TitleVariant`,
+`TrendPoint`, `TrendSparklineProps` and `TrendSparklineTone` types.
 
 ### Subpaths
 

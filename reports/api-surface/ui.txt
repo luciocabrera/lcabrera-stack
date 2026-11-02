@@ -6,6 +6,10 @@
 AppDocument [const] ({ children, rootData, stylexCssHref, }: AppDocumentProps) => JSX.Element
 AppProviders [const] ({ appId, children, defaultTheme, }: AppProvidersProps) => JSX.Element
 AppShell [const] () => JSX.Element
+BreadcrumbHandle [type] { readonly breadcrumb?: (match: UIMatch<TLoaderData>) => BreadcrumbItem; }
+BreadcrumbItem [type] { readonly label: string; /** Omitted for a step that has no page of its own; the last item never links. */ readonly to?: To; }
+Breadcrumbs [const] ({ items, label, }: BreadcrumbsProps) => JSX.Element | undefined
+BreadcrumbsProps [type] { readonly items: readonly BreadcrumbItem[]; /** The accessible name of the `nav` landmark. Defaults to `'Breadcrumb'`. */ readonly label?: string; }
 Button [const] ({ tooltipContent, tooltipPlacement, ...rest }: ButtonProps) => JSX.Element
 ChartAxis [type] { readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
 ChartMarker [type] { readonly label: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; }
@@ -23,6 +27,10 @@ LineChartPointsMode [type] 'always' | 'auto' | 'never'
 LineChartProps [type] { readonly description?: string; readonly hasDataTable?: boolean; readonly height?: number; readonly markers?: readonly ChartMarker[]; /** `auto` draws linked, toned and short-series points; a linked point is drawn in every mode, so its link stays reachable. */ readonly points?: LineChartPointsMode; readonly series: readonly LineSeries[]; readonly title: string; readonly xAxis?: ChartAxis<ChartX>; readonly yAxis?: ChartAxis<number>; }
 LineSeries [type] { readonly band?: readonly LineBandPoint[]; readonly id: string; readonly isDashed?: boolean; readonly label: string; readonly points: readonly ChartPoint[]; readonly tone?: ChartTone; }
 NavLink [const] ({ children, customStylex, icon, isBusy, isIconOnly, orientation, prefetch, size, tooltipContent, tooltipPlacement, variant, ...props }: NavLinkProps) => JSX.Element
+NavLinkProps [type] Omit<RouterNavLinkProps, 'children' | 'color'> & ( | { /** An inline link's text is its accessible name, so it cannot be icon-only. */ readonly isIconOnly?: false; readonly variant: 'inline'; } | { readonly isIconOnly?: boolean; readonly variant?: DesignSystemColor; } ) & { readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly isBusy?: boolean; /** Ignored by the `inline` variant, which flows with the surrounding text. */ readonly orientation?: DesignSystemOrientation; /** Ignored by the `inline` variant, which takes the surrounding font size. */ readonly size?: DesignSystemSize; readonly tooltipContent?: ReactNode; readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top'; }
+NavLinkVariant [type] NonNullable<NavLinkProps['variant']>
+PageHeader [const] ({ actions, breadcrumbLabel, breadcrumbs, description, title, }: PageHeaderProps) => JSX.Element
+PageHeaderProps [type] { readonly actions?: ReactNode; /** The accessible name of the breadcrumb `nav`. Defaults to `Breadcrumbs`' own `'Breadcrumb'`. */ readonly breadcrumbLabel?: string; /** Defaults to the matched routes' `handle.breadcrumb` entries, which needs a data router. */ readonly breadcrumbs?: readonly BreadcrumbItem[]; readonly description?: ReactNode; readonly title: string; }
 Pagination [type] { /** The anchor a keyset data source resumes from. */ readonly lastRow?: TData; readonly limit: number; readonly skip: number; }
 RootComponent [const] ({ appId, defaultTheme, getNavigationItems, isAuthEnabled, logoutRoute, }: RootComponentProps) => JSX.Element
 RootComponentProps [type] { readonly appId?: string; readonly defaultTheme?: ThemeMode; readonly getNavigationItems: GetNavigationItems; readonly isAuthEnabled?: boolean; readonly logoutRoute?: string; }
@@ -51,6 +59,7 @@ TrendSparkline [const] ({ height, isConnected, label, max, tone, width, ...serie
 TrendSparklineProps [type] TrendSparklineChartProps & (TrendSparklinePointsProps | TrendSparklineValuesProps)
 TrendSparklineTone [type] | 'error' | 'info' | 'neutral' | 'success' | 'warning'
 useNotifyOnError [const] (error: unknown) => void
+useRouteBreadcrumbs [const] () => BreadcrumbItem[]
 useTableRoutePage [const] <TData extends Record<string, unknown>, TResponse extends TablePageResponse<TData>>({ fetchPage }?: UseTableRoutePageArgs<TResponse>) => { columnsState: { columnFilters: ColumnFiltersState<TData>; columnOrder: ColumnOrderState<TData>; columnPinning: ColumnPinningState<TData>; columns: TableColumn<TData>[]; columnSizing: ColumnSizingState<TData>; columnVisibility: ColumnVisibilityState<TData>; sorting: { columnKey: keyof TData & string; direction: "asc" | "desc"; }[]; cellPalette?: Readonly<Record<string, TableCellPaletteEntry>> | undefined; }; dataPromise: Promise<TResponse>; groupingState: { totalsPlacement: TableTotalsPlacement; aggregates: readonly TableColumnAggregate[]; columnAxis?: string; keys: readonly string[]; mode: TableGroupingMode; periods: Readonly<Record<string, TableGroupPeriod>>; shares: readonly TableColumnAggregate[]; }; metaState: { isGroupingEnabled: boolean; isGroupingLocked: boolean; isKeysetEnabled: boolean; isServerFilterEnabled: boolean; defaultGroupFold: TableGroupFold | undefined; groupDetailsPath: string | undefined; groupingCapabilities: Readonly<Record<string, TableColumnGroupingCapability>>; hasDefaultGrouping: boolean; isColumnLayoutTransient: boolean; isUrlStateNested: boolean; lockedFilters: TableLockedFilters | undefined; preferredGroupingMode: TableGroupingMode | undefined; settingsTabOrder: readonly TableSettingsTabRole[] | undefined; additionalMetadata?: Readonly<Record<string, null | TableMetadataValue | undefined>>; crud?: TableCrudConfig; deleteActionPath?: string; enablePrefetch?: boolean | undefined; locale?: string; pagePath?: string; schemaName?: string; tableName: string; title: TableTitle; appId: string; columnSelectedKey?: string; columnSettingsSelectedTab?: string; density?: TableDensity; drawersSyncNonce?: number; headerDensity?: TableDensity; initialPageSize?: number | undefined; isBordered?: boolean | undefined; isColumnSettingsOpen?: boolean; isColumnSettingsPinned?: boolean; isRounded?: boolean | undefined; isStriped?: boolean | undefined; isTableSettingsOpen?: boolean; isTableSettingsPinned?: boolean; loadMorePageSize?: number | undefined; overscan?: number | undefined; persistenceKey: string; placeholderRowCount?: number | undefined; rowHeight?: number; settingsPanelWidth?: number; tableSettingsExpandedFilters?: readonly string[]; tableSettingsSelectedTab?: string; threshold?: number | undefined; wasTableSettingsOpenBeforeColumnSettings?: boolean; }; onLoadMore: (({ lastRow, limit, skip }: Pagination<TData>) => Promise<TResponse>) | undefined; }
 
 ## ./components/AppDocument
@@ -58,6 +67,13 @@ AppDocument [const] ({ children, rootData, stylexCssHref, }: AppDocumentProps) =
 
 ## ./components/AppShell
 AppShell [const] () => JSX.Element
+
+## ./components/Breadcrumbs
+BreadcrumbHandle [type] { readonly breadcrumb?: (match: UIMatch<TLoaderData>) => BreadcrumbItem; }
+BreadcrumbItem [type] { readonly label: string; /** Omitted for a step that has no page of its own; the last item never links. */ readonly to?: To; }
+Breadcrumbs [const] ({ items, label, }: BreadcrumbsProps) => JSX.Element | undefined
+BreadcrumbsProps [type] { readonly items: readonly BreadcrumbItem[]; /** The accessible name of the `nav` landmark. Defaults to `'Breadcrumb'`. */ readonly label?: string; }
+useRouteBreadcrumbs [const] () => BreadcrumbItem[]
 
 ## ./components/Button
 Button [const] ({ tooltipContent, tooltipPlacement, ...rest }: ButtonProps) => JSX.Element
@@ -190,6 +206,12 @@ NavbarProps [type] ComponentPropsWithoutRef<'nav'> & { readonly isCompact?: bool
 
 ## ./components/NavLink
 NavLink [const] ({ children, customStylex, icon, isBusy, isIconOnly, orientation, prefetch, size, tooltipContent, tooltipPlacement, variant, ...props }: NavLinkProps) => JSX.Element
+NavLinkProps [type] Omit<RouterNavLinkProps, 'children' | 'color'> & ( | { /** An inline link's text is its accessible name, so it cannot be icon-only. */ readonly isIconOnly?: false; readonly variant: 'inline'; } | { readonly isIconOnly?: boolean; readonly variant?: DesignSystemColor; } ) & { readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly isBusy?: boolean; /** Ignored by the `inline` variant, which flows with the surrounding text. */ readonly orientation?: DesignSystemOrientation; /** Ignored by the `inline` variant, which takes the surrounding font size. */ readonly size?: DesignSystemSize; readonly tooltipContent?: ReactNode; readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top'; }
+NavLinkVariant [type] NonNullable<NavLinkProps['variant']>
+
+## ./components/PageHeader
+PageHeader [const] ({ actions, breadcrumbLabel, breadcrumbs, description, title, }: PageHeaderProps) => JSX.Element
+PageHeaderProps [type] { readonly actions?: ReactNode; /** The accessible name of the breadcrumb `nav`. Defaults to `Breadcrumbs`' own `'Breadcrumb'`. */ readonly breadcrumbLabel?: string; /** Defaults to the matched routes' `handle.breadcrumb` entries, which needs a data router. */ readonly breadcrumbs?: readonly BreadcrumbItem[]; readonly description?: ReactNode; readonly title: string; }
 
 ## ./components/RootErrorBoundary
 RootErrorBoundary [const] ({ error }: RootErrorBoundaryProps) => JSX.Element
