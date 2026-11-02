@@ -498,6 +498,20 @@ describe('LineChart', () => {
       ).toEqual(['Latency', 'Throughput']);
     });
 
+    it('lists a third series too', () => {
+      renderChart({
+        series: [
+          LATENCY,
+          THROUGHPUT,
+          { ...THROUGHPUT, id: 'third', label: 'Third' },
+        ],
+      });
+
+      expect(
+        screen.getAllByRole('listitem').map(({ textContent }) => textContent),
+      ).toEqual(['Latency', 'Throughput', 'Third']);
+    });
+
     it('draws no legend for a single series', () => {
       renderChart();
 
@@ -525,6 +539,22 @@ describe('LineChart', () => {
   });
 
   describe('axes', () => {
+    it('renders no axis label for an axis without one', () => {
+      const { container } = renderChart({ xAxis: {}, yAxis: {} });
+      const labelled = new Set([
+        stylex.props(lineChartLayout.axisLabel, lineChartLayout.xLabel)
+          .className,
+        stylex.props(lineChartLayout.axisLabel, lineChartLayout.yLabel)
+          .className,
+      ]);
+
+      expect(
+        [...container.querySelectorAll('span')].filter((span) =>
+          labelled.has(span.getAttribute('class') ?? undefined),
+        ),
+      ).toEqual([]);
+    });
+
     it('labels the axes in HTML when labels are given', () => {
       renderChart({
         xAxis: { label: 'Request' },

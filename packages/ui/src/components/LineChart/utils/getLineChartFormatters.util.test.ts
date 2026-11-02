@@ -19,4 +19,11 @@ describe('getLineChartFormatters', () => {
       y: formatChartValue,
     });
   });
+
+  it('falls back to the default format when no axis is given', () => {
+    expect(getLineChartFormatters({})).toEqual({
+      x: formatChartValue,
+      y: formatChartValue,
+    });
+  });
 });
