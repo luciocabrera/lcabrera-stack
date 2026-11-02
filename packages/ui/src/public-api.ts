@@ -1,11 +1,24 @@
 export { AppDocument } from './components/AppDocument/AppDocument.component';
 export { AppProviders } from './components/AppProviders/AppProviders.component';
 export { AppShell } from './components/AppShell/AppShell.component';
+export { Breadcrumbs } from './components/Breadcrumbs/Breadcrumbs.component';
+export type {
+  BreadcrumbHandle,
+  BreadcrumbItem,
+  BreadcrumbsProps,
+} from './components/Breadcrumbs/Breadcrumbs.types';
+export { useRouteBreadcrumbs } from './components/Breadcrumbs/hooks/useRouteBreadcrumbs.hook';
 export { Button } from './components/Button/Button.component';
 export { Form } from './components/Form/Form.component';
 export type { FieldNode } from './components/Form/Form.types';
 export { JsonExplorer } from './components/JsonExplorer/JsonExplorer.component';
 export { NavLink } from './components/NavLink/NavLink.component';
+export type {
+  NavLinkProps,
+  NavLinkVariant,
+} from './components/NavLink/NavLink.types';
+export { PageHeader } from './components/PageHeader/PageHeader.component';
+export type { PageHeaderProps } from './components/PageHeader/PageHeader.types';
 export { RootComponent } from './components/RootComponent/RootComponent.component';
 export type { RootComponentProps } from './components/RootComponent/RootComponent.types';
 export { RootErrorBoundary } from './components/RootErrorBoundary/RootErrorBoundary.component';
