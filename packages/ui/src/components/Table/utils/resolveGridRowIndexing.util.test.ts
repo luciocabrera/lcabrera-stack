@@ -4,6 +4,7 @@ import {
   HEADER_ARIA_ROW_INDEX,
   resolveAriaRowCount,
   resolveBodyAriaRowIndex,
+  resolveFooterAriaRowIndex,
 } from './resolveGridRowIndexing.util';
 
 describe('resolveGridRowIndexing', () => {
@@ -38,5 +39,18 @@ describe('resolveGridRowIndexing', () => {
         resolveAriaRowCount({ isLoading: false, totalRows }),
       );
     }
+  });
+
+  it('counts a footer row and numbers it after the last body row', () => {
+    expect(
+      resolveAriaRowCount({ hasFooter: true, isLoading: false, totalRows: 3 }),
+    ).toBe(5);
+    expect(resolveFooterAriaRowIndex({ totalRows: 3 })).toBe(5);
+    expect(resolveFooterAriaRowIndex({ totalRows: 3 })).toBe(
+      resolveBodyAriaRowIndex({ rowIndex: 2 }) + 1,
+    );
+    expect(
+      resolveAriaRowCount({ hasFooter: true, isLoading: true, totalRows: 3 }),
+    ).toBe(-1);
   });
 });

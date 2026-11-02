@@ -95,7 +95,8 @@ drawers and resize write paths read them.
 
 `caption` and `footer` render inside `TableBase` in both layouts: a `<caption>`
 first, and `TableFooter`'s single `<tfoot>` row spanning every rendered column
-last. The `<table>` props and `customStylex` a `Table` is given are split off by
+last. The footer row takes the `aria-rowindex` after the last body row, and the
+virtual grid's `aria-rowcount` counts it. The `<table>` props and `customStylex` a `Table` is given are split off by
 `splitTableProps`, whose list of the `Table`'s own keys is checked against
 `TableProps` by type, and reach `TableBase` in both layouts. `className` and
 `style` are replaced by the table's own styles; `customStylex` is the way to

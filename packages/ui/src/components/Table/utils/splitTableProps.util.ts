@@ -3,12 +3,10 @@ import type { ComponentPropsWithRef } from 'react';
 import type { TableProps } from '../Table.types';
 import type { TableGridContentProps } from '../TableGrid/TableGrid.types';
 
-type OwnTablePropKey =
-  | 'title'
-  | Exclude<
-      keyof TableProps<Record<string, unknown>, unknown>,
-      keyof ComponentPropsWithRef<'table'>
-    >;
+type OwnTablePropKey = keyof Omit<
+  TableProps<Record<string, unknown>, unknown>,
+  Exclude<keyof ComponentPropsWithRef<'table'>, 'title'>
+>;
 
 type SplitTablePropsArgs<
   TData extends Record<string, unknown>,

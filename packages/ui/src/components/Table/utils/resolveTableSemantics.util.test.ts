@@ -9,6 +9,7 @@ describe('resolveTableSemantics', () => {
     expect(
       resolveTableSemantics({
         gridFocusProps: FOCUS,
+        hasFooter: false,
         isLoading: false,
         isTreeGrid: true,
         layout: 'static',
@@ -21,6 +22,7 @@ describe('resolveTableSemantics', () => {
     expect(
       resolveTableSemantics({
         gridFocusProps: FOCUS,
+        hasFooter: false,
         isLoading: false,
         isTreeGrid: false,
         layout: 'virtual',

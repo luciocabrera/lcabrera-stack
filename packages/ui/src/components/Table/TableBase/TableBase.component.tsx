@@ -51,6 +51,7 @@ export const TableBase = <TData extends Record<string, unknown>, TResponse>({
       {...rest}
       {...resolveTableSemantics({
         gridFocusProps,
+        hasFooter: footer !== undefined,
         isLoading,
         isTreeGrid,
         layout,

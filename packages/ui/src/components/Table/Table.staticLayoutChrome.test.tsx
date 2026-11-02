@@ -612,3 +612,59 @@ describe('Table static layout review fixes', () => {
     ).toBeNull();
   });
 });
+
+describe('Table footer row in a virtual grid', () => {
+  it('counts the footer in aria-rowcount and numbers it after the last body row', () => {
+    render(<Table columns={COLUMNS} footer='Two people' response={ROWS} />);
+
+    const footerRow = screen.getByTestId('table-footer').querySelector('tr');
+
+    expect(screen.getByTestId('table').getAttribute('aria-rowcount')).toBe(
+      String(ROWS.length + 2),
+    );
+    expect(footerRow?.getAttribute('aria-rowindex')).toBe(
+      String(ROWS.length + 2),
+    );
+  });
+
+  it('leaves the count at header plus rows with no footer', () => {
+    render(<Table columns={COLUMNS} response={ROWS} />);
+
+    expect(screen.getByTestId('table').getAttribute('aria-rowcount')).toBe(
+      String(ROWS.length + 1),
+    );
+  });
+
+  it('numbers the footer after the visible rows of a grouped grid', () => {
+    const grouped = [
+      {
+        tableGroup: {
+          aggregates: [],
+          count: 1,
+          isSubtotal: false,
+          path: [{ columnKey: 'name', label: 'Ada', value: 'Ada' }],
+        },
+      },
+      { id: 1, name: 'Ada' },
+    ];
+
+    render(
+      <Table
+        columns={COLUMNS as readonly TableColumn<Record<string, unknown>>[]}
+        footer='One group'
+        response={grouped}
+      />,
+    );
+
+    expect(screen.getByTestId('table').getAttribute('role')).toBe('treegrid');
+    expect(
+      screen
+        .getByTestId('table-footer')
+        .querySelector('tr')
+        ?.getAttribute('aria-rowindex'),
+    ).toBe(String(grouped.length + 2));
+    expect(screen.getByTestId('table').getAttribute('aria-rowcount')).toBe(
+      String(grouped.length + 2),
+    );
+  });
+});
