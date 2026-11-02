@@ -68,10 +68,10 @@ describe('getThemeTokenContrast', () => {
     expect(
       getThemeTokenContrast({
         background: colors.backgroundSecondary,
-        foreground: colors.textSecondary,
+        foreground: colors.textPrimary,
         theme: 'light',
       }),
-    ).toBeCloseTo(3.367, 2);
+    ).toBeCloseTo(7.75, 2);
   });
 
   it('composites a translucent background over the surface first', () => {
