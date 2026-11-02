@@ -15,9 +15,25 @@ area:
   - reports/api-surface/ui.txt
   - packages/ui/README.md
   - packages/ui/src/stylex-module-paths.test.json
-  - packages/ui/src/utils/tests/themeTokenContrast.util*
+  - packages/ui/src/utils/tests/compileStylexRules.util*
+  - packages/ui/src/utils/tests/compositeOverSurface.util*
+  - packages/ui/src/utils/tests/decodeSrgbChannel.util*
+  - packages/ui/src/utils/tests/encodeSrgbChannel.util*
+  - packages/ui/src/utils/tests/getColorTokenName.util*
+  - packages/ui/src/utils/tests/getLuminance.util*
+  - packages/ui/src/utils/tests/getThemeTokenContrast.util*
+  - packages/ui/src/utils/tests/labToLinearSrgb.util*
+  - packages/ui/src/utils/tests/multiplyColorMatrix.util*
+  - packages/ui/src/utils/tests/oklchToLinearSrgb.util*
+  - packages/ui/src/utils/tests/parseStylexRule.util*
+  - packages/ui/src/utils/tests/readColor.util*
+  - packages/ui/src/utils/tests/readColorChannels.util*
+  - packages/ui/src/utils/tests/readStylexDeclaration.util*
+  - packages/ui/src/utils/tests/readStylexRules.util*
+  - packages/ui/src/utils/tests/readThemeValue.util*
+  - packages/ui/src/utils/tests/tests.types.ts
 started: 2026-10-30
-updated: 2026-11-01
+updated: 2026-11-02
 plan: (none)
 pr: #1583
 issue: #1557
