@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import {
+  anyFixable,
   assertUnruled,
   DEFAULT_SEATS,
   dispatchPrompt,
@@ -231,6 +232,38 @@ describe('parseVerdict', () => {
     ],
   ])('refuses %s', (_label, text, problem) => {
     expect(parse(text)).toEqual({ problem });
+  });
+});
+
+describe('anyFixable', () => {
+  it("counts only a REAL verdict's fix, never a FALSE_POSITIVE seat's", () => {
+    const verdicts = [
+      parse('REAL\nEvidence: it fires.\nFix:'),
+      parse(
+        'FALSE_POSITIVE\nEvidence: e\nCheck: searched packages/x/src\nFix: rename it anyway.',
+      ),
+      parse('FALSE_POSITIVE\nEvidence: e\nCheck: read packages/x/src/a.ts'),
+    ];
+    expect(verdicts.map(({ fixable }) => fixable)).toEqual([
+      false,
+      false,
+      false,
+    ]);
+    expect(anyFixable(verdicts)).toBe(false);
+    expect(
+      outcomeOf({ fixable: anyFixable(verdicts), verifiers: verdicts }),
+    ).toBe('split');
+  });
+
+  it('counts a REAL verdict that gives a fix', () => {
+    const verdicts = [
+      parse('REAL\nEvidence: it fires.\nFix: guard the input.'),
+      parse('FALSE_POSITIVE\nEvidence: e\nCheck: read packages/x/src/a.ts'),
+    ];
+    expect(anyFixable(verdicts)).toBe(true);
+    expect(anyFixable([{ fixable: true, verdict: 'FALSE_POSITIVE' }])).toBe(
+      false,
+    );
   });
 });
 

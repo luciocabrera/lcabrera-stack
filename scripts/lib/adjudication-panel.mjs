@@ -116,11 +116,14 @@ export const parseVerdict = ({ exists, text }) => {
     ? {
         body: rest.join('\n').trim(),
         evidence,
-        fixable: Boolean(fix),
+        fixable: verdict === 'REAL' && Boolean(fix),
         verdict,
       }
     : { problem };
 };
+
+export const anyFixable = (verdicts) =>
+  verdicts.some(({ fixable, verdict }) => verdict === 'REAL' && fixable);
 
 export const outcomeOf = ({ fixable, verifiers }) => {
   const verdicts = new Set(verifiers.map(({ verdict }) => verdict));

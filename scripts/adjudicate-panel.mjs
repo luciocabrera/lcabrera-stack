@@ -36,6 +36,7 @@ import { readRegisters } from '../packages/repo-standards/scripts/config.mjs';
 import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
 import { CASES_DIR } from './lib/adjudicate-command.mjs';
 import {
+  anyFixable,
   assertUnruled,
   dispatchPrompt,
   envelopeFor,
@@ -230,7 +231,7 @@ const main = async () => {
   if (resolved.length > 0) throw new Error(resolved.join('\n'));
   const envelope = envelopeFor({
     caseFile,
-    fixable: parsed.some(({ parsed: verdict }) => verdict.fixable),
+    fixable: anyFixable(parsed.map(({ parsed: verdict }) => verdict)),
     verifiers,
   });
   const checked = toCurrentAdjudication({ input: envelope });
