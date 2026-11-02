@@ -167,14 +167,31 @@ export const paintOf = (target: Locator) => paintAt({ target });
 
 export const expectRightAligned = async (cell: Locator) => {
   const gaps = await cell.evaluate((element) => {
-    const range = document.createRange();
+    const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
+    const boxes: DOMRect[] = [];
 
-    range.selectNodeContents(element);
+    for (
+      let node = walker.nextNode();
+      node !== null;
+      node = walker.nextNode()
+    ) {
+      if (!node.textContent?.trim()) {
+        continue;
+      }
 
-    const text = range.getBoundingClientRect();
+      const range = document.createRange();
+
+      range.selectNodeContents(node);
+      boxes.push(range.getBoundingClientRect());
+    }
+
     const box = element.getBoundingClientRect();
+    const textLeft = Math.min(...boxes.map(({ left }) => left));
+    const textRight = Math.max(...boxes.map(({ right }) => right));
 
-    return { left: text.left - box.left, right: box.right - text.right };
+    return boxes.length === 0
+      ? { left: 0, right: 0 }
+      : { left: textLeft - box.left, right: box.right - textRight };
   });
 
   expect(gaps.right).toBeLessThan(gaps.left);
