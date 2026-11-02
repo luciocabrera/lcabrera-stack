@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { getMarkerGeometry } from './getMarkerGeometry.util';
 
+const INVALID_DATE = new Date(Number('NaN'));
+
 const x = (value: Date | number) => Number(value) * 10;
 
 describe('getMarkerGeometry', () => {
@@ -38,7 +40,7 @@ describe('getMarkerGeometry', () => {
     expect(
       getMarkerGeometry({
         markers: [
-          { label: 'Nowhere', x: new Date(NaN) },
+          { label: 'Nowhere', x: INVALID_DATE },
           { label: 'Late', x: 11 },
         ],
         x,

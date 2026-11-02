@@ -72,7 +72,9 @@ describe('getLineChartGeometry', () => {
 
     expect(geometry.xTicks.map(({ text }) => text)).toEqual([
       '2026-01-01',
+      '2026-01-01 12:00',
       '2026-01-02',
+      '2026-01-02 12:00',
       '2026-01-03',
     ]);
   });

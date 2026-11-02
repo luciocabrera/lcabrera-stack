@@ -46,6 +46,7 @@
   "src/components/LineChart/LineChartLegend/LineChartLegend.stylex.ts",
   "src/components/LineChart/LineChartMarkerLabels/LineChartMarkerLabels.stylex.ts",
   "src/components/LineChart/LineChartPlot/LineChartPlot.stylex.ts",
+  "src/components/LineChart/LineChartPointLinks/LineChartPointLinks.stylex.ts",
   "src/components/LineChart/LineChartTicks/LineChartTicks.stylex.ts",
   "src/components/MarkdownRenderer/MarkdownRenderer.stylex.ts",
   "src/components/Modal/Modal.stylex.ts",

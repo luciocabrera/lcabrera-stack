@@ -8,6 +8,7 @@ import {
   lineChartStroke,
 } from '#ui/components/LineChart/LineChart.stylex';
 import { LineChartDot } from '#ui/components/LineChart/LineChartDot/LineChartDot.component';
+import { LineChartPointLinks } from '#ui/components/LineChart/LineChartPointLinks/LineChartPointLinks.component';
 
 import type { LineChartPlotProps } from './LineChartPlot.types';
 
@@ -21,68 +22,75 @@ export const LineChartPlot = ({
 }: LineChartPlotProps) => {
   const titleId = useId();
   const descriptionId = useId();
-  const hasLinks = geometry.series.some(({ dots }) =>
-    dots.some(({ to }) => to !== undefined),
-  );
   const size = String(LINE_CHART.plotSize);
 
   return (
-    <svg
-      aria-describedby={description === undefined ? undefined : descriptionId}
-      aria-labelledby={titleId}
-      preserveAspectRatio='none'
-      role={hasLinks ? 'group' : 'img'}
-      viewBox={`0 0 ${size} ${size}`}
-      {...stylex.props(lineChartLayout.plot(height))}
-    >
-      <title id={titleId}>{title}</title>
-      {description !== undefined && (
-        <desc id={descriptionId}>{description}</desc>
-      )}
-      {geometry.gridlines !== '' && (
-        <path
-          d={geometry.gridlines}
-          {...stylex.props(lineChartPlotStyles.gridlines)}
-        />
-      )}
-      {geometry.series
-        .filter(({ band }) => band !== '')
-        .map(({ band, id, tone }) => (
+    <div {...stylex.props(lineChartLayout.plot(height))}>
+      <svg
+        aria-describedby={description === undefined ? undefined : descriptionId}
+        aria-labelledby={titleId}
+        preserveAspectRatio='none'
+        role='img'
+        viewBox={`0 0 ${size} ${size}`}
+        {...stylex.props(lineChartLayout.svg)}
+      >
+        <title id={titleId}>{title}</title>
+        {description !== undefined && (
+          <desc id={descriptionId}>{description}</desc>
+        )}
+        {geometry.gridlines !== '' && (
           <path
-            d={band}
-            key={id}
-            {...stylex.props(lineChartPlotStyles.band, lineChartFill[tone])}
+            d={geometry.gridlines}
+            {...stylex.props(lineChartPlotStyles.gridlines)}
           />
-        ))}
-      {geometry.series
-        .filter(({ line }) => line !== '')
-        .map(({ id, isDashed, label, line, tone }) => (
+        )}
+        {geometry.series
+          .filter(({ band }) => band !== '')
+          .map(({ band, id, tone }) => (
+            <path
+              d={band}
+              key={id}
+              {...stylex.props(lineChartPlotStyles.band, lineChartFill[tone])}
+            />
+          ))}
+        {geometry.series
+          .filter(({ line }) => line !== '')
+          .map(({ id, isDashed, label, line, tone }) => (
+            <path
+              d={line}
+              key={id}
+              {...stylex.props(
+                lineChartPlotStyles.line,
+                lineChartStroke[tone],
+                isDashed && lineChartPlotStyles.dashed,
+              )}
+            >
+              <title>{label}</title>
+            </path>
+          ))}
+        {geometry.markers.map(({ d, key, label, tone }) => (
           <path
-            d={line}
-            key={id}
-            {...stylex.props(
-              lineChartPlotStyles.line,
-              lineChartStroke[tone],
-              isDashed && lineChartPlotStyles.dashed,
-            )}
+            d={d}
+            key={key}
+            {...stylex.props(lineChartPlotStyles.marker, lineChartStroke[tone])}
           >
             <title>{label}</title>
           </path>
         ))}
-      {geometry.markers.map(({ d, key, label, tone }) => (
-        <path
-          d={d}
-          key={key}
-          {...stylex.props(lineChartPlotStyles.marker, lineChartStroke[tone])}
-        >
-          <title>{label}</title>
-        </path>
-      ))}
-      {geometry.series.flatMap(({ dots, id }) =>
-        dots.map(({ key, ...dot }) => (
-          <LineChartDot key={`${id}-${key}`} {...dot} />
-        )),
-      )}
-    </svg>
+        {geometry.series.flatMap(({ dots, id }) =>
+          dots
+            .filter(({ to }) => to === undefined)
+            .map(({ d, key, label, tone }) => (
+              <LineChartDot
+                d={d}
+                key={`${id}-${key}`}
+                label={label}
+                tone={tone}
+              />
+            )),
+        )}
+      </svg>
+      <LineChartPointLinks series={geometry.series} />
+    </div>
   );
 };

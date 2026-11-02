@@ -697,10 +697,13 @@ client because neither reads a size. Follow the same shape in any chart
 - **One path per series and per band.** Draw a dot only where it means
   something (a link, a tone, a series short enough to read); never one
   component per point.
-- **Every mark has an accessible name.** A line, a dot and a marker each carry
-  a `<title>`; a linked dot is a router `Link` with the same `aria-label`. The
-  SVG is `role="img"` named by its title, and `role="group"` once it holds a
-  link, because an image's children leave the accessibility tree.
+- **Every mark has an accessible name, and the SVG holds nothing interactive.**
+  A line, a dot and a marker each carry a `<title>`, and the SVG is
+  `role="img"` named by its title. A linked point is not drawn inside it: it is
+  a router `Link` in an HTML list laid over the plot, placed by percentage like
+  the labels and named by `aria-label`. An image's children leave the
+  accessibility tree, and a `role="group"` on the SVG would stand in for the
+  list element that already says what the links are.
 - **Prove it with a server render.** A chart's tests compare `renderToString`
   with the client render, hydrate the server markup with no recoverable error,
   and render once in the `node` environment, where any read of `window` throws.

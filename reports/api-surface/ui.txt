@@ -9,7 +9,7 @@ AppShell [const] () => JSX.Element
 Button [const] ({ tooltipContent, tooltipPlacement, ...rest }: ButtonProps) => JSX.Element
 ChartAxis [type] { readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
 ChartMarker [type] { readonly label: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; }
-ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: StatusBadgeTone; readonly x: ChartX; readonly y: null | number; }
+ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; readonly y: null | number; }
 ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'
 ChartX [type] Date | number
 FieldNode [type] | GroupFieldNode<TValues> | LeafFieldDef<TValues> | RowFieldNode<TValues> | TabFieldNode<TValues>
@@ -167,7 +167,7 @@ JsonExplorerSection [type] { readonly columns: readonly TableColumn<Record<strin
 ## ./components/LineChart
 ChartAxis [type] { readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
 ChartMarker [type] { readonly label: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; }
-ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: StatusBadgeTone; readonly x: ChartX; readonly y: null | number; }
+ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; readonly y: null | number; }
 ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'
 ChartX [type] Date | number
 LineBandPoint [type] { readonly lower: number; readonly upper: number; readonly x: ChartX; }

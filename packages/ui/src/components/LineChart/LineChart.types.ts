@@ -1,8 +1,6 @@
 import type { ChartScale } from '@lcabrera/utils/chart/chart.types';
 import type { To } from 'react-router';
 
-import type { StatusBadgeTone } from '#ui/components/StatusBadge/StatusBadge.types';
-
 export type ChartAxis<T extends ChartX> = {
   readonly domain?: readonly [T, T];
   readonly format?: (value: T) => string;
@@ -20,7 +18,7 @@ export type ChartMarker = {
 export type ChartPoint = {
   readonly label?: string;
   readonly to?: To;
-  readonly tone?: StatusBadgeTone;
+  readonly tone?: ChartTone;
   readonly x: ChartX;
   readonly y: null | number;
 };
@@ -45,8 +43,10 @@ export type LineChartDotGeometry = {
   readonly d: string;
   readonly key: string;
   readonly label: string;
+  readonly left: number;
   readonly to: To | undefined;
   readonly tone: ChartTone;
+  readonly top: number;
 };
 
 export type LineChartDrawnPoint = ChartPoint & { readonly y: number };
@@ -64,8 +64,13 @@ export type LineChartGeometry = {
   readonly yTicks: readonly LineChartTick[];
 };
 
-export type LineChartMarkerGeometry = LineChartDotGeometry & {
+export type LineChartMarkerGeometry = {
   readonly at: number;
+  readonly d: string;
+  readonly key: string;
+  readonly label: string;
+  readonly to: To | undefined;
+  readonly tone: ChartTone;
 };
 
 export type LineChartPointsMode = 'always' | 'auto' | 'never';

@@ -1,6 +1,7 @@
 import { bandPath } from '@lcabrera/utils/chart/band-path.util';
 import { decimate } from '@lcabrera/utils/chart/decimate.util';
 import { linePath } from '@lcabrera/utils/chart/line-path.util';
+import { roundToCents } from '@lcabrera/utils/numbers/round-to-cents.util';
 
 import type {
   ChartTone,
@@ -41,8 +42,10 @@ export const getSeriesGeometry = ({
         d: linePath({ points: [point], ...scales }),
         key: String(index),
         label: getPointName({ formatters, point, seriesLabel: series.label }),
+        left: roundToCents(scales.x(point.x)),
         to: point.to,
         tone: point.tone ?? tone,
+        top: roundToCents(scales.y(point.y)),
       })),
     id: series.id,
     isDashed: series.isDashed ?? false,

@@ -10,11 +10,16 @@ export const lineChartLayout = stylex.create({
   },
   plot: (height: number) => ({
     gridArea: 'plot',
-    overflow: 'visible',
-    display: 'block',
+    position: 'relative',
     height,
     width: '100%',
   }),
+  svg: {
+    overflow: 'visible',
+    display: 'block',
+    height: '100%',
+    width: '100%',
+  },
   root: {
     gridTemplateAreas:
       '"ylabel ylabel" ". markers" "yticks plot" ". xticks" ". xlabel" "legend legend"',
@@ -50,6 +55,15 @@ export const lineChartFill = stylex.create({
   secondary: { fill: colors.brandSecondary },
   success: { fill: colors.success },
   warning: { fill: colors.warning },
+});
+
+export const lineChartBackground = stylex.create({
+  error: { backgroundColor: colors.error },
+  info: { backgroundColor: colors.info },
+  neutral: { backgroundColor: colors.textSecondary },
+  secondary: { backgroundColor: colors.brandSecondary },
+  success: { backgroundColor: colors.success },
+  warning: { backgroundColor: colors.warning },
 });
 
 export const lineChartSwatch = stylex.create({

@@ -1,4 +1,5 @@
 import { isFiniteChartValue } from '@lcabrera/utils/chart/is-finite-chart-value.util';
+import { isFiniteNumber } from '@lcabrera/utils/guards/is-finite-number.util';
 
 import type {
   ChartMarker,
@@ -29,7 +30,7 @@ export const getChartDomains = ({
     ...markers.map(({ x }) => x),
   ].filter((x) => isFiniteChartValue(x));
   const ys = series.flatMap(({ band = [], points }) => [
-    ...points.map(({ y }) => y ?? NaN),
+    ...points.map(({ y }) => y).filter((y) => isFiniteNumber(y)),
     ...band.flatMap(({ lower, upper }) => [lower, upper]),
   ]);
 

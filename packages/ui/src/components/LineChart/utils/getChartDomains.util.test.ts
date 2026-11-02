@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import { getChartDomains } from './getChartDomains.util';
 
+const INVALID_DATE = new Date(Number('NaN'));
+
 const GAP: null = JSON.parse('null');
 
 describe('getChartDomains', () => {
@@ -37,13 +39,13 @@ describe('getChartDomains', () => {
   it('skips a position that is not finite', () => {
     expect(
       getChartDomains({
-        markers: [{ label: 'Lost', x: new Date(NaN) }],
+        markers: [{ label: 'Lost', x: INVALID_DATE }],
         series: [
           {
             id: 'a',
             label: 'A',
             points: [
-              { x: NaN, y: 1 },
+              { x: Number('NaN'), y: 1 },
               { x: 4, y: 2 },
             ],
           },

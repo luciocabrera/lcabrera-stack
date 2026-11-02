@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 
+import type { Root } from 'react-dom/client';
+
 import * as stylex from '@stylexjs/stylex';
 import {
   act,
@@ -22,7 +24,10 @@ import { lineChartLegendStyles } from './LineChartLegend/LineChartLegend.stylex'
 
 const GAP: null = JSON.parse('null');
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  vi.restoreAllMocks();
+});
 
 const LATENCY: LineSeries = {
   id: 'latency',
@@ -120,15 +125,29 @@ describe('LineChart', () => {
       ).toBe(false);
     });
 
-    it('takes the group role when a point is a link, so the link stays reachable', () => {
+    it('keeps the plot an image and lists a linked point as an HTML link over it', () => {
       renderChart({
-        series: [{ ...LATENCY, points: [{ to: '/requests/1', x: 0, y: 10 }] }],
+        series: [
+          {
+            ...LATENCY,
+            points: [
+              { to: '/requests/1', x: 0, y: 10 },
+              { x: 4, y: 40 },
+            ],
+          },
+        ],
       });
 
+      const link = screen.getByRole('link', { name: 'Latency: 0, 10' });
+
+      expect(screen.getByRole('img', { name: 'Request latency' })).toBeTruthy();
+      expect(link.closest('svg')).toBeNull();
       expect(
-        screen.getByRole('group', { name: 'Request latency' }),
+        within(screen.getByRole('list')).getByRole('listitem'),
       ).toBeTruthy();
-      expect(screen.queryByRole('img')).toBeNull();
+      expect(link.parentElement?.getAttribute('style')).toMatch(
+        /left:\s*0%.*top:\s*100%|top:\s*100%.*left:\s*0%/u,
+      );
     });
 
     it('draws one plot with a viewBox that does not keep its aspect ratio', () => {
@@ -317,7 +336,7 @@ describe('LineChart', () => {
       const { container } = renderChart({
         markers: [
           { label: 'Early', x: -10 },
-          { label: 'Nowhere', x: NaN },
+          { label: 'Nowhere', x: Number('NaN') },
         ],
         xAxis: { domain: [0, 4] },
       });
@@ -345,8 +364,12 @@ describe('LineChart', () => {
       const link = screen.getByRole('link', { name: 'Request 1: 10 ms' });
 
       expect(link.getAttribute('href')).toBe('/requests/1');
-      expect(link.querySelector(':scope path > title')?.textContent).toBe(
-        'Request 1: 10 ms',
+      expect(link.getAttribute('title')).toBe('Request 1: 10 ms');
+      expect(link.getAttribute('class')).not.toBe(
+        screen
+          .getAllByRole('link')
+          .find((other) => other !== link)
+          ?.getAttribute('class'),
       );
     });
 
@@ -417,7 +440,12 @@ describe('LineChart', () => {
         [...container.querySelectorAll(':scope svg path > title')]
           .map(({ textContent }) => textContent)
           .filter((name) => name !== 'Long'),
-      ).toEqual(['Long: 3, 3', 'Long: 7, 7']);
+      ).toEqual(['Long: 3, 3']);
+      expect(
+        screen
+          .getAllByRole('link')
+          .map((link) => link.getAttribute('aria-label')),
+      ).toEqual(['Long: 7, 7']);
     });
 
     it('draws a dot on a series of exactly the auto limit', () => {
@@ -454,7 +482,8 @@ describe('LineChart', () => {
         [...container.querySelectorAll(':scope svg path > title')].map(
           ({ textContent }) => textContent,
         ),
-      ).toEqual(['Latency', 'Linked']);
+      ).toEqual(['Latency']);
+      expect(screen.getByRole('link', { name: 'Linked' })).toBeTruthy();
     });
 
     it('colours a toned dot from its own tone over the series tone', () => {
@@ -630,6 +659,35 @@ describe('LineChart', () => {
       ).toBe('M0,87.5L12.5,75M37.5,62.5L50,50');
     });
 
+    it('labels a sub-day time axis with distinct times', () => {
+      const { container } = renderChart({
+        series: [
+          {
+            ...LATENCY,
+            points: [
+              { x: new Date('2026-11-02T09:00:00Z'), y: 1 },
+              { x: new Date('2026-11-02T15:00:00Z'), y: 2 },
+            ],
+          },
+        ],
+      });
+      const labels = [
+        ...(container.querySelectorAll('[aria-hidden="true"]')[1]?.children ??
+          []),
+      ].map(({ textContent }) => textContent);
+
+      expect(labels).toEqual([
+        '2026-11-02 09:00',
+        '2026-11-02 10:00',
+        '2026-11-02 11:00',
+        '2026-11-02 12:00',
+        '2026-11-02 13:00',
+        '2026-11-02 14:00',
+        '2026-11-02 15:00',
+      ]);
+      expect(new Set(labels).size).toBe(labels.length);
+    });
+
     it('formats a time axis as ISO dates by default', () => {
       const { container } = renderChart({
         series: [
@@ -692,6 +750,21 @@ describe('LineChart', () => {
       expect(table.getAttribute('class')).toBeTruthy();
     });
 
+    it('writes No value for a position that is not finite', () => {
+      renderChart({
+        hasDataTable: true,
+        series: [
+          { ...LATENCY, points: [{ x: new Date(Number('NaN')), y: 3 }] },
+        ],
+      });
+
+      expect(
+        within(screen.getByRole('table'))
+          .getAllByRole('cell')
+          .map(({ textContent }) => textContent),
+      ).toEqual(['No value', '3']);
+    });
+
     it('heads the value columns x and y without axis labels', () => {
       renderChart({ hasDataTable: true });
 
@@ -741,19 +814,30 @@ describe('LineChart', () => {
       const { container: tall } = renderChart({ height: 400 });
       const { container: short } = renderChart();
 
-      expect(tall.querySelector('svg')?.getAttribute('class')).toBe(
-        short.querySelector('svg')?.getAttribute('class'),
+      const tallPlot = tall.querySelector('svg')?.parentElement;
+      const shortPlot = short.querySelector('svg')?.parentElement;
+
+      expect(tallPlot?.getAttribute('class')).toBe(
+        shortPlot?.getAttribute('class'),
       );
-      expect(tall.querySelector('svg')?.getAttribute('style')).toContain(
-        '400px',
-      );
-      expect(short.querySelector('svg')?.getAttribute('style')).toContain(
-        '240px',
-      );
+      expect(tallPlot?.getAttribute('style')).toContain('400px');
+      expect(shortPlot?.getAttribute('style')).toContain('240px');
     });
   });
 
   describe('server render', () => {
+    const hydrated: { readonly container: HTMLElement; readonly root: Root }[] =
+      [];
+
+    afterEach(() => {
+      for (const { container, root } of hydrated.splice(0)) {
+        act(() => {
+          root.unmount();
+        });
+        container.remove();
+      }
+    });
+
     const CHART = (
       <LineChart
         description='Milliseconds per request'
@@ -797,18 +881,15 @@ describe('LineChart', () => {
       container.innerHTML = renderToString(tree);
       document.body.append(container);
 
-      const root = await act(async () =>
-        hydrateRoot(container, tree, { onRecoverableError }),
-      );
+      hydrated.push({
+        container,
+        root: await act(async () =>
+          hydrateRoot(container, tree, { onRecoverableError }),
+        ),
+      });
 
       expect(onRecoverableError).not.toHaveBeenCalled();
       expect(errors).not.toHaveBeenCalled();
-
-      act(() => {
-        root.unmount();
-      });
-      container.remove();
-      errors.mockRestore();
     });
   });
 });

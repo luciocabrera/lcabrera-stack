@@ -8,7 +8,9 @@ describe('getExtent', () => {
   });
 
   it('skips values that are not finite', () => {
-    expect(getExtent([NaN, 4, Infinity, 1])).toEqual([1, 4]);
+    expect(getExtent([Number('NaN'), 4, Number('Infinity'), 1])).toEqual([
+      1, 4,
+    ]);
   });
 
   it('returns one value twice for a single value', () => {
@@ -17,6 +19,6 @@ describe('getExtent', () => {
 
   it('returns undefined when no value is finite', () => {
     expect(getExtent([])).toBeUndefined();
-    expect(getExtent([NaN])).toBeUndefined();
+    expect(getExtent([Number('NaN')])).toBeUndefined();
   });
 });

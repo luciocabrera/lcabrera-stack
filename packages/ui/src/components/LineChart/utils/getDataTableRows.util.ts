@@ -1,3 +1,4 @@
+import { isFiniteChartValue } from '@lcabrera/utils/chart/is-finite-chart-value.util';
 import { isFiniteNumber } from '@lcabrera/utils/guards/is-finite-number.util';
 
 import type {
@@ -21,7 +22,9 @@ export const getDataTableRows = ({
       key: `${id}-${String(index)}`,
       series: label,
       to: point.to,
-      x: formatters.x(point.x),
+      x: isFiniteChartValue(point.x)
+        ? formatters.x(point.x)
+        : LINE_CHART.missingValue,
       y: isFiniteNumber(point.y)
         ? formatters.y(point.y)
         : LINE_CHART.missingValue,
