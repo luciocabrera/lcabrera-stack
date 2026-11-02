@@ -45,6 +45,6 @@ Add Breadcrumbs, PageHeader and an inline NavLink variant
 
 ## Status / next
 
-- Current step: gate green, PR ready for review
+- Current step: gate green; light and dark screenshots attached to the PR from the review-only branch `test/1557-ui-breadcrumbs-screenshots`, and the verifier's criterion-5 re-check passed
 - Blockers: none
-- Next:
+- Next: fresh blind review of this head, then merge
