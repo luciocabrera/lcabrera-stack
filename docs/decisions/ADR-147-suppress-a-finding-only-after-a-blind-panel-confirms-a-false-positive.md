@@ -69,7 +69,7 @@ baseline and no marker the panel did not confirm.
    expires at most six months after the case opened. The builder adds the
    analyzer's own next-line marker, in the form
    `<marker> <rule> -- false positive, case FP-nnnn: <one-line reason>`
-   (`<marker> <rule>: false positive, …` for Biome). Any REAL verdict with a
+   (for Biome, `biome-ignore <rule>: false positive, case FP-nnnn: <one-line reason>`). Any REAL verdict with a
    concrete `Fix:` is recorded `fixed`, and the builder applies that fix with
    no marker. A fix is not a suppression, so it needs no owner decision. Only
    when no REAL verdict gives a fix (`split`, or `escalated` when all three

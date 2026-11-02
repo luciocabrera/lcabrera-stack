@@ -173,6 +173,36 @@ describe('findClaimedMarkers — the explanation', () => {
   });
 });
 
+describe('the documented spellings', () => {
+  it.each([
+    [
+      'fallow',
+      '// fallow-ignore-next-line security/sql-concat -- false positive, case FP-0007: the identifier comes from a fixed allow-list',
+      'security/sql-concat',
+    ],
+    [
+      'biome',
+      '// biome-ignore lint/a11y/useButtonType: false positive, case FP-0012: a native reset button',
+      'lint/a11y/useButtonType',
+    ],
+  ])(
+    'reads the %s example from the docs as a claim',
+    (analyzer, text, rule) => {
+      const [found] = findClaimedMarkers({ file: FILE, text });
+      expect(found).toMatchObject({ analyzer, nextLine: true, rule });
+      expect(found.caseId).toMatch(/^FP-\d{4}$/u);
+      expect(
+        markerSpelling({
+          analyzer,
+          caseId: found.caseId,
+          reason: found.reason,
+          rule,
+        }),
+      ).toBe(text);
+    },
+  );
+});
+
 describe('hashLines and markerSpelling', () => {
   it('hashes the lines joined by newlines', () => {
     expect(hashLines(['a', 'b'])).toBe(
