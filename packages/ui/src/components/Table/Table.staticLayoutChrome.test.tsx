@@ -578,6 +578,23 @@ describe('Table static layout review fixes', () => {
     ).toBe(true);
   });
 
+  it('leaves a virtual header band at its summed width, with no colSpan', () => {
+    render(
+      <Table
+        columns={[
+          { isPrimaryKey: true, key: 'id', label: 'Id' },
+          { headerGroupLabel: 'Totals', key: 'name', label: 'Name' },
+          { headerGroupLabel: 'Totals', key: 'score', label: 'Score' },
+        ]}
+        response={[{ id: 1, name: 'Ada', score: 3 }]}
+      />,
+    );
+
+    expect(
+      screen.getByText('Totals').closest('th')?.hasAttribute('colspan'),
+    ).toBe(false);
+  });
+
   it('keeps a static empty state at its content height across renders', () => {
     const element = (
       <Table
