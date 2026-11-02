@@ -71,8 +71,23 @@ const sectionText = ({ label, sections }) => {
 
 const SOURCE_FILE = /\.(?:[cm]?[jt]sx?|json|md|ya?ml)$/u;
 
-const pathOf = (word) =>
-  word.replaceAll(/^\W+|\W+$/gu, '').replace(/:\d+(?:-\d+)?$/u, '');
+const WORD_CHARACTER = /\w/u;
+
+const LINE_SUFFIX = /^\d+(?:-\d+)?$/u;
+
+const isWordCharacter = (character) => WORD_CHARACTER.test(character);
+
+const pathOf = (word) => {
+  const characters = [...word];
+  const core = characters
+    .slice(
+      characters.findIndex((character) => isWordCharacter(character)),
+      characters.findLastIndex((character) => isWordCharacter(character)) + 1,
+    )
+    .join('');
+  const colon = core.lastIndexOf(':');
+  return LINE_SUFFIX.test(core.slice(colon + 1)) ? core.slice(0, colon) : core;
+};
 
 const citesALocation = ({ check, exists }) =>
   check.split(/\s+/u).some((word) => {

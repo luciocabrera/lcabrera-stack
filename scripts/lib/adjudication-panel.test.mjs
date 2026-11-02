@@ -217,7 +217,7 @@ describe('parseVerdict', () => {
     ],
     [
       'a check naming only a file with an unknown extension',
-      'FALSE_POSITIVE\nEvidence: e\nCheck: read notes.mdx and a.ts:3x',
+      'FALSE_POSITIVE\nEvidence: e\nCheck: read notes.mdx, a.ts:3x and a.ts:x3',
       NO_PATH,
     ],
     [
