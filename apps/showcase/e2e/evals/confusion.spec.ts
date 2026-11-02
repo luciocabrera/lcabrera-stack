@@ -1,3 +1,5 @@
+import type { Locator } from '@playwright/test';
+
 import { expect, test as it } from '@playwright/test';
 
 import {
@@ -22,6 +24,26 @@ const CHOICES = [
   ['2026-10-03 02:00 on feat/skipped', SEED_RUNS.skippedSkills],
 ] as const;
 
+type CurrentArgs = {
+  readonly name: string;
+  readonly scope: Locator;
+};
+
+const expectCurrentEntry = async ({ name, scope }: CurrentArgs) => {
+  await expect(scope.getByText(name, { exact: true })).toBeVisible();
+  await expect
+    .poll(() =>
+      scope
+        .getByRole('link', { exact: true, name })
+        .evaluateAll(
+          (links) =>
+            links.filter((link) => link.getAttribute('aria-current') !== 'page')
+              .length,
+        ),
+    )
+    .toBe(0);
+};
+
 const TRIGGERED = 'react-19 38 · 7 · 45';
 const NEAR_MISS = 'not store-pattern · 3 12 · 15';
 const ERRORED = 'store-pattern · 9 3 3 15';
@@ -37,9 +59,7 @@ it('offers the recent runs, marking the current one and linking the rest by ?run
     'Recent runs',
     ...CHOICES.map(([label]) => label),
   ]);
-  await expect(
-    runs.getByRole('link', { exact: true, name: 'Recent runs' }),
-  ).toHaveCount(0);
+  await expectCurrentEntry({ name: 'Recent runs', scope: runs });
 
   for (const [name, runId] of CHOICES) {
     await expectLink({ href: confusion(runId), name, scope: runs });
@@ -56,12 +76,10 @@ it('offers the recent runs, marking the current one and linking the rest by ?run
     })
     .click();
   await expect(page).toHaveURL(confusion(SEED_RUNS.featureSkills));
-  await expect(
-    runs.getByRole('link', {
-      exact: true,
-      name: '2026-10-14 02:00 on feat/trigger-wording',
-    }),
-  ).toHaveCount(0);
+  await expectCurrentEntry({
+    name: '2026-10-14 02:00 on feat/trigger-wording',
+    scope: runs,
+  });
   await expectLink({
     href: '/evals/confusion',
     name: 'Recent runs',

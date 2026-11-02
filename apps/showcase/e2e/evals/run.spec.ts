@@ -1,6 +1,7 @@
 import { expect, test as it } from '@playwright/test';
 
 import {
+  bodyCells,
   clickMenuAction,
   columnHeader,
   expectDatasetCount,
@@ -159,14 +160,29 @@ it('pages the trials in from the trials route as the table scrolls', async ({
 }) => {
   await openGrid(page, VERIFIER);
 
-  const nextPage = page.waitForRequest(
-    (request) =>
-      request.url().includes(`${VERIFIER}/trials?`) &&
-      new URL(request.url()).searchParams.get('skip') === '50',
+  const nextPage = page.waitForResponse(
+    (response) =>
+      response.url().includes(`${VERIFIER}/trials?`) &&
+      new URL(response.url()).searchParams.get('skip') === '50',
   );
 
+  await expect(
+    bodyCells(page, 'taskKey').filter({
+      hasText: 'verifier-fixtures/fixture-018',
+    }),
+  ).toHaveCount(0);
   await scrollToEnd(page);
-  await nextPage;
+
+  const response = await nextPage;
+
+  expect(response.ok()).toBe(true);
+  await expect(
+    bodyCells(page, 'taskKey')
+      .filter({
+        hasText: /^verifier-fixtures\/fixture-(01[89]|0[2-9]\d|1\d\d)$/u,
+      })
+      .first(),
+  ).toBeVisible();
   await expectDatasetCount(page, 510);
 });
 
@@ -180,5 +196,11 @@ it('keeps the trials table without filters', async ({ page }) => {
 });
 
 it('renders the run in light and dark', async ({ page }, testInfo) => {
-  await captureThemes({ name: 'run', page, path: LATEST, testInfo });
+  await captureThemes({
+    name: 'run',
+    open: openGrid,
+    page,
+    path: LATEST,
+    testInfo,
+  });
 });

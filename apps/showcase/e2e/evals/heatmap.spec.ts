@@ -2,6 +2,7 @@ import { expect, test as it } from '@playwright/test';
 
 import {
   captureThemes,
+  distinctColours,
   expectLink,
   expectTrialHref,
   mainOf,
@@ -128,6 +129,12 @@ it('colours each cell by its pass rate and hatches the flaky ones', async ({
   await expect(
     skills.getByRole('link', { name: /^store-pattern, .*, flaky; / }),
   ).toHaveCount(0);
+  const flat = skills.getByRole('link', {
+    name: cell('store-pattern, 2026-10-12: 100% (6/6)'),
+  });
+
+  expect(await distinctColours(flaky)).toBeGreaterThan(1);
+  expect(await distinctColours(flat)).toBe(1);
 });
 
 it('renders the heatmap in light and dark', async ({ page }, testInfo) => {

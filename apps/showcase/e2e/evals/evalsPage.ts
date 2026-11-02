@@ -12,6 +12,7 @@ type LinkArgs = {
 
 type ThemesArgs = {
   readonly name: string;
+  readonly open?: (page: Page, path: string) => Promise<unknown>;
   readonly page: Page;
   readonly path: string;
   readonly testInfo: TestInfo;
@@ -104,9 +105,14 @@ export const colorOf = (target: Locator) =>
 type PaintArgs = {
   readonly below?: number;
   readonly target: Locator;
+  readonly within?: Locator;
 };
 
-export const paintAt = async ({ below = 0, target }: PaintArgs) => {
+export const paintAt = async ({
+  below = 0,
+  target,
+  within = target,
+}: PaintArgs) => {
   await target.scrollIntoViewIfNeeded();
 
   const box = await target.boundingBox();
@@ -115,14 +121,46 @@ export const paintAt = async ({ below = 0, target }: PaintArgs) => {
     throw new Error('the mark has no box to paint');
   }
 
-  return target.page().evaluate(
-    ({ x, y }) => {
+  return within.evaluate(
+    (root, { x, y }) => {
       const painted = document.elementFromPoint(x, y);
 
-      return painted === null ? 'nothing' : getComputedStyle(painted).fill;
+      return painted !== null && root.contains(painted)
+        ? getComputedStyle(painted).fill
+        : 'outside';
     },
     { x: box.x + box.width / 2, y: box.y + box.height / 2 + below },
   );
+};
+
+export const distinctColours = async (target: Locator) => {
+  const bytes = [...(await target.screenshot())];
+
+  return target.page().evaluate(async (png) => {
+    const bitmap = await createImageBitmap(
+      new Blob([new Uint8Array(png)], { type: 'image/png' }),
+    );
+    const inset = 3;
+    const canvas = new OffscreenCanvas(bitmap.width, bitmap.height);
+    const context = canvas.getContext('2d');
+
+    context?.drawImage(bitmap, 0, 0);
+
+    const pixels =
+      context?.getImageData(
+        inset,
+        inset,
+        bitmap.width - inset * 2,
+        bitmap.height - inset * 2,
+      ).data ?? new Uint8ClampedArray();
+    const colours = new Set<string>();
+
+    for (let index = 0; index < pixels.length; index += 4) {
+      colours.add(pixels.slice(index, index + 3).join(','));
+    }
+
+    return colours.size;
+  }, bytes);
 };
 
 export const paintOf = (target: Locator) => paintAt({ target });
@@ -150,6 +188,7 @@ type ThemeArgs = ThemesArgs & {
 const captureTheme = async ({
   control,
   name,
+  open = openEvals,
   page,
   path,
   testInfo,
@@ -162,7 +201,7 @@ const captureTheme = async ({
       value: theme,
     },
   ]);
-  await openEvals(page, path);
+  await open(page, path);
   await expect(
     page.getByRole('button', { exact: true, name: control }),
   ).toBeVisible();

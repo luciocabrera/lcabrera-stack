@@ -124,15 +124,32 @@ it('shades the Wilson band around the pass-rate line', async ({ page }) => {
     exact: true,
     name: 'skill react-19 pass rate in skills over time',
   });
-  const dot = skills.getByRole('link', { name: /^skills run 53000000, / });
-  const band = await paintAt({ below: 12, target: dot });
+  const dot = skills.getByRole('link', { name: /^skills run 54000000, / });
+  const figureBox = await skills.boundingBox();
+  const dotBox = await dot.boundingBox();
 
-  expect(band).not.toBe('none');
+  if (figureBox === null || dotBox === null) {
+    throw new Error('the trend chart has no box to sample');
+  }
+
+  const toFloor =
+    figureBox.y + figureBox.height - (dotBox.y + dotBox.height / 2) - 6;
+  const band = await paintAt({ below: 12, target: dot, within: skills });
+  const backdrop = await paintAt({
+    below: toFloor,
+    target: dot,
+    within: skills,
+  });
+
+  expect(band).not.toBe('outside');
+  expect(backdrop).not.toBe('outside');
+  expect(band).not.toBe(backdrop);
   expect(band).not.toBe(await paintOf(dot));
   expect(
     await paintAt({
       below: 12,
       target: skills.getByRole('link', { name: /^skills run 51000000, / }),
+      within: skills,
     }),
   ).toBe(band);
 });
