@@ -48,22 +48,46 @@ describe('getThemeTokenContrast', () => {
     );
   });
 
-  it('composites a translucent token over the surface before measuring it', () => {
-    const overBackground = getThemeTokenContrast({
-      background: colors.backgroundPrimary,
-      foreground: colors.textPrimary,
+  it('leaves the contrast unchanged when the surface under an opaque background changes', () => {
+    const overPage = getThemeTokenContrast({
+      background: colors.backgroundSecondary,
+      foreground: colors.textSecondary,
       theme: 'light',
     });
-    const overGreySurface = getThemeTokenContrast({
-      background: colors.backgroundPrimary,
-      foreground: colors.textPrimary,
+    const overGrey = getThemeTokenContrast({
+      background: colors.backgroundSecondary,
+      foreground: colors.textSecondary,
       surface: colors.textTertiary,
       theme: 'light',
     });
 
-    expect(overBackground).toBeGreaterThan(4.5);
-    expect(overBackground).toBeLessThan(21);
-    expect(overGreySurface).toBeGreaterThan(overBackground);
+    expect(overGrey).toBeCloseTo(overPage, 10);
+  });
+
+  it('composites a translucent foreground over the background it is drawn on', () => {
+    expect(
+      getThemeTokenContrast({
+        background: colors.backgroundSecondary,
+        foreground: colors.textSecondary,
+        theme: 'light',
+      }),
+    ).toBeCloseTo(3.367, 2);
+  });
+
+  it('composites a translucent background over the surface first', () => {
+    const overPage = getThemeTokenContrast({
+      background: colors.textPrimary,
+      foreground: colors.brandPrimaryCardText,
+      theme: 'light',
+    });
+    const overGrey = getThemeTokenContrast({
+      background: colors.textPrimary,
+      foreground: colors.brandPrimaryCardText,
+      surface: colors.textTertiary,
+      theme: 'light',
+    });
+
+    expect(overGrey).not.toBeCloseTo(overPage, 2);
   });
 
   it('refuses a translucent surface', () => {
