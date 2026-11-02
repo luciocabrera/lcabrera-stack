@@ -188,8 +188,23 @@ describe('mutationArgs', () => {
       '/tmp/x.diff',
       '--min-score',
       '100',
+      '--setup-timeout',
+      '30m',
       '--allow-dirty',
       '--quiet',
+    ]);
+  });
+
+  it('passes a setup timeout it is given in place of the default', () => {
+    const args = mutationArgs({
+      base: 'abc',
+      diffFile: '/tmp/x.diff',
+      root: '.',
+      setupTimeout: '45m',
+    });
+    expect(args.slice(args.indexOf('--setup-timeout'), -2)).toEqual([
+      '--setup-timeout',
+      '45m',
     ]);
   });
 });

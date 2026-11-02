@@ -4,7 +4,12 @@ import { runGate } from './fallow-gate-command.mjs';
 import { gitDiffArgs } from './fallow-gate-diff.mjs';
 import { COULD_NOT_RUN } from './fallow-gate.mjs';
 
-const mutationRun = ({ diff = '', statuses = [], stdinFiles }) => {
+const mutationRun = ({
+  diff = '',
+  mutationSetupTimeout,
+  statuses = [],
+  stdinFiles,
+}) => {
   const log = { git: [], runs: [], temp: [], written: '' };
   const pending = [...statuses];
   const effects = {
@@ -13,6 +18,7 @@ const mutationRun = ({ diff = '', statuses = [], stdinFiles }) => {
       log.git.push(args);
       return { status: 0, stdout: diff };
     },
+    mutationSetupTimeout,
     readFile: (path) => `export const fromFile = '${path}';\n`,
     readStdinFiles: () => stdinFiles,
     root: '/repo',
@@ -56,6 +62,17 @@ describe('runGate — mutation', () => {
     expect(log.written).toBe('\nfallow mutation: packages/ui\n');
   });
 
+  it('hands every root the setup timeout the environment set', () => {
+    const { log } = mutationRun({
+      diff: `${component}\n${tracked}\n`,
+      mutationSetupTimeout: '45m',
+      stdinFiles: ['packages/ui/src/a.ts', 'scripts/b.mjs'],
+    });
+    expect(
+      log.runs.map((args) => args[args.indexOf('--setup-timeout') + 1]),
+    ).toEqual(['45m', '45m']);
+  });
+
   it('passes when every root passes', () => {
     expect(mutationRun({ stdinFiles: ['packages/ui/src/a.ts'] }).status).toBe(
       0,
@@ -91,6 +108,8 @@ describe('runGate — mutation', () => {
       '/tmp/gate/changes.diff',
       '--min-score',
       '100',
+      '--setup-timeout',
+      '30m',
       '--allow-dirty',
       '--quiet',
     ]);

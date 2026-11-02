@@ -45,6 +45,7 @@ import {
   NEEDS_BASE,
   REPOSITORY_ROOT,
   RUNS_ON_ANY_CHANGE,
+  SETUP_TIMEOUT_VARIABLE,
   sourceFiles,
   toRepoPath,
   verdictSource,
@@ -178,7 +179,12 @@ const mutateRoot = ({ base, diff, effects, files, root }) => {
       gateExit({
         analysis: 'mutation',
         status: runFallow({
-          args: mutationArgs({ base, diffFile, root }),
+          args: mutationArgs({
+            base,
+            diffFile,
+            root,
+            setupTimeout: effects.mutationSetupTimeout,
+          }),
           effects,
         }).status,
       }),
@@ -290,6 +296,7 @@ const runNode = (args, stdout) => {
 export const processEffects = (proc) => ({
   exists: (file) => existsSync(join(REPO_ROOT, file)),
   git: (args) => runGitStatus({ args, cwd: REPO_ROOT, maxBuffer: 2 ** 29 }),
+  mutationSetupTimeout: proc.env[SETUP_TIMEOUT_VARIABLE] || undefined,
   readFalsePositives: () => readFalsePositiveList(REPO_ROOT),
   readFile: (file) => readFileSync(join(REPO_ROOT, file), 'utf8'),
   readStdinFiles: () => {
