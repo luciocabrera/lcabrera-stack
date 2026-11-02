@@ -7,4 +7,4 @@ export const CASE_ID = /^FP-\d{4,}$/u;
 
 export const CASE_FILE = /^FP-(\d{4,})(?:\.json)?$/u;
 
-export const CLAIM = /^false positive, case (FP-\d{4,}):(.*)/u;
+export const CLAIM = /^false positive, case (FP-\d{4,}): (\S.*)/u;

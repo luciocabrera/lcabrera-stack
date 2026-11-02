@@ -37,15 +37,6 @@ const markerProblems = ({ entriesByCase, marker }) => {
       ),
     ];
   }
-  if (marker.reason === '') {
-    return [
-      problem(
-        'no-reason',
-        where,
-        `the marker gives no reason after "false positive, case ${marker.caseId}:"`,
-      ),
-    ];
-  }
   const entry = entriesByCase.get(marker.caseId);
   if (entry === undefined) {
     return [

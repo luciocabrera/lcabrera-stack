@@ -11,7 +11,7 @@ describe('the case-id patterns', () => {
       expect(CASE_FILE.exec(id)?.[1]).toBe(id.slice(3));
       expect(CLAIM.exec(`false positive, case ${id}: why`)?.slice(1)).toEqual([
         id,
-        ' why',
+        'why',
       ]);
     },
   );

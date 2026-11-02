@@ -126,9 +126,9 @@ describe('checkFalsePositives — each condition fails on its own', () => {
     ]);
   });
 
-  it('fails a marker with no reason', () => {
+  it('fails a marker with no reason: it is no claim, so its entry has no marker', () => {
     expect(kinds(check({ text: source(marker({ reason: '' })) }))).toEqual([
-      'no-reason',
+      'unmarked',
     ]);
   });
 

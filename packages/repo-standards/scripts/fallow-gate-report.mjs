@@ -7,7 +7,7 @@
  */
 import { isCalendarDate } from './calendar-date.mjs';
 
-const ADJUDICATED_REASON = /^false positive, case (FP-\d{4,}): \S/u;
+export const ADJUDICATED_REASON = /^false positive, case (FP-\d{4,}): (\S.*)/u;
 
 const isAdjudicated = ({ adjudicated, kind, path, reason, today }) => {
   const caseId = ADJUDICATED_REASON.exec(reason)?.[1];
