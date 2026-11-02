@@ -381,6 +381,12 @@ describe('NavLinkProps', () => {
   });
 });
 
+describe('NavLinkProps isActive', () => {
+  it('takes no isActive, which the router computes from the location', () => {
+    expectTypeOf<NavLinkProps>().not.toHaveProperty('isActive');
+  });
+});
+
 describe('NavLinkVariant', () => {
   it('is every variant NavLinkProps accepts', () => {
     expectTypeOf<NavLinkVariant>().toEqualTypeOf<

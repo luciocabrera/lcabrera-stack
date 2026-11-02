@@ -15,3 +15,5 @@ Add `Breadcrumbs`, `useRouteBreadcrumbs()` and `PageHeader`, and give `NavLink` 
 `Breadcrumbs`, `PageHeader`, `useRouteBreadcrumbs` and the `BreadcrumbHandle`, `BreadcrumbItem`, `BreadcrumbsProps`, `NavLinkProps`, `NavLinkVariant` and `PageHeaderProps` types are exported from the package root. The new `./components/Breadcrumbs` and `./components/PageHeader` subpaths export them as well, and `./components/NavLink` now exports `NavLinkProps` and `NavLinkVariant`.
 
 The test utilities under `src/utils/tests/` no longer ship in the package, except `./utils/tests/mockDialogElement.util`, which is a published subpath.
+
+`NavLinkProps` no longer declares `isActive`. The prop was never implemented: a value passed in reached the router's `NavLink` and was ignored. It is removed before `NavLinkProps` is first exported, so its removal breaks no consumer.

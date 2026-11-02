@@ -23,7 +23,6 @@ export type NavLinkProps = Omit<RouterNavLinkProps, 'children' | 'color'> &
     readonly children: ReactNode;
     readonly customStylex?: StyleXStyles;
     readonly icon?: ReactNode;
-    readonly isActive?: boolean;
     readonly isBusy?: boolean;
     /** Ignored by the `inline` variant, which flows with the surrounding text. */
     readonly orientation?: DesignSystemOrientation;
