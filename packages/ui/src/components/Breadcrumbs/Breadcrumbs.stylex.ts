@@ -33,10 +33,11 @@ export const styles = stylex.create({
     },
     color: colors.textSecondary,
     outlineOffset: '2px',
-    textDecorationLine: {
-      default: 'none',
-      ':focus-visible': 'underline',
-      ':hover': 'underline',
+    textDecorationLine: 'underline',
+    textDecorationThickness: {
+      default: '1px',
+      ':focus-visible': '2px',
+      ':hover': '2px',
     },
     textUnderlineOffset: '0.2em',
   },
