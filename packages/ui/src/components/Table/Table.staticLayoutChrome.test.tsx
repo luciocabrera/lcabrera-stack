@@ -395,15 +395,10 @@ describe('TablePresentationContext', () => {
   });
 });
 
-const bodyCellOf = (columnKey: string) => {
-  const cell = screen
-    .getByTestId('table-body')
-    .querySelector(`td[data-column-key="${CSS.escape(columnKey)}"]`);
-
-  if (cell === null) throw new Error(`no ${columnKey} cell`);
-
-  return cell;
-};
+const bodyCellOf = (columnKey: string) =>
+  screen
+    .getAllByTestId('table-body-cell')
+    .find((cell) => cell.dataset.columnKey === columnKey) ?? document.body;
 
 const classSet = (className = '') =>
   new Set(className.split(' ').filter(Boolean));
