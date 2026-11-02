@@ -2,7 +2,7 @@
  * Reads the declaration a rendered class sets for one property, from rules `compileStylexRules` listed.
  */
 
-import type { CompiledStylexRule } from './compileStylexRules.util';
+import type { CompiledStylexRule } from './tests.types';
 
 type ReadStylexDeclarationArgs = {
   readonly className: string | undefined;

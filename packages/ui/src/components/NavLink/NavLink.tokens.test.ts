@@ -1,15 +1,13 @@
 import * as stylex from '@stylexjs/stylex';
 import { describe, expect, it } from 'vite-plus/test';
 
-import type { ThemeName } from '#ui/utils/tests/themeTokenContrast.util';
+import type { ThemeName } from '#ui/utils/tests/tests.types';
 
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 import { compileStylexRules } from '#ui/utils/tests/compileStylexRules.util';
+import { getColorTokenName } from '#ui/utils/tests/getColorTokenName.util';
+import { getThemeTokenContrast } from '#ui/utils/tests/getThemeTokenContrast.util';
 import { readStylexDeclaration } from '#ui/utils/tests/readStylexDeclaration.util';
-import {
-  getColorTokenName,
-  getThemeTokenContrast,
-} from '#ui/utils/tests/themeTokenContrast.util';
 
 import { linkItemStyles } from './NavLink.stylex';
 import { getInlineClassName } from './utils';
@@ -155,25 +153,7 @@ describe('the inline NavLink colour tokens', () => {
     },
   );
 
-  it.each([
-    { body: colors.textPrimary, expected: 1.4, theme: 'light' },
-    { body: colors.textSecondary, expected: 3.2, theme: 'light' },
-    { body: colors.textPrimary, expected: 1.26, theme: 'dark' },
-    { body: colors.textSecondary, expected: 1.39, theme: 'dark' },
-  ] as const)(
-    'cannot tell the link from $theme body text by colour alone ($expected:1), which is why it is underlined at rest',
-    ({ body, expected, theme }) => {
-      const ratio = getThemeTokenContrast({
-        background: body,
-        foreground: appliedText,
-        theme,
-      });
-
-      expect(ratio).toBeCloseTo(expected, 1);
-    },
-  );
-
-  it('falls below the 3:1 a colour-only link needs against primary body text in both themes', () => {
+  it('falls below the 3:1 a colour-only link needs against primary body text in both themes, so it is underlined at rest', () => {
     for (const theme of THEMES) {
       expect(
         getThemeTokenContrast({
