@@ -34,9 +34,6 @@ export const seatProblems = ({ builderModel, seats }) => {
       : [
           `the three seats need three distinct models; got ${models.join(', ')}`,
         ]),
-    ...(models.every((model) => model === builderModel)
-      ? ["at least one seat must run on a model other than the builder's"]
-      : []),
   ];
 };
 
@@ -52,28 +49,52 @@ export const resolvedModelProblems = ({ builderModel, verifiers }) => {
   ];
 };
 
-const textAfter = ({ lines, prefix }) =>
-  lines
-    .map((line) => line.trim())
-    .find((line) => line.startsWith(prefix))
-    ?.slice(prefix.length)
-    .trim();
+const LABELS = ['Evidence:', 'Check:', 'Fix:'];
 
-const citesALocation = (text) =>
-  text.split(/\s+/u).some((word) => word.includes('/'));
+const sectionsOf = (lines) =>
+  lines.reduce((sections, line) => {
+    const trimmed = line.trim();
+    const label = LABELS.find((prefix) => trimmed.startsWith(prefix));
+    if (label !== undefined) {
+      return [...sections, { label, lines: [trimmed.slice(label.length)] }];
+    }
+    const last = sections.at(-1);
+    return last === undefined
+      ? sections
+      : [...sections.slice(0, -1), { ...last, lines: [...last.lines, line] }];
+  }, []);
 
-const verdictProblem = ({ check, fix, verdict }) => {
+const sectionText = ({ label, sections }) => {
+  const section = sections.find((entry) => entry.label === label);
+  return section === undefined ? undefined : section.lines.join('\n').trim();
+};
+
+const SOURCE_FILE = /\.(?:[cm]?[jt]sx?|json|md|ya?ml)$/u;
+
+const pathOf = (word) =>
+  word.replaceAll(/^\W+|\W+$/gu, '').replace(/:\d+(?:-\d+)?$/u, '');
+
+const citesALocation = ({ check, exists }) =>
+  check.split(/\s+/u).some((word) => {
+    const path = pathOf(word);
+    return SOURCE_FILE.test(path) || (path.includes('/') && exists(path));
+  });
+
+const verdictProblem = ({ check, evidence, exists, fix, verdict }) => {
+  if (evidence === undefined || evidence === '') {
+    return `a ${verdict} verdict needs a line starting "Evidence:"`;
+  }
   if (verdict === 'REAL') {
     return fix === undefined
       ? 'a REAL verdict needs a line starting "Fix:"'
       : undefined;
   }
-  return check === undefined || !citesALocation(check)
+  return check === undefined || !citesALocation({ check, exists })
     ? 'a FALSE_POSITIVE verdict needs a "Check:" line naming the file it looked in, as a path'
     : undefined;
 };
 
-export const parseVerdict = (text) => {
+export const parseVerdict = ({ exists, text }) => {
   const [first, ...rest] = text.trim().split('\n');
   const verdict = first.trim();
   if (!VERDICTS.has(verdict)) {
@@ -81,14 +102,23 @@ export const parseVerdict = (text) => {
       problem: `line one is "${verdict}", not REAL or FALSE_POSITIVE`,
     };
   }
-  const fix = textAfter({ lines: rest, prefix: 'Fix:' });
+  const sections = sectionsOf(rest);
+  const evidence = sectionText({ label: 'Evidence:', sections });
+  const fix = sectionText({ label: 'Fix:', sections });
   const problem = verdictProblem({
-    check: textAfter({ lines: rest, prefix: 'Check:' }),
+    check: sectionText({ label: 'Check:', sections }),
+    evidence,
+    exists,
     fix,
     verdict,
   });
   return problem === undefined
-    ? { evidence: rest.join('\n').trim(), fixable: Boolean(fix), verdict }
+    ? {
+        body: rest.join('\n').trim(),
+        evidence,
+        fixable: Boolean(fix),
+        verdict,
+      }
     : { problem };
 };
 

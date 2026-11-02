@@ -157,12 +157,11 @@ const namesFileWithin = ({ file, value }) =>
   );
 
 const isMatch = ({ context, finding, value }) => {
-  const own = value;
   return (
-    (context.fileSeen || namesFileWithin({ file: finding.file, value: own })) &&
+    (context.fileSeen || namesFileWithin({ file: finding.file, value })) &&
     (finding.ruleNeedle === '' ||
-      ruleNames(own).includes(finding.ruleNeedle)) &&
-    lineNumbers(own).some(
+      ruleNames(value).includes(finding.ruleNeedle)) &&
+    lineNumbers(value).some(
       (line) => line >= finding.start && line <= finding.end,
     )
   );

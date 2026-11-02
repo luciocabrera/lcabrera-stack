@@ -59,6 +59,14 @@ const MAX_TURNS = 80;
 
 const inRepo = (path) => repoPath({ path, root: ROOT });
 
+const isRepoPath = (path) => {
+  try {
+    return existsSync(inRepo(path));
+  } catch {
+    return false;
+  }
+};
+
 const read = (path) => readFileSync(inRepo(path), 'utf8');
 
 const write = (path, text) => {
@@ -143,7 +151,7 @@ const toVerifier = ({ hash, metrics, model, parsed, seat }) => ({
   agent_prompt_hash: hash,
   cost_usd: metrics.cost_usd_reported,
   duration_ms: metrics.duration_ms ?? 0,
-  evidence: parsed.evidence,
+  evidence: parsed.body,
   model,
   role: seat.role,
   tokens_in: metrics.tokens.input ?? 0,
@@ -151,12 +159,12 @@ const toVerifier = ({ hash, metrics, model, parsed, seat }) => ({
   verdict: parsed.verdict,
 });
 
-const recordDismissal = ({ caseDir, caseFile, envelope }) => {
+const recordDismissal = ({ caseDir, caseFile, envelope, reasons }) => {
   const evidence = `${CASES_DIR}/${caseFile.case.case_id}.json`;
   write(evidence, `${JSON.stringify(envelope, null, 2)}\n`);
   write(
     `${caseDir}/upstream.md`,
-    upstreamDraft({ caseFile, verifiers: envelope.verifiers }),
+    upstreamDraft({ caseFile, verifiers: reasons }),
   );
   const list = existsSync(inRepo(LIST)) ? JSON.parse(read(LIST)) : [];
   write(
@@ -198,7 +206,7 @@ const main = async () => {
     );
   const parsed = sessions.map((session) => ({
     ...session,
-    parsed: parseVerdict(session.text),
+    parsed: parseVerdict({ exists: isRepoPath, text: session.text }),
   }));
   for (const session of parsed)
     write(
@@ -236,7 +244,16 @@ const main = async () => {
   process.stdout.write(`${caseId}\n${summary}\n\n`);
   process.stdout.write(
     envelope.outcome === 'dismissed'
-      ? recordDismissal({ caseDir, caseFile, envelope })
+      ? recordDismissal({
+          caseDir,
+          caseFile,
+          envelope,
+          reasons: parsed.map(({ model, parsed: verdict, seat }) => ({
+            evidence: verdict.evidence,
+            model,
+            role: seat.role,
+          })),
+        })
       : recordOther({ caseDir, caseFile, envelope }),
   );
 };

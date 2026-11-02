@@ -76,18 +76,6 @@ describe('seats', () => {
     },
   );
 
-  it("refuses a panel where every seat is the builder's model", () => {
-    expect(
-      seatProblems({
-        builderModel: 'opus',
-        seats: seatsFrom({ adversary: 'opus', judges: ['opus', 'opus'] }),
-      }),
-    ).toEqual([
-      'the three seats need three distinct models; got opus, opus, opus',
-      "at least one seat must run on a model other than the builder's",
-    ]);
-  });
-
   it('refuses resolved models that collide, or all match the builder', () => {
     expect(
       resolvedModelProblems({
@@ -137,30 +125,58 @@ describe('dispatchPrompt', () => {
   });
 });
 
+const EXISTING = new Set(['packages/x/src', 'README']);
+
+const parse = (text) =>
+  parseVerdict({ exists: (path) => EXISTING.has(path), text });
+
 describe('parseVerdict', () => {
-  it('reads a FALSE_POSITIVE whose check names where it looked', () => {
+  it('reads each labelled section on its own', () => {
     expect(
-      parseVerdict(
-        'FALSE_POSITIVE\nEvidence: read it.\nCheck: no caller passes user input; searched packages/x/src for query(.',
+      parse(
+        'FALSE_POSITIVE\nEvidence: read it.\nIt is called once.\nCheck: no caller passes input; searched `packages/x/src/query.util.ts:3`.',
       ),
     ).toEqual({
-      evidence:
-        'Evidence: read it.\nCheck: no caller passes user input; searched packages/x/src for query(.',
+      body: 'Evidence: read it.\nIt is called once.\nCheck: no caller passes input; searched `packages/x/src/query.util.ts:3`.',
+      evidence: 'read it.\nIt is called once.',
       fixable: false,
       verdict: 'FALSE_POSITIVE',
     });
   });
 
+  it.each([
+    'Check: searched (packages/x/src) for callers',
+    'Check: searched packages/x/src/a.mjs, and found none',
+    'Check: read docs/a.md and package.json',
+    'Check: searched packages/x/src/ for callers',
+    'Check: read a.ts:3-5',
+    'Check: searched ./packages/x/src',
+  ])('accepts a check that names a path: %s', (check) => {
+    expect(parse(`FALSE_POSITIVE\nEvidence: e\n${check}`).verdict).toBe(
+      'FALSE_POSITIVE',
+    );
+  });
+
+  it('ignores text before the first labelled line', () => {
+    expect(
+      parse('FALSE_POSITIVE\nA preface.\nEvidence: e\nCheck: a.ts').evidence,
+    ).toBe('e');
+  });
+
   it('reads a REAL with a fix as fixable, and one with an empty fix as not', () => {
-    expect(parseVerdict('REAL\nFix: extract a helper.')).toMatchObject({
+    expect(parse('REAL\nEvidence: e\nFix: extract a helper.')).toMatchObject({
+      evidence: 'e',
       fixable: true,
       verdict: 'REAL',
     });
-    expect(parseVerdict('REAL\nEvidence: real.\nFix:')).toMatchObject({
+    expect(parse('REAL\nEvidence: real.\nFix:')).toMatchObject({
       fixable: false,
       verdict: 'REAL',
     });
   });
+
+  const NO_PATH =
+    'a FALSE_POSITIVE verdict needs a "Check:" line naming the file it looked in, as a path';
 
   it.each([
     [
@@ -169,14 +185,44 @@ describe('parseVerdict', () => {
       'line one is "Here is my verdict", not REAL or FALSE_POSITIVE',
     ],
     [
-      'a FALSE_POSITIVE with no check',
-      'FALSE_POSITIVE\nEvidence: trust me',
-      'a FALSE_POSITIVE verdict needs a "Check:" line naming the file it looked in, as a path',
+      'a verdict with no evidence',
+      'REAL\nFix: x',
+      'a REAL verdict needs a line starting "Evidence:"',
     ],
     [
-      'a FALSE_POSITIVE whose check names no location',
-      'FALSE_POSITIVE\nCheck: ran the trace and it was fine',
-      'a FALSE_POSITIVE verdict needs a "Check:" line naming the file it looked in, as a path',
+      'an empty evidence line',
+      'FALSE_POSITIVE\nEvidence:\nCheck: packages/x/src',
+      'a FALSE_POSITIVE verdict needs a line starting "Evidence:"',
+    ],
+    [
+      'a FALSE_POSITIVE with no check',
+      'FALSE_POSITIVE\nEvidence: trust me',
+      NO_PATH,
+    ],
+    [
+      'a check that names no location',
+      'FALSE_POSITIVE\nEvidence: e\nCheck: ran the trace and it was fine',
+      NO_PATH,
+    ],
+    [
+      'a check whose only slash is prose',
+      'FALSE_POSITIVE\nEvidence: e\nCheck: no caller and/or input reaches it',
+      NO_PATH,
+    ],
+    [
+      'a check naming a directory that is not in the tree',
+      'FALSE_POSITIVE\nEvidence: e\nCheck: searched packages/y/src',
+      NO_PATH,
+    ],
+    [
+      'a check naming only a file with an unknown extension',
+      'FALSE_POSITIVE\nEvidence: e\nCheck: read notes.mdx and a.ts:3x',
+      NO_PATH,
+    ],
+    [
+      'a check naming an existing name that is no path',
+      'FALSE_POSITIVE\nEvidence: e\nCheck: read README',
+      NO_PATH,
     ],
     [
       'a REAL with no fix line',
@@ -184,7 +230,7 @@ describe('parseVerdict', () => {
       'a REAL verdict needs a line starting "Fix:"',
     ],
   ])('refuses %s', (_label, text, problem) => {
-    expect(parseVerdict(text)).toEqual({ problem });
+    expect(parse(text)).toEqual({ problem });
   });
 });
 
