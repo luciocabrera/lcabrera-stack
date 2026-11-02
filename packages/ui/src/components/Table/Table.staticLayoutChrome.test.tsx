@@ -667,4 +667,60 @@ describe('Table footer row in a virtual grid', () => {
       String(grouped.length + 2),
     );
   });
+
+  it('numbers the footer after the reported total of a flat grid, not after its loaded rows', () => {
+    render(
+      <Table<Score, { readonly rows: readonly Score[]; readonly total: number }>
+        columns={COLUMNS}
+        dataSelector={(page) => page.rows}
+        dataTotalSelector={(page) => page.total}
+        footer='Two of fifty'
+        response={{ rows: ROWS, total: 50 }}
+      />,
+    );
+
+    expect(
+      screen
+        .getByTestId('table-footer')
+        .querySelector('tr')
+        ?.getAttribute('aria-rowindex'),
+    ).toBe('52');
+  });
+
+  it('numbers the footer after the standing rows of a tree, not after the reported total', () => {
+    const grouped: readonly Record<string, unknown>[] = [
+      {
+        tableGroup: {
+          aggregates: [],
+          count: 1,
+          isSubtotal: false,
+          path: [{ columnKey: 'name', label: 'Ada', value: 'Ada' }],
+        },
+      },
+      { id: 1, name: 'Ada' },
+    ];
+
+    render(
+      <Table<
+        Record<string, unknown>,
+        {
+          readonly rows: readonly Record<string, unknown>[];
+          readonly total: number;
+        }
+      >
+        columns={COLUMNS as readonly TableColumn<Record<string, unknown>>[]}
+        dataSelector={(page) => page.rows}
+        dataTotalSelector={(page) => page.total}
+        footer='One group'
+        response={{ rows: grouped, total: 50 }}
+      />,
+    );
+
+    expect(
+      screen
+        .getByTestId('table-footer')
+        .querySelector('tr')
+        ?.getAttribute('aria-rowindex'),
+    ).toBe(String(grouped.length + 2));
+  });
 });
