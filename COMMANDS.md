@@ -168,7 +168,7 @@ project-specific belongs in that project's own `package.json`.
 | `vp run test:evals`                   | the `evals/` suites — not a workspace and outside `scripts/`, so neither `-r` nor `test:scripts` reaches them; chained into `test:all` and `test:ci`, and run in `agent-evals.yml`                                         |
 | `vp run test:scripts`                 | the root `scripts/` suites — not a workspace, so the `-r` fan-out never reaches it                                                                                                                                         |
 | `vp run --filter showcase test:smoke` | the DB-bound suites — the only ones that need Postgres, opt-in; see below                                                                                                                                                  |
-| `vp run --filter showcase test:e2e`   | the browser suite for the grid — Postgres, opt-in, and not part of `test:ci` or `check:safe`                                                                                                                               |
+| `vp run --filter showcase test:e2e`   | the browser suite for the grid and the `/evals` pages — Postgres, opt-in, and not part of `test:ci` or `check:safe`                                                                                                        |
 | `vp run coverage:merge`               | merged coverage for the fallow gate (DB-free workspaces only) — see below                                                                                                                                                  |
 | `vp run coverage:report`              | per-workspace + monorepo coverage summary for the PR comment — see below                                                                                                                                                   |
 
@@ -210,7 +210,15 @@ second and runs every loader as the third.
 `vp run --filter showcase test:e2e` is the browser suite for the same database.
 It is opt-in in the same way: it is not part of `test:ci` or `check:safe`.
 Seed first (`vp run --filter showcase db:seed`) and leave `VITE_API_URL` unset
-so the routes read the local database.
+so the routes read the local database. Its global setup also rebuilds the
+`/evals` fixtures on the server `DB_*` names: it drops and recreates the
+databases `eval_history_e2e` (migrated, then loaded with the fixed history in
+`e2e/evals/seedStory.ts`) and `eval_history_e2e_empty` (migrated only), makes
+sure `eval_history_e2e_missing` does not exist, and creates or re-passwords the
+login role `eval_history_e2e_reader`, so `DB_USER` needs `CREATEDB` and
+`CREATEROLE`. Playwright then serves the app three times, one server per
+database, and the `evals-empty` and `evals-broken` projects run against the
+second and third.
 
 `test:scripts` is chained into both, and needs to be: root `scripts/` is **not a
 workspace**, so `vp run -r test` never reaches it. That is why the logic behind
