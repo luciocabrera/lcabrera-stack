@@ -85,7 +85,7 @@ export const lightTheme = stylex.createTheme(colors, {
 
   /* Text scale mapped properly to lightness */
   textPrimary: 'lab(12 34.23 -54.75 / 0.76)', //'oklch(25% 0.01 250)', // replaces #212529
-  textSecondary: 'lab(45 20 -30 / 0.8)', // replaces #495057
+  textSecondary: 'lab(44 20 -30)', // replaces #495057
   textTertiary: 'lab(53 0.01 250)', // replaces #6c757d
   textInverse: 'lab(100 0 0)',
   textGradient: 'linear-gradient(to right, #0955e2, #00b6a7, #400d8d)',

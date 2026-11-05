@@ -1,3 +1,5 @@
+import type { NavLinkRenderProps } from 'react-router';
+
 import * as stylex from '@stylexjs/stylex';
 import { NavLink as RouterNavLink } from 'react-router';
 
@@ -6,7 +8,7 @@ import { Tooltip } from '#ui/components/Tooltip';
 import type { NavLinkProps } from './NavLink.types';
 
 import { linkItemStyles } from './NavLink.stylex';
-import { getClassName } from './utils';
+import { getClassName, getInlineClassName } from './utils';
 
 export const NavLink = ({
   children,
@@ -22,22 +24,31 @@ export const NavLink = ({
   variant = 'outline',
   ...props
 }: NavLinkProps) => {
+  const isInline = variant === 'inline';
+
   const link = (
     <RouterNavLink
       aria-disabled={isBusy || undefined}
-      className={({ isActive }: { readonly isActive: boolean }) => {
-        const classNameValue = getClassName({
-          customStylex,
-          isActive,
-          isBusy,
-          isIconOnly,
-          orientation,
-          size,
-          styles: linkItemStyles,
-          variant,
-        });
-        return classNameValue;
-      }}
+      className={({ isActive, isPending }: NavLinkRenderProps) =>
+        variant === 'inline'
+          ? getInlineClassName({
+              customStylex,
+              isActive,
+              isBusy,
+              isPending,
+              styles: linkItemStyles,
+            })
+          : getClassName({
+              customStylex,
+              isActive,
+              isBusy,
+              isIconOnly,
+              orientation,
+              size,
+              styles: linkItemStyles,
+              variant,
+            })
+      }
       prefetch={prefetch}
       {...props}
     >
@@ -47,11 +58,17 @@ export const NavLink = ({
         </span>
       )}
       {Boolean(icon) && (
-        <span {...stylex.props(linkItemStyles.icon)}>{icon}</span>
+        <span
+          {...stylex.props(
+            isInline ? linkItemStyles.inline.icon : linkItemStyles.icon,
+          )}
+        >
+          {icon}
+        </span>
       )}
       <span
         {...stylex.props(
-          linkItemStyles.label,
+          !isInline && linkItemStyles.label,
           isIconOnly && linkItemStyles.labelHidden,
         )}
       >
