@@ -809,6 +809,74 @@ describe('LineChart', () => {
     );
   });
 
+  describe('a domain narrower than the data', () => {
+    const WIDE: LineSeries = {
+      band: [
+        { lower: 0, upper: 8, x: 0 },
+        { lower: 0, upper: 8, x: 8 },
+      ],
+      id: 'wide',
+      label: 'Wide',
+      points: [
+        { label: 'Inside', to: '/inside', x: 2, y: 2 },
+        { label: 'Past x', to: '/past-x', x: 8, y: 2 },
+        { label: 'Past y', to: '/past-y', x: 2, y: 8 },
+        { label: 'Plain past x', x: 8, y: 1 },
+        { label: 'Plain inside', x: 3, y: 3 },
+      ],
+    };
+    const NARROW = {
+      series: [WIDE],
+      xAxis: { domain: [0, 4] as const },
+      yAxis: { domain: [0, 4] as const },
+    };
+
+    it('keeps only the links inside the plot', () => {
+      renderChart(NARROW);
+
+      expect(
+        screen
+          .getAllByRole('link')
+          .map((link) => link.getAttribute('aria-label')),
+      ).toEqual(['Inside']);
+    });
+
+    it('keeps only the dots inside the plot', () => {
+      const { container } = renderChart(NARROW);
+
+      expect(
+        [...container.querySelectorAll(':scope svg > path > title')].map(
+          ({ textContent }) => textContent,
+        ),
+      ).toEqual(['Wide', 'Plain inside']);
+    });
+
+    it('clips the line and the band to the plot, through an id of its own', () => {
+      const { container } = renderChart(NARROW);
+      const clip = container.querySelector('clipPath');
+      const url = `url(#${clip?.getAttribute('id') ?? 'missing'})`;
+      const rect = clip?.querySelector('rect');
+      const line = titledPath({ container, name: 'Wide' });
+      const band = [...container.querySelectorAll(':scope svg > path')].find(
+        (path) => path.getAttribute('d')?.endsWith('Z'),
+      );
+
+      expect(
+        ['x', 'y', 'width', 'height'].map((name) => rect?.getAttribute(name)),
+      ).toEqual(['-1', '-1', '102', '102']);
+      expect(line?.getAttribute('clip-path')).toBe(url);
+      expect(band?.getAttribute('clip-path')).toBe(url);
+    });
+
+    it('still lists every point in the data table', () => {
+      renderChart({ ...NARROW, hasDataTable: true });
+
+      expect(
+        within(screen.getByRole('table')).getAllByRole('row'),
+      ).toHaveLength(WIDE.points.length + 1);
+    });
+  });
+
   describe('height', () => {
     it('sizes the plot from height and not from a measurement', () => {
       const { container: tall } = renderChart({ height: 400 });

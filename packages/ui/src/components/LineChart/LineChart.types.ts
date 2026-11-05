@@ -2,6 +2,7 @@ import type { ChartScale } from '@lcabrera/utils/chart/chart.types';
 import type { To } from 'react-router';
 
 export type ChartAxis<T extends ChartX> = {
+  /** A domain narrower than the data clips the line and band and drops the dots outside it. */
   readonly domain?: readonly [T, T];
   readonly format?: (value: T) => string;
   readonly label?: string;

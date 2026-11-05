@@ -16,6 +16,7 @@ import { LINE_CHART } from '#ui/components/LineChart/LineChart.constants';
 import { getPointName } from './getPointName.util';
 import { isDotDrawn } from './isDotDrawn.util';
 import { isDrawnPoint } from './isDrawnPoint.util';
+import { isWithinPlot } from './isWithinPlot.util';
 
 type GetSeriesGeometryArgs = {
   readonly formatters: LineChartFormatters;
@@ -46,7 +47,8 @@ export const getSeriesGeometry = ({
         to: point.to,
         tone: point.tone ?? tone,
         top: roundToCents(scales.y(point.y)),
-      })),
+      }))
+      .filter(({ left, top }) => isWithinPlot(left) && isWithinPlot(top)),
     id: series.id,
     isDashed: series.isDashed ?? false,
     label: series.label,

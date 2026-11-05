@@ -92,11 +92,30 @@ describe('getSeriesGeometry', () => {
     expect(geometry.dots.map(({ label }) => label)).toEqual(['Linked']);
   });
 
+  it('drops a dot past either edge of the plot', () => {
+    const geometry = getSeriesGeometry({
+      formatters,
+      mode: 'always',
+      scales,
+      series: {
+        ...SERIES,
+        points: [
+          { label: 'Inside', x: 1, y: 1 },
+          { label: 'Past x', x: 11, y: 1 },
+          { label: 'Past y', x: 1, y: 101 },
+        ],
+      },
+      tone: 'info',
+    });
+
+    expect(geometry.dots.map(({ label }) => label)).toEqual(['Inside']);
+  });
+
   it('counts only drawn points against the auto dot limit', () => {
     const geometry = getSeriesGeometry({
       formatters,
       mode: 'auto',
-      scales,
+      scales: { x: Number, y: (value) => value },
       series: {
         ...SERIES,
         points: [

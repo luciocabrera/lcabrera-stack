@@ -11,7 +11,7 @@ BreadcrumbItem [type] { readonly label: string; /** Omitted for a step that has 
 Breadcrumbs [const] ({ items, label, }: BreadcrumbsProps) => JSX.Element | undefined
 BreadcrumbsProps [type] { readonly items: readonly BreadcrumbItem[]; /** The accessible name of the `nav` landmark. Defaults to `'Breadcrumb'`. */ readonly label?: string; }
 Button [const] ({ tooltipContent, tooltipPlacement, ...rest }: ButtonProps) => JSX.Element
-ChartAxis [type] { readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
+ChartAxis [type] { /** A domain narrower than the data clips the line and band and drops the dots outside it. */ readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
 ChartMarker [type] { readonly label: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; }
 ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; readonly y: null | number; }
 ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'
@@ -181,7 +181,7 @@ JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 JsonExplorerSection [type] { readonly columns: readonly TableColumn<Record<string, unknown>>[]; readonly label: string; readonly rows: readonly Record<string, unknown>[]; }
 
 ## ./components/LineChart
-ChartAxis [type] { readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
+ChartAxis [type] { /** A domain narrower than the data clips the line and band and drops the dots outside it. */ readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
 ChartMarker [type] { readonly label: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; }
 ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; readonly y: null | number; }
 ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'

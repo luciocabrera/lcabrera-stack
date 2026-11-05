@@ -28,6 +28,6 @@ Add LineChart to @lcabrera/ui
 
 ## Status / next
 
-- Current step: round 2 review findings are fixed and origin/main is merged. A date axis picks its tick step from the span, a linked point is an HTML link over the plot so the SVG stays `role="img"`, and `ChartPoint.tone` is a `ChartTone`.
+- Current step: round 3 review findings are fixed. A domain narrower than the data clips the line and band and drops the dots and links outside it, and PATTERNS no longer names `TrendSparkline` as following the chart shape.
 - Blockers: none
 - Next: bot review of this head, then the blind verifier

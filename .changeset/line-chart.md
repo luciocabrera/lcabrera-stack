@@ -12,8 +12,9 @@ a series without a tone takes the next palette tone. `markers` draw a dashed
 vertical line at an `x`, labelled above the plot and linked when the marker has
 `to`.
 
-`xAxis` and `yAxis` take a `label`, a `domain`, `ticks` and a `format`; without
-them the domain spans every point, band and marker and the ticks are nice
+`xAxis` and `yAxis` take a `label`, a `domain`, `ticks` and a `format`. A
+`domain` narrower than the data clips the line and band and drops the dots and
+links outside it; the data table still lists every point. Without these the domain spans every point, band and marker and the ticks are nice
 values. On a date axis the step follows the span, from milliseconds through
 hours and days up to months and years, and the default format adds the UTC time
 to any date that is not at midnight, so a sub-day axis has distinct labels. `points`

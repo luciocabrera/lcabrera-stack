@@ -22,6 +22,8 @@ export const LineChartPlot = ({
 }: LineChartPlotProps) => {
   const titleId = useId();
   const descriptionId = useId();
+  const clipId = useId();
+  const clipPath = `url(#${clipId})`;
   const size = String(LINE_CHART.plotSize);
 
   return (
@@ -38,6 +40,14 @@ export const LineChartPlot = ({
         {description !== undefined && (
           <desc id={descriptionId}>{description}</desc>
         )}
+        <clipPath id={clipId}>
+          <rect
+            height={LINE_CHART.plotSize + 2 * LINE_CHART.clipMargin}
+            width={LINE_CHART.plotSize + 2 * LINE_CHART.clipMargin}
+            x={-LINE_CHART.clipMargin}
+            y={-LINE_CHART.clipMargin}
+          />
+        </clipPath>
         {geometry.gridlines !== '' && (
           <path
             d={geometry.gridlines}
@@ -48,6 +58,7 @@ export const LineChartPlot = ({
           .filter(({ band }) => band !== '')
           .map(({ band, id, tone }) => (
             <path
+              clipPath={clipPath}
               d={band}
               key={id}
               {...stylex.props(lineChartPlotStyles.band, lineChartFill[tone])}
@@ -57,6 +68,7 @@ export const LineChartPlot = ({
           .filter(({ line }) => line !== '')
           .map(({ id, isDashed, label, line, tone }) => (
             <path
+              clipPath={clipPath}
               d={line}
               key={id}
               {...stylex.props(
