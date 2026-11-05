@@ -50,6 +50,7 @@ import {
   toRepoPath,
   verdictSource,
 } from './fallow-gate.mjs';
+import { isoDay, readFalsePositiveList } from './false-positive-list.mjs';
 import { runGitStatus } from './git-exec.mjs';
 
 const readInput = ({ argv, effects }) => {
@@ -141,7 +142,14 @@ const gateOnReport = ({ analysis, base, effects, files }) => {
     analysis === 'coverage-gaps'
       ? introducedChanges({ diff: readDiff({ base, effects }), files })
       : undefined;
-  const findings = reportFindings({ analysis, introduced, report });
+  const findings = reportFindings({
+    adjudicated:
+      analysis === 'suppressions' ? effects.readFalsePositives() : [],
+    analysis,
+    introduced,
+    report,
+    today: effects.today(),
+  });
   if (findings.length === 0) {
     effects.write(
       `fallow ${analysis}: no finding in ${files.length} changed source file(s).\n`,
@@ -289,6 +297,7 @@ export const processEffects = (proc) => ({
   exists: (file) => existsSync(join(REPO_ROOT, file)),
   git: (args) => runGitStatus({ args, cwd: REPO_ROOT, maxBuffer: 2 ** 29 }),
   mutationSetupTimeout: proc.env[SETUP_TIMEOUT_VARIABLE] || undefined,
+  readFalsePositives: () => readFalsePositiveList(REPO_ROOT),
   readFile: (file) => readFileSync(join(REPO_ROOT, file), 'utf8'),
   readStdinFiles: () => {
     if (proc.stdin.isTTY) {
@@ -303,6 +312,7 @@ export const processEffects = (proc) => ({
   },
   root: REPO_ROOT,
   spawn: (args, stdout) => runNode([fallowEntry(), ...args], stdout),
+  today: () => isoDay(new Date()),
   withTempFile: (content, use) => {
     const directory = mkdtempSync(join(tmpdir(), 'repo-fallow-gate-'));
     const path = join(directory, 'changes.diff');

@@ -17,6 +17,8 @@
  * so `eslint-disable-next-line` is not reported as a bare `eslint-disable`.
  */
 
+import { findCommentDirectives } from './comment-directives.mjs';
+
 const INLINE_DIRECTIVES = [
   'eslint-disable-next-line',
   'eslint-disable',
@@ -67,27 +69,16 @@ const ruleFrom = ({ directive, rest }) => {
     : `${directive} (unscoped)`;
 };
 
-const isDirectivePosition = (before) => {
-  const trimmed = before.trimEnd();
-  if (trimmed.endsWith('//') || trimmed.endsWith('/*')) return true;
-  const leading = before.trim();
-  return leading === '' || leading === '*';
-};
-
 export const findInlineSuppressions = ({ file, text }) =>
-  text.split('\n').flatMap((line, index) =>
-    [...line.matchAll(DIRECTIVE_PATTERN)]
-      .filter((match) => isDirectivePosition(line.slice(0, match.index)))
-      .map((match) => ({
-        directive: match[0],
-        file,
-        kind: 'inline',
-        line: index + 1,
-        rule: ruleFrom({
-          directive: match[0],
-          rest: line.slice(match.index + match[0].length),
-        }),
-      })),
+  findCommentDirectives({ file, pattern: DIRECTIVE_PATTERN, text }).map(
+    ({ column, line, rest, token }) => ({
+      column,
+      directive: token,
+      file,
+      kind: 'inline',
+      line,
+      rule: ruleFrom({ directive: token, rest }),
+    }),
   );
 
 const GLOB_TOKENS = new Map([
