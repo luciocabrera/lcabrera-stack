@@ -158,7 +158,9 @@ const namesFileWithin = ({ file, value }) =>
 
 const isMatch = ({ context, finding, value }) => {
   return (
-    (context.fileSeen || namesFileWithin({ file: finding.file, value })) &&
+    (context.fileSeen ||
+      (finding.ruleNeedle !== '' &&
+        namesFileWithin({ file: finding.file, value }))) &&
     (finding.ruleNeedle === '' ||
       ruleNames(value).includes(finding.ruleNeedle)) &&
     lineNumbers(value).some(

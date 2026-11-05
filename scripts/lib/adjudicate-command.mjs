@@ -5,6 +5,7 @@
  */
 import { parseArgs } from 'node:util';
 
+import { incompleteReason } from '../../packages/repo-standards/scripts/fallow-gate-report.mjs';
 import {
   ADJUDICATED_ANALYZERS,
   fallowScope,
@@ -42,7 +43,14 @@ const readInput = (argv) => {
 
 const SUPPRESS_TOKEN = /fallow-ignore-(?:next-line|file) (\S+)/u;
 
+const SIMILAR_CODE = {
+  command: 'similar-code',
+  scope: { section: 'candidates' },
+  token: 'similar-code',
+};
+
 const fallowIssue = ({ effects, rule }) => {
+  if (rule === SIMILAR_CODE.token) return SIMILAR_CODE;
   const issue = effects
     .fallowRegistry()
     .issue_types.find(
@@ -88,8 +96,14 @@ const ANALYZER_REPORTS = {
       tool: 'eslint',
     };
   },
-  fallow: ({ issue }) => ({
-    args: [issue.command, '--format', 'json', '--quiet'],
+  fallow: ({ finding, issue }) => ({
+    args: [
+      issue.command,
+      '--format',
+      'json',
+      '--quiet',
+      ...(issue === SIMILAR_CODE ? [`--file=${finding.file}`] : []),
+    ],
     tool: 'fallow',
   }),
   oxlint: ({ finding }) => ({
@@ -104,15 +118,44 @@ const parseJsonOutput = (stdout) => {
   return JSON.parse(stdout.slice(start));
 };
 
-const analyzerReport = ({ analyzer, effects, finding, issue }) =>
-  analyzer === 'react-doctor'
-    ? effects.readJson('reports/react-doctor/full-latest.json')
+const assertModelReady = (effects) => {
+  const status = parseJsonOutput(
+    effects.run({
+      args: ['similar-code', 'status', '--format', 'json', '--quiet'],
+      tool: 'fallow',
+    }).stdout,
+  );
+  if (status.model_ready !== true) {
+    throw new Error(
+      "similar-code has no local model installed, so it compared nothing. Installing it is the repository owner's decision; this command never fetches it.",
+    );
+  }
+};
+
+const similarCodeReport = ({ effects, finding, issue }) => {
+  assertModelReady(effects);
+  const report = parseJsonOutput(
+    effects.run(ANALYZER_REPORTS.fallow({ finding, issue })).stdout,
+  );
+  const incomplete = incompleteReason({ analysis: 'similar-code', report });
+  if (incomplete !== undefined) throw new Error(incomplete);
+  return report;
+};
+
+const analyzerReport = ({ analyzer, effects, finding, issue }) => {
+  if (analyzer === 'react-doctor') {
+    return effects.readJson('reports/react-doctor/full-latest.json');
+  }
+  return issue === SIMILAR_CODE
+    ? similarCodeReport({ effects, finding, issue })
     : parseJsonOutput(
         effects.run(ANALYZER_REPORTS[analyzer]({ effects, finding, issue }))
           .stdout,
       );
+};
 
-const explanation = ({ analyzer, effects, finding }) => {
+const explanation = ({ analyzer, effects, finding, issue }) => {
+  if (issue === SIMILAR_CODE) return;
   if (analyzer === 'fallow') {
     return effects.run({ args: ['explain', finding.rule], tool: 'fallow' })
       .stdout;
@@ -154,7 +197,7 @@ export const openCase = ({ argv, effects }) => {
     caseId,
     code: flaggedCode({ ...finding, text }),
     createdAt: effects.now(),
-    explain: explanation({ analyzer, effects, finding }),
+    explain: explanation({ analyzer, effects, finding, issue }),
     finding,
     findingId,
     markerRule: issue.token,

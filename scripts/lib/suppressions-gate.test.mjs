@@ -268,6 +268,15 @@ describe('verify-suppressions — panel-confirmed false positives', () => {
     expect(result.stdout).toContain(`${OUTSIDE_FILE}:1  no-console`);
   });
 
+  it.each(['.mts', '.cts'])('reads a marker in a %s file', (extension) => {
+    const root = settledRoot();
+    const file = OUTSIDE_FILE.replace('.ts', extension);
+    writeIn(root)(file, '// eslint-disable-next-line no-console -- noisy\n');
+    const result = runGate(root);
+    expect(result.status).not.toBe(0);
+    expect(result.stdout).toContain(`${file}:1  no-console`);
+  });
+
   it('leaves TypeScript and Sonar directives outside the public packages to their own owners', () => {
     const root = settledRoot();
     writeIn(root)(

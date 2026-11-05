@@ -73,7 +73,16 @@ const SKIP_DIRS = new Set([
   '.tmp',
 ]);
 
-const SCANNED_EXTENSIONS = ['.ts', '.tsx', '.mjs', '.cjs', '.js', '.jsx'];
+const SCANNED_EXTENSIONS = [
+  '.ts',
+  '.tsx',
+  '.mts',
+  '.cts',
+  '.mjs',
+  '.cjs',
+  '.js',
+  '.jsx',
+];
 
 const walk = (directory) => {
   let entries = [];
