@@ -2,7 +2,7 @@
 id: ui-text-tertiary-contrast
 title: fix(ui): bring textTertiary to the contrast its uses require
 owner: agent:claude
-status: active
+status: review
 branch: fix/1591-ui-text-tertiary-contrast
 area:
   - packages/ui/src/design-system/**
@@ -23,6 +23,6 @@ fix(ui): bring textTertiary to the contrast its uses require
 
 ## Status / next
 
-- Current step: tokens moved, test extended, running the gate
+- Current step: gate green except workspace:verify, which needs Docker; PR ready for review
 - Blockers: none
 - Next:
