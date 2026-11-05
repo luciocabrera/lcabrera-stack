@@ -23,6 +23,6 @@ fix(ui): bring textTertiary to the contrast its uses require
 
 ## Status / next
 
-- Current step: classification table corrected to five uses after review; awaiting CI for workspace:verify
+- Current step: dark textTertiary raised to clear surfaceElevated; awaiting review
 - Blockers: none
 - Next:

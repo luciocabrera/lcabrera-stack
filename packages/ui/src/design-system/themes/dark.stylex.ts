@@ -101,7 +101,7 @@ export const darkTheme = stylex.createTheme(colors, {
   /* --- Typography Inversion --- */
   textPrimary: 'oklch(92% 0.01 250)', // light text
   textSecondary: 'oklch(75% 0.01 250)',
-  textTertiary: 'oklch(61% 0.01 250)',
+  textTertiary: 'oklch(64% 0.01 250)',
   textInverse: 'oklch(12% 0.01 250)',
   textGradient: 'linear-gradient(to right, #88b2ff, #80fff5, #c095ff)',
 

@@ -16,6 +16,7 @@ const BACKGROUND_TOKENS = [
   'backgroundSecondary',
   'backgroundTertiary',
   'surfaceSecondary',
+  'surfaceElevated',
 ] as const;
 
 const PAIRS = THEMES.flatMap((theme) =>
