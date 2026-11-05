@@ -11,7 +11,7 @@ export const lightTheme = stylex.createTheme(colors, {
   success: 'oklch(52% 0.06 160)',
   warning: 'oklch(44% 0.08 80)',
   error: 'oklch(0.48095 0.14876 27.27312)',
-  info: 'oklch(66% 0.19 220)',
+  info: 'oklch(68.8% 0.139 231.5)',
 
   glassBackgroundColorPrimary: '#ffffffc9', // '#ffffff85', //'#0000002b',
   glassBackgroundColorSecondary: '#ffffff4d',
@@ -57,12 +57,12 @@ export const lightTheme = stylex.createTheme(colors, {
   errorText: 'oklch(100% 0 0)',
 
   successBackground: 'oklch(92% 0.02 160 / 0.32)',
-  successCardText: 'oklch(38% 0.09 160)',
+  successCardText: 'oklch(38.1% 0.087 159.1)',
   successHover: 'oklch(from success l-0.07 c+0.01 h)',
   successText: 'oklch(100% 0 0)',
 
   warningBackground: 'oklch(92% 0.03 80 / 0.32)',
-  warningCardText: 'oklch(32% 0.11 80)',
+  warningCardText: 'oklch(32.3% 0.075 60.2)',
   warningHover: 'oklch(from warning l-0.07 c+0.03 h)',
   warningText: 'oklch(100% 0 0)',
 
@@ -86,7 +86,7 @@ export const lightTheme = stylex.createTheme(colors, {
   /* Text scale mapped properly to lightness */
   textPrimary: 'lab(12 34.23 -54.75 / 0.76)', //'oklch(25% 0.01 250)', // replaces #212529
   textSecondary: 'lab(44 20 -30)', // replaces #495057
-  textTertiary: 'lab(53 0.01 250)', // replaces #6c757d
+  textTertiary: 'oklch(53% 0.01 250)',
   textInverse: 'lab(100 0 0)',
   textGradient: 'linear-gradient(to right, #0955e2, #00b6a7, #400d8d)',
 
