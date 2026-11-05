@@ -2,7 +2,8 @@ import type { ChartTone } from './LineChart.types';
 
 export const LINE_CHART = {
   autoDotLimit: 24,
-  clipMargin: 1,
+  clipOrigin: -1,
+  clipSize: 102,
   decimateThreshold: 1000,
   defaultHeight: 240,
   maxTimeTicks: 8,

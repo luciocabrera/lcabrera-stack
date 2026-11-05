@@ -42,10 +42,10 @@ export const LineChartPlot = ({
         )}
         <clipPath id={clipId}>
           <rect
-            height={LINE_CHART.plotSize + 2 * LINE_CHART.clipMargin}
-            width={LINE_CHART.plotSize + 2 * LINE_CHART.clipMargin}
-            x={-LINE_CHART.clipMargin}
-            y={-LINE_CHART.clipMargin}
+            height={LINE_CHART.clipSize}
+            width={LINE_CHART.clipSize}
+            x={LINE_CHART.clipOrigin}
+            y={LINE_CHART.clipOrigin}
           />
         </clipPath>
         {geometry.gridlines !== '' && (
