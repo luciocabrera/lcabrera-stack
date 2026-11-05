@@ -23,6 +23,6 @@ fix(ui): bring textTertiary to the contrast its uses require
 
 ## Status / next
 
-- Current step: gate green except workspace:verify, which needs Docker; PR ready for review
+- Current step: classification table corrected to five uses after review; awaiting CI for workspace:verify
 - Blockers: none
 - Next:
