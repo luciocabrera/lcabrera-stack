@@ -16,7 +16,7 @@ area:
   - packages/ui/src/PATTERNS.md
   - .changeset/**
 started: 2026-11-02
-updated: 2026-11-02
+updated: 2026-11-05
 plan: (none)
 pr: '#1592'
 issue: #1562
@@ -28,6 +28,6 @@ Add LineChart to @lcabrera/ui
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: round 2 review findings are fixed and origin/main is merged. A date axis picks its tick step from the span, a linked point is an HTML link over the plot so the SVG stays `role="img"`, and `ChartPoint.tone` is a `ChartTone`.
 - Blockers: none
-- Next:
+- Next: bot review of this head, then the blind verifier
