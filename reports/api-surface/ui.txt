@@ -11,11 +11,21 @@ BreadcrumbItem [type] { readonly label: string; /** Omitted for a step that has 
 Breadcrumbs [const] ({ items, label, }: BreadcrumbsProps) => JSX.Element | undefined
 BreadcrumbsProps [type] { readonly items: readonly BreadcrumbItem[]; /** The accessible name of the `nav` landmark. Defaults to `'Breadcrumb'`. */ readonly label?: string; }
 Button [const] ({ tooltipContent, tooltipPlacement, ...rest }: ButtonProps) => JSX.Element
+ChartAxis [type] { /** A domain narrower than the data clips the line and band and drops the dots outside it. */ readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
+ChartMarker [type] { readonly label: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; }
+ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; readonly y: null | number; }
+ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'
+ChartX [type] Date | number
 FieldNode [type] | GroupFieldNode<TValues> | LeafFieldDef<TValues> | RowFieldNode<TValues> | TabFieldNode<TValues>
 Form [const] <TValues extends Record<string, unknown>>({ action, children, method, ...providerProps }: FormProps<TValues>) => JSX.Element
 hydrateApp [const] () => void
 JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 LayoutProps [type] { readonly children: ReactNode; }
+LineBandPoint [type] { readonly lower: number; readonly upper: number; readonly x: ChartX; }
+LineChart [const] ({ description, hasDataTable, height, markers, points, series, title, xAxis, yAxis, }: LineChartProps) => JSX.Element
+LineChartPointsMode [type] 'always' | 'auto' | 'never'
+LineChartProps [type] { readonly description?: string; readonly hasDataTable?: boolean; readonly height?: number; readonly markers?: readonly ChartMarker[]; /** `auto` draws linked, toned and short-series points; a linked point is drawn in every mode, so its link stays reachable. */ readonly points?: LineChartPointsMode; readonly series: readonly LineSeries[]; readonly title: string; readonly xAxis?: ChartAxis<ChartX>; readonly yAxis?: ChartAxis<number>; }
+LineSeries [type] { readonly band?: readonly LineBandPoint[]; readonly id: string; readonly isDashed?: boolean; readonly label: string; readonly points: readonly ChartPoint[]; readonly tone?: ChartTone; }
 NavLink [const] ({ children, customStylex, icon, isBusy, isIconOnly, orientation, prefetch, size, tooltipContent, tooltipPlacement, variant, ...props }: NavLinkProps) => JSX.Element
 NavLinkProps [type] Omit<RouterNavLinkProps, 'children' | 'color'> & ( | { /** An inline link's text is its accessible name, so it cannot be icon-only. */ readonly isIconOnly?: false; readonly variant: 'inline'; } | { readonly isIconOnly?: boolean; readonly variant?: DesignSystemColor; } ) & { readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly isBusy?: boolean; /** Ignored by the `inline` variant, which flows with the surrounding text. */ readonly orientation?: DesignSystemOrientation; /** Ignored by the `inline` variant, which takes the surrounding font size. */ readonly size?: DesignSystemSize; readonly tooltipContent?: ReactNode; readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top'; }
 NavLinkVariant [type] NonNullable<NavLinkProps['variant']>
@@ -169,6 +179,18 @@ WarningIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 ## ./components/JsonExplorer
 JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 JsonExplorerSection [type] { readonly columns: readonly TableColumn<Record<string, unknown>>[]; readonly label: string; readonly rows: readonly Record<string, unknown>[]; }
+
+## ./components/LineChart
+ChartAxis [type] { /** A domain narrower than the data clips the line and band and drops the dots outside it. */ readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
+ChartMarker [type] { readonly label: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; }
+ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; readonly y: null | number; }
+ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'
+ChartX [type] Date | number
+LineBandPoint [type] { readonly lower: number; readonly upper: number; readonly x: ChartX; }
+LineChart [const] ({ description, hasDataTable, height, markers, points, series, title, xAxis, yAxis, }: LineChartProps) => JSX.Element
+LineChartPointsMode [type] 'always' | 'auto' | 'never'
+LineChartProps [type] { readonly description?: string; readonly hasDataTable?: boolean; readonly height?: number; readonly markers?: readonly ChartMarker[]; /** `auto` draws linked, toned and short-series points; a linked point is drawn in every mode, so its link stays reachable. */ readonly points?: LineChartPointsMode; readonly series: readonly LineSeries[]; readonly title: string; readonly xAxis?: ChartAxis<ChartX>; readonly yAxis?: ChartAxis<number>; }
+LineSeries [type] { readonly band?: readonly LineBandPoint[]; readonly id: string; readonly isDashed?: boolean; readonly label: string; readonly points: readonly ChartPoint[]; readonly tone?: ChartTone; }
 
 ## ./components/MarkdownRenderer
 MarkdownRenderer [const] ({ content }: MarkdownRendererProps) => JSX.Element

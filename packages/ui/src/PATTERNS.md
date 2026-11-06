@@ -676,6 +676,46 @@ null-safe — `{Boolean(data?.err) && <p>{data?.err}</p>}`.) See ADR-035 §7.
 
 ---
 
+## A Chart Measures Nothing
+
+`LineChart` stretches to its container and renders the same markup on the server
+and the client because it reads no size. Follow its shape in any chart that
+stretches
+([ADR-146](../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (e)).
+`TrendSparkline` is outside this pattern: it is a fixed-size sparkline with its
+own `width` and `height`, so its `<circle>` dots cannot stretch, and its links sit
+inside its SVG. Its geometry does come from `@lcabrera/utils/chart/*`.
+
+- **Geometry is `@lcabrera/utils/chart/*`.** Scales, nice ticks, line and band
+  paths and decimation are pure functions there; a component's `utils/` only
+  arranges them. Do not reimplement a path or a scale inside `ui`.
+- **One plot, two layers.** Scale every position onto a fixed `viewBox` with
+  `preserveAspectRatio="none"`, and give each stroke
+  `vectorEffect: 'non-scaling-stroke'` so it keeps its width while the plot
+  stretches. Text never goes in that SVG: an axis, tick or marker label is HTML,
+  placed with a StyleX dynamic style at the same position written as a
+  percentage, so it never stretches either.
+- **A dot is a zero-length segment, not a `<circle>`.** A circle stretches into
+  an ellipse in a plot that does not keep its aspect ratio; a round line cap on
+  a non-scaling stroke stays round. `linePath` of a single point draws one.
+- **One path per series and per band.** Draw a dot only where it means
+  something (a link, a tone, a series short enough to read); never one
+  component per point.
+- **Every mark has an accessible name, and the SVG holds nothing interactive.**
+  A line, a dot and a marker each carry a `<title>`, and the SVG is
+  `role="img"` named by its title. A linked point is not drawn inside it: it is
+  a router `Link` in an HTML list laid over the plot, placed by percentage like
+  the labels and named by `aria-label`. An image's children leave the
+  accessibility tree, and a `role="group"` on the SVG would stand in for the
+  list element that already says what the links are.
+- **Nothing leaves the plot.** An axis `domain` can be narrower than the data, and
+  the SVG's `overflow` is visible so a stroke on an edge stays whole. Clip each
+  line and band with a `clipPath` a small margin outside the plot, with its id
+  from `useId`, and drop any dot, link, tick or marker outside the plot.
+- **Prove it with a server render.** A chart's tests compare `renderToString`
+  with the client render, hydrate the server markup with no recoverable error,
+  and render once in the `node` environment, where any read of `window` throws.
+
 ## Naming Conventions
 
 | Thing                  | Convention                                     | Example                      |

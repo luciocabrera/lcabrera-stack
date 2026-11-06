@@ -117,11 +117,13 @@ section above.
 ### Root barrel — `@lcabrera/ui`
 
 `AppDocument`, `AppProviders`, `AppShell`, `Breadcrumbs`, `Button`, `Form`,
-`JsonExplorer`, `NavLink`, `PageHeader`, `RootErrorBoundary`,
+`JsonExplorer`, `LineChart`, `NavLink`, `PageHeader`, `RootErrorBoundary`,
 `RouteErrorBoundary`, `SectionCard`, `StatusBadge`, `Table`, `TableLayout`,
 `Tabs`, `Text`, `Title`, `TrendSparkline`, `hydrateApp`, `useNotifyOnError`,
 `useRouteBreadcrumbs`, plus the `BreadcrumbHandle`, `BreadcrumbItem`,
-`BreadcrumbsProps`, `FieldNode`, `LayoutProps`, `NavLinkProps`, `NavLinkVariant`,
+`BreadcrumbsProps`, `ChartAxis`, `ChartMarker`, `ChartPoint`, `ChartTone`,
+`ChartX`, `FieldNode`, `LayoutProps`, `LineBandPoint`, `LineChartPointsMode`,
+`LineChartProps`, `LineSeries`, `NavLinkProps`, `NavLinkVariant`,
 `PageHeaderProps`, `Pagination`, `TextElement`, `TextProps`, `TextSize`,
 `TextTone`, `TextWeight`, `TitleLevel`, `TitleProps`, `TitleVariant`,
 `TrendPoint`, `TrendSparklineProps` and `TrendSparklineTone` types.
