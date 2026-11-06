@@ -4,15 +4,11 @@ import { TableBodyCell } from '#ui/components/Table/TableBodyCell';
 
 import type { TableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
 
+import { toCellLayout } from './toCellLayout.util';
+
 type RenderFromDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly descriptor: TableBodyCellDescriptor<TData>;
 };
-
-const toCellLayout = <TData extends Record<string, unknown>>({
-  align,
-  isFill,
-  staticWidths,
-}: TableBodyCellDescriptor<TData>) => ({ align, isFill, staticWidths });
 
 export const renderFromDescriptor = <TData extends Record<string, unknown>>({
   descriptor,

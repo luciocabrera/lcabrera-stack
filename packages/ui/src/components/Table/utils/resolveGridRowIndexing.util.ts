@@ -12,10 +12,6 @@ const UNKNOWN_ROW_COUNT = -1;
 
 export const HEADER_ARIA_ROW_INDEX = 1;
 
-type ResolveFooterAriaRowIndexArgs = {
-  readonly totalRows: number;
-};
-
 export const resolveAriaRowCount = ({
   hasFooter = false,
   isLoading,
@@ -25,10 +21,6 @@ export const resolveAriaRowCount = ({
 
   return totalRows + HEADER_ARIA_ROW_INDEX + (hasFooter ? 1 : 0);
 };
-
-export const resolveFooterAriaRowIndex = ({
-  totalRows,
-}: ResolveFooterAriaRowIndexArgs) => totalRows + HEADER_ARIA_ROW_INDEX + 1;
 
 export const resolveBodyAriaRowIndex = ({
   rowIndex,

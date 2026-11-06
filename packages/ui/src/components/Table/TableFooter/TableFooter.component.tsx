@@ -4,7 +4,7 @@ import { useGetPinnedColumnPartition } from '#ui/components/Table/contexts/Table
 import { useGetTableTotalRows } from '#ui/components/Table/contexts/TableData/data/selectors';
 import { useTableGroupTree } from '#ui/components/Table/hooks/useTableGroupTree.hook';
 import { countRenderedColumns } from '#ui/components/Table/utils/countRenderedColumns.util';
-import { resolveFooterAriaRowIndex } from '#ui/components/Table/utils/resolveGridRowIndexing.util';
+import { resolveFooterAriaRowIndex } from '#ui/components/Table/utils/resolveFooterAriaRowIndex.util';
 
 import type { TableFooterProps } from './TableFooter.types';
 

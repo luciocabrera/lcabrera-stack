@@ -101,9 +101,13 @@ first, and `TableFooter`'s single `<tfoot>` row spanning every rendered column
 last. The footer row takes the `aria-rowindex` after the last body row, and the
 virtual grid's `aria-rowcount` counts it. The `<table>` props and `customStylex` a `Table` is given are split off by
 `splitTableProps`, whose list of the `Table`'s own keys is checked against
-`TableProps` by type, and reach `TableBase` in both layouts. `className` and
-`style` are replaced by the table's own styles; `customStylex` is the way to
-style it.
+`TableProps` by type, and reach `TableBase` in both layouts. In the virtual layout,
+`composeTableGridFocusProps` runs a consumer's `onFocus`, `onBlur` and `onKeyDown`
+before the grid's handlers. `role` never passes through, because the layout
+decides it. `tabIndex` and `aria-rowcount` do not pass through in the virtual
+layout, because the grid owns its roving tab stop and row count; they do in the
+static layout. `className` and `style` are replaced by the table's own styles;
+`customStylex` is the way to style it.
 
 ## Component Hierarchy
 

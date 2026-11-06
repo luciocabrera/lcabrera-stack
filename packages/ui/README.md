@@ -244,6 +244,16 @@ the table's `<caption>` and `footer` as one `<tfoot>` row across every column, i
 either layout. A static row is at least the density's row height and grows to fit
 its content.
 
+`Table` passes other `<table>` props and a `ref` to the element. In the virtual
+layout, `onFocus`, `onBlur` and `onKeyDown` run together with the grid's own
+handlers, yours first. A few props do not pass through:
+
+- `role`, in either layout: the layout decides it.
+- `tabIndex` and `aria-rowcount`, in the virtual layout: the grid owns its roving
+  tab stop and its row count. Both pass through in the static layout.
+- `className` and `style`, in either layout: the table's own styles replace them.
+  Use `customStylex` instead.
+
 ### A full data table
 
 `TableLayout` is the assembled table: header, virtualized body, settings and

@@ -6,6 +6,7 @@ import {
   useTableGridFocus,
   useTableGroupTree,
 } from '#ui/components/Table/hooks';
+import { composeTableGridFocusProps } from '#ui/components/Table/utils/composeTableGridFocusProps.util';
 import { resolveTableSemantics } from '#ui/components/Table/utils/resolveTableSemantics.util';
 
 import type { TableBaseProps } from './TableBase.types';
@@ -50,7 +51,10 @@ export const TableBase = <TData extends Record<string, unknown>, TResponse>({
       data-testid='table'
       {...rest}
       {...resolveTableSemantics({
-        gridFocusProps,
+        gridFocusProps: composeTableGridFocusProps({
+          grid: gridFocusProps,
+          tableProps: rest,
+        }),
         hasFooter: footer !== undefined,
         isLoading,
         isTreeGrid,

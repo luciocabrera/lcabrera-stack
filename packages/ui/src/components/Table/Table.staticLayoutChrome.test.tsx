@@ -1,9 +1,15 @@
 // @vitest-environment jsdom
 
 import * as stylex from '@stylexjs/stylex';
-import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import {
+  act,
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+} from '@testing-library/react';
 import { use } from 'react';
-import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
+import { afterEach, beforeAll, describe, expect, it, vi } from 'vite-plus/test';
 
 import { GlobalSettingsProvider } from '#ui/contexts/GlobalSettingsContext';
 import { GlobalSettingsContext } from '#ui/contexts/GlobalSettingsContext/GlobalSettingsContext.context';
@@ -852,5 +858,95 @@ describe('Table static layout pinned offsets', () => {
         style: tableHeaderCellStyles.staticLayout(FIXED_START_WIDTHS),
       }),
     ).toBe(false);
+  });
+});
+
+describe('Table element props the grid also uses', () => {
+  it('runs a consumer key handler and the grid keyboard together in the virtual layout', () => {
+    const onKeyDown = vi.fn();
+
+    render(<Table columns={COLUMNS} onKeyDown={onKeyDown} response={ROWS} />);
+
+    const isDefaultKept = fireEvent.keyDown(screen.getByTestId('table'), {
+      key: 'ArrowDown',
+    });
+
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(isDefaultKept).toBe(false);
+  });
+
+  it('runs consumer focus handlers and the grid roving focus together in the virtual layout', () => {
+    const onBlur = vi.fn();
+    const onFocus = vi.fn();
+
+    render(
+      <Table
+        columns={COLUMNS}
+        onBlur={onBlur}
+        onFocus={onFocus}
+        response={ROWS}
+      />,
+    );
+
+    const table = screen.getByTestId('table');
+
+    expect(table.getAttribute('tabindex')).toBe('0');
+
+    act(() => {
+      table.focus();
+    });
+
+    expect(onFocus).toHaveBeenCalled();
+    expect(table.getAttribute('tabindex')).toBe('-1');
+
+    act(() => {
+      (document.activeElement as HTMLElement).blur();
+    });
+
+    expect(onBlur).toHaveBeenCalled();
+    expect(table.getAttribute('tabindex')).toBe('0');
+  });
+
+  it('keeps the grid role, tab stop and row count over the consumer in the virtual layout', () => {
+    render(
+      <Table
+        aria-rowcount={99}
+        columns={COLUMNS}
+        response={ROWS}
+        role='presentation'
+        tabIndex={-1}
+      />,
+    );
+
+    const table = screen.getByTestId('table');
+
+    expect(table.getAttribute('role')).toBe('grid');
+    expect(table.getAttribute('tabindex')).toBe('0');
+    expect(table.getAttribute('aria-rowcount')).toBe(String(ROWS.length + 1));
+  });
+
+  it('passes handlers, tabIndex and aria-rowcount through in the static layout, keeping role table', () => {
+    const onKeyDown = vi.fn();
+
+    render(
+      <Table
+        aria-rowcount={99}
+        columns={COLUMNS}
+        layout='static'
+        onKeyDown={onKeyDown}
+        response={ROWS}
+        role='presentation'
+        tabIndex={0}
+      />,
+    );
+
+    const table = screen.getByTestId('table');
+
+    fireEvent.keyDown(table, { key: 'ArrowDown' });
+
+    expect(onKeyDown).toHaveBeenCalledTimes(1);
+    expect(table.getAttribute('tabindex')).toBe('0');
+    expect(table.getAttribute('aria-rowcount')).toBe('99');
+    expect(table.getAttribute('role')).toBe('table');
   });
 });

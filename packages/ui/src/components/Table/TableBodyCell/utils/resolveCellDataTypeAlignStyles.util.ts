@@ -11,11 +11,15 @@ type ResolveCellDataTypeAlignStylesArgs = {
   readonly isAlignedByDataType: boolean;
 };
 
-const isRightAlignedDataType = (dataType: TableColumnDataType) =>
-  dataType === 'number' || dataType === 'currency';
+const RIGHT_ALIGNED_DATA_TYPES: ReadonlySet<TableColumnDataType> = new Set([
+  'currency',
+  'number',
+]);
 
-const isCenteredDataType = (dataType: TableColumnDataType) =>
-  dataType === 'boolean' || dataType === 'date';
+const CENTERED_DATA_TYPES: ReadonlySet<TableColumnDataType> = new Set([
+  'boolean',
+  'date',
+]);
 
 export const resolveCellDataTypeAlignStyles = ({
   align,
@@ -26,10 +30,10 @@ export const resolveCellDataTypeAlignStyles = ({
 
   return [
     isByDataType &&
-      isRightAlignedDataType(dataType) &&
+      RIGHT_ALIGNED_DATA_TYPES.has(dataType) &&
       tableBodyCellStyles.alignRight,
     isByDataType &&
-      isCenteredDataType(dataType) &&
+      CENTERED_DATA_TYPES.has(dataType) &&
       tableBodyCellStyles.alignCenter,
   ];
 };
