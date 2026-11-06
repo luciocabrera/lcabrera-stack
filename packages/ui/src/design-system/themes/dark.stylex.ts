@@ -17,7 +17,7 @@ export const darkTheme = stylex.createTheme(colors, {
   success: 'oklch(52% 0.06 160)',
   warning: 'oklch(44% 0.08 80)',
   error: 'oklch(0.48095 0.14876 27.27312)',
-  info: 'oklch(66% 0.19 220)',
+  info: 'oklch(68.8% 0.139 231.5)',
 
   glassBackgroundColorPrimary: '#1211119e', //'#0000002b',
   glassBackgroundColorSecondary: 'lab(10 -0.81 -2.83 / 0.51)',
@@ -50,9 +50,9 @@ export const darkTheme = stylex.createTheme(colors, {
   brandPrimaryActive: 'oklch(from brandPrimary l-0.08 c+0.01)',
 
   brandPrimaryBackground: 'oklch(28% 0.05 266)',
-  brandPrimaryCardText: 'oklch(85% 0.08 266)',
+  brandPrimaryCardText: 'oklch(84.8% 0.074 264.7)',
   brandPrimaryText: 'oklch(100% 0 0)',
-  brandPrimaryTextActive: 'lab(74 -29.14 91.81)',
+  brandPrimaryTextActive: 'oklch(76.4% 0.185 122)',
 
   brandSecondaryHover: 'oklch(from brandSecondary l+0.06 c+0.02)',
   brandSecondaryActive: 'oklch(from brandSecondary l-0.08 c+0.02)',
@@ -62,7 +62,7 @@ export const darkTheme = stylex.createTheme(colors, {
   // errorBackground: 'oklch(28% 0.06 25)',
 
   errorBackground: 'oklch(92% 0.03 25 / 0.32)',
-  errorCardText: 'oklch(88% 0.08 25)',
+  errorCardText: 'oklch(87.1% 0.068 25.8)',
   errorHover: 'oklch(from error l+0.08 c+0.02 h)',
   errorText: 'oklch(100% 0 0)',
 
@@ -101,7 +101,7 @@ export const darkTheme = stylex.createTheme(colors, {
   /* --- Typography Inversion --- */
   textPrimary: 'oklch(92% 0.01 250)', // light text
   textSecondary: 'oklch(75% 0.01 250)',
-  textTertiary: 'oklch(60% 0.01 250)',
+  textTertiary: 'oklch(64% 0.01 250)',
   textInverse: 'oklch(12% 0.01 250)',
   textGradient: 'linear-gradient(to right, #88b2ff, #80fff5, #c095ff)',
 

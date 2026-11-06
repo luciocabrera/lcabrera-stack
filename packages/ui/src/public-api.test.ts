@@ -1,6 +1,10 @@
 import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
-import type { TrendSparklineTone } from './public-api';
+import type {
+  ChartTone,
+  LineChartPointsMode,
+  TrendSparklineTone,
+} from './public-api';
 
 import * as publicApi from './public-api';
 
@@ -15,6 +19,16 @@ describe('public API', () => {
     expect(publicApi.TrendSparkline).toBeTypeOf('function');
     expectTypeOf<TrendSparklineTone>().toEqualTypeOf<
       'error' | 'info' | 'neutral' | 'success' | 'warning'
+    >();
+  });
+
+  it('exports LineChart as a component with its tone and points types', () => {
+    expect(publicApi.LineChart).toBeTypeOf('function');
+    expectTypeOf<ChartTone>().toEqualTypeOf<
+      'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'
+    >();
+    expectTypeOf<LineChartPointsMode>().toEqualTypeOf<
+      'always' | 'auto' | 'never'
     >();
   });
 });
