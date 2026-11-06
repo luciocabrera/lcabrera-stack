@@ -35,7 +35,18 @@ describe('readColor', () => {
     },
   );
 
-  it.each(['#ffffff00', 'rgb(0 0 0)', 'var(--x)'])('refuses %s', (value) => {
+  it('reads a hex colour as encoded sRGB, keeping its alpha', () => {
+    expect(readColor('#efeded99')).toEqual({
+      alpha: 0.6,
+      rgb: [
+        expect.closeTo(239 / 255, 10),
+        expect.closeTo(237 / 255, 10),
+        expect.closeTo(237 / 255, 10),
+      ],
+    });
+  });
+
+  it.each(['#fff', 'rgb(0 0 0)', 'var(--x)'])('refuses %s', (value) => {
     expect(() => readColor(value)).toThrow(`Unsupported colour value ${value}`);
   });
 });

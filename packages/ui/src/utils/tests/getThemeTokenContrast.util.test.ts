@@ -35,13 +35,13 @@ describe('getThemeTokenContrast', () => {
     expect(
       getThemeTokenContrast({
         background: colors.backgroundPrimary,
-        foreground: colors.textTertiary,
+        foreground: colors.textSecondary,
         theme: 'light',
       }),
     ).not.toBeCloseTo(
       getThemeTokenContrast({
         background: colors.backgroundPrimary,
-        foreground: colors.textTertiary,
+        foreground: colors.textSecondary,
         theme: 'dark',
       }),
       1,
