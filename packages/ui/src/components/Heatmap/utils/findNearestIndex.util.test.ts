@@ -35,6 +35,12 @@ describe('findNearestIndex', () => {
     },
   );
 
+  it('looks back when the target is an unlisted current index', () => {
+    expect(findNearestIndex({ current: 2, indexes: INDEXES, target: 2 })).toBe(
+      1,
+    );
+  });
+
   it('stays put when the target is the current index', () => {
     expect(findNearestIndex({ current: 3, indexes: INDEXES, target: 3 })).toBe(
       3,

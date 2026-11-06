@@ -3,7 +3,7 @@ import { useId } from 'react';
 
 import type { HeatmapProps } from './Heatmap.types';
 
-import { HEATMAP, HEATMAP_TONE_SCALE } from './Heatmap.constants';
+import { HEATMAP } from './Heatmap.constants';
 import { heatmapLayout } from './Heatmap.stylex';
 import { HeatmapAxisLabels } from './HeatmapAxisLabels/HeatmapAxisLabels.component';
 import { HeatmapDataTable } from './HeatmapDataTable/HeatmapDataTable.component';
@@ -22,7 +22,7 @@ export const Heatmap = ({
   hasDataTable,
   legend,
   rows,
-  scale = HEATMAP_TONE_SCALE,
+  scale,
   title,
 }: HeatmapProps) => {
   const dotsId = useId();
@@ -61,7 +61,6 @@ export const Heatmap = ({
         />
         {firstLinked !== undefined && (
           <HeatmapGrid
-            columnCount={columns.length}
             descriptionId={descriptionId}
             firstLinked={firstLinked}
             linked={geometry.linked}

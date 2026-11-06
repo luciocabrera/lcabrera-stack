@@ -31,12 +31,10 @@ const move = ({
   readonly linked: readonly HeatmapLinkedCell[];
 }) =>
   resolveHeatmapFocusMove({
-    columnCount: 5,
     current,
     isRangeModifier,
     key,
     linked,
-    rowCount: 30,
   })?.key;
 
 const FULL = [0, 1, 2].flatMap((row) =>

@@ -22,6 +22,15 @@ describe('getCellFill', () => {
     ).toEqual({ kind: 'tone', tone: 'error' });
   });
 
+  it('reads no scale as the tone scale', () => {
+    expect(
+      getCellFill({
+        cell: { ...CELL, tone: 'info', value: 50 },
+        scale: undefined,
+      }),
+    ).toEqual({ kind: 'tone', tone: 'info' });
+  });
+
   it('falls back to the neutral tone for a cell without one', () => {
     expect(getCellFill({ cell: CELL, scale: TONE })).toEqual({
       kind: 'tone',

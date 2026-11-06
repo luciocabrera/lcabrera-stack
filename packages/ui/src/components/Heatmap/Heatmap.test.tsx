@@ -150,6 +150,9 @@ describe('Heatmap', () => {
       const plot = screen.getByRole('img', { name: 'Grid' });
 
       expect(plot.tagName.toLowerCase()).toBe('svg');
+      expect(plot.getAttribute('aria-labelledby')).toBe(
+        plot.querySelector('title')?.id,
+      );
       expect(plot.getAttribute('aria-describedby')).toBe(
         plot.querySelector('desc')?.id,
       );
@@ -330,6 +333,8 @@ describe('Heatmap', () => {
       expect(container.querySelectorAll('defs')).toHaveLength(1);
       expect(patterns).toHaveLength(2);
       expect(dots?.querySelector('circle')?.getAttribute('r')).toBe('1.5');
+      expect(dots?.querySelector('circle')?.getAttribute('cx')).toBe('3');
+      expect(dots?.querySelector('circle')?.getAttribute('cy')).toBe('3');
       expect(hatch?.querySelector('path')?.getAttribute('d')).toBe('M0,0V6');
       expect(dots?.getAttribute('width')).toBe('6');
       expect(hatch?.getAttribute('height')).toBe('6');
@@ -488,10 +493,12 @@ describe('Heatmap', () => {
     it('hide the rects from the accessibility tree, with their titles gone', () => {
       const { container } = renderHeatmap({
         cells: [linkedCell({ at: [1, 1] })],
+        description: 'Described',
       });
       const plot = getPlot(container);
 
       expect(plot.getAttribute('aria-hidden')).toBe('true');
+      expect(plot.getAttribute('aria-describedby')).toBeNull();
       expect(plot.getAttribute('role')).toBeNull();
       expect(plot.getAttribute('aria-labelledby')).toBeNull();
       expect(getRects(container)).toHaveLength(9);

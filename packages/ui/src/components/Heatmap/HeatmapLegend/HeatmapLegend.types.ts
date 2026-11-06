@@ -7,5 +7,5 @@ import type {
 export type HeatmapLegendProps = {
   readonly items: readonly HeatmapLegendItem[] | undefined;
   readonly patternIds: HeatmapPatternIds;
-  readonly scale: HeatmapScale;
+  readonly scale: HeatmapScale | undefined;
 };

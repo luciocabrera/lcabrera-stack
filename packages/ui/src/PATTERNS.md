@@ -729,8 +729,8 @@ size of its SVG. These rules apply to any chart of that shape:
 - **One tab stop.** Linked cells rove like the Table's cells and reuse its key
   map, with the movement skipping any cell without a link. Hold the tab stop by
   the cell's identity rather than its index, and use no effect: the handler
-  focuses the target through `table.rows[r].cells[c]`, and the focus event moves
-  the stop. A hidden data table carries no links, so it adds no tab stops.
+  focuses the target, and the focus event moves the stop. A hidden data table
+  carries no links, so it adds no tab stops.
 - **Colour is never the only signal.** Patterns are defined once in `defs`, with
   ids from `useId`, and painted by a second rect over the fill, so they work over
   any tone. A legend swatch reuses the same definitions. A missing position has a

@@ -16,13 +16,13 @@ export const HeatmapLegend = ({
   patternIds,
   scale,
 }: HeatmapLegendProps) => {
-  if (items.length === 0 && scale.kind !== 'sequential') return;
+  if (items.length === 0 && scale?.kind !== 'sequential') return;
 
   const size = HEATMAP.swatchSize;
 
   return (
     <ul {...stylex.props(lineChartLegendStyles.list)}>
-      {scale.kind === 'sequential' && (
+      {scale?.kind === 'sequential' && (
         <li {...stylex.props(lineChartLegendStyles.item)}>
           {scale.domain[0]}
           <span aria-hidden {...stylex.props(heatmapLegendStyles.ramp)} />

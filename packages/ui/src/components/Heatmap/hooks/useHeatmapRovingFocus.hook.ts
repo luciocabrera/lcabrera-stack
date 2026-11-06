@@ -8,17 +8,13 @@ import { HEATMAP } from '#ui/components/Heatmap/Heatmap.constants';
 import { resolveHeatmapFocusMove } from '#ui/components/Heatmap/utils/resolveHeatmapFocusMove.util';
 
 type UseHeatmapRovingFocusArgs = {
-  readonly columnCount: number;
   readonly firstLinked: HeatmapLinkedCell;
   readonly linked: readonly HeatmapLinkedCell[];
-  readonly rowCount: number;
 };
 
 export const useHeatmapRovingFocus = ({
-  columnCount,
   firstLinked,
   linked,
-  rowCount,
 }: UseHeatmapRovingFocusArgs) => {
   const [focusedKey, setFocusedKey] = useState<string>();
   const tabStop = linked.find(({ key }) => key === focusedKey) ?? firstLinked;
@@ -33,20 +29,19 @@ export const useHeatmapRovingFocus = ({
     if (event.altKey) return;
 
     const next = resolveHeatmapFocusMove({
-      columnCount,
       current: tabStop,
       isRangeModifier: event.ctrlKey || event.metaKey,
       key: event.key,
       linked,
-      rowCount,
     });
 
     if (next === undefined) return;
 
     event.preventDefault();
-    event.currentTarget.rows[next.rowIndex]?.cells[next.columnIndex]
-      ?.querySelector('a')
-      ?.focus();
+
+    for (const link of event.currentTarget.querySelectorAll('a')) {
+      if (link.getAttribute(HEATMAP.cellAttribute) === next.key) link.focus();
+    }
   };
 
   return {

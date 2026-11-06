@@ -16,5 +16,3 @@ export const HEATMAP = {
 export const HEATMAP_DEFAULT_TONE = 'neutral' satisfies ChartTone;
 
 export const HEATMAP_PATTERNS: readonly HeatmapPattern[] = ['dots', 'hatch'];
-
-export const HEATMAP_TONE_SCALE = { kind: 'tone' } as const;

@@ -8,7 +8,6 @@ import type { HeatmapGridProps } from './HeatmapGrid.types';
 import { heatmapGridStyles } from './HeatmapGrid.stylex';
 
 export const HeatmapGrid = ({
-  columnCount,
   descriptionId,
   firstLinked,
   linked,
@@ -16,10 +15,8 @@ export const HeatmapGrid = ({
   titleId,
 }: HeatmapGridProps) => {
   const { gridProps, tabStop } = useHeatmapRovingFocus({
-    columnCount,
     firstLinked,
     linked,
-    rowCount: rows.length,
   });
 
   return (

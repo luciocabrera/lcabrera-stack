@@ -4,7 +4,6 @@ import type {
 } from '#ui/components/Heatmap/Heatmap.types';
 
 export type HeatmapGridProps = {
-  readonly columnCount: number;
   readonly descriptionId: string | undefined;
   readonly firstLinked: HeatmapLinkedCell;
   readonly linked: readonly HeatmapLinkedCell[];

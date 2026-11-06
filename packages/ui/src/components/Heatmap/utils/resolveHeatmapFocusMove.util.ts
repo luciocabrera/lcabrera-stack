@@ -6,28 +6,25 @@ import { resolveGridFocusKey } from '#ui/components/Table/contexts/TableFocus/fo
 import { findNearestIndex } from './findNearestIndex.util';
 
 type ResolveHeatmapFocusMoveArgs = {
-  readonly columnCount: number;
   readonly current: HeatmapLinkedCell;
   readonly isRangeModifier: boolean;
   readonly key: string;
   readonly linked: readonly HeatmapLinkedCell[];
-  readonly rowCount: number;
 };
 
 export const resolveHeatmapFocusMove = ({
-  columnCount,
   current,
   isRangeModifier,
   key,
   linked,
-  rowCount,
 }: ResolveHeatmapFocusMoveArgs) => {
+  const rowIndexes = linked.map(({ rowIndex }) => rowIndex);
   const target = resolveGridFocusKey({
     columnIndex: current.columnIndex,
     isRangeModifier,
     key,
-    lastColumnIndex: columnCount - 1,
-    lastRowIndex: rowCount - 1,
+    lastColumnIndex: Math.max(...linked.map(({ columnIndex }) => columnIndex)),
+    lastRowIndex: Math.max(...rowIndexes),
     pageRows: HEATMAP.pageRows,
     rowIndex: current.rowIndex,
   });
@@ -36,7 +33,7 @@ export const resolveHeatmapFocusMove = ({
 
   const nearestRow = findNearestIndex({
     current: current.rowIndex,
-    indexes: linked.map(({ rowIndex }) => rowIndex),
+    indexes: rowIndexes,
     target: target.rowIndex,
   });
   const inRow = linked.filter(({ rowIndex }) => rowIndex === nearestRow);

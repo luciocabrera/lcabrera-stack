@@ -11,13 +11,13 @@ import { HEATMAP_DEFAULT_TONE } from '#ui/components/Heatmap/Heatmap.constants';
 
 type GetCellFillArgs = {
   readonly cell: HeatmapCell | undefined;
-  readonly scale: HeatmapScale;
+  readonly scale: HeatmapScale | undefined;
 };
 
 export const getCellFill = ({ cell, scale }: GetCellFillArgs): HeatmapFill => {
   if (cell === undefined) return { kind: 'empty' };
 
-  if (scale.kind === 'sequential' && isFiniteNumber(cell.value)) {
+  if (scale?.kind === 'sequential' && isFiniteNumber(cell.value)) {
     const toPercent = scaleLinear({
       domain: scale.domain,
       isClamped: true,

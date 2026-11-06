@@ -16,7 +16,7 @@ type GetHeatmapGeometryArgs = {
   readonly cellSize: number;
   readonly columns: readonly HeatmapAxisItem[];
   readonly rows: readonly HeatmapAxisItem[];
-  readonly scale: HeatmapScale;
+  readonly scale: HeatmapScale | undefined;
 };
 
 export const getHeatmapGeometry = ({
