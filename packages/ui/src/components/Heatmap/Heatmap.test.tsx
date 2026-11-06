@@ -130,16 +130,14 @@ const focusLink = (name: string) => {
   return link;
 };
 
+const ID_PATTERN = /_r_\w+_/giu;
+
 const normalise = (html: string) => {
-  const ids = new Map<string, string>();
+  const ids = [...new Set(html.match(ID_PATTERN))];
 
   return html
     .replaceAll(/style="[^"]*"/gu, (style) => style.replaceAll(/[\s;]/gu, ''))
-    .replaceAll(/_r_\w+_/giu, (id) => {
-      if (!ids.has(id)) ids.set(id, `id-${String(ids.size)}`);
-
-      return ids.get(id) ?? id;
-    });
+    .replaceAll(ID_PATTERN, (id) => `id-${String(ids.indexOf(id))}`);
 };
 
 describe('Heatmap', () => {
