@@ -1,12 +1,15 @@
 ---
 id: 1563-ui-heatmap
-title: feat(ui): add Heatmap
+title: Add Heatmap to @lcabrera/ui
 owner: agent:claude
-status: active
+status: review
 branch: feat/1563-1563-ui-heatmap
 area:
   - packages/ui/src/components/Heatmap/**
   - packages/ui/src/public-api.ts
+  - packages/ui/src/public-api.test.ts
+  - packages/ui/src/stylex-module-paths.test.json
+  - reports/api-surface/ui.txt
   - packages/ui/package.json
   - packages/ui/src/INVENTORY.md
   - packages/ui/src/PATTERNS.md
@@ -15,16 +18,16 @@ area:
 started: 2026-11-06
 updated: 2026-11-06
 plan: (none)
-pr: (none)
+pr: '#1594'
 issue: #1563
 ---
 
 ## What
 
-feat(ui): add Heatmap
+Add Heatmap to @lcabrera/ui
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: built, gate running
 - Blockers: none
-- Next:
+- Next: review

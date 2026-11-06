@@ -11,6 +11,15 @@ export { useRouteBreadcrumbs } from './components/Breadcrumbs/hooks/useRouteBrea
 export { Button } from './components/Button/Button.component';
 export { Form } from './components/Form/Form.component';
 export type { FieldNode } from './components/Form/Form.types';
+export { Heatmap } from './components/Heatmap/Heatmap.component';
+export type {
+  HeatmapAxisItem,
+  HeatmapCell,
+  HeatmapLegendItem,
+  HeatmapPattern,
+  HeatmapProps,
+  HeatmapScale,
+} from './components/Heatmap/Heatmap.types';
 export { JsonExplorer } from './components/JsonExplorer/JsonExplorer.component';
 export { LineChart } from './components/LineChart/LineChart.component';
 export type {

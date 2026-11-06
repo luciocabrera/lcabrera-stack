@@ -18,6 +18,13 @@ ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'war
 ChartX [type] Date | number
 FieldNode [type] | GroupFieldNode<TValues> | LeafFieldDef<TValues> | RowFieldNode<TValues> | TabFieldNode<TValues>
 Form [const] <TValues extends Record<string, unknown>>({ action, children, method, ...providerProps }: FormProps<TValues>) => JSX.Element
+Heatmap [const] ({ cells, cellSize, columns, description, hasDataTable, legend, rows, scale, title, }: HeatmapProps) => JSX.Element
+HeatmapAxisItem [type] { readonly key: string; readonly label: string; readonly to?: To; }
+HeatmapCell [type] { readonly column: string; readonly label: string; readonly pattern?: HeatmapPattern; readonly row: string; readonly to?: To; /** Under a sequential scale this applies only when `value` is not finite. */ readonly tone?: ChartTone; readonly value?: number; }
+HeatmapLegendItem [type] { readonly label: string; readonly pattern?: HeatmapPattern; readonly tone?: ChartTone; }
+HeatmapPattern [type] 'dots' | 'hatch'
+HeatmapProps [type] { readonly cells: readonly HeatmapCell[]; readonly cellSize?: number; readonly columns: readonly HeatmapAxisItem[]; readonly description?: string; readonly hasDataTable?: boolean; readonly legend?: readonly HeatmapLegendItem[]; readonly rows: readonly HeatmapAxisItem[]; readonly scale?: HeatmapScale; readonly title: string; }
+HeatmapScale [type] | { readonly domain: readonly [number, number]; readonly kind: 'sequential' } | { readonly kind: 'tone' }
 hydrateApp [const] () => void
 JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 LayoutProps [type] { readonly children: ReactNode; }
@@ -131,6 +138,15 @@ RowFieldNode [type] { readonly fields: readonly FieldNode<TValues>[]; readonly s
 SelectFieldDef [type] BaseFieldDef<TValues> & { readonly mode?: 'multi' | 'single'; readonly options: readonly FieldOption[]; readonly type: 'select'; }
 TabFieldNode [type] { readonly tabs: readonly { readonly fields: readonly FieldNode<TValues>[]; readonly label: string; }[]; readonly type: 'tab'; }
 TextFieldDef [type] BaseFieldDef<TValues> & { readonly type: 'email' | 'password' | 'text' | 'textarea'; }
+
+## ./components/Heatmap
+Heatmap [const] ({ cells, cellSize, columns, description, hasDataTable, legend, rows, scale, title, }: HeatmapProps) => JSX.Element
+HeatmapAxisItem [type] { readonly key: string; readonly label: string; readonly to?: To; }
+HeatmapCell [type] { readonly column: string; readonly label: string; readonly pattern?: HeatmapPattern; readonly row: string; readonly to?: To; /** Under a sequential scale this applies only when `value` is not finite. */ readonly tone?: ChartTone; readonly value?: number; }
+HeatmapLegendItem [type] { readonly label: string; readonly pattern?: HeatmapPattern; readonly tone?: ChartTone; }
+HeatmapPattern [type] 'dots' | 'hatch'
+HeatmapProps [type] { readonly cells: readonly HeatmapCell[]; readonly cellSize?: number; readonly columns: readonly HeatmapAxisItem[]; readonly description?: string; readonly hasDataTable?: boolean; readonly legend?: readonly HeatmapLegendItem[]; readonly rows: readonly HeatmapAxisItem[]; readonly scale?: HeatmapScale; readonly title: string; }
+HeatmapScale [type] | { readonly domain: readonly [number, number]; readonly kind: 'sequential' } | { readonly kind: 'tone' }
 
 ## ./components/Icons
 BarChartIcon [const] ({ size, ...props }: IconProps) => JSX.Element
