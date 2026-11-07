@@ -4,6 +4,7 @@ import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { styles as textStyles } from '#ui/components/Text/Text.stylex';
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
@@ -40,6 +41,24 @@ describe('DescriptionList', () => {
       ['DD', '42'],
     ]);
     expect(screen.getByText('42').tagName).toBe('STRONG');
+  });
+
+  it('draws a term as small secondary text and a value as small primary text', () => {
+    const { container } = render(<DescriptionList items={ITEMS} />);
+
+    const term = container.querySelector('dt') as HTMLElement;
+    const value = container.querySelector('dd') as HTMLElement;
+
+    expect(hasStylexStyle({ element: term, style: textStyles.size.sm })).toBe(
+      true,
+    );
+    expect(
+      hasStylexStyle({ element: term, style: textStyles.tone.secondary }),
+    ).toBe(true);
+    expect(hasStylexStyle({ element: value, style: textStyles.size.sm })).toBe(
+      true,
+    );
+    expect(hasStylexStyle({ element: value, style: styles.value })).toBe(true);
   });
 
   it('pairs each term with its value inside one group', () => {

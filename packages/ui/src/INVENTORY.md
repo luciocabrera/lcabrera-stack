@@ -257,6 +257,12 @@ Covers `packages/ui` only. Two sibling packages own what used to be listed here,
 | `getTrendPointsGeometry` | `components/TrendSparkline/utils/getTrendPointsGeometry.util.ts` | Places one dot per point on a zero-based, clamped scale inset from the edges, and the line through them when connected                                                          |
 | `getTrendValuesLine`     | `components/TrendSparkline/utils/getTrendValuesLine.util.ts`     | Draws a value series as a path across the full width, scaled from its lowest value to `max` or its highest                                                                      |
 
+### `src/components/VirtualSelect/VirtualSelectTrigger/utils/` _(private delegates)_
+
+| Function               | Location                                                                           | Description                                                                                                                                  |
+| ---------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `getTriggerLabelProps` | `components/VirtualSelect/VirtualSelectTrigger/utils/getTriggerLabelProps.util.ts` | The `id` and `aria-labelledby` that name a trigger by the select's visible label and then by its own content; nothing when there is no label |
+
 ### `src/components/Form/builders/` _(public — field-tree DSL)_
 
 Ergonomic builders for the `fields` tree, exported from `@lcabrera/ui/components/Form`. A generic builder cannot infer `TValues` from a string `accessor`, so `createFieldBuilders<TValues>()` binds the value shape once and returns the tree builders with `accessor` type-checked against the value keys; `buildFieldValidation`/`toFieldOptions` are value-shape-agnostic and exported standalone.

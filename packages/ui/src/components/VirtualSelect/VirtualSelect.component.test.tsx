@@ -58,7 +58,11 @@ vi.mock('./utils', async () => {
   };
 });
 
+import { styles as textStyles } from '#ui/components/Text/Text.stylex';
+import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
+
 import { VirtualSelect } from './VirtualSelect.component';
+import { styles } from './VirtualSelect.stylex';
 
 const resizeObserverCallbackRef: {
   current: ResizeObserverCallback | undefined;
@@ -326,6 +330,13 @@ describe('VirtualSelect', () => {
     const trigger = screen.getByRole('button', { name: 'State Select...' });
 
     expect(label.tagName).toBe('SPAN');
+    expect(hasStylexStyle({ element: label, style: styles.label })).toBe(true);
+    expect(hasStylexStyle({ element: label, style: textStyles.size.sm })).toBe(
+      true,
+    );
+    expect(
+      hasStylexStyle({ element: label, style: textStyles.weight.medium }),
+    ).toBe(true);
     expect(trigger.getAttribute('aria-labelledby')).toBe(
       `${label.id} ${trigger.id}`,
     );

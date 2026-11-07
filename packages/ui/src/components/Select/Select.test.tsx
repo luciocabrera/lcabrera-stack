@@ -9,6 +9,7 @@ import {
   formInputSizeVariants,
   formInputStyles,
 } from '#ui/components/Form/fields/formInput.stylex';
+import { styles as textStyles } from '#ui/components/Text/Text.stylex';
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
@@ -50,6 +51,12 @@ describe('Select', () => {
     const select = screen.getByLabelText('State');
 
     expect(label.tagName).toBe('LABEL');
+    expect(hasStylexStyle({ element: label, style: textStyles.size.sm })).toBe(
+      true,
+    );
+    expect(
+      hasStylexStyle({ element: label, style: textStyles.weight.medium }),
+    ).toBe(true);
     expect(select.tagName).toBe('SELECT');
     expect(label.parentElement).toBe(select.parentElement);
     expect(
