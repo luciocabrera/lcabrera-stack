@@ -716,6 +716,26 @@ inside its SVG. Its geometry does come from `@lcabrera/utils/chart/*`.
   with the client render, hydrate the server markup with no recoverable error,
   and render once in the `node` environment, where any read of `window` throws.
 
+`Heatmap` measures nothing either, but it does not stretch: `cellSize` fixes the
+size of its SVG. These rules apply to any chart of that shape:
+
+- **The rects stay in one group.** Every position is a `rect` in a single `<g>`,
+  whatever else the chart holds, and the SVG holds nothing interactive.
+- **The role follows the links.** With no link the SVG is `role="img"`, and each
+  rect carries a `<title>`. With a link the SVG is `aria-hidden`, and an HTML
+  `<table role="grid">` of the same rows and columns lies over it, named by the
+  SVG's title. A cell with `to` is a router `Link` filling its `<td>`, and a cell
+  without one is a `<td>` named by `title`.
+- **One tab stop.** Linked cells rove like the Table's cells and reuse its key
+  map, with the movement skipping any cell without a link. Hold the tab stop by
+  the cell's identity rather than its index, and use no effect: the handler
+  focuses the target, and the focus event moves the stop. A hidden data table
+  carries no links, so it adds no tab stops.
+- **Colour is never the only signal.** Patterns are defined once in `defs`, with
+  ids from `useId`, and painted by a second rect over the fill, so they work over
+  any tone. A legend swatch reuses the same definitions. A missing position has a
+  dashed outline and no fill, so it never reads as the low end of a scale.
+
 ## Naming Conventions
 
 | Thing                  | Convention                                     | Example                      |

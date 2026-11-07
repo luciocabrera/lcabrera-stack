@@ -2,6 +2,7 @@ import { describe, expect, expectTypeOf, it } from 'vite-plus/test';
 
 import type {
   ChartTone,
+  HeatmapPattern,
   LineChartPointsMode,
   TrendSparklineTone,
 } from './public-api';
@@ -30,5 +31,10 @@ describe('public API', () => {
     expectTypeOf<LineChartPointsMode>().toEqualTypeOf<
       'always' | 'auto' | 'never'
     >();
+  });
+
+  it('exports Heatmap as a component with its pattern type', () => {
+    expect(publicApi.Heatmap).toBeTypeOf('function');
+    expectTypeOf<HeatmapPattern>().toEqualTypeOf<'dots' | 'hatch'>();
   });
 });

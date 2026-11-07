@@ -57,6 +57,7 @@
     "./components/Card/CardTitle": "./src/components/Card/CardTitle/index.ts",
     "./components/Form": "./src/components/Form/index.ts",
     "./components/Form/Form.types": "./src/components/Form/Form.types.ts",
+    "./components/Heatmap": "./src/components/Heatmap/index.ts",
     "./components/Icons": "./src/components/Icons/index.ts",
     "./components/JsonExplorer": "./src/components/JsonExplorer/index.ts",
     "./components/LineChart": "./src/components/LineChart/index.ts",
