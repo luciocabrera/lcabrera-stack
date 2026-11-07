@@ -326,6 +326,8 @@ describe('VirtualSelect', () => {
     );
 
     const label = screen.getByText('State');
+
+    expect(document.querySelector('body > div > div > span')).toBe(label);
     const trigger = screen.getByRole('button', { name: 'State Select...' });
 
     expect(label.tagName).toBe('SPAN');
@@ -353,6 +355,7 @@ describe('VirtualSelect', () => {
     );
 
     expect(container.querySelector('[id^="virtual-select-label-"]')).toBeNull();
+    expect(container.querySelector(':scope > div > span')).toBeNull();
     expect(
       screen
         .getByRole('button', { name: 'Select...' })
