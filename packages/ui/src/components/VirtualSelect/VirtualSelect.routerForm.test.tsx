@@ -1,12 +1,7 @@
 // @vitest-environment jsdom
 
-import type { Root } from 'react-dom/client';
-
-import { act, cleanup, fireEvent, screen } from '@testing-library/react';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
 import { useState } from 'react';
-import { hydrateRoot } from 'react-dom/client';
-import { renderToString } from 'react-dom/server';
-import { createRoutesStub, Form, useLoaderData } from 'react-router';
 import {
   afterEach,
   beforeEach,
@@ -16,16 +11,14 @@ import {
   vi,
 } from 'vite-plus/test';
 
+import { createGetFormRoutesStub } from '#ui/utils/tests/createGetFormRoutesStub.util';
 import { getFormQuery } from '#ui/utils/tests/getFormQuery.util';
+import { hydrateServerMarkup } from '#ui/utils/tests/hydrateServerMarkup.util';
+import { renderServerMarkup } from '#ui/utils/tests/renderServerMarkup.util';
 
 import { VirtualSelect } from './VirtualSelect.component';
 
-const OPTIONS = [
-  { label: 'Open', value: 'open' },
-  { label: 'Closed', value: 'closed' },
-] as const;
-
-const hydrated: { container: HTMLElement; root: Root }[] = [];
+const unmounts: (() => void)[] = [];
 
 beforeEach(() => {
   vi.stubGlobal(
@@ -39,12 +32,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  for (const { container, root } of hydrated.splice(0)) {
-    act(() => {
-      root.unmount();
-    });
-    container.remove();
-  }
+  for (const unmount of unmounts.splice(0)) unmount();
   vi.unstubAllGlobals();
   cleanup();
 });
@@ -58,54 +46,33 @@ const StateField = () => {
       mode='single'
       name='a'
       onChange={setSelected}
-      options={OPTIONS}
+      options={[
+        { label: 'Open', value: 'open' },
+        { label: 'Closed', value: 'closed' },
+      ]}
       selected={selected}
     />
   );
 };
 
-const Results = () => <output>{useLoaderData<string>()}</output>;
-
-const createStub = () => {
-  const resultsLoader = vi.fn(
-    ({ request }: { readonly request: Request }) => new URL(request.url).search,
-  );
-  const Stub = createRoutesStub([
-    {
-      Component: () => (
-        <Form action='/results' method='get'>
-          <StateField />
-          <button type='submit'>Apply</button>
-        </Form>
-      ),
-      path: '/',
-    },
-    { Component: Results, loader: resultsLoader, path: '/results' },
-  ]);
-
-  return { resultsLoader, Stub };
-};
-
 describe('VirtualSelect in a router GET form', () => {
   it('submits ?a=<value> through the router once hydrated', async () => {
-    const { resultsLoader, Stub } = createStub();
+    const { resultsLoader, Stub } = createGetFormRoutesStub({
+      fields: <StateField />,
+    });
     const tree = <Stub initialEntries={['/']} />;
-    const container = document.createElement('div');
-    const onRecoverableError = vi.fn();
-
-    container.innerHTML = renderToString(tree);
-    document.body.append(container);
+    const container = renderServerMarkup(tree);
 
     expect(
       getFormQuery(container.querySelector('form') as HTMLFormElement),
     ).toBe('a=open');
 
-    hydrated.push({
+    const { onRecoverableError, unmount } = await hydrateServerMarkup({
       container,
-      root: await act(async () =>
-        hydrateRoot(container, tree, { onRecoverableError }),
-      ),
+      tree,
     });
+
+    unmounts.push(unmount);
 
     expect(onRecoverableError).not.toHaveBeenCalled();
 

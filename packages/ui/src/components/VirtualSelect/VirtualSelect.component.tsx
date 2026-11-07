@@ -1,7 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
 
-import { Text } from '#ui/components/Text';
-
 import type { VirtualSelectProps } from './VirtualSelect.types';
 
 import { VirtualSelectProvider } from './contexts';
@@ -9,6 +7,8 @@ import { useVirtualSelect } from './hooks';
 import { styles } from './VirtualSelect.stylex';
 import { VirtualSelectDropdown } from './VirtualSelectDropdown/VirtualSelectDropdown.component';
 import { VirtualSelectHeader } from './VirtualSelectHeader/VirtualSelectHeader.component';
+import { VirtualSelectHiddenInputs } from './VirtualSelectHiddenInputs/VirtualSelectHiddenInputs.component';
+import { VirtualSelectLabel } from './VirtualSelectLabel/VirtualSelectLabel.component';
 
 export const VirtualSelect = ({
   customStylex,
@@ -90,23 +90,10 @@ export const VirtualSelect = ({
           shouldFillHeight ? styles.containerFill : undefined,
         )}
       >
-        {label !== undefined && (
-          <Text
-            as='span'
-            customStylex={styles.label}
-            id={labelId}
-            size='sm'
-            weight='medium'
-          >
-            {label}
-          </Text>
-        )}
+        <VirtualSelectLabel label={label} />
         <VirtualSelectHeader />
         <VirtualSelectDropdown />
-        {name !== undefined &&
-          selected.map((value) => (
-            <input key={value} name={name} type='hidden' value={value} />
-          ))}
+        <VirtualSelectHiddenInputs name={name} selected={selected} />
       </div>
     </VirtualSelectProvider>
   );

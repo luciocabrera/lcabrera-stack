@@ -9,7 +9,7 @@ import {
   formInputSizeVariants,
   formInputStyles,
 } from '#ui/components/Form/fields/formInput.stylex';
-import { styles as textStyles } from '#ui/components/Text/Text.stylex';
+import { expectFieldLabel } from '#ui/utils/tests/expectFieldLabel.util';
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
@@ -47,24 +47,7 @@ describe('Select', () => {
   it('names the select with a visible label above it', () => {
     render(<Select label='State' options={OPTIONS} />);
 
-    const label = screen.getByText('State');
-    const select = screen.getByLabelText('State');
-
-    expect(label.tagName).toBe('LABEL');
-    expect(hasStylexStyle({ element: label, style: textStyles.size.sm })).toBe(
-      true,
-    );
-    expect(
-      hasStylexStyle({ element: label, style: textStyles.weight.medium }),
-    ).toBe(true);
-    expect(select.tagName).toBe('SELECT');
-    expect(label.parentElement).toBe(select.parentElement);
-    expect(
-      hasStylexStyle({
-        element: label.parentElement as Element,
-        style: formInputStyles.field,
-      }),
-    ).toBe(true);
+    expect(expectFieldLabel('State').tagName).toBe('SELECT');
   });
 
   it('keeps an id it is given, and labels through it', () => {

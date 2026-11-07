@@ -709,10 +709,11 @@ const [q, setQ] = useState('');
 - **Ids come from `useId`.** A `label` is tied to its control by a generated id
   unless the caller passes `id`, so the server and the client render the same
   markup.
-- **Test it as a browser would.** Render the route with `createRoutesStub` to a
-  string, read the query from the server markup's form with
-  `utils/tests/getFormQuery.util.ts`, then hydrate, submit and assert what the
-  next route's loader received.
+- **Test it as a browser would.** Build the routes with
+  `createGetFormRoutesStub`, render them with `renderServerMarkup` and read the
+  query from the server markup's form with `getFormQuery`; then
+  `hydrateServerMarkup`, submit, and assert what the results route's loader
+  received. All four are in `utils/tests/`.
 
 ---
 

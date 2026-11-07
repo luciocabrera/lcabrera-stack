@@ -59,13 +59,15 @@ graph TD
 
 Every store slice is read — and every action dispatched — inside the component that renders it, and **each piece of state has exactly one owning store** (select metadata → meta store; list config/callbacks + search/filter-mode → list store; data + selection → list data store). The shell holds no store wiring; it owns only the select-level concerns it mirrors into the provider.
 
-| Delegate                  | Selectors read                                                                                                                                                    | Actions dispatched                                   | Props kept                                |
-| ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------- |
-| `VirtualSelect` (shell)   | — (mounts the provider)                                                                                                                                           | — (`onChange` mapping lives on the `listState`)      | public API (unchanged)                    |
-| `VirtualSelectHeader`     | `useGetIsBusy` (meta) — only what it renders itself (the overlay)                                                                                                 | —                                                    | none                                      |
-| `VirtualSelectTrigger`    | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetLabelId`, `useGetListboxId`, `useGetMode`, `useGetPlaceholder` (meta); `useGetSelectedValues` (data) | `useToggleDropdown` (meta), `useToggleOption` (data) | none (owns `triggerRef` + overflow)       |
-| `VirtualSelectDivTrigger` | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetLabelId`, `useGetListboxId`, `useGetMode` (meta)                                                     | `useToggleDropdown` (meta)                           | `children`, `triggerRef` (producer→child) |
-| `VirtualSelectDropdown`   | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetListboxId` (meta); `useGetShouldFillHeight` (list)                                      | —                                                    | none                                      |
+| Delegate                    | Selectors read                                                                                                                                                    | Actions dispatched                                   | Props kept                                |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------- |
+| `VirtualSelect` (shell)     | — (mounts the provider)                                                                                                                                           | — (`onChange` mapping lives on the `listState`)      | public API (unchanged)                    |
+| `VirtualSelectHeader`       | `useGetIsBusy` (meta) — only what it renders itself (the overlay)                                                                                                 | —                                                    | none                                      |
+| `VirtualSelectTrigger`      | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetLabelId`, `useGetListboxId`, `useGetMode`, `useGetPlaceholder` (meta); `useGetSelectedValues` (data) | `useToggleDropdown` (meta), `useToggleOption` (data) | none (owns `triggerRef` + overflow)       |
+| `VirtualSelectDivTrigger`   | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetLabelId`, `useGetListboxId`, `useGetMode` (meta)                                                     | `useToggleDropdown` (meta)                           | `children`, `triggerRef` (producer→child) |
+| `VirtualSelectLabel`        | `useGetLabelId` (meta)                                                                                                                                            | —                                                    | `label` (shell prop)                      |
+| `VirtualSelectHiddenInputs` | —                                                                                                                                                                 | —                                                    | `name`, `selected` (shell props)          |
+| `VirtualSelectDropdown`     | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetListboxId` (meta); `useGetShouldFillHeight` (list)                                      | —                                                    | none                                      |
 
 ## Data Flow
 
@@ -139,14 +141,16 @@ Owned by `VirtualSelectTrigger`: the trigger holds its own ref, runs `useVirtual
 
 ## Label and Form Submission
 
-Both are rendered by the shell, inside the container, so the dropdown still
-anchors to one element. `label` draws a visible label whose id goes into the
-meta store as `labelId`; each trigger reads it and sets
+Both are private delegates the shell renders inside the container, so the
+dropdown still anchors to one element. `VirtualSelectLabel` draws the visible
+label under the id the shell put in the meta store as `labelId`; each trigger
+reads the same id and sets
 `aria-labelledby="<labelId> <its own id>"`, so a screen reader hears the label
 and then the current selection. The always-open shell is not a control and
 takes no label wiring.
 
-`name` renders one `<input type="hidden">` per value in `selected`. The
+`VirtualSelectHiddenInputs` renders one `<input type="hidden">` per value in
+`selected` under `name`. The
 selection lives in the parent's state, so before hydration the form submits
 only what the server rendered; a form that must work without script uses the
 native `Select` instead.

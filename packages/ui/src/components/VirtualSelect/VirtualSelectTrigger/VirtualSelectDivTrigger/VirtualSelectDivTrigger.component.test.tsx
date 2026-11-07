@@ -39,7 +39,6 @@ vi.mock('../../contexts/meta/actions', () => ({
 
 vi.mock('../../contexts/meta/selectors', () => ({
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
-  useGetIsBusy: () => metaState.current.isBusy,
   useGetIsInert: () => metaState.current.isBusy || metaState.current.isDisabled,
   useGetIsOpen: () => metaState.current.isOpen,
   useGetLabelId: () => metaState.current.labelId,

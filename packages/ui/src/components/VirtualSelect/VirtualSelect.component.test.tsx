@@ -231,21 +231,12 @@ describe('VirtualSelect', () => {
       />,
     );
 
-    const trigger = document.querySelector('[aria-haspopup="listbox"]');
-
-    if (trigger === null) {
-      throw new Error('Expected virtual select trigger to exist');
-    }
-
-    fireEvent.click(trigger);
-
-    const bravoRow = screen.getByText('Bravo').closest('label');
-
-    if (bravoRow === null) {
-      throw new Error('Expected the Bravo option row to exist');
-    }
-
-    fireEvent.click(within(bravoRow).getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { expanded: false }));
+    fireEvent.click(
+      within(screen.getByRole('listbox')).getByRole('checkbox', {
+        name: 'Bravo',
+      }),
+    );
 
     expect(onChange).toHaveBeenCalledWith(['alpha-id', 'bravo-id']);
     expect(screen.getByRole('listbox')).toBeTruthy();

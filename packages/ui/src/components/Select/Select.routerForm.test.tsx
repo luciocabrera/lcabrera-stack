@@ -1,87 +1,53 @@
 // @vitest-environment jsdom
 
-import type { ReactElement } from 'react';
-import type { Root } from 'react-dom/client';
-
-import { act, cleanup, fireEvent, screen } from '@testing-library/react';
-import { hydrateRoot } from 'react-dom/client';
-import { renderToString } from 'react-dom/server';
-import { createRoutesStub, Form, useLoaderData } from 'react-router';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { cleanup, fireEvent, screen } from '@testing-library/react';
+import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { TextInput } from '#ui/components/TextInput';
+import { createGetFormRoutesStub } from '#ui/utils/tests/createGetFormRoutesStub.util';
 import { getFormQuery } from '#ui/utils/tests/getFormQuery.util';
+import { hydrateServerMarkup } from '#ui/utils/tests/hydrateServerMarkup.util';
+import { renderServerMarkup } from '#ui/utils/tests/renderServerMarkup.util';
 
 import { Select } from './Select.component';
 
-const OPTIONS = [
-  { label: 'Open', value: 'open' },
-  { label: 'Closed', value: 'closed' },
-] as const;
-
-const hydrated: { container: HTMLElement; root: Root }[] = [];
+const unmounts: (() => void)[] = [];
 
 afterEach(() => {
-  for (const { container, root } of hydrated.splice(0)) {
-    act(() => {
-      root.unmount();
-    });
-    container.remove();
-  }
+  for (const unmount of unmounts.splice(0)) unmount();
   cleanup();
 });
 
-const Results = () => <output>{useLoaderData<string>()}</output>;
-
-const createStub = () => {
-  const resultsLoader = vi.fn(
-    ({ request }: { readonly request: Request }) => new URL(request.url).search,
-  );
-  const Stub = createRoutesStub([
-    {
-      Component: () => (
-        <Form action='/results' method='get'>
-          <Select
-            defaultValue='closed'
-            id='state'
-            label='State'
-            name='a'
-            options={OPTIONS}
-          />
-          <TextInput
-            defaultValue='main'
-            id='branch'
-            label='Branch'
-            name='branch'
-          />
-          <button type='submit'>Apply</button>
-        </Form>
-      ),
-      path: '/',
-    },
-    { Component: Results, loader: resultsLoader, path: '/results' },
-  ]);
-
-  return { resultsLoader, Stub };
-};
-
-const renderOnServer = (tree: ReactElement) => {
-  const container = document.createElement('div');
-
-  container.innerHTML = renderToString(tree);
-  document.body.append(container);
-
-  return container;
-};
+const createStub = () =>
+  createGetFormRoutesStub({
+    fields: (
+      <>
+        <Select
+          defaultValue='closed'
+          id='state'
+          label='State'
+          name='a'
+          options={[
+            { label: 'Open', value: 'open' },
+            { label: 'Closed', value: 'closed' },
+          ]}
+        />
+        <TextInput
+          defaultValue='main'
+          id='branch'
+          label='Branch'
+          name='branch'
+        />
+      </>
+    ),
+  });
 
 describe('Select and TextInput in a router GET form', () => {
   it('render named native controls that submit without any script', () => {
     const { Stub } = createStub();
-    const container = renderOnServer(<Stub initialEntries={['/']} />);
+    const container = renderServerMarkup(<Stub initialEntries={['/']} />);
     const form = container.querySelector('form') as HTMLFormElement;
 
-    expect(form.getAttribute('method')).toBe('get');
-    expect(form.getAttribute('action')).toBe('/results');
     expect(getFormQuery(form)).toBe('a=closed&branch=main');
 
     (form.elements.namedItem('a') as HTMLSelectElement).value = 'open';
@@ -95,15 +61,12 @@ describe('Select and TextInput in a router GET form', () => {
   it('submit ?a=<value>&branch=<text> through the router once hydrated', async () => {
     const { resultsLoader, Stub } = createStub();
     const tree = <Stub initialEntries={['/']} />;
-    const container = renderOnServer(tree);
-    const onRecoverableError = vi.fn();
-
-    hydrated.push({
-      container,
-      root: await act(async () =>
-        hydrateRoot(container, tree, { onRecoverableError }),
-      ),
+    const { onRecoverableError, unmount } = await hydrateServerMarkup({
+      container: renderServerMarkup(tree),
+      tree,
     });
+
+    unmounts.push(unmount);
 
     expect(onRecoverableError).not.toHaveBeenCalled();
 
