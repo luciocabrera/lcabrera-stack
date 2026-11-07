@@ -40,7 +40,7 @@ const itemVariants = stylex.create({
   },
 });
 
-export const styles = {
+export const descriptionListStyles = {
   item: itemVariants,
   layout: layoutVariants,
   list: local.list,

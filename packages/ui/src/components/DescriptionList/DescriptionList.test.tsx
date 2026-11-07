@@ -9,7 +9,7 @@ import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMar
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
 import { DescriptionList } from './DescriptionList.component';
-import { styles } from './DescriptionList.stylex';
+import { descriptionListStyles } from './DescriptionList.stylex';
 
 const ITEMS = [
   { term: 'Owner', value: 'Platform' },
@@ -58,7 +58,9 @@ describe('DescriptionList', () => {
     expect(hasStylexStyle({ element: value, style: textStyles.size.sm })).toBe(
       true,
     );
-    expect(hasStylexStyle({ element: value, style: styles.value })).toBe(true);
+    expect(
+      hasStylexStyle({ element: value, style: descriptionListStyles.value }),
+    ).toBe(true);
   });
 
   it('pairs each term with its value inside one group', () => {
@@ -80,14 +82,19 @@ describe('DescriptionList', () => {
 
     const list = getList(container);
 
-    expect(hasStylexStyle({ element: list, style: styles.list })).toBe(true);
-    expect(hasStylexStyle({ element: list, style: styles.layout.grid })).toBe(
-      true,
-    );
+    expect(
+      hasStylexStyle({ element: list, style: descriptionListStyles.list }),
+    ).toBe(true);
+    expect(
+      hasStylexStyle({
+        element: list,
+        style: descriptionListStyles.layout.grid,
+      }),
+    ).toBe(true);
     expect(
       hasStylexStyle({
         element: list.firstElementChild as Element,
-        style: styles.item.grid,
+        style: descriptionListStyles.item.grid,
       }),
     ).toBe(true);
   });
@@ -99,16 +106,22 @@ describe('DescriptionList', () => {
 
     const list = getList(container);
 
-    expect(hasStylexStyle({ element: list, style: styles.layout.inline })).toBe(
-      true,
-    );
-    expect(hasStylexStyle({ element: list, style: styles.layout.grid })).toBe(
-      false,
-    );
+    expect(
+      hasStylexStyle({
+        element: list,
+        style: descriptionListStyles.layout.inline,
+      }),
+    ).toBe(true);
+    expect(
+      hasStylexStyle({
+        element: list,
+        style: descriptionListStyles.layout.grid,
+      }),
+    ).toBe(false);
     expect(
       hasStylexStyle({
         element: list.firstElementChild as Element,
-        style: styles.item.inline,
+        style: descriptionListStyles.item.inline,
       }),
     ).toBe(true);
   });
@@ -128,9 +141,12 @@ describe('DescriptionList', () => {
     expect(
       hasStylexStyle({ element: list, style: overrideStyles.narrow }),
     ).toBe(true);
-    expect(hasStylexStyle({ element: list, style: styles.layout.grid })).toBe(
-      false,
-    );
+    expect(
+      hasStylexStyle({
+        element: list,
+        style: descriptionListStyles.layout.grid,
+      }),
+    ).toBe(false);
   });
 
   it('renders the same markup on the server and the client', () => {
