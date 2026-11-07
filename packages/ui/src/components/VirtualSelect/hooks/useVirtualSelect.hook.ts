@@ -18,6 +18,7 @@ type UseVirtualSelectArgs = {
   readonly isAlwaysOpen: boolean;
   readonly isBusy: boolean;
   readonly isDisabled: boolean;
+  readonly label?: VirtualSelectProps['label'];
   readonly listboxId: VirtualSelectProps['listboxId'];
   readonly mode: VirtualSelectProps['mode'];
   readonly onChange: VirtualSelectProps['onChange'];
@@ -34,6 +35,7 @@ export const useVirtualSelect = ({
   isAlwaysOpen,
   isBusy,
   isDisabled,
+  label,
   listboxId,
   mode,
   onChange,
@@ -46,6 +48,10 @@ export const useVirtualSelect = ({
   const generatedListboxId = useId();
   const resolvedListboxId =
     listboxId ?? `virtual-select-listbox-${generatedListboxId}`;
+  const labelId =
+    label === undefined
+      ? undefined
+      : `virtual-select-label-${generatedListboxId}`;
 
   const { getValueFromLabel, optionEntries, selectedLabels } =
     resolveVirtualSelectOptions({ options, selected });
@@ -86,6 +92,7 @@ export const useVirtualSelect = ({
     handleListChange,
     isMulti,
     isOpen,
+    labelId,
     resolvedListboxId,
     selectedLabels,
     toggleDropdown,

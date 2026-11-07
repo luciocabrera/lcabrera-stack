@@ -39,4 +39,55 @@ export const formInputStyles = stylex.create({
     position: 'relative',
     height: '2.25rem',
   },
+  field: {
+    gap: spacing.xxs,
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
+  },
+  select: {
+    appearance: 'auto',
+    cursor: {
+      default: 'pointer',
+      ':disabled': 'not-allowed',
+    },
+  },
+});
+
+export const formInputSizeVariants = stylex.create({
+  embedded: {
+    borderRadius: borderRadius.sm,
+    paddingBlock: 0,
+    paddingInline: spacing.xxs,
+    fontSize: typography.fontSizeXs,
+    height: spacing.lg,
+  },
+  lg: {
+    borderRadius: borderRadius.lg,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
+    fontSize: typography.fontSizeLg,
+    height: spacing.xxl,
+  },
+  md: {
+    borderRadius: borderRadius.md,
+    paddingBlock: spacing.xs,
+    paddingInline: spacing.sm,
+    fontSize: typography.fontSizeMd,
+    height: '2.5rem',
+  },
+  mini: {
+    borderRadius: borderRadius.sm,
+    paddingBlock: 0,
+    paddingInline: spacing.xs,
+    fontSize: typography.fontSizeSm,
+    height: '1.75rem',
+  },
+  sm: {
+    borderRadius: borderRadius.sm,
+    paddingBlock: spacing.xxs,
+    paddingInline: spacing.xs,
+    fontSize: typography.fontSizeSm,
+    height: spacing.xl,
+  },
 });

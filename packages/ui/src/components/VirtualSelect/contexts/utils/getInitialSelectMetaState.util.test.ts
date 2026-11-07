@@ -19,6 +19,12 @@ describe('getInitialSelectMetaState', () => {
     expect(state).toEqual({ ...baseArgs, isListVisible: false });
   });
 
+  it('carries the id of the visible label when there is one', () => {
+    expect(
+      getInitialSelectMetaState({ ...baseArgs, labelId: 'label-id' }).labelId,
+    ).toBe('label-id');
+  });
+
   it('pre-computes isListVisible when the dropdown is open', () => {
     expect(
       getInitialSelectMetaState({ ...baseArgs, isOpen: true }).isListVisible,

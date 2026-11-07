@@ -15,17 +15,20 @@ area:
   - packages/ui/src/components/Tooltip/**
   - packages/ui/src/components/TrendSparkline/**
   - packages/ui/src/components/Form/fields/TextField/**
+  - packages/ui/src/components/Form/fields/formInput.stylex.ts
   - packages/ui/src/components/Table/TableSettingsDrawer/GroupingSection/ActiveGroupKeyList/GroupKeyPeriodSelect/**
   - packages/ui/src/public-api.ts
+  - packages/ui/src/stylex-module-paths.test.json
+  - packages/ui/src/utils/tests/getFormQuery.util*
   - packages/ui/package.json
   - packages/ui/src/INVENTORY.md
   - packages/ui/src/PATTERNS.md
-  - packages/ui/api-surface/**
+  - reports/api-surface/ui.txt
   - .changeset/ui-form-controls.md
 started: 2026-11-07
 updated: 2026-11-07
 plan: (none)
-pr: (none)
+pr: '#1595'
 issue: #1558
 ---
 
@@ -35,6 +38,6 @@ Add Select, TextInput and DescriptionList to @lcabrera/ui
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implemented; running the full gate
 - Blockers: none
 - Next:

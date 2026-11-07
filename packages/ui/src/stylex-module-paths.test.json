@@ -15,6 +15,7 @@
   "src/components/Card/CardTitle/CardTitle.stylex.ts",
   "src/components/Checkbox/Checkbox.stylex.ts",
   "src/components/ChoiceModal/ChoiceModal.stylex.ts",
+  "src/components/DescriptionList/DescriptionList.stylex.ts",
   "src/components/DraggableList/DraggableList.stylex.ts",
   "src/components/DraggableList/DraggableListItem/DraggableListItem.stylex.ts",
   "src/components/Form/FormBody/FormBody.stylex.ts",

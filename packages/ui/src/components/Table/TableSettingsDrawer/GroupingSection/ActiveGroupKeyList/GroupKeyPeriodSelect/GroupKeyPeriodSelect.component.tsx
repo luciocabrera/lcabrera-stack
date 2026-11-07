@@ -1,5 +1,4 @@
-import * as stylex from '@stylexjs/stylex';
-
+import { Select } from '#ui/components/Select';
 import { useGetTableColumnGroupingCapability } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import { TABLE_GROUP_PERIOD_LABELS } from '#ui/components/Table/Table.constants';
 import { isTableGroupPeriod } from '#ui/components/Table/utils/isTableGroupPeriod.util';
@@ -35,19 +34,19 @@ export const GroupKeyPeriodSelect = ({
   };
 
   return (
-    <select
+    <Select
       aria-label={`${label} grouping granularity`}
+      customStylex={styles.periodSelect}
       disabled={isBusy}
       onChange={handleChange}
+      options={[
+        { label: 'Raw', value: RAW_VALUE },
+        ...available.map((period) => ({
+          label: TABLE_GROUP_PERIOD_LABELS[period],
+          value: period,
+        })),
+      ]}
       value={periods[columnKey] ?? RAW_VALUE}
-      {...stylex.props(styles.periodSelect)}
-    >
-      <option value={RAW_VALUE}>Raw</option>
-      {available.map((period) => (
-        <option key={period} value={period}>
-          {TABLE_GROUP_PERIOD_LABELS[period]}
-        </option>
-      ))}
-    </select>
+    />
   );
 };

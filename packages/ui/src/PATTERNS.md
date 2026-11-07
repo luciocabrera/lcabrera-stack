@@ -675,6 +675,45 @@ All form-like components are **fully controlled** — no internal state for the 
 
 **Exception:** UI-only state (open/closed, hover, focus) is always local.
 
+**The native controls are the other exception.** `Select` and `TextInput` wrap
+one native element and take its attributes, so they are uncontrolled with
+`defaultValue` and controlled with `value` + `onChange`, as the element is. The
+next section is when to use which.
+
+---
+
+## Native Controls in a GET Form
+
+A filter form that puts its values in the URL is a router `<Form method='get'>`
+holding named, uncontrolled controls, and a loader that reads
+`new URL(request.url).searchParams`. The browser builds the query string; the
+component mirrors no value into state and builds no URL.
+
+```tsx
+// ✅ submits before hydration as well as after
+<Form method='get'>
+  <Select defaultValue={state} label='State' name='state' options={states} />
+  <TextInput defaultValue={query} label='Search' name='q' />
+  <Button type='submit'>Apply</Button>
+</Form>;
+
+// ❌ the value lives in state and the URL is assembled by hand
+const [q, setQ] = useState('');
+<Button onClick={() => navigate(`?q=${q}`)}>Apply</Button>;
+```
+
+- **Pick the control by when it must work.** `Select` and `TextInput` are native
+  elements and submit with no script. `VirtualSelect` with `name` submits through
+  hidden inputs, which hold the parent's selection state, so it fits a long or
+  loaded-on-demand list in a page that is already hydrated.
+- **Ids come from `useId`.** A `label` is tied to its control by a generated id
+  unless the caller passes `id`, so the server and the client render the same
+  markup.
+- **Test it as a browser would.** Render the route with `createRoutesStub` to a
+  string, read the query from the server markup's form with
+  `utils/tests/getFormQuery.util.ts`, then hydrate, submit and assert what the
+  next route's loader received.
+
 ---
 
 ## Conditional Rendering (`noLeakedRender`)

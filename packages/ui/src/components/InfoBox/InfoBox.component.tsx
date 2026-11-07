@@ -4,6 +4,6 @@ import type { InfoBoxProps } from './InfoBox.types';
 
 import { styles } from './InfoBox.stylex';
 
-export const InfoBox = ({ children }: InfoBoxProps) => {
-  return <div {...stylex.props(styles.container)}>{children}</div>;
-};
+export const InfoBox = ({ tone = 'neutral', ...rest }: InfoBoxProps) => (
+  <div {...rest} {...stylex.props(styles.container, styles.tone[tone])} />
+);

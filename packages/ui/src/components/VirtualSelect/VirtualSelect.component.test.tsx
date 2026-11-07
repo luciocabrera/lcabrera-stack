@@ -270,4 +270,83 @@ describe('VirtualSelect', () => {
     expect(screen.queryByRole('listbox')).toBeNull();
     expect(onFetchInitial).toHaveBeenCalledTimes(1);
   });
+
+  it('submits one hidden input per selected value under its name', () => {
+    const { container } = render(
+      <VirtualSelect
+        mode='multi'
+        name='state'
+        onChange={() => void 0}
+        options={[
+          { label: 'Alpha', value: 'alpha-id' },
+          { label: 'Bravo', value: 'bravo-id' },
+        ]}
+        selected={['alpha-id', 'bravo-id']}
+      />,
+    );
+
+    expect(
+      [...container.querySelectorAll('input')].map((input) => [
+        input.type,
+        input.name,
+        input.value,
+      ]),
+    ).toStrictEqual([
+      ['hidden', 'state', 'alpha-id'],
+      ['hidden', 'state', 'bravo-id'],
+    ]);
+  });
+
+  it('renders no hidden input without a name', () => {
+    const { container } = render(
+      <VirtualSelect
+        mode='single'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={['Alpha']}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Alpha' })).toBeTruthy();
+    expect(container.querySelector('input[type="hidden"]')).toBeNull();
+  });
+
+  it('shows a visible label and names the trigger by it', () => {
+    render(
+      <VirtualSelect
+        label='State'
+        mode='single'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    const label = screen.getByText('State');
+    const trigger = screen.getByRole('button', { name: 'State Select...' });
+
+    expect(label.tagName).toBe('SPAN');
+    expect(trigger.getAttribute('aria-labelledby')).toBe(
+      `${label.id} ${trigger.id}`,
+    );
+    expect(label.id).toMatch(/^virtual-select-label-/);
+  });
+
+  it('renders no label element without a label', () => {
+    const { container } = render(
+      <VirtualSelect
+        mode='single'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    expect(container.querySelector('[id^="virtual-select-label-"]')).toBeNull();
+    expect(
+      screen
+        .getByRole('button', { name: 'Select...' })
+        .getAttribute('aria-labelledby'),
+    ).toBeNull();
+  });
 });

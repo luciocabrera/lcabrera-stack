@@ -8,6 +8,7 @@ export const VirtualSelectTrigger = () => {
     content,
     isInert,
     isOpen,
+    labelProps,
     listboxId,
     mode,
     shouldUseDivTrigger,
@@ -36,6 +37,7 @@ export const VirtualSelectTrigger = () => {
         assignTriggerRef({ node, triggerRef });
       }}
       type='button'
+      {...labelProps}
       {...getTriggerStyleProps({ isInert, isOpen, mode })}
     >
       {content}

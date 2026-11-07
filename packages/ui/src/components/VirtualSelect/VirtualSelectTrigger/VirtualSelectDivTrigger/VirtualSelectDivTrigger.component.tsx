@@ -7,11 +7,13 @@ import {
   useGetIsAlwaysOpen,
   useGetIsInert,
   useGetIsOpen,
+  useGetLabelId,
   useGetListboxId,
   useGetMode,
 } from '../../contexts/meta/selectors';
 import {
   assignTriggerRef,
+  getTriggerLabelProps,
   getTriggerStyleProps,
   handleDivTriggerKeyDown,
 } from '../utils';
@@ -23,6 +25,7 @@ export const VirtualSelectDivTrigger = ({
   const isAlwaysOpen = useGetIsAlwaysOpen();
   const isInert = useGetIsInert();
   const isOpen = useGetIsOpen();
+  const labelId = useGetLabelId();
   const listboxId = useGetListboxId();
   const mode = useGetMode();
   const toggleDropdown = useToggleDropdown();
@@ -31,6 +34,7 @@ export const VirtualSelectDivTrigger = ({
   const interactionProps = isAlwaysOpen
     ? undefined
     : {
+        ...getTriggerLabelProps({ labelId }),
         'aria-controls': listboxId,
         'aria-disabled': shouldDisableInteraction,
         'aria-expanded': isOpen,

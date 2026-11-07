@@ -4,11 +4,6 @@ import { typography } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 const local = stylex.create({
-  /**
-   * Sized against the list row it sits in rather than against the drawer's form
-   * controls: it qualifies an item in place, so matching the field styling
-   * would read as a second control rather than as part of the key.
-   */
   periodSelect: {
     borderColor: colors.borderPrimary,
     borderRadius: '4px',
@@ -19,6 +14,8 @@ const local = stylex.create({
     backgroundColor: colors.backgroundPrimary,
     color: colors.textPrimary,
     fontSize: typography.fontSizeXs,
+    height: 'auto',
+    width: 'auto',
   },
 });
 

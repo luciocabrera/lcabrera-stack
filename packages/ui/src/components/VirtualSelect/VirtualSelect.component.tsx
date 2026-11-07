@@ -1,5 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { Text } from '#ui/components/Text';
+
 import type { VirtualSelectProps } from './VirtualSelect.types';
 
 import { VirtualSelectProvider } from './contexts';
@@ -14,9 +16,11 @@ export const VirtualSelect = ({
   isAlwaysOpen = false,
   isBusy = false,
   isDisabled = false,
+  label,
   listboxId,
   listMaxHeight,
   mode,
+  name,
   onChange,
   onFetchInitial,
   onFetchMore,
@@ -33,6 +37,7 @@ export const VirtualSelect = ({
     handleListChange,
     isMulti,
     isOpen,
+    labelId,
     resolvedListboxId,
     selectedLabels,
     toggleDropdown,
@@ -41,6 +46,7 @@ export const VirtualSelect = ({
     isAlwaysOpen,
     isBusy,
     isDisabled,
+    label,
     listboxId,
     mode,
     onChange,
@@ -69,6 +75,7 @@ export const VirtualSelect = ({
         isBusy,
         isDisabled,
         isOpen,
+        labelId,
         listboxId: resolvedListboxId,
         mode,
         onCloseDropdown: closeDropdown,
@@ -83,8 +90,23 @@ export const VirtualSelect = ({
           shouldFillHeight ? styles.containerFill : undefined,
         )}
       >
+        {label !== undefined && (
+          <Text
+            as='span'
+            customStylex={styles.label}
+            id={labelId}
+            size='sm'
+            weight='medium'
+          >
+            {label}
+          </Text>
+        )}
         <VirtualSelectHeader />
         <VirtualSelectDropdown />
+        {name !== undefined &&
+          selected.map((value) => (
+            <input key={value} name={name} type='hidden' value={value} />
+          ))}
       </div>
     </VirtualSelectProvider>
   );

@@ -11,14 +11,29 @@ BreadcrumbItem [type] { readonly label: string; /** Omitted for a step that has 
 Breadcrumbs [const] ({ items, label, }: BreadcrumbsProps) => JSX.Element | undefined
 BreadcrumbsProps [type] { readonly items: readonly BreadcrumbItem[]; /** The accessible name of the `nav` landmark. Defaults to `'Breadcrumb'`. */ readonly label?: string; }
 Button [const] ({ tooltipContent, tooltipPlacement, ...rest }: ButtonProps) => JSX.Element
+Card [const] ({ children, color, customStylex, elevation, interactive, padding, ...props }: CardProps) => JSX.Element
+CardBody [const] ({ children, ...props }: CardBodyProps) => JSX.Element
+CardColor [type] | 'default' | 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'warning'
+CardDescription [const] ({ children, ...props }: CardDescriptionProps) => JSX.Element
+CardFooter [const] ({ children, ...props }: CardFooterProps) => JSX.Element
+CardHeader [const] ({ children, ...props }: CardHeaderProps) => JSX.Element
+CardProps [type] ComponentPropsWithoutRef<'div'> & { readonly color?: CardColor; readonly customStylex?: StyleXStyles; readonly elevation?: CardElevation; readonly interactive?: CardInteractive; readonly padding?: CardPadding; }
+CardTitle [const] ({ children, icon, ...props }: CardTitleProps) => JSX.Element
 ChartAxis [type] { /** A domain narrower than the data clips the line and band and drops the dots outside it. */ readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
 ChartMarker [type] { readonly label: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; }
 ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; readonly y: null | number; }
 ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'
 ChartX [type] Date | number
+DescriptionList [const] ({ customStylex, items, layout, ...rest }: DescriptionListProps) => JSX.Element
+DescriptionListItem [type] { readonly term: string; readonly value: ReactNode; }
+DescriptionListLayout [type] 'grid' | 'inline'
+DescriptionListProps [type] Omit< ComponentPropsWithoutRef<'dl'>, 'children' | 'className' | 'style' > & { readonly customStylex?: StyleXStyles; readonly items: readonly DescriptionListItem[]; readonly layout?: DescriptionListLayout; }
 FieldNode [type] | GroupFieldNode<TValues> | LeafFieldDef<TValues> | RowFieldNode<TValues> | TabFieldNode<TValues>
 Form [const] <TValues extends Record<string, unknown>>({ action, children, method, ...providerProps }: FormProps<TValues>) => JSX.Element
 hydrateApp [const] () => void
+InfoBox [const] ({ tone, ...rest }: InfoBoxProps) => JSX.Element
+InfoBoxProps [type] Omit< ComponentPropsWithoutRef<'div'>, 'className' | 'style' > & { readonly tone?: InfoBoxTone; }
+InfoBoxTone [type] 'error' | 'info' | 'neutral' | 'success' | 'warning'
 JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 LayoutProps [type] { readonly children: ReactNode; }
 LineBandPoint [type] { readonly lower: number; readonly upper: number; readonly x: ChartX; }
@@ -37,6 +52,9 @@ RootComponentProps [type] { readonly appId?: string; readonly defaultTheme?: The
 RootErrorBoundary [const] ({ error }: RootErrorBoundaryProps) => JSX.Element
 RouteErrorBoundary [const] ({ defaultMessage, error, icon, title, }: RouteErrorBoundaryProps) => JSX.Element
 SectionCard [const] ({ children, customStylex, description, title, }: SectionCardProps) => JSX.Element
+Select [const] ({ customStylex, id, label, options, size, ...rest }: SelectProps) => JSX.Element
+SelectOption [type] { readonly label: string; readonly value: string; }
+SelectProps [type] Omit< ComponentPropsWithRef<'select'>, 'children' | 'className' | 'size' | 'style' > & { readonly customStylex?: StyleXStyles; readonly label?: string; readonly options: readonly SelectOption[]; readonly size?: DesignSystemSize; }
 StatusBadge [const] ({ label, tone }: StatusBadgeProps) => JSX.Element
 Table [const] <TData extends Record<string, unknown>, TResponse>(props: TableProps<TData, TResponse>) => JSX.Element
 TableGroupDetailsView [const] <TData extends Record<string, unknown>, TResponse extends TablePageResponse<TData>>({ closePath, fallbackTitle, fetchPage, }: TableGroupDetailsViewProps<TData, TResponse>) => JSX.Element
@@ -44,8 +62,12 @@ TableLayout [const] <TData extends Record<string, unknown>, TResponse = Record<s
 TablePageResponse [type] { readonly data: readonly TData[]; /** A refusal arrives as a successful response carrying data, not a rejected promise. */ readonly error?: TableResponseError; readonly hasMore?: boolean; readonly total?: number; }
 TableRouteView [const] <TData extends Record<string, unknown>, TResponse extends TablePageResponse<TData>>({ actions, dataErrorSelector, dataSelector, dataTotalSelector, fetchPage, }: TableRouteViewProps<TData, TResponse>) => JSX.Element
 Tabs [const] ({ defaultSelectedTab, isBusy, label, onSelectTab, selectedTab, tabs, ...props }: TabsProps) => JSX.Element
+Tag [const] ({ label, onRemove }: TagProps) => JSX.Element
+TagProps [type] { readonly label: string; readonly onRemove?: () => void; }
 Text [const] <TElement extends TextElement = "p">(props: TextProps<TElement>) => JSX.Element
 TextElement [type] | 'dd' | 'div' | 'dt' | 'figcaption' | 'label' | 'p' | 'span'
+TextInput [const] ({ customStylex, id, label, size, ...rest }: TextInputProps) => JSX.Element
+TextInputProps [type] Omit< ComponentPropsWithRef<'input'>, 'className' | 'size' | 'style' > & { readonly customStylex?: StyleXStyles; readonly label?: string; readonly size?: DesignSystemSize; }
 TextProps [type] Omit< ComponentPropsWithoutRef<TElement>, 'children' | 'className' | 'style' > & { readonly as?: TElement; readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly isMono?: boolean; readonly isTabular?: boolean; readonly size?: TextSize; readonly tone?: TextTone; readonly weight?: TextWeight; }
 TextSize [type] 'lg' | 'md' | 'sm' | 'xs'
 TextTone [type] | 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning'
@@ -54,6 +76,9 @@ Title [const] ({ actions, children, customStylex, icon, level, variant, ...props
 TitleLevel [type] 1 | 2 | 3
 TitleProps [type] Omit<ComponentProps<'div'>, 'className' | 'style'> & { readonly actions?: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly level?: TitleLevel; readonly variant?: TitleVariant; }
 TitleVariant [type] 'plain' | 'toolbar'
+Tooltip [const] ({ children, content, placement, }: TooltipProps) => JSX.Element
+TooltipPlacement [type] 'bottom' | 'left' | 'right' | 'top'
+TooltipProps [type] { readonly children: ReactNode; readonly content: ReactNode; readonly placement?: TooltipPlacement; }
 TrendPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: TrendSparklineTone; readonly value: number; }
 TrendSparkline [const] ({ height, isConnected, label, max, tone, width, ...series }: TrendSparklineProps) => JSX.Element
 TrendSparklineProps [type] TrendSparklineChartProps & (TrendSparklinePointsProps | TrendSparklineValuesProps)
@@ -102,6 +127,12 @@ CardHeader [const] ({ children, ...props }: CardHeaderProps) => JSX.Element
 
 ## ./components/Card/CardTitle
 CardTitle [const] ({ children, icon, ...props }: CardTitleProps) => JSX.Element
+
+## ./components/DescriptionList
+DescriptionList [const] ({ customStylex, items, layout, ...rest }: DescriptionListProps) => JSX.Element
+DescriptionListItem [type] { readonly term: string; readonly value: ReactNode; }
+DescriptionListLayout [type] 'grid' | 'inline'
+DescriptionListProps [type] Omit< ComponentPropsWithoutRef<'dl'>, 'children' | 'className' | 'style' > & { readonly customStylex?: StyleXStyles; readonly items: readonly DescriptionListItem[]; readonly layout?: DescriptionListLayout; }
 
 ## ./components/Form
 createFieldBuilders [const] <TValues extends Record<string, unknown>>() => { choiceField: <T extends ChoiceFieldType>(args: ChoiceFieldArgs<TValues, T>) => { description?: string | undefined; clientValidation?: FieldClientValidation; accessor: keyof TValues & string; label: string; options: readonly FieldOption[]; type: T; }; field: <T extends BaseFieldType>(args: FieldArgs<TValues, T>) => { disabled?: boolean | undefined; description?: string | undefined; clientValidation?: FieldClientValidation; accessor: keyof TValues & string; label: string; type: T; }; fieldGroup: (args: FieldGroupArgs<TValues>) => { defaultCollapsed?: boolean | undefined; collapsible?: boolean | undefined; fields: readonly FieldNode<TValues>[]; label: string; type: "group"; }; fieldRow: (args: FieldRowArgs<TValues>) => { fields: readonly FieldNode<TValues>[]; type: "row"; spans?: undefined; } | { fields: readonly FieldNode<TValues>[]; spans: readonly number[]; type: "row"; }; toggleField: (args: ToggleFieldArgs<TValues>) => { accessor: keyof TValues & string; label: string; type: "boolean"; variant: "toggle"; }; }
@@ -176,6 +207,11 @@ UngroupRowsIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 UserIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 WarningIcon [const] ({ size, ...props }: IconProps) => JSX.Element
 
+## ./components/InfoBox
+InfoBox [const] ({ tone, ...rest }: InfoBoxProps) => JSX.Element
+InfoBoxProps [type] Omit< ComponentPropsWithoutRef<'div'>, 'className' | 'style' > & { readonly tone?: InfoBoxTone; }
+InfoBoxTone [type] 'error' | 'info' | 'neutral' | 'success' | 'warning'
+
 ## ./components/JsonExplorer
 JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 JsonExplorerSection [type] { readonly columns: readonly TableColumn<Record<string, unknown>>[]; readonly label: string; readonly rows: readonly Record<string, unknown>[]; }
@@ -221,6 +257,11 @@ RouteErrorBoundary [const] ({ defaultMessage, error, icon, title, }: RouteErrorB
 
 ## ./components/SectionCard
 SectionCard [const] ({ children, customStylex, description, title, }: SectionCardProps) => JSX.Element
+
+## ./components/Select
+Select [const] ({ customStylex, id, label, options, size, ...rest }: SelectProps) => JSX.Element
+SelectOption [type] { readonly label: string; readonly value: string; }
+SelectProps [type] Omit< ComponentPropsWithRef<'select'>, 'children' | 'className' | 'size' | 'style' > & { readonly customStylex?: StyleXStyles; readonly label?: string; readonly options: readonly SelectOption[]; readonly size?: DesignSystemSize; }
 
 ## ./components/Settings/Settings.component
 Settings [const] () => JSX.Element
@@ -433,6 +474,10 @@ createEmptyColumnsState [const] <TData extends Record<string, unknown>>({ column
 ## ./components/Table/utils/inferTableColumnsFromJson.util
 inferTableColumnsFromJson [const] ({ rows, }: InferTableColumnsFromJsonArgs) => readonly TableColumn<Record<string, unknown>>[]
 
+## ./components/Tag
+Tag [const] ({ label, onRemove }: TagProps) => JSX.Element
+TagProps [type] { readonly label: string; readonly onRemove?: () => void; }
+
 ## ./components/Text
 Text [const] <TElement extends TextElement = "p">(props: TextProps<TElement>) => JSX.Element
 TextElement [type] | 'dd' | 'div' | 'dt' | 'figcaption' | 'label' | 'p' | 'span'
@@ -441,11 +486,20 @@ TextSize [type] 'lg' | 'md' | 'sm' | 'xs'
 TextTone [type] | 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'tertiary' | 'warning'
 TextWeight [type] 'bold' | 'medium' | 'normal' | 'semibold'
 
+## ./components/TextInput
+TextInput [const] ({ customStylex, id, label, size, ...rest }: TextInputProps) => JSX.Element
+TextInputProps [type] Omit< ComponentPropsWithRef<'input'>, 'className' | 'size' | 'style' > & { readonly customStylex?: StyleXStyles; readonly label?: string; readonly size?: DesignSystemSize; }
+
 ## ./components/Title
 Title [const] ({ actions, children, customStylex, icon, level, variant, ...props }: TitleProps) => JSX.Element | undefined
 TitleLevel [type] 1 | 2 | 3
 TitleProps [type] Omit<ComponentProps<'div'>, 'className' | 'style'> & { readonly actions?: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly level?: TitleLevel; readonly variant?: TitleVariant; }
 TitleVariant [type] 'plain' | 'toolbar'
+
+## ./components/Tooltip
+Tooltip [const] ({ children, content, placement, }: TooltipProps) => JSX.Element
+TooltipPlacement [type] 'bottom' | 'left' | 'right' | 'top'
+TooltipProps [type] { readonly children: ReactNode; readonly content: ReactNode; readonly placement?: TooltipPlacement; }
 
 ## ./components/TrendSparkline
 TrendPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: TrendSparklineTone; readonly value: number; }
@@ -459,15 +513,15 @@ VirtualListContent [const] () => JSX.Element
 VirtualListDataState [type] { readonly data: readonly string[]; readonly hasMore: boolean; readonly isLoading: boolean; readonly isLoadingMore: boolean; readonly totalCount?: number; }
 
 ## ./components/VirtualSelect
-VirtualSelect [const] ({ customStylex, dataState, isAlwaysOpen, isBusy, isDisabled, listboxId, listMaxHeight, mode, onChange, onFetchInitial, onFetchMore, onOpenChange, options, placeholder, selected, shouldFillHeight, }: VirtualSelectProps) => JSX.Element
+VirtualSelect [const] ({ customStylex, dataState, isAlwaysOpen, isBusy, isDisabled, label, listboxId, listMaxHeight, mode, name, onChange, onFetchInitial, onFetchMore, onOpenChange, options, placeholder, selected, shouldFillHeight, }: VirtualSelectProps) => JSX.Element
 
 ## ./components/VirtualSelect/hooks
-useVirtualSelect [const] ({ dataState, isAlwaysOpen, isBusy, isDisabled, listboxId, mode, onChange, onOpenChange, options, selected, }: UseVirtualSelectArgs) => { closeDropdown: () => void; containerRef: RefObject<HTMLDivElement | null>; effectiveDataState: VirtualListDataState | { data: string[]; hasMore: boolean; isLoading: boolean; isLoadingMore: boolean; }; handleListChange: (filter?: SelectFilter) => void; isMulti: boolean; isOpen: boolean; resolvedListboxId: string; selectedLabels: string[]; toggleDropdown: () => void; }
+useVirtualSelect [const] ({ dataState, isAlwaysOpen, isBusy, isDisabled, label, listboxId, mode, onChange, onOpenChange, options, selected, }: UseVirtualSelectArgs) => { closeDropdown: () => void; containerRef: RefObject<HTMLDivElement | null>; effectiveDataState: VirtualListDataState | { data: string[]; hasMore: boolean; isLoading: boolean; isLoadingMore: boolean; }; handleListChange: (filter?: SelectFilter) => void; isMulti: boolean; isOpen: boolean; labelId: string | undefined; resolvedListboxId: string; selectedLabels: string[]; toggleDropdown: () => void; }
 useVirtualSelectDropdown [const] ({ isAlwaysOpen, isInert, onOpenChange, }: UseVirtualSelectDropdownArgs) => { closeDropdown: () => void; isListVisible: boolean; isOpen: boolean; toggleDropdown: () => void; }
 useVirtualSelectTagOverflow [const] ({ mode, selected, triggerRef, }: UseVirtualSelectTagOverflowArgs) => number
 
 ## ./components/VirtualSelect/VirtualSelectTrigger/hooks
-useVirtualSelectTrigger [const] () => { chevron: JSX.Element | undefined; content: ReactNode; isInert: boolean; isOpen: boolean; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
+useVirtualSelectTrigger [const] () => { chevron: JSX.Element | undefined; content: ReactNode; isInert: boolean; isOpen: boolean; labelProps: { 'aria-labelledby'?: undefined; id?: undefined; } | { 'aria-labelledby': string; id: string; }; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
 
 ## ./contexts/NotificationContext
 AppNotification [type] { readonly durationMs: number; readonly id: string; readonly message: string; readonly placement: NotificationPlacement; readonly title?: string; readonly variant: CardColor; }
