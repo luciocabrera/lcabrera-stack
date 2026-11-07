@@ -15,8 +15,7 @@ import {
 const { metaState, setMetaState, toggleDropdownMock } = vi.hoisted(() => {
   const initialMetaState = {
     isAlwaysOpen: false,
-    isBusy: false,
-    isDisabled: false,
+    isInert: false,
     isOpen: false,
     labelId: undefined as string | undefined,
     listboxId: 'listbox-id',
@@ -39,7 +38,7 @@ vi.mock('../../contexts/meta/actions', () => ({
 
 vi.mock('../../contexts/meta/selectors', () => ({
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
-  useGetIsInert: () => metaState.current.isBusy || metaState.current.isDisabled,
+  useGetIsInert: () => metaState.current.isInert,
   useGetIsOpen: () => metaState.current.isOpen,
   useGetLabelId: () => metaState.current.labelId,
   useGetListboxId: () => metaState.current.listboxId,
@@ -117,8 +116,8 @@ describe('VirtualSelectDivTrigger', () => {
     expect(toggleDropdownMock).toHaveBeenCalledTimes(3);
   });
 
-  it('disables interaction while busy', () => {
-    setMetaState({ isBusy: true });
+  it('disables interaction while inert', () => {
+    setMetaState({ isInert: true });
 
     render(
       <VirtualSelectDivTrigger triggerRef={createTriggerRef()}>
