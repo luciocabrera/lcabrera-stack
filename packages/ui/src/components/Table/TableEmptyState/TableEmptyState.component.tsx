@@ -1,14 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 import { useState } from 'react';
 
-import { NoDataDescriptive } from '#ui/components/Icons';
 import { useGetPinnedColumnPartition } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useTableContainerRef } from '#ui/components/Table/contexts/TableWrapper';
 import { useElementSize, useResizeObserver } from '#ui/hooks';
 
 import { styles } from './TableEmptyState.stylex';
-import { TableEmptyStateAction } from './TableEmptyStateAction/TableEmptyStateAction.component';
-import { TableEmptyStateMessage } from './TableEmptyStateMessage/TableEmptyStateMessage.component';
+import { TableEmptyStateBody } from './TableEmptyStateBody.component';
 
 export const TableEmptyState = () => {
   const { centerCols, leftPinnedCols, rightPinnedCols } =
@@ -37,13 +35,7 @@ export const TableEmptyState = () => {
     <tr {...stylex.props(styles.row)}>
       <td colSpan={colSpan} {...stylex.props(styles.cell)}>
         <div {...stylex.props(styles.viewport(viewportHeight, width))}>
-          <div {...stylex.props(styles.content)}>
-            <div {...stylex.props(styles.illustration)}>
-              <NoDataDescriptive />
-            </div>
-            <TableEmptyStateMessage />
-            <TableEmptyStateAction />
-          </div>
+          <TableEmptyStateBody />
         </div>
       </td>
     </tr>

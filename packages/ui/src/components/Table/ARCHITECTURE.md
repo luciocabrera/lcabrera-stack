@@ -51,6 +51,64 @@ would clear whatever the user had sorted, filtered, pinned or sized whenever the
 parent re-rendered
 ([ADR-142](../../../../../docs/decisions/ADR-142-a-table-given-rows-keeps-its-state-in-memory-and-the-route-level-layout-supplies-persistence.md)).
 
+## Static layout
+
+`layout` and `features` are resolved once, by `resolveTablePresentation`, and
+provided by `TableGridContent` as `TablePresentationContext`, a value context
+next to `TableDensityContext`. Every component that renders differently reads
+it there, so neither prop is drilled and neither is written to a store.
+
+- `TableGridContent` renders `TableStaticContent` instead of `TableContent`. Its
+  wrapper sets no `height: 100%` and is no size container, so the table is as
+  tall as its rows; there is no sentinel and no infinite scroll.
+  `TableStaticBody` renders every row through `TableBodyRows`, with no
+  virtualizer.
+- `TableBase` renders `role="table"`, sets no `aria-rowcount` and spreads no
+  grid focus handlers. `TableBodyCell` sets no role, no `tabIndex` and no focus
+  handler, so the document's own tab order reaches a link in a cell. The focus
+  provider stays mounted, because the shared group-fold actions read its store.
+- Rows, cells and header cells take back their table `display` (`table-row`,
+  `table-cell`), so their implicit roles hold. A row's density height is a
+  minimum there, as a table row's `height` always is, so a taller cell grows its
+  row: the static layout's row height is always `auto`.
+- `useTableGroupTree` returns `toStaticGroupTree` in the static layout: every row
+  as given and no row metadata. A tree of group rows therefore renders flat,
+  with no `aria-level`, no disclosure and nothing that folds.
+- A column's `width` is unset unless it is declared or resized, so a static
+  column sizes to its content; `'fill'` is `100%`, which in an auto table layout
+  takes what the other columns leave. A stored size from the resize handle wins
+  over both, in the header and the body alike. A pinned column is the exception: it
+  is fixed at its stored size or its start width, the numbers
+  `getPinnedColumnOffsets` computes the sticky offsets from, so the offsets
+  match the widths the browser renders.
+- A header cell stays `position: sticky` in the static layout, so a pinned
+  column's header pins with its body cells. A header band spans its columns
+  with `colSpan` and is sized by the table, not by summed widths.
+- An empty static body renders `TableStaticEmptyState`, whose height comes from
+  its content. The virtual `TableEmptyState` measures the scroll container
+  instead, which an auto-height container would feed back into.
+
+`features` also governs the virtual layout. Each gate sits in the component it
+hides: `toolbar` gates `TableTitle`, `settings` gates the gear in
+`TableTitleActions`, `TableDrawersSection` and the column menu's manage action, `columnMenu` gates `TableHeaderActionsMenu`, and
+`resize` gates `ResizeHandle`. `Table` passes `hasTableChrome` to `TableOwnStack`:
+with every switch off, the own stack mounts no `FiltersDataProvider`,
+`GlobalSettingsProvider` or `NotificationProvider`, because only the menus,
+drawers and resize write paths read them.
+
+`caption` and `footer` render inside `TableBase` in both layouts: a `<caption>`
+first, and `TableFooter`'s single `<tfoot>` row spanning every rendered column
+last. The footer row takes the `aria-rowindex` after the last body row, and the
+virtual grid's `aria-rowcount` counts it. The `<table>` props and `customStylex` a `Table` is given are split off by
+`splitTableProps`, whose list of the `Table`'s own keys is checked against
+`TableProps` by type, and reach `TableBase` in both layouts. In the virtual layout,
+`composeTableGridFocusProps` runs a consumer's `onFocus`, `onBlur` and `onKeyDown`
+before the grid's handlers. `role` never passes through, because the layout
+decides it. `tabIndex` and `aria-rowcount` do not pass through in the virtual
+layout, because the grid owns its roving tab stop and row count; they do in the
+static layout. `className` and `style` are replaced by the table's own styles;
+`customStylex` is the way to style it.
+
 ## Component Hierarchy
 
 ```mermaid
@@ -230,7 +288,7 @@ graph TD
 
 ## Accessibility
 
-The Table is a **grid**, and its roles are declared rather than inherited: the
+In the virtual layout the Table is a **grid**, and its roles are declared rather than inherited: the
 `display` overrides that make virtualization work take every structural element
 out of the table formatting context, and a browser drops an element's implicit
 table role along with its table `display`

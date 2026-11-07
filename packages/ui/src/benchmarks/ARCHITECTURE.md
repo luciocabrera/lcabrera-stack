@@ -63,7 +63,8 @@ result reverses at ~1,000,000 elements, which a ratio-only summary hid.
 
 ## Files
 
-| File                   | Measures                                                                                                             |
-| ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `arrayShapes.bench.ts` | The eight react-doctor sites accepted in the triage record — current implementation vs. a fused single-pass variant. |
-| `fixedSites.bench.ts`  | The two sites #450 changed — pre-fix vs. post-fix, to confirm the fix was an improvement rather than a wash.         |
+| File                     | Measures                                                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------- |
+| `arrayShapes.bench.ts`   | The eight react-doctor sites accepted in the triage record — current implementation vs. a fused single-pass variant. |
+| `tableLayouts.bench.tsx` | Twelve small `Table`s on one page, virtual against static — client mount and unmount, and server render (#1560).     |
+| `fixedSites.bench.ts`    | The two sites #450 changed — pre-fix vs. post-fix, to confirm the fix was an improvement rather than a wash.         |

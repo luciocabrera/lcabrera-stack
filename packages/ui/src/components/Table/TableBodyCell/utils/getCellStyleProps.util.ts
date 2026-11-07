@@ -1,46 +1,44 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { TableColumnDataType } from '#ui/components/Table/Table.types';
+import type {
+  TableColumnAlign,
+  TableColumnDataType,
+} from '#ui/components/Table/Table.types';
+import type { TableStaticColumnWidths } from '#ui/components/Table/utils/resolveStaticColumnWidths.util';
 
 import type { TableBodyCellProps } from '../TableBodyCell.types';
 
 import { tableBodyCellStyles } from '../TableBodyCell.stylex';
-
-const isRightAlignedDataType = (dataType: TableColumnDataType) =>
-  dataType === 'number' || dataType === 'currency';
-
-const isCenteredDataType = (dataType: TableColumnDataType) =>
-  dataType === 'boolean' || dataType === 'date';
+import { resolveCellDataTypeAlignStyles } from './resolveCellDataTypeAlignStyles.util';
+import { resolveCellLayoutStyles } from './resolveCellLayoutStyles.util';
+import { resolveCellPinStyles } from './resolveCellPinStyles.util';
 
 type GetCellStylePropsArgs = Pick<
   TableBodyCellProps<Record<string, unknown>>,
   'customStylex' | 'minWidth' | 'pinInfo' | 'width'
 > & {
+  readonly align?: TableColumnAlign;
   readonly dataType: TableColumnDataType;
   readonly isAlignedByDataType: boolean;
+  readonly isFill?: boolean;
+  readonly staticWidths?: TableStaticColumnWidths;
 };
 
 export const getCellStyleProps = ({
+  align,
   customStylex,
   dataType,
   isAlignedByDataType,
+  isFill,
   minWidth,
   pinInfo,
+  staticWidths,
   width,
-}: GetCellStylePropsArgs) => {
-  const isRightAligned =
-    isAlignedByDataType && isRightAlignedDataType(dataType);
-  const isCentered = isAlignedByDataType && isCenteredDataType(dataType);
-
-  return stylex.props(
+}: GetCellStylePropsArgs) =>
+  stylex.props(
     tableBodyCellStyles.base(minWidth, width),
-    isRightAligned && tableBodyCellStyles.alignRight,
-    isCentered && tableBodyCellStyles.alignCenter,
-    pinInfo?.side === 'left' && tableBodyCellStyles.pinnedLeft(pinInfo.offset),
-    pinInfo?.side === 'right' &&
-      tableBodyCellStyles.pinnedRight(pinInfo.offset),
-    pinInfo?.isLastPinnedLeft && tableBodyCellStyles.pinnedShadowLeft,
-    pinInfo?.isFirstPinnedRight && tableBodyCellStyles.pinnedShadowRight,
+    ...resolveCellDataTypeAlignStyles({ align, dataType, isAlignedByDataType }),
+    ...resolveCellPinStyles(pinInfo),
+    ...resolveCellLayoutStyles({ align, isFill, staticWidths }),
     customStylex,
   );
-};

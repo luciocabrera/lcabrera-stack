@@ -239,6 +239,8 @@ export type TableChromeState = {
 };
 
 export type TableColumn<TData> = {
+  /** Unset aligns as the `dataType` gives. */
+  readonly align?: TableColumnAlign;
   /** Plain data like `filterOptionsDescriptor`; resolved against the renderers registered on the client. */
   readonly cell?: TableCellCall;
   readonly dataType?: TableColumnDataType;
@@ -261,12 +263,16 @@ export type TableColumn<TData> = {
   readonly maxWidth?: number;
   readonly minWidth?: number;
   readonly render?: (row: TData) => ReactNode;
+  /** A number is the starting width in pixels; `'fill'` takes the width the other columns leave. */
+  readonly width?: 'fill' | number;
 };
 
 export type TableColumnAggregate = {
   readonly columnKey: string;
   readonly fn: TableAggregateFn;
 };
+
+export type TableColumnAlign = 'center' | 'end' | 'start';
 
 export type TableColumnAnalyticalRole = 'dimension' | 'fact' | 'unsupported';
 
@@ -363,6 +369,15 @@ export type TableDensityStep = {
   readonly rowHeight: number;
 };
 
+export type TableFeatures = {
+  readonly columnMenu?: boolean;
+  readonly resize?: boolean;
+  /** The settings button and the drawers it opens. */
+  readonly settings?: boolean;
+  /** The title bar. */
+  readonly toolbar?: boolean;
+};
+
 export type TableFocusState = {
   readonly columnKey: string | undefined;
   /** Bumped so re-entering the cell that already holds focus is still a change. */
@@ -441,6 +456,8 @@ export type TableGroupRowSummary = {
   readonly path: readonly TableGroupKeyValue[];
 };
 
+export type TableLayoutMode = 'static' | 'virtual';
+
 export type TableLockedFilter = {
   readonly columnKey: string;
   readonly label: string;
@@ -489,14 +506,22 @@ export type TableProps<
     | TableRowsSource<TData>
     | TableSelectedSource<TData, TResponse, Promise<TResponse> | TResponse>
   ) & {
+    readonly caption?: ReactNode;
     /** Seeds the providers the Table mounts when none are above it. */
     readonly columns: readonly TableColumn<TData>[];
     /** The level when the meta state holds none. */
     readonly density?: TableDensity;
+    /** Each one unset is on in the virtual layout and off in the static one. */
+    readonly features?: TableFeatures;
+    /** One row spanning every column, in `<tfoot>`. */
+    readonly footer?: ReactNode;
     /** The header row's level when the meta state holds none; defaults to the density. */
     readonly headerDensity?: TableDensity;
+    /** Defaults to on in the virtual layout and off in the static one. */
     readonly isFlexWrapperEnabled?: boolean;
     readonly isLoading?: boolean;
+    /** `'static'` renders every row at its content's height, as `role="table"`; defaults to `'virtual'`. */
+    readonly layout?: TableLayoutMode;
     /** Read only when the Table mounts its own providers. */
     readonly title?: string;
   };

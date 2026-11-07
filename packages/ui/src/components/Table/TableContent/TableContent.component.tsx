@@ -14,10 +14,14 @@ import { useTableContentRuntime } from './useTableContentRuntime.hook';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
+  caption,
+  customStylex,
   dataSelector,
   dataTotalSelector,
+  footer,
   icon,
   onLoadMore,
+  tableProps,
 }: TableContentProps<TData, TResponse>) => {
   const { containerRef, isLoading, isRounded, sentinelRef, wrapperRef } =
     useTableContentRuntime<TData, TResponse>({
@@ -47,7 +51,12 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
             )}
             data-testid='table-scroll-container'
           >
-            <TableBase>
+            <TableBase
+              {...tableProps}
+              caption={caption}
+              customStylex={customStylex}
+              footer={footer}
+            >
               <TableHeader />
               <TableBody tableContainerRef={containerRef} />
             </TableBase>

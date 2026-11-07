@@ -621,6 +621,42 @@ confirm a test fails before believing the test.
 
 ---
 
+## Static or Virtual: Choosing a Table Layout
+
+One `Table` component has two layouts, picked by `layout`
+([ADR-146](../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (b)).
+Pick by what the reader does with the table, not by how many rows it has today.
+
+| Use                                                                                        | Layout                    |
+| ------------------------------------------------------------------------------------------ | ------------------------- |
+| A handful of rows in a card or a page section: a summary, a comparison, a list with links  | `'static'`                |
+| Rows that grow without bound, load more on scroll, or that a reader sorts, filters or pins | `'virtual'` (the default) |
+| A table that fills a region of the page and scrolls inside it                              | `'virtual'`               |
+
+```tsx
+// ✅ a short summary: every row, as tall as its rows, links on the normal tab order
+<Table caption='This week' columns={columns} layout='static' response={rows} />
+
+// ❌ a virtual table squeezed into a card: it needs a height from its parent and
+// brings a settings button and column menus nobody uses here
+<Table columns={columns} response={rows} />
+```
+
+The static layout renders `role="table"`, never a grid: no roving tab stop, no
+arrow-key navigation, no folding. Each `features` switch (`toolbar`, `settings`,
+`columnMenu`, `resize`) defaults to on in the virtual layout and off in the
+static one, so turn on only what the reader needs. With all four off, the table
+mounts no filter, global-settings or notification provider, which is what keeps a
+page of many small tables cheap. A tree of group rows renders flat in the static
+layout, every row shown, because nothing there can fold it. If a reader needs to
+fold groups, use the virtual layout.
+
+Columns sent from a loader cannot carry a `render` function, so a column whose
+cells hold links is built in the component that renders the table. Set `align`
+on it: a `render` cell gets no alignment from its `dataType`.
+
+---
+
 ## Controlled Component Contract
 
 All form-like components are **fully controlled** — no internal state for the value:
