@@ -38,6 +38,6 @@ Add Select, TextInput and DescriptionList to @lcabrera/ui
 
 ## Status / next
 
-- Current step: implemented; running the full gate
-- Blockers: none
+- Current step: implemented; fallow preflight blocked on one finding sent for adjudication
+- Blockers: VirtualSelect cognitive complexity from prop count (fallow health)
 - Next:
