@@ -8,7 +8,7 @@ import { styles as textStyles } from '#ui/components/Text/Text.stylex';
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
-import { DescriptionList } from './DescriptionList.component';
+import { DescriptionList } from '.';
 import { descriptionListStyles } from './DescriptionList.stylex';
 
 const ITEMS = [
