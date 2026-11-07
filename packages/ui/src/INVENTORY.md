@@ -254,7 +254,7 @@ Covers `packages/ui` only. Two sibling packages own what used to be listed here,
 | ------------------------- | ---------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | `findNearestIndex`        | `components/Heatmap/utils/findNearestIndex.util.ts`        | The closest listed index at or past a target in the direction of travel, or the outermost one                         |
 | `getCellFill`             | `components/Heatmap/utils/getCellFill.util.ts`             | What fills a position: empty when missing, its value's place in a sequential domain, or its tone                      |
-| `getCellKey`              | `components/Heatmap/utils/getCellKey.util.ts`              | A position's identity from its row and column keys, safe inside a quoted selector                                     |
+| `getCellKey`              | `components/Heatmap/utils/getCellKey.util.ts`              | A position's identity from its row and column keys, kept apart when a key holds the separator                         |
 | `getFillStyle`            | `components/Heatmap/utils/getFillStyle.util.ts`            | The StyleX style for a fill                                                                                           |
 | `getHeatmapGeometry`      | `components/Heatmap/utils/getHeatmapGeometry.util.ts`      | Lays the flat cells onto the axes: one entry per position, its place, its name, and the linked cells in reading order |
 | `getUsedPatterns`         | `components/Heatmap/utils/getUsedPatterns.util.ts`         | The patterns a cell or a legend entry names, each once                                                                |
