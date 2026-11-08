@@ -36,6 +36,11 @@ const LINK_FORMS = [
   },
 ];
 
+const LINE_SUFFIX_FORMS = ['2', '2-4', '2:5'].map((suffix) => ({
+  form: `a root-anchored path with the line suffix :${suffix}`,
+  markdown: (target) => `See \`docs/agents/${target}:${suffix}\`.\n`,
+}));
+
 describe('repo-verify-docs-paths', () => {
   it.each(LINK_FORMS)('fails on $form to a missing file', ({ markdown }) => {
     const result = run(makeRoot(markdown('does-not-exist.json')));
@@ -44,23 +49,10 @@ describe('repo-verify-docs-paths', () => {
     expect(result.stderr).toContain(`${DOC}: \`does-not-exist.json\``);
   });
 
-  it.each(LINK_FORMS)(
+  it.each([...LINK_FORMS, ...LINE_SUFFIX_FORMS])(
     'passes $form once its target exists beside the doc',
     ({ markdown }) => {
       const root = makeRoot(markdown('facts.json'));
-      writeIn(root)('docs/agents/facts.json', '{}\n');
-
-      const result = run(root);
-
-      expect(result.status).toBe(0);
-      expect(result.stdout).toContain('Documented-path gate passed');
-    },
-  );
-
-  it.each(['2', '2-4', '2:5'])(
-    'resolves a path with the line suffix :%s against the path alone',
-    (suffix) => {
-      const root = makeRoot(`See \`docs/agents/facts.json:${suffix}\`.\n`);
       writeIn(root)('docs/agents/facts.json', '{}\n');
 
       const result = run(root);
