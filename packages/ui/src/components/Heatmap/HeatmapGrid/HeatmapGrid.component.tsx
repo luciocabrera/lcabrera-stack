@@ -24,6 +24,8 @@ export const HeatmapGrid = ({
       aria-describedby={descriptionId}
       aria-labelledby={titleId}
       {...gridProps}
+      // biome-ignore lint/a11y/noNoninteractiveElementToInteractiveRole: false positive, case FP-0001: a table with roving focus and arrow keys is the ARIA data grid, and grid subclasses table
+      role='grid'
       {...stylex.props(heatmapGridStyles.table)}
     >
       <tbody>

@@ -48,7 +48,6 @@ export const useHeatmapRovingFocus = ({
     gridProps: {
       onFocus: handleFocus,
       onKeyDown: handleKeyDown,
-      role: HEATMAP.gridRole,
     },
     tabStop,
   };

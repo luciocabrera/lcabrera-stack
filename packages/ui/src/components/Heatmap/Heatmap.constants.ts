@@ -6,7 +6,6 @@ export const HEATMAP = {
   cellAttribute: 'data-heatmap-cell',
   cellGap: 1,
   defaultCellSize: 16,
-  gridRole: 'grid',
   missingValue: 'No value',
   pageRows: 10,
   patternSize: 6,
