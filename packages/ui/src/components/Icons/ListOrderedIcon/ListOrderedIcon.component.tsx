@@ -1,15 +1,10 @@
 import type { IconProps } from '../Icons.types';
 
+import { IconBase } from '../IconBase';
+import { unsetIconStroke } from '../Icons.constants';
+
 export const ListOrderedIcon = ({ size = 16, ...props }: IconProps) => (
-  <svg
-    aria-hidden='true'
-    fill='none'
-    height={size}
-    viewBox='0 0 16 16'
-    width={size}
-    xmlns='http://www.w3.org/2000/svg'
-    {...props}
-  >
+  <IconBase size={size} viewBox='0 0 16 16' {...unsetIconStroke} {...props}>
     <path
       d='M6 3.5H14M6 8H14M6 12.5H14'
       stroke='currentColor'
@@ -46,5 +41,5 @@ export const ListOrderedIcon = ({ size = 16, ...props }: IconProps) => (
     >
       3
     </text>
-  </svg>
+  </IconBase>
 );

@@ -278,9 +278,13 @@ it was judged at (`base_sha`, `head_sha`) and the pull request, then one entry
 per verifier with its role (`judge` or `adversary`), model,
 `agent_prompt_hash`, verdict (`REAL` or `FALSE_POSITIVE`), evidence, duration,
 tokens and cost, and last the case's outcome: `dismissed`, `fixed`, `split` or
-`escalated`. The schema refuses a dismissed case that any verifier called
-`REAL`, a split case on which every verifier agreed, and a model sitting twice
-in one role. It is versioned by ADR-131's rules, with its own
+`escalated`. A split or fixed case may carry the repository owner's
+`owner_ruling`: a `verdict`, the GitHub login that gave it (`by`), the
+`YYYY-MM-DD` date (`at`) and the `https` URL of the ruling (`reference`). The
+schema refuses a dismissed case that any verifier called `REAL`, a split case
+on which every verifier agreed, a model sitting twice in one role, and an owner
+ruling on a dismissed or escalated case or dated before the case opened. The
+ingest does not store the ruling yet. It is versioned by ADR-131's rules, with its own
 `schema_version` and its own upcaster map, `ADJUDICATION_UPCASTERS`.
 
 A dismissed case is a confirmed false positive, and the gate compares against

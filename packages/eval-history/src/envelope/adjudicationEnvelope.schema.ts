@@ -13,6 +13,9 @@ const sha256 = z.string().regex(/^[0-9a-f]{64}$/u);
 const gitSha = z.string().regex(/^[0-9a-f]{40}$/u);
 const count = z.int().nonnegative();
 const name = z.string().min(1);
+const githubLogin = z
+  .string()
+  .regex(/^[\dA-Za-z](?:[\dA-Za-z]|-(?=[\dA-Za-z])){0,38}$/u);
 
 const caseSchema = z.object({
   analyzer: name,
@@ -39,9 +42,17 @@ const verifierSchema = z.object({
   verdict: z.enum(ADJUDICATION_VERDICTS),
 });
 
+const ownerRulingSchema = z.object({
+  at: z.iso.date(),
+  by: githubLogin,
+  reference: z.url({ protocol: /^https$/u }).meta({ pattern: '^https://' }),
+  verdict: z.enum(ADJUDICATION_VERDICTS),
+});
+
 export const adjudicationShapeSchema = z.object({
   case: caseSchema,
   outcome: z.enum(ADJUDICATION_OUTCOMES),
+  owner_ruling: ownerRulingSchema.optional(),
   schema_version: z.literal(ADJUDICATION_SCHEMA_VERSION),
   verifiers: z.array(verifierSchema).min(1),
 });

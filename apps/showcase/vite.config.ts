@@ -4,7 +4,10 @@ import { defineConfig } from 'vite-plus';
 import { pluginsConfig } from './config/vite.plugins.config.ts';
 import { runConfig } from './config/vite.run.config.ts';
 
+const cacheDir = process.env.SHOWCASE_VITE_CACHE_DIR;
+
 export default defineConfig({
+  ...(cacheDir !== undefined && cacheDir !== '' && { cacheDir }),
   build: {
     // Never expose source maps in production — server code would be publicly
     // visible in the browser. The dev server has its own source map pipeline

@@ -1,8 +1,10 @@
 /**
  * Decides whether every false-positive marker in the tree matches one live
  * entry of `docs/agents/false-positives.json`, and whether every entry is
- * backed by a unanimous panel of three distinct models. Pure: the caller reads
- * the files and validates each case envelope against its schema. Policy:
+ * backed by a panel of three distinct models that ruled FALSE_POSITIVE
+ * unanimously, or by the owner's FALSE_POSITIVE ruling on a split or fixed
+ * case. Pure: the caller reads the files and validates each case envelope
+ * against its schema, which holds the ruling's shape. Policy:
  * `docs/agents/public-package-suppressions.md`.
  */
 import { isCalendarDate } from '../../packages/repo-standards/scripts/calendar-date.mjs';
@@ -125,8 +127,43 @@ const caseFieldProblems = ({ envelope, entry }) =>
       ),
     );
 
-const panelProblems = ({ envelope, entry }) => {
-  const { outcome, verifiers } = envelope;
+const verdictProblems = ({ entry, envelope, split, today }) => {
+  const { outcome, owner_ruling: ruling } = envelope;
+  if (ruling === undefined) {
+    return outcome === 'dismissed' && !split
+      ? []
+      : [
+          problem(
+            'not-unanimous',
+            entry.case,
+            `the panel did not rule FALSE_POSITIVE unanimously (outcome ${outcome}), and no owner ruled on it`,
+          ),
+        ];
+  }
+  return [
+    ...(ruling.verdict === 'FALSE_POSITIVE'
+      ? []
+      : [
+          problem(
+            'owner-ruled-real',
+            entry.case,
+            `${ruling.by} ruled the ${outcome} case ${ruling.verdict} on ${ruling.at} (${ruling.reference}); fix the finding`,
+          ),
+        ]),
+    ...(ruling.at > today
+      ? [
+          problem(
+            'ruling-in-future',
+            entry.case,
+            `the owner's ruling is dated ${ruling.at}, after today (${today}), which would stretch its expiry`,
+          ),
+        ]
+      : []),
+  ];
+};
+
+const panelProblems = ({ envelope, entry, today }) => {
+  const { verifiers } = envelope;
   const models = new Set(verifiers.map(({ model }) => model));
   const roles = verifiers.map(({ role }) => role);
   const split = verifiers.some(({ verdict }) => verdict !== 'FALSE_POSITIVE');
@@ -150,19 +187,11 @@ const panelProblems = ({ envelope, entry }) => {
             'the panel needs two judges and one adversary',
           ),
         ]),
-    ...(outcome === 'dismissed' && !split
-      ? []
-      : [
-          problem(
-            'not-unanimous',
-            entry.case,
-            `the panel did not rule FALSE_POSITIVE unanimously (outcome ${outcome})`,
-          ),
-        ]),
+    ...verdictProblems({ entry, envelope, split, today }),
   ];
 };
 
-const evidenceProblems = ({ entry, readCase }) => {
+const evidenceProblems = ({ entry, readCase, today }) => {
   const read = readCase(entry.evidence);
   if (read.missing) {
     return [
@@ -179,16 +208,20 @@ const evidenceProblems = ({ entry, readCase }) => {
     ];
   }
   const { envelope } = read;
-  const limit = addMonths(envelope.case.created_at, MAX_MONTHS);
+  const ruled = envelope.owner_ruling !== undefined;
+  const limit = addMonths(
+    ruled ? envelope.owner_ruling.at : envelope.case.created_at,
+    MAX_MONTHS,
+  );
   return [
     ...caseFieldProblems({ entry, envelope }),
-    ...panelProblems({ entry, envelope }),
+    ...panelProblems({ entry, envelope, today }),
     ...(entry.expires > limit
       ? [
           problem(
             'expiry-too-far',
             entry.case,
-            `expires ${entry.expires}, past ${limit}, six months after the case opened`,
+            `expires ${entry.expires}, past ${limit}, six months after ${ruled ? 'the owner ruled' : 'the case opened'}`,
           ),
         ]
       : []),
@@ -234,7 +267,7 @@ const entryProblems = ({ entry, markers, readCase, readText, today }) => {
     ...(entry.expires < today
       ? [problem('expired', entry.case, `expired on ${entry.expires}`)]
       : []),
-    ...evidenceProblems({ entry, readCase }),
+    ...evidenceProblems({ entry, readCase, today }),
     ...hashProblems({ entry, markers, readText }),
   ];
 };

@@ -15,6 +15,7 @@ import {
   nextCaseId,
   parseFindingId,
 } from './adjudication-case.mjs';
+import { caseCommit } from './case-snapshot.mjs';
 
 export const CASES_DIR = 'docs/agents/adjudications';
 
@@ -171,6 +172,9 @@ const explanation = ({ analyzer, effects, finding, issue }) => {
   }
 };
 
+const snapshotNote = (sha) =>
+  `The flagged lines are not committed, so the panel reads ${sha}, a snapshot of the working tree made with git stash create; no ref moved.\n`;
+
 export const openCase = ({ argv, effects }) => {
   const { analyzer, findingId, pr, trace } = readInput(argv);
   const finding = parseFindingId(findingId);
@@ -199,11 +203,20 @@ export const openCase = ({ argv, effects }) => {
         `${analyzer} does not report ${finding.rule} at ${finding.file}:${finding.start} now, so there is nothing to adjudicate.`,
     );
   }
+  const code = flaggedCode({ ...finding, text });
+  const shas = effects.shas();
+  const commit = caseCommit({
+    code,
+    file: finding.file,
+    head: shas.head,
+    snapshot: effects.snapshot,
+    textAt: (sha) => effects.textAt({ file: finding.file, sha }),
+  });
   const caseId = nextCaseId(effects.caseNames());
   const body = buildCase({
     analyzer,
     caseId,
-    code: flaggedCode({ ...finding, text }),
+    code,
     createdAt: effects.now(),
     completion: issue === SIMILAR_CODE ? completionOf(report) : undefined,
     explain: explanation({ analyzer, effects, finding, issue }),
@@ -212,7 +225,7 @@ export const openCase = ({ argv, effects }) => {
     markerRule: issue.token,
     pr,
     records,
-    shas: effects.shas(),
+    shas: { ...shas, head: commit.sha },
     trace:
       analyzer === 'fallow'
         ? fallowTrace({ command: issue.command, effects, records, trace })
@@ -221,7 +234,7 @@ export const openCase = ({ argv, effects }) => {
   const path = `${CASES_DIR}/${caseId}/case.json`;
   effects.writeJson(path, body);
   effects.write(
-    `Opened ${caseId}: ${path}\nRun the panel next: vp run adjudicate:panel -- ${caseId} --builder-model <your model id>\n`,
+    `Opened ${caseId}: ${path}\n${commit.snapshot ? snapshotNote(commit.sha) : ''}Run the panel next: vp run adjudicate:panel -- ${caseId} --builder-model <your model id>\n`,
   );
   return 0;
 };

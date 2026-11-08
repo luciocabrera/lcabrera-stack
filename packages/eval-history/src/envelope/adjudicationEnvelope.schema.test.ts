@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
+import { z } from 'zod';
 
 import { adjudicationEnvelopeSchema } from './adjudicationEnvelope.schema.ts';
 import { envelopeJsonSchema } from './envelopeJsonSchema.util.ts';
@@ -127,10 +128,112 @@ describe('adjudicationEnvelopeSchema', () => {
   });
 });
 
+const RULING = {
+  at: '2026-11-08',
+  by: 'luciocabrera',
+  reference:
+    'https://github.com/luciocabrera/lcabrera-stack/pull/1595#issuecomment-1',
+  verdict: 'FALSE_POSITIVE',
+};
+
+const ruledSplit = (ruling: object) => ({
+  ...fixture,
+  outcome: 'split',
+  owner_ruling: ruling,
+  verifiers: [judge, secondJudge, { ...adversary, verdict: 'REAL' }],
+});
+
+describe('adjudicationEnvelopeSchema — the owner ruling', () => {
+  it('keeps a complete ruling on a split case', () => {
+    const parsed = adjudicationEnvelopeSchema.parse(ruledSplit(RULING));
+    expect(parsed.owner_ruling).toEqual(RULING);
+  });
+
+  it.each(['at', 'by', 'reference', 'verdict'])(
+    'rejects a ruling with no %s',
+    (field) => {
+      const rest = Object.fromEntries(
+        Object.entries(RULING).filter(([key]) => key !== field),
+      );
+      expect(issuePaths(ruledSplit(rest))).toEqual([`owner_ruling.${field}`]);
+    },
+  );
+
+  it.each([
+    { field: 'at', value: '' },
+    { field: 'at', value: '2026-02-30' },
+    { field: 'at', value: '8 November 2026' },
+    { field: 'by', value: '' },
+    { field: 'by', value: '-lucio' },
+    { field: 'by', value: 'lucio cabrera' },
+    { field: 'reference', value: '' },
+    { field: 'reference', value: 'issue #1595' },
+    { field: 'reference', value: 'http://github.com/x/y/pull/1' },
+    { field: 'reference', value: 'httpsx://github.com/x/y/pull/1' },
+    { field: 'reference', value: 'xhttps://github.com/x/y/pull/1' },
+    { field: 'verdict', value: '' },
+    { field: 'verdict', value: 'false_positive' },
+  ])('rejects a ruling whose $field is "$value"', ({ field, value }) => {
+    expect(issuePaths(ruledSplit({ ...RULING, [field]: value }))).toEqual([
+      `owner_ruling.${field}`,
+    ]);
+  });
+
+  it('rejects a ruling on a dismissed or escalated case', () => {
+    expect(issuePaths({ ...fixture, owner_ruling: RULING })).toEqual([
+      'owner_ruling',
+    ]);
+    expect(
+      issuePaths({
+        ...ruledSplit(RULING),
+        outcome: 'escalated',
+        verifiers: fixture.verifiers.map((seat) => ({
+          ...seat,
+          verdict: 'REAL',
+        })),
+      }),
+    ).toEqual(['owner_ruling']);
+  });
+
+  it('accepts a ruling on a fixed case, and rejects one dated before the case opened', () => {
+    expect(issuePaths({ ...ruledSplit(RULING), outcome: 'fixed' })).toEqual([]);
+    const openingDay = fixture.case.created_at.slice(0, 10);
+    expect(issuePaths(ruledSplit({ ...RULING, at: openingDay }))).toEqual([]);
+    const early = adjudicationEnvelopeSchema.safeParse(
+      ruledSplit({ ...RULING, at: '2020-01-01' }),
+    );
+    expect(
+      early.error?.issues.map(({ message, path }) => [path.join('.'), message]),
+    ).toEqual([
+      [
+        'owner_ruling.at',
+        'an owner ruling is dated on or after the day the case opened',
+      ],
+    ]);
+  });
+});
+
 describe('adjudication.schema.json', () => {
   it('matches the Zod schema; run schema:write when this fails', () => {
     expect(files.get('adjudication.schema.json')).toEqual(
       envelopeJsonSchema(adjudicationEnvelopeSchema),
     );
+  });
+
+  it("carries the ruling reference's https-only rule, not only its uri format", () => {
+    const referenceRule = z.record(z.string(), z.unknown());
+    const ruling = z.object({
+      properties: z.object({ reference: referenceRule }),
+    });
+    const document = z.object({
+      properties: z.object({ owner_ruling: ruling }),
+    });
+    const { reference } = document.parse(files.get('adjudication.schema.json'))
+      .properties.owner_ruling.properties;
+    expect(reference).toEqual({
+      format: 'uri',
+      pattern: '^https://',
+      type: 'string',
+    });
   });
 });
