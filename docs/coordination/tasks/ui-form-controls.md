@@ -38,6 +38,6 @@ Add Select, TextInput and DescriptionList to @lcabrera/ui
 
 ## Status / next
 
-- Current step: implemented; fallow preflight blocked on one finding sent for adjudication
-- Blockers: VirtualSelect cognitive complexity from prop count (fallow health)
+- Current step: FP-0001 ruled a false positive by the owner; running the full gate
+- Blockers: none
 - Next:

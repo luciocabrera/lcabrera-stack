@@ -48,5 +48,11 @@
       "tokens_out": 14797,
       "verdict": "FALSE_POSITIVE"
     }
-  ]
+  ],
+  "owner_ruling": {
+    "at": "2026-11-08",
+    "by": "luciocabrera",
+    "reference": "https://github.com/luciocabrera/lcabrera-stack/pull/1595#issuecomment-6725764061",
+    "verdict": "FALSE_POSITIVE"
+  }
 }
