@@ -58,6 +58,7 @@ export const DEFAULT_REGISTERS = {
   adrTemplateHome: 'docs/decisions',
   coordinationBoardDoc: 'docs/coordination/BOARD.md',
   coordinationTasksDir: 'docs/coordination/tasks',
+  falsePositives: 'docs/agents/false-positives.json',
   planningDir: 'docs/agents/planning',
   requirementsDir: 'docs/product/requirements',
 };
@@ -162,6 +163,11 @@ export const resolveRegisters = (raw) => {
       block.coordinationTasksDir,
       DEFAULT_REGISTERS.coordinationTasksDir,
       'registers.coordinationTasksDir',
+    ),
+    falsePositives: repoRelative(
+      block.falsePositives,
+      DEFAULT_REGISTERS.falsePositives,
+      'registers.falsePositives',
     ),
     planningDir: repoRelative(
       block.planningDir,
