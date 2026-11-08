@@ -8,10 +8,11 @@ area:
   - apps/showcase/e2e/evals/**
   - apps/showcase/e2e/global-setup.ts
   - apps/showcase/playwright.config.ts
+  - apps/showcase/vite.config.ts
   - .github/workflows/e2e.yml
   - COMMANDS.md
 started: 2026-10-30
-updated: 2026-11-02
+updated: 2026-11-08
 plan: (none)
 pr: '#1579'
 issue: #1551

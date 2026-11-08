@@ -218,7 +218,11 @@ sure `eval_history_e2e_missing` does not exist, and creates or re-passwords the
 login role `eval_history_e2e_reader`, so `DB_USER` needs `CREATEDB` and
 `CREATEROLE`. Playwright then serves the app three times, one server per
 database, and the `evals-empty` and `evals-broken` projects run against the
-second and third.
+second and third. Each of those servers sets `SHOWCASE_VITE_CACHE_DIR`, which
+`apps/showcase/vite.config.ts` reads as Vite's `cacheDir`, so the three dev
+servers each optimise dependencies into their own `node_modules/.vite-e2e-*`
+folder instead of racing on the shared `.vite` one. Unset, Vite keeps its
+default cache, so a dev server started by hand behaves as before.
 
 `test:scripts` is chained into both, and needs to be: root `scripts/` is **not a
 workspace**, so `vp run -r test` never reaches it. That is why the logic behind

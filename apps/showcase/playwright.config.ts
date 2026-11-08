@@ -27,6 +27,7 @@ const webServer = (args: {
     : `vp exec react-router dev --host 127.0.0.1 --port ${String(args.port)} --strictPort`,
   env: {
     PORT: String(args.port),
+    SHOWCASE_VITE_CACHE_DIR: `node_modules/.vite-e2e-${args.database}`,
     ...(evalsServer !== undefined && {
       EVALS_DASHBOARD: '1',
       EVALS_READER_DATABASE_URL: evalsServer.readerUrlOf(args.database),

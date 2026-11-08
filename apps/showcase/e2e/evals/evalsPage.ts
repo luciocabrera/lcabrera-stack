@@ -224,8 +224,39 @@ const captureTheme = async ({
   ).toBeVisible();
 
   const file = testInfo.outputPath(`${name}-${theme}.png`);
+  const viewport = page.viewportSize();
+  const hidden = await mainOf(page).evaluate((main) => {
+    const scrollers = [main, ...ancestorsOf(main)].filter(
+      (element) => element.scrollHeight > element.clientHeight + 1,
+    );
+
+    return Math.max(
+      0,
+      ...scrollers.map(
+        (element) => element.scrollHeight - element.clientHeight,
+      ),
+    );
+
+    function ancestorsOf(element: Element): readonly Element[] {
+      return element.parentElement === null
+        ? []
+        : [element.parentElement, ...ancestorsOf(element.parentElement)];
+    }
+  });
+
+  if (viewport !== null) {
+    await page.setViewportSize({
+      height: viewport.height + hidden,
+      width: viewport.width,
+    });
+  }
 
   await page.screenshot({ fullPage: true, path: file });
+
+  if (viewport !== null) {
+    await page.setViewportSize(viewport);
+  }
+
   await testInfo.attach(`${name} (${theme})`, {
     contentType: 'image/png',
     path: file,
