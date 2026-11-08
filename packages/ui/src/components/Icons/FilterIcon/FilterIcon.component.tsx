@@ -1,15 +1,10 @@
 import type { IconProps } from '../Icons.types';
 
+import { IconBase } from '../IconBase';
+import { unsetIconStroke } from '../Icons.constants';
+
 export const FilterIcon = ({ size = 16, ...props }: IconProps) => (
-  <svg
-    aria-hidden='true'
-    fill='none'
-    height={size}
-    viewBox='0 0 16 16'
-    width={size}
-    xmlns='http://www.w3.org/2000/svg'
-    {...props}
-  >
+  <IconBase size={size} viewBox='0 0 16 16' {...unsetIconStroke} {...props}>
     <path
       d='M2 4H14M4 8H12M6 12H10'
       stroke='currentColor'
@@ -17,5 +12,5 @@ export const FilterIcon = ({ size = 16, ...props }: IconProps) => (
       strokeLinejoin='round'
       strokeWidth='1.5'
     />
-  </svg>
+  </IconBase>
 );
