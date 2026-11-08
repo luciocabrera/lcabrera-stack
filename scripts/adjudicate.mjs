@@ -1,22 +1,17 @@
 /**
  * Opens a false-positive case: re-runs the analyzer, keeps the finding only if
- * the analyzer still reports it, and writes what the blind panel reads. The
- * builder's view of the finding is not an input. Policy:
+ * the analyzer still reports it, and writes what the blind panel reads. When
+ * the flagged lines are not committed, the case names a `git stash create`
+ * snapshot of the working tree instead of HEAD. The builder's view of the
+ * finding is not an input. Policy:
  * docs/agents/public-package-suppressions.md.
  *
  * Usage: vp run adjudicate -- <analyzer> <file>:<line>[-<end line>]:<rule> [--trace <target>] [--pr <number>]
- * Exit codes: 0 = case written; 1 = bad arguments, or the finding is not reported.
+ * Exit codes: 0 = case written; 1 = bad arguments, the finding is not
+ * reported, or neither HEAD nor a snapshot holds the flagged lines.
  */
 import { execFileSync } from 'node:child_process';
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'node:fs';
-import { dirname } from 'node:path';
+import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs';
 import process from 'node:process';
 
 import { readWorkspaceGraph } from '../packages/repo-standards/scripts/affected-tests.mjs';
@@ -24,6 +19,8 @@ import { runGitStatus } from '../packages/repo-standards/scripts/git-exec.mjs';
 import { readConventions } from '../packages/repo-standards/scripts/config.mjs';
 import { CASES_DIR, openCase } from './lib/adjudicate-command.mjs';
 import { takenCaseNames } from './lib/adjudication-case.mjs';
+import { stashSnapshot, textAt } from './lib/case-snapshot.mjs';
+import { jsonWriterIn, runCommand } from './lib/command-shell.mjs';
 import { repoPath, toolEntry } from './lib/tool-paths.mjs';
 
 const ROOT = process.cwd();
@@ -120,20 +117,14 @@ const effects = {
     base: git(['rev-parse', '--verify', `${baseRef()}^{commit}`]),
     head: git(['rev-parse', '--verify', 'HEAD^{commit}']),
   }),
+  snapshot: () => stashSnapshot({ root: ROOT }),
+  textAt: ({ file, sha }) => textAt({ file, root: ROOT, sha }),
   workspaceOf,
   write: (text) => process.stdout.write(text),
-  writeJson: (path, value) => {
-    const target = inRepo(path);
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`);
-  },
+  writeJson: jsonWriterIn(ROOT),
 };
 
-try {
-  process.exitCode = openCase({ argv: process.argv.slice(2), effects });
-} catch (error) {
-  process.stderr.write(
-    `adjudicate: ${error instanceof Error ? error.message : String(error)}\n`,
-  );
-  process.exitCode = 1;
-}
+runCommand({
+  name: 'adjudicate',
+  run: () => openCase({ argv: process.argv.slice(2), effects }),
+});

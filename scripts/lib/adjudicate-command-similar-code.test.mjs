@@ -51,6 +51,8 @@ const run = ({ modelReady = true, report = REPORT } = {}) => {
         };
       },
       shas: () => ({ base: '1'.repeat(40), head: '2'.repeat(40) }),
+      snapshot: () => '',
+      textAt: () => 'export const a = 1;\n',
       write: () => undefined,
       writeJson: (_path, value) => written.push(value),
     },

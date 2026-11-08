@@ -1,9 +1,11 @@
 /**
  * The decisions behind `vp run adjudicate:panel`: who sits on the panel, what a
  * verdict must hold, the outcome three verdicts make, and the envelope, list
- * entry and upstream draft a unanimous dismissal produces. Pure: the runner
+ * entry, marker and upstream draft a dismissal produces, by the panel or by the
+ * owner's ruling. Pure: the runner
  * starts the sessions and writes the files.
  */
+import { markerSpelling } from './false-positive-markers.mjs';
 import { expiryFor } from './false-positives.mjs';
 
 export const DEFAULT_SEATS = [
@@ -180,16 +182,28 @@ export const envelopeFor = ({
   verifiers,
 });
 
-export const listEntryFor = ({ caseFile, evidence }) => ({
+export const listEntryFor = ({
+  caseFile,
+  evidence,
+  from = caseFile.case.created_at,
+}) => ({
   analyzer: caseFile.case.analyzer,
   case: caseFile.case.case_id,
   contentHash: caseFile.case.content_hash,
   evidence,
-  expires: expiryFor(caseFile.case.created_at),
+  expires: expiryFor(from),
   file: caseFile.case.file,
   lines: caseFile.code.end - caseFile.code.start + 1,
   rule: caseFile.case.rule,
 });
+
+export const listWithEntry = ({ caseFile, evidence, from, list }) => [
+  ...list,
+  listEntryFor({ caseFile, evidence, from }),
+];
+
+export const markerInstruction = (caseFile) =>
+  `Add this marker above line ${caseFile.code.start} of ${caseFile.case.file}:\n  ${markerSpelling({ analyzer: caseFile.case.analyzer, caseId: caseFile.case.case_id, reason: '<one-line reason>', rule: caseFile.case.rule })}\n`;
 
 export const upstreamDraft = ({ caseFile, verifiers }) =>
   [

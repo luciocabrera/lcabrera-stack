@@ -12,7 +12,8 @@ takes the next number after every case here and on the default branch.
 analyzer reports it, its explanation and trace, and the flagged code. The panel
 writes one `<role>-<model>.verdict.md` per seat beside it, and, on a dismissal,
 an `upstream.md` draft that is never posted without the repository owner's
-explicit yes. The policy is
+explicit yes. On a split or `fixed` case, `vp run adjudicate:rule` adds the
+owner's ruling to the case file as `owner_ruling`. The policy is
 [ADR-147](../../decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md).
 
 Each file is an adjudication envelope:

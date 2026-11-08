@@ -6,6 +6,7 @@
   "scripts": {
     "adjudicate": "node scripts/adjudicate.mjs",
     "adjudicate:panel": "node scripts/adjudicate-panel.mjs",
+    "adjudicate:rule": "node scripts/adjudicate-rule.mjs",
     "adr:list": "repo-verify-adrs --list",
     "adr:new": "repo-adr",
     "adr:verify": "repo-verify-adrs",

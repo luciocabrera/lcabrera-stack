@@ -152,7 +152,7 @@ const FP_FILE = 'packages/ui/src/flagged.util.ts';
 const FP_LINE = 'export const flagged = (value) => value;';
 const FP_MARKER = `// eslint-disable-next-line some/rule -- false positive, case ${FP_CASE}: the rule misreads this`;
 
-const fpVerifier = (model, role) => ({
+const fpVerifier = (model, role, verdict = 'FALSE_POSITIVE') => ({
   agent_prompt_hash: 'a'.repeat(64),
   cost_usd: null,
   duration_ms: 1,
@@ -161,10 +161,13 @@ const fpVerifier = (model, role) => ({
   role,
   tokens_in: 1,
   tokens_out: 1,
-  verdict: 'FALSE_POSITIVE',
+  verdict,
 });
 
-const writeFalsePositiveCase = (root, { expires, marker = FP_MARKER }) => {
+const writeFalsePositiveCase = (
+  root,
+  { expires, marker = FP_MARKER, ruled = {} },
+) => {
   const write = writeIn(root);
   const contentHash = createHash('sha256').update(FP_LINE).digest('hex');
   const createdAt = new Date(Date.now() - 86_400_000).toISOString();
@@ -191,6 +194,7 @@ const writeFalsePositiveCase = (root, { expires, marker = FP_MARKER }) => {
         fpVerifier('model-b', 'judge'),
         fpVerifier('model-c', 'adversary'),
       ],
+      ...ruled,
     }),
   );
   write(
@@ -236,6 +240,44 @@ describe('verify-suppressions — panel-confirmed false positives', () => {
     expect(result.status).not.toBe(0);
     expect(result.stdout).toContain(`inline ${FP_FILE} no-console`);
     expect(result.stdout).not.toContain('some/rule');
+  });
+
+  const SPLIT = {
+    outcome: 'split',
+    verifiers: [
+      fpVerifier('model-a', 'judge'),
+      fpVerifier('model-b', 'judge', 'REAL'),
+      fpVerifier('model-c', 'adversary'),
+    ],
+  };
+
+  const ownerRuling = (verdict) => ({
+    at: new Date().toISOString().slice(0, 10),
+    by: 'luciocabrera',
+    reference: 'https://github.com/luciocabrera/lcabrera-stack/pull/1595',
+    verdict,
+  });
+
+  it('passes a split case the owner ruled FALSE_POSITIVE, and fails it unruled or ruled REAL', () => {
+    const passing = settledRoot();
+    writeFalsePositiveCase(passing, {
+      ruled: { ...SPLIT, owner_ruling: ownerRuling('FALSE_POSITIVE') },
+    });
+    expect(runGate(passing).status).toBe(0);
+
+    const unruled = settledRoot();
+    writeFalsePositiveCase(unruled, { ruled: SPLIT });
+    const open = runGate(unruled);
+    expect(open.status).not.toBe(0);
+    expect(open.stdout).toContain('[not-unanimous]');
+
+    const real = settledRoot();
+    writeFalsePositiveCase(real, {
+      ruled: { ...SPLIT, owner_ruling: ownerRuling('REAL') },
+    });
+    const ruledReal = runGate(real);
+    expect(ruledReal.status).not.toBe(0);
+    expect(ruledReal.stdout).toContain('[owner-ruled-real]');
   });
 
   it('fails the same marker once its entry has expired', () => {

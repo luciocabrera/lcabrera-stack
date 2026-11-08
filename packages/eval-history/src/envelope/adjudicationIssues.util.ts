@@ -1,3 +1,5 @@
+import { z } from 'zod';
+
 import type { AdjudicationShape } from './envelope.types.ts';
 
 type IssueArgs = {
@@ -11,10 +13,40 @@ const issue = ({ message, path }: IssueArgs) => ({
   path: [...path],
 });
 
-export const adjudicationIssues = ({
+const RULED_OUTCOMES = new Set(['fixed', 'split']);
+
+const isoDate = z.iso.date();
+
+const rulingIssues = ({
+  case: { created_at: createdAt },
   outcome,
-  verifiers,
+  owner_ruling: ruling,
 }: AdjudicationShape) => {
+  if (ruling === undefined) return [];
+  return [
+    ...(RULED_OUTCOMES.has(outcome)
+      ? []
+      : [
+          issue({
+            message: `an owner ruling closes a split or fixed case, not a ${outcome} one`,
+            path: ['owner_ruling'],
+          }),
+        ]),
+    ...(isoDate.safeParse(ruling.at).success &&
+    ruling.at < createdAt.slice(0, 10)
+      ? [
+          issue({
+            message:
+              'an owner ruling is dated on or after the day the case opened',
+            path: ['owner_ruling', 'at'],
+          }),
+        ]
+      : []),
+  ];
+};
+
+export const adjudicationIssues = (shape: AdjudicationShape) => {
+  const { outcome, verifiers } = shape;
   const verdicts = new Set(verifiers.map(({ verdict }) => verdict));
   const seats = verifiers.map(({ model, role }) => `${role}/${model}`);
 
@@ -46,5 +78,6 @@ export const adjudicationIssues = ({
           path: ['verifiers', index, 'model'],
         }),
       ),
+    ...rulingIssues(shape),
   ];
 };
