@@ -40,7 +40,7 @@ const readInput = ({ argv, today }) => {
   };
 };
 
-const ruledEnvelope = ({ caseId, record, ruling }) => {
+const ruledEnvelope = ({ caseId, record, ruling, today }) => {
   if (record === undefined) {
     throw new Error(
       `${caseId} has no panel record; run vp run adjudicate:panel -- ${caseId} first`,
@@ -56,6 +56,11 @@ const ruledEnvelope = ({ caseId, record, ruling }) => {
   if (!checked.ok) {
     throw new Error(
       `the ruling does not make a valid envelope:\n  ${checked.problems.join('\n  ')}\n${USAGE}`,
+    );
+  }
+  if (ruling.at > today) {
+    throw new Error(
+      `a ruling cannot be dated ${ruling.at}, after today (${today}); its entry's six months would start late`,
     );
   }
   return envelope;
@@ -85,6 +90,7 @@ export const recordRuling = ({ argv, effects }) => {
     caseId,
     record: effects.readJson(evidence),
     ruling,
+    today,
   });
   if (ruling.verdict === 'REAL') {
     effects.writeJson(evidence, envelope);

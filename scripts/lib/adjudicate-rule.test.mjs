@@ -72,7 +72,11 @@ describe('recordRuling — a FALSE_POSITIVE ruling', () => {
       `// fallow-ignore-next-line security/sql-concat -- false positive, case ${CASE}: <one-line reason>`,
     );
     expect(
-      check({ cases: { [RECORD]: written[RECORD] }, entries: written[LIST] }),
+      check({
+        cases: { [RECORD]: written[RECORD] },
+        entries: written[LIST],
+        today: '2026-11-08',
+      }),
     ).toEqual([]);
   });
 
@@ -103,6 +107,21 @@ describe('recordRuling — a FALSE_POSITIVE ruling', () => {
     expect(written).toEqual({});
   });
 
+  it('accepts a ruling dated today and refuses one dated tomorrow, writing nothing', () => {
+    expect(
+      rule({
+        argv: [...ARGS, '--verdict', 'REAL', '--at', '2026-11-08'],
+      }).run(),
+    ).toBe(0);
+    const { run, written } = rule({
+      argv: [...ARGS, '--verdict', 'FALSE_POSITIVE', '--at', '2026-11-09'],
+    });
+    expect(run).toThrow(
+      "a ruling cannot be dated 2026-11-09, after today (2026-11-08); its entry's six months would start late",
+    );
+    expect(written).toEqual({});
+  });
+
   it('accepts a ruling whose entry expires on the day it is recorded', () => {
     const { run } = rule({
       argv: [...ARGS, '--verdict', 'FALSE_POSITIVE', '--at', '2026-11-08'],
@@ -114,12 +133,12 @@ describe('recordRuling — a FALSE_POSITIVE ruling', () => {
   it('appends to a list that already holds other cases, and takes --at', () => {
     const other = { case: 'FP-0001' };
     const { run, written } = rule({
-      argv: [...ARGS, '--verdict', 'FALSE_POSITIVE', '--at', '2026-11-09'],
+      argv: [...ARGS, '--verdict', 'FALSE_POSITIVE', '--at', '2026-11-07'],
       files: { [LIST]: [other] },
     });
     run();
     expect(written[LIST].map(({ case: id }) => id)).toEqual(['FP-0001', CASE]);
-    expect(written[RECORD].owner_ruling.at).toBe('2026-11-09');
+    expect(written[RECORD].owner_ruling.at).toBe('2026-11-07');
   });
 
   it('refuses a case the list already holds, and writes nothing', () => {

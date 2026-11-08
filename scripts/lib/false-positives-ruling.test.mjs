@@ -2,10 +2,14 @@ import { describe, expect, it } from 'vite-plus/test';
 
 import {
   ENTRY,
-  check,
+  check as checkOn,
   envelope,
   verifier,
 } from './false-positives-fixtures.mjs';
+
+const RULING_DAY = '2027-03-01';
+
+const check = (args) => checkOn({ today: RULING_DAY, ...args });
 
 const RULING = {
   at: '2026-11-08',
@@ -42,7 +46,7 @@ describe('checkFalsePositives — an owner ruling on a split panel', () => {
   });
 
   it('counts the six months from the ruling, not from the day the case opened', () => {
-    const late = { ...RULING, at: '2027-03-01' };
+    const late = { ...RULING, at: RULING_DAY };
     const entry = (expires) => [{ ...ENTRY, expires }];
     const problems = (expires) =>
       check({
@@ -59,6 +63,23 @@ describe('checkFalsePositives — an owner ruling on a split panel', () => {
       ),
     ).toEqual([
       'expires 2027-04-30, past 2027-04-29, six months after the case opened',
+    ]);
+  });
+
+  it('passes a ruling dated the day the gate runs and fails one dated the day after', () => {
+    const on = (at) =>
+      check({
+        cases: { [ENTRY.evidence]: ruled({ ruling: { ...RULING, at } }) },
+        today: '2026-11-08',
+      });
+    expect(on('2026-11-08')).toEqual([]);
+    expect(on('2026-11-09')).toEqual([
+      {
+        kind: 'ruling-in-future',
+        message:
+          "the owner's ruling is dated 2026-11-09, after today (2026-11-08), which would stretch its expiry",
+        where: ENTRY.case,
+      },
     ]);
   });
 

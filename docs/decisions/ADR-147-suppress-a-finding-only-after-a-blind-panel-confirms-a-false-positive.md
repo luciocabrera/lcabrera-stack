@@ -199,7 +199,9 @@ case opened, and the gate's six-month limit is counted from the same date. A
 ruling can come long after the panel sat. Counted from the opening day, a late
 ruling would print a marker for an entry the gate already rejects as expired.
 The command refuses an `at` far enough back that its entry has already
-expired. The six-month rule still holds: the dismissal is re-adjudicated six
+expired, and an `at` later than today. A later date would push the expiry out
+without limit, so the gate also fails a ruling dated after the day it runs,
+whoever wrote the envelope. The six-month rule still holds: the dismissal is re-adjudicated six
 months after the last decision that made it.
 
 Nothing checks that `by` names the repository owner, or that `reference` holds

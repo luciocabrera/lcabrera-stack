@@ -127,7 +127,7 @@ const caseFieldProblems = ({ envelope, entry }) =>
       ),
     );
 
-const verdictProblems = ({ entry, envelope, split }) => {
+const verdictProblems = ({ entry, envelope, split, today }) => {
   const { outcome, owner_ruling: ruling } = envelope;
   if (ruling === undefined) {
     return outcome === 'dismissed' && !split
@@ -140,18 +140,29 @@ const verdictProblems = ({ entry, envelope, split }) => {
           ),
         ];
   }
-  return ruling.verdict === 'FALSE_POSITIVE'
-    ? []
-    : [
-        problem(
-          'owner-ruled-real',
-          entry.case,
-          `${ruling.by} ruled the ${outcome} case ${ruling.verdict} on ${ruling.at} (${ruling.reference}); fix the finding`,
-        ),
-      ];
+  return [
+    ...(ruling.verdict === 'FALSE_POSITIVE'
+      ? []
+      : [
+          problem(
+            'owner-ruled-real',
+            entry.case,
+            `${ruling.by} ruled the ${outcome} case ${ruling.verdict} on ${ruling.at} (${ruling.reference}); fix the finding`,
+          ),
+        ]),
+    ...(ruling.at > today
+      ? [
+          problem(
+            'ruling-in-future',
+            entry.case,
+            `the owner's ruling is dated ${ruling.at}, after today (${today}), which would stretch its expiry`,
+          ),
+        ]
+      : []),
+  ];
 };
 
-const panelProblems = ({ envelope, entry }) => {
+const panelProblems = ({ envelope, entry, today }) => {
   const { verifiers } = envelope;
   const models = new Set(verifiers.map(({ model }) => model));
   const roles = verifiers.map(({ role }) => role);
@@ -176,11 +187,11 @@ const panelProblems = ({ envelope, entry }) => {
             'the panel needs two judges and one adversary',
           ),
         ]),
-    ...verdictProblems({ entry, envelope, split }),
+    ...verdictProblems({ entry, envelope, split, today }),
   ];
 };
 
-const evidenceProblems = ({ entry, readCase }) => {
+const evidenceProblems = ({ entry, readCase, today }) => {
   const read = readCase(entry.evidence);
   if (read.missing) {
     return [
@@ -204,7 +215,7 @@ const evidenceProblems = ({ entry, readCase }) => {
   );
   return [
     ...caseFieldProblems({ entry, envelope }),
-    ...panelProblems({ entry, envelope }),
+    ...panelProblems({ entry, envelope, today }),
     ...(entry.expires > limit
       ? [
           problem(
@@ -256,7 +267,7 @@ const entryProblems = ({ entry, markers, readCase, readText, today }) => {
     ...(entry.expires < today
       ? [problem('expired', entry.case, `expired on ${entry.expires}`)]
       : []),
-    ...evidenceProblems({ entry, readCase }),
+    ...evidenceProblems({ entry, readCase, today }),
     ...hashProblems({ entry, markers, readText }),
   ];
 };

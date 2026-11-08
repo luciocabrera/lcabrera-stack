@@ -122,8 +122,8 @@ packages as everywhere else.
    `vp run adjudicate:rule -- FP-nnnn --verdict <FALSE_POSITIVE|REAL> --by <login> --reference <url>`.
    A FALSE_POSITIVE ruling writes the list entry and prints the marker; a REAL
    one means fix the finding. `adjudicate:rule` does not take an escalated
-   case: three REAL verdicts leave nothing to dismiss, so the owner's part
-   there is deciding the fix.
+   case: a `fixed` case has a fix to weigh against dismissing, and an
+   escalated one has none, so the owner's part there is deciding the fix.
 
 5. Never post the upstream draft without the owner's explicit yes.
 
