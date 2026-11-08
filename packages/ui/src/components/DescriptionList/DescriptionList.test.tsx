@@ -2,7 +2,7 @@
 
 import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { styles as textStyles } from '#ui/components/Text/Text.stylex';
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
@@ -61,6 +61,27 @@ describe('DescriptionList', () => {
     expect(
       hasStylexStyle({ element: value, style: descriptionListStyles.value }),
     ).toBe(true);
+  });
+
+  it('renders two items with the same term, in order, with no key warning', () => {
+    const errors = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const { container } = render(
+      <DescriptionList
+        items={[
+          { term: 'Owner', value: 'Platform' },
+          { term: 'Owner', value: 'Data' },
+        ]}
+      />,
+    );
+
+    expect(
+      [...getList(container).querySelectorAll('dt, dd')].map(
+        (node) => node.textContent,
+      ),
+    ).toStrictEqual(['Owner', 'Platform', 'Owner', 'Data']);
+    expect(errors).not.toHaveBeenCalled();
+
+    errors.mockRestore();
   });
 
   it('pairs each term with its value inside one group', () => {

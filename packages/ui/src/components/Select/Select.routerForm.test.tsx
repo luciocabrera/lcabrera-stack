@@ -83,4 +83,37 @@ describe('Select and TextInput in a router GET form', () => {
     expect(result.textContent).toBe('?a=open&branch=release+2');
     expect(resultsLoader).toHaveBeenCalledTimes(1);
   });
+
+  it('hydrate the generated label ids without a mismatch when no id is passed', async () => {
+    const { Stub } = createGetFormRoutesStub({
+      fields: (
+        <>
+          <Select
+            label='State'
+            name='a'
+            options={[{ label: 'Open', value: 'open' }]}
+          />
+          <TextInput label='Branch' name='branch' />
+        </>
+      ),
+    });
+    const tree = <Stub initialEntries={['/']} />;
+    const container = renderServerMarkup(tree);
+    const serverIds = [...container.querySelectorAll('select, input')].map(
+      (control) => control.id,
+    );
+    const { onRecoverableError, unmount } = await hydrateServerMarkup({
+      container,
+      tree,
+    });
+
+    unmounts.push(unmount);
+
+    expect(onRecoverableError).not.toHaveBeenCalled();
+    expect(serverIds.every((id) => id.length > 0)).toBe(true);
+    expect([
+      screen.getByLabelText('State').id,
+      screen.getByLabelText('Branch').id,
+    ]).toStrictEqual(serverIds);
+  });
 });

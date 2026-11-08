@@ -5,6 +5,7 @@ import { Text } from '#ui/components/Text';
 import type { DescriptionListProps } from './DescriptionList.types';
 
 import { descriptionListStyles } from './DescriptionList.stylex';
+import { keyDescriptionListItems } from './utils/keyDescriptionListItems.util';
 
 export const DescriptionList = ({
   customStylex,
@@ -20,11 +21,8 @@ export const DescriptionList = ({
       customStylex,
     )}
   >
-    {items.map((item) => (
-      <div
-        key={item.term}
-        {...stylex.props(descriptionListStyles.item[layout])}
-      >
+    {keyDescriptionListItems(items).map(({ item, key }) => (
+      <div key={key} {...stylex.props(descriptionListStyles.item[layout])}>
         <Text as='dt' size='sm' tone='secondary'>
           {item.term}
         </Text>

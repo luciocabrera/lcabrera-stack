@@ -18,7 +18,7 @@ export const hydrateServerMarkup = async ({
   tree,
 }: HydrateServerMarkupArgs) => {
   const onRecoverableError = vi.fn();
-  const root = await act(async () =>
+  const root = await act(() =>
     hydrateRoot(container, tree, { onRecoverableError }),
   );
 
