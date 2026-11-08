@@ -334,6 +334,7 @@ describe('openCase — what reaches the panel', () => {
     expect(Object.keys(value).toSorted()).toEqual([
       'case',
       'code',
+      'completion',
       'explain',
       'finding',
       'schema_version',

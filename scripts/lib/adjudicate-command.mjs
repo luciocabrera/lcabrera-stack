@@ -137,10 +137,15 @@ const similarCodeReport = ({ effects, finding, issue }) => {
   const report = parseJsonOutput(
     effects.run(ANALYZER_REPORTS.fallow({ finding, issue })).stdout,
   );
-  const incomplete = incompleteReason({ analysis: 'similar-code', report });
-  if (incomplete !== undefined) throw new Error(incomplete);
   return report;
 };
+
+const completionOf = (report) => ({
+  partial: (report.completion?.phases ?? [])
+    .filter(({ status }) => status !== 'complete')
+    .map(({ phase, reason, status }) => ({ phase, reason, status })),
+  status: report.completion?.status ?? 'missing',
+});
 
 const analyzerReport = ({ analyzer, effects, finding, issue }) => {
   if (analyzer === 'react-doctor') {
@@ -177,6 +182,7 @@ export const openCase = ({ argv, effects }) => {
     analyzer === 'fallow'
       ? fallowIssue({ effects, rule: finding.rule })
       : { token: finding.rule };
+  const report = analyzerReport({ analyzer, effects, finding, issue });
   const records = matchingRecords({
     finding: {
       ...finding,
@@ -184,11 +190,13 @@ export const openCase = ({ argv, effects }) => {
       scope: issue.scope,
       whole: analyzer === 'fallow',
     },
-    report: analyzerReport({ analyzer, effects, finding, issue }),
+    report,
   });
   if (records.length === 0) {
     throw new Error(
-      `${analyzer} does not report ${finding.rule} at ${finding.file}:${finding.start} now, so there is nothing to adjudicate.`,
+      (issue === SIMILAR_CODE &&
+        incompleteReason({ analysis: 'similar-code', report })) ||
+        `${analyzer} does not report ${finding.rule} at ${finding.file}:${finding.start} now, so there is nothing to adjudicate.`,
     );
   }
   const caseId = nextCaseId(effects.caseNames());
@@ -197,6 +205,7 @@ export const openCase = ({ argv, effects }) => {
     caseId,
     code: flaggedCode({ ...finding, text }),
     createdAt: effects.now(),
+    completion: issue === SIMILAR_CODE ? completionOf(report) : undefined,
     explain: explanation({ analyzer, effects, finding, issue }),
     finding,
     findingId,

@@ -84,10 +84,60 @@ describe('openCase — a similar-code candidate', () => {
     );
   });
 
-  it('refuses a partial run as inconclusive', () => {
+  it('records a complete run as complete', () => {
+    expect(run().value.completion).toEqual({ partial: [], status: 'complete' });
+  });
+
+  it('refuses a partial run with no matching candidate as inconclusive', () => {
     expect(() =>
-      run({ report: { candidates: [], completion: { status: 'partial' } } }),
-    ).toThrow('similar-code finished with completion "partial"');
+      run({
+        report: {
+          candidates: [candidate(20)],
+          completion: { phases: [], status: 'partial' },
+        },
+      }),
+    ).toThrow(
+      'similar-code finished with completion "partial", so an empty candidate list is not conclusive',
+    );
+  });
+
+  it('opens a case on a candidate a partial run reports, and records why it was partial', () => {
+    const { value } = run({
+      report: {
+        candidates: [candidate(1)],
+        completion: {
+          phases: [
+            { phase: 'discovery', reason: null, status: 'complete' },
+            {
+              phase: 'extraction',
+              reason: 'outside extraction limits',
+              status: 'partial',
+            },
+          ],
+          status: 'partial',
+        },
+      },
+    });
+    expect(value.finding).toEqual([candidate(1)]);
+    expect(value.completion).toEqual({
+      partial: [
+        {
+          phase: 'extraction',
+          reason: 'outside extraction limits',
+          status: 'partial',
+        },
+      ],
+      status: 'partial',
+    });
+  });
+
+  it('records a report with no completion block as missing', () => {
+    expect(
+      run({ report: { candidates: [candidate(1)] } }).value.completion,
+    ).toEqual({
+      partial: [],
+      status: 'missing',
+    });
   });
 
   it('refuses a location no candidate names', () => {
