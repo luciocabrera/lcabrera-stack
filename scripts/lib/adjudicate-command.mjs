@@ -172,6 +172,9 @@ const explanation = ({ analyzer, effects, finding, issue }) => {
   }
 };
 
+const snapshotNote = (sha) =>
+  `The flagged lines are not committed, so the panel reads ${sha}, a snapshot of the working tree made with git stash create; no ref moved.\n`;
+
 export const openCase = ({ argv, effects }) => {
   const { analyzer, findingId, pr, trace } = readInput(argv);
   const finding = parseFindingId(findingId);
@@ -231,7 +234,7 @@ export const openCase = ({ argv, effects }) => {
   const path = `${CASES_DIR}/${caseId}/case.json`;
   effects.writeJson(path, body);
   effects.write(
-    `Opened ${caseId}: ${path}\n${commit.snapshot ? `The flagged lines are not committed, so the panel reads ${commit.sha}, a snapshot of the working tree made with git stash create; no ref moved.\n` : ''}Run the panel next: vp run adjudicate:panel -- ${caseId} --builder-model <your model id>\n`,
+    `Opened ${caseId}: ${path}\n${commit.snapshot ? snapshotNote(commit.sha) : ''}Run the panel next: vp run adjudicate:panel -- ${caseId} --builder-model <your model id>\n`,
   );
   return 0;
 };

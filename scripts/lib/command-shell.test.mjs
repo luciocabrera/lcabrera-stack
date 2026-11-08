@@ -1,11 +1,23 @@
-import { mkdtempSync, readFileSync, realpathSync, rmSync } from 'node:fs';
-import { tmpdir } from 'node:os';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import process from 'node:process';
 
-import { describe, expect, it, onTestFinished, vi } from 'vite-plus/test';
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+  vi,
+} from 'vite-plus/test';
+
+import { createFixtureRoots } from '../../packages/repo-standards/scripts/repo-fixtures.mjs';
 
 import { jsonWriterIn, runCommand } from './command-shell.mjs';
+
+const roots = createFixtureRoots('command-shell-');
+
+afterEach(() => roots.removeAll());
 
 const keepExitCode = () => {
   const before = process.exitCode;
@@ -16,8 +28,7 @@ const keepExitCode = () => {
 
 describe('jsonWriterIn', () => {
   it('writes indented JSON with a trailing newline, creating the directory', () => {
-    const root = realpathSync(mkdtempSync(join(tmpdir(), 'command-shell-')));
-    onTestFinished(() => rmSync(root, { force: true, recursive: true }));
+    const root = roots.make();
     jsonWriterIn(root)('a/b/case.json', { id: 1 });
     expect(readFileSync(join(root, 'a/b/case.json'), 'utf8')).toBe(
       '{\n  "id": 1\n}\n',

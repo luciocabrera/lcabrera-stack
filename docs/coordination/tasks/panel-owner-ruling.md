@@ -2,7 +2,7 @@
 id: panel-owner-ruling
 title: record an owner ruling on a split panel and adjudicate uncommitted lint findings
 owner: agent:claude
-status: active
+status: review
 branch: fix/1600-panel-owner-ruling
 area:
   - scripts/lib/**
@@ -19,7 +19,7 @@ area:
 started: 2026-11-08
 updated: 2026-11-08
 plan: (none)
-pr: (none)
+pr: 1601
 issue: #1600
 ---
 

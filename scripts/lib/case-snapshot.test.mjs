@@ -3,18 +3,25 @@ import {
   chmodSync,
   existsSync,
   mkdirSync,
-  mkdtempSync,
   readFileSync,
-  realpathSync,
   rmSync,
   writeFileSync,
 } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 
-import { describe, expect, it, onTestFinished } from 'vite-plus/test';
+import {
+  afterEach,
+  describe,
+  expect,
+  it,
+  onTestFinished,
+} from 'vite-plus/test';
 
 import { runGitStatus } from '../../packages/repo-standards/scripts/git-exec.mjs';
+import {
+  createFixtureRoots,
+  writeIn,
+} from '../../packages/repo-standards/scripts/repo-fixtures.mjs';
 import { openCase } from './adjudicate-command.mjs';
 import { listEntryFor } from './adjudication-panel.mjs';
 import {
@@ -33,10 +40,9 @@ const CLEAN = ['export const Grid = () => (', '  <div>cells</div>', ');', ''];
 const FLAGGED = "  <div role='grid'>cells</div>";
 const PLANTED = [CLEAN[0], FLAGGED, ...CLEAN.slice(2)];
 
-const removeAfterTest = (path) => {
-  onTestFinished(() => rmSync(path, { force: true, recursive: true }));
-  return path;
-};
+const roots = createFixtureRoots('case-snapshot-');
+
+afterEach(() => roots.removeAll());
 
 const git = (root, args) => runGitStatus({ args, cwd: root });
 
@@ -46,16 +52,9 @@ const IDENTITY = [
   ['commit.gpgsign', 'false'],
 ];
 
-const writeAt = ({ path, root, text }) => {
-  mkdirSync(join(root, dirname(path)), { recursive: true });
-  writeFileSync(join(root, path), text);
-};
-
 const repository = () => {
-  const root = removeAfterTest(
-    realpathSync(mkdtempSync(join(tmpdir(), 'case-snapshot-'))),
-  );
-  const write = (path, text) => writeAt({ path, root, text });
+  const root = roots.make();
+  const write = writeIn(root);
   write(FILE, CLEAN.join('\n'));
   git(root, ['init', '-q', '-b', 'main']);
   for (const [key, value] of IDENTITY) git(root, ['config', key, value]);
@@ -210,7 +209,7 @@ describe('a flagged line that is only in the working tree', () => {
       casePath: 'docs/agents/adjudications/FP-0001/case.json',
       root,
     });
-    removeAfterTest(tree);
+    onTestFinished(() => rmSync(tree, { force: true, recursive: true }));
     expect(readFileSync(join(tree, FILE), 'utf8')).toContain(FLAGGED);
     expect(refState(root)).toEqual(before);
   });
