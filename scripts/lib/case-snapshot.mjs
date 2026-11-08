@@ -18,7 +18,6 @@ const git = ({ args, root }) =>
     encoding: 'utf8',
     env: buildGitEnv(process.env),
     maxBuffer: 2 ** 28,
-    stdio: ['ignore', 'pipe', 'pipe'],
   });
 
 export const textAt = ({ file, root, sha }) => {

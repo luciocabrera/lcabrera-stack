@@ -168,6 +168,8 @@ describe('adjudicationEnvelopeSchema — the owner ruling', () => {
     { field: 'reference', value: '' },
     { field: 'reference', value: 'issue #1595' },
     { field: 'reference', value: 'http://github.com/x/y/pull/1' },
+    { field: 'reference', value: 'httpsx://github.com/x/y/pull/1' },
+    { field: 'reference', value: 'xhttps://github.com/x/y/pull/1' },
     { field: 'verdict', value: '' },
     { field: 'verdict', value: 'false_positive' },
   ])('rejects a ruling whose $field is "$value"', ({ field, value }) => {
@@ -194,8 +196,18 @@ describe('adjudicationEnvelopeSchema — the owner ruling', () => {
 
   it('accepts a ruling on a fixed case, and rejects one dated before the case opened', () => {
     expect(issuePaths({ ...ruledSplit(RULING), outcome: 'fixed' })).toEqual([]);
-    expect(issuePaths(ruledSplit({ ...RULING, at: '2020-01-01' }))).toEqual([
-      'owner_ruling.at',
+    const openingDay = fixture.case.created_at.slice(0, 10);
+    expect(issuePaths(ruledSplit({ ...RULING, at: openingDay }))).toEqual([]);
+    const early = adjudicationEnvelopeSchema.safeParse(
+      ruledSplit({ ...RULING, at: '2020-01-01' }),
+    );
+    expect(
+      early.error?.issues.map(({ message, path }) => [path.join('.'), message]),
+    ).toEqual([
+      [
+        'owner_ruling.at',
+        'an owner ruling is dated on or after the day the case opened',
+      ],
     ]);
   });
 });

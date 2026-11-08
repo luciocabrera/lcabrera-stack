@@ -50,10 +50,8 @@ const ESLINT_REPORT = [
 
 const fakeEffects = ({
   calls = [],
-  committed = SOURCE,
   out = [],
   report = ESLINT_REPORT,
-  snapshot = '',
   stdout,
   written = [],
 } = {}) => ({
@@ -75,8 +73,8 @@ const fakeEffects = ({
     return { status: 1, stdout: stdout ?? `noise\n${JSON.stringify(report)}` };
   },
   shas: () => ({ base: '1'.repeat(40), head: '2'.repeat(40) }),
-  snapshot: () => snapshot,
-  textAt: ({ sha }) => (sha === snapshot ? SOURCE : committed),
+  snapshot: () => '',
+  textAt: () => SOURCE,
   workspaceOf: () => 'packages/x',
   write: (text) => out.push(text),
   writeJson: (path, value) => written.push({ path, value }),

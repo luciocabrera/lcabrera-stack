@@ -30,7 +30,7 @@ export const marker = (overrides = {}) =>
   });
 
 export const source = (line = marker(), flagged = FLAGGED) =>
-  [line, ...flagged, ''].join('\n');
+  [line, ...flagged].join('\n');
 
 export const verifier = (model, role, verdict = 'FALSE_POSITIVE') => ({
   agent_prompt_hash: 'a'.repeat(64),

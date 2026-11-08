@@ -65,6 +65,9 @@ describe('recordRuling — a FALSE_POSITIVE ruling', () => {
     });
     const entry = listEntryFor({ caseFile: CASE_BODY, evidence: RECORD });
     expect(written[LIST]).toEqual([entry]);
+    expect(written[RECORD].verifiers[0].evidence).toBe(
+      'Ran the trace and found no path from input to the identifier.',
+    );
     expect(out.join('')).toContain(
       `// fallow-ignore-next-line security/sql-concat -- false positive, case ${CASE}: <one-line reason>`,
     );
@@ -154,6 +157,39 @@ describe('recordRuling — what it refuses', () => {
     );
     expect(rule({ argv: [...ARGS, 'extra'] }).run).toThrow('usage:');
     expect(rule({ argv: ['--', 'FP-1'] }).run).toThrow('is not a case id');
+  });
+
+  it('refuses a missing case id with the usage line', () => {
+    expect(rule({ argv: ['--', '--verdict', 'REAL'] }).run).toThrow(
+      'usage: vp run adjudicate:rule -- <FP-nnnn>',
+    );
+  });
+
+  it('lists every field the schema refuses, one per line', () => {
+    const { run } = rule({
+      argv: [
+        '--',
+        CASE,
+        '--verdict',
+        'REAL',
+        '--by',
+        'a b',
+        '--reference',
+        'x',
+      ],
+    });
+    expect(run).toThrow(
+      /the ruling does not make a valid envelope:\n {2}owner_ruling\.by: [^\n]+\n {2}owner_ruling\.reference: /u,
+    );
+  });
+
+  it('refuses a FALSE_POSITIVE ruling whose case file is gone, and writes nothing', () => {
+    const { run, written } = rule({
+      argv: [...ARGS, '--verdict', 'FALSE_POSITIVE'],
+      files: { [CASE_FILE]: undefined },
+    });
+    expect(run).toThrow(`${CASE_FILE} does not exist`);
+    expect(written).toEqual({});
   });
 
   it('refuses a case the panel has not ruled on', () => {

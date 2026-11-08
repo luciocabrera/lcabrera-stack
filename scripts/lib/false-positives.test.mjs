@@ -71,6 +71,10 @@ describe('checkFalsePositives — each condition fails on its own', () => {
     expect(kinds(check({ text }))).toEqual(['hash']);
   });
 
+  it('fails a marker above a blank line, which is not the flagged code', () => {
+    expect(kinds(check({ text: source(marker(), ['']) }))).toEqual(['hash']);
+  });
+
   it('tells a marker that moved away from unchanged lines apart from an edit', () => {
     const text = [marker(), 'export const other = 1;', ...FLAGGED, ''].join(
       '\n',

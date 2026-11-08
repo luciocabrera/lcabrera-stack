@@ -29,6 +29,6 @@ record an owner ruling on a split panel and adjudicate uncommitted lint findings
 
 ## Status / next
 
-- Current step: implemented; real run and gate next
+- Current step: gate green; PR in review
 - Blockers: none
 - Next:

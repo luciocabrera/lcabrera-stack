@@ -173,14 +173,16 @@ describe('caseCommit', () => {
 
   it('refuses cleanly when there is nothing to snapshot', () => {
     expect(() => decide({ texts: { head: CLEAN.join('\n') } })).toThrow(
-      `HEAD does not hold the flagged lines of ${FILE}, and there is nothing to snapshot`,
+      `HEAD does not hold the flagged lines of ${FILE}, and there is nothing to snapshot: no tracked file differs from HEAD. git stash create keeps only tracked files, so stage a new file with git add, which runs no hook, and open the case again.`,
     );
   });
 
   it('refuses a snapshot that does not hold the lines either', () => {
     expect(() =>
       decide({ snapshot: 'snap', texts: { head: undefined, snap: undefined } }),
-    ).toThrow('neither HEAD nor the working-tree snapshot snap');
+    ).toThrow(
+      `neither HEAD nor the working-tree snapshot snap holds the flagged lines of ${FILE}. git stash create keeps only tracked files, so stage a new file with git add, which runs no hook, and open the case again.`,
+    );
   });
 });
 
