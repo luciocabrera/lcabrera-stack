@@ -182,20 +182,24 @@ export const envelopeFor = ({
   verifiers,
 });
 
-export const listEntryFor = ({ caseFile, evidence }) => ({
+export const listEntryFor = ({
+  caseFile,
+  evidence,
+  from = caseFile.case.created_at,
+}) => ({
   analyzer: caseFile.case.analyzer,
   case: caseFile.case.case_id,
   contentHash: caseFile.case.content_hash,
   evidence,
-  expires: expiryFor(caseFile.case.created_at),
+  expires: expiryFor(from),
   file: caseFile.case.file,
   lines: caseFile.code.end - caseFile.code.start + 1,
   rule: caseFile.case.rule,
 });
 
-export const listWithEntry = ({ caseFile, evidence, list }) => [
+export const listWithEntry = ({ caseFile, evidence, from, list }) => [
   ...list,
-  listEntryFor({ caseFile, evidence }),
+  listEntryFor({ caseFile, evidence, from }),
 ];
 
 export const markerInstruction = (caseFile) =>

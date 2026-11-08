@@ -86,7 +86,8 @@
         },
         "reference": {
           "type": "string",
-          "format": "uri"
+          "format": "uri",
+          "pattern": "^https://"
         },
         "verdict": {
           "type": "string",

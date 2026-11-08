@@ -8,6 +8,7 @@ import {
   writeFileSync,
 } from 'node:fs';
 import { join } from 'node:path';
+import process from 'node:process';
 
 import {
   afterEach,
@@ -15,6 +16,7 @@ import {
   expect,
   it,
   onTestFinished,
+  vi,
 } from 'vite-plus/test';
 
 import { runGitStatus } from '../../packages/repo-standards/scripts/git-exec.mjs';
@@ -141,6 +143,30 @@ const decide = ({ snapshot = '', texts }) =>
     snapshot: () => snapshot,
     textAt: (sha) => texts[sha],
   });
+
+describe('the git reads', () => {
+  it("names git's own error when it cannot make a snapshot, and prints nothing itself", () => {
+    const stderr = vi.spyOn(process.stderr, 'write').mockReturnValue(true);
+    onTestFinished(() => stderr.mockRestore());
+    const root = roots.make();
+    expect(() => stashSnapshot({ root })).toThrow(
+      /^git stash create failed: fatal: not a git repository/u,
+    );
+    expect(textAt({ file: 'a.ts', root, sha: 'HEAD' })).toBeUndefined();
+    expect(stderr).not.toHaveBeenCalled();
+  });
+
+  it('reads a committed file exactly, and gives nothing for a path HEAD lacks', () => {
+    const { root, write } = repository();
+    write('src/blank.ts', '\n\nexport const x = 1;\n');
+    git(root, ['add', '-A']);
+    git(root, ['commit', '-q', '-m', 'blank']);
+    expect(textAt({ file: 'src/blank.ts', root, sha: 'HEAD' })).toBe(
+      '\n\nexport const x = 1;\n',
+    );
+    expect(textAt({ file: 'src/none.ts', root, sha: 'HEAD' })).toBeUndefined();
+  });
+});
 
 describe('caseCommit', () => {
   it('keeps HEAD when HEAD holds the flagged lines, and makes no snapshot', () => {

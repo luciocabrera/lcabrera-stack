@@ -9,6 +9,7 @@ import { parseArgs } from 'node:util';
 
 import { CASES_DIR } from './adjudicate-command.mjs';
 import { listWithEntry, markerInstruction } from './adjudication-panel.mjs';
+import { expiryFor } from './false-positives.mjs';
 import { caseIdFrom } from './tool-paths.mjs';
 
 const USAGE =
@@ -60,18 +61,25 @@ const ruledEnvelope = ({ caseId, record, ruling }) => {
   return envelope;
 };
 
-const dismissal = ({ caseFile, effects, evidence }) => {
+const dismissal = ({ caseFile, effects, evidence, ruling, today }) => {
+  const expires = expiryFor(ruling.at);
+  if (expires < today) {
+    throw new Error(
+      `a ruling dated ${ruling.at} gives a list entry that expired on ${expires}, six months later; rule again with today's date`,
+    );
+  }
   const list = effects.readList() ?? [];
   if (list.some((entry) => entry.case === caseFile.case.case_id)) {
     throw new Error(
       `${effects.listPath} already holds ${caseFile.case.case_id}`,
     );
   }
-  return listWithEntry({ caseFile, evidence, list });
+  return listWithEntry({ caseFile, evidence, from: ruling.at, list });
 };
 
 export const recordRuling = ({ argv, effects }) => {
-  const { caseId, ruling } = readInput({ argv, today: effects.today() });
+  const today = effects.today();
+  const { caseId, ruling } = readInput({ argv, today });
   const evidence = `${CASES_DIR}/${caseId}.json`;
   const envelope = ruledEnvelope({
     caseId,
@@ -89,7 +97,7 @@ export const recordRuling = ({ argv, effects }) => {
   if (caseFile === undefined) {
     throw new Error(`${CASES_DIR}/${caseId}/case.json does not exist`);
   }
-  const list = dismissal({ caseFile, effects, evidence });
+  const list = dismissal({ caseFile, effects, evidence, ruling, today });
   effects.writeJson(evidence, envelope);
   effects.writeJson(effects.listPath, list);
   effects.write(

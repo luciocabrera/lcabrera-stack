@@ -113,14 +113,17 @@ packages as everywhere else.
    ```
 
    Any REAL verdict with a concrete `Fix:`: apply that fix, even if the other
-   seats ruled FALSE_POSITIVE. That is not a suppression, so it needs no owner
-   decision. Ask the repository owner only when no REAL verdict gives a fix
-   (a split, or an escalation when all three ruled REAL), or when the fix
-   cannot be applied. Record the owner's answer on a split or `fixed` case
-   with
+   seats ruled FALSE_POSITIVE. Applying a fix is not a suppression, so it needs
+   no owner decision. The case goes to the repository owner in three
+   situations: a split where no REAL verdict gives a fix, an escalation where
+   all three ruled REAL and none gives a fix, and a `fixed` case whose fix
+   cannot be applied. On a split or on that `fixed` case, record the owner's
+   answer with
    `vp run adjudicate:rule -- FP-nnnn --verdict <FALSE_POSITIVE|REAL> --by <login> --reference <url>`.
    A FALSE_POSITIVE ruling writes the list entry and prints the marker; a REAL
-   one means fix the finding.
+   one means fix the finding. `adjudicate:rule` does not take an escalated
+   case: three REAL verdicts leave nothing to dismiss, so the owner's part
+   there is deciding the fix.
 
 5. Never post the upstream draft without the owner's explicit yes.
 
@@ -129,9 +132,11 @@ and fails unless it names a case and a reason, one live entry has the same
 analyzer, rule and file, every entry has exactly one marker, the case file is a
 valid envelope with three distinct models, two judges and one adversary, that
 ruled FALSE_POSITIVE unanimously or whose split or `fixed` case carries the
-owner's complete FALSE_POSITIVE ruling, the hash of the lines under the marker still matches, and the entry has not
-expired. An entry lasts six months at most. Any edit to the flagged lines voids
-it. A matched marker in a public package needs no register entry here.
+owner's complete FALSE_POSITIVE ruling, the hash of the lines under the marker
+still matches, and the entry has not expired. An entry lasts six months at
+most, counted from the day the case opened or, on a ruled case, from the day
+the owner ruled. Any edit to the flagged lines voids it. A matched marker in a
+public package needs no register entry here.
 
 The same gate fails an ESLint, Oxlint, Biome or React Doctor marker outside the
 public packages that names no case. A fallow marker there is caught by

@@ -197,7 +197,11 @@ const evidenceProblems = ({ entry, readCase }) => {
     ];
   }
   const { envelope } = read;
-  const limit = addMonths(envelope.case.created_at, MAX_MONTHS);
+  const ruled = envelope.owner_ruling !== undefined;
+  const limit = addMonths(
+    ruled ? envelope.owner_ruling.at : envelope.case.created_at,
+    MAX_MONTHS,
+  );
   return [
     ...caseFieldProblems({ entry, envelope }),
     ...panelProblems({ entry, envelope }),
@@ -206,7 +210,7 @@ const evidenceProblems = ({ entry, readCase }) => {
           problem(
             'expiry-too-far',
             entry.case,
-            `expires ${entry.expires}, past ${limit}, six months after the case opened`,
+            `expires ${entry.expires}, past ${limit}, six months after ${ruled ? 'the owner ruled' : 'the case opened'}`,
           ),
         ]
       : []),

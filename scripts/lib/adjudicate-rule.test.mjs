@@ -25,7 +25,7 @@ const SPLIT = envelope({
 
 const CASE_BODY = { case: SPLIT.case, code: { end: 2, start: 2 } };
 
-const rule = ({ argv, files = {} }) => {
+const rule = ({ argv, files = {}, today = '2026-11-08' }) => {
   const store = { [CASE_FILE]: CASE_BODY, [RECORD]: SPLIT, ...files };
   const written = {};
   const out = [];
@@ -36,7 +36,7 @@ const rule = ({ argv, files = {} }) => {
         listPath: LIST,
         readJson: (path) => store[path],
         readList: () => store[LIST],
-        today: () => '2026-11-08',
+        today: () => today,
         write: (text) => out.push(text),
         writeJson: (path, value) => {
           written[path] = value;
@@ -64,7 +64,7 @@ describe('recordRuling — a FALSE_POSITIVE ruling', () => {
       },
     });
     const entry = listEntryFor({ caseFile: CASE_BODY, evidence: RECORD });
-    expect(written[LIST]).toEqual([entry]);
+    expect(written[LIST]).toEqual([{ ...entry, expires: '2027-05-08' }]);
     expect(written[RECORD].verifiers[0].evidence).toBe(
       'Ran the trace and found no path from input to the identifier.',
     );
@@ -74,6 +74,41 @@ describe('recordRuling — a FALSE_POSITIVE ruling', () => {
     expect(
       check({ cases: { [RECORD]: written[RECORD] }, entries: written[LIST] }),
     ).toEqual([]);
+  });
+
+  it('counts six months from a late ruling, so its entry is live and the gate passes', () => {
+    const { run, written } = rule({
+      argv: [...ARGS, '--verdict', 'FALSE_POSITIVE'],
+      today: '2027-06-01',
+    });
+    expect(run()).toBe(0);
+    expect(written[LIST][0].expires).toBe('2027-12-01');
+    expect(
+      check({
+        cases: { [RECORD]: written[RECORD] },
+        entries: written[LIST],
+        today: '2027-06-01',
+      }),
+    ).toEqual([]);
+  });
+
+  it('refuses a ruling dated so long ago that its entry has already expired', () => {
+    const { run, written } = rule({
+      argv: [...ARGS, '--verdict', 'FALSE_POSITIVE', '--at', '2026-11-08'],
+      today: '2027-05-09',
+    });
+    expect(run).toThrow(
+      "a ruling dated 2026-11-08 gives a list entry that expired on 2027-05-08, six months later; rule again with today's date",
+    );
+    expect(written).toEqual({});
+  });
+
+  it('accepts a ruling whose entry expires on the day it is recorded', () => {
+    const { run } = rule({
+      argv: [...ARGS, '--verdict', 'FALSE_POSITIVE', '--at', '2026-11-08'],
+      today: '2027-05-08',
+    });
+    expect(run()).toBe(0);
   });
 
   it('appends to a list that already holds other cases, and takes --at', () => {

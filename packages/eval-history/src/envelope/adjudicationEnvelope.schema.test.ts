@@ -1,5 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
+import { z } from 'zod';
 
 import { adjudicationEnvelopeSchema } from './adjudicationEnvelope.schema.ts';
 import { envelopeJsonSchema } from './envelopeJsonSchema.util.ts';
@@ -217,5 +218,22 @@ describe('adjudication.schema.json', () => {
     expect(files.get('adjudication.schema.json')).toEqual(
       envelopeJsonSchema(adjudicationEnvelopeSchema),
     );
+  });
+
+  it("carries the ruling reference's https-only rule, not only its uri format", () => {
+    const referenceRule = z.record(z.string(), z.unknown());
+    const ruling = z.object({
+      properties: z.object({ reference: referenceRule }),
+    });
+    const document = z.object({
+      properties: z.object({ owner_ruling: ruling }),
+    });
+    const { reference } = document.parse(files.get('adjudication.schema.json'))
+      .properties.owner_ruling.properties;
+    expect(reference).toEqual({
+      format: 'uri',
+      pattern: '^https://',
+      type: 'string',
+    });
   });
 });

@@ -45,7 +45,7 @@ const verifierSchema = z.object({
 const ownerRulingSchema = z.object({
   at: z.iso.date(),
   by: githubLogin,
-  reference: z.url({ protocol: /^https$/u }),
+  reference: z.url({ protocol: /^https$/u }).meta({ pattern: '^https://' }),
   verdict: z.enum(ADJUDICATION_VERDICTS),
 });
 

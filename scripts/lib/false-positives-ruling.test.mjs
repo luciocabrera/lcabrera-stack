@@ -41,6 +41,27 @@ describe('checkFalsePositives — an owner ruling on a split panel', () => {
     expect(kindsFor(ruled({ outcome: 'fixed', ruling: RULING }))).toEqual([]);
   });
 
+  it('counts the six months from the ruling, not from the day the case opened', () => {
+    const late = { ...RULING, at: '2027-03-01' };
+    const entry = (expires) => [{ ...ENTRY, expires }];
+    const problems = (expires) =>
+      check({
+        cases: { [ENTRY.evidence]: ruled({ ruling: late }) },
+        entries: entry(expires),
+      });
+    expect(problems('2027-09-01')).toEqual([]);
+    expect(problems('2027-09-02').map(({ message }) => message)).toEqual([
+      'expires 2027-09-02, past 2027-09-01, six months after the owner ruled',
+    ]);
+    expect(
+      check({ entries: [{ ...ENTRY, expires: '2027-04-30' }] }).map(
+        ({ message }) => message,
+      ),
+    ).toEqual([
+      'expires 2027-04-30, past 2027-04-29, six months after the case opened',
+    ]);
+  });
+
   it('still passes a unanimous dismissal with no ruling', () => {
     expect(kindsFor(envelope())).toEqual([]);
   });

@@ -18,6 +18,7 @@ const git = ({ args, root }) =>
     encoding: 'utf8',
     env: buildGitEnv(process.env),
     maxBuffer: 2 ** 28,
+    stdio: 'pipe',
   });
 
 export const textAt = ({ file, root, sha }) => {
@@ -28,8 +29,15 @@ export const textAt = ({ file, root, sha }) => {
   }
 };
 
-export const stashSnapshot = ({ root }) =>
-  git({ args: ['stash', 'create'], root }).trim();
+export const stashSnapshot = ({ root }) => {
+  try {
+    return git({ args: ['stash', 'create'], root }).trim();
+  } catch (error) {
+    throw new Error(
+      `git stash create failed: ${String(error.stderr ?? error.message).trim()}`,
+    );
+  }
+};
 
 const holds = ({ code, text }) =>
   text !== undefined &&

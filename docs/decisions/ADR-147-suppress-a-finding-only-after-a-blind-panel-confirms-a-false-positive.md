@@ -187,11 +187,23 @@ always failed `not-unanimous`.
 now writes an `owner_ruling` object into `FP-nnnn.json`: the `verdict`, `by`
 (a GitHub login), `at` (a `YYYY-MM-DD` date, today unless `--at` names one)
 and `reference` (the `https` URL of the comment where the owner ruled). The
-envelope schema holds that shape. It also refuses a ruling on a `dismissed` or
+envelope schema holds that shape, and the emitted `adjudication.schema.json`
+keeps the `https` rule as a pattern. It also refuses a ruling on a `dismissed` or
 `escalated` case, and one dated before the case opened. A FALSE_POSITIVE
 ruling writes the list entry and prints the marker, as a unanimous dismissal
 does. A REAL one writes only the ruling, and the builder fixes the finding. The
 command never overwrites a ruling.
+
+A ruled case's entry expires six months after the ruling's `at`, not after the
+case opened, and the gate's six-month limit is counted from the same date. A
+ruling can come long after the panel sat. Counted from the opening day, a late
+ruling would print a marker for an entry the gate already rejects as expired.
+The command refuses an `at` far enough back that its entry has already
+expired. The six-month rule still holds: the dismissal is re-adjudicated six
+months after the last decision that made it.
+
+Nothing checks that `by` names the repository owner, or that `reference` holds
+their ruling. The PR diff carries the ruling, and its review is the check.
 
 `suppressions:verify` accepts a split or `fixed` envelope only when its
 `owner_ruling` is complete and says FALSE_POSITIVE. A missing, empty or
