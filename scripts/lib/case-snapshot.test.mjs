@@ -12,7 +12,7 @@ import {
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it, onTestFinished } from 'vite-plus/test';
 
 import { runGitStatus } from '../../packages/repo-standards/scripts/git-exec.mjs';
 import { openCase } from './adjudicate-command.mjs';
@@ -33,36 +33,32 @@ const CLEAN = ['export const Grid = () => (', '  <div>cells</div>', ');', ''];
 const FLAGGED = "  <div role='grid'>cells</div>";
 const PLANTED = [CLEAN[0], FLAGGED, ...CLEAN.slice(2)];
 
-const made = [];
+const removeAfterTest = (path) => {
+  onTestFinished(() => rmSync(path, { force: true, recursive: true }));
+  return path;
+};
 
-afterEach(() => {
-  for (const path of made.splice(0))
-    rmSync(path, { force: true, recursive: true });
-});
+const git = (root, args) => runGitStatus({ args, cwd: root });
 
-const git = (root, args) =>
-  runGitStatus({
-    args: [
-      '-c',
-      'user.name=t',
-      '-c',
-      'user.email=t@t',
-      '-c',
-      'commit.gpgsign=false',
-      ...args,
-    ],
-    cwd: root,
-  });
+const IDENTITY = [
+  ['user.name', 't'],
+  ['user.email', 't@t'],
+  ['commit.gpgsign', 'false'],
+];
+
+const writeAt = ({ path, root, text }) => {
+  mkdirSync(join(root, dirname(path)), { recursive: true });
+  writeFileSync(join(root, path), text);
+};
 
 const repository = () => {
-  const root = realpathSync(mkdtempSync(join(tmpdir(), 'case-snapshot-')));
-  made.push(root);
-  const write = (path, text) => {
-    mkdirSync(dirname(join(root, path)), { recursive: true });
-    writeFileSync(join(root, path), text);
-  };
+  const root = removeAfterTest(
+    realpathSync(mkdtempSync(join(tmpdir(), 'case-snapshot-'))),
+  );
+  const write = (path, text) => writeAt({ path, root, text });
   write(FILE, CLEAN.join('\n'));
   git(root, ['init', '-q', '-b', 'main']);
+  for (const [key, value] of IDENTITY) git(root, ['config', key, value]);
   git(root, ['add', '-A']);
   git(root, ['commit', '-q', '-m', 'clean']);
   return { head: git(root, ['rev-parse', 'HEAD']).stdout, root, write };
@@ -214,7 +210,7 @@ describe('a flagged line that is only in the working tree', () => {
       casePath: 'docs/agents/adjudications/FP-0001/case.json',
       root,
     });
-    made.push(tree);
+    removeAfterTest(tree);
     expect(readFileSync(join(tree, FILE), 'utf8')).toContain(FLAGGED);
     expect(refState(root)).toEqual(before);
   });

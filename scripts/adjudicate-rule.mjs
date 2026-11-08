@@ -8,12 +8,12 @@
  * Exit codes: 0 = ruling recorded; 1 = bad arguments, no panel record, a
  * ruling already recorded, or a ruling the envelope schema refuses.
  */
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname } from 'node:path';
+import { existsSync, readFileSync } from 'node:fs';
 import process from 'node:process';
 
 import { readRegisters } from '../packages/repo-standards/scripts/config.mjs';
 import { recordRuling } from './lib/adjudicate-rule.mjs';
+import { jsonWriterIn, runCommand } from './lib/command-shell.mjs';
 import { repoPath } from './lib/tool-paths.mjs';
 
 const ROOT = process.cwd();
@@ -32,18 +32,10 @@ const effects = {
   readList: () => readJson(LIST),
   today: () => new Date().toISOString().slice(0, 10),
   write: (text) => process.stdout.write(text),
-  writeJson: (path, value) => {
-    const target = inRepo(path);
-    mkdirSync(dirname(target), { recursive: true });
-    writeFileSync(target, `${JSON.stringify(value, null, 2)}\n`);
-  },
+  writeJson: jsonWriterIn(ROOT),
 };
 
-try {
-  process.exitCode = recordRuling({ argv: process.argv.slice(2), effects });
-} catch (error) {
-  process.stderr.write(
-    `adjudicate:rule: ${error instanceof Error ? error.message : String(error)}\n`,
-  );
-  process.exitCode = 1;
-}
+runCommand({
+  name: 'adjudicate:rule',
+  run: () => recordRuling({ argv: process.argv.slice(2), effects }),
+});
