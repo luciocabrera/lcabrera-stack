@@ -73,6 +73,8 @@ const fakeEffects = ({
     return { status: 1, stdout: stdout ?? `noise\n${JSON.stringify(report)}` };
   },
   shas: () => ({ base: '1'.repeat(40), head: '2'.repeat(40) }),
+  snapshot: () => '',
+  textAt: () => SOURCE,
   workspaceOf: () => 'packages/x',
   write: (text) => out.push(text),
   writeJson: (path, value) => written.push({ path, value }),

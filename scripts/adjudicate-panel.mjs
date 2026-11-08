@@ -42,7 +42,8 @@ import {
   assertUnruled,
   dispatchPrompt,
   envelopeFor,
-  listEntryFor,
+  listWithEntry,
+  markerInstruction,
   nextStep,
   parseVerdict,
   resolvedModelProblems,
@@ -51,7 +52,6 @@ import {
   upstreamDraft,
   verdictFileName,
 } from './lib/adjudication-panel.mjs';
-import { markerSpelling } from './lib/false-positive-markers.mjs';
 import { PANEL_TOOLS, scopeHook } from './lib/panel-scope.mjs';
 import { exportCaseTree } from './lib/panel-tree.mjs';
 import { caseIdFrom, repoPath } from './lib/tool-paths.mjs';
@@ -172,9 +172,9 @@ const recordDismissal = ({ caseDir, caseFile, envelope, reasons }) => {
   const list = existsSync(inRepo(LIST)) ? JSON.parse(read(LIST)) : [];
   write(
     LIST,
-    `${JSON.stringify([...list, listEntryFor({ caseFile, evidence })], null, 2)}\n`,
+    `${JSON.stringify(listWithEntry({ caseFile, evidence, list }), null, 2)}\n`,
   );
-  return `Dismissed unanimously. Recorded ${evidence} and the ${LIST} entry. Add this marker above line ${caseFile.code.start} of ${caseFile.case.file}:\n  ${markerSpelling({ analyzer: caseFile.case.analyzer, caseId: caseFile.case.case_id, reason: '<one-line reason>', rule: caseFile.case.rule })}\nThe upstream draft is ${caseDir}/upstream.md; never post it without the owner's explicit yes.\n`;
+  return `Dismissed unanimously. Recorded ${evidence} and the ${LIST} entry. ${markerInstruction(caseFile)}The upstream draft is ${caseDir}/upstream.md; never post it without the owner's explicit yes.\n`;
 };
 
 const recordOther = ({ caseFile, envelope }) => {

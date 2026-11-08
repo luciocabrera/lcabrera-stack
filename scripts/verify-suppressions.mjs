@@ -136,7 +136,7 @@ const readCase = (path) => {
 
 const reportFalsePositives = ({ markers, readText }) =>
   report(
-    `False-positive marker(s) that do not match a live, unanimous panel case in ${FALSE_POSITIVES_PATH}:`,
+    `False-positive marker(s) that do not match a live case in ${FALSE_POSITIVES_PATH}, dismissed by a unanimous panel or by the owner's ruling:`,
     checkFalsePositives({
       entries: readFalsePositiveList(REPO_ROOT),
       markers,
@@ -324,7 +324,7 @@ const main = () => {
   process.stdout.write(
     `${packageDirs.length} public package(s): ${own.length} scoped suppression(s), ` +
       `${inherited.length} inherited from repo-wide policy. All listed, documented and settled. ` +
-      `${markers.length} false-positive marker(s), each matching a unanimous panel case.\n`,
+      `${markers.length} false-positive marker(s), each matching a case a unanimous panel or the owner's ruling dismissed.\n`,
   );
 };
 

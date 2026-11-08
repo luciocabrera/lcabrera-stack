@@ -21,6 +21,7 @@ import { FileTextIcon } from './FileTextIcon';
 import { FilterIcon } from './FilterIcon';
 import { GroupRowsIcon } from './GroupRowsIcon';
 import { HomeIcon } from './HomeIcon';
+import { capturedIconMarkup } from './Icons.fixtures';
 import { InfoIcon } from './InfoIcon';
 import { ListAllIcon } from './ListAllIcon';
 import { ListCheckedIcon } from './ListCheckedIcon';
@@ -92,6 +93,24 @@ const iconComponents = [
   { Component: WarningIcon, defaultSize: 24, name: 'WarningIcon' },
 ] as const;
 
+const overridingProps = {
+  className: 'icon-probe',
+  size: 32,
+  stroke: 'red',
+  strokeWidth: '3',
+} as const;
+
+const serialiseAttributes = (element: Element) =>
+  Array.from(element.attributes, ({ name, value }) => ({ name, value }))
+    .toSorted((a, b) => a.name.localeCompare(b.name))
+    .map(({ name, value }) => ` ${name}="${value}"`)
+    .join('');
+
+const toMarkup = (node: Node): string =>
+  node instanceof Element
+    ? `<${node.localName}${serialiseAttributes(node)}>${Array.from(node.childNodes, toMarkup).join('')}</${node.localName}>`
+    : (node.textContent ?? '');
+
 const iconDirectoryNames = readdirSync(
   path.dirname(fileURLToPath(import.meta.url)),
   { withFileTypes: true },
@@ -131,4 +150,20 @@ describe('Icons', () => {
     expect(svg?.getAttribute('width')).toBe('32');
     expect(svg?.getAttribute('height')).toBe('32');
   });
+
+  it.each(iconComponents)(
+    '$name renders the markup captured for it',
+    ({ Component, name }) => {
+      const { container } = render(
+        <>
+          <Component />
+          <Component {...overridingProps} />
+        </>,
+      );
+      expect(Array.from(container.childNodes, toMarkup)).toStrictEqual([
+        capturedIconMarkup[name].default,
+        capturedIconMarkup[name].overridden,
+      ]);
+    },
+  );
 });
