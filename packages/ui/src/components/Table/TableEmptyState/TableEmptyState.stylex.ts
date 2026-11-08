@@ -27,6 +27,13 @@ export const styles = stylex.create({
   row: {
     display: 'table-row',
   },
+  staticViewport: {
+    padding: spacing.md,
+    alignItems: 'center',
+    boxSizing: 'border-box',
+    display: 'flex',
+    justifyContent: 'center',
+  },
   viewport: (height: number, width: number) => ({
     padding: spacing.md,
     overflow: 'hidden',

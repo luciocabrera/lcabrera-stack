@@ -4,6 +4,8 @@ import { TableBodyCell } from '#ui/components/Table/TableBodyCell';
 
 import type { TableBodyCellDescriptor } from './buildTableBodyCellDescriptor.util';
 
+import { toCellLayout } from './toCellLayout.util';
+
 type RenderFromDescriptorArgs<TData extends Record<string, unknown>> = {
   readonly descriptor: TableBodyCellDescriptor<TData>;
 };
@@ -15,6 +17,7 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
     return createElement(
       TableBodyCell,
       {
+        cellLayout: toCellLayout(descriptor),
         columnKey: descriptor.columnKey,
         dataType: descriptor.dataType,
         isLoadingState: descriptor.isLoadingState,
@@ -31,6 +34,7 @@ export const renderFromDescriptor = <TData extends Record<string, unknown>>({
   }
 
   return createElement(TableBodyCell, {
+    cellLayout: toCellLayout(descriptor),
     columnKey: descriptor.columnKey,
     dataType: descriptor.dataType,
     format: descriptor.format,

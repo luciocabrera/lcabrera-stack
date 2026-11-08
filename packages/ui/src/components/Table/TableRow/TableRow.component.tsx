@@ -1,9 +1,11 @@
 import * as stylex from '@stylexjs/stylex';
+import { use } from 'react';
 
 import {
   useGetTableHeaderRowHeight,
   useGetTableRowHeight,
 } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
+import { TablePresentationContext } from '#ui/components/Table/contexts/TableConfig/TablePresentationContext.context';
 
 import type { TableRowProps } from './TableRow.types';
 
@@ -19,6 +21,7 @@ export const TableRow = ({
   const bodyRowHeight = useGetTableRowHeight();
   const headerRowHeight = useGetTableHeaderRowHeight();
   const rowHeight = isHeader ? headerRowHeight : bodyRowHeight;
+  const isStatic = use(TablePresentationContext).layout === 'static';
 
   return (
     <tr
@@ -29,6 +32,7 @@ export const TableRow = ({
         tableRowStyles.height(rowHeight),
         isStriped && tableRowStyles.striped,
         isHeader && tableRowStyles.header,
+        isStatic && tableRowStyles.staticLayout(rowHeight),
         customStylex,
       )}
     >

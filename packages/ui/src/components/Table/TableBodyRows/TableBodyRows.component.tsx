@@ -1,3 +1,5 @@
+import { use } from 'react';
+
 import { resolveTableCellCalls } from '#ui/components/Table/cellRenderers/resolveTableCellCalls.util';
 import { useTableCellRendering } from '#ui/components/Table/contexts/TableCellRendering/useTableCellRendering.hook';
 import { useWarnUnresolvedTableCellCalls } from '#ui/components/Table/contexts/TableCellRendering/useWarnUnresolvedTableCellCalls.hook';
@@ -8,6 +10,7 @@ import {
   useGetPinnedColumnPartition,
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useGetTableGroupingKeys } from '#ui/components/Table/contexts/TableConfig/grouping/selectors';
+import { TablePresentationContext } from '#ui/components/Table/contexts/TableConfig/TablePresentationContext.context';
 import { useTableGroupTree } from '#ui/components/Table/hooks';
 import { createRenderTableBodyCell } from '#ui/components/Table/TableBody/utils/createRenderTableBodyCell.util';
 import { renderTableBodyPinnedGroup } from '#ui/components/Table/TableBody/utils/renderTableBodyPinnedGroup.util';
@@ -37,6 +40,7 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
   const pinnedOffsets = useGetPinnedColumnOffsets();
   const appliedGroupingKeys = useGetTableGroupingKeys();
   const { renderers, tone } = useTableCellRendering();
+  const { layout } = use(TablePresentationContext);
   const cellCalls = resolveTableCellCalls({
     columns: [...leftPinnedCols, ...centerCols, ...rightPinnedCols],
     renderers,
@@ -56,6 +60,7 @@ export const TableBodyRows = <TData extends Record<string, unknown>>({
     columnSizing,
     groupingKeys,
     isLoadingState,
+    layout,
     pinnedOffsets,
     tone,
   });

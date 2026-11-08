@@ -16,7 +16,8 @@ allowed-tools: Read, Grep, Glob, Bash(vp:*)
 
 Configuration lore for the four analysers. **Non-Negotiable Rule 11 (AGENTS.md
 §5) governs all of them and is not repeated here: never ignore, suppress, or omit
-a finding — verify, then fix the code.** This skill is the _how the engines are
+a finding — verify, then fix the code, unless a blind panel confirmed a false
+positive.** This skill is the _how the engines are
 wired_ half.
 
 The cardinal trap, common to every engine below: **a rule that is not loaded

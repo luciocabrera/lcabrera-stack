@@ -39,4 +39,13 @@ describe('resolveGridRowIndexing', () => {
       );
     }
   });
+
+  it('counts a footer row', () => {
+    expect(
+      resolveAriaRowCount({ hasFooter: true, isLoading: false, totalRows: 3 }),
+    ).toBe(5);
+    expect(
+      resolveAriaRowCount({ hasFooter: true, isLoading: true, totalRows: 3 }),
+    ).toBe(-1);
+  });
 });

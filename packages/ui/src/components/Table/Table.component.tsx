@@ -9,12 +9,14 @@ import { generatePlaceholderData } from './TableBody/utils';
 import { TableDataResolver } from './TableDataResolver';
 import { TableGrid } from './TableGrid/TableGrid.component';
 import { TableOwnStack } from './TableOwnStack/TableOwnStack.component';
+import { hasTableChrome } from './utils/hasTableChrome.util';
 import { needsOwnTableStack } from './utils/needsOwnTableStack.util';
+import { resolveTablePresentation } from './utils/resolveTablePresentation.util';
 
 export const Table = <TData extends Record<string, unknown>, TResponse>(
   props: TableProps<TData, TResponse>,
 ) => {
-  const { columns, dataSelector, response, title } = props;
+  const { columns, dataSelector, features, layout, response, title } = props;
   const isNeedsOwnStack = needsOwnTableStack({
     hasConfig: use(TableConfigContext) !== undefined,
     isInOwnStack: use(TableOwnStackContext),
@@ -23,7 +25,13 @@ export const Table = <TData extends Record<string, unknown>, TResponse>(
 
   if (isNeedsOwnStack) {
     return (
-      <TableOwnStack<TData> columns={columns} title={title}>
+      <TableOwnStack<TData>
+        columns={columns}
+        hasChrome={hasTableChrome(
+          resolveTablePresentation({ features, layout }).features,
+        )}
+        title={title}
+      >
         <Table<TData, TResponse> {...props} />
       </TableOwnStack>
     );

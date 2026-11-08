@@ -1,0 +1,268 @@
+/**
+ * Decides whether every false-positive marker in the tree matches one live
+ * entry of `docs/agents/false-positives.json`, and whether every entry is
+ * backed by a unanimous panel of three distinct models. Pure: the caller reads
+ * the files and validates each case envelope against its schema. Policy:
+ * `docs/agents/public-package-suppressions.md`.
+ */
+import { isCalendarDate } from '../../packages/repo-standards/scripts/calendar-date.mjs';
+import { coveredLines, hashLines } from './false-positive-markers.mjs';
+
+const ENTRY_FIELDS = [
+  'case',
+  'analyzer',
+  'rule',
+  'file',
+  'contentHash',
+  'expires',
+  'evidence',
+];
+
+const PANEL_SIZE = 3;
+
+const MAX_MONTHS = 6;
+
+const problem = (kind, where, message) => ({ kind, message, where });
+
+const markerWhere = ({ file, line }) => `${file}:${line}`;
+
+const markerProblems = ({ entriesByCase, marker }) => {
+  const where = markerWhere(marker);
+  if (!marker.nextLine) {
+    return [
+      problem(
+        'form',
+        where,
+        `${marker.directive} covers more than the next line; use the analyzer's next-line marker`,
+      ),
+    ];
+  }
+  const entry = entriesByCase.get(marker.caseId);
+  if (entry === undefined) {
+    return [
+      problem(
+        'unlisted',
+        where,
+        `${marker.caseId} has no entry in the false-positive list`,
+      ),
+    ];
+  }
+  return ['analyzer', 'rule', 'file']
+    .filter((field) => entry[field] !== marker[field])
+    .map((field) =>
+      problem(
+        'mismatch',
+        where,
+        `the marker's ${field} "${marker[field]}" differs from ${marker.caseId}'s "${entry[field]}"`,
+      ),
+    );
+};
+
+const addMonths = (iso, months) => {
+  const [year, month, day] = iso.slice(0, 10).split('-').map(Number);
+  const target = new Date(Date.UTC(year, month - 1 + months, 1));
+  const lastDay = new Date(
+    Date.UTC(target.getUTCFullYear(), target.getUTCMonth() + 1, 0),
+  ).getUTCDate();
+  target.setUTCDate(Math.min(day, lastDay));
+  return target.toISOString().slice(0, 10);
+};
+
+const shapeProblems = (entry) => {
+  const missing = ENTRY_FIELDS.filter(
+    (field) => typeof entry[field] !== 'string' || entry[field].trim() === '',
+  );
+  const badLines = !Number.isSafeInteger(entry.lines) || entry.lines < 1;
+  const badDate = !isCalendarDate(entry.expires);
+  const evidence = `docs/agents/adjudications/${entry.case}.json`;
+  return [
+    ...missing.map((field) =>
+      problem('entry', entry.case, `the entry has no "${field}"`),
+    ),
+    ...(badLines
+      ? [problem('entry', entry.case, '"lines" is not a positive integer')]
+      : []),
+    ...(badDate && !missing.includes('expires')
+      ? [problem('entry', entry.case, '"expires" is not a YYYY-MM-DD date')]
+      : []),
+    ...(entry.evidence === evidence || missing.includes('evidence')
+      ? []
+      : [problem('entry', entry.case, `"evidence" is not ${evidence}`)]),
+  ];
+};
+
+const markerCountProblems = ({ entry, markers }) => {
+  const count = markers.filter(({ caseId }) => caseId === entry.case).length;
+  if (count === 1) return [];
+  return [
+    problem(
+      count === 0 ? 'unmarked' : 'duplicated',
+      entry.case,
+      count === 0
+        ? `no marker in the code names ${entry.case}`
+        : `${count} markers name ${entry.case}; an entry has exactly one`,
+    ),
+  ];
+};
+
+const caseFieldProblems = ({ envelope, entry }) =>
+  [
+    ['case_id', 'case'],
+    ['analyzer', 'analyzer'],
+    ['rule', 'rule'],
+    ['file', 'file'],
+    ['content_hash', 'contentHash'],
+  ]
+    .filter(
+      ([caseField, entryField]) =>
+        envelope.case[caseField] !== entry[entryField],
+    )
+    .map(([caseField, entryField]) =>
+      problem(
+        'case-mismatch',
+        entry.case,
+        `the case file's ${caseField} differs from the entry's ${entryField}`,
+      ),
+    );
+
+const panelProblems = ({ envelope, entry }) => {
+  const { outcome, verifiers } = envelope;
+  const models = new Set(verifiers.map(({ model }) => model));
+  const roles = verifiers.map(({ role }) => role);
+  const split = verifiers.some(({ verdict }) => verdict !== 'FALSE_POSITIVE');
+  return [
+    ...(verifiers.length === PANEL_SIZE && models.size === PANEL_SIZE
+      ? []
+      : [
+          problem(
+            'models',
+            entry.case,
+            `the panel sat ${verifiers.length} verifier(s) on ${models.size} distinct model(s); it needs ${PANEL_SIZE} on ${PANEL_SIZE}`,
+          ),
+        ]),
+    ...(roles.filter((role) => role === 'judge').length === 2 &&
+    roles.includes('adversary')
+      ? []
+      : [
+          problem(
+            'roles',
+            entry.case,
+            'the panel needs two judges and one adversary',
+          ),
+        ]),
+    ...(outcome === 'dismissed' && !split
+      ? []
+      : [
+          problem(
+            'not-unanimous',
+            entry.case,
+            `the panel did not rule FALSE_POSITIVE unanimously (outcome ${outcome})`,
+          ),
+        ]),
+  ];
+};
+
+const evidenceProblems = ({ entry, readCase }) => {
+  const read = readCase(entry.evidence);
+  if (read.missing) {
+    return [
+      problem('no-case-file', entry.case, `${entry.evidence} does not exist`),
+    ];
+  }
+  if (!read.ok) {
+    return [
+      problem(
+        'case-invalid',
+        entry.case,
+        `${entry.evidence} is not a valid case envelope: ${read.problems.join('; ')}`,
+      ),
+    ];
+  }
+  const { envelope } = read;
+  const limit = addMonths(envelope.case.created_at, MAX_MONTHS);
+  return [
+    ...caseFieldProblems({ entry, envelope }),
+    ...panelProblems({ entry, envelope }),
+    ...(entry.expires > limit
+      ? [
+          problem(
+            'expiry-too-far',
+            entry.case,
+            `expires ${entry.expires}, past ${limit}, six months after the case opened`,
+          ),
+        ]
+      : []),
+  ];
+};
+
+const flaggedLineAt = ({ entry, text }) => {
+  const lines = text.split('\n');
+  const at = lines.findIndex(
+    (_, index) =>
+      hashLines(lines.slice(index, index + entry.lines)) === entry.contentHash,
+  );
+  return at === -1 ? undefined : at + 1;
+};
+
+const hashProblems = ({ entry, markers, readText }) => {
+  const marker = markers.find(({ caseId }) => caseId === entry.case);
+  if (marker === undefined) return [];
+  const text = readText(marker.file);
+  const lines = coveredLines({ line: marker.line, lines: entry.lines, text });
+  if (hashLines(lines) === entry.contentHash) return [];
+  const moved = flaggedLineAt({ entry, text });
+  return [
+    moved === undefined
+      ? problem(
+          'hash',
+          entry.case,
+          `the ${entry.lines} line(s) under the marker at ${markerWhere(marker)} changed since the panel ruled; the dismissal is void`,
+        )
+      : problem(
+          'misplaced',
+          entry.case,
+          `the flagged lines start at line ${moved}, not under the marker at ${markerWhere(marker)}; move the marker above them`,
+        ),
+  ];
+};
+
+const entryProblems = ({ entry, markers, readCase, readText, today }) => {
+  const shape = shapeProblems(entry);
+  if (shape.length !== 0) return shape;
+  return [
+    ...markerCountProblems({ entry, markers }),
+    ...(entry.expires < today
+      ? [problem('expired', entry.case, `expired on ${entry.expires}`)]
+      : []),
+    ...evidenceProblems({ entry, readCase }),
+    ...hashProblems({ entry, markers, readText }),
+  ];
+};
+
+const duplicateCaseProblems = (entries) =>
+  entries
+    .map(({ case: caseId }) => caseId)
+    .filter((caseId, index, all) => all.indexOf(caseId) !== index)
+    .map((caseId) =>
+      problem('entry', caseId, 'the list holds this case more than once'),
+    );
+
+export const checkFalsePositives = ({
+  entries,
+  markers,
+  readCase,
+  readText,
+  today,
+}) => {
+  const entriesByCase = new Map(entries.map((entry) => [entry.case, entry]));
+  const covering = markers.filter(({ nextLine }) => nextLine);
+  return [
+    ...markers.flatMap((marker) => markerProblems({ entriesByCase, marker })),
+    ...duplicateCaseProblems(entries),
+    ...entries.flatMap((entry) =>
+      entryProblems({ entry, markers: covering, readCase, readText, today }),
+    ),
+  ];
+};
+
+export const expiryFor = (createdAt) => addMonths(createdAt, MAX_MONTHS);

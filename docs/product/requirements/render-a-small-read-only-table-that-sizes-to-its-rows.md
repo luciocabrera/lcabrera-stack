@@ -3,7 +3,7 @@ id: render-a-small-read-only-table-that-sizes-to-its-rows
 lines:
   - application
 persona: application-developer
-state: unmet
+state: met
 packages:
   - ui
 requires:
@@ -11,6 +11,8 @@ requires:
 issues:
   - 1560
 evidence:
+  - type: test
+    ref: packages/ui/src/components/Table/Table.staticLayout.test.tsx
   - type: code
     ref: packages/ui/src/components/Table/Table.component.tsx
   - type: code

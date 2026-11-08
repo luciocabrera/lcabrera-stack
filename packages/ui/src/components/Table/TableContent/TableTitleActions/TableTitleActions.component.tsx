@@ -1,3 +1,5 @@
+import { use } from 'react';
+
 import { Button } from '#ui/components/Button';
 import { SettingsIcon } from '#ui/components/Icons';
 
@@ -8,6 +10,7 @@ import {
   useGetTableCrud,
   useGetTableTitleSingular,
 } from '../../contexts/TableConfig/meta/selectors';
+import { TablePresentationContext } from '../../contexts/TableConfig/TablePresentationContext.context';
 import {
   useGetTableIsLoading,
   useGetTableIsLoadingMore,
@@ -20,9 +23,20 @@ export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
   const isLoadingMore = useGetTableIsLoadingMore();
   const titleSingular = useGetTableTitleSingular();
   const toggleTableIsTableSettingsOpen = useToogleTableIsTableSettingsOpen();
+  const { features } = use(TablePresentationContext);
 
   const isBusy = isLoading || isLoadingMore;
   const resolvedTitleSingular = titleSingular ?? 'Record';
+  const settingsButton = features.settings ? (
+    <Button
+      aria-label='Table settings'
+      icon={<SettingsIcon size={16} />}
+      isBusy={isBusy}
+      onClick={toggleTableIsTableSettingsOpen}
+      size='mini'
+      variant='ghost'
+    />
+  ) : undefined;
 
   return (
     <>
@@ -34,14 +48,7 @@ export const TableTitleActions = ({ actions }: TableTitleActionsProps) => {
           to='new'
         />
       )}
-      <Button
-        aria-label='Table settings'
-        icon={<SettingsIcon size={16} />}
-        isBusy={isBusy}
-        onClick={toggleTableIsTableSettingsOpen}
-        size='mini'
-        variant='ghost'
-      />
+      {settingsButton}
     </>
   );
 };

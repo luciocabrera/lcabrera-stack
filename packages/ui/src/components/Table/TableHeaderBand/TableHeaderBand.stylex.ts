@@ -42,6 +42,16 @@ export const tableHeaderBandStyles = stylex.create({
     whiteSpace: 'nowrap',
     minWidth: 0,
   },
+  staticLayout: {
+    display: 'table-cell',
+    flexShrink: null,
+    verticalAlign: 'bottom',
+    height: null,
+    maxHeight: null,
+    maxWidth: null,
+    minWidth: null,
+    width: null,
+  },
   pinnedLeft: (offset: number) => ({
     backgroundColor: colors.surfaceSecondary,
     zIndex: `calc(${zIndex.sticky} + 2)`,

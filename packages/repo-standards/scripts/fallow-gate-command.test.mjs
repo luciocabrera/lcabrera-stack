@@ -23,12 +23,14 @@ const fakeEffects = ({
         calls.push({ git: args });
         return diff;
       },
+      readFalsePositives: () => [],
       readStdinFiles: () => stdinFiles,
       root: '/repo',
       spawn: (args, stdout) => {
         calls.push({ args, stdout });
         return queue.shift() ?? { status: 0, stdout: '' };
       },
+      today: () => '2026-10-30',
       workspaceDirs: () => workspaceDirs,
       write: (text) => {
         out.push(text);

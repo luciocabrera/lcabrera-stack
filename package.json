@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "adjudicate": "node scripts/adjudicate.mjs",
+    "adjudicate:panel": "node scripts/adjudicate-panel.mjs",
     "adr:list": "repo-verify-adrs --list",
     "adr:new": "repo-adr",
     "adr:verify": "repo-verify-adrs",
