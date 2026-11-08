@@ -96,7 +96,10 @@ packages as everywhere else.
    the code worse ends here.
 2. `vp run adjudicate -- <analyzer> <file>:<line>[-<end line>]:<rule>` opens a
    case under `docs/agents/adjudications/`, in a directory named after the
-   case, from what the analyzer reports. It takes no free text.
+   case, from what the analyzer reports. It takes no free text. When HEAD
+   does not hold the flagged lines, the case names a `git stash create`
+   snapshot of the working tree, which runs no hook and moves no ref. A new
+   file must be staged first, because the snapshot leaves out untracked files.
 3. `vp run adjudicate:panel -- FP-nnnn --builder-model <id>` runs `fp-judge`
    twice and `fp-adversary` once, in parallel, on three distinct models.
 4. All three FALSE_POSITIVE: the command records the case, writes an upstream
@@ -113,15 +116,20 @@ packages as everywhere else.
    seats ruled FALSE_POSITIVE. That is not a suppression, so it needs no owner
    decision. Ask the repository owner only when no REAL verdict gives a fix
    (a split, or an escalation when all three ruled REAL), or when the fix
-   cannot be applied.
+   cannot be applied. Record the owner's answer on a split or `fixed` case
+   with
+   `vp run adjudicate:rule -- FP-nnnn --verdict <FALSE_POSITIVE|REAL> --by <login> --reference <url>`.
+   A FALSE_POSITIVE ruling writes the list entry and prints the marker; a REAL
+   one means fix the finding.
 
 5. Never post the upstream draft without the owner's explicit yes.
 
 `vp run suppressions:verify` reads every marker that claims a false positive
 and fails unless it names a case and a reason, one live entry has the same
 analyzer, rule and file, every entry has exactly one marker, the case file is a
-valid envelope with three distinct models ruling FALSE_POSITIVE unanimously,
-the hash of the lines under the marker still matches, and the entry has not
+valid envelope with three distinct models, two judges and one adversary, that
+ruled FALSE_POSITIVE unanimously or whose split or `fixed` case carries the
+owner's complete FALSE_POSITIVE ruling, the hash of the lines under the marker still matches, and the entry has not
 expired. An entry lasts six months at most. Any edit to the flagged lines voids
 it. A matched marker in a public package needs no register entry here.
 

@@ -72,6 +72,29 @@
       "type": "string",
       "enum": ["dismissed", "fixed", "split", "escalated"]
     },
+    "owner_ruling": {
+      "type": "object",
+      "properties": {
+        "at": {
+          "type": "string",
+          "format": "date",
+          "pattern": "^(?:(?:\\d\\d[2468][048]|\\d\\d[13579][26]|\\d\\d0[48]|[02468][048]00|[13579][26]00)-02-29|\\d{4}-(?:(?:0[13578]|1[02])-(?:0[1-9]|[12]\\d|3[01])|(?:0[469]|11)-(?:0[1-9]|[12]\\d|30)|(?:02)-(?:0[1-9]|1\\d|2[0-8])))$"
+        },
+        "by": {
+          "type": "string",
+          "pattern": "^[\\dA-Za-z](?:[\\dA-Za-z]|-(?=[\\dA-Za-z])){0,38}$"
+        },
+        "reference": {
+          "type": "string",
+          "format": "uri"
+        },
+        "verdict": {
+          "type": "string",
+          "enum": ["REAL", "FALSE_POSITIVE"]
+        }
+      },
+      "required": ["at", "by", "reference", "verdict"]
+    },
     "schema_version": {
       "type": "number",
       "const": 1

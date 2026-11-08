@@ -1,8 +1,9 @@
 /**
- * The tree a false-positive panel reads: the files of the case's commit,
- * exported with `git archive`, so the directory has no `.git` and no history,
- * commit message or branch to reach. The coordination claims are removed too,
- * and the flagged lines must hash as the case recorded them.
+ * The tree a false-positive panel reads: the files of the case's commit, or
+ * of its working-tree snapshot, exported with `git archive`, so the directory
+ * has no `.git` and no history, commit message or branch to reach. The
+ * coordination claims are removed too, and the flagged lines must hash as the
+ * case recorded them.
  */
 import { execFileSync } from 'node:child_process';
 import {
@@ -69,7 +70,7 @@ const assertFlaggedLines = ({ caseFile, into }) => {
     .slice(caseFile.code.start - 1, caseFile.code.end);
   if (hashLines(lines) !== caseFile.case.content_hash) {
     throw new Error(
-      `${caseFile.case.file} at ${caseFile.case.head_sha} does not hold the flagged lines; commit them and open the case again`,
+      `${caseFile.case.file} at ${caseFile.case.head_sha} does not hold the flagged lines; open the case again with vp run adjudicate`,
     );
   }
 };

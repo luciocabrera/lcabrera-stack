@@ -1,8 +1,10 @@
 /**
  * Decides whether every false-positive marker in the tree matches one live
  * entry of `docs/agents/false-positives.json`, and whether every entry is
- * backed by a unanimous panel of three distinct models. Pure: the caller reads
- * the files and validates each case envelope against its schema. Policy:
+ * backed by a panel of three distinct models that ruled FALSE_POSITIVE
+ * unanimously, or by the owner's FALSE_POSITIVE ruling on a split or fixed
+ * case. Pure: the caller reads the files and validates each case envelope
+ * against its schema, which holds the ruling's shape. Policy:
  * `docs/agents/public-package-suppressions.md`.
  */
 import { isCalendarDate } from '../../packages/repo-standards/scripts/calendar-date.mjs';
@@ -125,8 +127,32 @@ const caseFieldProblems = ({ envelope, entry }) =>
       ),
     );
 
+const verdictProblems = ({ entry, envelope, split }) => {
+  const { outcome, owner_ruling: ruling } = envelope;
+  if (ruling === undefined) {
+    return outcome === 'dismissed' && !split
+      ? []
+      : [
+          problem(
+            'not-unanimous',
+            entry.case,
+            `the panel did not rule FALSE_POSITIVE unanimously (outcome ${outcome}), and no owner ruled on it`,
+          ),
+        ];
+  }
+  return ruling.verdict === 'FALSE_POSITIVE'
+    ? []
+    : [
+        problem(
+          'owner-ruled-real',
+          entry.case,
+          `${ruling.by} ruled the ${outcome} case ${ruling.verdict} on ${ruling.at} (${ruling.reference}); fix the finding`,
+        ),
+      ];
+};
+
 const panelProblems = ({ envelope, entry }) => {
-  const { outcome, verifiers } = envelope;
+  const { verifiers } = envelope;
   const models = new Set(verifiers.map(({ model }) => model));
   const roles = verifiers.map(({ role }) => role);
   const split = verifiers.some(({ verdict }) => verdict !== 'FALSE_POSITIVE');
@@ -150,15 +176,7 @@ const panelProblems = ({ envelope, entry }) => {
             'the panel needs two judges and one adversary',
           ),
         ]),
-    ...(outcome === 'dismissed' && !split
-      ? []
-      : [
-          problem(
-            'not-unanimous',
-            entry.case,
-            `the panel did not rule FALSE_POSITIVE unanimously (outcome ${outcome})`,
-          ),
-        ]),
+    ...verdictProblems({ entry, envelope, split }),
   ];
 };
 

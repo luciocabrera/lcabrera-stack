@@ -173,6 +173,63 @@ dismissing it.
   list entry with no marker suppresses nothing, and a marker with no entry has
   no evidence behind it. The gate needs both to agree, one to one.
 
+## Amendment 2026-11-08 — an owner ruling, and a case on uncommitted lines
+
+[#1600](https://github.com/luciocabrera/lcabrera-stack/issues/1600). Two
+steps of the Decision had no way to complete, and the owner chose both
+designs below over their alternatives.
+
+**The owner's ruling is recorded in the envelope.** Step 5 sends a split, or a
+`fixed` case whose fix cannot be applied, to the repository owner, but the gate
+accepted only a unanimous dismissal, so a marker carrying the owner's ruling
+always failed `not-unanimous`.
+`vp run adjudicate:rule -- FP-nnnn --verdict <FALSE_POSITIVE|REAL> --by <login> --reference <url>`
+now writes an `owner_ruling` object into `FP-nnnn.json`: the `verdict`, `by`
+(a GitHub login), `at` (a `YYYY-MM-DD` date, today unless `--at` names one)
+and `reference` (the `https` URL of the comment where the owner ruled). The
+envelope schema holds that shape. It also refuses a ruling on a `dismissed` or
+`escalated` case, and one dated before the case opened. A FALSE_POSITIVE
+ruling writes the list entry and prints the marker, as a unanimous dismissal
+does. A REAL one writes only the ruling, and the builder fixes the finding. The
+command never overwrites a ruling.
+
+`suppressions:verify` accepts a split or `fixed` envelope only when its
+`owner_ruling` is complete and says FALSE_POSITIVE. A missing, empty or
+malformed field fails the envelope as invalid, and a REAL ruling fails as
+`owner-ruled-real`. The panel still needs three distinct models, two judges and
+one adversary, whatever the owner ruled. With no ruling the gate behaves as
+before, and a split fails `not-unanimous`. The rejection of a majority vote
+stands: what settles a split is the owner's named ruling, never a count of the
+verdicts.
+
+The alternatives were to keep the gate unanimous-only, which leaves the owner's
+decision with nowhere to go, or to re-run the panel until it agrees, which
+replaces the decision with another vote.
+
+**A case can name a snapshot of the working tree.** Step 3 runs the panel in a
+`git archive` export of the case's commit, and the export refused flagged lines
+that commit did not hold. The pre-commit hook runs Biome, ESLint and Oxlint and
+refuses a line they flag, so a finding from any of the three could not reach the
+panel without bypassing the hook. `vp run adjudicate` now checks whether HEAD
+holds the flagged lines. When it does not, the case's `head_sha` is the commit
+`git stash create` prints. That command writes a commit object holding the
+staged and unstaged changes to tracked files, runs no hook, moves no ref and
+adds no stash entry. The command refuses when there is nothing to snapshot, and
+when the snapshot does not hold the lines either. A snapshot leaves out
+untracked files, so a flagged line in a new file reaches it once the file is
+staged, and staging runs no hook. The `base_sha` stays the merge base, and the
+line hash is taken from the working tree. That is the same hash the gate takes
+under the marker once the marker is committed above those lines.
+
+Nothing references the snapshot commit, so `git gc` may prune it once it is
+older than `gc.pruneExpire`. Run the panel before then. A pruned snapshot fails
+the export with the sha it could not archive.
+
+The alternatives were to export the working tree with no commit at all, which
+leaves the case naming no tree anyone can re-read, or to restructure the code
+until the analyzer stops reporting it, which is the bending of correct code
+this decision exists to stop.
+
 ## References
 
 - [#1549](https://github.com/luciocabrera/lcabrera-stack/issues/1549) — the
