@@ -56,4 +56,24 @@ describe('repo-verify-docs-paths', () => {
       expect(result.stdout).toContain('Documented-path gate passed');
     },
   );
+
+  it.each(['2', '2-4', '2:5'])(
+    'resolves a path with the line suffix :%s against the path alone',
+    (suffix) => {
+      const root = makeRoot(`See \`docs/agents/facts.json:${suffix}\`.\n`);
+      writeIn(root)('docs/agents/facts.json', '{}\n');
+
+      const result = run(root);
+
+      expect(result.status).toBe(0);
+      expect(result.stdout).toContain('Documented-path gate passed');
+    },
+  );
+
+  it('still fails on a missing file named with a line suffix', () => {
+    const result = run(makeRoot('See `docs/agents/gone.json:2-4`.\n'));
+
+    expect(result.status).toBe(1);
+    expect(result.stderr).toContain(`${DOC}: \`docs/agents/gone.json\``);
+  });
 });
