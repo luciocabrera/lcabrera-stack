@@ -9,6 +9,7 @@ export type VirtualSelectMetaState = {
   readonly isDisabled: boolean;
   readonly isListVisible: boolean;
   readonly isOpen: boolean;
+  readonly labelId?: string;
   readonly listboxId: string;
   readonly mode: VirtualSelectMode;
   readonly placeholder: string;
@@ -28,9 +29,11 @@ export type VirtualSelectProps = {
   readonly isBusy?: boolean;
   /** Inert, but not loading: no shimmer, unlike `isBusy`. */
   readonly isDisabled?: boolean;
+  readonly label?: string;
   readonly listboxId?: string;
   readonly listMaxHeight?: string;
   readonly mode: VirtualSelectMode;
+  readonly name?: string;
   readonly onChange: (selected: string[]) => void;
   readonly onFetchInitial?: (signal: AbortSignal) => Promise<void> | void;
   readonly onFetchMore?: () => Promise<void> | void;

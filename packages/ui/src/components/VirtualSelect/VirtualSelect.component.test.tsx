@@ -58,7 +58,10 @@ vi.mock('./utils', async () => {
   };
 });
 
+import { Text } from '#ui/components/Text';
+
 import { VirtualSelect } from './VirtualSelect.component';
+import { styles } from './VirtualSelect.stylex';
 
 const resizeObserverCallbackRef: {
   current: ResizeObserverCallback | undefined;
@@ -228,21 +231,12 @@ describe('VirtualSelect', () => {
       />,
     );
 
-    const trigger = document.querySelector('[aria-haspopup="listbox"]');
-
-    if (trigger === null) {
-      throw new Error('Expected virtual select trigger to exist');
-    }
-
-    fireEvent.click(trigger);
-
-    const bravoRow = screen.getByText('Bravo').closest('label');
-
-    if (bravoRow === null) {
-      throw new Error('Expected the Bravo option row to exist');
-    }
-
-    fireEvent.click(within(bravoRow).getByRole('checkbox'));
+    fireEvent.click(screen.getByRole('button', { expanded: false }));
+    fireEvent.click(
+      within(screen.getByRole('listbox')).getByRole('checkbox', {
+        name: 'Bravo',
+      }),
+    );
 
     expect(onChange).toHaveBeenCalledWith(['alpha-id', 'bravo-id']);
     expect(screen.getByRole('listbox')).toBeTruthy();
@@ -269,5 +263,141 @@ describe('VirtualSelect', () => {
 
     expect(screen.queryByRole('listbox')).toBeNull();
     expect(onFetchInitial).toHaveBeenCalledTimes(1);
+  });
+
+  it('submits one hidden input per selected value under its name', () => {
+    const { container } = render(
+      <VirtualSelect
+        mode='multi'
+        name='state'
+        onChange={() => void 0}
+        options={[
+          { label: 'Alpha', value: 'alpha-id' },
+          { label: 'Bravo', value: 'bravo-id' },
+        ]}
+        selected={['alpha-id', 'bravo-id']}
+      />,
+    );
+
+    expect(
+      [...container.querySelectorAll('input')].map((input) => [
+        input.type,
+        input.name,
+        input.value,
+      ]),
+    ).toStrictEqual([
+      ['hidden', 'state', 'alpha-id'],
+      ['hidden', 'state', 'bravo-id'],
+    ]);
+  });
+
+  it('renders no hidden input without a name', () => {
+    const { container } = render(
+      <VirtualSelect
+        mode='single'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={['Alpha']}
+      />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Alpha' })).toBeTruthy();
+    expect(container.querySelector('input[type="hidden"]')).toBeNull();
+  });
+
+  it('shows a visible label and names the trigger by it', () => {
+    render(
+      <VirtualSelect
+        label='State'
+        mode='single'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    const label = screen.getByText('State');
+
+    expect(document.querySelector('body > div > div > span')).toBe(label);
+    const trigger = screen.getByRole('button', { name: 'State Select...' });
+
+    expect(label.tagName).toBe('SPAN');
+    expect(label.className).toBe(
+      render(
+        <Text as='span' customStylex={styles.label} size='sm' weight='medium'>
+          Reference
+        </Text>,
+      ).container.firstElementChild?.className,
+    );
+    expect(trigger.getAttribute('aria-labelledby')).toBe(
+      `${label.id} ${trigger.id}`,
+    );
+    expect(label.id).toMatch(/^virtual-select-label-/);
+  });
+
+  it('renders no label element without a label', () => {
+    const { container } = render(
+      <VirtualSelect
+        mode='single'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    expect(container.querySelector('[id^="virtual-select-label-"]')).toBeNull();
+    expect(container.querySelector(':scope > div > span')).toBeNull();
+    expect(
+      screen
+        .getByRole('button', { name: 'Select...' })
+        .getAttribute('aria-labelledby'),
+    ).toBeNull();
+  });
+
+  it('names an always-open listbox by its visible label', () => {
+    render(
+      <VirtualSelect
+        isAlwaysOpen
+        label='State'
+        mode='multi'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    expect(screen.getByRole('listbox', { name: 'State' })).toBeTruthy();
+  });
+
+  it('names the opened listbox of a collapsed select by its visible label', () => {
+    render(
+      <VirtualSelect
+        label='State'
+        mode='single'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'State Select...' }));
+
+    expect(screen.getByRole('listbox', { name: 'State' })).toBeTruthy();
+  });
+
+  it('leaves the listbox without aria-labelledby when there is no label', () => {
+    render(
+      <VirtualSelect
+        isAlwaysOpen
+        mode='multi'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    expect(
+      screen.getByRole('listbox').getAttribute('aria-labelledby'),
+    ).toBeNull();
   });
 });

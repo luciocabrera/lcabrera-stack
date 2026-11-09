@@ -8,5 +8,15 @@
     "file": "packages/ui/src/components/Heatmap/HeatmapGrid/HeatmapGrid.component.tsx",
     "lines": 1,
     "rule": "lint/a11y/noNoninteractiveElementToInteractiveRole"
+  },
+  {
+    "analyzer": "fallow",
+    "case": "FP-0002",
+    "contentHash": "389d08622d75308b44b0d9d3be5db8f752716ef7462f67c47398e12b5e24fef8",
+    "evidence": "docs/agents/adjudications/FP-0002.json",
+    "expires": "2027-05-08",
+    "file": "packages/ui/src/components/VirtualSelect/VirtualSelect.component.tsx",
+    "lines": 1,
+    "rule": "complexity"
   }
 ]

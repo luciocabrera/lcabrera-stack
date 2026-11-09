@@ -23,6 +23,7 @@ const {
     isBusy: false,
     isDisabled: false,
     isOpen: false,
+    labelId: undefined as string | undefined,
     listboxId: 'listbox-id',
     mode: 'single',
     placeholder: 'Pick one',
@@ -50,6 +51,7 @@ vi.mock('../contexts/meta/selectors', () => ({
   useGetIsBusy: () => metaState.current.isBusy,
   useGetIsInert: () => metaState.current.isBusy || metaState.current.isDisabled,
   useGetIsOpen: () => metaState.current.isOpen,
+  useGetLabelId: () => metaState.current.labelId,
   useGetListboxId: () => metaState.current.listboxId,
   useGetMode: () => metaState.current.mode,
   useGetPlaceholder: () => metaState.current.placeholder,
@@ -90,6 +92,30 @@ describe('VirtualSelectTrigger', () => {
     fireEvent.click(trigger);
 
     expect(toggleDropdownMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('is named by the visible label and then by its own content', () => {
+    setMetaState({ labelId: 'status' });
+
+    render(
+      <>
+        <span id='status'>Status</span>
+        <VirtualSelectTrigger />
+      </>,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Status Pick one' });
+
+    expect(trigger.id).toBe('status-trigger');
+  });
+
+  it('carries no label wiring without a visible label', () => {
+    render(<VirtualSelectTrigger />);
+
+    const trigger = screen.getByRole('button', { name: 'Pick one' });
+
+    expect(trigger.getAttribute('aria-labelledby')).toBeNull();
+    expect(trigger.getAttribute('id')).toBeNull();
   });
 
   it('renders the selected single label from the store', () => {

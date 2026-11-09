@@ -7,16 +7,21 @@ import { useVirtualSelect } from './hooks';
 import { styles } from './VirtualSelect.stylex';
 import { VirtualSelectDropdown } from './VirtualSelectDropdown/VirtualSelectDropdown.component';
 import { VirtualSelectHeader } from './VirtualSelectHeader/VirtualSelectHeader.component';
+import { VirtualSelectHiddenInputs } from './VirtualSelectHiddenInputs/VirtualSelectHiddenInputs.component';
+import { VirtualSelectLabel } from './VirtualSelectLabel/VirtualSelectLabel.component';
 
+// fallow-ignore-next-line complexity -- false positive, case FP-0002: prop count of a required public API; no branching to remove
 export const VirtualSelect = ({
   customStylex,
   dataState,
   isAlwaysOpen = false,
   isBusy = false,
   isDisabled = false,
+  label,
   listboxId,
   listMaxHeight,
   mode,
+  name,
   onChange,
   onFetchInitial,
   onFetchMore,
@@ -33,6 +38,7 @@ export const VirtualSelect = ({
     handleListChange,
     isMulti,
     isOpen,
+    labelId,
     resolvedListboxId,
     selectedLabels,
     toggleDropdown,
@@ -41,6 +47,7 @@ export const VirtualSelect = ({
     isAlwaysOpen,
     isBusy,
     isDisabled,
+    label,
     listboxId,
     mode,
     onChange,
@@ -69,6 +76,7 @@ export const VirtualSelect = ({
         isBusy,
         isDisabled,
         isOpen,
+        labelId,
         listboxId: resolvedListboxId,
         mode,
         onCloseDropdown: closeDropdown,
@@ -83,8 +91,10 @@ export const VirtualSelect = ({
           shouldFillHeight ? styles.containerFill : undefined,
         )}
       >
+        <VirtualSelectLabel label={label} />
         <VirtualSelectHeader />
         <VirtualSelectDropdown />
+        <VirtualSelectHiddenInputs name={name} selected={selected} />
       </div>
     </VirtualSelectProvider>
   );

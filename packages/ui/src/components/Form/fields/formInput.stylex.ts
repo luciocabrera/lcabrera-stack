@@ -39,4 +39,17 @@ export const formInputStyles = stylex.create({
     position: 'relative',
     height: '2.25rem',
   },
+  field: {
+    gap: spacing.xxs,
+    display: 'flex',
+    flexDirection: 'column',
+    minWidth: 0,
+  },
+  select: {
+    appearance: 'auto',
+    cursor: {
+      default: 'pointer',
+      ':disabled': 'not-allowed',
+    },
+  },
 });

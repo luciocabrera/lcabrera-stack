@@ -8,13 +8,18 @@ import {
   useGetIsAlwaysOpen,
   useGetIsInert,
   useGetIsOpen,
+  useGetLabelId,
   useGetListboxId,
   useGetMode,
   useGetPlaceholder,
 } from '../../contexts/meta/selectors';
 import { useVirtualSelectTagOverflow } from '../../hooks';
 import { resolveTagOverflow } from '../../utils';
-import { renderChevron, renderTriggerContent } from '../utils';
+import {
+  getTriggerLabelProps,
+  renderChevron,
+  renderTriggerContent,
+} from '../utils';
 
 export const useVirtualSelectTrigger = () => {
   const triggerRef = useRef<HTMLButtonElement | HTMLDivElement | undefined>(
@@ -24,6 +29,7 @@ export const useVirtualSelectTrigger = () => {
   const isAlwaysOpen = useGetIsAlwaysOpen();
   const isInert = useGetIsInert();
   const isOpen = useGetIsOpen();
+  const labelId = useGetLabelId();
   const listboxId = useGetListboxId();
   const mode = useGetMode();
   const placeholder = useGetPlaceholder();
@@ -58,12 +64,14 @@ export const useVirtualSelectTrigger = () => {
   });
 
   const chevron = renderChevron({ isAlwaysOpen, isOpen });
+  const labelProps = getTriggerLabelProps({ labelId });
 
   return {
     chevron,
     content,
     isInert,
     isOpen,
+    labelProps,
     listboxId,
     mode,
     shouldUseDivTrigger,

@@ -4,6 +4,7 @@ export { useGetIsBusy } from './useGetIsBusy.hook';
 export { useGetIsInert } from './useGetIsInert.hook';
 export { useGetIsListVisible } from './useGetIsListVisible.hook';
 export { useGetIsOpen } from './useGetIsOpen.hook';
+export { useGetLabelId } from './useGetLabelId.hook';
 export { useGetListboxId } from './useGetListboxId.hook';
 export { useGetMode } from './useGetMode.hook';
 export { useGetPlaceholder } from './useGetPlaceholder.hook';

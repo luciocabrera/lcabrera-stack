@@ -21,6 +21,7 @@ import {
   useGetIsBusy,
   useGetIsListVisible,
   useGetIsOpen,
+  useGetLabelId,
   useGetListboxId,
   useGetMode,
   useGetPlaceholder,
@@ -102,6 +103,15 @@ describe('VirtualSelect meta hooks', () => {
     expect(
       renderHook(() => useGetPlaceholder(), { wrapper }).result.current,
     ).toBe('Pick a fruit...');
+
+    expect(
+      renderHook(() => useGetLabelId(), { wrapper }).result.current,
+    ).toBeUndefined();
+    expect(
+      renderHook(() => useGetLabelId(), {
+        wrapper: setup({ labelId: 'label-id' }).wrapper,
+      }).result.current,
+    ).toBe('label-id');
 
     const closed = setup({ isListVisible: false, isOpen: false });
 

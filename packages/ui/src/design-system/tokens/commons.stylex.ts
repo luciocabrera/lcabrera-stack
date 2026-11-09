@@ -199,58 +199,104 @@ export const overlayStyles = stylex.create({
   },
 });
 
-export const sizeVariants = stylex.create({
+const sizeDimensions = {
   embedded: {
     borderRadius: borderRadius.sm,
+    fontSize: typography.fontSizeXs,
+    height: spacing.lg,
+  },
+  lg: {
+    borderRadius: borderRadius.lg,
+    fontSize: typography.fontSizeLg,
+    height: spacing.xxl,
+  },
+  md: {
+    borderRadius: borderRadius.md,
+    fontSize: typography.fontSizeMd,
+    height: '2.5rem',
+  },
+  mini: {
+    borderRadius: borderRadius.sm,
+    fontSize: typography.fontSizeSm,
+    height: '1.75rem',
+  },
+  sm: {
+    borderRadius: borderRadius.sm,
+    fontSize: typography.fontSizeSm,
+    height: spacing.xl,
+  },
+} as const;
+
+export const sizeVariants = stylex.create({
+  embedded: {
+    ...sizeDimensions.embedded,
     paddingBlock: spacing.xxs,
     paddingInline: spacing.xxs,
     alignItems: 'center',
-    fontSize: typography.fontSizeXs,
     justifyContent: 'center',
-    height: spacing.lg,
-    minHeight: spacing.lg,
-    minWidth: spacing.lg,
-    width: spacing.lg,
+    minHeight: sizeDimensions.embedded.height,
+    minWidth: sizeDimensions.embedded.height,
+    width: sizeDimensions.embedded.height,
   },
 
   lg: {
-    borderRadius: borderRadius.lg,
+    ...sizeDimensions.lg,
     paddingBlock: spacing.md,
     paddingInline: spacing.lg,
-    fontSize: typography.fontSizeLg,
-    height: spacing.xxl,
-    minHeight: spacing.xxl,
+    minHeight: sizeDimensions.lg.height,
   },
 
   md: {
-    borderRadius: borderRadius.md,
+    ...sizeDimensions.md,
     paddingBlock: spacing.sm,
     paddingInline: spacing.md,
-    fontSize: typography.fontSizeMd,
-    height: '2.5rem',
-    minHeight: '2.5rem',
+    minHeight: sizeDimensions.md.height,
   },
 
   sm: {
-    borderRadius: borderRadius.sm,
+    ...sizeDimensions.sm,
     paddingBlock: spacing.xs,
     paddingInline: spacing.sm,
-    fontSize: typography.fontSizeSm,
-    height: spacing.xl,
-    minHeight: spacing.xl,
+    minHeight: sizeDimensions.sm.height,
   },
 
   mini: {
-    borderRadius: borderRadius.sm,
+    ...sizeDimensions.mini,
     paddingBlock: spacing.xs,
     paddingInline: spacing.xs,
     alignItems: 'center',
-    fontSize: typography.fontSizeSm,
     justifyContent: 'center',
-    height: '1.75rem',
-    minHeight: '1.75rem',
-    minWidth: '1.75rem',
-    width: '1.75rem',
+    minHeight: sizeDimensions.mini.height,
+    minWidth: sizeDimensions.mini.height,
+    width: sizeDimensions.mini.height,
+  },
+});
+
+export const controlSizeVariants = stylex.create({
+  embedded: {
+    ...sizeDimensions.embedded,
+    paddingBlock: 0,
+    paddingInline: spacing.xxs,
+  },
+  lg: {
+    ...sizeDimensions.lg,
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
+  },
+  md: {
+    ...sizeDimensions.md,
+    paddingBlock: spacing.xs,
+    paddingInline: spacing.sm,
+  },
+  mini: {
+    ...sizeDimensions.mini,
+    paddingBlock: 0,
+    paddingInline: spacing.xs,
+  },
+  sm: {
+    ...sizeDimensions.sm,
+    paddingBlock: spacing.xxs,
+    paddingInline: spacing.xs,
   },
 });
 

@@ -21,7 +21,10 @@ vi.mock('#ui/components/Button', () => ({
 
 import { Tag } from './Tag.component';
 
-afterEach(cleanup);
+afterEach(() => {
+  cleanup();
+  MockButton.mockClear();
+});
 
 describe('Tag', () => {
   it('renders the label text', () => {
@@ -38,5 +41,25 @@ describe('Tag', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Remove React' }));
 
     expect(handleRemove).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the click from reaching anything around the chip', () => {
+    const handleBodyClick = vi.fn();
+
+    document.body.addEventListener('click', handleBodyClick);
+    render(<Tag label='React' onRemove={vi.fn()} />);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Remove React' }));
+    document.body.removeEventListener('click', handleBodyClick);
+
+    expect(handleBodyClick).not.toHaveBeenCalled();
+  });
+
+  it('renders a read-only chip with no remove button without onRemove', () => {
+    render(<Tag label='React' />);
+
+    expect(screen.getByText('React').textContent).toBe('React');
+    expect(screen.queryByRole('button')).toBeNull();
+    expect(MockButton).not.toHaveBeenCalled();
   });
 });

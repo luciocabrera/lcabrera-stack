@@ -9,6 +9,7 @@ import {
   useGetCustomStylex,
   useGetIsAlwaysOpen,
   useGetIsListVisible,
+  useGetLabelId,
   useGetListboxId,
 } from '../contexts/meta/selectors';
 import { useVirtualSelectAnchorRef } from '../contexts/useVirtualSelectAnchorRef.hook';
@@ -21,6 +22,7 @@ export const VirtualSelectDropdown = () => {
   const customStylex = useGetCustomStylex();
   const isAlwaysOpen = useGetIsAlwaysOpen();
   const isListVisible = useGetIsListVisible();
+  const labelId = useGetLabelId();
   const listboxId = useGetListboxId();
   const shouldFillHeight = useGetShouldFillHeight();
   const dropdownRef = useRef<HTMLDivElement>(null);
@@ -39,6 +41,7 @@ export const VirtualSelectDropdown = () => {
 
   return (
     <div
+      aria-labelledby={labelId}
       id={listboxId}
       popover={isFloating && HAS_POPOVER_SUPPORT ? 'manual' : undefined}
       ref={dropdownRef}

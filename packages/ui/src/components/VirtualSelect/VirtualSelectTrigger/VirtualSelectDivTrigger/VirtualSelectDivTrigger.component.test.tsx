@@ -15,9 +15,9 @@ import {
 const { metaState, setMetaState, toggleDropdownMock } = vi.hoisted(() => {
   const initialMetaState = {
     isAlwaysOpen: false,
-    isBusy: false,
-    isDisabled: false,
+    isInert: false,
     isOpen: false,
+    labelId: undefined as string | undefined,
     listboxId: 'listbox-id',
     mode: 'multi',
   };
@@ -38,9 +38,9 @@ vi.mock('../../contexts/meta/actions', () => ({
 
 vi.mock('../../contexts/meta/selectors', () => ({
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
-  useGetIsBusy: () => metaState.current.isBusy,
-  useGetIsInert: () => metaState.current.isBusy || metaState.current.isDisabled,
+  useGetIsInert: () => metaState.current.isInert,
   useGetIsOpen: () => metaState.current.isOpen,
+  useGetLabelId: () => metaState.current.labelId,
   useGetListboxId: () => metaState.current.listboxId,
   useGetMode: () => metaState.current.mode,
 }));
@@ -82,6 +82,23 @@ describe('VirtualSelectDivTrigger', () => {
     expect(screen.getByText('Alpha').textContent).toBe('Alpha');
   });
 
+  it('is named by the visible label and then by its own content', () => {
+    setMetaState({ labelId: 'status' });
+
+    render(
+      <>
+        <span id='status'>Status</span>
+        <VirtualSelectDivTrigger triggerRef={createTriggerRef()}>
+          <span>Alpha</span>
+        </VirtualSelectDivTrigger>
+      </>,
+    );
+
+    const trigger = screen.getByRole('button', { name: 'Status Alpha' });
+
+    expect(trigger.id).toBe('status-trigger');
+  });
+
   it('dispatches the toggle action on click and on Enter/Space key presses only', () => {
     render(
       <VirtualSelectDivTrigger triggerRef={createTriggerRef()}>
@@ -99,8 +116,8 @@ describe('VirtualSelectDivTrigger', () => {
     expect(toggleDropdownMock).toHaveBeenCalledTimes(3);
   });
 
-  it('disables interaction while busy', () => {
-    setMetaState({ isBusy: true });
+  it('disables interaction while inert', () => {
+    setMetaState({ isInert: true });
 
     render(
       <VirtualSelectDivTrigger triggerRef={createTriggerRef()}>
@@ -120,7 +137,7 @@ describe('VirtualSelectDivTrigger', () => {
   });
 
   it('renders a static non-interactive shell when always open', () => {
-    setMetaState({ isAlwaysOpen: true });
+    setMetaState({ isAlwaysOpen: true, labelId: 'status' });
     const triggerRef = createTriggerRef();
 
     const { container } = render(
@@ -134,6 +151,7 @@ describe('VirtualSelectDivTrigger', () => {
     expect(trigger?.tagName).toBe('DIV');
     expect(trigger?.getAttribute('role')).toBeNull();
     expect(trigger?.getAttribute('aria-expanded')).toBeNull();
+    expect(trigger?.getAttribute('aria-labelledby')).toBeNull();
     expect(triggerRef.current).toBe(trigger);
     expect(screen.getByText('Alpha').textContent).toBe('Alpha');
   });
