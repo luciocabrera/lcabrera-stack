@@ -1,19 +1,21 @@
 import type { NavLinkRenderProps } from 'react-router';
 
-import * as stylex from '@stylexjs/stylex';
-import { NavLink as RouterNavLink } from 'react-router';
+import { Link as RouterLink, NavLink as RouterNavLink } from 'react-router';
 
 import { Tooltip } from '#ui/components/Tooltip';
 
 import type { NavLinkProps } from './NavLink.types';
 
-import { linkItemStyles } from './NavLink.stylex';
-import { getClassName, getInlineClassName } from './utils';
+import { NavLinkContent } from './NavLinkContent/NavLinkContent.component';
+import { getNavLinkClassName, toLinkProps } from './utils';
 
 export const NavLink = ({
+  caseSensitive,
   children,
   customStylex,
+  end,
   icon,
+  isActive: activeOverride,
   isBusy = false,
   isIconOnly = false,
   orientation = 'vertical',
@@ -24,58 +26,52 @@ export const NavLink = ({
   variant = 'outline',
   ...props
 }: NavLinkProps) => {
-  const isInline = variant === 'inline';
-
-  const link = (
-    <RouterNavLink
-      aria-disabled={isBusy || undefined}
-      className={({ isActive, isPending }: NavLinkRenderProps) =>
-        variant === 'inline'
-          ? getInlineClassName({
-              customStylex,
-              isActive,
-              isBusy,
-              isPending,
-              styles: linkItemStyles,
-            })
-          : getClassName({
-              customStylex,
-              isActive,
-              isBusy,
-              isIconOnly,
-              orientation,
-              size,
-              styles: linkItemStyles,
-              variant,
-            })
-      }
-      prefetch={prefetch}
-      {...props}
+  const classNameFor = ({
+    isActive,
+    isPending,
+  }: Pick<NavLinkRenderProps, 'isActive' | 'isPending'>) =>
+    getNavLinkClassName({
+      customStylex,
+      isActive,
+      isBusy,
+      isIconOnly,
+      isPending,
+      orientation,
+      size,
+      variant,
+    });
+  const content = (
+    <NavLinkContent
+      icon={icon}
+      isBusy={isBusy}
+      isIconOnly={isIconOnly}
+      isInline={variant === 'inline'}
     >
-      {Boolean(isBusy) && (
-        <span {...stylex.props(linkItemStyles.busyOverlay)}>
-          <span {...stylex.props(linkItemStyles.busyWave)} />
-        </span>
-      )}
-      {Boolean(icon) && (
-        <span
-          {...stylex.props(
-            isInline ? linkItemStyles.inline.icon : linkItemStyles.icon,
-          )}
-        >
-          {icon}
-        </span>
-      )}
-      <span
-        {...stylex.props(
-          !isInline && linkItemStyles.label,
-          isIconOnly && linkItemStyles.labelHidden,
-        )}
-      >
-        {children}
-      </span>
-    </RouterNavLink>
+      {children}
+    </NavLinkContent>
   );
+  const link =
+    activeOverride === undefined ? (
+      <RouterNavLink
+        aria-disabled={isBusy || undefined}
+        caseSensitive={caseSensitive}
+        className={classNameFor}
+        end={end}
+        prefetch={prefetch}
+        {...props}
+      >
+        {content}
+      </RouterNavLink>
+    ) : (
+      <RouterLink
+        aria-disabled={isBusy || undefined}
+        className={classNameFor({ isActive: activeOverride, isPending: false })}
+        prefetch={prefetch}
+        {...toLinkProps({ isActive: activeOverride, props })}
+      >
+        {content}
+      </RouterLink>
+    );
 
   if (tooltipContent) {
     return (

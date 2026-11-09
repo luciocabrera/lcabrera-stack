@@ -80,6 +80,7 @@ describe('buildTableBodyCellDescriptor', () => {
       dataType: 'number',
       format: undefined,
       isLoadingState: false,
+      isNumeric: true,
       key: 'amount',
       kind: 'default',
       label: 'Amount',

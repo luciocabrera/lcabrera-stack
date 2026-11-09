@@ -653,7 +653,8 @@ fold groups, use the virtual layout.
 
 Columns sent from a loader cannot carry a `render` function, so a column whose
 cells hold links is built in the component that renders the table. Set `align`
-on it: a `render` cell gets no alignment from its `dataType`.
+on it: a `render` cell gets no alignment from its `dataType`. It does get tabular
+figures from a `number` or `currency` `dataType`, so declare that too.
 
 ---
 

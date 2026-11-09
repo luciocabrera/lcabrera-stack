@@ -39,7 +39,7 @@ describe('costChartPoints', () => {
       ],
     });
 
-    expect(points.map(({ href }) => href)).toEqual([
+    expect(points.map(({ to }) => to)).toEqual([
       '/evals/runs/00000000-0000-4000-8000-000000000002?trial=5',
       '/evals/runs/00000000-0000-4000-8000-000000000001?trial=11',
     ]);
@@ -52,7 +52,7 @@ describe('costChartPoints', () => {
     const [point] = costChartPoints({ metric: 'p95', runs: [run({})] });
 
     expect(point).toMatchObject({
-      href: '/evals/runs/00000000-0000-4000-8000-000000000001?trial=12',
+      to: '/evals/runs/00000000-0000-4000-8000-000000000001?trial=12',
       value: 2000,
     });
   });

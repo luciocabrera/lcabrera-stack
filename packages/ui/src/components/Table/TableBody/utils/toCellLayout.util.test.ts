@@ -9,12 +9,14 @@ describe('toCellLayout', () => {
       align: 'end',
       columnKey: 'name',
       isFill: true,
+      isNumeric: true,
       staticWidths,
     } as const;
 
     expect(toCellLayout(descriptor)).toStrictEqual({
       align: 'end',
       isFill: true,
+      isNumeric: true,
       staticWidths,
     });
   });
@@ -23,6 +25,7 @@ describe('toCellLayout', () => {
     expect(toCellLayout({})).toStrictEqual({
       align: undefined,
       isFill: undefined,
+      isNumeric: undefined,
       staticWidths: undefined,
     });
   });

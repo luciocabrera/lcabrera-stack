@@ -1,33 +1,40 @@
+import { Card } from '@lcabrera/ui/components/Card';
+import { Text } from '@lcabrera/ui/components/Text';
+import { Title } from '@lcabrera/ui/components/Title';
+import { TrendSparkline } from '@lcabrera/ui/components/TrendSparkline';
 import * as stylex from '@stylexjs/stylex';
 
 import type { CostChartsProps } from './EvalsCost.types';
 
-import { EVALS_COST_LABELS } from '../constants/evalsDashboard.constants';
-import { Sparkline } from '../Sparkline';
+import { pageStyles } from '../evalsPage.stylex';
+import { COST_CHARTS, COST_SPARKLINE } from './EvalsCost.constants';
 import { styles } from './EvalsCost.stylex';
 
 export const CostCharts = ({ charts }: CostChartsProps) => (
   <div {...stylex.props(styles.charts)}>
-    {charts.map(({ computed, p95, reported, suite }) => (
-      <section key={suite} {...stylex.props(styles.card)}>
-        <h3 {...stylex.props(styles.heading)}>{suite}</h3>
-        <p {...stylex.props(styles.note)}>
-          Cost per run, {EVALS_COST_LABELS.reported.toLowerCase()}
-        </p>
-        <Sparkline
-          label={`${suite}: cost per run, ${EVALS_COST_LABELS.reported.toLowerCase()}`}
-          points={reported}
-        />
-        <p {...stylex.props(styles.note)}>
-          Cost per run, {EVALS_COST_LABELS.computed.toLowerCase()}
-        </p>
-        <Sparkline
-          label={`${suite}: cost per run, ${EVALS_COST_LABELS.computed.toLowerCase()}`}
-          points={computed}
-        />
-        <p {...stylex.props(styles.note)}>p95 duration per run</p>
-        <Sparkline label={`${suite}: p95 duration per run`} points={p95} />
-      </section>
+    {charts.map((chart) => (
+      <Card customStylex={pageStyles.section} key={chart.suite} padding='md'>
+        <Title level={3} variant='plain'>
+          {chart.suite}
+        </Title>
+        {COST_CHARTS.map(({ caption, metric }) => (
+          <figure
+            aria-label={`${chart.suite}: ${caption.toLowerCase()}`}
+            key={metric}
+            {...stylex.props(styles.figure)}
+          >
+            <Text as='figcaption' size='sm' tone='secondary'>
+              {caption}
+            </Text>
+            <TrendSparkline
+              height={COST_SPARKLINE.height}
+              label={`${chart.suite}: ${caption.toLowerCase()}`}
+              points={chart[metric]}
+              width={COST_SPARKLINE.width}
+            />
+          </figure>
+        ))}
+      </Card>
     ))}
   </div>
 );

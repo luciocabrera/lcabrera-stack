@@ -3,5 +3,6 @@ import type { TableBodyCellLayout } from '#ui/components/Table/TableBodyCell/Tab
 export const toCellLayout = ({
   align,
   isFill,
+  isNumeric,
   staticWidths,
-}: TableBodyCellLayout) => ({ align, isFill, staticWidths });
+}: TableBodyCellLayout) => ({ align, isFill, isNumeric, staticWidths });

@@ -1,51 +1,55 @@
+import { useRouteBreadcrumbs } from '@lcabrera/ui/components/Breadcrumbs';
+import { PageHeader } from '@lcabrera/ui/components/PageHeader';
+import { Text } from '@lcabrera/ui/components/Text';
 import * as stylex from '@stylexjs/stylex';
-import { Link, useLoaderData } from 'react-router';
+import { useLoaderData } from 'react-router';
 
 import type { loader } from './evals-cost.loader';
 
-import { EVALS_COST_RUNS } from '../constants/evalsDashboard.constants';
-import { EvalsPageHeader } from '../EvalsPageHeader';
-import { FiguresTable } from '../FiguresTable';
+import {
+  EVALS_BREADCRUMB,
+  EVALS_COST_RUNS,
+} from '../constants/evalsDashboard.constants';
+import { pageStyles } from '../evalsPage.stylex';
 import { CostCharts } from './CostCharts.component';
-import { COST_COLUMNS } from './EvalsCost.constants';
-import { styles } from './EvalsCost.stylex';
+import { CostTable } from './CostTable.component';
 
 export const EvalsCost = () => {
   const { charts, runs, subjects, suites } = useLoaderData<typeof loader>();
+  const breadcrumbs = [EVALS_BREADCRUMB, ...useRouteBreadcrumbs()];
 
   return (
-    <div {...stylex.props(styles.page)}>
-      <EvalsPageHeader title='Cost and latency' trail='cost and latency' />
-      <p {...stylex.props(styles.note)}>
+    <div {...stylex.props(pageStyles.page)}>
+      <PageHeader breadcrumbs={breadcrumbs} title='Cost and latency' />
+      <Text size='sm' tone='secondary'>
         Over the last {EVALS_COST_RUNS} runs of each suite. The SDK reports a
         cost for each trial it ran; the computed cost multiplies each trial's
         tokens by the model price in force when its run started. The two are
         never added together. Each chart point opens its run at its costliest or
         slowest trial.
-      </p>
+      </Text>
       <CostCharts charts={charts} />
-      <FiguresTable
+      <CostTable
         caption='Per suite'
-        columns={COST_COLUMNS}
-        rows={suites.map(({ cells, id, label }) => ({
-          cells: { ...cells, name: label },
-          key: id,
-        }))}
+        density='compact'
+        rows={suites.map(({ cells, label }) => ({ ...cells, name: label }))}
       />
-      <FiguresTable
+      <CostTable
         caption='Per subject'
-        columns={COST_COLUMNS}
-        rows={subjects.map(({ cells, href, id, label }) => ({
-          cells: { ...cells, name: <Link to={href}>{label}</Link> },
-          key: id,
+        density='compact'
+        rows={subjects.map(({ cells, href, label }) => ({
+          ...cells,
+          href,
+          name: label,
         }))}
       />
-      <FiguresTable
+      <CostTable
         caption='Per run'
-        columns={COST_COLUMNS}
-        rows={runs.map(({ cells, href, id, label }) => ({
-          cells: { ...cells, name: <Link to={href}>{label}</Link> },
-          key: id,
+        density='dense'
+        rows={runs.map(({ cells, href, label }) => ({
+          ...cells,
+          href,
+          name: label,
         }))}
       />
     </div>

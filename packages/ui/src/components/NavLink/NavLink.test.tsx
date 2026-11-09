@@ -382,8 +382,20 @@ describe('NavLinkProps', () => {
 });
 
 describe('NavLinkProps isActive', () => {
-  it('takes no isActive, which the router computes from the location', () => {
-    expectTypeOf<NavLinkProps>().not.toHaveProperty('isActive');
+  it('takes an optional boolean isActive', () => {
+    expectTypeOf<NavLinkProps['isActive']>().toEqualTypeOf<
+      boolean | undefined
+    >();
+  });
+
+  it('leaves the router NavLink in charge when isActive is unset', () => {
+    render(
+      <NavLink to='/docs' variant='inline'>
+        Docs
+      </NavLink>,
+    );
+
+    expect(mockRouterNavLink).toHaveBeenCalledTimes(1);
   });
 });
 

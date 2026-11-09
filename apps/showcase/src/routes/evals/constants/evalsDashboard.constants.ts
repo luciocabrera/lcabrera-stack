@@ -54,3 +54,5 @@ export const EVALS_COST_LABELS = {
   computed: 'Computed from model prices',
   reported: 'Reported by the SDK',
 } as const;
+
+export const EVALS_BREADCRUMB = { label: 'Evals', to: '/evals' } as const;

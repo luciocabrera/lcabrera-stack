@@ -146,6 +146,20 @@ const renderScores = ({ layout = 'static' }: RenderScoresArgs = {}) =>
     </section>,
   );
 
+const headerLabelsWrap = (layout: TableLayoutMode) => {
+  renderScores({ layout });
+
+  const result = screen
+    .getAllByTestId('table-header-label')
+    .map((element) =>
+      hasStylexStyle({ element, style: tableHeaderCellStyles.staticLabel }),
+    );
+
+  cleanup();
+
+  return result;
+};
+
 describe('Table static layout', () => {
   it('renders every row, as a table, under its caption, inside a parent with no height', () => {
     renderScores();
@@ -202,6 +216,11 @@ describe('Table static layout', () => {
         hasStylexStyle({ element, style: virtualContentStyles.wrapper }),
       ),
     ).toBe(true);
+  });
+
+  it('wraps a header label in the static layout and truncates it in the virtual one', () => {
+    expect(headerLabelsWrap('static')).toStrictEqual([true, true, true]);
+    expect(headerLabelsWrap('virtual')).toStrictEqual([false, false, false]);
   });
 
   it('renders no settings button, column menu or resize handle by default', () => {
@@ -459,6 +478,48 @@ describe('Table column alignment', () => {
       }),
     ).toBe(false);
   });
+
+  it.each(['static', 'virtual'] as const)(
+    'sets tabular figures on every cell of a number column, its own or a render cell, and on no string one, in the %s layout',
+    (layout) => {
+      render(
+        <Table
+          columns={[
+            {
+              align: 'start',
+              dataType: 'number',
+              isPrimaryKey: true,
+              key: 'id',
+              label: 'Id',
+            },
+            {
+              dataType: 'string',
+              key: 'name',
+              label: 'Name',
+              render: ({ name }) => <em>{name}</em>,
+            },
+            {
+              dataType: 'number',
+              key: 'score',
+              label: 'Score',
+              render: ({ score }) => <em>{score}</em>,
+            },
+          ]}
+          layout={layout}
+          response={ROWS.slice(0, 1)}
+        />,
+      );
+
+      expect(
+        ['id', 'score', 'name'].map((key) =>
+          hasStylexStyle({
+            element: cellOf(key),
+            style: tableBodyCellStyles.tabularFigures,
+          }),
+        ),
+      ).toEqual([true, true, false]);
+    },
+  );
 
   it('keeps an explicit alignment on a render cell, which dataType alone cannot', () => {
     render(

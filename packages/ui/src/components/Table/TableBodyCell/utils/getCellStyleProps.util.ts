@@ -11,6 +11,7 @@ import type { TableBodyCellProps } from '../TableBodyCell.types';
 import { tableBodyCellStyles } from '../TableBodyCell.stylex';
 import { resolveCellDataTypeAlignStyles } from './resolveCellDataTypeAlignStyles.util';
 import { resolveCellLayoutStyles } from './resolveCellLayoutStyles.util';
+import { resolveCellNumericStyles } from './resolveCellNumericStyles.util';
 import { resolveCellPinStyles } from './resolveCellPinStyles.util';
 
 type GetCellStylePropsArgs = Pick<
@@ -21,6 +22,7 @@ type GetCellStylePropsArgs = Pick<
   readonly dataType: TableColumnDataType;
   readonly isAlignedByDataType: boolean;
   readonly isFill?: boolean;
+  readonly isNumeric?: boolean;
   readonly staticWidths?: TableStaticColumnWidths;
 };
 
@@ -30,6 +32,7 @@ export const getCellStyleProps = ({
   dataType,
   isAlignedByDataType,
   isFill,
+  isNumeric,
   minWidth,
   pinInfo,
   staticWidths,
@@ -38,6 +41,7 @@ export const getCellStyleProps = ({
   stylex.props(
     tableBodyCellStyles.base(minWidth, width),
     ...resolveCellDataTypeAlignStyles({ align, dataType, isAlignedByDataType }),
+    resolveCellNumericStyles({ dataType, isAlignedByDataType, isNumeric }),
     ...resolveCellPinStyles(pinInfo),
     ...resolveCellLayoutStyles({ align, isFill, staticWidths }),
     customStylex,

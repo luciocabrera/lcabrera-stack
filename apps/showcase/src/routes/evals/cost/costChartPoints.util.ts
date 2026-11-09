@@ -45,9 +45,8 @@ export const costChartPoints = ({ metric, runs }: CostChartPointsArgs) => {
         trial === 'slowest' ? run.slowestTrialId : run.costliestTrialId;
 
       return {
-        href: evalsHref({ runId: run.runId, trialId }),
-        key: run.runId,
         label: `Run ${run.runId.slice(0, 8)}, ${run.startedAt.toISOString().slice(0, 10)}: ${describe(figure)}; open the ${trial} trial, ${trialId}`,
+        to: evalsHref({ runId: run.runId, trialId }),
         value: figure,
       };
     });

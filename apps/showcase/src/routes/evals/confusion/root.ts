@@ -1,3 +1,4 @@
+export { handle } from './evals-confusion.handle';
 export { loader } from './evals-confusion.loader';
 export { meta } from './evals-confusion.meta';
 export { EvalsConfusion as default } from './EvalsConfusion.component';

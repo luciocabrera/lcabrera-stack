@@ -14,6 +14,7 @@ describe('resolveCellLayout', () => {
     expect(resolveCellLayout({ col: {} })).toStrictEqual({
       align: undefined,
       isFill: undefined,
+      isNumeric: undefined,
       staticWidths: undefined,
     });
   });
@@ -51,7 +52,24 @@ describe('resolveCellLayout', () => {
     ).toStrictEqual({
       align: undefined,
       isFill: undefined,
+      isNumeric: undefined,
       staticWidths: { maxWidth: undefined, minWidth: 40, width: '100%' },
     });
   });
+
+  it.each(['static', 'virtual'] as const)(
+    'marks a number or currency column numeric in the %s layout, and no other',
+    (layout) => {
+      expect(
+        resolveCellLayout({ col: { dataType: 'number' }, layout }).isNumeric,
+      ).toBe(true);
+      expect(
+        resolveCellLayout({ col: { dataType: 'currency' }, layout }).isNumeric,
+      ).toBe(true);
+      expect(
+        resolveCellLayout({ col: { dataType: 'date' }, layout }).isNumeric,
+      ).toBeUndefined();
+      expect(resolveCellLayout({ col: {}, layout }).isNumeric).toBeUndefined();
+    },
+  );
 });

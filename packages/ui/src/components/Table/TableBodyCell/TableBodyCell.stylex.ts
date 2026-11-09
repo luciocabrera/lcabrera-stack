@@ -79,6 +79,9 @@ export const tableBodyCellStyles = stylex.create({
   booleanContent: {
     width: 'auto',
   },
+  tabularFigures: {
+    fontVariantNumeric: 'tabular-nums',
+  },
   textContent: {
     overflow: 'hidden',
     display: 'block',

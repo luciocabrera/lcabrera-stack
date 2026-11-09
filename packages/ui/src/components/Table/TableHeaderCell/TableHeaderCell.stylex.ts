@@ -82,6 +82,11 @@ export const tableHeaderCellStyles = stylex.create({
     borderLeftStyle: 'solid',
     borderLeftWidth: 2,
   },
+  staticLabel: {
+    overflowWrap: 'break-word',
+    textOverflow: 'clip',
+    whiteSpace: 'normal',
+  },
   content: {
     flex: '1',
     overflow: 'hidden',
