@@ -67,7 +67,7 @@ Every store slice is read — and every action dispatched — inside the compone
 | `VirtualSelectDivTrigger`   | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetLabelId`, `useGetListboxId`, `useGetMode` (meta)                                                     | `useToggleDropdown` (meta)                           | `children`, `triggerRef` (producer→child) |
 | `VirtualSelectLabel`        | `useGetLabelId` (meta)                                                                                                                                            | —                                                    | `label` (shell prop)                      |
 | `VirtualSelectHiddenInputs` | —                                                                                                                                                                 | —                                                    | `name`, `selected` (shell props)          |
-| `VirtualSelectDropdown`     | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetListboxId` (meta); `useGetShouldFillHeight` (list)                                      | —                                                    | none                                      |
+| `VirtualSelectDropdown`     | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetLabelId`, `useGetListboxId` (meta); `useGetShouldFillHeight` (list)                     | —                                                    | none                                      |
 
 ## Data Flow
 
@@ -147,7 +147,10 @@ label under the id the shell put in the meta store as `labelId`; each trigger
 reads the same id and sets
 `aria-labelledby="<labelId> <its own id>"`, so a screen reader hears the label
 and then the current selection. The always-open shell is not a control and
-takes no label wiring.
+takes no label wiring. `VirtualSelectDropdown` reads the same id and sets
+`aria-labelledby` on the `listbox`, so the list is named by the label in every
+mode, including always-open, where it is the only control. With no `label` the
+id is undefined and no attribute is written.
 
 `VirtualSelectHiddenInputs` renders one `<input type="hidden">` per value in
 `selected` under `name`. The

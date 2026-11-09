@@ -45,6 +45,7 @@ vi.mock('../contexts/meta/selectors', () => ({
   useGetCustomStylex: () => metaState.current.customStylex,
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsListVisible: () => metaState.current.isListVisible,
+  useGetLabelId: () => undefined,
   useGetListboxId: () => metaState.current.listboxId,
 }));
 

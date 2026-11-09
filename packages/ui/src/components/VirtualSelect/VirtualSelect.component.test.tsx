@@ -353,4 +353,51 @@ describe('VirtualSelect', () => {
         .getAttribute('aria-labelledby'),
     ).toBeNull();
   });
+
+  it('names an always-open listbox by its visible label', () => {
+    render(
+      <VirtualSelect
+        isAlwaysOpen
+        label='State'
+        mode='multi'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    expect(screen.getByRole('listbox', { name: 'State' })).toBeTruthy();
+  });
+
+  it('names the opened listbox of a collapsed select by its visible label', () => {
+    render(
+      <VirtualSelect
+        label='State'
+        mode='single'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'State Select...' }));
+
+    expect(screen.getByRole('listbox', { name: 'State' })).toBeTruthy();
+  });
+
+  it('leaves the listbox without aria-labelledby when there is no label', () => {
+    render(
+      <VirtualSelect
+        isAlwaysOpen
+        mode='multi'
+        onChange={() => void 0}
+        options={['Alpha']}
+        selected={[]}
+      />,
+    );
+
+    expect(
+      screen.getByRole('listbox').getAttribute('aria-labelledby'),
+    ).toBeNull();
+  });
 });
