@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 
-import { NavLink } from '@lcabrera/ui';
-import { cleanup, render, screen } from '@testing-library/react';
+import { NavLink, StatusBadge } from '@lcabrera/ui';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -45,25 +45,21 @@ describe('flakyRunColumn', () => {
     ).toMatchObject({ align: 'end', key: 'r1', label: '2026-10-01' });
   });
 
-  it('links each cell to its run, and styles a split cell apart from a steady one', () => {
+  it('links a split cell to its run with its tally in a warning badge', () => {
+    render(<StatusBadge label='2/3' tone='warning' />);
+
+    const badgeClass = screen.getByText('2/3').className;
+
+    cleanup();
     renderRunCell('r1');
 
     const split = screen.getByRole('link', { name: '2/3' });
-    const splitClass = split.className;
 
     expect(split.getAttribute('href')).toBe('/evals/runs/r1');
+    expect(within(split).getByText('2/3').className).toBe(badgeClass);
+  });
 
-    cleanup();
-    renderRunCell('r2');
-
-    const steady = screen.getByRole('link', { name: '3/3' });
-
-    expect(steady.getAttribute('href')).toBe('/evals/runs/r2');
-    expect(splitClass).not.toBe(steady.className);
-
-    const steadyClass = steady.className;
-
-    cleanup();
+  it('links a steady cell to its run as a plain inline link', () => {
     render(
       <MemoryRouter>
         <NavLink to='/evals/runs/r2' variant='inline'>
@@ -72,9 +68,19 @@ describe('flakyRunColumn', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('link', { name: '3/3' }).className).toBe(
-      steadyClass,
-    );
+    const plain = screen.getByRole('link', { name: '3/3' });
+    const plainClasses = [plain.className, screen.getByText('3/3').className];
+
+    cleanup();
+    renderRunCell('r2');
+
+    const steady = screen.getByRole('link', { name: '3/3' });
+
+    expect(steady.getAttribute('href')).toBe('/evals/runs/r2');
+    expect([
+      steady.className,
+      within(steady).getByText('3/3').className,
+    ]).toEqual(plainClasses);
   });
 
   it('draws nothing for a run the task has no cell for', () => {

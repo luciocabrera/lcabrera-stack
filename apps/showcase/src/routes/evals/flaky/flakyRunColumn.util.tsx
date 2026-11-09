@@ -1,10 +1,8 @@
 import type { TableColumn } from '@lcabrera/ui/components/Table';
 
-import { NavLink } from '@lcabrera/ui';
+import { NavLink, StatusBadge } from '@lcabrera/ui';
 
 import type { FlakyRun, FlakyTaskRow } from './EvalsFlaky.types';
-
-import { styles } from './EvalsFlaky.stylex';
 
 export const flakyRunColumn = ({ label, runId }: FlakyRun) =>
   ({
@@ -16,12 +14,12 @@ export const flakyRunColumn = ({ label, runId }: FlakyRun) =>
 
       return (
         cell !== undefined && (
-          <NavLink
-            customStylex={cell.isSplit && styles.split}
-            to={cell.href}
-            variant='inline'
-          >
-            {cell.label}
+          <NavLink to={cell.href} variant='inline'>
+            {cell.isSplit ? (
+              <StatusBadge label={cell.label} tone='warning' />
+            ) : (
+              cell.label
+            )}
           </NavLink>
         )
       );

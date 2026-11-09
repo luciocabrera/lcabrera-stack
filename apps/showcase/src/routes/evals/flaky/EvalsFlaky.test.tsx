@@ -103,7 +103,9 @@ describe('EvalsFlaky', () => {
 
     expect(steady.getAttribute('href')).toBe('/evals/runs/r0');
     expect(split.getAttribute('href')).toBe('/evals/runs/r1');
-    expect(split.className).not.toBe(steady.className);
+    expect(within(split).getByText('2/3').className).not.toBe(
+      within(steady).getByText('3/3').className,
+    );
     expect(
       screen.getByRole('heading', { level: 2, name: 'skills' }),
     ).toBeDefined();
