@@ -142,7 +142,7 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     expect(status).toBe(0);
     expect(stdout).toContain('evals:migrate: granted evals_writer');
     expect(stdout).toContain('evals:migrate: granted evals_reader');
-  });
+  }, 60_000);
 
   it('exits 1 naming the lacking privilege when a non-owner cannot grant it', async () => {
     await createdRoles();
@@ -167,7 +167,7 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     expect(stdout).toContain('  select on column evals.eval_run.run_id');
     expect(stdout).toContain('  select on table evals.v_task_pass_rate');
     expect(stdout).not.toContain('granted evals_reader');
-  });
+  }, 60_000);
 
   it('exits 1 naming a reporting view recreated without security_invoker', async () => {
     const { database, url } = await migratedDatabase();
@@ -189,7 +189,7 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
       '  view evals.v_subject_trend without security_invoker',
     );
     expect(stdout).not.toContain('granted evals_reader');
-  });
+  }, 60_000);
 
   it('exits 1 naming a security definer function the reader can execute', async () => {
     const { database, url } = await migratedDatabase();
@@ -207,7 +207,7 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     expect(stdout).toContain(
       '  function evals.probe_definer() is security definer',
     );
-  });
+  }, 60_000);
 
   it('exits 0 when the owner-privilege views and functions belong to an extension', async () => {
     const { database, url } = await migratedDatabase();
@@ -227,7 +227,7 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     expect(stdout).toContain('evals:migrate: granted evals_reader');
     expect(stdout).not.toContain('pg_stat_statements');
     expect(stdout).not.toContain('probe_extension_definer');
-  });
+  }, 60_000);
 
   it('skips a security definer function in another session temp schema and still names one in public', async () => {
     const { database, url } = await migratedDatabase();
@@ -260,5 +260,5 @@ describe.skipIf(!DATABASE_URL)('evals:migrate against Postgres', () => {
     } finally {
       await session.end();
     }
-  });
+  }, 60_000);
 });
