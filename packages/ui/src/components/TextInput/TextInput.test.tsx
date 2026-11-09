@@ -5,10 +5,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import {
-  formInputSizeVariants,
-  formInputStyles,
-} from '#ui/components/Form/fields/formInput.stylex';
+import { formInputStyles } from '#ui/components/Form/fields/formInput.stylex';
+import { controlSizeVariants } from '#ui/design-system/tokens/commons.stylex';
 import { expectFieldLabel } from '#ui/utils/tests/expectFieldLabel.util';
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
@@ -101,16 +99,14 @@ describe('TextInput', () => {
   });
 
   it.each(
-    Object.keys(
-      formInputSizeVariants,
-    ) as (keyof typeof formInputSizeVariants)[],
+    Object.keys(controlSizeVariants) as (keyof typeof controlSizeVariants)[],
   )('applies the %s size', (size) => {
     render(<TextInput aria-label='Search' size={size} />);
 
     expect(
       hasStylexStyle({
         element: screen.getByRole('textbox'),
-        style: formInputSizeVariants[size],
+        style: controlSizeVariants[size],
       }),
     ).toBe(true);
   });
@@ -130,7 +126,7 @@ describe('TextInput', () => {
       true,
     );
     expect(
-      hasStylexStyle({ element: input, style: formInputSizeVariants.sm }),
+      hasStylexStyle({ element: input, style: controlSizeVariants.sm }),
     ).toBe(false);
   });
 

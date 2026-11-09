@@ -5,10 +5,8 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { createRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import {
-  formInputSizeVariants,
-  formInputStyles,
-} from '#ui/components/Form/fields/formInput.stylex';
+import { formInputStyles } from '#ui/components/Form/fields/formInput.stylex';
+import { controlSizeVariants } from '#ui/design-system/tokens/commons.stylex';
 import { expectFieldLabel } from '#ui/utils/tests/expectFieldLabel.util';
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
@@ -126,16 +124,14 @@ describe('Select', () => {
   });
 
   it.each(
-    Object.keys(
-      formInputSizeVariants,
-    ) as (keyof typeof formInputSizeVariants)[],
+    Object.keys(controlSizeVariants) as (keyof typeof controlSizeVariants)[],
   )('applies the %s size', (size) => {
     render(<Select aria-label='State' options={OPTIONS} size={size} />);
 
     expect(
       hasStylexStyle({
         element: screen.getByRole('combobox'),
-        style: formInputSizeVariants[size],
+        style: controlSizeVariants[size],
       }),
     ).toBe(true);
   });
@@ -156,7 +152,7 @@ describe('Select', () => {
       hasStylexStyle({ element: select, style: overrideStyles.tall }),
     ).toBe(true);
     expect(
-      hasStylexStyle({ element: select, style: formInputSizeVariants.sm }),
+      hasStylexStyle({ element: select, style: controlSizeVariants.sm }),
     ).toBe(false);
   });
 

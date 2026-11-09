@@ -12,7 +12,10 @@ attributes and `ref`. Give them a `name` and a `defaultValue` and a router
 value held in state. `Select` takes `options` of `{ value, label }`. Both take
 an optional visible `label`, tied to the control by a `useId` id unless you
 pass `id`, a `size` on the `Button` scale, and `customStylex`, which is applied
-last.
+last. Their sizes come from `controlSizeVariants`, a new export of
+`@lcabrera/ui/design-system/tokens/commons.stylex`. It shares each size's
+height, font size and border radius with `sizeVariants`, so a control and a
+`Button` of the same size line up; only the padding differs.
 
 `VirtualSelect` takes `name` and `label`. With `name` it renders one hidden
 input per selected value, so a form submits its selection once the page is

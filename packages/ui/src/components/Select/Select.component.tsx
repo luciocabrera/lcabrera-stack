@@ -1,11 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 import { useId } from 'react';
 
-import {
-  formInputSizeVariants,
-  formInputStyles,
-} from '#ui/components/Form/fields/formInput.stylex';
+import { formInputStyles } from '#ui/components/Form/fields/formInput.stylex';
 import { Text } from '#ui/components/Text';
+import { controlSizeVariants } from '#ui/design-system/tokens/commons.stylex';
 
 import type { SelectProps } from './Select.types';
 
@@ -27,7 +25,7 @@ export const Select = ({
       {...stylex.props(
         formInputStyles.input,
         formInputStyles.select,
-        size && formInputSizeVariants[size],
+        size && controlSizeVariants[size],
         customStylex,
       )}
     >

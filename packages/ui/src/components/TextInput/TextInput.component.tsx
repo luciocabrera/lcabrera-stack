@@ -1,11 +1,9 @@
 import * as stylex from '@stylexjs/stylex';
 import { useId } from 'react';
 
-import {
-  formInputSizeVariants,
-  formInputStyles,
-} from '#ui/components/Form/fields/formInput.stylex';
+import { formInputStyles } from '#ui/components/Form/fields/formInput.stylex';
 import { Text } from '#ui/components/Text';
+import { controlSizeVariants } from '#ui/design-system/tokens/commons.stylex';
 
 import type { TextInputProps } from './TextInput.types';
 
@@ -25,7 +23,7 @@ export const TextInput = ({
       id={inputId}
       {...stylex.props(
         formInputStyles.input,
-        size && formInputSizeVariants[size],
+        size && controlSizeVariants[size],
         customStylex,
       )}
     />
