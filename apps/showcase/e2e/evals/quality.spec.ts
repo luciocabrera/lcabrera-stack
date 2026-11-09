@@ -90,11 +90,11 @@ it('draws a sparkline per dimension with red, green and grey points that open th
 }) => {
   await openEvals(page, '/evals/quality');
 
-  const description = page.getByRole('figure', {
+  const description = page.getByRole('group', {
     exact: true,
     name: 'react-19 description over its last 5 scored runs',
   });
-  const examples = page.getByRole('figure', {
+  const examples = page.getByRole('group', {
     exact: true,
     name: 'react-19 examples over its last 2 scored runs',
   });
@@ -135,7 +135,7 @@ it('draws a sparkline per dimension with red, green and grey points that open th
   expect(
     await paintOf(
       page
-        .getByRole('figure', {
+        .getByRole('group', {
           exact: true,
           name: 'unslop description over its last 5 scored runs',
         })

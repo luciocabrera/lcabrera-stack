@@ -1,18 +1,17 @@
-import type { FiguresColumn } from '../FiguresTable';
+import type { BreadcrumbHandle } from '@lcabrera/ui';
+import type { TableColumn } from '@lcabrera/ui/components/Table';
 
-export const FLIP_COLUMNS: readonly FiguresColumn[] = [
-  { key: 'task', label: 'Task' },
-  { key: 'subject', label: 'Subject' },
-  { isNumeric: true, key: 'a', label: 'A' },
-  { isNumeric: true, key: 'b', label: 'B' },
-  { key: 'change', label: 'Change' },
-];
+import type { CompareTotal } from './EvalsCompare.types';
 
-export const TOTAL_COLUMNS: readonly FiguresColumn[] = [
+export const EVALS_COMPARE_HANDLE = {
+  breadcrumb: () => [{ label: 'Evals', to: '/evals' }, { label: 'compare' }],
+} satisfies BreadcrumbHandle;
+
+export const TOTAL_COLUMNS: readonly TableColumn<CompareTotal>[] = [
   { key: 'metric', label: 'Total' },
-  { isNumeric: true, key: 'a', label: 'A' },
-  { isNumeric: true, key: 'b', label: 'B' },
-  { isNumeric: true, key: 'change', label: 'Change' },
+  { align: 'end', key: 'a', label: 'A' },
+  { align: 'end', key: 'b', label: 'B' },
+  { align: 'end', key: 'change', label: 'Change' },
 ];
 
 export const PREFILLED_CHOICE = { a: 1, b: 0 } as const;

@@ -1,48 +1,21 @@
-import {
-  borderRadius,
-  spacing,
-  typography,
-} from '@lcabrera/ui/design-system/tokens/base.stylex';
-import { colors } from '@lcabrera/ui/design-system/tokens/colors.stylex';
+import { spacing } from '@lcabrera/ui/design-system/tokens/base.stylex';
 import * as stylex from '@stylexjs/stylex';
 
 export const styles = stylex.create({
-  field: {
-    gap: spacing.xxs,
-    display: 'flex',
-    flexDirection: 'column',
-    fontSize: typography.fontSizeSm,
-  },
-  form: {
-    padding: spacing.md,
-    borderRadius: borderRadius.md,
+  branchForm: {
     gap: spacing.md,
-    alignItems: 'flex-end',
-    backgroundColor: colors.surfaceSecondary,
-    display: 'flex',
-    flexWrap: 'wrap',
+    alignItems: 'end',
+    display: 'grid',
+    gridTemplateColumns: 'minmax(0, 20rem) 12rem',
   },
-  heading: {
-    margin: 0,
-    fontSize: typography.fontSizeLg,
-    fontWeight: typography.fontWeightSemibold,
+  pickerForm: {
+    gap: spacing.md,
+    alignItems: 'end',
+    display: 'grid',
+    gridTemplateColumns: 'repeat(2, minmax(0, 1fr)) 12rem',
   },
-  note: {
-    margin: 0,
-    color: colors.textSecondary,
-    fontSize: typography.fontSizeSm,
-  },
-  page: {
-    padding: spacing.xl,
-    gap: spacing.lg,
-    display: 'flex',
-    flexDirection: 'column',
-  },
-  regressed: {
-    color: colors.errorText,
-  },
-  section: {
-    gap: spacing.sm,
+  runs: {
+    gap: spacing.xxs,
     display: 'flex',
     flexDirection: 'column',
   },

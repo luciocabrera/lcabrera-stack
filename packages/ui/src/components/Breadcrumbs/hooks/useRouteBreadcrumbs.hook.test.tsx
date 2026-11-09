@@ -36,6 +36,13 @@ const projectHandle: BreadcrumbHandle<ProjectData> = {
   }),
 };
 
+const trailHandle: BreadcrumbHandle = {
+  breadcrumb: () => [
+    { label: 'Reports', to: '/reports' },
+    { label: 'Quarterly' },
+  ],
+};
+
 const renderTrail = async (path: string) => {
   const Stub = createRoutesStub([
     {
@@ -78,6 +85,16 @@ const renderTrail = async (path: string) => {
           handle: { title: 'Projects' },
           path: 'projects',
         },
+        {
+          Component: TrailProbe,
+          handle: trailHandle,
+          path: 'reports/quarterly',
+        },
+        {
+          Component: TrailProbe,
+          handle: { breadcrumb: () => [] } satisfies BreadcrumbHandle,
+          path: 'unlisted',
+        },
       ],
       Component: Outlet,
       handle: rootHandle,
@@ -102,6 +119,22 @@ describe('useRouteBreadcrumbs', () => {
     ];
 
     expect(await renderTrail('/projects/42/settings')).toEqual(expected);
+  });
+
+  it('spreads a trail a flat route returns, in order, after the outer routes', async () => {
+    const expected: readonly BreadcrumbItem[] = [
+      { label: 'Home', to: '/' },
+      { label: 'Reports', to: '/reports' },
+      { label: 'Quarterly' },
+    ];
+
+    expect(await renderTrail('/reports/quarterly')).toEqual(expected);
+  });
+
+  it('adds nothing for a route whose trail is empty', async () => {
+    const expected: readonly BreadcrumbItem[] = [{ label: 'Home', to: '/' }];
+
+    expect(await renderTrail('/unlisted')).toEqual(expected);
   });
 
   it('skips a matched route with no handle and a handle without a breadcrumb', async () => {
