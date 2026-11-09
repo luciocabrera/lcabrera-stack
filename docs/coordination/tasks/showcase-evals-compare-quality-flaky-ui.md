@@ -10,6 +10,8 @@ area:
   - apps/showcase/src/routes/evals/flaky/**
   - apps/showcase/e2e/evals/quality.spec.ts
   - packages/ui/src/components/Breadcrumbs/**
+  - packages/ui/src/components/Table/TableHeaderCell/**
+  - packages/ui/src/components/Table/Table.staticLayout.test.tsx
 started: 2026-11-09
 updated: 2026-11-09
 plan: (none)
@@ -25,4 +27,4 @@ refactor(showcase): move the compare, quality and flaky pages onto @lcabrera/ui
 
 - Current step: built and gated; PR #1609 open for review
 - Blockers: none
-- Next: verifier
+- Next: once #1610 merges, swap the flaky split tone onto the badge, then verifier
