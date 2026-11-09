@@ -9,7 +9,10 @@ and the yes/no badges in the Table's column details drew their text with
 `errorText`, `infoText`, `successText` or `warningText`. Those tokens are white,
 the foreground for a solid status fill, so on the pale `*Background` wash or the
 page they measured about 1.1:1 in the light theme. They now use the matching
-`*CardText` token and reach WCAG AA (4.5:1) in both themes.
+`*CardText` token and reach WCAG AA (4.5:1) in both themes, except the
+`NotificationItem` dismiss buttons. Those sit on a gradient that runs toward the
+solid status colour, and they reach 4.5:1 only on the base `surfacePrimary`; on
+the gradient their contrast is not measured and can be lower (tracked in #1612).
 
 A new `infoCardText` token completes the set: `oklch(40% 0.07 230)` in the light
 theme and `oklch(91% 0.05 230)` in the dark one.

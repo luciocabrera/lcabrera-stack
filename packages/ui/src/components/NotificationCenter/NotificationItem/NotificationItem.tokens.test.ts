@@ -2,7 +2,6 @@ import { expect, it } from 'vite-plus/test';
 
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 import { listStyleTextContrasts } from '#ui/utils/tests/listStyleTextContrasts.util';
-import { STYLE_TEXT_CONTRAST_TITLE } from '#ui/utils/tests/tests.constants';
 
 import { styles } from './NotificationItem.stylex';
 
@@ -20,6 +19,9 @@ const CASES = await listStyleTextContrasts({
   },
 });
 
-it.each(CASES)(STYLE_TEXT_CONTRAST_TITLE, ({ ratio }) => {
-  expect(ratio).toBeGreaterThanOrEqual(4.5);
-});
+it.each(CASES)(
+  '$theme $name ($foreground) reaches 4.5:1 on the base surface $background, before the status gradient',
+  ({ ratio }) => {
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
+  },
+);

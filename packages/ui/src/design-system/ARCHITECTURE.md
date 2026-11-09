@@ -167,10 +167,13 @@ white `*Text`. Which foreground belongs on the solid fill (the bare `error`,
 Each component below has a `*.tokens.test.ts` that compiles its StyleX module and
 holds the listed status styles to 4.5:1 in both themes. `StatusBadge`, `InfoBox`
 and `DetailsSection` are measured on the wash each style sets, laid over every
-surface in `PAGE_BACKGROUNDS`. `Text` and `FormFieldChrome` are measured on each
-of those surfaces directly, and `NotificationItem`'s dismiss buttons on
-`surfacePrimary` alone. A translucent surface is composited over
-`backgroundPrimary`, and the notification's status gradient is not modelled.
+surface in `PAGE_BACKGROUNDS`, and `Text` and `FormFieldChrome` on each of those
+surfaces directly. A translucent surface is composited over `backgroundPrimary`.
+
+`NotificationItem`'s dismiss buttons are measured on the base `surfacePrimary`
+only. They are drawn on a gradient toward the solid status colour, which the test
+does not model, so their test is a floor on the base surface and not proof of AA
+(tracked on #1612).
 `Card` has no such test. `themeTextContrast.test.ts` measures every `*CardText`
 on its wash over those same surfaces, and on the surfaces directly, as token
 pairs.
