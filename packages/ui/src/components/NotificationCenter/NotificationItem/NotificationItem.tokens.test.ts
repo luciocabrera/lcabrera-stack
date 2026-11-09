@@ -1,40 +1,21 @@
-import { describe, expect, it } from 'vite-plus/test';
-
 import { colors } from '#ui/design-system/tokens/colors.stylex';
-import { compileStylexRules } from '#ui/utils/tests/compileStylexRules.util';
-import { listStyleTextContrasts } from '#ui/utils/tests/listStyleTextContrasts.util';
+import { describeStyleTextContrasts } from '#ui/utils/tests/describeStyleTextContrasts.util';
 
 import { styles } from './NotificationItem.stylex';
 
-const SOURCES = import.meta.glob<string>('./NotificationItem.stylex.ts', {
-  eager: true,
-  import: 'default',
-  query: '?raw',
-});
-
-const rules = await compileStylexRules([
-  {
-    path: 'components/NotificationCenter/NotificationItem/NotificationItem.stylex.ts',
-    source: SOURCES['./NotificationItem.stylex.ts'] ?? '',
-  },
-]);
-
-const CONTRASTS = listStyleTextContrasts({
+await describeStyleTextContrasts({
   backgrounds: [colors.surfacePrimary],
-  rules,
+  path: 'components/NotificationCenter/NotificationItem/NotificationItem.stylex.ts',
+  sources: import.meta.glob<string>('./NotificationItem.stylex.ts', {
+    eager: true,
+    import: 'default',
+    query: '?raw',
+  }),
   styles: {
     dismissButtonError: styles.dismissButtonError,
     dismissButtonInfo: styles.dismissButtonInfo,
     dismissButtonSuccess: styles.dismissButtonSuccess,
     dismissButtonWarning: styles.dismissButtonWarning,
   },
-});
-
-describe('the NotificationItem status dismiss buttons', () => {
-  it.each(CONTRASTS)(
-    '$theme $name meets WCAG AA on $background',
-    ({ ratio }) => {
-      expect(ratio).toBeGreaterThanOrEqual(4.5);
-    },
-  );
+  title: 'the NotificationItem status dismiss buttons',
 });

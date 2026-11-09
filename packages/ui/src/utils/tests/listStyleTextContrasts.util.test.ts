@@ -1,95 +1,47 @@
-import * as stylex from '@stylexjs/stylex';
 import { describe, expect, it } from 'vite-plus/test';
 
+import { styles } from '#ui/components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 import { getThemeTokenContrast } from './getThemeTokenContrast.util';
 import { listStyleTextContrasts } from './listStyleTextContrasts.util';
 
-const fixture = stylex.create({
-  bare: { margin: 0 },
-  onPage: { color: colors.textPrimary },
-  onWash: {
-    backgroundColor: colors.errorBackground,
-    color: colors.errorCardText,
-  },
-});
+const PATH =
+  'components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.stylex.ts';
 
-const classOf = (style: (typeof fixture)[keyof typeof fixture]) =>
-  stylex.props(style).className?.split(' ') ?? [];
-
-const [washFirst = '', washSecond = ''] = classOf(fixture.onWash);
-const [pageClass = ''] = classOf(fixture.onPage);
-
-const RULES = [
-  {
-    className: washFirst,
-    property: 'background-color',
-    pseudo: '',
-    value: colors.errorBackground,
-  },
-  {
-    className: washSecond,
-    property: 'background-color',
-    pseudo: '',
-    value: colors.errorBackground,
-  },
-  {
-    className: washFirst,
-    property: 'color',
-    pseudo: '',
-    value: colors.errorCardText,
-  },
-  {
-    className: washSecond,
-    property: 'color',
-    pseudo: '',
-    value: colors.errorCardText,
-  },
-  {
-    className: pageClass,
-    property: 'color',
-    pseudo: '',
-    value: colors.textPrimary,
-  },
-];
+const SOURCES = import.meta.glob<string>(
+  '../../components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.stylex.ts',
+  { eager: true, import: 'default', query: '?raw' },
+);
 
 describe('listStyleTextContrasts', () => {
-  it('measures a style against the background it sets, in both themes', () => {
-    expect(
+  it('measures a style against the background it sets, in both themes', async () => {
+    await expect(
       listStyleTextContrasts({
-        rules: RULES,
-        styles: { onWash: fixture.onWash },
+        path: PATH,
+        sources: SOURCES,
+        styles: { badgeNo: styles.badgeNo },
       }),
-    ).toEqual([
-      {
+    ).resolves.toEqual(
+      (['light', 'dark'] as const).map((theme) => ({
         background: 'errorBackground',
-        name: 'onWash',
+        name: 'badgeNo',
         ratio: getThemeTokenContrast({
           background: colors.errorBackground,
           foreground: colors.errorCardText,
-          theme: 'light',
+          theme,
         }),
-        theme: 'light',
-      },
-      {
-        background: 'errorBackground',
-        name: 'onWash',
-        ratio: getThemeTokenContrast({
-          background: colors.errorBackground,
-          foreground: colors.errorCardText,
-          theme: 'dark',
-        }),
-        theme: 'dark',
-      },
-    ]);
+        theme,
+      })),
+    );
   });
 
-  it('measures a style against each background named', () => {
-    const measured = listStyleTextContrasts({
+  it('measures a style that sets no background against each background named', async () => {
+    const measured = await listStyleTextContrasts({
       backgrounds: [colors.backgroundPrimary, colors.surfaceElevated],
-      rules: RULES,
-      styles: { onPage: fixture.onPage },
+      path: PATH,
+      sources: SOURCES,
+      styles: { label: styles.label },
     });
 
     expect(
@@ -102,18 +54,40 @@ describe('listStyleTextContrasts', () => {
     ]);
   });
 
-  it('refuses a style that sets no text colour', () => {
-    expect(() =>
-      listStyleTextContrasts({ rules: RULES, styles: { bare: fixture.bare } }),
-    ).toThrow('bare sets no text colour or no background');
+  it('refuses a style that sets no text colour', async () => {
+    await expect(
+      listStyleTextContrasts({
+        path: PATH,
+        sources: SOURCES,
+        styles: { item: styles.item },
+      }),
+    ).rejects.toThrow('item sets no text colour');
   });
 
-  it('refuses a style that sets no background when none is named', () => {
-    expect(() =>
+  it('refuses a style that sets no background when none is named', async () => {
+    await expect(
       listStyleTextContrasts({
-        rules: RULES,
-        styles: { onPage: fixture.onPage },
+        path: PATH,
+        sources: SOURCES,
+        styles: { label: styles.label },
       }),
-    ).toThrow('onPage sets no text colour or no background');
+    ).rejects.toThrow('label sets no background and none is named');
+  });
+
+  it('refuses backgrounds named for a style that sets its own', async () => {
+    await expect(
+      listStyleTextContrasts({
+        backgrounds: [colors.backgroundPrimary],
+        path: PATH,
+        sources: SOURCES,
+        styles: { badgeYes: styles.badgeYes },
+      }),
+    ).rejects.toThrow('badgeYes sets its own background, so none can be named');
+  });
+
+  it('refuses anything but the one module source', async () => {
+    await expect(
+      listStyleTextContrasts({ path: PATH, sources: {}, styles: {} }),
+    ).rejects.toThrow(`Expected the source of ${PATH} alone`);
   });
 });

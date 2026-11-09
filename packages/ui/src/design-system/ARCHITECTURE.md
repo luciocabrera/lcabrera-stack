@@ -162,9 +162,16 @@ Color categories:
 
 A semantic colour has two foregrounds. `*Text` is white and belongs only on the
 solid fill, the bare `error`, `info`, `success` or `warning` colour. Text on the
-pale `*Background` wash or on the page uses `*CardText`. Each component that draws status text on a wash or on
-the page has a `*.tokens.test.ts` that holds its compiled styles to 4.5:1 in both
-themes, so a component that switches back to a `*Text` token fails it.
+pale `*Background` wash or on the page uses `*CardText`.
+
+Each component below has a `*.tokens.test.ts` that compiles its StyleX module and
+holds the listed status styles to 4.5:1 in both themes: `StatusBadge`, `InfoBox`
+and `DetailsSection` on the wash each style sets, `Text` and `FormFieldChrome`
+on the page and surface backgrounds in `PAGE_BACKGROUNDS`, and `NotificationItem`'s
+dismiss buttons on `surfacePrimary` alone. A translucent wash is measured over
+`backgroundPrimary`, and the notification's status gradient is not modelled.
+`Card` has no such test; its `*CardText` pairs are measured only as token pairs,
+in `themeTextContrast.test.ts`.
 
 ---
 
