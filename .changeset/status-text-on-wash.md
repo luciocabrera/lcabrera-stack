@@ -1,5 +1,5 @@
 ---
-'@lcabrera/ui': patch
+'@lcabrera/ui': minor
 ---
 
 Status text now uses the wash foreground. `StatusBadge`, `InfoBox`, `Text` with
@@ -28,5 +28,12 @@ are lighter in the dark theme too.
 
 Components that draw on a solid status fill keep the white `*Text` tokens: the
 `error`, `success` and `warning` button variants, the `danger-ghost` hover, and
-the Table cell badge tones. A theme that overrides a `*CardText` token now
-colours these components with it.
+the Table cell badge tones.
+
+This is a minor release for two reasons. `infoCardText` is a new key on the
+exported `colors` var group. And a theme override changes what it reaches. A
+theme that sets `errorText`, `infoText`, `successText` or `warningText` no
+longer colours the status text of `StatusBadge`, `InfoBox`, `Text`,
+`FormFieldChrome`, the `NotificationItem` dismiss buttons or the column-details
+badges; to restyle that text, set the matching `*CardText` token instead. An
+override of a `*Text` token still reaches the solid-fill components above.
