@@ -52,8 +52,19 @@ criterion is not verified — say so rather than passing it.
    diff's framing of them.
 4. **Re-run the quality gate yourself** via the `quality-gate-workflow` skill. Do
    not trust a reported pass.
-5. **Plant a violation and prove a gate fires** — see below. At least one.
-6. **Report** in the contract's §5 schema, then **emit the verdict document** —
+5. **Check every false positive the diff adds.** For each new entry in
+   `docs/agents/false-positives.json`, read its case under
+   `docs/agents/adjudications/` and confirm four things yourself:
+   `case.json` and the `FP-nnnn.json` envelope exist; the panel sat three
+   distinct models, two judges and one adversary, with a verdict file for each;
+   the three ruled `FALSE_POSITIVE`, or the envelope carries the owner's
+   `FALSE_POSITIVE` ruling with a reference you can open; and `case.json`
+   holds nothing the builder wrote, only the analyzer's output and the code.
+   Any one missing is `not-met`. The rules you are checking against are
+   [`docs/agents/false-positive-panel.md`](../../docs/agents/false-positive-panel.md);
+   do not re-judge the finding.
+6. **Plant a violation and prove a gate fires** — see below. At least one.
+7. **Report** in the contract's §5 schema, then **emit the verdict document** —
    see below. Both, always; the prose is for a human and the document is what the
    merge bar can read.
 

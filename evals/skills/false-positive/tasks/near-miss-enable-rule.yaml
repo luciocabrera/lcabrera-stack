@@ -1,0 +1,15 @@
+id: near-miss-enable-rule
+name: Turning a rule on in the config
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Show the biome.jsonc snippet that sets lint/suspicious/noConsole to error. Only the snippet. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-false-positive-alone
+    config:
+      forbidden_skills:
+        - false-positive

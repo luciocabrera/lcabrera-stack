@@ -22,6 +22,11 @@ area:
   - .github/pull_request_template.md
   - packages/repo-standards/scripts/commit-convention.mjs
   - CLAUDE.md
+  - AGENTS.md
+  - COMMANDS.md
+  - docs/README.md
+  - docs/agents/epic-orchestration.md
+  - docs/agents/public-package-suppressions.md
   - evals/skills/**
 started: 2026-11-09
 updated: 2026-11-09
@@ -36,6 +41,6 @@ Add the /false-positive skill and the panel contract
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: contract, skill, links and evals written; dry run next
 - Blockers: none
-- Next:
+- Next: gate, PR

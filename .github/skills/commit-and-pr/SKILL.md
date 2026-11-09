@@ -78,6 +78,11 @@ printf 'feat(ui): my subject\n' | vp run commit:verify -- -
   [`unslop`](../unslop/SKILL.md) on the sentences inside the sections, and do not
   rewrite the headings — the gate matches them as headings, so numbering, emoji
   or bold in one fails it.
+- **False positives** — a PR that adds an entry to
+  `docs/agents/false-positives.json` lists each case under **Verification**,
+  with its three verdicts. What each line carries is §9 of
+  [`docs/agents/false-positive-panel.md`](../../../docs/agents/false-positive-panel.md).
+  No new section: the gate does not check it, and the PR's verifier does.
 
 Self-check before opening/updating a PR:
 
