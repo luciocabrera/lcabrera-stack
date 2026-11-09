@@ -6,19 +6,15 @@ import { colors } from '#ui/design-system/tokens/colors.stylex';
 import { getThemeTokenContrast } from './getThemeTokenContrast.util';
 import { listStyleTextContrasts } from './listStyleTextContrasts.util';
 
-const PATH =
-  'components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.stylex.ts';
-
-const SOURCES = import.meta.glob<string>(
-  '../../components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.stylex.ts',
-  { eager: true, import: 'default', query: '?raw' },
+const SOURCES = import.meta.glob(
+  '/src/components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.stylex.ts',
+  { query: '?raw' },
 );
 
 describe('listStyleTextContrasts', () => {
   it('measures a style against the background it sets, in both themes', async () => {
     await expect(
       listStyleTextContrasts({
-        path: PATH,
         sources: SOURCES,
         styles: { badgeNo: styles.badgeNo },
       }),
@@ -40,7 +36,6 @@ describe('listStyleTextContrasts', () => {
   it('measures a style that sets no background against each background named', async () => {
     const measured = await listStyleTextContrasts({
       backgrounds: [colors.backgroundPrimary, colors.surfaceElevated],
-      path: PATH,
       sources: SOURCES,
       styles: { label: styles.label },
     });
@@ -58,7 +53,6 @@ describe('listStyleTextContrasts', () => {
   it('refuses a style that sets no text colour', async () => {
     await expect(
       listStyleTextContrasts({
-        path: PATH,
         sources: SOURCES,
         styles: { item: styles.item },
       }),
@@ -68,7 +62,6 @@ describe('listStyleTextContrasts', () => {
   it('refuses a style that sets no background when none is named', async () => {
     await expect(
       listStyleTextContrasts({
-        path: PATH,
         sources: SOURCES,
         styles: { label: styles.label },
       }),
@@ -79,7 +72,6 @@ describe('listStyleTextContrasts', () => {
     await expect(
       listStyleTextContrasts({
         backgrounds: [colors.backgroundPrimary],
-        path: PATH,
         sources: SOURCES,
         styles: { badgeYes: styles.badgeYes },
       }),
@@ -88,7 +80,16 @@ describe('listStyleTextContrasts', () => {
 
   it('refuses anything but the one module source', async () => {
     await expect(
-      listStyleTextContrasts({ path: PATH, sources: {}, styles: {} }),
-    ).rejects.toThrow(`Expected the source of ${PATH} alone`);
+      listStyleTextContrasts({ sources: {}, styles: {} }),
+    ).rejects.toThrow('Expected the source of one StyleX module');
+  });
+
+  it('refuses a module that was not read as raw source', async () => {
+    await expect(
+      listStyleTextContrasts({
+        sources: { '/src/fake.stylex.ts': async () => ({ styles: {} }) },
+        styles: {},
+      }),
+    ).rejects.toThrow('/src/fake.stylex.ts was not read as raw source');
   });
 });

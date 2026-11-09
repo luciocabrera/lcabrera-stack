@@ -8,3 +8,6 @@ export const PAGE_BACKGROUNDS = [
   colors.surfaceSecondary,
   colors.surfaceElevated,
 ];
+
+export const STYLE_TEXT_CONTRAST_TITLE =
+  '$theme $name ($foreground) meets WCAG AA on $background';

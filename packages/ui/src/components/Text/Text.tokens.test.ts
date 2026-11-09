@@ -1,16 +1,16 @@
 import { expect, it } from 'vite-plus/test';
 
 import { listStyleTextContrasts } from '#ui/utils/tests/listStyleTextContrasts.util';
-import { PAGE_BACKGROUNDS } from '#ui/utils/tests/tests.constants';
+import {
+  PAGE_BACKGROUNDS,
+  STYLE_TEXT_CONTRAST_TITLE,
+} from '#ui/utils/tests/tests.constants';
 
 import { styles } from './Text.stylex';
 
 const CASES = await listStyleTextContrasts({
   backgrounds: PAGE_BACKGROUNDS,
-  path: 'components/Text/Text.stylex.ts',
-  sources: import.meta.glob<string>('./Text.stylex.ts', {
-    eager: true,
-    import: 'default',
+  sources: import.meta.glob('/src/components/Text/Text.stylex.ts', {
     query: '?raw',
   }),
   styles: {
@@ -21,9 +21,6 @@ const CASES = await listStyleTextContrasts({
   },
 });
 
-it.each(CASES)(
-  '$theme $name ($foreground) meets WCAG AA on $background',
-  ({ ratio }) => {
-    expect(ratio).toBeGreaterThanOrEqual(4.5);
-  },
-);
+it.each(CASES)(STYLE_TEXT_CONTRAST_TITLE, ({ ratio }) => {
+  expect(ratio).toBeGreaterThanOrEqual(4.5);
+});

@@ -2,17 +2,16 @@ import { expect, it } from 'vite-plus/test';
 
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 import { listStyleTextContrasts } from '#ui/utils/tests/listStyleTextContrasts.util';
+import { STYLE_TEXT_CONTRAST_TITLE } from '#ui/utils/tests/tests.constants';
 
 import { styles } from './NotificationItem.stylex';
 
 const CASES = await listStyleTextContrasts({
   backgrounds: [colors.surfacePrimary],
-  path: 'components/NotificationCenter/NotificationItem/NotificationItem.stylex.ts',
-  sources: import.meta.glob<string>('./NotificationItem.stylex.ts', {
-    eager: true,
-    import: 'default',
-    query: '?raw',
-  }),
+  sources: import.meta.glob(
+    '/src/components/NotificationCenter/NotificationItem/NotificationItem.stylex.ts',
+    { query: '?raw' },
+  ),
   styles: {
     dismissButtonError: styles.dismissButtonError,
     dismissButtonInfo: styles.dismissButtonInfo,
@@ -21,9 +20,6 @@ const CASES = await listStyleTextContrasts({
   },
 });
 
-it.each(CASES)(
-  '$theme $name ($foreground) meets WCAG AA on $background',
-  ({ ratio }) => {
-    expect(ratio).toBeGreaterThanOrEqual(4.5);
-  },
-);
+it.each(CASES)(STYLE_TEXT_CONTRAST_TITLE, ({ ratio }) => {
+  expect(ratio).toBeGreaterThanOrEqual(4.5);
+});
