@@ -1,0 +1,15 @@
+id: near-miss-general-definition
+name: What a false positive is in general
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "In statistics, what is the difference between a false positive and a false negative? Two sentences. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-false-positive-alone
+    config:
+      forbidden_skills:
+        - false-positive

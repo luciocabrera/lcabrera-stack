@@ -16,9 +16,11 @@ allowed-tools: Read, Grep, Glob, Bash(vp:*)
 
 Configuration lore for the four analysers. **Non-Negotiable Rule 11 (AGENTS.md
 §5) governs all of them and is not repeated here: never ignore, suppress, or omit
-a finding — verify, then fix the code, unless a blind panel confirmed a false
-positive.** This skill is the _how the engines are
-wired_ half.
+a finding — verify, then fix the code.** A finding you believe is wrong goes
+through the [`false-positive`](../false-positive/SKILL.md) skill, under the
+rules in
+[`docs/agents/false-positive-panel.md`](../../../docs/agents/false-positive-panel.md).
+This skill is the _how the engines are wired_ half.
 
 The cardinal trap, common to every engine below: **a rule that is not loaded
 reports exactly the same clean pass as code that is correct.** Always confirm a

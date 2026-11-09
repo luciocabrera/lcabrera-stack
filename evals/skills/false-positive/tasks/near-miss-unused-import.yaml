@@ -1,0 +1,15 @@
+id: near-miss-unused-import
+name: Fixing an unused-import finding
+set: capability
+tags:
+  - negative-trigger
+inputs:
+  prompt: "Oxlint says this import is unused, and it is: nothing in the file uses formatDate. Show the corrected import line only: import { formatDate, parseDate } from './dates'; Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: false
+graders:
+  - type: skill_invocation
+    name: leaves-false-positive-alone
+    config:
+      forbidden_skills:
+        - false-positive

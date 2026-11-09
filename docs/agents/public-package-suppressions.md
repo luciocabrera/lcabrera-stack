@@ -86,62 +86,16 @@ never asked for one.
 
 ## Panel-confirmed false positives
 
-A finding the builder believes is wrong is decided by three blind verifiers on
-three different models, never by the builder
-([ADR-147](../decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md)).
-It applies to fallow, ESLint, Oxlint, Biome and React Doctor, in the public
+A finding the builder believes is wrong is decided by a blind panel, never by
+the builder, through the
+[`false-positive`](../../.github/skills/false-positive/SKILL.md) skill. It
+applies to fallow, ESLint, Oxlint, Biome and React Doctor, in the public
 packages as everywhere else.
-
-1. Try a fix first. A small restructure that clears the finding without making
-   the code worse ends here.
-2. `vp run adjudicate -- <analyzer> <file>:<line>[-<end line>]:<rule>` opens a
-   case under `docs/agents/adjudications/`, in a directory named after the
-   case, from what the analyzer reports. It takes no free text. When HEAD
-   does not hold the flagged lines, the case names a `git stash create`
-   snapshot of the working tree, which runs no hook and moves no ref. A new
-   file must be staged first, because the snapshot leaves out untracked files.
-3. `vp run adjudicate:panel -- FP-nnnn --builder-model <id>` runs `fp-judge`
-   twice and `fp-adversary` once, in parallel, on three distinct models.
-4. All three FALSE_POSITIVE: the command records the case, writes an upstream
-   draft, and adds the entry to
-   [`false-positives.json`](false-positives.json). Add the analyzer's next-line
-   marker it prints:
-
-   ```ts
-   // fallow-ignore-next-line security/sql-concat -- false positive, case FP-0007: the identifier comes from a fixed allow-list
-   // biome-ignore lint/a11y/useButtonType: false positive, case FP-0012: <one-line reason>
-   ```
-
-   Any REAL verdict with a concrete `Fix:`: apply that fix, even if the other
-   seats ruled FALSE_POSITIVE. Applying a fix is not a suppression, so it needs
-   no owner decision. The case goes to the repository owner in three
-   situations: a split where no REAL verdict gives a fix, an escalation where
-   all three ruled REAL and none gives a fix, and a `fixed` case whose fix
-   cannot be applied. On a split or on that `fixed` case, record the owner's
-   answer with
-   `vp run adjudicate:rule -- FP-nnnn --verdict <FALSE_POSITIVE|REAL> --by <login> --reference <url>`.
-   A FALSE_POSITIVE ruling writes the list entry and prints the marker; a REAL
-   one means fix the finding. `adjudicate:rule` does not take an escalated
-   case: a `fixed` case has a fix to weigh against dismissing, and an
-   escalated one has none, so the owner's part there is deciding the fix.
-
-5. Never post the upstream draft without the owner's explicit yes.
-
-`vp run suppressions:verify` reads every marker that claims a false positive
-and fails unless it names a case and a reason, one live entry has the same
-analyzer, rule and file, every entry has exactly one marker, the case file is a
-valid envelope with three distinct models, two judges and one adversary, that
-ruled FALSE_POSITIVE unanimously or whose split or `fixed` case carries the
-owner's complete FALSE_POSITIVE ruling, the hash of the lines under the marker
-still matches, and the entry has not expired. An entry lasts six months at
-most, counted from the day the case opened or, on a ruled case, from the day
-the owner ruled. Any edit to the flagged lines voids it. A matched marker in a
-public package needs no register entry here.
-
-The same gate fails an ESLint, Oxlint, Biome or React Doctor marker outside the
-public packages that names no case. A fallow marker there is caught by
-`vp run fallow:suppressions` when its file changes, and passes that gate only
-when a live entry names its case.
+[`false-positive-panel.md`](false-positive-panel.md) owns the rules: what is
+eligible, the case, the panel, the decision rule, the marker, the expiry and
+what `vp run suppressions:verify` checks. A marker that matches a live entry
+of [`false-positives.json`](false-positives.json) needs no register entry
+here.
 
 ## Targeted vs repo-wide
 

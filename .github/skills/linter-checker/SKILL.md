@@ -65,7 +65,9 @@ Report to the user:
 
 Do not re-derive, re-triage, or second-guess the findings — they are exactly
 what `oxlint`, eslint and Biome reported, which is the point of this skill being
-deterministic.
+deterministic. A finding someone believes is wrong is fixed or taken through the
+[`false-positive`](../false-positive/SKILL.md) skill
+([rules](../../../docs/agents/false-positive-panel.md)), never suppressed here.
 
 ## Example Prompts
 
