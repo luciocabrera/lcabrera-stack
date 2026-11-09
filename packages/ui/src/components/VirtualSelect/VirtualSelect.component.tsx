@@ -10,7 +10,7 @@ import { VirtualSelectHeader } from './VirtualSelectHeader/VirtualSelectHeader.c
 import { VirtualSelectHiddenInputs } from './VirtualSelectHiddenInputs/VirtualSelectHiddenInputs.component';
 import { VirtualSelectLabel } from './VirtualSelectLabel/VirtualSelectLabel.component';
 
-// fallow-ignore-next-line complexity -- false positive, case FP-0001: prop count of a required public API; no branching to remove
+// fallow-ignore-next-line complexity -- false positive, case FP-0002: prop count of a required public API; no branching to remove
 export const VirtualSelect = ({
   customStylex,
   dataState,

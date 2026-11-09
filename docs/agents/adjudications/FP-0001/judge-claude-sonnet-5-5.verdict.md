@@ -1,19 +1,14 @@
-REAL
-
+FALSE_POSITIVE
 Evidence:
 
-- The case file reports `VirtualSelect` at cognitive complexity 16, with `exceeded: "cognitive"`. The default limit is 15, as `docs/tooling/fallow-summary.md` states.
-- `.fallowrc.json` sets no `maxCognitive` for the `health` section as a whole. None of its `thresholdOverrides` covers `packages/ui/src/components/VirtualSelect/`. They cover tests, repo-standards scripts and eslint-local-rules only. The default limit therefore applies to this file.
-- I read `VirtualSelect.component.tsx`. The function is a 17-property destructured parameter with 5 default values, one hook call, one ternary and one JSX tree. The score is mostly default-value branching plus a large prop surface. That makes it a borderline, mildly inflated measurement, but the rule is working as defined and the value is over the limit.
-- ADR-032 says to read `exceeded`. A `cognitive` finding is real complexity, not a coverage artifact like `crap`-only findings.
-- The evidence is balanced at best, and the instructions say to rule REAL in that case.
+- **Flagged code:** `HeatmapGrid.component.tsx:27` puts `role='grid'` on a `<table>`. Biome flags it because it treats `grid` as an interactive role and `table` as a non-interactive element.
+- **Real grid behaviour:** The component is a working ARIA grid.
+  - `useHeatmapRovingFocus` supplies `onKeyDown` through `gridProps`.
+  - `HeatmapGridRow` sets `tabIndex={key === tabStopKey ? 0 : -1}` on the cells, which is roving focus.
+  - The table is labelled by `aria-labelledby` and `aria-describedby`.
+  - So this is not a static table dressed up with an interactive role. The rule exists to stop that.
+- **Spec:** `table` with `role="grid"` is the WAI-ARIA Authoring Practices Guide's own markup for a data grid. ARIA also makes `grid` a subclass of `table`. `jsx-a11y` allows `table: ['grid']` by default. Biome's rule takes no options, so it can't be told about that allowance.
+- **Repo decision:** `biome.jsonc` lines 378-407 already turn this rule off for `TableBase.component.tsx` and `TableBodyCell.component.tsx`. The comment there gives the reasoning above. It also records that switching to `<div>`s or dropping the roles was considered and rejected on merit. ADR-062 covers the grid semantics.
+- **Remaining gap:** The `includes` list in that override doesn't cover `HeatmapGrid.component.tsx`, so the rule still fires here. That is a missing config entry, not a real accessibility defect.
 
-Fix: In `VirtualSelect.component.tsx`, remove the inline destructuring defaults from the `VirtualSelect` signature. They are `isAlwaysOpen = false`, `isBusy = false`, `isDisabled = false`, `options = []`, `placeholder = 'Select...'` and `shouldFillHeight = false`.
-
-1. Take `props: VirtualSelectProps` instead.
-2. Let `useVirtualSelect` apply the defaults for `isAlwaysOpen`, `isBusy`, `isDisabled` and `options`, and return the resolved values.
-3. Apply `placeholder` and `shouldFillHeight` in the hook too, or in a small `resolveVirtualSelectProps(props)` helper in `./hooks`. Either way the component body no longer carries the default branching.
-4. Move the `shouldFillHeight ? styles.containerFill : undefined` ternary into a helper, or into the hook's return value as a `containerStyle`.
-5. Re-run fallow to confirm the score is at or below 15.
-
-Do not add a suppression comment. That would hide the finding without changing the code.
+Check: The finding would be real if the `<table>` had `role="grid"` but no grid behaviour (no roving focus, no key handling, no focusable cells), or if the role were a truly interactive one such as `button` or `link`. I searched `packages/ui/src/components/Heatmap/` for `role`, `tabIndex`, `onKeyDown` and `gridProps`. I found the hook `hooks/useHeatmapRovingFocus.hook.ts` (which supplies `onKeyDown`), `HeatmapGridRow/HeatmapGridRow.component.tsx` (which sets roving `tabIndex`), and `HeatmapGrid.component.tsx`. Neither condition is present. I also checked `biome.jsonc` and the ADRs, which already treat the same pattern as accepted.

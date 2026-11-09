@@ -24,6 +24,15 @@ export type {
 } from './components/DescriptionList/DescriptionList.types';
 export { Form } from './components/Form/Form.component';
 export type { FieldNode } from './components/Form/Form.types';
+export { Heatmap } from './components/Heatmap/Heatmap.component';
+export type {
+  HeatmapAxisItem,
+  HeatmapCell,
+  HeatmapLegendItem,
+  HeatmapPattern,
+  HeatmapProps,
+  HeatmapScale,
+} from './components/Heatmap/Heatmap.types';
 export { InfoBox } from './components/InfoBox/InfoBox.component';
 export type {
   InfoBoxProps,

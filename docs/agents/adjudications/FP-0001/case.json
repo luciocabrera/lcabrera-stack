@@ -1,64 +1,43 @@
 {
   "case": {
-    "analyzer": "fallow",
-    "base_sha": "99bb26c34d4cf7337a7bac571499f88c63e2a3d4",
+    "analyzer": "biome",
+    "base_sha": "bde165a72b0d283af052c7f923218ae5e690c2c8",
     "case_id": "FP-0001",
-    "content_hash": "389d08622d75308b44b0d9d3be5db8f752716ef7462f67c47398e12b5e24fef8",
-    "created_at": "2026-11-08T11:08:34.757Z",
-    "file": "packages/ui/src/components/VirtualSelect/VirtualSelect.component.tsx",
-    "finding_id": "packages/ui/src/components/VirtualSelect/VirtualSelect.component.tsx:13:high-cognitive-complexity",
-    "head_sha": "ef79bbb62a9a6188931c2347c6714235398c473a",
-    "pr": 1595,
-    "rule": "complexity"
+    "content_hash": "f9b25a7706c07f49953d8767bc8d947e7f99b65e8fb6aa88f2eb2ae5f1396d02",
+    "created_at": "2026-11-08T19:06:12.391Z",
+    "file": "packages/ui/src/components/Heatmap/HeatmapGrid/HeatmapGrid.component.tsx",
+    "finding_id": "packages/ui/src/components/Heatmap/HeatmapGrid/HeatmapGrid.component.tsx:27:lint/a11y/noNoninteractiveElementToInteractiveRole",
+    "head_sha": "94406e2136d5d4093e304a6cdb43826457b82fde",
+    "pr": 1594,
+    "rule": "lint/a11y/noNoninteractiveElementToInteractiveRole"
   },
   "code": {
-    "content_hash": "389d08622d75308b44b0d9d3be5db8f752716ef7462f67c47398e12b5e24fef8",
-    "context": "    3  import type { VirtualSelectProps } from './VirtualSelect.types';\n    4  \n    5  import { VirtualSelectProvider } from './contexts';\n    6  import { useVirtualSelect } from './hooks';\n    7  import { styles } from './VirtualSelect.stylex';\n    8  import { VirtualSelectDropdown } from './VirtualSelectDropdown/VirtualSelectDropdown.component';\n    9  import { VirtualSelectHeader } from './VirtualSelectHeader/VirtualSelectHeader.component';\n   10  import { VirtualSelectHiddenInputs } from './VirtualSelectHiddenInputs/VirtualSelectHiddenInputs.component';\n   11  import { VirtualSelectLabel } from './VirtualSelectLabel/VirtualSelectLabel.component';\n   12  \n   13  export const VirtualSelect = ({\n   14    customStylex,\n   15    dataState,\n   16    isAlwaysOpen = false,\n   17    isBusy = false,\n   18    isDisabled = false,\n   19    label,\n   20    listboxId,\n   21    listMaxHeight,\n   22    mode,\n   23    name,",
-    "context_end": 23,
-    "context_start": 3,
-    "end": 13,
-    "start": 13
+    "content_hash": "f9b25a7706c07f49953d8767bc8d947e7f99b65e8fb6aa88f2eb2ae5f1396d02",
+    "context": "   17    const { gridProps, tabStop } = useHeatmapRovingFocus({\n   18      firstLinked,\n   19      linked,\n   20    });\n   21  \n   22    return (\n   23      <table\n   24        aria-describedby={descriptionId}\n   25        aria-labelledby={titleId}\n   26        {...gridProps}\n   27        role='grid'\n   28        {...stylex.props(heatmapGridStyles.table)}\n   29      >\n   30        <tbody>\n   31          {rows.map((row, index) => (\n   32            <HeatmapGridRow\n   33              cells={row.cells}\n   34              key={row.key}\n   35              tabStopKey={index === tabStop.rowIndex ? tabStop.key : undefined}\n   36            />\n   37          ))}",
+    "context_end": 37,
+    "context_start": 17,
+    "end": 27,
+    "start": 27
   },
   "completion": null,
-  "explain": "High Cognitive Complexity\nfallow/high-cognitive-complexity\n\nFunction has high cognitive complexity\n\nWhy it matters\nSonarSource cognitive complexity exceeds the configured threshold. Unlike cyclomatic complexity, cognitive complexity penalizes nesting depth and non-linear control flow (breaks, continues, early returns). It measures how hard a function is to understand when reading sequentially. fallow also emits this rule on synthetic `<template>` findings across every supported template dialect (Angular .html templates and inline `@Component({ template: ... })` literals, Vue SFC `<template>` blocks, Svelte markup, Astro markup), where nesting penalties accumulate on stacked control-flow blocks: Angular `@if`/`@for`/`@switch`, Vue `v-if`/`v-for`, Svelte `{#if}`/`{#each}`/`{#await}`; on each top-level Svelte `{#snippet name(...)}` block, emitted as its own `<snippet:NAME>` unit with nesting rebased to zero so in-file snippet extraction lowers the parent template's score; and on synthetic `<component>` rollup findings whose `cognitive` is the worst class method's score plus the template's. Ranking and `--targets` use the rollup total; JSON exposes the per-half breakdown under `component_rollup`.\n\nExample\nA function contains several nested conditionals, loops, and early exits, exceeding the configured complexity threshold. fallow also flags synthetic template-family findings on markup: Angular .html templates and inline `@Component({ template: ... })` literals, Vue SFC `<template>` blocks, Svelte markup, and Astro markup, plus each top-level Svelte `{#snippet name(...)}` block as its own `<snippet:NAME>` unit. `<component>` rollup findings combine the worst class method with its template.\n\nHow to fix\nFor function findings, extract named helpers, split independent branches, flatten guard clauses, and add tests around the behavior before refactoring. For `<template>` findings, flatten nested control flow and move branch selection out of the markup: Angular `@if`/`@for`/`@switch`/`@defer` and legacy `*ngIf`/`*ngFor` into computed signals on the component class, Vue `v-if`/`v-else-if`/`v-for` into computed properties, Svelte `{#if}`/`{:else if}`/`{#each}`/`{#await}`/`{#key}` into derived state, Astro control flow into props resolved in the frontmatter. In Svelte, moving a repeated or deeply nested block into a top-level `{#snippet}` gives it its own `<snippet:NAME>` unit with nesting rebased to zero, so the in-file extraction moves the score; splitting a large template into child components lowers the score in every dialect. For `<component>` rollup findings, attack the larger half first; the per-half breakdown lives in `component_rollup`. To report these findings without a failed run, set the `complexity-cyclomatic` or `complexity-cognitive` rule to `warn`.\n\nDocs: https://fallow.tools/docs/explanations/health/#cognitive-complexity\n",
+  "explain": "Summary\n\n- Name: noNoninteractiveElementToInteractiveRole\n- Fix: unsafe\n- Default severity: error\n- Available from version: 1.0.0\n- Diagnostic category: lint/a11y/noNoninteractiveElementToInteractiveRole\n- This rule is recommended\n\nDescription\n\n Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.\n\n Non-interactive HTML elements indicate _content_ and _containers_ in the user interface.\n Non-interactive elements include `<main>`, `<area>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.\n\n Interactive HTML elements indicate _controls_ in the user interface.\n Interactive elements include `<a href>`, `<button>`, `<input>`, `<select>`, `<textarea>`.\n\n [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) should not be used to convert a non-interactive element to an interactive element.\n Interactive ARIA roles include `button`, `link`, `checkbox`, `menuitem`, `menuitemcheckbox`, `menuitemradio`, `option`, `radio`, `searchbox`, `switch` and `textbox`.\n\nExamples\n\nInvalid\n\n ```jsx,expect_diagnostic\n <h1 role=\"button\">Some text</h1>\n ```\n\nValid\n\n\n ```jsx\n <span role=\"button\">Some text</span>\n ```\n\nAccessibility guidelines\n\n - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)\n\nResources\n\n - [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro)\n - [WAI-ARIA Authoring Practices Guide - Design Patterns and Widgets](https://www.w3.org/TR/wai-aria-practices-1.1/#aria_ex)\n - [Fundamental Keyboard Navigation Conventions](https://www.w3.org/TR/wai-aria-practices-1.1/#kbd_generalnav)\n - [Mozilla Developer Network - ARIA Techniques](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role#Keyboard_and_focus)\n\n\n",
   "finding": [
     {
-      "path": "packages/ui/src/components/VirtualSelect/VirtualSelect.component.tsx",
-      "name": "VirtualSelect",
-      "line": 13,
-      "col": 29,
-      "cyclomatic": 2,
-      "cognitive": 16,
-      "line_count": 88,
-      "param_count": 1,
-      "react_hook_count": 1,
-      "react_jsx_max_depth": 3,
-      "react_prop_count": 18,
-      "react_hook_profile": {
-        "state": 0,
-        "effect": 0,
-        "memo": 0,
-        "callback": 0,
-        "custom": 1
-      },
-      "exceeded": "cognitive",
-      "severity": "moderate",
-      "effective_severity": "error",
-      "actions": [
-        {
-          "type": "refactor-function",
-          "auto_fixable": false,
-          "description": "Refactor `VirtualSelect` to reduce complexity (extract helper functions, simplify branching)",
-          "note": "Split into smaller functions with single responsibilities. Splitting relocates branching, so it lowers this function's score without lowering the total"
+      "severity": "error",
+      "message": "The HTML element table is non-interactive and should not have an interactive role.",
+      "category": "lint/a11y/noNoninteractiveElementToInteractiveRole",
+      "location": {
+        "path": "packages/ui/src/components/Heatmap/HeatmapGrid/HeatmapGrid.component.tsx",
+        "start": {
+          "line": 27,
+          "column": 7
         },
-        {
-          "type": "suppress-line",
-          "auto_fixable": false,
-          "description": "Suppress with an inline comment above the function declaration",
-          "comment": "// fallow-ignore-next-line complexity",
-          "placement": "above-function-declaration"
+        "end": {
+          "line": 27,
+          "column": 18
         }
-      ]
+      },
+      "advices": []
     }
   ],
   "schema_version": 1,
