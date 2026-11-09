@@ -54,8 +54,16 @@ const trimTrailingPunctuation = (value) =>
     ? trimTrailingPunctuation(value.slice(0, -1))
     : value;
 
+const LINE_SUFFIX = /:\d+(?:-\d+|:\d+)?$/;
+
+const stripLineSuffix = (value) => {
+  const suffix = LINE_SUFFIX.exec(value);
+  const path = suffix === null ? value : value.slice(0, suffix.index);
+  return path.includes('/') && !hasScheme(path) ? path : value;
+};
+
 export const normaliseToken = (token) =>
-  trimTrailingPunctuation(token.split('#', 1)[0].trim());
+  stripLineSuffix(trimTrailingPunctuation(token.split('#', 1)[0].trim()));
 
 export const inlineCodeTokens = (text) =>
   text.split('`').filter((_, index) => index % 2 === 1);
