@@ -29,6 +29,6 @@ exact Vite+ 1.4.0 pin stay where they are.
 
 ## Status / next
 
-- Current step: CI and review on #1606.
+- Current step: the Babel hold comment is scoped to major 8, answering the review on #1606.
 - Blockers: none.
 - Next: delete this file when the PR merges.

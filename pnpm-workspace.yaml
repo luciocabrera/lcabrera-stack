@@ -26,13 +26,11 @@ catalogs:
     pg: ^8.23.1
 
   build:
-    # Both Babel entries stay on the major whose `@babel/core` the peer of
-    # `vite-plugin-babel` accepts. The newer preset major peers on the newer
-    # core, so neither can move until a `vite-plugin-babel` release accepts
-    # that core. Moving only the preset leaves its core peer unmet, and its
-    # options reject the `allExtensions`/`isTSX` the Babel configs pass.
-    # Moving the core, alone or with the preset, leaves `vite-plugin-babel`'s
-    # peer unmet.
+    # Stay on major 7. `vite-plugin-babel` peers on `@babel/core` `^7.0.0`, so a
+    # move inside 7 is fine. Moving either entry to 8 leaves a peer unmet: the
+    # plugin does not accept core 8, and the 8.x preset peers on core 8. The 8.x
+    # preset also does not accept `allExtensions` or `isTSX`, which the Babel
+    # configs pass.
     '@babel/core': ^7.29.13
     '@babel/preset-typescript': ^7.29.7
     # The ESLint toolchain gets TypeScript 6 from .pnpmfile.cjs, because
