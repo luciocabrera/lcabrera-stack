@@ -2,7 +2,7 @@
 id: false-positive-skill
 title: Add the /false-positive skill and the panel contract
 owner: agent:claude
-status: active
+status: review
 branch: feat/1555-false-positive-skill
 area:
   - .github/skills/false-positive/**
@@ -32,7 +32,7 @@ area:
 started: 2026-11-09
 updated: 2026-11-09
 plan: (none)
-pr: (none)
+pr: #1607
 issue: #1555
 ---
 
@@ -42,6 +42,6 @@ Add the /false-positive skill and the panel contract
 
 ## Status / next
 
-- Current step: contract, skill, links and evals written; dry run next
+- Current step: dry run done, gate green; PR up for review
 - Blockers: none
 - Next: gate, PR

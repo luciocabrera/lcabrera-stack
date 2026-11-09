@@ -221,4 +221,5 @@ Tracked, not fixed here:
   `fallow similar-code` can finish a run as `partial`, and fallow's issue
   registry has no `similar-code` marker. A dismissed `similar-code` case still
   gets its list entry and marker, and `suppressions:verify` holds the two to
-  each other, but fallow itself does not skip the candidate.
+  each other. Whether fallow itself then skips the candidate has not been
+  checked.

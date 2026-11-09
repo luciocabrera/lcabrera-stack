@@ -125,4 +125,4 @@ for a `FALSE_POSITIVE` ruling or step 1 for a `REAL` one.
 
 The contract's §10 lists them: #1599 (the placeholder reason, no retry for a
 malformed seat, `builder_model` not in the schema) and #1574 (`similar-code`
-partial runs, and no `similar-code` marker fallow honours).
+partial runs, and no `similar-code` marker in fallow's registry).
