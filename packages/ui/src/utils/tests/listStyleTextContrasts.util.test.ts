@@ -25,6 +25,7 @@ describe('listStyleTextContrasts', () => {
     ).resolves.toEqual(
       (['light', 'dark'] as const).map((theme) => ({
         background: 'errorBackground',
+        foreground: 'errorCardText',
         name: 'badgeNo',
         ratio: getThemeTokenContrast({
           background: colors.errorBackground,

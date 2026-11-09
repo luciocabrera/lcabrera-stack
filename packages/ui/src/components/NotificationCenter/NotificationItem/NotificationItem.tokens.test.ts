@@ -1,9 +1,11 @@
+import { expect, it } from 'vite-plus/test';
+
 import { colors } from '#ui/design-system/tokens/colors.stylex';
-import { describeStyleTextContrasts } from '#ui/utils/tests/describeStyleTextContrasts.util';
+import { listStyleTextContrasts } from '#ui/utils/tests/listStyleTextContrasts.util';
 
 import { styles } from './NotificationItem.stylex';
 
-await describeStyleTextContrasts({
+const CASES = await listStyleTextContrasts({
   backgrounds: [colors.surfacePrimary],
   path: 'components/NotificationCenter/NotificationItem/NotificationItem.stylex.ts',
   sources: import.meta.glob<string>('./NotificationItem.stylex.ts', {
@@ -17,5 +19,11 @@ await describeStyleTextContrasts({
     dismissButtonSuccess: styles.dismissButtonSuccess,
     dismissButtonWarning: styles.dismissButtonWarning,
   },
-  title: 'the NotificationItem status dismiss buttons',
 });
+
+it.each(CASES)(
+  '$theme $name ($foreground) meets WCAG AA on $background',
+  ({ ratio }) => {
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
+  },
+);

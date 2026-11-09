@@ -1,8 +1,10 @@
-import { describeStyleTextContrasts } from '#ui/utils/tests/describeStyleTextContrasts.util';
+import { expect, it } from 'vite-plus/test';
+
+import { listStyleTextContrasts } from '#ui/utils/tests/listStyleTextContrasts.util';
 
 import { styles } from './DetailsSection.stylex';
 
-await describeStyleTextContrasts({
+const CASES = await listStyleTextContrasts({
   path: 'components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.stylex.ts',
   sources: import.meta.glob<string>('./DetailsSection.stylex.ts', {
     eager: true,
@@ -14,5 +16,11 @@ await describeStyleTextContrasts({
     badgeNone: styles.badgeNone,
     badgeYes: styles.badgeYes,
   },
-  title: 'the DetailsSection badges',
 });
+
+it.each(CASES)(
+  '$theme $name ($foreground) meets WCAG AA on $background',
+  ({ ratio }) => {
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
+  },
+);

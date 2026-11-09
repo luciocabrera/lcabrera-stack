@@ -1,9 +1,11 @@
-import { describeStyleTextContrasts } from '#ui/utils/tests/describeStyleTextContrasts.util';
+import { expect, it } from 'vite-plus/test';
+
+import { listStyleTextContrasts } from '#ui/utils/tests/listStyleTextContrasts.util';
 import { PAGE_BACKGROUNDS } from '#ui/utils/tests/tests.constants';
 
 import { styles } from './Text.stylex';
 
-await describeStyleTextContrasts({
+const CASES = await listStyleTextContrasts({
   backgrounds: PAGE_BACKGROUNDS,
   path: 'components/Text/Text.stylex.ts',
   sources: import.meta.glob<string>('./Text.stylex.ts', {
@@ -17,5 +19,11 @@ await describeStyleTextContrasts({
     success: styles.tone.success,
     warning: styles.tone.warning,
   },
-  title: 'the Text status tones',
 });
+
+it.each(CASES)(
+  '$theme $name ($foreground) meets WCAG AA on $background',
+  ({ ratio }) => {
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
+  },
+);

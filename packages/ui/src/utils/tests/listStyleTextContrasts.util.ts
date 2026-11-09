@@ -61,6 +61,7 @@ export const listStyleTextContrasts = async ({
     return THEMES.flatMap((theme) =>
       drawnOn.map((background) => ({
         background: getColorTokenName(background),
+        foreground: getColorTokenName(foreground),
         name,
         ratio: getThemeTokenContrast({ background, foreground, theme }),
         theme,

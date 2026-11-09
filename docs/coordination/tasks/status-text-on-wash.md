@@ -16,7 +16,6 @@ area:
   - packages/ui/src/design-system/ARCHITECTURE.md
   - packages/ui/src/utils/tests/listStyleTextContrasts.*
   - packages/ui/src/utils/tests/tests.constants.ts
-  - packages/ui/src/utils/tests/describeStyleTextContrasts.util.ts
   - packages/ui/src/INVENTORY.md
   - reports/api-surface/ui.txt
   - .changeset/status-text-on-wash.md

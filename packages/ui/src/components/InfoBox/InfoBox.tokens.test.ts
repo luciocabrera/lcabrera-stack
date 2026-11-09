@@ -1,8 +1,10 @@
-import { describeStyleTextContrasts } from '#ui/utils/tests/describeStyleTextContrasts.util';
+import { expect, it } from 'vite-plus/test';
+
+import { listStyleTextContrasts } from '#ui/utils/tests/listStyleTextContrasts.util';
 
 import { styles } from './InfoBox.stylex';
 
-await describeStyleTextContrasts({
+const CASES = await listStyleTextContrasts({
   path: 'components/InfoBox/InfoBox.stylex.ts',
   sources: import.meta.glob<string>('./InfoBox.stylex.ts', {
     eager: true,
@@ -10,5 +12,11 @@ await describeStyleTextContrasts({
     query: '?raw',
   }),
   styles: styles.tone,
-  title: 'the InfoBox tones',
 });
+
+it.each(CASES)(
+  '$theme $name ($foreground) meets WCAG AA on $background',
+  ({ ratio }) => {
+    expect(ratio).toBeGreaterThanOrEqual(4.5);
+  },
+);
