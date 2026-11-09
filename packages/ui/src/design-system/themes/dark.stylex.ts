@@ -68,7 +68,7 @@ export const darkTheme = stylex.createTheme(colors, {
 
   // successBackground: 'oklch(0.29 0.1 155.23 / 0.5)',
   successBackground: 'oklch(92% 0.02 160 / 0.32)',
-  successCardText: 'oklch(85% 0.07 160)',
+  successCardText: 'oklch(88% 0.07 160)',
   // successCardText: 'oklch(38% 0.09 160)',
   successHover: 'oklch(from success l+0.08 c+0.02 h)',
   successText: 'oklch(100% 0 0)',
@@ -81,6 +81,7 @@ export const darkTheme = stylex.createTheme(colors, {
 
   // infoBackground: 'oklch(0.24 0.11 261.62 / 0.77)',
   infoBackground: 'oklch(92% 0.03 220 / 0.32)',
+  infoCardText: 'oklch(88% 0.06 230)',
   infoHover: 'oklch(from info l+0.10 c+0.03 h)',
   infoText: 'oklch(100% 0 0)',
 

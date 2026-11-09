@@ -19,11 +19,29 @@ const BACKGROUND_TOKENS = [
   'surfaceElevated',
 ] as const;
 
-const PAIRS = THEMES.flatMap((theme) =>
+const STATUS_TONES = ['error', 'info', 'success', 'warning'] as const;
+
+const NEUTRAL_PAIRS = THEMES.flatMap((theme) =>
   TEXT_TOKENS.flatMap((text) =>
     BACKGROUND_TOKENS.map((background) => ({ background, text, theme })),
   ),
 );
+
+const STATUS_PAIRS = THEMES.flatMap((theme) =>
+  STATUS_TONES.flatMap((tone) =>
+    [
+      `${tone}Background` as const,
+      'surfacePrimary' as const,
+      ...BACKGROUND_TOKENS,
+    ].map((background) => ({
+      background,
+      text: `${tone}CardText` as const,
+      theme,
+    })),
+  ),
+);
+
+const PAIRS = [...NEUTRAL_PAIRS, ...STATUS_PAIRS];
 
 const THEME_COLORS = THEMES.flatMap((theme) =>
   readThemeColors(theme).map((color) => ({ ...color, theme })),

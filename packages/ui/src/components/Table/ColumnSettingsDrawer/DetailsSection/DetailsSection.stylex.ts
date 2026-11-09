@@ -19,7 +19,7 @@ export const styles = stylex.create({
   },
   badgeNo: {
     backgroundColor: colors.errorBackground,
-    color: colors.errorText,
+    color: colors.errorCardText,
   },
   badgeNone: {
     backgroundColor: colors.backgroundTertiary,
@@ -27,7 +27,7 @@ export const styles = stylex.create({
   },
   badgeYes: {
     backgroundColor: colors.successBackground,
-    color: colors.successText,
+    color: colors.successCardText,
   },
   container: {
     gap: 0,

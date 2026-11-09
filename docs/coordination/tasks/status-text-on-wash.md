@@ -2,7 +2,7 @@
 id: status-text-on-wash
 title: fix(ui): use the wash foreground for status text on a status wash
 owner: agent:claude
-status: active
+status: review
 branch: fix/1610-status-text-on-wash
 area:
   - packages/ui/src/design-system/themes/**
@@ -13,12 +13,12 @@ area:
   - packages/ui/src/components/NotificationCenter/NotificationItem/**
   - packages/ui/src/components/Table/ColumnSettingsDrawer/DetailsSection/**
   - packages/ui/src/components/Form/FormFieldChrome/**
-  - packages/ui/src/utils/tests/**
-  - .changeset/**
+  - packages/ui/src/design-system/ARCHITECTURE.md
+  - .changeset/status-text-on-wash.md
 started: 2026-11-09
 updated: 2026-11-09
 plan: (none)
-pr: (none)
+pr: #1611
 issue: #1610
 ---
 

@@ -160,6 +160,12 @@ Color categories:
 | **Disabled**            | `disabled`, `disabledText`                                                                                                                                                                           |
 | **Glass / gradient**    | `glassBackgroundColorPrimary/Secondary/Tertiary`, `glassBackdropFilterPrimary/Secondary`, `glassGradientBackground`, `glassGradientBackdrop`, `gradientLinearBackground`, `gradientRadialBackground` |
 
+A semantic colour has two foregrounds. `*Text` is white and belongs only on the
+solid fill, the bare `error`, `info`, `success` or `warning` colour. Text on the
+pale `*Background` wash or on the page uses `*CardText`. `themes/statusTextContrast.test.ts` holds every component
+that draws status text on a wash or on the page to 4.5:1 in both themes, so a
+component that switches back to a `*Text` token fails it.
+
 ---
 
 ### `tokens/commons.stylex.ts` — Shared Style Recipes
