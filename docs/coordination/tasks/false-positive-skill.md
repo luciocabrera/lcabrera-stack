@@ -25,6 +25,7 @@ area:
   - AGENTS.md
   - COMMANDS.md
   - docs/README.md
+  - .claude/README.md
   - docs/agents/epic-orchestration.md
   - docs/agents/public-package-suppressions.md
   - evals/skills/**

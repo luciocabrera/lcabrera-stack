@@ -7,7 +7,7 @@ argument-hint: '<analyzer> <file>:<line>[-<end line>]:<rule> — analyzer is bio
 
 # /false-positive &lt;analyzer&gt; &lt;finding&gt;
 
-You think a finding is wrong. This skill decides whether it is, and you do not.
+You think a finding is wrong. The panel decides whether it is, not you.
 A blind panel of three models rules from a case file that holds nothing you
 wrote. Its verdict either sends you back to fix the code, puts the finding in
 front of the repository owner, or lets you suppress it.
@@ -79,13 +79,13 @@ recount the votes yourself: the outcome the command prints is the one the
 gate checks.
 
 - **`dismissed`**: go to step 5.
-- **`fixed`**: apply the `Fix:` a REAL verdict gives, re-run the analyzer and
-  the gate, and add no marker. If the fix cannot be applied, go to step 7.
+- **`fixed`**: do what §5 says, re-run the analyzer and the gate, and go to
+  step 6. If you cannot, go to step 7.
 - **`split`** or **`escalated`**: go to step 7.
 
-If the command exits 1 on a malformed verdict, it recorded nothing and the
-other two verdicts are lost (#1599). Report it, and do not re-run the panel on
-the same case without saying so.
+If the command exits 1 on a malformed verdict, it recorded nothing and all
+three verdicts are lost (#1599). Report that to the owner before you seat the
+panel again, because a second run is a second paid vote.
 
 ## 5. Write the marker
 
