@@ -19,7 +19,7 @@ export const ComparePicker = ({ choices }: ComparePickerProps) => {
   return (
     <>
       <Card padding='md'>
-        <Form method='get' {...stylex.props(styles.pickerForm)}>
+        <Form method='get' {...stylex.props(styles.form)}>
           {(['a', 'b'] as const).map((side) => (
             <Select
               defaultValue={choices[PREFILLED_CHOICE[side]]?.runId}
@@ -31,6 +31,7 @@ export const ComparePicker = ({ choices }: ComparePickerProps) => {
             />
           ))}
           <Button
+            customStylex={styles.submit}
             isBusy={isSubmittingField({ field: 'a', location })}
             type='submit'
           >
@@ -39,7 +40,7 @@ export const ComparePicker = ({ choices }: ComparePickerProps) => {
         </Form>
       </Card>
       <Card padding='md'>
-        <Form method='get' {...stylex.props(styles.branchForm)}>
+        <Form method='get' {...stylex.props(styles.form)}>
           <TextInput
             label='Branch'
             name='branch'
@@ -47,6 +48,7 @@ export const ComparePicker = ({ choices }: ComparePickerProps) => {
             required
           />
           <Button
+            customStylex={styles.submit}
             isBusy={isSubmittingField({ field: 'branch', location })}
             type='submit'
           >

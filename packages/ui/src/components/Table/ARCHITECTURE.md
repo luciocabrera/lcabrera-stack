@@ -81,6 +81,9 @@ it there, so neither prop is drilled and neither is written to a store.
   is fixed at its stored size or its start width, the numbers
   `getPinnedColumnOffsets` computes the sticky offsets from, so the offsets
   match the widths the browser renders.
+- A header label wraps in the static layout instead of truncating with an
+  ellipsis, so a column can be narrower than its label and the header row grows
+  to fit, as a body row does.
 - A header cell stays `position: sticky` in the static layout, so a pinned
   column's header pins with its body cells. A header band spans its columns
   with `colSpan` and is sized by the table, not by summed widths.
