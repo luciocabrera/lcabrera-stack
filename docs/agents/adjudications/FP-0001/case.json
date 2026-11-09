@@ -1,0 +1,45 @@
+{
+  "case": {
+    "analyzer": "biome",
+    "base_sha": "bde165a72b0d283af052c7f923218ae5e690c2c8",
+    "case_id": "FP-0001",
+    "content_hash": "f9b25a7706c07f49953d8767bc8d947e7f99b65e8fb6aa88f2eb2ae5f1396d02",
+    "created_at": "2026-11-08T19:06:12.391Z",
+    "file": "packages/ui/src/components/Heatmap/HeatmapGrid/HeatmapGrid.component.tsx",
+    "finding_id": "packages/ui/src/components/Heatmap/HeatmapGrid/HeatmapGrid.component.tsx:27:lint/a11y/noNoninteractiveElementToInteractiveRole",
+    "head_sha": "94406e2136d5d4093e304a6cdb43826457b82fde",
+    "pr": 1594,
+    "rule": "lint/a11y/noNoninteractiveElementToInteractiveRole"
+  },
+  "code": {
+    "content_hash": "f9b25a7706c07f49953d8767bc8d947e7f99b65e8fb6aa88f2eb2ae5f1396d02",
+    "context": "   17    const { gridProps, tabStop } = useHeatmapRovingFocus({\n   18      firstLinked,\n   19      linked,\n   20    });\n   21  \n   22    return (\n   23      <table\n   24        aria-describedby={descriptionId}\n   25        aria-labelledby={titleId}\n   26        {...gridProps}\n   27        role='grid'\n   28        {...stylex.props(heatmapGridStyles.table)}\n   29      >\n   30        <tbody>\n   31          {rows.map((row, index) => (\n   32            <HeatmapGridRow\n   33              cells={row.cells}\n   34              key={row.key}\n   35              tabStopKey={index === tabStop.rowIndex ? tabStop.key : undefined}\n   36            />\n   37          ))}",
+    "context_end": 37,
+    "context_start": 17,
+    "end": 27,
+    "start": 27
+  },
+  "completion": null,
+  "explain": "Summary\n\n- Name: noNoninteractiveElementToInteractiveRole\n- Fix: unsafe\n- Default severity: error\n- Available from version: 1.0.0\n- Diagnostic category: lint/a11y/noNoninteractiveElementToInteractiveRole\n- This rule is recommended\n\nDescription\n\n Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.\n\n Non-interactive HTML elements indicate _content_ and _containers_ in the user interface.\n Non-interactive elements include `<main>`, `<area>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.\n\n Interactive HTML elements indicate _controls_ in the user interface.\n Interactive elements include `<a href>`, `<button>`, `<input>`, `<select>`, `<textarea>`.\n\n [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) should not be used to convert a non-interactive element to an interactive element.\n Interactive ARIA roles include `button`, `link`, `checkbox`, `menuitem`, `menuitemcheckbox`, `menuitemradio`, `option`, `radio`, `searchbox`, `switch` and `textbox`.\n\nExamples\n\nInvalid\n\n ```jsx,expect_diagnostic\n <h1 role=\"button\">Some text</h1>\n ```\n\nValid\n\n\n ```jsx\n <span role=\"button\">Some text</span>\n ```\n\nAccessibility guidelines\n\n - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)\n\nResources\n\n - [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro)\n - [WAI-ARIA Authoring Practices Guide - Design Patterns and Widgets](https://www.w3.org/TR/wai-aria-practices-1.1/#aria_ex)\n - [Fundamental Keyboard Navigation Conventions](https://www.w3.org/TR/wai-aria-practices-1.1/#kbd_generalnav)\n - [Mozilla Developer Network - ARIA Techniques](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role#Keyboard_and_focus)\n\n\n",
+  "finding": [
+    {
+      "severity": "error",
+      "message": "The HTML element table is non-interactive and should not have an interactive role.",
+      "category": "lint/a11y/noNoninteractiveElementToInteractiveRole",
+      "location": {
+        "path": "packages/ui/src/components/Heatmap/HeatmapGrid/HeatmapGrid.component.tsx",
+        "start": {
+          "line": 27,
+          "column": 7
+        },
+        "end": {
+          "line": 27,
+          "column": 18
+        }
+      },
+      "advices": []
+    }
+  ],
+  "schema_version": 1,
+  "trace": null
+}
