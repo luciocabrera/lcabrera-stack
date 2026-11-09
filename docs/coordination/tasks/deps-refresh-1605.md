@@ -13,6 +13,8 @@ area:
   - .changeset/raise-the-emitted-pnpm-pin.md
   - .changeset/raise-vite-config-peer-floors.md
   - packages/devkit/scripts/workspace.mjs
+  - packages/eval-history/src/migrate/migrateScript.integration.test.ts
+  - packages/repo-standards/scripts/housekeeping-run.test.mjs
 started: 2026-11-09
 updated: 2026-11-09
 plan: (none)
@@ -29,6 +31,6 @@ exact Vite+ 1.4.0 pin stay where they are.
 
 ## Status / next
 
-- Current step: the Babel hold comment is scoped to major 8, answering the review on #1606.
+- Current step: the migrate script tests and the four-pass prune test have the timeout the loaded unit-test job needs.
 - Blockers: none.
 - Next: delete this file when the PR merges.
