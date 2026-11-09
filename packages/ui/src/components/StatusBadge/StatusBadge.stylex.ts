@@ -24,11 +24,11 @@ const base = stylex.create({
 const toneVariants = stylex.create({
   error: {
     backgroundColor: colors.errorBackground,
-    color: colors.errorText,
+    color: colors.errorCardText,
   },
   info: {
     backgroundColor: colors.infoBackground,
-    color: colors.infoText,
+    color: colors.infoCardText,
   },
   neutral: {
     backgroundColor: colors.backgroundTertiary,
@@ -36,11 +36,11 @@ const toneVariants = stylex.create({
   },
   success: {
     backgroundColor: colors.successBackground,
-    color: colors.successText,
+    color: colors.successCardText,
   },
   warning: {
     backgroundColor: colors.warningBackground,
-    color: colors.warningText,
+    color: colors.warningCardText,
   },
 });
 
