@@ -14,6 +14,8 @@ area:
   - packages/ui/src/components/Table/ColumnSettingsDrawer/DetailsSection/**
   - packages/ui/src/components/Form/FormFieldChrome/**
   - packages/ui/src/design-system/ARCHITECTURE.md
+  - packages/ui/src/utils/tests/listStyleTextContrasts.*
+  - packages/ui/src/INVENTORY.md
   - .changeset/status-text-on-wash.md
 started: 2026-11-09
 updated: 2026-11-09
