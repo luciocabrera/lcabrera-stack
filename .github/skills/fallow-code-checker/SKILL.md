@@ -91,6 +91,12 @@ Mark as potential false positive when any is true:
 - command/script binaries are invoked through npx wrappers
 - project config shows explicit keep rationale
 
+A "potential false positive" in this report is a label, not a dismissal. The
+finding is fixed or taken through the
+[`false-positive`](../false-positive/SKILL.md) skill under
+[its rules](../../../docs/agents/false-positive-panel.md), and never suppressed
+on the strength of this triage.
+
 5. Assign canonical severity.
 
 Use category-based mapping first, then adjust by impact:

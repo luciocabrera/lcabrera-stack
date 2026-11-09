@@ -1,0 +1,16 @@
+id: trigger-similar-code-wrong
+name: A similar-code candidate the user disputes
+set: capability
+tags:
+  - positive-trigger
+inputs:
+  prompt: "fallow similar-code says my encode and decode helpers are near-duplicates, but they are inverses of each other and cannot share a body. How do I get this candidate dismissed properly? Tell me what you would do first. Load any skill you need, but don't run shell commands or edit files."
+expected:
+  should_trigger: true
+graders:
+  - type: skill_invocation
+    name: loads-false-positive
+    config:
+      mode: any_order
+      required_skills:
+        - false-positive

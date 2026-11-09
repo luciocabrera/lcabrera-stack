@@ -25,13 +25,13 @@ const sizeVariants = stylex.create({
 });
 
 const toneVariants = stylex.create({
-  error: { color: colors.errorText },
-  info: { color: colors.infoText },
+  error: { color: colors.errorCardText },
+  info: { color: colors.infoCardText },
   primary: { color: colors.textPrimary },
   secondary: { color: colors.textSecondary },
-  success: { color: colors.successText },
+  success: { color: colors.successCardText },
   tertiary: { color: colors.textTertiary },
-  warning: { color: colors.warningText },
+  warning: { color: colors.warningCardText },
 });
 
 const weightVariants = stylex.create({

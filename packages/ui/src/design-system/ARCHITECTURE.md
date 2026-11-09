@@ -160,6 +160,24 @@ Color categories:
 | **Disabled**            | `disabled`, `disabledText`                                                                                                                                                                           |
 | **Glass / gradient**    | `glassBackgroundColorPrimary/Secondary/Tertiary`, `glassBackdropFilterPrimary/Secondary`, `glassGradientBackground`, `glassGradientBackdrop`, `gradientLinearBackground`, `gradientRadialBackground` |
 
+Text on the pale `*Background` wash or on the page uses `*CardText`, never the
+white `*Text`. Which foreground belongs on the solid fill (the bare `error`,
+`info`, `success` or `warning` colour) is not measured here.
+
+Each component below has a `*.tokens.test.ts` that compiles its StyleX module and
+holds the listed status styles to 4.5:1 in both themes. `StatusBadge`, `InfoBox`
+and `DetailsSection` are measured on the wash each style sets, laid over every
+surface in `PAGE_BACKGROUNDS`, and `Text` and `FormFieldChrome` on each of those
+surfaces directly. A translucent surface is composited over `backgroundPrimary`.
+
+`NotificationItem`'s dismiss buttons are measured on the base `surfacePrimary`
+only. They are drawn on a gradient toward the solid status colour, which the test
+does not model, so their test is a floor on the base surface and not proof of AA
+(tracked on #1612).
+`Card` has no such test. `themeTextContrast.test.ts` measures every `*CardText`
+on its wash over those same surfaces, and on the surfaces directly, as token
+pairs.
+
 ---
 
 ### `tokens/commons.stylex.ts` — Shared Style Recipes

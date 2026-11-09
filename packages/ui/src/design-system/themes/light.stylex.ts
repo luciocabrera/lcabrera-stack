@@ -67,6 +67,7 @@ export const lightTheme = stylex.createTheme(colors, {
   warningText: 'oklch(100% 0 0)',
 
   infoBackground: 'oklch(92% 0.03 220 / 0.32)',
+  infoCardText: 'oklch(40% 0.07 230)',
   infoHover: 'oklch(from info l-0.10 c+0.03 h)',
   infoText: 'oklch(100% 0 0)',
 

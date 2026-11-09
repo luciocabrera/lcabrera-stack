@@ -185,11 +185,10 @@ branch to conflict with
 - Re-run the full gate after non-trivial fixes.
 - Run a workspace's tests with `vp run test`, which runs its `test` task (`vp test run` plus any arguments the task adds); stage 8 stays `vp run test:changed` from the root.
 - Never silence a finding to get a stage green (CLAUDE.md rule 11) — fix the code.
-  This covers `// biome-ignore` exactly as it covers `// eslint-disable`. The
-  only exception is a false positive a blind panel confirmed: open a case with
-  `vp run adjudicate` and let `vp run adjudicate:panel` rule. A split goes to
-  the repository owner, whose answer `vp run adjudicate:rule` records
-  ([ADR-147](../../../docs/decisions/ADR-147-suppress-a-finding-only-after-a-blind-panel-confirms-a-false-positive.md)).
+  This covers `// biome-ignore` exactly as it covers `// eslint-disable`. A
+  finding you believe is wrong goes through the
+  [`false-positive`](../false-positive/SKILL.md) skill, under the rules in
+  [`docs/agents/false-positive-panel.md`](../../../docs/agents/false-positive-panel.md).
 - Never trust a green Biome run on a rule you just enabled — a disabled rule and
   correct code report identically. Confirm with a deliberate violation first.
 

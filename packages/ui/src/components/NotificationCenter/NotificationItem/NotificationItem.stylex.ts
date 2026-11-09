@@ -41,10 +41,10 @@ export const styles = stylex.create({
     color: colors.textSecondary,
   },
   dismissButtonError: {
-    color: colors.errorText,
+    color: colors.errorCardText,
   },
   dismissButtonInfo: {
-    color: colors.infoText,
+    color: colors.infoCardText,
   },
   dismissButtonPrimary: {
     color: colors.brandPrimaryText,
@@ -53,10 +53,10 @@ export const styles = stylex.create({
     color: colors.brandSecondaryText,
   },
   dismissButtonSuccess: {
-    color: colors.successText,
+    color: colors.successCardText,
   },
   dismissButtonWarning: {
-    color: colors.warningText,
+    color: colors.warningCardText,
   },
   item: {
     animationDuration: transitions.normal,

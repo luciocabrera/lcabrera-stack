@@ -357,6 +357,10 @@ more than you are reviewing, and the reviews are what make this worth doing.
 - Anything needing a credential, an external account, or a published side effect
 - A merge that would need a force-push or a bypass of a branch rule
 - A finding that suggests already-merged work is wrong
+- A false-positive case that stops with the repository owner. Pause that issue
+  only, raise it with the three verdicts as
+  [`false-positive-panel.md`](false-positive-panel.md) §7 says, and keep the
+  rest of the wave moving
 
 **Decide it yourself — do not ask:**
 

@@ -90,16 +90,32 @@ describe('getThemeTokenContrast', () => {
     expect(overGrey).not.toBeCloseTo(overPage, 2);
   });
 
-  it('refuses a translucent surface', () => {
-    expect(() =>
+  it('composites a translucent surface over backgroundPrimary before laying the background on it', () => {
+    expect(
       getThemeTokenContrast({
-        background: colors.backgroundPrimary,
-        foreground: colors.textPrimary,
-        surface: colors.successBackground,
+        background: colors.errorBackground,
+        foreground: colors.errorCardText,
+        surface: colors.surfaceElevated,
+        theme: 'light',
+      }),
+    ).toBeCloseTo(6.815, 2);
+  });
+
+  it('measures over backgroundPrimary itself the same as with no surface named', () => {
+    expect(
+      getThemeTokenContrast({
+        background: colors.errorBackground,
+        foreground: colors.errorCardText,
+        surface: colors.backgroundPrimary,
         theme: 'dark',
       }),
-    ).toThrow(
-      `The dark theme's surface ${colors.successBackground} is translucent`,
+    ).toBeCloseTo(
+      getThemeTokenContrast({
+        background: colors.errorBackground,
+        foreground: colors.errorCardText,
+        theme: 'dark',
+      }),
+      10,
     );
   });
 });

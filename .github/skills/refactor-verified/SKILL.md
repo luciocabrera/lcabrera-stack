@@ -56,6 +56,12 @@ If a finding is wrong, say so with evidence and change nothing.
 <verifier Findings section, verbatim>
 ```
 
+If the builder reports a false-positive case that stopped with the repository
+owner, pause here. Do not dispatch the verifier and do not count the round.
+Raise the case to Lucio with its three verdicts, as
+[`docs/agents/false-positive-panel.md`](../../../docs/agents/false-positive-panel.md)
+§7 says, and resume this round once the ruling is recorded.
+
 **2. Capture the diff yourself.** Do not ask the builder for it.
 
 ```bash

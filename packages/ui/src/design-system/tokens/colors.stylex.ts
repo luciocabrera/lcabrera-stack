@@ -64,6 +64,7 @@ export const colors = stylex.defineVars({
   shadowHover: 'var(--shadow-hover)',
   info: 'var(--info)',
   infoBackground: 'var(--info-background)',
+  infoCardText: 'var(--info-card-text)',
   infoHover: 'var(--info-hover)',
 
   infoText: 'var(--info-text)',
