@@ -2,7 +2,7 @@
 id: deps-refresh-1605
 title: Refresh the catalog and the pins devkit emits
 owner: agent:grok
-status: active
+status: review
 branch: build/1605-deps-refresh
 area:
   - pnpm-workspace.yaml
@@ -16,7 +16,7 @@ area:
 started: 2026-11-09
 updated: 2026-11-09
 plan: (none)
-pr: (none)
+pr: #1606
 issue: #1605
 ---
 
@@ -29,6 +29,6 @@ exact Vite+ 1.4.0 pin stay where they are.
 
 ## Status / next
 
-- Current step: changesets for the published floors, then the pre-push gate and the PR.
+- Current step: CI and review on #1606.
 - Blockers: none.
-- Next: set `pr` once the pull request exists, and delete this file when it merges.
+- Next: delete this file when the PR merges.
