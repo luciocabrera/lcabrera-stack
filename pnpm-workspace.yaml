@@ -26,14 +26,12 @@ catalogs:
     pg: ^8.23.1
 
   build:
-    # Both Babel entries stay on the major whose `@babel/core` the peer of
-    # `vite-plugin-babel` accepts. The newer preset major peers on the newer
-    # core, so neither can move until a `vite-plugin-babel` release accepts
-    # that core. Moving only the preset leaves its core peer unmet, and its
-    # options reject the `allExtensions`/`isTSX` the Babel configs pass.
-    # Moving the core, alone or with the preset, leaves `vite-plugin-babel`'s
-    # peer unmet.
-    '@babel/core': ^7.29.7
+    # Stay on major 7. `vite-plugin-babel` peers on `@babel/core` `^7.0.0`, so a
+    # move inside 7 is fine. Moving either entry to 8 leaves a peer unmet: the
+    # plugin does not accept core 8, and the 8.x preset peers on core 8. The 8.x
+    # preset also does not accept `allExtensions` or `isTSX`, which the Babel
+    # configs pass.
+    '@babel/core': ^7.29.13
     '@babel/preset-typescript': ^7.29.7
     # The ESLint toolchain gets TypeScript 6 from .pnpmfile.cjs, because
     # typescript-eslint has no TypeScript 7 support yet (ADR-139).
@@ -53,17 +51,17 @@ catalogs:
     '@eslint/js': ^10.0.1
     '@typescript-eslint/rule-tester': ^8.72.1
     '@typescript-eslint/utils': ^8.72.1
-    eslint: ^10.13.0
+    eslint: ^10.14.0
     eslint-config-prettier: ^10.1.8
     eslint-plugin-perfectionist: ^5.13.0
     eslint-plugin-react-dom: ^5.28.8
     eslint-plugin-react-hooks: ^7.1.1
     eslint-plugin-react-refresh: ^0.5.7
     eslint-plugin-react-x: ^5.28.8
-    eslint-plugin-security: ^4.2.0
+    eslint-plugin-security: ^4.2.1
     eslint-plugin-unicorn: ^78.0.0
-    globals: ^17.13.0
-    react-doctor: ^0.9.18
+    globals: ^17.14.0
+    react-doctor: ^0.9.22
     typescript-eslint: ^8.72.1
 
   react:
@@ -84,12 +82,12 @@ catalogs:
     zod: ^4.6.7
 
   test:
-    '@anthropic-ai/claude-agent-sdk': ^0.3.312
+    '@anthropic-ai/claude-agent-sdk': ^0.3.319
     '@stryker-mutator/core': ^10.1.1
     '@testing-library/react': ^16.3.3
     jsdom: ^30.1.3
-    '@playwright/test': ^1.64.1
-    playwright: ^1.64.1
+    '@playwright/test': ^1.65.0
+    playwright: ^1.65.0
     # Both must be DECLARED to resolve, for different reasons, and neither is
     # safe to drop because "nothing imports it".
     #
@@ -118,11 +116,11 @@ catalogs:
     '@arethetypeswrong/core': ^0.18.5
     '@changesets/cli': ^3.0.3
     '@changesets/get-release-plan': ^5.0.2
-    fallow: ^3.37.0
-    knip: ^6.43.0
+    fallow: ^3.41.0
+    knip: ^6.44.2
     lighthouse: ^13.6.0
     publint: ^0.3.25
-    semver: ^7.8.5
+    semver: ^7.8.6
     yaml: ^2.9.1
     ts-morph: ^28.0.0
 
@@ -188,7 +186,7 @@ overrides:
   # a range the parent accepts — it moves the parent off its pin. Same major, and
   # express and body-parser resolve the same qs this override names, so it is
   # proven in this install. Drop once typed-rest-client repins.
-  qs@6: ^6.17.0
+  qs@6: ^6.17.1
   # GHSA-g3hv-75wg-m249 — denial of service through globparts amplification in
   # minimatch, patched in 11.0.1 with no 10.x backport, and reached on a
   # production path. Every parent stops short of the patched major: `eslint`
