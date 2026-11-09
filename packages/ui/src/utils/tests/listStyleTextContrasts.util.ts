@@ -1,5 +1,5 @@
 /**
- * Compiles one StyleX module from the raw source a lazy, root-relative `import.meta.glob` loads, and measures the text colour each listed style sets, in both themes, against the background it sets or against each background named.
+ * Compiles one StyleX module from the raw source a lazy, root-relative `import.meta.glob` loads, and measures the text colour each listed style sets, in both themes. A style that sets its own background is measured on it over every surface in `PAGE_BACKGROUNDS`; one that does not is measured directly on each background named.
  * A style that sets no text colour, that sets no background where none is named, or that sets one where some are named, is refused rather than measured against a guess.
  */
 
@@ -7,10 +7,13 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 
 import * as stylex from '@stylexjs/stylex';
 
+import { colors } from '#ui/design-system/tokens/colors.stylex';
+
 import { compileStylexRules } from './compileStylexRules.util';
 import { getColorTokenName } from './getColorTokenName.util';
 import { getThemeTokenContrast } from './getThemeTokenContrast.util';
 import { readStylexDeclaration } from './readStylexDeclaration.util';
+import { PAGE_BACKGROUNDS } from './tests.constants';
 
 type ListStyleTextContrastsArgs = {
   readonly backgrounds?: readonly string[];
@@ -62,19 +65,33 @@ export const listStyleTextContrasts = async ({
       throw new Error(`${name} sets its own background, so none can be named`);
     }
 
-    const drawnOn =
-      backgrounds ?? (ownBackground === undefined ? [] : [ownBackground]);
+    const layers =
+      ownBackground === undefined
+        ? (backgrounds ?? []).map((background) => ({
+            background,
+            surface: colors.backgroundPrimary,
+          }))
+        : PAGE_BACKGROUNDS.map((surface) => ({
+            background: ownBackground,
+            surface,
+          }));
 
-    if (drawnOn.length === 0) {
+    if (layers.length === 0) {
       throw new Error(`${name} sets no background and none is named`);
     }
 
     return THEMES.flatMap((theme) =>
-      drawnOn.map((background) => ({
+      layers.map(({ background, surface }) => ({
         background: getColorTokenName(background),
         foreground: getColorTokenName(foreground),
         name,
-        ratio: getThemeTokenContrast({ background, foreground, theme }),
+        ratio: getThemeTokenContrast({
+          background,
+          foreground,
+          surface,
+          theme,
+        }),
+        surface: getColorTokenName(surface),
         theme,
       })),
     );

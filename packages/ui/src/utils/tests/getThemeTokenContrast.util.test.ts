@@ -90,16 +90,26 @@ describe('getThemeTokenContrast', () => {
     expect(overGrey).not.toBeCloseTo(overPage, 2);
   });
 
-  it('refuses a translucent surface', () => {
-    expect(() =>
-      getThemeTokenContrast({
-        background: colors.backgroundPrimary,
-        foreground: colors.textPrimary,
-        surface: colors.successBackground,
-        theme: 'dark',
-      }),
-    ).toThrow(
-      `The dark theme's surface ${colors.successBackground} is translucent`,
-    );
+  it('composites a translucent surface over backgroundPrimary first', () => {
+    const overPage = getThemeTokenContrast({
+      background: colors.errorBackground,
+      foreground: colors.errorCardText,
+      theme: 'dark',
+    });
+    const overSurface = getThemeTokenContrast({
+      background: colors.errorBackground,
+      foreground: colors.errorCardText,
+      surface: colors.surfaceElevated,
+      theme: 'dark',
+    });
+    const overPageAgain = getThemeTokenContrast({
+      background: colors.errorBackground,
+      foreground: colors.errorCardText,
+      surface: colors.backgroundPrimary,
+      theme: 'dark',
+    });
+
+    expect(overSurface).not.toBeCloseTo(overPage, 2);
+    expect(overPageAgain).toBeCloseTo(overPage, 10);
   });
 });

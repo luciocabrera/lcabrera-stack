@@ -3,8 +3,10 @@ import { describe, expect, it } from 'vite-plus/test';
 import { styles } from '#ui/components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
+import { getColorTokenName } from './getColorTokenName.util';
 import { getThemeTokenContrast } from './getThemeTokenContrast.util';
 import { listStyleTextContrasts } from './listStyleTextContrasts.util';
+import { PAGE_BACKGROUNDS } from './tests.constants';
 
 const SOURCES = import.meta.glob(
   '/src/components/Table/ColumnSettingsDrawer/DetailsSection/DetailsSection.stylex.ts',
@@ -12,24 +14,28 @@ const SOURCES = import.meta.glob(
 );
 
 describe('listStyleTextContrasts', () => {
-  it('measures a style against the background it sets, in both themes', async () => {
+  it('measures a style on the background it sets, over every page surface, in both themes', async () => {
     await expect(
       listStyleTextContrasts({
         sources: SOURCES,
         styles: { badgeNo: styles.badgeNo },
       }),
     ).resolves.toEqual(
-      (['light', 'dark'] as const).map((theme) => ({
-        background: 'errorBackground',
-        foreground: 'errorCardText',
-        name: 'badgeNo',
-        ratio: getThemeTokenContrast({
-          background: colors.errorBackground,
-          foreground: colors.errorCardText,
+      (['light', 'dark'] as const).flatMap((theme) =>
+        PAGE_BACKGROUNDS.map((surface) => ({
+          background: 'errorBackground',
+          foreground: 'errorCardText',
+          name: 'badgeNo',
+          ratio: getThemeTokenContrast({
+            background: colors.errorBackground,
+            foreground: colors.errorCardText,
+            surface,
+            theme,
+          }),
+          surface: getColorTokenName(surface),
           theme,
-        }),
-        theme,
-      })),
+        })),
+      ),
     );
   });
 
@@ -41,12 +47,14 @@ describe('listStyleTextContrasts', () => {
     });
 
     expect(
-      measured.map(({ background, theme }) => `${theme} ${background}`),
+      measured.map(
+        ({ background, surface, theme }) => `${theme} ${background} ${surface}`,
+      ),
     ).toEqual([
-      'light backgroundPrimary',
-      'light surfaceElevated',
-      'dark backgroundPrimary',
-      'dark surfaceElevated',
+      'light backgroundPrimary backgroundPrimary',
+      'light surfaceElevated backgroundPrimary',
+      'dark backgroundPrimary backgroundPrimary',
+      'dark surfaceElevated backgroundPrimary',
     ]);
   });
 

@@ -62,26 +62,26 @@ export const darkTheme = stylex.createTheme(colors, {
   // errorBackground: 'oklch(28% 0.06 25)',
 
   errorBackground: 'oklch(92% 0.03 25 / 0.32)',
-  errorCardText: 'oklch(87.1% 0.068 25.8)',
+  errorCardText: 'oklch(91% 0.04 25)',
   errorHover: 'oklch(from error l+0.08 c+0.02 h)',
   errorText: 'oklch(100% 0 0)',
 
   // successBackground: 'oklch(0.29 0.1 155.23 / 0.5)',
   successBackground: 'oklch(92% 0.02 160 / 0.32)',
-  successCardText: 'oklch(88% 0.07 160)',
+  successCardText: 'oklch(91% 0.06 160)',
   // successCardText: 'oklch(38% 0.09 160)',
   successHover: 'oklch(from success l+0.08 c+0.02 h)',
   successText: 'oklch(100% 0 0)',
 
   // warningBackground: 'oklch(0.32 0.07 77.86 / 0.49)',
   warningBackground: 'oklch(92% 0.03 80 / 0.32)',
-  warningCardText: 'oklch(88% 0.09 80)',
+  warningCardText: 'oklch(91% 0.075 80)',
   warningHover: 'oklch(from warning l+0.08 c+0.03 h)',
   warningText: 'oklch(100% 0 0)',
 
   // infoBackground: 'oklch(0.24 0.11 261.62 / 0.77)',
   infoBackground: 'oklch(92% 0.03 220 / 0.32)',
-  infoCardText: 'oklch(88% 0.06 230)',
+  infoCardText: 'oklch(91% 0.05 230)',
   infoHover: 'oklch(from info l+0.10 c+0.03 h)',
   infoText: 'oklch(100% 0 0)',
 

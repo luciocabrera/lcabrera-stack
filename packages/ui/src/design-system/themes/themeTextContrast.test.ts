@@ -21,24 +21,38 @@ const BACKGROUND_TOKENS = [
 
 const STATUS_TONES = ['error', 'info', 'success', 'warning'] as const;
 
+const SURFACE_TOKENS = ['surfacePrimary', ...BACKGROUND_TOKENS] as const;
+
 const NEUTRAL_PAIRS = THEMES.flatMap((theme) =>
   TEXT_TOKENS.flatMap((text) =>
-    BACKGROUND_TOKENS.map((background) => ({ background, text, theme })),
+    BACKGROUND_TOKENS.map((background) => ({
+      background,
+      surface: 'backgroundPrimary' as const,
+      text,
+      theme,
+    })),
   ),
 );
 
 const STATUS_PAIRS = THEMES.flatMap((theme) =>
-  STATUS_TONES.flatMap((tone) =>
-    [
-      `${tone}Background` as const,
-      'surfacePrimary' as const,
-      ...BACKGROUND_TOKENS,
-    ].map((background) => ({
-      background,
-      text: `${tone}CardText` as const,
-      theme,
-    })),
-  ),
+  STATUS_TONES.flatMap((tone) => {
+    const text = `${tone}CardText` as const;
+
+    return [
+      ...SURFACE_TOKENS.map((surface) => ({
+        background: `${tone}Background` as const,
+        surface,
+        text,
+        theme,
+      })),
+      ...SURFACE_TOKENS.map((background) => ({
+        background,
+        surface: 'backgroundPrimary' as const,
+        text,
+        theme,
+      })),
+    ];
+  }),
 );
 
 const PAIRS = [...NEUTRAL_PAIRS, ...STATUS_PAIRS];
@@ -49,12 +63,13 @@ const THEME_COLORS = THEMES.flatMap((theme) =>
 
 describe('theme text contrast', () => {
   it.each(PAIRS)(
-    '$theme $text on $background meets WCAG AA for body text',
-    ({ background, text, theme }) => {
+    '$theme $text on $background over $surface meets WCAG AA for body text',
+    ({ background, surface, text, theme }) => {
       expect(
         getThemeTokenContrast({
           background: colors[background],
           foreground: colors[text],
+          surface: colors[surface],
           theme,
         }),
       ).toBeGreaterThanOrEqual(WCAG_AA_BODY_TEXT);

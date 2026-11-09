@@ -1,6 +1,7 @@
 /**
  * Computes the WCAG contrast ratio between two colour tokens as a theme assigns them.
- * The background is composited over an opaque surface and the foreground over that result, in sRGB, the way a browser paints them.
+ * The background is composited over the surface and the foreground over that result, in sRGB, the way a browser paints them.
+ * A translucent surface is first composited over `backgroundPrimary`, the page under every surface, which must itself be opaque.
  */
 
 import { colors } from '#ui/design-system/tokens/colors.stylex';
@@ -28,15 +29,19 @@ export const getThemeTokenContrast = ({
 }: ThemeTokenContrastArgs) => {
   const readToken = (token: string) =>
     readColor(readThemeValue({ name: getColorTokenName(token), theme }));
-  const base = readToken(surface);
+  const page = readToken(colors.backgroundPrimary);
 
-  if (base.alpha !== 1) {
-    throw new Error(`The ${theme} theme's surface ${surface} is translucent`);
+  if (page.alpha !== 1) {
+    throw new Error(`The ${theme} theme's backgroundPrimary is translucent`);
   }
 
+  const base = compositeOverSurface({
+    color: readToken(surface),
+    surface: page.rgb,
+  });
   const backdrop = compositeOverSurface({
     color: readToken(background),
-    surface: base.rgb,
+    surface: base,
   });
   const painted = compositeOverSurface({
     color: readToken(foreground),

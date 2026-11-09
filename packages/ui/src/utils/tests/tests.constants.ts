@@ -10,4 +10,4 @@ export const PAGE_BACKGROUNDS = [
 ];
 
 export const STYLE_TEXT_CONTRAST_TITLE =
-  '$theme $name ($foreground) meets WCAG AA on $background';
+  '$theme $name ($foreground) meets WCAG AA on $background over $surface';
