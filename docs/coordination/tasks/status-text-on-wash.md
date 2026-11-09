@@ -16,6 +16,7 @@ area:
   - packages/ui/src/design-system/ARCHITECTURE.md
   - packages/ui/src/utils/tests/listStyleTextContrasts.*
   - packages/ui/src/INVENTORY.md
+  - reports/api-surface/ui.txt
   - .changeset/status-text-on-wash.md
 started: 2026-11-09
 updated: 2026-11-09
