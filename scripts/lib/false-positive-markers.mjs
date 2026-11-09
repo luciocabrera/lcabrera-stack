@@ -2,7 +2,7 @@
  * Reads the inline markers that claim a panel-confirmed false positive, in the
  * spelling each analyzer accepts, and hashes the lines a marker covers. Pure:
  * `verify-suppressions.mjs` reads the files. The marker format and the panel
- * behind it are `docs/agents/public-package-suppressions.md`.
+ * behind it are `docs/agents/false-positive-panel.md` §6.
  */
 import { createHash } from 'node:crypto';
 

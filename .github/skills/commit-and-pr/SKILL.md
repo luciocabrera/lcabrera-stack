@@ -82,7 +82,8 @@ printf 'feat(ui): my subject\n' | vp run commit:verify -- -
   `docs/agents/false-positives.json` lists each case under **Verification**,
   with its three verdicts. What each line carries is §9 of
   [`docs/agents/false-positive-panel.md`](../../../docs/agents/false-positive-panel.md).
-  No new section: the gate does not check it, and the PR's verifier does.
+  No new section: `suppressions:verify` checks the record in the tree, but no
+  gate checks this listing in the PR body.
 
 Self-check before opening/updating a PR:
 

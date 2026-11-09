@@ -60,7 +60,15 @@ criterion is not verified — say so rather than passing it.
    the three ruled `FALSE_POSITIVE`, or the envelope carries the owner's
    `FALSE_POSITIVE` ruling with a reference you can open; and `case.json`
    holds nothing the builder wrote, only the analyzer's output and the code.
-   Any one missing is `not-met`. The rules you are checking against are
+   Any one missing is a blocking defect, whether or not the issue has a
+   criterion about false positives. Record it under **Findings** as its own
+   entry, and in the verdict document as a `findings` entry at `high`: a
+   suppression no panel confirmed breaks Rule 11
+   ([`agent-review-contract.md`](../../docs/agents/agent-review-contract.md)
+   §3), so it carries `failure_scenario` and `refutation` and makes the
+   verdict `FAIL` on its own. If a green `suppressions:verify` already checks
+   the part you found missing, §3 caps the finding at `medium`: name that
+   check and say which of the two is wrong. The rules you are checking against are
    [`docs/agents/false-positive-panel.md`](../../docs/agents/false-positive-panel.md);
    do not re-judge the finding.
 6. **Plant a violation and prove a gate fires** — see below. At least one.

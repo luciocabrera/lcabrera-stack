@@ -53,8 +53,8 @@ reads the case's commit.
 
 ## 3. Seat the panel
 
-Pick three distinct models: two judges and one adversary, with at least one
-of them not your own model. Then run:
+Pick the three models as the contract's §3 says: two judges and one
+adversary. Then run:
 
 ```bash
 vp run adjudicate:panel -- FP-nnnn --builder-model <your model id> \
@@ -81,7 +81,8 @@ gate checks.
 - **`dismissed`**: go to step 5.
 - **`fixed`**: do what §5 says, re-run the analyzer and the gate, and go to
   step 6. If you cannot, go to step 7.
-- **`split`** or **`escalated`**: go to step 7.
+- **`split`** or **`escalated`**: commit the case as step 6 says, then go to
+  step 7.
 
 If the command exits 1 on a malformed verdict, it recorded nothing and all
 three verdicts are lost (#1599). Report that to the owner before you seat the
@@ -101,10 +102,11 @@ Then run `vp run suppressions:verify`, and for a fallow marker
 
 ## 6. Save the case
 
-Commit the case directory, the `FP-nnnn.json` envelope beside it, the list
-entry and the marker together, whatever the outcome. Every verdict is kept for
-the verdict history, and a committed number is never reused. `vp run
-evals:ingest` reads the envelope from there.
+Commit the case directory and the `FP-nnnn.json` envelope beside it, whatever
+the outcome, with the list entry and the marker when there are any. Every
+verdict is kept for the verdict history, and a committed number is never
+reused: an uncommitted case loses its number with the worktree, and the next
+case takes it. `vp run evals:ingest` reads the envelope from there.
 
 In the pull request, list each case under **Verification**, as the contract's
 §9 says. Never post `upstream.md` anywhere without the repository owner's
@@ -112,8 +114,8 @@ explicit yes to its text and its destination.
 
 ## 7. Stop and report to the owner
 
-On a `split`, an `escalated` case, or a fix that cannot be applied, stop work
-on that finding and report to Lucio what the contract's §7 lists: the case,
+On a `split`, an `escalated` case, or a fix that cannot be applied, make sure
+the case is committed (step 6), then stop work on that finding and report to Lucio what the contract's §7 lists: the case,
 the three verdicts with seat and model, and the fix you rejected. Do not mark
 the finding, dismiss it, or sit the panel again.
 
@@ -123,6 +125,4 @@ for a `FALSE_POSITIVE` ruling or step 1 for a `REAL` one.
 
 ## Known gaps
 
-The contract's §10 lists them: #1599 (the placeholder reason, no retry for a
-malformed seat, `builder_model` not in the schema) and #1574 (`similar-code`
-partial runs, and no `similar-code` marker in fallow's registry).
+The contract's §10 lists them.

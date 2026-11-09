@@ -201,11 +201,14 @@ say yes to that text.
 A pull request that adds a list entry lists each case under **Verification**:
 the case number, the analyzer, rule and file, and each seat's verdict with its
 role and model. On a ruled case, it adds the owner's ruling and its reference.
-The PR's blind verifier checks every new entry the diff adds: the case file
-exists, the panel sat three distinct models, the votes are unanimous or the
-owner ruled `FALSE_POSITIVE`, and the case holds nothing the builder wrote.
-CI can check the record's shape, but it cannot prove the three sessions ran.
-That is why the verifier reads the verdicts.
+What checks that depends on how the PR was made. Under `/refactor-verified`
+or `/epic`, the blind verifier checks every new entry the diff adds: the case
+file exists, the panel sat three distinct models, the votes are unanimous or
+the owner ruled `FALSE_POSITIVE`, and the case holds nothing the builder
+wrote. Outside those two workflows nothing reads the verdicts:
+`suppressions:verify` checks the record's shape, and no gate can prove the
+three sessions ran or reads the PR body's listing. A reviewer of such a PR
+has to read the case and its verdicts themselves.
 
 ## 10. Known gaps
 
