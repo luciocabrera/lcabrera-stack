@@ -22,6 +22,17 @@ const BANNED = [
   'h3',
 ] as const;
 
+const REPORTED_INPUTS = [
+  "const View = () => <input name='q' type='text' />;",
+  "const View = () => <input name='q' />;",
+  "const View = ({ kind }) => <input name='q' type={kind} />;",
+  "const View = () => <input name='q' type={'hidden'} />;",
+  'const View = () => <input name=\'q\' type="hidden" type="text" />;',
+  "const View = ({ rest }) => <input name='q' type='hidden' {...rest} />;",
+  "const View = () => <input name='q' type='Hidden' />;",
+  "const View = () => <input name='q' type />;",
+];
+
 const reported = (element: string) => ({
   data: { element },
   messageId: 'rawUiPrimitive' as const,
@@ -41,38 +52,10 @@ ruleTester.run('no-raw-ui-primitives', rule, {
       code: 'const View = () => <table><tbody><tr><td><button>Go</button></td></tr></tbody></table>;',
       errors: [reported('table'), reported('button')],
     },
-    {
-      code: "const View = () => <input name='q' type='text' />;",
+    ...REPORTED_INPUTS.map((code) => ({
+      code,
       errors: [reported('input')],
-    },
-    {
-      code: "const View = () => <input name='q' />;",
-      errors: [reported('input')],
-    },
-    {
-      code: "const View = ({ kind }) => <input name='q' type={kind} />;",
-      errors: [reported('input')],
-    },
-    {
-      code: "const View = () => <input name='q' type={'hidden'} />;",
-      errors: [reported('input')],
-    },
-    {
-      code: 'const View = () => <input name=\'q\' type="hidden" type="text" />;',
-      errors: [reported('input')],
-    },
-    {
-      code: "const View = ({ rest }) => <input name='q' type='hidden' {...rest} />;",
-      errors: [reported('input')],
-    },
-    {
-      code: "const View = () => <input name='q' type='Hidden' />;",
-      errors: [reported('input')],
-    },
-    {
-      code: "const View = () => <input name='q' type />;",
-      errors: [reported('input')],
-    },
+    })),
     {
       code: "const View = () => <h2 data-type='hidden'>Title</h2>;",
       errors: [reported('h2')],
