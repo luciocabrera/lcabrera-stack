@@ -126,8 +126,9 @@ export const paintAt = async ({
       const painted = document
         .elementsFromPoint(x, y)
         .find((element) => element instanceof SVGElement);
+      const scope = root.closest('figure') ?? root;
 
-      return painted !== undefined && root.contains(painted)
+      return painted !== undefined && scope.contains(painted)
         ? getComputedStyle(painted).fill
         : 'outside';
     },
