@@ -1,4 +1,7 @@
+import { readAdjudicationAccuracy } from '@repo/eval-history/adjudications/readAdjudicationAccuracy.service';
 import { evalsReaderPool } from '@repo/eval-history/queries/evalsReaderPool.service';
+import { readAdjudicationCases } from '@repo/eval-history/queries/readAdjudicationCases.service';
+import { readAdjudicationVerdicts } from '@repo/eval-history/queries/readAdjudicationVerdicts.service';
 import { readAnnotations } from '@repo/eval-history/queries/readAnnotations.service';
 import { readFlakyTasks } from '@repo/eval-history/queries/readFlakyTasks.service';
 import { readQualityBaselines } from '@repo/eval-history/queries/readQualityBaselines.service';
@@ -18,6 +21,9 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { EVALS_REGRESSION } from '../constants/evalsDashboard.constants';
 import {
+  selectAdjudicationAccuracy,
+  selectAdjudicationCases,
+  selectAdjudicationVerdicts,
   selectAnnotations,
   selectFlakyTasks,
   selectQualityBaselines,
@@ -39,6 +45,19 @@ const POOL = { query: vi.fn() };
 
 vi.mock('@repo/eval-history/queries/evalsReaderPool.service', () => ({
   evalsReaderPool: vi.fn(() => POOL),
+}));
+
+vi.mock(
+  '@repo/eval-history/adjudications/readAdjudicationAccuracy.service',
+  () => ({ readAdjudicationAccuracy: vi.fn(() => Promise.resolve([])) }),
+);
+
+vi.mock('@repo/eval-history/queries/readAdjudicationCases.service', () => ({
+  readAdjudicationCases: vi.fn(() => Promise.resolve([])),
+}));
+
+vi.mock('@repo/eval-history/queries/readAdjudicationVerdicts.service', () => ({
+  readAdjudicationVerdicts: vi.fn(() => Promise.resolve([])),
 }));
 
 vi.mock('@repo/eval-history/queries/readAnnotations.service', () => ({
@@ -176,6 +195,18 @@ describe('the evals history service', () => {
     });
     expect(readTriggerConfusion).toHaveBeenCalledWith({ client: POOL, runIds });
     expect(evalsReaderPool).toHaveBeenCalledTimes(5);
+  });
+
+  it('reads the panel history on the reader pool', async () => {
+    await Promise.all([
+      selectAdjudicationAccuracy(),
+      selectAdjudicationCases(),
+      selectAdjudicationVerdicts(),
+    ]);
+
+    expect(readAdjudicationAccuracy).toHaveBeenCalledWith({ client: POOL });
+    expect(readAdjudicationCases).toHaveBeenCalledWith({ client: POOL });
+    expect(readAdjudicationVerdicts).toHaveBeenCalledWith({ client: POOL });
   });
 
   it("reads the regression rule's runs and history on the reader pool", async () => {

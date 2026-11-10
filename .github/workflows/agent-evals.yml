@@ -230,3 +230,97 @@ jobs:
           if ! vp run evals:ingest -- .tmp/eval-results; then
             echo "::warning title=Eval history::evals:ingest did not store every envelope; they are in the eval-envelopes-verifier-fixtures artifact, and vp run evals:ingest sends a downloaded copy."
           fi
+
+  fp-panel:
+    name: False-positive panel fixtures (Claude, advisory)
+    concurrency:
+      group: fp-panel-${{ github.event.pull_request.number || github.ref }}
+      cancel-in-progress: true
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' &&
+      github.event.pull_request.head.repo.full_name == github.repository)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          fetch-depth: 0
+
+      - name: Did the panel's inputs change
+        id: scope
+        env:
+          BASE_REF: ${{ github.base_ref }}
+          EVENT_NAME: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT_NAME" = workflow_dispatch ]; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! CHANGED="$(git diff --name-only "origin/$BASE_REF...HEAD" 2>/dev/null)"; then
+            echo "::notice::Diff range origin/$BASE_REF...HEAD unresolvable, so running the fixtures."
+            echo "run=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if printf '%s\n' "$CHANGED" |
+            grep -qE '^\.claude/agents/fp-(judge|adversary)\.md$'; then
+            echo "run=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "run=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Setup Vite+
+        if: steps.scope.outputs.run == 'true'
+        uses: voidzero-dev/setup-vp@cab1ab9eaff52d4857875f4f2c016e36af8f2c76 # v1.22.0
+        with:
+          cache: false
+          run-install: false
+
+      - name: Install dependencies
+        if: steps.scope.outputs.run == 'true'
+        run: vp install --frozen-lockfile --ignore-scripts && vp config
+
+      - name: Panel verdicts on the fixtures
+        if: steps.scope.outputs.run == 'true'
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+        run: vp run evals:fp-panel
+
+      - name: Upload reports
+        if: always() && steps.scope.outputs.run == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: fp-panel-reports
+          path: .tmp/fp-panel-evals/
+          if-no-files-found: ignore
+          retention-days: 7
+
+      - name: Upload envelopes
+        if: always() && steps.scope.outputs.run == 'true'
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7
+        with:
+          name: eval-envelopes-fp-panel
+          path: .tmp/eval-results/
+          if-no-files-found: ignore
+          retention-days: 90
+
+      - name: Ingest envelopes (advisory)
+        if: always() && steps.scope.outputs.run == 'true'
+        continue-on-error: true
+        timeout-minutes: 5
+        env:
+          EVALS_DATABASE_URL: ${{ secrets.EVALS_DATABASE_URL }}
+        run: |
+          if [ -z "$EVALS_DATABASE_URL" ]; then
+            echo "::notice title=Eval history::EVALS_DATABASE_URL is not set, so ingest is skipped; the envelopes are in the eval-envelopes-fp-panel artifact."
+            exit 0
+          fi
+          if [ ! -d .tmp/eval-results ]; then
+            echo "::notice title=Eval history::No envelope was written under .tmp/eval-results, so there is nothing to ingest."
+            exit 0
+          fi
+          if ! vp run evals:ingest -- .tmp/eval-results; then
+            echo "::warning title=Eval history::evals:ingest did not store every envelope; they are in the eval-envelopes-fp-panel artifact, and vp run evals:ingest sends a downloaded copy."
+          fi

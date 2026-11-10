@@ -12,7 +12,9 @@ area:
   - evals/fp-panel/**
   - evals/README.md
   - evals/runner-writes.test.mjs
-  - apps/showcase/src/routes/evals/.server/evalsHistory.service.ts
+  - apps/showcase/src/routes/evals/.server/evalsHistory.service*
+  - apps/showcase/src/routes/evals/.server/evalsPublicPayload.test.ts
+  - apps/showcase/src/routes/evals/utils/evalsRouteEntries.util.test.ts
   - apps/showcase/src/INVENTORY.md
   - docs/agents/false-positive-panel.md
   - packages/eval-history/**
@@ -32,6 +34,6 @@ feat(showcase): add the adjudications page and the fp-panel evals suite
 
 ## Status / next
 
-- Current step: eval-history schema, fp-panel suite, then the page
+- Current step: page, e2e and docs written; running the full gate
 - Blockers: none
 - Next:

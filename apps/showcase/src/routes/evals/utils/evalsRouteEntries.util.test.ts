@@ -42,6 +42,7 @@ describe('evalsRouteEntries', () => {
       'evals/confusion',
       'evals/quality',
       'evals/health',
+      'evals/adjudications',
     ]);
   });
 });
