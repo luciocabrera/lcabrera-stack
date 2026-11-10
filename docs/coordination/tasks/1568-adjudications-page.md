@@ -2,7 +2,7 @@
 id: 1568-adjudications-page
 title: feat(showcase): add the adjudications page and the fp-panel evals suite
 owner: agent:claude
-status: active
+status: review
 branch: feat/1568-1568-adjudications-page
 area:
   - apps/showcase/src/routes/evals/adjudications/**
@@ -37,6 +37,6 @@ feat(showcase): add the adjudications page and the fp-panel evals suite
 
 ## Status / next
 
-- Current step: page, e2e and docs written; running the full gate
+- Current step: gate green, PR ready for review
 - Blockers: none
 - Next:
