@@ -1,3 +1,4 @@
+import { Title } from '@lcabrera/ui/components/Title';
 import * as stylex from '@stylexjs/stylex';
 
 import type { ShowcaseSubsectionProps } from './ShowcaseSubsection.types';
@@ -9,7 +10,9 @@ export const ShowcaseSubsection = ({
   title,
 }: ShowcaseSubsectionProps) => (
   <div {...stylex.props(styles.subsection)}>
-    <h3 {...stylex.props(styles.subsectionTitle)}>{title}</h3>
+    <Title customStylex={styles.subsectionTitle} level={3} variant='plain'>
+      {title}
+    </Title>
     {children}
   </div>
 );

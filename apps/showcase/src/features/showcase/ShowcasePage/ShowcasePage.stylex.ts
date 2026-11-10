@@ -42,10 +42,4 @@ export const styles = stylex.create({
     justifyContent: 'space-between',
     marginBottom: spacing.xxl,
   },
-
-  title: {
-    margin: 0,
-    fontSize: typography.fontSize3xl,
-    fontWeight: typography.fontWeightBold,
-  },
 });
