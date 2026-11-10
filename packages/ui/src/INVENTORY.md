@@ -301,6 +301,31 @@ Covers `packages/ui` only. Two sibling packages own what used to be listed here,
 | ---------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
 | `getTriggerLabelProps` | `components/VirtualSelect/VirtualSelectTrigger/utils/getTriggerLabelProps.util.ts` | The `id` and `aria-labelledby` that name a trigger by the select's visible label and then by its own content; nothing when there is no label |
 
+### `src/components/VirtualSelect/utils/` _(private delegates)_
+
+| Function                 | Location                                                        | Description                                                                                                                                                       |
+| ------------------------ | --------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `isTrailingTriggerChild` | `components/VirtualSelect/utils/isTrailingTriggerChild.util.ts` | Whether a trigger child is the chevron or the `+N more` badge rather than a tag, read from the presence of its valueless `data-chevron`/`data-overflow` attribute |
+
+### `src/components/VirtualSelect/VirtualSelectDropdown/utils/` _(private delegates)_
+
+| Function          | Location                                                                       | Description                                                                                                                                                                         |
+| ----------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shouldOpenAbove` | `components/VirtualSelect/VirtualSelectDropdown/utils/shouldOpenAbove.util.ts` | Whether a floating list opens above its trigger: always for `top`, never for `bottom`, and for `auto` only when it overflows a space below too small to use and above has more room |
+
+### `src/components/VirtualList/utils/` _(private delegates)_
+
+| Function            | Location                                                 | Description                                                                                                                         |
+| ------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
+| `resolveListHeight` | `components/VirtualList/utils/resolveListHeight.util.ts` | The scroll area's height from every loaded option plus the Select All row, capped by `listMaxHeight`, so filtering never changes it |
+
+### `src/components/Table/filters/FilterInputs/utils/` _(private delegates)_
+
+| Function               | Location                                                                   | Description                                                                                                        |
+| ---------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| `shouldShowSelectList` | `components/Table/filters/FilterInputs/utils/shouldShowSelectList.util.ts` | Whether a text filter picks its value from an option list: an equality operator on a column with fetchable options |
+| `isValueSelectList`    | `components/Table/filters/FilterInputs/utils/isValueSelectList.util.ts`    | Whether a filter row's value input is that option list, so the operator select is drawn joined to it               |
+
 ### `src/components/Form/builders/` _(public — field-tree DSL)_
 
 Ergonomic builders for the `fields` tree, exported from `@lcabrera/ui/components/Form`. A generic builder cannot infer `TValues` from a string `accessor`, so `createFieldBuilders<TValues>()` binds the value shape once and returns the tree builders with `accessor` type-checked against the value keys; `buildFieldValidation`/`toFieldOptions` are value-shape-agnostic and exported standalone.
