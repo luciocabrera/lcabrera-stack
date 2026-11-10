@@ -1,39 +1,61 @@
+import { Button, Card, Select, TextInput } from '@lcabrera/ui';
 import * as stylex from '@stylexjs/stylex';
-import { Form } from 'react-router';
+import { Form, useNavigation } from 'react-router';
 
 import type { ComparePickerProps } from './EvalsCompare.types';
 
 import { PREFILLED_CHOICE } from './EvalsCompare.constants';
 import { styles } from './EvalsCompare.stylex';
+import { isSubmittingField } from './isSubmittingField.util';
 import { runChoiceLabel } from './runChoiceLabel.util';
 
-export const ComparePicker = ({ choices }: ComparePickerProps) => (
-  <>
-    <Form method='get' {...stylex.props(styles.form)}>
-      {(['a', 'b'] as const).map((side) => (
-        <label key={side} {...stylex.props(styles.field)}>
-          <span>Run {side.toUpperCase()}</span>
-          <select
-            defaultValue={choices[PREFILLED_CHOICE[side]]?.runId}
-            name={side}
-            required
+export const ComparePicker = ({ choices }: ComparePickerProps) => {
+  const { location } = useNavigation();
+  const options = choices.map((run) => ({
+    label: runChoiceLabel(run),
+    value: run.runId,
+  }));
+
+  return (
+    <>
+      <Card padding='md'>
+        <Form method='get' {...stylex.props(styles.form)}>
+          {(['a', 'b'] as const).map((side) => (
+            <Select
+              defaultValue={choices[PREFILLED_CHOICE[side]]?.runId}
+              key={side}
+              label={`Run ${side.toUpperCase()}`}
+              name={side}
+              options={options}
+              required
+            />
+          ))}
+          <Button
+            customStylex={styles.submit}
+            isBusy={isSubmittingField({ field: 'a', location })}
+            type='submit'
           >
-            {choices.map((run) => (
-              <option key={run.runId} value={run.runId}>
-                {runChoiceLabel(run)}
-              </option>
-            ))}
-          </select>
-        </label>
-      ))}
-      <button type='submit'>Compare runs</button>
-    </Form>
-    <Form method='get' {...stylex.props(styles.form)}>
-      <label {...stylex.props(styles.field)}>
-        <span>Branch</span>
-        <input name='branch' placeholder='feat/…' required />
-      </label>
-      <button type='submit'>Compare with main</button>
-    </Form>
-  </>
-);
+            Compare runs
+          </Button>
+        </Form>
+      </Card>
+      <Card padding='md'>
+        <Form method='get' {...stylex.props(styles.form)}>
+          <TextInput
+            label='Branch'
+            name='branch'
+            placeholder='feat/…'
+            required
+          />
+          <Button
+            customStylex={styles.submit}
+            isBusy={isSubmittingField({ field: 'branch', location })}
+            type='submit'
+          >
+            Compare with main
+          </Button>
+        </Form>
+      </Card>
+    </>
+  );
+};

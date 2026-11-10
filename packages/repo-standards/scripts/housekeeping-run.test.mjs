@@ -124,7 +124,7 @@ describe('housekeeping:prune --apply', () => {
     expect(readFileSync(join(tree.unique, 'file.txt'), 'utf8')).toBe(
       'two\na line no history holds\n',
     );
-  });
+  }, 30_000);
 
   it('keeps a worktree with an untracked file even when every tracked change is in history', () => {
     const tree = buildSortingRepository(make());

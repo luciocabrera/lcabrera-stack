@@ -195,6 +195,11 @@ Cite these when no `CC.*` / `GOF.*` / `DS.*` / `TS.*` / `REACT.*` ID fits. Do no
 - **LOW** — minor; in-passing fix
 - **NIT** — style preference, no real cost
 
+A `fix` never proposes a suppression marker or a rule-off. When an analyzer
+finding in the diff looks wrong, the `fix` names the
+[`false-positive`](../false-positive/SKILL.md) skill, which follows
+[its rules](../../../docs/agents/false-positive-panel.md).
+
 Sort findings by severity (desc), then by file path. Emit **exactly this structure** as your final response, which satisfies the shared schema defined in `../code-smell-shared/SCHEMA_V1.md` and `../code-smell-shared/REPORT_TEMPLATE.md`:
 
 ````markdown

@@ -28,7 +28,9 @@
 
 <!-- How correctness was established, not how confident you feel: the quality
      gate, automated tests, manual steps, edge cases, environment, logs. Prefer
-     evidence a reader can re-run. If something is unverified, say so here. -->
+     evidence a reader can re-run. If something is unverified, say so here.
+     A PR that adds a false-positive list entry lists each case here with its
+     three verdicts: docs/agents/false-positive-panel.md §9. -->
 
 ## Impact Analysis
 

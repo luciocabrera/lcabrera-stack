@@ -1,3 +1,5 @@
+import type { Locator } from '@playwright/test';
+
 import { expect, test as it } from '@playwright/test';
 
 import {
@@ -12,6 +14,13 @@ import {
 import { SEED_RUNS, SEED_TASKS } from './seedStory';
 
 const run = (runId: string) => `/evals/runs/${runId}`;
+
+const tallyColorOf = async (cell: Locator) => {
+  const link = cell.getByRole('link');
+  const tally = (await link.textContent()) ?? '';
+
+  return colorOf(link.getByText(tally, { exact: true }));
+};
 
 const WOBBLY_ROW = `${SEED_TASKS.wobbly} 2 of 4 0/0, 3 not scored 2/3 2/3 3/3 3/3 3/3`;
 
@@ -145,12 +154,12 @@ it('marks the cells whose trials split apart from the rest', async ({
   await openEvals(page, '/evals/flaky');
 
   const cells = cellsOf(rowOf(page, WOBBLY_ROW));
-  const split = await colorOf(cells.nth(3).getByRole('link'));
-  const steady = await colorOf(cells.nth(5).getByRole('link'));
+  const split = await tallyColorOf(cells.nth(3));
+  const steady = await tallyColorOf(cells.nth(5));
 
-  expect(await colorOf(cells.nth(4).getByRole('link'))).toBe(split);
+  expect(await tallyColorOf(cells.nth(4))).toBe(split);
   expect(split).not.toBe(steady);
-  expect(await colorOf(cells.nth(2).getByRole('link'))).toBe(steady);
+  expect(await tallyColorOf(cells.nth(2))).toBe(steady);
 });
 
 it('renders the flaky page in light and dark', async ({ page }, testInfo) => {

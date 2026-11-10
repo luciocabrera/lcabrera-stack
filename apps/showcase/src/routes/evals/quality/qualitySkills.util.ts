@@ -89,9 +89,8 @@ export const qualitySkills = ({
             } => entry.score !== undefined,
           )
           .map(({ run, score }) => ({
-            href: evalsHref({ runId: run.runId }),
-            key: run.runId,
             label: `Run ${run.runId.slice(0, 8)}, ${run.startedAt.slice(0, 10)}: ${score.mean.toFixed(2)} over ${String(score.trials)} trials`,
+            to: evalsHref({ runId: run.runId }),
             tone: toneOf({ band, value: score.mean }),
             value: score.mean,
           }));

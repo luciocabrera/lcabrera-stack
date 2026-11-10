@@ -16,7 +16,7 @@ export const styles = stylex.create({
   },
   error: {
     margin: 0,
-    color: colors.errorText,
+    color: colors.errorCardText,
     fontSize: typography.fontSizeSm,
   },
   label: {
@@ -25,6 +25,6 @@ export const styles = stylex.create({
     fontWeight: typography.fontWeightMedium,
   },
   required: {
-    color: colors.errorText,
+    color: colors.errorCardText,
   },
 });

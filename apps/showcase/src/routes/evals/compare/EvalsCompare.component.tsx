@@ -1,19 +1,19 @@
+import { PageHeader } from '@lcabrera/ui';
 import * as stylex from '@stylexjs/stylex';
 import { useLoaderData } from 'react-router';
 
 import type { loader } from './evals-compare.loader';
 
-import { EvalsPageHeader } from '../EvalsPageHeader';
+import { pageStyles } from '../evalsPage.stylex';
 import { ComparePicker } from './ComparePicker.component';
 import { CompareReport } from './CompareReport.component';
-import { styles } from './EvalsCompare.stylex';
 
 export const EvalsCompare = () => {
   const { choices, comparison } = useLoaderData<typeof loader>();
 
   return (
-    <div {...stylex.props(styles.page)}>
-      <EvalsPageHeader title='Compare runs' trail='compare' />
+    <div {...stylex.props(pageStyles.page)}>
+      <PageHeader title='Compare runs' />
       {comparison === undefined ? (
         <ComparePicker choices={choices} />
       ) : (

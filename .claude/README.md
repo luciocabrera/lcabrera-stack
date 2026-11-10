@@ -94,6 +94,7 @@ Auto-invocation is driven by the `description` field (Claude matches it against 
 | `epic`                        | A whole epic: waves of builders, a blind reviewer per PR   | description, or `/epic <n>`                        |
 | `health-swarm`                | Six parallel scouts auditing repo-wide rot                 | description (periodic audit / "what has rotted")   |
 | `worktree-housekeeping`       | Merged worktrees, branches and throwaway containers        | description, or `/worktree-housekeeping`           |
+| `false-positive`              | The only way a finding is suppressed: the blind panel      | description, or `/false-positive <analyzer> <id>`  |
 | `lint-toolchain`              | Configure or debug Oxlint / eslint / Biome / Sonar         | description + `paths`                              |
 | `releasing`                   | Changesets release, changelog, PR label taxonomy           | description (cutting a release)                    |
 | `product-requirement`         | The `docs/product/` register of what a consumer can do     | description (building against a published package) |
