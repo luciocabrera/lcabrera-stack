@@ -78,7 +78,7 @@ describe('resolveDropdownPlacement', () => {
     expect(placement.top).toBe(8);
   });
 
-  it('stays below under the bottom placement however little room there is', () => {
+  it('holds the bottom placement below however little room there is, never capping it under a usable list', () => {
     const placement = resolveDropdownPlacement({
       ...baseArgs,
       anchorRect: { bottom: 620, left: 32, top: 588, width: 240 },
@@ -88,10 +88,36 @@ describe('resolveDropdownPlacement', () => {
     });
 
     expect(placement).toMatchObject({
-      maxHeight: 700 - 620 - 8,
+      maxHeight: 160,
       side: 'below',
       top: 620,
     });
+  });
+
+  it('holds the top placement above against the viewport top, never capping it to nothing', () => {
+    const placement = resolveDropdownPlacement({
+      ...baseArgs,
+      anchorRect: { bottom: 40, left: 32, top: 10, width: 240 },
+      dropdownHeight: 300,
+      placement: 'top',
+    });
+
+    expect(placement).toMatchObject({
+      maxHeight: 160,
+      side: 'above',
+      top: 10 - 8 - 160,
+    });
+  });
+
+  it('caps a forced side by its own room once that room exceeds the usable minimum', () => {
+    const placement = resolveDropdownPlacement({
+      ...baseArgs,
+      anchorRect: { bottom: 340, left: 32, top: 308, width: 240 },
+      dropdownHeight: 120,
+      placement: 'bottom',
+    });
+
+    expect(placement.maxHeight).toBe(900 - 340 - 8);
   });
 
   it('opens above under the top placement even with room below', () => {

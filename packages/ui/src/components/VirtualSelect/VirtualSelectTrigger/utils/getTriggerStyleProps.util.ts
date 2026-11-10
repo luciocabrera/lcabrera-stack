@@ -5,12 +5,12 @@ import type { VirtualSelectAttachedEdge } from '../../VirtualSelect.types';
 import { styles } from '../VirtualSelectTrigger.stylex';
 
 type GetTriggerStylePropsArgs = {
-  attachedEdge?: VirtualSelectAttachedEdge;
-  hasTags?: boolean;
-  isAttachedBelow?: boolean;
-  isInert?: boolean;
-  isOpen: boolean;
-  isStatic?: boolean;
+  readonly attachedEdge?: VirtualSelectAttachedEdge;
+  readonly hasTags?: boolean;
+  readonly isAttachedBelow?: boolean;
+  readonly isInert?: boolean;
+  readonly isOpen: boolean;
+  readonly isStatic?: boolean;
 };
 
 export const getTriggerStyleProps = ({

@@ -25,6 +25,9 @@ export const resolveDropdownPlacement = ({
 }: ResolveDropdownPlacementArgs): DropdownPlacement => {
   const spaceBelow = Math.max(0, viewportHeight - anchorRect.bottom - gap);
   const spaceAbove = Math.max(0, anchorRect.top - 2 * gap);
+  const capFloor = placement === 'auto' ? 0 : minUsableHeight;
+  const capAbove = Math.max(capFloor, spaceAbove);
+  const capBelow = Math.max(capFloor, spaceBelow);
 
   if (
     shouldOpenAbove({
@@ -37,16 +40,16 @@ export const resolveDropdownPlacement = ({
   ) {
     return {
       left: anchorRect.left,
-      maxHeight: spaceAbove,
+      maxHeight: capAbove,
       side: 'above',
-      top: anchorRect.top - gap - Math.min(dropdownHeight, spaceAbove),
+      top: anchorRect.top - gap - Math.min(dropdownHeight, capAbove),
       width: anchorRect.width,
     };
   }
 
   return {
     left: anchorRect.left,
-    maxHeight: spaceBelow,
+    maxHeight: capBelow,
     side: 'below',
     top: anchorRect.bottom,
     width: anchorRect.width,

@@ -537,7 +537,6 @@ useVirtualSelectDropdown [const] ({ isAlwaysOpen, isInert, onOpenChange, }: UseV
 useVirtualSelectTagOverflow [const] ({ mode, selected, triggerRef, }: UseVirtualSelectTagOverflowArgs) => number
 
 ## ./components/VirtualSelect/VirtualSelectTrigger/hooks
-useTriggerStyleProps [const] ({ hasTags, isStatic, }: UseTriggerStylePropsArgs) => Readonly<{ className?: string; 'data-style-src'?: string; style?: Readonly<{ [$$Key$$: string]: string | number; }>; }>
 useVirtualSelectTrigger [const] () => { chevron: JSX.Element | undefined; content: ReactNode; isInert: boolean; isOpen: boolean; labelProps: { 'aria-labelledby'?: undefined; id?: undefined; } | { 'aria-labelledby': string; id: string; }; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; shouldUseTagButtons: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
 
 ## ./contexts/NotificationContext
