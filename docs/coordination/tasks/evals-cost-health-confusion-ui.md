@@ -13,6 +13,7 @@ area:
   - packages/ui/src/components/Table/TableBodyCell/**
   - packages/ui/src/components/Table/Table.staticLayout.test.tsx
   - packages/ui/src/components/TrendSparkline/**
+  - apps/showcase/src/routes/evals/FiguresTable/**
   - apps/showcase/e2e/evals/figures.spec.ts
   - apps/showcase/e2e/evals/cost.spec.ts
   - apps/showcase/e2e/evals/health.spec.ts
