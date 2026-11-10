@@ -4,7 +4,10 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { breadcrumbTrail, evalsTrail } from '../utils/pageHeader.fixtures';
+import { expectHydratesWithoutMismatch } from '../utils/serverMarkup.fixtures';
 import { EvalsSubjectTrend } from './EvalsSubjectTrend.component';
+import { EVALS_SUBJECT_TREND_HANDLE } from './EvalsSubjectTrend.constants';
 
 const POINT = {
   contentHashes: ['b'.repeat(64)],
@@ -16,38 +19,41 @@ const POINT = {
   value: 0.5,
 };
 
+const ROUTE = {
+  Component: EvalsSubjectTrend,
+  handle: EVALS_SUBJECT_TREND_HANDLE,
+  loader: () => ({
+    kind: 'skill',
+    name: 'react-19',
+    series: [
+      {
+        marks: [
+          {
+            href: POINT.href,
+            key: 'content-r2',
+            kind: 'content',
+            label: 'Content hash changed to bbbbbbbbbbbb',
+            pointLabel: POINT.label,
+            startedAt: POINT.startedAt,
+          },
+        ],
+        points: [POINT],
+        runs: 1,
+        suite: 'skills',
+      },
+      { marks: [], points: [], runs: 2, suite: 'skill-quality' },
+    ],
+  }),
+  path: '/evals/subjects/:kind/:name',
+};
+
 afterEach(() => {
   cleanup();
 });
 
 describe('EvalsSubjectTrend', () => {
   it('charts each suite apart and lists each mark with a link to its run', async () => {
-    const Stub = createRoutesStub([
-      {
-        Component: EvalsSubjectTrend,
-        loader: () => ({
-          kind: 'skill',
-          name: 'react-19',
-          series: [
-            {
-              marks: [
-                {
-                  index: 0,
-                  key: 'content-r2',
-                  kind: 'content',
-                  label: 'Content hash changed to bbbbbbbbbbbb',
-                },
-              ],
-              points: [POINT],
-              runs: 1,
-              suite: 'skills',
-            },
-            { marks: [], points: [], runs: 2, suite: 'skill-quality' },
-          ],
-        }),
-        path: '/evals/subjects/:kind/:name',
-      },
-    ]);
+    const Stub = createRoutesStub([ROUTE]);
 
     render(<Stub initialEntries={['/evals/subjects/skill/react-19']} />);
 
@@ -66,8 +72,42 @@ describe('EvalsSubjectTrend', () => {
         name: 'skill react-19 pass rate in skill-quality over time',
       }),
     ).toBeDefined();
-    expect(screen.getByRole('listitem').textContent).toContain(
-      'Content hash changed to bbbbbbbbbbbb',
-    );
+    expect(
+      screen
+        .getAllByRole('listitem')
+        .map(({ textContent }) => textContent)
+        .filter((text) => text?.includes('changed')),
+    ).toEqual([`Content hash changed to bbbbbbbbbbbb: ${POINT.label}`]);
+    expect(
+      screen
+        .getAllByRole('heading', { level: 2 })
+        .map(
+          (heading) =>
+            heading.closest('section')?.querySelectorAll(':scope > ul').length,
+        ),
+    ).toEqual([1, 0]);
+  });
+
+  it('titles the page by subject under a trail naming its kind', async () => {
+    const Stub = createRoutesStub([ROUTE]);
+
+    render(<Stub initialEntries={['/evals/subjects/skill/react-19']} />);
+
+    expect(
+      await screen.findByRole('heading', { level: 1, name: 'skill react-19' }),
+    ).toBeDefined();
+    expect(breadcrumbTrail()).toEqual(evalsTrail('skill trend'));
+    expect(
+      screen
+        .getAllByRole('heading', { level: 2 })
+        .map(({ textContent }) => textContent),
+    ).toEqual(['skills', 'skill-quality']);
+  });
+
+  it('hydrates the server markup without a mismatch', async () => {
+    await expectHydratesWithoutMismatch({
+      path: '/evals/subjects/skill/react-19',
+      routes: [ROUTE],
+    });
   });
 });

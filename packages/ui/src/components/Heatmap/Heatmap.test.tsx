@@ -141,6 +141,35 @@ const normalise = (html: string) => {
 };
 
 describe('Heatmap', () => {
+  describe('the root', () => {
+    it('is a figure named by the title the plot draws', () => {
+      const { container } = renderHeatmap({ title: 'Grid' });
+
+      const figure = screen.getByRole('figure', { name: 'Grid' });
+
+      expect(figure).toBe(container.firstElementChild);
+      expect(figure.getAttribute('aria-labelledby')).toBe(
+        getPlot(container).querySelector('title')?.id,
+      );
+    });
+
+    it('keeps the figure and its name once a cell is linked', () => {
+      const { container } = renderHeatmap({
+        cells: [linkedCell({ at: [1, 1] })],
+        title: 'Linked grid',
+      });
+
+      const figure = screen.getByRole('figure', { name: 'Linked grid' });
+
+      expect(figure.getAttribute('aria-labelledby')).toBe(
+        screen.getByRole('grid').getAttribute('aria-labelledby'),
+      );
+      expect(within(figure).getAllByRole('link')).toHaveLength(
+        container.querySelectorAll('a').length,
+      );
+    });
+  });
+
   describe('the plot', () => {
     it('is an image named by the title and described by the description', () => {
       renderHeatmap({ description: 'Values by row and column', title: 'Grid' });

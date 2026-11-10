@@ -50,4 +50,16 @@ describe('Heatmap on the server', () => {
 
     expect(html).toContain('role="img"');
   });
+
+  it('names the figure root by the title id the plot draws', () => {
+    const html = renderToString(
+      <Heatmap cells={[]} columns={COLUMNS} rows={ROWS} title='Named grid' />,
+    );
+    const labelledBy = /^<figure aria-labelledby="([^"]+)"/u.exec(html)?.[1];
+
+    expect(labelledBy).toBeDefined();
+    expect(html).toContain(
+      `<title id="${String(labelledBy)}">Named grid</title>`,
+    );
+  });
 });

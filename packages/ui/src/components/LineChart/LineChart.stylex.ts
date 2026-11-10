@@ -21,6 +21,7 @@ export const lineChartLayout = stylex.create({
     width: '100%',
   },
   root: {
+    margin: 0,
     gridTemplateAreas:
       '"ylabel ylabel" ". markers" "yticks plot" ". xticks" ". xlabel" "legend legend"',
     display: 'grid',

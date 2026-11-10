@@ -23,16 +23,14 @@ describe('trialChartPoints', () => {
       }),
     ).toEqual([
       {
-        href: '/evals/runs/run-a?trial=7',
-        key: '7',
         label: 'skills/react-19/trigger-1 trial 0: pass, 12s',
+        to: '/evals/runs/run-a?trial=7',
         tone: 'success',
         value: 12_000,
       },
       {
-        href: '/evals/runs/run-a?trial=8',
-        key: '8',
         label: 'skills/react-19/trigger-1 trial 0: fail, 12s',
+        to: '/evals/runs/run-a?trial=8',
         tone: 'error',
         value: 12_000,
       },

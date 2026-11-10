@@ -3,7 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { CompareReportProps } from './EvalsCompare.types';
 
-import { pageStyles } from '../evalsPage.stylex';
+import { layoutStyles } from '../evalsLayout.stylex';
 import { evalsHref } from '../utils/evalsHref.util';
 import { FLIP_COLUMNS } from './CompareReport.constants';
 import { TOTAL_COLUMNS } from './EvalsCompare.constants';
@@ -27,7 +27,7 @@ export const CompareReport = ({
         </Text>
       ))}
     </div>
-    <section {...stylex.props(pageStyles.section)}>
+    <section {...stylex.props(layoutStyles.section)}>
       <Title level={2} variant='plain'>
         Flipped tasks
       </Title>
@@ -45,7 +45,7 @@ export const CompareReport = ({
         />
       )}
     </section>
-    <section {...stylex.props(pageStyles.section)}>
+    <section {...stylex.props(layoutStyles.section)}>
       <Title level={2} variant='plain'>
         Totals
       </Title>
@@ -57,7 +57,7 @@ export const CompareReport = ({
         response={totals}
       />
     </section>
-    <section {...stylex.props(pageStyles.section)}>
+    <section {...stylex.props(layoutStyles.section)}>
       <Title level={2} variant='plain'>
         Changed inputs
       </Title>

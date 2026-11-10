@@ -7,7 +7,7 @@ import { TrendSparkline } from '@lcabrera/ui/components/TrendSparkline';
 
 import type { HealthSuiteProps } from './EvalsHealth.types';
 
-import { pageStyles } from '../evalsPage.stylex';
+import { layoutStyles } from '../evalsLayout.stylex';
 import {
   HEALTH_CLASS_COLUMNS,
   HEALTH_RUN_COLUMNS,
@@ -17,7 +17,7 @@ import { HEALTH_SPARKLINE } from './HealthSuite.constants';
 export const HealthSuite = ({
   suite: { classes, points, runs, suite, totals, troubled },
 }: HealthSuiteProps) => (
-  <Card customStylex={pageStyles.section} padding='lg'>
+  <Card customStylex={layoutStyles.section} padding='lg'>
     <Title level={2} variant='plain'>
       {suite}
     </Title>

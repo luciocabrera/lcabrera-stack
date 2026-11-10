@@ -133,7 +133,7 @@ it('draws a pass-rate sparkline per suite whose points open their runs', async (
 }) => {
   await openEvals(page, '/evals');
 
-  const skills = page.getByRole('figure', {
+  const skills = page.getByRole('group', {
     exact: true,
     name: 'skills pass rate over its last 5 runs',
   });
@@ -166,7 +166,7 @@ it('draws a pass-rate sparkline per suite whose points open their runs', async (
   });
   await expect(
     page
-      .getByRole('figure', {
+      .getByRole('group', {
         exact: true,
         name: 'skill-quality pass rate over its last 5 runs',
       })
@@ -174,7 +174,7 @@ it('draws a pass-rate sparkline per suite whose points open their runs', async (
   ).toHaveCount(5);
   await expect(
     page
-      .getByRole('figure', {
+      .getByRole('group', {
         exact: true,
         name: 'verifier-fixtures pass rate over its last 1 runs',
       })
@@ -182,7 +182,7 @@ it('draws a pass-rate sparkline per suite whose points open their runs', async (
   ).toHaveCount(1);
   await expect(
     page
-      .getByRole('figure', {
+      .getByRole('group', {
         exact: true,
         name: 'rules-consistency pass rate over its last 0 runs',
       })

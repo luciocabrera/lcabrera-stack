@@ -5,6 +5,7 @@ import { colors } from '#ui/design-system/tokens/colors.stylex';
 
 export const heatmapLayout = stylex.create({
   root: {
+    margin: 0,
     gridTemplateAreas: '". columns" "rows plot" "legend legend"',
     columnGap: spacing.xs,
     display: 'grid',
