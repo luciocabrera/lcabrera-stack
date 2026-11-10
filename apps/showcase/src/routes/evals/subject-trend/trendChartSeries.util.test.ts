@@ -39,6 +39,14 @@ describe('trendChartSeries', () => {
           value: 0,
         }),
         point({
+          href: '/evals/runs/r4?trial=4',
+          label: 'skills run r4',
+          lower: undefined,
+          startedAt: '2026-10-04T02:00:00.000Z',
+          upper: 0.5,
+          value: 0.3,
+        }),
+        point({
           href: '/evals/runs/r3?trial=3',
           label: 'skills run r3',
           lower: 0.1,
@@ -47,7 +55,7 @@ describe('trendChartSeries', () => {
           value: 0.2,
         }),
       ],
-      runs: 3,
+      runs: 4,
       suite: 'skills',
     });
 
@@ -69,6 +77,12 @@ describe('trendChartSeries', () => {
           to: '/evals/runs/r2?trial=2',
           x: new Date('2026-10-02T02:00:00.000Z'),
           y: 0,
+        },
+        {
+          label: 'skills run r4',
+          to: '/evals/runs/r4?trial=4',
+          x: new Date('2026-10-04T02:00:00.000Z'),
+          y: 0.3,
         },
         {
           label: 'skills run r3',

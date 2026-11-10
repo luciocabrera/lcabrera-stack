@@ -78,6 +78,14 @@ describe('EvalsSubjectTrend', () => {
         .map(({ textContent }) => textContent)
         .filter((text) => text?.includes('changed')),
     ).toEqual([`Content hash changed to bbbbbbbbbbbb: ${POINT.label}`]);
+    expect(
+      screen
+        .getAllByRole('heading', { level: 2 })
+        .map(
+          (heading) =>
+            heading.closest('section')?.querySelectorAll(':scope > ul').length,
+        ),
+    ).toEqual([1, 0]);
   });
 
   it('titles the page by subject under a trail naming its kind', async () => {

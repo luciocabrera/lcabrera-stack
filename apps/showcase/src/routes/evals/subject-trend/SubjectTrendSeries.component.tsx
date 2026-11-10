@@ -33,7 +33,7 @@ export const SubjectTrendSeries = ({
         title={`${kind} ${name} pass rate in ${suite} over time`}
         yAxis={{ domain: [0, 1] }}
       />
-      {marks.length > 0 && (
+      {marks.length === 0 ? undefined : (
         <ul {...stylex.props(layoutStyles.list)}>
           {marks.map(({ href, key, label, pointLabel }) => (
             <li key={key}>
