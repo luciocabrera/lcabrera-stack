@@ -9,17 +9,17 @@ import {
   useGetIsOpen,
   useGetLabelId,
   useGetListboxId,
-  useGetMode,
 } from '../../contexts/meta/selectors';
+import { useTriggerStyleProps } from '../hooks/useTriggerStyleProps.hook';
 import {
   assignTriggerRef,
   getTriggerLabelProps,
-  getTriggerStyleProps,
   handleDivTriggerKeyDown,
 } from '../utils';
 
 export const VirtualSelectDivTrigger = ({
   children,
+  hasTags,
   triggerRef,
 }: VirtualSelectDivTriggerProps) => {
   const isAlwaysOpen = useGetIsAlwaysOpen();
@@ -27,8 +27,8 @@ export const VirtualSelectDivTrigger = ({
   const isOpen = useGetIsOpen();
   const labelId = useGetLabelId();
   const listboxId = useGetListboxId();
-  const mode = useGetMode();
   const toggleDropdown = useToggleDropdown();
+  const styleProps = useTriggerStyleProps({ hasTags, isStatic: isAlwaysOpen });
 
   const shouldDisableInteraction = isInert || isAlwaysOpen;
   const interactionProps = isAlwaysOpen
@@ -55,12 +55,7 @@ export const VirtualSelectDivTrigger = ({
         assignTriggerRef({ node, triggerRef });
       }}
       {...interactionProps}
-      {...getTriggerStyleProps({
-        isInert,
-        isOpen,
-        isStatic: isAlwaysOpen,
-        mode,
-      })}
+      {...styleProps}
     >
       {children}
     </div>

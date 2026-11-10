@@ -19,6 +19,7 @@ describe('getInitialListState', () => {
       hasFetchInitial: false,
       hasFetchMore: true,
       hasSelectAll: true,
+      isTopAttached: false,
       listFilterMode: 'all',
       listMaxHeight: '12rem',
       name: 'country-filter',
@@ -43,6 +44,7 @@ describe('getInitialListState', () => {
       hasFetchInitial: true,
       hasFetchMore: true,
       hasSelectAll: false,
+      isTopAttached: false,
       listFilterMode: 'all',
       listMaxHeight: '18.75rem',
       name: undefined,
@@ -57,12 +59,20 @@ describe('getInitialListState', () => {
       hasFetchInitial: false,
       hasFetchMore: false,
       hasSelectAll: true,
+      isTopAttached: false,
       listFilterMode: 'all',
       listMaxHeight: '18.75rem',
       name: undefined,
       searchTerm: '',
       shouldFillHeight: false,
     });
+  });
+
+  it('carries the top-attached layout flag through', () => {
+    expect(
+      getInitialListState({ isTopAttached: true, onChange: () => {} })
+        .isTopAttached,
+    ).toBe(true);
   });
 
   it('preserves the current UI fields so a config re-sync never clobbers them', () => {

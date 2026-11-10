@@ -6,7 +6,6 @@ import { colors } from '#ui/design-system/tokens/colors.stylex';
 export const styles = stylex.create({
   optionsList: {
     borderColor: colors.borderPrimary,
-    borderRadius: borderRadius.md,
     borderStyle: 'solid',
     borderWidth: '1px',
     gap: spacing.xs,
@@ -16,6 +15,11 @@ export const styles = stylex.create({
     display: 'flex',
     flexDirection: 'column',
     position: 'relative',
+    borderBottomLeftRadius: borderRadius.md,
+    borderBottomRightRadius: borderRadius.md,
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+    borderTopWidth: 0,
     maxWidth: '100%',
     minWidth: 0,
     width: '100%',

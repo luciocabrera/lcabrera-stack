@@ -4,6 +4,7 @@ import type { TextOrSelectFilterInputProps } from './TextOrSelectFilterInput.typ
 
 import { SelectFilterInput } from '../../../SelectFilterInput';
 import { TextFilterInput } from '../../../TextFilterInput';
+import { shouldShowSelectList } from '../../utils';
 
 export const TextOrSelectFilterInput = <TData,>({
   columnKey,
@@ -14,8 +15,7 @@ export const TextOrSelectFilterInput = <TData,>({
   operator,
   shouldFillHeight,
 }: TextOrSelectFilterInputProps<TData>) => {
-  const shouldShowSelectList =
-    hasFetchableOptions && (operator === 'equals' || operator === 'notEquals');
+  const isSelectList = shouldShowSelectList({ hasFetchableOptions, operator });
 
   const handleSelectChange = (selectFilter?: SelectFilter) => {
     if (selectFilter) {
@@ -28,7 +28,7 @@ export const TextOrSelectFilterInput = <TData,>({
     }
   };
 
-  if (shouldShowSelectList) {
+  if (isSelectList) {
     return (
       <SelectFilterInput
         columnKey={columnKey}

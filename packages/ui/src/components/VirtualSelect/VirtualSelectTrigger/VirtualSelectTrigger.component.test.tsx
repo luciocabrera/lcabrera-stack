@@ -47,6 +47,7 @@ vi.mock('../contexts/meta/actions', () => ({
 }));
 
 vi.mock('../contexts/meta/selectors', () => ({
+  useGetAttachedEdge: () => undefined,
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsBusy: () => metaState.current.isBusy,
   useGetIsInert: () => metaState.current.isBusy || metaState.current.isDisabled,
@@ -57,12 +58,24 @@ vi.mock('../contexts/meta/selectors', () => ({
   useGetPlaceholder: () => metaState.current.placeholder,
 }));
 
+vi.mock('#ui/components/VirtualList/contexts/list/selectors', () => ({
+  useGetIsTopAttached: () => false,
+}));
+
 vi.mock('#ui/components/VirtualList/contexts/data/actions', () => ({
   useToggleOption: () => toggleOptionMock,
 }));
 
 vi.mock('#ui/components/VirtualList/contexts/data/selectors', () => ({
   useGetSelectedValues: useGetSelectedValuesMock,
+}));
+
+const { useTriggerStylePropsMock } = vi.hoisted(() => ({
+  useTriggerStylePropsMock: vi.fn(() => ({})),
+}));
+
+vi.mock('./hooks/useTriggerStyleProps.hook', () => ({
+  useTriggerStyleProps: useTriggerStylePropsMock,
 }));
 
 vi.mock('../hooks', () => ({
@@ -92,6 +105,15 @@ describe('VirtualSelectTrigger', () => {
     fireEvent.click(trigger);
 
     expect(toggleDropdownMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('styles the native button trigger as a plain, untagged, interactive trigger', () => {
+    render(<VirtualSelectTrigger />);
+
+    expect(useTriggerStylePropsMock).toHaveBeenCalledWith({
+      hasTags: false,
+      isStatic: false,
+    });
   });
 
   it('is named by the visible label and then by its own content', () => {

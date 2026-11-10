@@ -1,3 +1,4 @@
+export { useGetAttachedEdge } from './useGetAttachedEdge.hook';
 export { useGetCustomStylex } from './useGetCustomStylex.hook';
 export { useGetIsAlwaysOpen } from './useGetIsAlwaysOpen.hook';
 export { useGetIsBusy } from './useGetIsBusy.hook';
@@ -8,3 +9,4 @@ export { useGetLabelId } from './useGetLabelId.hook';
 export { useGetListboxId } from './useGetListboxId.hook';
 export { useGetMode } from './useGetMode.hook';
 export { useGetPlaceholder } from './useGetPlaceholder.hook';
+export { useGetPlacement } from './useGetPlacement.hook';

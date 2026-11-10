@@ -2,10 +2,12 @@ import type { VirtualSelectMetaState } from '../../VirtualSelect.types';
 
 type GetInitialSelectMetaStateArgs = Omit<
   VirtualSelectMetaState,
-  'isListVisible'
->;
+  'isListVisible' | 'placement'
+> &
+  Partial<Pick<VirtualSelectMetaState, 'placement'>>;
 
 export const getInitialSelectMetaState = ({
+  attachedEdge,
   customStylex,
   isAlwaysOpen,
   isBusy,
@@ -15,8 +17,10 @@ export const getInitialSelectMetaState = ({
   listboxId,
   mode,
   placeholder,
+  placement = 'auto',
 }: GetInitialSelectMetaStateArgs) => {
   const state: VirtualSelectMetaState = {
+    attachedEdge,
     customStylex,
     isAlwaysOpen,
     isBusy,
@@ -27,6 +31,7 @@ export const getInitialSelectMetaState = ({
     listboxId,
     mode,
     placeholder,
+    placement,
   };
 
   return state;

@@ -23,6 +23,7 @@ export const INITIAL_LIST_STATE: VirtualListState = {
   hasFetchInitial: false,
   hasFetchMore: false,
   hasSelectAll: true,
+  isTopAttached: false,
   listFilterMode: 'all',
   listMaxHeight: LIST_MAX_HEIGHT,
   searchTerm: '',

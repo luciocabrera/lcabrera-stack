@@ -1,4 +1,4 @@
-export const ITEM_HEIGHT = 32;
+export const ITEM_HEIGHT = 36;
 
 export const LIST_MAX_HEIGHT = '18.75rem';
 

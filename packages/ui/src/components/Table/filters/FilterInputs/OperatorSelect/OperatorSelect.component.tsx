@@ -10,6 +10,7 @@ import {
 } from '../utils';
 
 export const OperatorSelect = ({
+  attachedEdge,
   dataType,
   filter,
   onChange,
@@ -39,6 +40,7 @@ export const OperatorSelect = ({
 
   return (
     <VirtualSelect
+      attachedEdge={attachedEdge}
       mode='single'
       onChange={handleOperatorChange}
       onOpenChange={onOpenChange}

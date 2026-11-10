@@ -11,7 +11,13 @@ import {
   vi,
 } from 'vite-plus/test';
 
-const { contentRenderCount, metaState, setMetaState } = vi.hoisted(() => {
+const {
+  contentRenderCount,
+  metaState,
+  placementState,
+  setIsTopAttachedMock,
+  setMetaState,
+} = vi.hoisted(() => {
   const initialMetaState = {
     customStylex: undefined as stylex.StyleXStyles | undefined,
     isAlwaysOpen: false,
@@ -24,6 +30,18 @@ const { contentRenderCount, metaState, setMetaState } = vi.hoisted(() => {
   return {
     contentRenderCount: { current: 0 },
     metaState: state,
+    placementState: {
+      current: undefined as
+        | undefined
+        | {
+            readonly left: number;
+            readonly maxHeight: number;
+            readonly side: 'above' | 'below';
+            readonly top: number;
+            readonly width: number;
+          },
+    },
+    setIsTopAttachedMock: vi.fn(),
     setMetaState: (next: Partial<typeof initialMetaState>) => {
       state.current = { ...initialMetaState, ...next };
     },
@@ -37,6 +55,10 @@ vi.mock('#ui/components/VirtualList', () => ({
   },
 }));
 
+vi.mock('#ui/components/VirtualList/contexts/list/actions', () => ({
+  useSetIsTopAttached: () => setIsTopAttachedMock,
+}));
+
 vi.mock('#ui/components/VirtualList/contexts/list/selectors', () => ({
   useGetShouldFillHeight: () => metaState.current.shouldFillHeight,
 }));
@@ -47,6 +69,7 @@ vi.mock('../contexts/meta/selectors', () => ({
   useGetIsListVisible: () => metaState.current.isListVisible,
   useGetLabelId: () => undefined,
   useGetListboxId: () => metaState.current.listboxId,
+  useGetPlacement: () => 'auto',
 }));
 
 // The dropdown anchors to the shell container; these cases mount it without a
@@ -57,6 +80,10 @@ vi.mock('../contexts/useVirtualSelectAnchorRef.hook', () => {
 
   return { useVirtualSelectAnchorRef: () => anchorRef };
 });
+
+vi.mock('./useVirtualSelectDropdownPosition.hook', () => ({
+  useVirtualSelectDropdownPosition: () => placementState.current,
+}));
 
 vi.mock('../contexts/meta/actions', () => ({
   useCloseDropdown: () => vi.fn(),
@@ -71,6 +98,7 @@ const consumerStyles = stylex.create({
 
 beforeEach(() => {
   setMetaState({});
+  placementState.current = undefined;
   contentRenderCount.current = 0;
 });
 
@@ -106,6 +134,13 @@ describe('VirtualSelectDropdown', () => {
 
     expect(screen.getByRole('listbox')).toBeTruthy();
     expect(contentRenderCount.current).toBe(1);
+    expect(setIsTopAttachedMock).toHaveBeenLastCalledWith(true);
+  });
+
+  it('reports an unplaced floating list as not attached to its trigger', () => {
+    render(<VirtualSelectDropdown />);
+
+    expect(setIsTopAttachedMock).toHaveBeenLastCalledWith(false);
   });
 
   it('does not let a consumer style override its own positioning', () => {
@@ -135,5 +170,33 @@ describe('VirtualSelectDropdown', () => {
     const tweakedClassName = screen.getByRole('listbox').className;
 
     expect(tweakedClassName).not.toBe(baseClassName);
+  });
+
+  it('reports the list attached to its trigger once placed below it', () => {
+    placementState.current = {
+      left: 0,
+      maxHeight: 400,
+      side: 'below',
+      top: 40,
+      width: 200,
+    };
+
+    render(<VirtualSelectDropdown />);
+
+    expect(setIsTopAttachedMock).toHaveBeenLastCalledWith(true);
+  });
+
+  it('reports the list detached from its trigger once placed above it', () => {
+    placementState.current = {
+      left: 0,
+      maxHeight: 400,
+      side: 'above',
+      top: 0,
+      width: 200,
+    };
+
+    render(<VirtualSelectDropdown />);
+
+    expect(setIsTopAttachedMock).toHaveBeenLastCalledWith(false);
   });
 });

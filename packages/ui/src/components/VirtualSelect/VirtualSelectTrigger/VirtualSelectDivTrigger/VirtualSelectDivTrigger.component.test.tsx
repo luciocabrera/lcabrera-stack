@@ -32,11 +32,16 @@ const { metaState, setMetaState, toggleDropdownMock } = vi.hoisted(() => {
   };
 });
 
+vi.mock('#ui/components/VirtualList/contexts/list/selectors', () => ({
+  useGetIsTopAttached: () => false,
+}));
+
 vi.mock('../../contexts/meta/actions', () => ({
   useToggleDropdown: () => toggleDropdownMock,
 }));
 
 vi.mock('../../contexts/meta/selectors', () => ({
+  useGetAttachedEdge: () => undefined,
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsInert: () => metaState.current.isInert,
   useGetIsOpen: () => metaState.current.isOpen,
@@ -65,7 +70,7 @@ describe('VirtualSelectDivTrigger', () => {
     const triggerRef = createTriggerRef();
 
     render(
-      <VirtualSelectDivTrigger triggerRef={triggerRef}>
+      <VirtualSelectDivTrigger hasTags={false} triggerRef={triggerRef}>
         <span>Alpha</span>
       </VirtualSelectDivTrigger>,
     );
@@ -88,7 +93,10 @@ describe('VirtualSelectDivTrigger', () => {
     render(
       <>
         <span id='status'>Status</span>
-        <VirtualSelectDivTrigger triggerRef={createTriggerRef()}>
+        <VirtualSelectDivTrigger
+          hasTags={false}
+          triggerRef={createTriggerRef()}
+        >
           <span>Alpha</span>
         </VirtualSelectDivTrigger>
       </>,
@@ -101,7 +109,7 @@ describe('VirtualSelectDivTrigger', () => {
 
   it('dispatches the toggle action on click and on Enter/Space key presses only', () => {
     render(
-      <VirtualSelectDivTrigger triggerRef={createTriggerRef()}>
+      <VirtualSelectDivTrigger hasTags={false} triggerRef={createTriggerRef()}>
         <span>Alpha</span>
       </VirtualSelectDivTrigger>,
     );
@@ -120,7 +128,7 @@ describe('VirtualSelectDivTrigger', () => {
     setMetaState({ isInert: true });
 
     render(
-      <VirtualSelectDivTrigger triggerRef={createTriggerRef()}>
+      <VirtualSelectDivTrigger hasTags={false} triggerRef={createTriggerRef()}>
         <span>Alpha</span>
       </VirtualSelectDivTrigger>,
     );
@@ -141,7 +149,7 @@ describe('VirtualSelectDivTrigger', () => {
     const triggerRef = createTriggerRef();
 
     const { container } = render(
-      <VirtualSelectDivTrigger triggerRef={triggerRef}>
+      <VirtualSelectDivTrigger hasTags={false} triggerRef={triggerRef}>
         <span>Alpha</span>
       </VirtualSelectDivTrigger>,
     );
@@ -154,5 +162,22 @@ describe('VirtualSelectDivTrigger', () => {
     expect(trigger?.getAttribute('aria-labelledby')).toBeNull();
     expect(triggerRef.current).toBe(trigger);
     expect(screen.getByText('Alpha').textContent).toBe('Alpha');
+  });
+
+  it('lays out a row of tags differently from an empty trigger', () => {
+    const { rerender } = render(
+      <VirtualSelectDivTrigger hasTags={false} triggerRef={createTriggerRef()}>
+        <span>Alpha</span>
+      </VirtualSelectDivTrigger>,
+    );
+    const emptyClassName = screen.getByRole('button').className;
+
+    rerender(
+      <VirtualSelectDivTrigger hasTags triggerRef={createTriggerRef()}>
+        <span>Alpha</span>
+      </VirtualSelectDivTrigger>,
+    );
+
+    expect(screen.getByRole('button').className).not.toBe(emptyClassName);
   });
 });

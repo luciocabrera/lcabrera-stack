@@ -75,6 +75,7 @@ export const useVirtualSelectTrigger = () => {
     listboxId,
     mode,
     shouldUseDivTrigger,
+    shouldUseTagButtons,
     toggleDropdown,
     triggerRef,
   };

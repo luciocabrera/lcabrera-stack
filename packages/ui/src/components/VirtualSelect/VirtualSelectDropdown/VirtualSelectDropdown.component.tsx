@@ -11,10 +11,13 @@ import {
   useGetIsListVisible,
   useGetLabelId,
   useGetListboxId,
+  useGetPlacement,
 } from '../contexts/meta/selectors';
 import { useVirtualSelectAnchorRef } from '../contexts/useVirtualSelectAnchorRef.hook';
+import { useSyncIsTopAttached } from './useSyncIsTopAttached.hook';
 import { useVirtualSelectDropdownPosition } from './useVirtualSelectDropdownPosition.hook';
 import { resolveDropdownStyles } from './utils/resolveDropdownStyles.util';
+import { resolvePopoverMode } from './utils/resolvePopoverMode.util';
 import { HAS_POPOVER_SUPPORT } from './VirtualSelectDropdown.constants';
 
 export const VirtualSelectDropdown = () => {
@@ -24,6 +27,7 @@ export const VirtualSelectDropdown = () => {
   const isListVisible = useGetIsListVisible();
   const labelId = useGetLabelId();
   const listboxId = useGetListboxId();
+  const preferredPlacement = useGetPlacement();
   const shouldFillHeight = useGetShouldFillHeight();
   const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -35,7 +39,10 @@ export const VirtualSelectDropdown = () => {
     dropdownRef,
     isEnabled: isFloating && isListVisible,
     onScrollAway: closeDropdown,
+    placement: preferredPlacement,
   });
+
+  useSyncIsTopAttached({ isAlwaysOpen, placement });
 
   if (!isListVisible) return;
 
@@ -43,7 +50,10 @@ export const VirtualSelectDropdown = () => {
     <div
       aria-labelledby={labelId}
       id={listboxId}
-      popover={isFloating && HAS_POPOVER_SUPPORT ? 'manual' : undefined}
+      popover={resolvePopoverMode({
+        hasPopoverSupport: HAS_POPOVER_SUPPORT,
+        isFloating,
+      })}
       ref={dropdownRef}
       role='listbox'
       {...stylex.props(

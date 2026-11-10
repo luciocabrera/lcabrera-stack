@@ -79,3 +79,7 @@ export const tooltip = stylex.defineVars({
   arrowSize: '12px',
   slideDistance: '4px',
 });
+
+export const backdropBlur = stylex.defineVars({
+  floating: 'blur(10px)',
+});

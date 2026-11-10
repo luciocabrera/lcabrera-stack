@@ -140,6 +140,16 @@ Static design values defined with `stylex.defineVars`. These never change betwee
 | `arrowOffset`   | -6px  | Pulls arrow flush to the tooltip edge  |
 | `slideDistance` | 4px   | Entrance/exit translate distance       |
 
+#### `backdropBlur`
+
+| Token      | Value        | Purpose                                                                    |
+| ---------- | ------------ | -------------------------------------------------------------------------- |
+| `floating` | `blur(10px)` | A small panel floating over content (tooltip, actions popover) stays light |
+
+Only values two or more surfaces share become a token here. A blur used once
+stays in its component's own `*.stylex.ts`, and the full-chrome surfaces take
+theirs from the theme's `glassBackdropFilter*` color tokens.
+
 ---
 
 ### `tokens/colors.stylex.ts` — Semantic Color Tokens
@@ -284,7 +294,9 @@ hardcoded gradient.
 matching: the popover previously carried a hardcoded opaque `#0f172a` and an
 explicit `backdropFilter: 'none'`, so it read as a different material from the
 settings drawer open beside it. Both now compose the same recipe, which is what
-makes the match survive a change to either.
+makes the match survive a change to either. The popover overrides only the
+`backdropFilter`, with the lighter `backdropBlur.floating`, so a small menu floating over the
+grid keeps the content behind it legible; the fill stays the recipe's.
 
 `interactiveCard` is the resting card for rows and option cards that answer the
 pointer. Its three consumers compose it inside their own `*.stylex.ts` rather

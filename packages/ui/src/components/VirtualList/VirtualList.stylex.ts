@@ -9,6 +9,8 @@ import { colors } from '#ui/design-system/tokens/colors.stylex';
 import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 import { filterBaseStyles } from '#ui/design-system/tokens/filters.stylex';
 
+import { ITEM_HEIGHT } from './VirtualList.constants';
+
 const localStyles = stylex.create({
   label: {
     flex: '1', // Take remaining space after checkbox
@@ -34,25 +36,31 @@ const localStyles = stylex.create({
     bottom: '0',
   },
   option: {
-    padding: `${spacing.xs} ${spacing.sm}`,
     borderRadius: {
       default: '0',
       ':hover': borderRadius.sm,
     },
     gap: spacing.sm,
     overflow: 'hidden',
+    paddingBlock: 0,
+    paddingInline: spacing.sm,
     alignItems: 'center',
     backgroundColor: {
       default: 'transparent',
       ':nth-child(even)': colors.surfaceStripe,
       ':hover': colors.surfaceSecondary,
     },
+    boxSizing: 'border-box',
     cursor: 'pointer',
     display: 'flex',
+    flexShrink: 0,
     justifyContent: 'flex-start',
     position: 'relative', // Anchor for shimmer overlay
     minWidth: 0, // Allow flex children to shrink below content size
   },
+  optionHeight: (height: number) => ({
+    height,
+  }),
   optionButtonReset: {
     margin: 0,
     borderColor: 'transparent',
@@ -73,6 +81,14 @@ const localStyles = stylex.create({
     flex: '1',
     minHeight: 0,
   },
+  containerShrinkable: {
+    minHeight: 0,
+  },
+  group: {
+    display: 'flex',
+    flexDirection: 'column',
+    minHeight: 0,
+  },
   listFilterButton: {
     borderRadius: 0,
   },
@@ -87,11 +103,13 @@ export const skeletonStyles = { ...skeleton };
 export const styles = {
   container: filterBaseStyles.container,
   containerFill: localStyles.containerFill,
+  containerShrinkable: localStyles.containerShrinkable,
+  group: localStyles.group,
   label: localStyles.label,
   listFilterButton: localStyles.listFilterButton,
   listFilterButtonActive: localStyles.listFilterButtonActive,
   loadingMore: localStyles.loadingMore,
-  option: localStyles.option,
+  option: [localStyles.option, localStyles.optionHeight(ITEM_HEIGHT)],
   optionButtonReset: localStyles.optionButtonReset,
   optionDisabled: localStyles.optionDisabled,
 };

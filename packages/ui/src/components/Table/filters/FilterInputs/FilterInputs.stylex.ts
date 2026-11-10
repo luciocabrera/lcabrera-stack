@@ -7,6 +7,9 @@ const localStyles = stylex.create({
     flex: '1',
     minHeight: 0,
   },
+  containerJoined: {
+    gap: 0,
+  },
   contentHidden: {
     visibility: 'hidden',
   },
@@ -15,5 +18,6 @@ const localStyles = stylex.create({
 export const styles = {
   container: filterBaseStyles.container,
   containerFill: localStyles.containerFill,
+  containerJoined: localStyles.containerJoined,
   contentHidden: localStyles.contentHidden,
 };

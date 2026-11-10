@@ -66,6 +66,7 @@ export const SelectFilterInput = <TData,>({
 
   return (
     <VirtualSelect
+      attachedEdge='top'
       customStylex={styles.selectOverride}
       dataState={dataState}
       isAlwaysOpen

@@ -7,6 +7,8 @@ export type AnchorRect = {
 
 export type DropdownPlacement = {
   readonly left: number;
+  readonly maxHeight: number;
+  readonly side: 'above' | 'below';
   readonly top: number;
   readonly width: number;
 };

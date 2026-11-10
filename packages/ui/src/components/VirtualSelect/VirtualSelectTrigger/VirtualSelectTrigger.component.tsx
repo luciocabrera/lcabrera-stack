@@ -1,5 +1,6 @@
+import { useTriggerStyleProps } from './hooks/useTriggerStyleProps.hook';
 import { useVirtualSelectTrigger } from './hooks/useVirtualSelectTrigger.hook';
-import { assignTriggerRef, getTriggerStyleProps } from './utils';
+import { assignTriggerRef } from './utils';
 import { VirtualSelectDivTrigger } from './VirtualSelectDivTrigger/VirtualSelectDivTrigger.component';
 
 export const VirtualSelectTrigger = () => {
@@ -10,15 +11,22 @@ export const VirtualSelectTrigger = () => {
     isOpen,
     labelProps,
     listboxId,
-    mode,
     shouldUseDivTrigger,
+    shouldUseTagButtons,
     toggleDropdown,
     triggerRef,
   } = useVirtualSelectTrigger();
+  const buttonStyleProps = useTriggerStyleProps({
+    hasTags: false,
+    isStatic: false,
+  });
 
   if (shouldUseDivTrigger) {
     return (
-      <VirtualSelectDivTrigger triggerRef={triggerRef}>
+      <VirtualSelectDivTrigger
+        hasTags={shouldUseTagButtons}
+        triggerRef={triggerRef}
+      >
         {content}
         {chevron}
       </VirtualSelectDivTrigger>
@@ -38,7 +46,7 @@ export const VirtualSelectTrigger = () => {
       }}
       type='button'
       {...labelProps}
-      {...getTriggerStyleProps({ isInert, isOpen, mode })}
+      {...buttonStyleProps}
     >
       {content}
       {chevron}

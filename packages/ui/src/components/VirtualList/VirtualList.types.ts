@@ -52,6 +52,7 @@ export type VirtualListProps = {
 export type VirtualListState = VirtualListConfigState & VirtualListUiState;
 
 export type VirtualListUiState = {
+  readonly isTopAttached: boolean;
   readonly listFilterMode: ListFilterMode;
   readonly searchTerm: string;
 };

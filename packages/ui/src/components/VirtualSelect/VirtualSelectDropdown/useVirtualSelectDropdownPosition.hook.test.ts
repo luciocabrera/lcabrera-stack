@@ -53,6 +53,7 @@ const setup = () => {
       dropdownRef: { current: dropdown },
       isEnabled: true,
       onScrollAway,
+      placement: 'auto',
     }),
   );
 
@@ -100,7 +101,13 @@ describe('useVirtualSelectDropdownPosition', () => {
 
     observe();
 
-    expect(view.result.current).toEqual({ left: 20, top: 112, width: 200 });
+    expect(view.result.current).toEqual({
+      left: 20,
+      maxHeight: globalThis.innerHeight - 100 - 12,
+      side: 'below',
+      top: 100,
+      width: 200,
+    });
   });
 
   it('keeps the same placement object when the geometry has not moved', () => {
@@ -123,7 +130,13 @@ describe('useVirtualSelectDropdownPosition', () => {
     observe();
 
     expect(view.result.current).not.toBe(first);
-    expect(view.result.current).toEqual({ left: 20, top: 312, width: 200 });
+    expect(view.result.current).toEqual({
+      left: 20,
+      maxHeight: globalThis.innerHeight - 300 - 12,
+      side: 'below',
+      top: 300,
+      width: 200,
+    });
   });
 
   it('replaces the placement when only the width changes', () => {
@@ -189,6 +202,7 @@ describe('useVirtualSelectDropdownPosition', () => {
         dropdownRef: { current: dropdown },
         isEnabled: false,
         onScrollAway: vi.fn(),
+        placement: 'auto',
       }),
     );
 

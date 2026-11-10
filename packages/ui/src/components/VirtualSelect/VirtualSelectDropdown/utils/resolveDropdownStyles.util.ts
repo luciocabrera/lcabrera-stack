@@ -27,5 +27,10 @@ export const resolveDropdownStyles = ({
   isFloating && placement === undefined && styles.dropdownUnplaced,
   isFloating &&
     placement !== undefined &&
-    styles.dropdownAt(placement.left, placement.top, placement.width),
+    styles.dropdownAt(
+      placement.left,
+      placement.top,
+      placement.width,
+      placement.maxHeight,
+    ),
 ];

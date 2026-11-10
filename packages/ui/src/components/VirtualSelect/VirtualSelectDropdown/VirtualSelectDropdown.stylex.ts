@@ -61,8 +61,14 @@ export const styles = stylex.create({
     zIndex: zIndex.dropdown,
   },
   /** Viewport coordinates; the gap to the trigger is baked into `top`. */
-  dropdownAt: (left: number, top: number, width: number) => ({
+  dropdownAt: (
+    left: number,
+    top: number,
+    width: number,
+    maxHeight: number,
+  ) => ({
     left,
+    maxHeight,
     top,
     width,
   }),
@@ -72,10 +78,12 @@ export const styles = stylex.create({
   },
   dropdownStatic: {
     position: 'relative',
+    marginTop: 0,
   },
   dropdownStaticFill: {
     flex: '1',
     position: 'relative',
+    marginTop: 0,
     minHeight: 0,
   },
 });

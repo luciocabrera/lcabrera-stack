@@ -11,6 +11,7 @@ export const styles = stylex.create({
   footer: {
     alignItems: 'center',
     display: 'flex',
+    flexShrink: 0,
     justifyContent: 'space-between',
     height: spacing.xl,
   },

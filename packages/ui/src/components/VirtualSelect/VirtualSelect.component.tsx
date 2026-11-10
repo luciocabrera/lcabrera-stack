@@ -12,6 +12,7 @@ import { VirtualSelectLabel } from './VirtualSelectLabel/VirtualSelectLabel.comp
 
 // fallow-ignore-next-line complexity -- false positive, case FP-0002: prop count of a required public API; no branching to remove
 export const VirtualSelect = ({
+  attachedEdge,
   customStylex,
   dataState,
   isAlwaysOpen = false,
@@ -28,21 +29,11 @@ export const VirtualSelect = ({
   onOpenChange,
   options = [],
   placeholder = 'Select...',
+  placement,
   selected,
   shouldFillHeight = false,
 }: VirtualSelectProps) => {
-  const {
-    closeDropdown,
-    containerRef,
-    effectiveDataState,
-    handleListChange,
-    isMulti,
-    isOpen,
-    labelId,
-    resolvedListboxId,
-    selectedLabels,
-    toggleDropdown,
-  } = useVirtualSelect({
+  const { containerRef, selectedLabels, ...shell } = useVirtualSelect({
     dataState,
     isAlwaysOpen,
     isBusy,
@@ -59,29 +50,31 @@ export const VirtualSelect = ({
   return (
     <VirtualSelectProvider
       anchorRef={containerRef}
-      dataState={effectiveDataState}
+      dataState={shell.effectiveDataState}
       filter={{ type: 'select', values: selectedLabels }}
       listState={{
-        hasCheckboxes: isMulti,
-        hasSelectAll: isMulti,
+        hasCheckboxes: shell.isMulti,
+        hasSelectAll: shell.isMulti,
         listMaxHeight,
-        onChange: handleListChange,
+        onChange: shell.handleListChange,
         onFetchInitial,
         onFetchMore,
         shouldFillHeight,
       }}
       metaState={{
+        attachedEdge,
         customStylex,
         isAlwaysOpen,
         isBusy,
         isDisabled,
-        isOpen,
-        labelId,
-        listboxId: resolvedListboxId,
+        isOpen: shell.isOpen,
+        labelId: shell.labelId,
+        listboxId: shell.resolvedListboxId,
         mode,
-        onCloseDropdown: closeDropdown,
-        onToggleDropdown: toggleDropdown,
+        onCloseDropdown: shell.closeDropdown,
+        onToggleDropdown: shell.toggleDropdown,
         placeholder,
+        placement,
       }}
     >
       <div

@@ -7,8 +7,6 @@ import {
 } from '#ui/design-system/tokens/base.stylex';
 import { colors } from '#ui/design-system/tokens/colors.stylex';
 
-export const TRIGGER_MAX_HEIGHT = 88;
-
 export const styles = stylex.create({
   chevron: (isOpen: boolean) => ({
     borderColor: isOpen
@@ -42,7 +40,7 @@ export const styles = stylex.create({
     borderColor: {
       default: colors.borderPrimary,
     },
-    borderRadius: borderRadius.sm,
+    borderRadius: borderRadius.md,
     borderStyle: 'solid',
     borderWidth: '1px',
     gap: spacing.xs,
@@ -61,15 +59,26 @@ export const styles = stylex.create({
     minWidth: 0,
     width: '100%',
   },
+  triggerAttachedAbove: {
+    borderTopLeftRadius: 0,
+    borderTopRightRadius: 0,
+  },
+  triggerAttachedBelow: {
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderBottomWidth: 0,
+  },
   triggerBusy: {
     cursor: 'not-allowed',
     opacity: 0.75,
   },
   triggerClamped: {
     overflow: 'hidden',
+    paddingBlock: `calc((2.25rem - 2px - ${spacing.lg}) / 2)`,
+    paddingInline: spacing.xs,
     alignContent: 'flex-start',
     justifyContent: 'flex-start',
-    maxHeight: `${TRIGGER_MAX_HEIGHT}px`,
+    height: '2.25rem',
   },
   triggerLabel: {
     flex: '1 1 auto',
@@ -91,5 +100,10 @@ export const styles = stylex.create({
   },
   triggerStatic: {
     cursor: 'default',
+    borderBottomLeftRadius: 0,
+    borderBottomRightRadius: 0,
+    borderBottomWidth: 0,
+    borderTopLeftRadius: borderRadius.md,
+    borderTopRightRadius: borderRadius.md,
   },
 });

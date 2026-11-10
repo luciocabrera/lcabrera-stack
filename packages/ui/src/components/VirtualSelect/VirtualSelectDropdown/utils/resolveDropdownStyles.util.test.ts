@@ -12,7 +12,13 @@ const FLOATING = {
   customStylex: consumerStyles.surfaceTweak,
   isAlwaysOpen: false,
   isFloating: true,
-  placement: { left: 10, top: 20, width: 200 },
+  placement: {
+    left: 10,
+    maxHeight: 400,
+    side: 'below' as const,
+    top: 20,
+    width: 200,
+  },
   shouldFillHeight: false,
 } as const;
 

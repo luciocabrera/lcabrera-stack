@@ -74,7 +74,7 @@ Every store slice is read — and every action dispatched — inside the compone
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------- | ------------------------------------------------------ |
 | `VirtualList` (shell)                                  | — (no store wiring in the shell)                                                                                                                                   | —                                       | public API (unchanged)                                 |
 | `VirtualListContent`                                   | `useGetShouldFillHeight` (list)                                                                                                                                    | —                                       | none                                                   |
-| `VirtualListHeader`                                    | `useGetSearchTerm`, `useGetSearchInputName` (list)                                                                                                                 | `useSetSearchTerm`, `useClearSearch`    | none                                                   |
+| `VirtualListHeader`                                    | `useGetIsTopAttached`, `useGetSearchTerm`, `useGetSearchInputName` (list)                                                                                          | `useSetSearchTerm`, `useClearSearch`    | none                                                   |
 | `VirtualListBody`                                      | `useGetHasMore`, `useGetIsLoadingOptions` (data), `useGetHasFetchMore`, `useGetListMaxHeight`, `useGetShouldFillHeight` (list)                                     | `useFetchMore`                          | none                                                   |
 | `VirtualListBodyChildren`                              | `useGetContentMode`, `useGetTotalItems` (data)                                                                                                                     | —                                       | `scrollContainerRef` (producer→child)                  |
 | `VirtualListBodyOptions`                               | `useGetFilteredOptions`, `useGetShouldShowSelectAll` (data)                                                                                                        | —                                       | `startIndex`, `endIndex`, `offsetY`, `totalHeight`     |
@@ -114,7 +114,7 @@ parents such as drawer filter cards.
 
 | Constant                   | Value       | Role                                             |
 | -------------------------- | ----------- | ------------------------------------------------ |
-| `ITEM_HEIGHT`              | `32 px`     | Fixed row height (enables O(1) offset math)      |
+| `ITEM_HEIGHT`              | `36 px`     | Fixed row height (enables O(1) offset math)      |
 | `LIST_MAX_HEIGHT`          | `18.75 rem` | Default `max-height` of the scroll container     |
 | `DEFAULT_CONTAINER_HEIGHT` | `300 px`    | Fallback before the ref is measured              |
 | `SCROLL_THRESHOLD`         | `50 px`     | Distance from bottom that triggers `onFetchMore` |
@@ -167,3 +167,9 @@ The initial fetch (`onFetchInitial`) fires once from a `VirtualListProvider` eff
 | `onFetchInitial`   | `() => Promise<void> \| void`     | —            | Fetches data on mount                            |
 | `onFetchMore`      | `() => Promise<void> \| void`     | —            | Fetches next page when near bottom               |
 | `shouldFillHeight` | `boolean`                         | `false`      | Expand list to fill all available vertical space |
+
+The search box and the option list draw as one bordered group, with no gap between them and the outer corners rounded; the footer sits apart below it. `isTopAttached` is not a prop: it is list UI state, kept across a config re-sync like `searchTerm`, and written through `useSetIsTopAttached`. It squares the group's top corners for a control drawn flush on top of it; `VirtualSelectDropdown` sets it while the list sits under the select's trigger.
+
+Every option row, the Select All row and each skeleton row is exactly `ITEM_HEIGHT` tall, applied from the constant through `styles.option`, so the scroll area the virtualizer computes (`count × ITEM_HEIGHT`) is the height the rows actually take. A row sized by its padding and content overflowed that area once the list stopped having a fixed height, and showed a scrollbar on a list that fit.
+
+The scroll area's height comes from `resolveListHeight`: every **loaded** option plus the Select All row, times `ITEM_HEIGHT`, capped by `listMaxHeight`, and the full `listMaxHeight` while nothing has loaded. It counts loaded options, not filtered ones, so a search, a `selected`/`unselected` filter mode or an empty result never changes the list's height; a short list still ends at its last option. It is a `height`, not a `min-height`, so a capped floating dropdown can still shrink it.

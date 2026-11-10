@@ -529,7 +529,7 @@ VirtualListContent [const] () => JSX.Element
 VirtualListDataState [type] { readonly data: readonly string[]; readonly hasMore: boolean; readonly isLoading: boolean; readonly isLoadingMore: boolean; readonly totalCount?: number; }
 
 ## ./components/VirtualSelect
-VirtualSelect [const] ({ customStylex, dataState, isAlwaysOpen, isBusy, isDisabled, label, listboxId, listMaxHeight, mode, name, onChange, onFetchInitial, onFetchMore, onOpenChange, options, placeholder, selected, shouldFillHeight, }: VirtualSelectProps) => JSX.Element
+VirtualSelect [const] ({ attachedEdge, customStylex, dataState, isAlwaysOpen, isBusy, isDisabled, label, listboxId, listMaxHeight, mode, name, onChange, onFetchInitial, onFetchMore, onOpenChange, options, placeholder, placement, selected, shouldFillHeight, }: VirtualSelectProps) => JSX.Element
 
 ## ./components/VirtualSelect/hooks
 useVirtualSelect [const] ({ dataState, isAlwaysOpen, isBusy, isDisabled, label, listboxId, mode, onChange, onOpenChange, options, selected, }: UseVirtualSelectArgs) => { closeDropdown: () => void; containerRef: RefObject<HTMLDivElement | null>; effectiveDataState: VirtualListDataState | { data: string[]; hasMore: boolean; isLoading: boolean; isLoadingMore: boolean; }; handleListChange: (filter?: SelectFilter) => void; isMulti: boolean; isOpen: boolean; labelId: string | undefined; resolvedListboxId: string; selectedLabels: string[]; toggleDropdown: () => void; }
@@ -537,7 +537,7 @@ useVirtualSelectDropdown [const] ({ isAlwaysOpen, isInert, onOpenChange, }: UseV
 useVirtualSelectTagOverflow [const] ({ mode, selected, triggerRef, }: UseVirtualSelectTagOverflowArgs) => number
 
 ## ./components/VirtualSelect/VirtualSelectTrigger/hooks
-useVirtualSelectTrigger [const] () => { chevron: JSX.Element | undefined; content: ReactNode; isInert: boolean; isOpen: boolean; labelProps: { 'aria-labelledby'?: undefined; id?: undefined; } | { 'aria-labelledby': string; id: string; }; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
+useVirtualSelectTrigger [const] () => { chevron: JSX.Element | undefined; content: ReactNode; isInert: boolean; isOpen: boolean; labelProps: { 'aria-labelledby'?: undefined; id?: undefined; } | { 'aria-labelledby': string; id: string; }; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; shouldUseTagButtons: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
 
 ## ./contexts/NotificationContext
 AppNotification [type] { readonly durationMs: number; readonly id: string; readonly message: string; readonly placement: NotificationPlacement; readonly title?: string; readonly variant: CardColor; }
@@ -566,6 +566,7 @@ ICON_SIZE_XXS [const] 10
 ## ./design-system/reset.css
 
 ## ./design-system/tokens/base.stylex
+backdropBlur [const] stylex.VarGroup<Readonly<{ floating: string; }>, symbol>
 borderRadius [const] stylex.VarGroup<Readonly<{ full: string; lg: string; md: string; none: string; sm: string; xl: string; }>, symbol>
 easing [const] stylex.VarGroup<Readonly<{ easeIn: string; easeInOut: string; easeOut: string; linear: string; }>, symbol>
 shadows [const] stylex.VarGroup<Readonly<{ lg: string; md: string; none: string; sm: string; xl: string; }>, symbol>

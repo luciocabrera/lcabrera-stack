@@ -1,5 +1,7 @@
 export { useGetHasCheckboxes } from './useGetHasCheckboxes.hook';
 export { useGetHasFetchMore } from './useGetHasFetchMore.hook';
+export { useGetHasSelectAll } from './useGetHasSelectAll.hook';
+export { useGetIsTopAttached } from './useGetIsTopAttached.hook';
 export { useGetListFilterMode } from './useGetListFilterMode.hook';
 export { useGetListMaxHeight } from './useGetListMaxHeight.hook';
 export { useGetSearchInputName } from './useGetSearchInputName.hook';

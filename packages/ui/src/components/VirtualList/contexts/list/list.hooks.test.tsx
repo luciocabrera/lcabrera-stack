@@ -21,6 +21,7 @@ import { useSetListFilterMode } from './actions/useSetListFilterMode.hook';
 import { useSetSearchTerm } from './actions/useSetSearchTerm.hook';
 import { useGetHasCheckboxes } from './selectors/useGetHasCheckboxes.hook';
 import { useGetHasFetchMore } from './selectors/useGetHasFetchMore.hook';
+import { useGetIsTopAttached } from './selectors/useGetIsTopAttached.hook';
 import { useGetListFilterMode } from './selectors/useGetListFilterMode.hook';
 import { useGetListMaxHeight } from './selectors/useGetListMaxHeight.hook';
 import { useGetSearchInputName } from './selectors/useGetSearchInputName.hook';
@@ -41,6 +42,7 @@ const setup = ({ listState = {} }: SetupArgs = {}) => {
     hasFetchInitial: false,
     hasFetchMore: true,
     hasSelectAll: true,
+    isTopAttached: false,
     listFilterMode: 'all',
     listMaxHeight: '18.75rem',
     name: 'fruit-search',
@@ -102,6 +104,14 @@ describe('VirtualList list hooks', () => {
     expect(
       renderHook(() => useGetShouldFillHeight(), { wrapper }).result.current,
     ).toBe(false);
+    expect(
+      renderHook(() => useGetIsTopAttached(), { wrapper }).result.current,
+    ).toBe(false);
+    expect(
+      renderHook(() => useGetIsTopAttached(), {
+        wrapper: setup({ listState: { isTopAttached: true } }).wrapper,
+      }).result.current,
+    ).toBe(true);
 
     const withoutCheckboxes = setup({ listState: { hasCheckboxes: false } });
 
