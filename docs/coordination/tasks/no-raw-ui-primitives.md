@@ -12,10 +12,11 @@ area:
   - docs/product/**
   - .changeset/**
   - reports/api-surface/eslint-plugin.txt
+  - apps/showcase/src/features/showcase/ShowcasePage/**
 started: 2026-11-10
 updated: 2026-11-10
 plan: (none)
-pr: (none)
+pr: '#1616'
 issue: #1567
 ---
 
@@ -25,6 +26,6 @@ Add no-raw-ui-primitives for apps and update the ui docs
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: rule, showcase headings and ui docs in; gate and screenshots next
 - Blockers: none
 - Next:

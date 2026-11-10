@@ -656,6 +656,67 @@ cells hold links is built in the component that renders the table. Set `align`
 on it: a `render` cell gets no alignment from its `dataType`. It does get tabular
 figures from a `number` or `currency` `dataType`, so declare that too.
 
+### Density
+
+`density` picks one of four levels, and each level sets the row height and the
+font size first; the cell padding follows from them
+([ADR-146](../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (a)).
+`headerDensity` sets the header row on its own and defaults to `density`.
+
+| Level         | Use it for                                                             |
+| ------------- | ---------------------------------------------------------------------- |
+| `dense`       | Many narrow numeric columns a reader scans across rather than reads    |
+| `compact`     | The default: a working table of text and numbers                       |
+| `comfortable` | A short table read row by row, such as a comparison or a list of links |
+| `spacious`    | Rows whose cells hold more than one line, a chart or a control         |
+
+```tsx
+// ✅ cells holding a chart: the level sets a taller row and a larger font
+<Table columns={columns} density='spacious' layout='static' response={rows} />
+```
+
+Both props are the level a saved meta state falls back to, not an override of
+it: a reader who picked a level in the settings drawer keeps it. A `rowHeight`
+set in the meta state still wins over the level's row height.
+
+---
+
+## Page Header and Headings
+
+A page opens with one `PageHeader`: the breadcrumb trail, the page's single
+level-1 heading, an `actions` slot and a description. Below it, every heading is
+a `Title` with `variant='plain'`, one `level` per step of the outline: level 2
+for a section, level 3 for a part of a section. Never skip a level, and never
+pick one for its size.
+
+```tsx
+// ✅ one outline, drawn by the package
+<PageHeader description='Updated hourly.' title='Orders' />
+<section>
+  <Title level={2} variant='plain'>Open</Title>
+  <Table columns={columns} layout='static' response={open} />
+</section>
+
+// ❌ hand-written headings, sized and coloured one by one
+<h1 {...stylex.props(styles.pageTitle)}>Orders</h1>
+<h3 {...stylex.props(styles.bigLabel)}>Open</h3>
+```
+
+- **The document title is not the heading.** `PageHeader` never sets it; the
+  route's `meta` export does.
+- **Spacing around a heading belongs to its container.** `customStylex` styles
+  `Title`'s container, so a margin goes there; the heading's own size, weight
+  and colour come from its level.
+- **An application draws no raw table, control or heading.** It renders
+  `Table`, `Select`, `TextInput`, `Button` and `Title` instead of `<table>`,
+  `<select>`, `<input>`, `<button>` and `<h1>`–`<h3>`, and a multi-line field
+  through a `Form` field of type `textarea`
+  ([ADR-146](../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (c)).
+  The `no-raw-ui-primitives` rule of `@lcabrera/eslint-plugin` reports a raw one
+  in application code. An `<input type='hidden'>` is the exception: it carries
+  form data and draws nothing. This package itself renders those elements, so
+  the rule is never enabled for it.
+
 ---
 
 ## Controlled Component Contract

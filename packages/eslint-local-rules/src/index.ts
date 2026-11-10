@@ -18,6 +18,7 @@ import filenameConvention from './filename-convention.ts';
 import mergeDuplicateImports from './merge-duplicate-imports.ts';
 import noHabitReturnTypes from './no-habit-return-types.ts';
 import noInlineTypeImports from './no-inline-type-imports.ts';
+import noRawUiPrimitives from './no-raw-ui-primitives.ts';
 import noTypeDefinitionsInComponents from './no-type-definitions-in-components.ts';
 import readonlyProps from './readonly-props.ts';
 import singleComponentExport from './single-component-export.ts';
@@ -31,6 +32,7 @@ export const rules = {
   'merge-duplicate-imports': mergeDuplicateImports,
   'no-habit-return-types': noHabitReturnTypes,
   'no-inline-type-imports': noInlineTypeImports,
+  'no-raw-ui-primitives': noRawUiPrimitives,
   'no-type-definitions-in-components': noTypeDefinitionsInComponents,
   'readonly-props': readonlyProps,
   'single-component-export': singleComponentExport,
