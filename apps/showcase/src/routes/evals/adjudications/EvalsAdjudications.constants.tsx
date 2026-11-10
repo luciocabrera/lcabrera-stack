@@ -27,7 +27,7 @@ export const EVALS_ADJUDICATION_CASES = 100;
 
 export const UNRECORDED_BUILDER = 'not recorded';
 
-export const OUTCOME_TONES = {
+const OUTCOME_TONES = {
   dismissed: 'success',
   escalated: 'error',
   fixed: 'info',

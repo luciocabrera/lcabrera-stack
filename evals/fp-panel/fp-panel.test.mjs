@@ -16,8 +16,8 @@ import {
   panelTask,
   panelTrial,
   promptHashOf,
-  runCount,
   seatLine,
+  seatRunCount,
   seatScore,
   selectedFixtures,
   suiteExitCode,
@@ -155,8 +155,8 @@ describe('the small helpers', () => {
   });
 
   it('takes one run or more', () => {
-    expect(runCount('1')).toBe(1);
-    expect(() => runCount('0')).toThrow(
+    expect(seatRunCount('1')).toBe(1);
+    expect(() => seatRunCount('0')).toThrow(
       '--runs must be a whole number of at least 1',
     );
   });

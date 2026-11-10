@@ -24,7 +24,8 @@ Each fixture is a finding whose true answer is known, stated in
 
 - the system prompt is the agent definition's body, unchanged;
 - the session runs in a scratch tree holding only the fixture's files and the
-  case file at `docs/agents/adjudications/FP-9nnn/case.json`, with no history;
+  case file where `vp run adjudicate` would write it, under
+  `docs/agents/adjudications/`, numbered from FP-9001, with no history;
 - it gets Read, Glob and Grep, and the panel's own hook refuses any path
   outside that tree;
 - the dispatch is the panel's, naming only the case file's path.

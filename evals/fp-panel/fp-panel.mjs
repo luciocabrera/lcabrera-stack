@@ -17,7 +17,7 @@ import { sessionTrial, taskRecord } from '../run-envelope.mjs';
 
 export const SUITE = 'fp-panel';
 export const ROLES = ['judge', 'adversary'];
-export const FIXTURE_SUFFIX = '.fixture';
+const FIXTURE_SUFFIX = '.fixture';
 
 const FIRST_CASE_NUMBER = 9001;
 const OPENED_AT = '2026-11-01T00:00:00.000Z';
@@ -25,7 +25,7 @@ const NO_COMMIT = '0'.repeat(40);
 const SYSTEM_PROMPT_PATH = 'system-prompt';
 const CASES_ROOT = 'evals/fp-panel/cases';
 
-export const agentOf = (role) => `fp-${role}`;
+const agentOf = (role) => `fp-${role}`;
 
 export const agentPath = (role) => `.claude/agents/${agentOf(role)}.md`;
 
@@ -75,9 +75,9 @@ export const selectedFixtures = ({ expected, names }) => {
     .filter(({ fixture }) => names.length === 0 || names.includes(fixture));
 };
 
-export const runCount = (value) => wholeNumber({ minimum: 1, value });
+export const seatRunCount = (value) => wholeNumber({ minimum: 1, value });
 
-export const taskKeyOf = ({ fixture, role }) => `${SUITE}/${fixture}/${role}`;
+const taskKeyOf = ({ fixture, role }) => `${SUITE}/${fixture}/${role}`;
 
 export const promptHashOf = ({ dispatch, systemPrompt }) =>
   fileSetHash([

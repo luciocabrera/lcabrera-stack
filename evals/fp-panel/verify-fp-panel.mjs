@@ -57,8 +57,8 @@ import {
   panelTrial,
   promptHashOf,
   ROLES,
-  runCount,
   seatLine,
+  seatRunCount,
   seatScore,
   selectedFixtures,
   SUITE,
@@ -246,7 +246,7 @@ const main = async () => {
       runs: { default: '2', type: 'string' },
     },
   });
-  const runs = runCount(values.runs);
+  const runs = seatRunCount(values.runs);
   const fixtures = selectedFixtures({
     expected: JSON.parse(read('./expected.json')),
     names: positionals,
