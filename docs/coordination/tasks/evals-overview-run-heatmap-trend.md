@@ -2,7 +2,7 @@
 id: evals-overview-run-heatmap-trend
 title: Move evals overview, run detail, heatmap and trend onto @lcabrera/ui
 owner: agent:claude
-status: active
+status: review
 branch: refactor/1566-evals-overview-run-heatmap-trend
 area:
   - apps/showcase/src/routes/evals/**
@@ -24,6 +24,6 @@ Move evals overview, run detail, heatmap and trend onto @lcabrera/ui
 
 ## Status / next
 
-- Current step: just claimed
-- Blockers: none
-- Next:
+- Current step: all four pages on `@lcabrera/ui`; the gate is green and the PR is ready for review
+- Blockers: none (owner rulings on #1566 applied)
+- Next: review and merge
