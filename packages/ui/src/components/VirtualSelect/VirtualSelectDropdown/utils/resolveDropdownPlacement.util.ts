@@ -42,7 +42,10 @@ export const resolveDropdownPlacement = ({
       left: anchorRect.left,
       maxHeight: capAbove,
       side: 'above',
-      top: anchorRect.top - gap - Math.min(dropdownHeight, capAbove),
+      top: Math.max(
+        gap,
+        anchorRect.top - gap - Math.min(dropdownHeight, capAbove),
+      ),
       width: anchorRect.width,
     };
   }
@@ -51,7 +54,13 @@ export const resolveDropdownPlacement = ({
     left: anchorRect.left,
     maxHeight: capBelow,
     side: 'below',
-    top: anchorRect.bottom,
+    top: Math.max(
+      gap,
+      Math.min(
+        anchorRect.bottom,
+        viewportHeight - gap - Math.min(dropdownHeight, capBelow),
+      ),
+    ),
     width: anchorRect.width,
   };
 };

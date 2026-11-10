@@ -5,7 +5,7 @@
 `VirtualSelect` takes a `placement` prop, `'auto' | 'bottom' | 'top'`, for the
 side its floating list opens on. `'bottom'` and `'top'` fix the side; with
 little room on it, the list keeps a few rows' height rather than shrinking to
-nothing. `'auto'`,
+nothing, and moves over its own trigger to stay inside the viewport. `'auto'`,
 the default, opens below and flips above only when the list does not fit below
 and the room there cannot show a few rows.
 

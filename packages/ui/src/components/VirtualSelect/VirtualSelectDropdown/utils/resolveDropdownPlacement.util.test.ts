@@ -78,7 +78,7 @@ describe('resolveDropdownPlacement', () => {
     expect(placement.top).toBe(8);
   });
 
-  it('holds the bottom placement below however little room there is, never capping it under a usable list', () => {
+  it('keeps a forced bottom list on screen by overlapping its trigger when the room below is under the usable minimum', () => {
     const placement = resolveDropdownPlacement({
       ...baseArgs,
       anchorRect: { bottom: 620, left: 32, top: 588, width: 240 },
@@ -90,11 +90,11 @@ describe('resolveDropdownPlacement', () => {
     expect(placement).toMatchObject({
       maxHeight: 160,
       side: 'below',
-      top: 620,
+      top: 700 - 8 - 160,
     });
   });
 
-  it('holds the top placement above against the viewport top, never capping it to nothing', () => {
+  it('keeps a forced top list on screen by overlapping its trigger when the room above is under the usable minimum', () => {
     const placement = resolveDropdownPlacement({
       ...baseArgs,
       anchorRect: { bottom: 40, left: 32, top: 10, width: 240 },
@@ -105,8 +105,32 @@ describe('resolveDropdownPlacement', () => {
     expect(placement).toMatchObject({
       maxHeight: 160,
       side: 'above',
-      top: 10 - 8 - 160,
+      top: 8,
     });
+  });
+
+  it('pins a forced bottom list to the viewport top when the viewport is shorter than the usable minimum', () => {
+    const placement = resolveDropdownPlacement({
+      ...baseArgs,
+      anchorRect: { bottom: 60, left: 32, top: 30, width: 240 },
+      dropdownHeight: 300,
+      placement: 'bottom',
+      viewportHeight: 120,
+    });
+
+    expect(placement).toMatchObject({ maxHeight: 160, top: 8 });
+  });
+
+  it('places a forced bottom list flush below a trigger with room for the list it measured', () => {
+    const placement = resolveDropdownPlacement({
+      ...baseArgs,
+      anchorRect: { bottom: 600, left: 32, top: 568, width: 240 },
+      dropdownHeight: 80,
+      placement: 'bottom',
+      viewportHeight: 700,
+    });
+
+    expect(placement).toMatchObject({ maxHeight: 160, top: 600 });
   });
 
   it('caps a forced side by its own room once that room exceeds the usable minimum', () => {
