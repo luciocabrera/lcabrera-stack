@@ -5,4 +5,5 @@ export type LineChartPlotProps = {
   readonly geometry: LineChartGeometry;
   readonly height: number;
   readonly title: string;
+  readonly titleId: string;
 };

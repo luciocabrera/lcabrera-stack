@@ -42,12 +42,12 @@ describe('trendMarks', () => {
       ],
     });
 
-    expect(marks.map(({ index, kind, label }) => [index, kind, label])).toEqual(
-      [
-        [1, 'content', 'Content hash changed to bbbbbbbbbbbb'],
-        [2, 'model', 'Model changed from model-a to model-b'],
-      ],
-    );
+    expect(
+      marks.map(({ kind, label, startedAt }) => [startedAt, kind, label]),
+    ).toEqual([
+      ['2026-01-02', 'content', 'Content hash changed to bbbbbbbbbbbb'],
+      ['2026-01-03', 'model', 'Model changed from model-a to model-b'],
+    ]);
     expect(marks.map(({ href, pointLabel }) => [href, pointLabel])).toEqual([
       ['/evals/runs/r2', 'r2'],
       ['/evals/runs/r3', 'r3'],
@@ -87,11 +87,11 @@ describe('trendMarks', () => {
     expect(marks).toEqual([
       {
         href: '/evals/runs/r2',
-        index: 1,
         key: 'annotation-4',
         kind: 'annotation',
         label: 'incident annotation, 2026-01-01',
         pointLabel: 'r2',
+        startedAt: '2026-01-02T02:00:00.000Z',
       },
     ]);
   });
@@ -107,6 +107,6 @@ describe('trendMarks', () => {
       ],
     });
 
-    expect(mark?.index).toBe(1);
+    expect(mark?.startedAt).toBe('2026-01-02T02:00:00.000Z');
   });
 });

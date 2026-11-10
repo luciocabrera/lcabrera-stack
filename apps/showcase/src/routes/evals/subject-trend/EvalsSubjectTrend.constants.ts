@@ -6,3 +6,9 @@ export const EVALS_SUBJECT_TREND_HANDLE = {
     { label: `${params.kind ?? ''} trend` },
   ],
 } satisfies BreadcrumbHandle;
+
+export const MARK_TONES = {
+  annotation: 'warning',
+  content: 'info',
+  model: 'secondary',
+} as const;

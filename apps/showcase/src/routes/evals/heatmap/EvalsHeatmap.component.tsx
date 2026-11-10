@@ -1,3 +1,4 @@
+import { Heatmap } from '@lcabrera/ui/components/Heatmap';
 import { PageHeader } from '@lcabrera/ui/components/PageHeader';
 import { Text } from '@lcabrera/ui/components/Text';
 import { Title } from '@lcabrera/ui/components/Title';
@@ -8,7 +9,7 @@ import type { loader } from './evals-heatmap.loader';
 
 import { EVALS_FLAKY } from '../constants/evalsDashboard.constants';
 import { layoutStyles } from '../evalsLayout.stylex';
-import { HeatmapGrid } from '../HeatmapGrid';
+import { HEATMAP_LEGEND } from './EvalsHeatmap.constants';
 
 export const EvalsHeatmap = () => {
   const { flaky, grids } = useLoaderData<typeof loader>();
@@ -24,12 +25,18 @@ export const EvalsHeatmap = () => {
         {flaky.length} tasks now). Each cell opens its run at one of its trials.
       </Text>
       {grids.length === 0 && <Text>No eval runs are stored yet.</Text>}
-      {grids.map((grid) => (
-        <section key={grid.suite} {...stylex.props(layoutStyles.section)}>
+      {grids.map(({ cells, columns, rows, suite, title }) => (
+        <section key={suite} {...stylex.props(layoutStyles.section)}>
           <Title level={2} variant='plain'>
-            {grid.suite}
+            {suite}
           </Title>
-          <HeatmapGrid grid={grid} />
+          <Heatmap
+            cells={cells}
+            columns={columns}
+            legend={HEATMAP_LEGEND}
+            rows={rows}
+            title={title}
+          />
         </section>
       ))}
     </div>

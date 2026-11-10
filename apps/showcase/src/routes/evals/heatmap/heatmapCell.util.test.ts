@@ -22,12 +22,23 @@ const CELL: SubjectRun = {
 describe('heatmapCell', () => {
   it('links the cell through to its run and its trial, coloured by rate', () => {
     expect(heatmapCell({ cell: CELL, flakyTasks: new Set() })).toEqual({
-      href: '/evals/runs/00000000-0000-4000-8000-000000000001?trial=5',
-      isFlaky: false,
-      key: 'skill/react-19/00000000-0000-4000-8000-000000000001',
+      column: '00000000-0000-4000-8000-000000000001',
       label: 'react-19, 2026-10-01: 33% (1/3); open trial 5',
-      tone: 'low',
+      row: 'skill/react-19',
+      to: '/evals/runs/00000000-0000-4000-8000-000000000001?trial=5',
+      tone: 'error',
     });
+  });
+
+  it.each([
+    { k: 3, n: 3, tone: 'success' },
+    { k: 2, n: 3, tone: 'warning' },
+    { k: 1, n: 3, tone: 'error' },
+    { k: 0, n: 0, tone: 'neutral' },
+  ] as const)('tones a cell at $k of $n as $tone', ({ k, n, tone }) => {
+    expect(
+      heatmapCell({ cell: { ...CELL, k, n }, flakyTasks: new Set() }).tone,
+    ).toBe(tone);
   });
 
   it('marks the cell flaky when one of its tasks is flaky in its suite', () => {
@@ -36,7 +47,7 @@ describe('heatmapCell', () => {
       flakyTasks: new Set(['skills\nskills/react-19/near-miss-1']),
     });
 
-    expect(cell.isFlaky).toBe(true);
+    expect(cell.pattern).toBe('hatch');
     expect(cell.label).toContain(', flaky;');
   });
 
@@ -45,7 +56,7 @@ describe('heatmapCell', () => {
       heatmapCell({
         cell: CELL,
         flakyTasks: new Set(['skill-quality\nskills/react-19/near-miss-1']),
-      }).isFlaky,
-    ).toBe(false);
+      }).pattern,
+    ).toBeUndefined();
   });
 });

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -10,24 +10,26 @@ import { EvalsHeatmap } from './EvalsHeatmap.component';
 import { EVALS_HEATMAP_HANDLE } from './EvalsHeatmap.constants';
 
 const GRID = {
-  runs: [{ href: '/evals/runs/r1', label: 'Run r1', runId: 'r1' }],
-  subjects: [
+  cells: [
     {
-      cells: [
-        {
-          href: '/evals/runs/r1?trial=1',
-          isFlaky: true,
-          key: 'skill/react-19/r1',
-          label: 'react-19, 2026-10-01: 60% (3/5), flaky; open trial 1',
-          tone: 'mid',
-        },
-      ],
-      href: '/evals/subjects/skill/react-19',
+      column: 'r1',
+      label: 'react-19, 2026-10-01: 60% (3/5), flaky; open trial 1',
+      pattern: 'hatch',
+      row: 'skill/react-19',
+      to: '/evals/runs/r1?trial=1',
+      tone: 'warning',
+    },
+  ],
+  columns: [{ key: 'r1', label: 'Run r1', to: '/evals/runs/r1' }],
+  rows: [
+    {
       key: 'skill/react-19',
       label: 'react-19',
+      to: '/evals/subjects/skill/react-19',
     },
   ],
   suite: 'skills',
+  title: 'skills: 1 subjects over 1 runs',
 };
 
 const renderWith = (data: unknown) => {
@@ -48,24 +50,33 @@ afterEach(() => {
 });
 
 describe('EvalsHeatmap', () => {
-  it('draws a grid per suite', async () => {
-    renderWith({
-      flaky: [],
-      grids: [
-        {
-          runs: [{ href: '/evals/runs/r1', label: 'Run r1', runId: 'r1' }],
-          subjects: [],
-          suite: 'skills',
-        },
-      ],
-    });
+  it('draws a figure per suite named by its shape, with linked axes and cells', async () => {
+    renderWith({ flaky: [], grids: [GRID] });
 
     expect(
       await screen.findByRole('heading', { level: 2, name: 'skills' }),
     ).toBeDefined();
+
+    const figure = screen.getByRole('figure', {
+      name: 'skills: 1 subjects over 1 runs',
+    });
+
     expect(
-      screen.getByRole('figure', { name: 'skills: 0 subjects over 1 runs' }),
-    ).toBeDefined();
+      within(figure)
+        .getAllByRole('link')
+        .map((link) => [
+          link.textContent || link.getAttribute('aria-label'),
+          link.getAttribute('href'),
+        ]),
+    ).toEqual([
+      ['Run r1', '/evals/runs/r1'],
+      ['react-19', '/evals/subjects/skill/react-19'],
+      [
+        'react-19, 2026-10-01: 60% (3/5), flaky; open trial 1',
+        '/evals/runs/r1?trial=1',
+      ],
+    ]);
+    expect(within(figure).getByText('Holds a flaky task')).toBeDefined();
   });
 
   it('says when no run is stored', async () => {

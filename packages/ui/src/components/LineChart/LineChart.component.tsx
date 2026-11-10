@@ -1,4 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
+import { useId } from 'react';
 
 import type { LineChartProps } from './LineChart.types';
 
@@ -16,6 +17,7 @@ import { getLineChartGeometry } from './utils/getLineChartGeometry.util';
 export const LineChart = ({
   description,
   hasDataTable,
+  hasMarkerLabels,
   height = LINE_CHART.defaultHeight,
   markers,
   points = 'auto',
@@ -33,17 +35,21 @@ export const LineChart = ({
     xAxis,
     yAxis,
   });
+  const titleId = useId();
 
   return (
-    <div {...stylex.props(lineChartLayout.root)}>
+    <figure aria-labelledby={titleId} {...stylex.props(lineChartLayout.root)}>
       <LineChartAxisLabel axis='y' label={yAxis.label} />
-      <LineChartMarkerLabels markers={geometry.markers} />
+      {hasMarkerLabels !== false && (
+        <LineChartMarkerLabels markers={geometry.markers} />
+      )}
       <LineChartTicks axis='y' ticks={geometry.yTicks} />
       <LineChartPlot
         description={description}
         geometry={geometry}
         height={height}
         title={title}
+        titleId={titleId}
       />
       <LineChartTicks axis='x' ticks={geometry.xTicks} />
       <LineChartAxisLabel axis='x' label={xAxis.label} />
@@ -57,6 +63,6 @@ export const LineChart = ({
           yLabel={yAxis.label}
         />
       )}
-    </div>
+    </figure>
   );
 };

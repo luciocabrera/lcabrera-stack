@@ -42,7 +42,7 @@ export const Heatmap = ({
   const [firstLinked] = geometry.linked;
 
   return (
-    <div {...stylex.props(heatmapLayout.root)}>
+    <figure aria-labelledby={titleId} {...stylex.props(heatmapLayout.root)}>
       <HeatmapAxisLabels axis='column' cellSize={cellSize} items={columns} />
       <HeatmapAxisLabels axis='row' cellSize={cellSize} items={rows} />
       <div {...stylex.props(heatmapPlotStyles.box)}>
@@ -77,6 +77,6 @@ export const Heatmap = ({
           title={title}
         />
       )}
-    </div>
+    </figure>
   );
 };

@@ -30,11 +30,11 @@ const ROUTE = {
         marks: [
           {
             href: POINT.href,
-            index: 0,
             key: 'content-r2',
             kind: 'content',
             label: 'Content hash changed to bbbbbbbbbbbb',
             pointLabel: POINT.label,
+            startedAt: POINT.startedAt,
           },
         ],
         points: [POINT],
