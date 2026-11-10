@@ -4,17 +4,13 @@ import type {
 } from '#ui/components/Table/Table.types';
 
 import { tableBodyCellStyles } from '../TableBodyCell.stylex';
+import { NUMERIC_DATA_TYPES } from './resolveCellNumericStyles.util';
 
 type ResolveCellDataTypeAlignStylesArgs = {
   readonly align?: TableColumnAlign;
   readonly dataType: TableColumnDataType;
   readonly isAlignedByDataType: boolean;
 };
-
-const RIGHT_ALIGNED_DATA_TYPES: ReadonlySet<TableColumnDataType> = new Set([
-  'currency',
-  'number',
-]);
 
 const CENTERED_DATA_TYPES: ReadonlySet<TableColumnDataType> = new Set([
   'boolean',
@@ -30,7 +26,7 @@ export const resolveCellDataTypeAlignStyles = ({
 
   return [
     isByDataType &&
-      RIGHT_ALIGNED_DATA_TYPES.has(dataType) &&
+      NUMERIC_DATA_TYPES.has(dataType) &&
       tableBodyCellStyles.alignRight,
     isByDataType &&
       CENTERED_DATA_TYPES.has(dataType) &&

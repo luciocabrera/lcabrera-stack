@@ -1,14 +1,15 @@
+import { NavLink } from '@lcabrera/ui/components/NavLink';
+import { PageHeader } from '@lcabrera/ui/components/PageHeader';
+import { Text } from '@lcabrera/ui/components/Text';
 import * as stylex from '@stylexjs/stylex';
-import { Link, useLoaderData } from 'react-router';
+import { useLoaderData } from 'react-router';
 
 import type { loader } from './evals-confusion.loader';
 
 import { pageStyles } from '../evalsPage.stylex';
-import { EvalsPageHeader } from '../EvalsPageHeader';
-import { FiguresTable } from '../FiguresTable';
 import { evalsHref } from '../utils/evalsHref.util';
-import { CORNER } from './EvalsConfusion.constants';
-import { styles } from './EvalsConfusion.stylex';
+import { ConfusionMatrix } from './ConfusionMatrix.component';
+import { ConfusionRunPicker } from './ConfusionRunPicker.component';
 
 export const EvalsConfusion = () => {
   const { choices, matrix, runs, selectedRunId } =
@@ -21,8 +22,8 @@ export const EvalsConfusion = () => {
 
   return (
     <div {...stylex.props(pageStyles.page)}>
-      <EvalsPageHeader title='Trigger confusion' trail='confusion' />
-      <p {...stylex.props(pageStyles.note)}>
+      <PageHeader title='Trigger confusion' />
+      <Text size='sm' tone='secondary'>
         One row per expectation: a trigger task expects its skill to load, a
         near-miss task (<em>not</em> the skill) expects it to stay unloaded. One
         column per skill any trial loaded. A trial that loaded two skills counts
@@ -30,72 +31,19 @@ export const EvalsConfusion = () => {
         session failed under (error). A count in red is a skill loading where
         the task did not expect it, or none loading where one was expected.
         Skipped trials are left out.
-      </p>
-      <nav aria-label='Runs' {...stylex.props(pageStyles.section)}>
-        <ul {...stylex.props(styles.choices)}>
-          <li>
-            {selectedRunId === undefined ? (
-              <strong>Recent runs</strong>
-            ) : (
-              <Link to='/evals/confusion'>Recent runs</Link>
-            )}
-          </li>
-          {choices.map((choice) => (
-            <li key={choice.runId}>
-              {choice.runId === selectedRunId ? (
-                <strong>{choice.label}</strong>
-              ) : (
-                <Link
-                  to={`/evals/confusion?${new URLSearchParams({ run: choice.runId }).toString()}`}
-                >
-                  {choice.label}
-                </Link>
-              )}
-            </li>
-          ))}
-        </ul>
-      </nav>
+      </Text>
+      <ConfusionRunPicker choices={choices} selectedRunId={selectedRunId} />
       {selectedRunId !== undefined && (
-        <p {...stylex.props(pageStyles.note)}>
-          <Link to={evalsHref({ runId: selectedRunId })}>Open the run</Link>
-        </p>
+        <Text size='sm' tone='secondary'>
+          <NavLink to={evalsHref({ runId: selectedRunId })} variant='inline'>
+            Open the run
+          </NavLink>
+        </Text>
       )}
       {matrix.rows.length === 0 ? (
-        <p>No trigger or near-miss trial is stored for {scope}.</p>
+        <Text>No trigger or near-miss trial is stored for {scope}.</Text>
       ) : (
-        <FiguresTable
-          caption={`Skills loaded per expectation over ${scope}`}
-          columns={[
-            { key: 'expected', label: CORNER },
-            ...matrix.columns.map((column) => ({
-              isNumeric: true,
-              key: `loaded:${column}`,
-              label: column,
-            })),
-            { isNumeric: true, key: 'trials', label: 'Trials' },
-          ]}
-          rows={matrix.rows.map(({ cells, expected, trials }) => ({
-            cells: {
-              expected,
-              trials,
-              ...Object.fromEntries(
-                cells.map(({ column, count, isMisload, label }) => [
-                  `loaded:${column}`,
-                  <span
-                    key={column}
-                    {...stylex.props(
-                      count === 0 && styles.empty,
-                      count > 0 && isMisload && styles.misload,
-                    )}
-                  >
-                    {label}
-                  </span>,
-                ]),
-              ),
-            },
-            key: expected,
-          }))}
-        />
+        <ConfusionMatrix matrix={matrix} scope={scope} />
       )}
     </div>
   );

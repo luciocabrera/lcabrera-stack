@@ -7,6 +7,7 @@ import { TrendSparklineDot } from './TrendSparklineDot/TrendSparklineDot.compone
 import { getTrendPointsGeometry, getTrendValuesLine } from './utils';
 
 export const TrendSparkline = ({
+  emptyRole,
   height = 24,
   isConnected = true,
   label,
@@ -40,9 +41,9 @@ export const TrendSparkline = ({
 
   return (
     <svg
-      aria-hidden={isEmpty}
+      aria-hidden={isEmpty && emptyRole === undefined}
       height={height}
-      role={isEmpty ? undefined : populatedRole}
+      role={isEmpty ? emptyRole : populatedRole}
       viewBox={`0 0 ${String(width)} ${String(height)}`}
       width={width}
     >

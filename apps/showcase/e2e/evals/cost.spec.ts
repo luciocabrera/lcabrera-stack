@@ -51,20 +51,20 @@ it('draws three sparklines per suite card', async ({ page }) => {
 
     for (const chart of CHARTS) {
       await expect(
-        page.getByRole('figure', { exact: true, name: `${suite}: ${chart}` }),
+        page.getByRole('group', { exact: true, name: `${suite}: ${chart}` }),
       ).toBeVisible();
     }
   }
 
-  const reported = page.getByRole('figure', {
+  const reported = page.getByRole('group', {
     exact: true,
     name: 'skills: cost per run, reported by the sdk',
   });
-  const computed = page.getByRole('figure', {
+  const computed = page.getByRole('group', {
     exact: true,
     name: 'skills: cost per run, computed from model prices',
   });
-  const slowest = page.getByRole('figure', {
+  const slowest = page.getByRole('group', {
     exact: true,
     name: 'skills: p95 duration per run',
   });
@@ -91,7 +91,7 @@ it('draws three sparklines per suite card', async ({ page }) => {
   });
   await expect(
     page
-      .getByRole('figure', {
+      .getByRole('group', {
         exact: true,
         name: 'rules-consistency: cost per run, reported by the sdk',
       })

@@ -62,6 +62,7 @@ type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
   readonly isLoadingState: NonNullable<
     TableBodyCellProps<TData>['isLoadingState']
   >;
+  readonly isNumeric?: TableBodyCellLayout['isNumeric'];
   readonly key: DataKey<TData>;
   readonly minWidth: NonNullable<TableBodyCellProps<TData>['minWidth']>;
   readonly pinInfo: TableBodyCellProps<TData>['pinInfo'];

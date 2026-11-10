@@ -78,10 +78,10 @@ describe('runHealth', () => {
 
   it('plots every run oldest first and lists the troubled ones newest first', () => {
     expect(
-      skills?.points.map(({ key, tone, value }) => [key, value, tone]),
+      skills?.points.map(({ to, tone, value }) => [to, value, tone]),
     ).toEqual([
-      [RUN_A, 3, 'error'],
-      [RUN_B, 4, 'error'],
+      [`/evals/runs/${RUN_A}`, 3, 'error'],
+      [`/evals/runs/${RUN_B}`, 4, 'error'],
     ]);
     expect(
       skills?.troubled.map(({ errors, rateLimits, runId, timeouts }) => [
@@ -93,6 +93,25 @@ describe('runHealth', () => {
     ).toEqual([
       [RUN_B, 4, 0, 3],
       [RUN_A, 2, 1, 2],
+    ]);
+  });
+});
+
+describe('runHealth points', () => {
+  const [suite] = runHealth({
+    counts: [
+      { errorClass: 'execution', outcome: 'error', runId: RUN_A, trials: 1 },
+      { errorClass: undefined, outcome: 'timeout', runId: RUN_A, trials: 1 },
+    ],
+    runs: [run({ runId: RUN_B }), run({ runId: RUN_A })],
+  });
+
+  it('tones a clean run success and a run with as many errors as timeouts error', () => {
+    expect(
+      suite?.points.map(({ label, tone, value }) => [label, value, tone]),
+    ).toEqual([
+      ['2026-10-01 02:00 on main: 1 errors, 1 timeouts', 2, 'error'],
+      ['2026-10-01 02:00 on main: 0 errors, 0 timeouts', 0, 'success'],
     ]);
   });
 });

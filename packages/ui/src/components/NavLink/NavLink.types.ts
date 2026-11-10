@@ -23,6 +23,8 @@ export type NavLinkProps = Omit<RouterNavLinkProps, 'children' | 'color'> &
     readonly children: ReactNode;
     readonly customStylex?: StyleXStyles;
     readonly icon?: ReactNode;
+    /** Replaces the router's pathname match for `aria-current` and the active style, and turns off the pending style; unset, the router decides. */
+    readonly isActive?: boolean;
     readonly isBusy?: boolean;
     /** Ignored by the `inline` variant, which flows with the surrounding text. */
     readonly orientation?: DesignSystemOrientation;

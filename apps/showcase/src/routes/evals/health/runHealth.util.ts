@@ -65,16 +65,13 @@ export const runHealth = ({ counts, runs }: RunHealthArgs) => {
 
     return {
       classes: byClass(suiteCounts),
-      points: perRun
-        .toReversed()
-        .map(({ errors, href, label, runId, timeouts }) => ({
-          href,
-          key: runId,
-          label: `${label}: ${String(errors)} errors, ${String(timeouts)} timeouts`,
-          tone:
-            errors + timeouts > 0 ? ('error' as const) : ('success' as const),
-          value: errors + timeouts,
-        })),
+      points: perRun.toReversed().map(({ errors, href, label, timeouts }) => ({
+        label: `${label}: ${String(errors)} errors, ${String(timeouts)} timeouts`,
+        to: href,
+        tone:
+          errors + timeouts === 0 ? ('success' as const) : ('error' as const),
+        value: errors + timeouts,
+      })),
       runs: perRun.length,
       suite,
       totals: {

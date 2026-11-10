@@ -11,6 +11,7 @@ import type { TableStaticColumnWidths } from '#ui/components/Table/utils/resolve
 export type TableBodyCellLayout = {
   readonly align?: TableColumnAlign;
   readonly isFill?: boolean;
+  readonly isNumeric?: boolean;
   readonly staticWidths?: TableStaticColumnWidths;
 };
 
