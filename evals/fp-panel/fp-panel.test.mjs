@@ -1,3 +1,7 @@
+import {
+  SUITES,
+  VERIFIER_ROLES,
+} from '@repo/eval-history/envelope/envelope.constants';
 import { runEnvelopeSchema } from '@repo/eval-history/envelope/envelope.schema';
 import { mkdtempSync, readFileSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -16,10 +20,12 @@ import {
   panelTask,
   panelTrial,
   promptHashOf,
+  ROLES,
   seatLine,
   seatRunCount,
   seatScore,
   selectedFixtures,
+  SUITE,
   suiteExitCode,
   treePathOf,
 } from './fp-panel.mjs';
@@ -140,6 +146,13 @@ describe('selectedFixtures', () => {
     expect(() => selectedFixtures({ expected, names: ['c'] })).toThrow(
       'no fp-panel fixture named c; the fixtures are a, b',
     );
+  });
+});
+
+describe('the suite and its roles', () => {
+  it('records under a suite eval-history accepts, seating every verifier role', () => {
+    expect(SUITES).toContain(SUITE);
+    expect(new Set(ROLES)).toEqual(new Set(VERIFIER_ROLES));
   });
 });
 
