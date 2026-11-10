@@ -1,115 +1,41 @@
+import { NavLink } from '@lcabrera/ui/components/NavLink';
+import { PageHeader } from '@lcabrera/ui/components/PageHeader';
+import { Text } from '@lcabrera/ui/components/Text';
 import * as stylex from '@stylexjs/stylex';
-import { Link, useLoaderData } from 'react-router';
+import { useLoaderData } from 'react-router';
 
 import type { loader } from './evals-overview.loader';
 
-import { Sparkline } from '../Sparkline';
-import { compareHref } from '../utils/compareHref.util';
-import { costLabel } from '../utils/costLabel.util';
-import { durationLabel } from '../utils/durationLabel.util';
-import { evalsHref } from '../utils/evalsHref.util';
-import { intervalLabel } from '../utils/intervalLabel.util';
-import { passRateLabel } from '../utils/passRateLabel.util';
+import { layoutStyles } from '../evalsLayout.stylex';
+import { EVALS_VIEWS } from './EvalsOverview.constants';
 import { styles } from './EvalsOverview.stylex';
-import {
-  regressionFindingKey,
-  regressionFindingLabel,
-} from './regressionFindingLabel.util';
+import { RegressionAlert } from './RegressionAlert.component';
+import { SuiteCard } from './SuiteCard.component';
 
 export const EvalsOverview = () => {
   const { regressions, suites } = useLoaderData<typeof loader>();
 
   return (
-    <div {...stylex.props(styles.page)}>
-      <h1 {...stylex.props(styles.title)}>Evals</h1>
-      <nav aria-label='Eval views' {...stylex.props(styles.views)}>
-        <Link to='/evals/compare'>Compare runs</Link>
-        <Link to='/evals/heatmap'>Heatmap</Link>
-        <Link to='/evals/cost'>Cost and latency</Link>
-        <Link to='/evals/flaky'>Flaky tasks</Link>
-        <Link to='/evals/confusion'>Trigger confusion</Link>
-        <Link to='/evals/quality'>Quality dimensions</Link>
-        <Link to='/evals/health'>Run health</Link>
+    <div {...stylex.props(layoutStyles.page)}>
+      <PageHeader title='Evals' />
+      <nav aria-label='Eval views'>
+        <ul {...stylex.props(layoutStyles.row)}>
+          {EVALS_VIEWS.map(({ label, to }) => (
+            <li key={to}>
+              <NavLink to={to} variant='inline'>
+                {label}
+              </NavLink>
+            </li>
+          ))}
+        </ul>
       </nav>
-      {regressions.map(
-        ({ findings, flakyLeftOut, latest, previous, suite }) => (
-          <div key={suite} role='alert' {...stylex.props(styles.banner)}>
-            <p {...stylex.props(styles.bannerLine)}>
-              {suite} regressed on main in{' '}
-              <Link to={evalsHref({ runId: latest.runId })}>
-                the latest run
-              </Link>{' '}
-              against{' '}
-              <Link to={evalsHref({ runId: previous.runId })}>
-                the run before
-              </Link>
-              .{' '}
-              <Link to={compareHref({ a: previous.runId, b: latest.runId })}>
-                Compare them
-              </Link>
-              .
-            </p>
-            <ul {...stylex.props(styles.findings)}>
-              {findings.map((finding) => (
-                <li key={regressionFindingKey(finding)}>
-                  {regressionFindingLabel(finding)}
-                </li>
-              ))}
-            </ul>
-            {flakyLeftOut.length > 0 && (
-              <p {...stylex.props(styles.bannerLine)}>
-                {flakyLeftOut.length} flaky{' '}
-                {flakyLeftOut.length === 1 ? 'task was' : 'tasks were'} left out
-                of the rule; <Link to='/evals/flaky'>see the flaky tasks</Link>.
-              </p>
-            )}
-          </div>
-        ),
-      )}
-      {suites.length === 0 && <p>No eval runs are stored yet.</p>}
+      {regressions.map((regression) => (
+        <RegressionAlert key={regression.suite} regression={regression} />
+      ))}
+      {suites.length === 0 && <Text>No eval runs are stored yet.</Text>}
       <div {...stylex.props(styles.grid)}>
-        {suites.map(({ flakyLeftOut, latest, points, suite }) => (
-          <section key={suite} {...stylex.props(styles.card)}>
-            <h2 {...stylex.props(styles.suiteName)}>
-              <Link to={evalsHref({ runId: latest.runId })}>{suite}</Link>
-            </h2>
-            <dl {...stylex.props(styles.facts)}>
-              <dt {...stylex.props(styles.factTerm)}>Pass rate</dt>
-              <dd {...stylex.props(styles.factValue)}>
-                {passRateLabel(latest)}
-              </dd>
-              <dt {...stylex.props(styles.factTerm)}>Interval</dt>
-              <dd {...stylex.props(styles.factValue)}>
-                {intervalLabel(latest)}
-              </dd>
-              <dt {...stylex.props(styles.factTerm)}>Cost</dt>
-              <dd {...stylex.props(styles.factValue)}>
-                {costLabel(latest.costUsd)}
-              </dd>
-              <dt {...stylex.props(styles.factTerm)}>Duration</dt>
-              <dd {...stylex.props(styles.factValue)}>
-                {durationLabel(latest.durationMs)}
-              </dd>
-              <dt {...stylex.props(styles.factTerm)}>Flaky, left out</dt>
-              <dd {...stylex.props(styles.factValue)}>
-                {flakyLeftOut === undefined ? (
-                  'no main pair to judge'
-                ) : (
-                  <Link to='/evals/flaky'>{flakyLeftOut.length} tasks</Link>
-                )}
-              </dd>
-              <dt {...stylex.props(styles.factTerm)}>Run</dt>
-              <dd {...stylex.props(styles.factValue)}>
-                {latest.startedAt.slice(0, 16).replace('T', ' ')} on{' '}
-                {latest.branch} at {latest.gitSha.slice(0, 8)}
-              </dd>
-            </dl>
-            <Sparkline
-              label={`${suite} pass rate over its last ${String(points.length)} runs`}
-              maxValue={1}
-              points={points}
-            />
-          </section>
+        {suites.map((summary) => (
+          <SuiteCard key={summary.suite} summary={summary} />
         ))}
       </div>
     </div>

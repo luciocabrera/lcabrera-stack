@@ -6,7 +6,7 @@ import { useLoaderData } from 'react-router';
 
 import type { loader } from './evals-confusion.loader';
 
-import { pageStyles } from '../evalsPage.stylex';
+import { layoutStyles } from '../evalsLayout.stylex';
 import { evalsHref } from '../utils/evalsHref.util';
 import { ConfusionMatrix } from './ConfusionMatrix.component';
 import { ConfusionRunPicker } from './ConfusionRunPicker.component';
@@ -21,7 +21,7 @@ export const EvalsConfusion = () => {
       : `the run of ${only?.label ?? selectedRunId}`;
 
   return (
-    <div {...stylex.props(pageStyles.page)}>
+    <div {...stylex.props(layoutStyles.page)}>
       <PageHeader title='Trigger confusion' />
       <Text size='sm' tone='secondary'>
         One row per expectation: a trigger task expects its skill to load, a

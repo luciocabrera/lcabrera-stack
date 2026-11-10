@@ -79,7 +79,7 @@ describe('the run page loader', () => {
     const data = await invoke(`/evals/runs/${RUN_ID}`);
 
     expect(data.run).toMatchObject({ rate: 0.8, runId: RUN_ID });
-    expect(data.chart.map(({ href }) => href)).toEqual([
+    expect(data.chart.map(({ to }) => to)).toEqual([
       `/evals/runs/${RUN_ID}?trial=7`,
     ]);
     expect(data.selectedTrial).toBeUndefined();

@@ -48,6 +48,10 @@ describe('trendMarks', () => {
         [2, 'model', 'Model changed from model-a to model-b'],
       ],
     );
+    expect(marks.map(({ href, pointLabel }) => [href, pointLabel])).toEqual([
+      ['/evals/runs/r2', 'r2'],
+      ['/evals/runs/r3', 'r3'],
+    ]);
   });
 
   it('names every content hash of a run that held more than one', () => {
@@ -82,11 +86,27 @@ describe('trendMarks', () => {
 
     expect(marks).toEqual([
       {
+        href: '/evals/runs/r2',
         index: 1,
         key: 'annotation-4',
         kind: 'annotation',
         label: 'incident annotation, 2026-01-01',
+        pointLabel: 'r2',
       },
     ]);
+  });
+
+  it('marks an annotation made at the very start of a run on that run', () => {
+    const [mark] = trendMarks({
+      annotations: [
+        { annotationId: '6', at: '2026-01-02T02:00:00.000Z', kind: 'note' },
+      ],
+      points: [
+        point({ key: 'r1', startedAt: '2026-01-01T02:00:00.000Z' }),
+        point({ key: 'r2', startedAt: '2026-01-02T02:00:00.000Z' }),
+      ],
+    });
+
+    expect(mark?.index).toBe(1);
   });
 });

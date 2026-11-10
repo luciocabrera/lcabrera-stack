@@ -5,7 +5,7 @@ import { useLoaderData } from 'react-router';
 
 import type { loader } from './evals-health.loader';
 
-import { pageStyles } from '../evalsPage.stylex';
+import { layoutStyles } from '../evalsLayout.stylex';
 import { RATE_LIMIT_CLASSES } from './EvalsHealth.constants';
 import { HealthSuite } from './HealthSuite.component';
 
@@ -13,7 +13,7 @@ export const EvalsHealth = () => {
   const { suites } = useLoaderData<typeof loader>();
 
   return (
-    <div {...stylex.props(pageStyles.page)}>
+    <div {...stylex.props(layoutStyles.page)}>
       <PageHeader title='Run health' />
       <Text size='sm' tone='secondary'>
         Trials that ended in an error or a timeout in the recent runs of each

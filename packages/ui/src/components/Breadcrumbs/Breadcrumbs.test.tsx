@@ -105,7 +105,10 @@ describe('Breadcrumbs', () => {
       within(screen.getByRole('list'))
         .getAllByRole('listitem')
         .map((item) => item.textContent),
-    ).toEqual(['Home/', 'Projects/', 'Reports/', 'Quarterly']);
+    ).toEqual(['Home / ', 'Projects / ', 'Reports / ', 'Quarterly']);
+    expect(screen.getByRole('navigation').textContent).toBe(
+      'Home / Projects / Reports / Quarterly',
+    );
     expect(screen.getByRole('link', { name: 'Home' }).textContent).toBe('Home');
   });
 

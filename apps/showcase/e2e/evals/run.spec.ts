@@ -81,7 +81,7 @@ it('charts each trial duration, and a point selects its trial until Clear', asyn
 }) => {
   await openGrid(page, LATEST);
 
-  const chart = page.getByRole('figure', {
+  const chart = page.getByRole('group', {
     exact: true,
     name: 'Duration of each of the 15 trials',
   });
@@ -121,7 +121,7 @@ it('notes that the chart shows the first 500 of a larger run', async ({
 
   await expect(
     page
-      .getByRole('figure', {
+      .getByRole('group', {
         exact: true,
         name: 'Duration of each of the 500 trials',
       })

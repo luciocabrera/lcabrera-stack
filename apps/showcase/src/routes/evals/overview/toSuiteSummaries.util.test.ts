@@ -63,15 +63,13 @@ describe('toSuiteSummaries', () => {
 
     expect(summary?.points).toEqual([
       {
-        href: '/evals/runs/a',
-        key: 'a',
         label: 'Run a, 2026-10-01 on main: 60% (1/2)',
+        to: '/evals/runs/a',
         value: 0.6,
       },
       {
-        href: '/evals/runs/c',
-        key: 'c',
         label: 'Run c, 2026-10-03 on main: 90% (1/2)',
+        to: '/evals/runs/c',
         value: 0.9,
       },
     ]);

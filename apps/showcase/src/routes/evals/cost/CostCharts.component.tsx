@@ -6,14 +6,14 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { CostChartsProps } from './EvalsCost.types';
 
-import { pageStyles } from '../evalsPage.stylex';
+import { layoutStyles } from '../evalsLayout.stylex';
 import { COST_CHARTS, COST_SPARKLINE } from './EvalsCost.constants';
 import { styles } from './EvalsCost.stylex';
 
 export const CostCharts = ({ charts }: CostChartsProps) => (
   <div {...stylex.props(styles.charts)}>
     {charts.map((chart) => (
-      <Card customStylex={pageStyles.section} key={chart.suite} padding='md'>
+      <Card customStylex={layoutStyles.section} key={chart.suite} padding='md'>
         <Title level={3} variant='plain'>
           {chart.suite}
         </Title>

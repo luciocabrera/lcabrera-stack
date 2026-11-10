@@ -29,7 +29,7 @@ export const BreadcrumbsItem = ({
         </Link>
       )}
       <span aria-hidden='true' {...stylex.props(styles.separator)}>
-        /
+        {' / '}
       </span>
     </li>
   );
