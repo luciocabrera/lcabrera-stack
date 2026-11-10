@@ -1,5 +1,5 @@
 import { RuleTester } from '@typescript-eslint/rule-tester';
-import { afterAll, describe, it } from 'vite-plus/test';
+import { afterAll, describe, expect, it } from 'vite-plus/test';
 
 import rule from './no-raw-ui-primitives.ts';
 
@@ -101,4 +101,16 @@ ruleTester.run('no-raw-ui-primitives', rule, {
       filename: 'src/routes/home/Home.component.tsx',
     },
   ],
+});
+
+describe('no-raw-ui-primitives meta', () => {
+  it('is a suggestion that names the element and the component library', () => {
+    expect(rule.meta.type).toBe('suggestion');
+    expect(rule.meta.messages.rawUiPrimitive).toBe(
+      'Render `<{{element}}>` through the component library rather than as a raw intrinsic element.',
+    );
+    expect(rule.meta.docs?.description).toBe(
+      'Disallow raw table, form-control and heading elements in favour of the component library',
+    );
+  });
 });
