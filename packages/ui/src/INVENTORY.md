@@ -309,9 +309,10 @@ Covers `packages/ui` only. Two sibling packages own what used to be listed here,
 
 ### `src/components/VirtualSelect/VirtualSelectDropdown/utils/` _(private delegates)_
 
-| Function          | Location                                                                       | Description                                                                                                                                                                         |
-| ----------------- | ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `shouldOpenAbove` | `components/VirtualSelect/VirtualSelectDropdown/utils/shouldOpenAbove.util.ts` | Whether a floating list opens above its trigger: always for `top`, never for `bottom`, and for `auto` only when it overflows a space below too small to use and above has more room |
+| Function             | Location                                                                          | Description                                                                                                                                                                         |
+| -------------------- | --------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `shouldOpenAbove`    | `components/VirtualSelect/VirtualSelectDropdown/utils/shouldOpenAbove.util.ts`    | Whether a floating list opens above its trigger: always for `top`, never for `bottom`, and for `auto` only when it overflows a space below too small to use and above has more room |
+| `resolvePopoverMode` | `components/VirtualSelect/VirtualSelectDropdown/utils/resolvePopoverMode.util.ts` | `manual` for a floating list in a browser with the popover API, so it renders in the top layer; nothing otherwise                                                                   |
 
 ### `src/components/VirtualList/utils/` _(private delegates)_
 
@@ -321,10 +322,12 @@ Covers `packages/ui` only. Two sibling packages own what used to be listed here,
 
 ### `src/components/Table/filters/FilterInputs/utils/` _(private delegates)_
 
-| Function               | Location                                                                   | Description                                                                                                        |
-| ---------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `shouldShowSelectList` | `components/Table/filters/FilterInputs/utils/shouldShowSelectList.util.ts` | Whether a text filter picks its value from an option list: an equality operator on a column with fetchable options |
-| `isValueSelectList`    | `components/Table/filters/FilterInputs/utils/isValueSelectList.util.ts`    | Whether a filter row's value input is that option list, so the operator select is drawn joined to it               |
+| Function                | Location                                                                    | Description                                                                                                                                |
+| ----------------------- | --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `shouldShowSelectList`  | `components/Table/filters/FilterInputs/utils/shouldShowSelectList.util.ts`  | Whether a text filter picks its value from an option list: an equality operator on a column with fetchable options                         |
+| `isValueSelectList`     | `components/Table/filters/FilterInputs/utils/isValueSelectList.util.ts`     | Whether a filter row's value input is that option list, so the operator select is drawn joined to it                                       |
+| `resolveOperatorJoin`   | `components/Table/filters/FilterInputs/utils/resolveOperatorJoin.util.ts`   | The operator select's attached edge and the row's gap-closing style: `bottom` and `containerJoined` over an option list, neither otherwise |
+| `toBooleanColumnFilter` | `components/Table/filters/FilterInputs/utils/toBooleanColumnFilter.util.ts` | A boolean column's filter: a `boolean` or `empty` filter passes through, anything else becomes none                                        |
 
 ### `src/components/Form/builders/` _(public — field-tree DSL)_
 
