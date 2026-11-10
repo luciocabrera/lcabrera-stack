@@ -27,6 +27,11 @@ describe('isAdversaryAlone', () => {
         }),
       ]),
     ).toBe(false);
+    expect(
+      isAdversaryAlone(
+        ofCase('FP-0001').filter(({ role }) => role === 'judge'),
+      ),
+    ).toBe(false);
     expect(isAdversaryAlone([])).toBe(false);
   });
 });

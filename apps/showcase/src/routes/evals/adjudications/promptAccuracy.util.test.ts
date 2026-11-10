@@ -64,6 +64,40 @@ describe('promptAccuracy', () => {
     expect(rows.map(({ role }) => role)).toEqual(['adversary', 'judge']);
   });
 
+  it('orders one role by the first case each prompt sat on', () => {
+    const older = adjudication({
+      caseId: 'FP-0040',
+      createdAt: new Date('2026-10-01T00:00:00.000Z'),
+    });
+    const verdicts = [
+      seat({
+        agentPromptHash: 'z'.repeat(64),
+        caseId: 'FP-0040',
+        model: 'm',
+        role: 'judge',
+        verdict: 'REAL',
+      }),
+      seat({
+        agentPromptHash: 'a'.repeat(64),
+        caseId: 'FP-0041',
+        model: 'm',
+        role: 'judge',
+        verdict: 'REAL',
+      }),
+    ];
+    const rows = promptAccuracy(
+      scoredVerdicts({
+        cases: [older, adjudication({ caseId: 'FP-0041' })],
+        verdicts,
+      }),
+    );
+
+    expect(rows.map(({ prompt }) => prompt)).toEqual([
+      'z'.repeat(12),
+      'a'.repeat(12),
+    ]);
+  });
+
   it('lists no prompt without a verdict', () => {
     expect(promptAccuracy([])).toEqual([]);
   });
