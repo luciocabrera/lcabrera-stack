@@ -9,6 +9,10 @@ area:
   - apps/showcase/src/routes.ts
   - apps/showcase/e2e/evals/adjudications*
   - apps/showcase/e2e/evals/seed*
+  - apps/showcase/e2e/evals/overview.spec.ts
+  - apps/showcase/e2e/evals/empty.spec.ts
+  - apps/showcase/src/routes/evals/overview/EvalsOverview.constants.ts
+  - apps/showcase/src/routes/evals/overview/EvalsOverview.test.tsx
   - evals/fp-panel/**
   - evals/README.md
   - evals/runner-writes.test.mjs

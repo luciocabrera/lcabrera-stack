@@ -156,6 +156,7 @@ describe('EvalsOverview', () => {
       ['Trigger confusion', '/evals/confusion'],
       ['Quality dimensions', '/evals/quality'],
       ['Run health', '/evals/health'],
+      ['False-positive panel', '/evals/adjudications'],
     ]);
   });
 
