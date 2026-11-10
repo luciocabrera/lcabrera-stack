@@ -150,21 +150,25 @@ const recordSeat = ({ fixture, index, record, role, session }) => {
   return { ...session, fixture: fixture.fixture, role: role.role };
 };
 
+const sitInScratch = (seat) =>
+  inScratchDirectory('fp-panel-eval-', (tree) => sitIn({ ...seat, tree }));
+
+const seatJob =
+  ({ fixture, index, model, record, role }) =>
+  async () =>
+    recordSeat({
+      fixture,
+      index,
+      record,
+      role,
+      session: await sitInScratch({ fixture, model, role }),
+    });
+
 const jobsFor = ({ fixtures, model, record, roles, runs }) =>
   fixtures.flatMap((fixture) =>
     roles.flatMap((role) =>
-      Array.from(
-        { length: runs },
-        (_, index) => async () =>
-          recordSeat({
-            fixture,
-            index,
-            record,
-            role,
-            session: await inScratchDirectory('fp-panel-eval-', (tree) =>
-              sitIn({ fixture, model, role, tree }),
-            ),
-          }),
+      Array.from({ length: runs }, (_, index) =>
+        seatJob({ fixture, index, model, record, role }),
       ),
     ),
   );

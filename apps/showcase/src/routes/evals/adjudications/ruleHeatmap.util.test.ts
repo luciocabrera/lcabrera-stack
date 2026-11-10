@@ -17,9 +17,9 @@ describe('ruleHeatmap', () => {
       { key: 'claude-opus-5-5', label: 'claude-opus-5-5' },
       { key: 'claude-sonnet-5-5', label: 'claude-sonnet-5-5' },
     ]);
-    expect(heatmap.columns).toEqual([
-      { key: `biome/${RULE}`, label: `biome: ${RULE}` },
-      { key: 'fallow/complexity', label: 'fallow: complexity' },
+    expect(heatmap.columns.map(({ key, label }) => [key, label])).toEqual([
+      [`biome/${RULE}`, `biome: ${RULE}`],
+      ['fallow/complexity', 'fallow: complexity'],
     ]);
     expect(heatmap.title).toBe('Accuracy of 3 models over 2 rules');
   });
