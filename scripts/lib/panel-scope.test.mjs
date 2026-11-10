@@ -11,7 +11,12 @@ import { join } from 'node:path';
 
 import { afterAll, describe, expect, it } from 'vite-plus/test';
 
-import { PANEL_TOOLS, scopeDecision, scopeHook } from './panel-scope.mjs';
+import {
+  PANEL_TOOLS,
+  panelSessionOptions,
+  scopeDecision,
+  scopeHook,
+} from './panel-scope.mjs';
 
 const tree = realpathSync(mkdtempSync(join(tmpdir(), 'panel-scope-')));
 const outside = realpathSync(mkdtempSync(join(tmpdir(), 'panel-outside-')));
@@ -107,5 +112,44 @@ describe('scopeHook', () => {
         permissionDecisionReason: '/etc/passwd is outside the case tree',
       },
     });
+  });
+});
+
+describe('panelSessionOptions', () => {
+  const options = panelSessionOptions({
+    maxTurns: 80,
+    model: 'opus',
+    systemPrompt: 'Judge the case.',
+    tree,
+  });
+
+  it('seats a session in the tree with the read-only tools, no settings and no MCP server', () => {
+    expect({ ...options, hooks: undefined }).toEqual({
+      cwd: tree,
+      hooks: undefined,
+      maxTurns: 80,
+      mcpServers: {},
+      model: 'opus',
+      permissionMode: 'dontAsk',
+      persistSession: false,
+      settingSources: [],
+      strictMcpConfig: true,
+      systemPrompt: 'Judge the case.',
+      tools: PANEL_TOOLS,
+    });
+  });
+
+  it('runs every tool call through the scope hook for that tree', async () => {
+    const [
+      {
+        hooks: [hook],
+      },
+    ] = options.hooks.PreToolUse;
+    const answer = await hook({
+      tool_input: { file_path: join(outside, 'secret.txt') },
+      tool_name: 'Read',
+    });
+
+    expect(answer.hookSpecificOutput.permissionDecision).toBe('deny');
   });
 });

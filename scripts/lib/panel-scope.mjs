@@ -3,6 +3,8 @@
  * of the three read-only file tools, and every path it names stays inside the
  * exported case tree. A read anywhere else is refused, so a session cannot
  * reach the repository, its history or the builder's notes by absolute path.
+ * The session options every panel seat runs with live here too, so a seat run
+ * outside `vp run adjudicate:panel` is held to the same scope.
  */
 import { existsSync, realpathSync } from 'node:fs';
 import { isAbsolute, resolve, sep } from 'node:path';
@@ -68,3 +70,22 @@ export const scopeHook =
       },
     };
   };
+
+export const panelSessionOptions = ({
+  maxTurns,
+  model,
+  systemPrompt,
+  tree,
+}) => ({
+  cwd: tree,
+  hooks: { PreToolUse: [{ hooks: [scopeHook({ tree })] }] },
+  maxTurns,
+  mcpServers: {},
+  model,
+  permissionMode: 'dontAsk',
+  persistSession: false,
+  settingSources: [],
+  strictMcpConfig: true,
+  systemPrompt,
+  tools: PANEL_TOOLS,
+});

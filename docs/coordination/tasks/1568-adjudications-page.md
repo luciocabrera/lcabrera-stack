@@ -13,6 +13,8 @@ area:
   - evals/README.md
   - evals/runner-writes.test.mjs
   - devkit.config.json
+  - scripts/adjudicate-panel.mjs
+  - scripts/lib/panel-scope*
   - apps/showcase/src/routes/evals/.server/evalsHistory.service*
   - apps/showcase/src/routes/evals/.server/evalsPublicPayload.test.ts
   - apps/showcase/src/routes/evals/utils/evalsRouteEntries.util.test.ts

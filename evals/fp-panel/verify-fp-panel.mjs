@@ -25,7 +25,10 @@ import {
   dispatchPrompt,
   parseVerdict,
 } from '../../scripts/lib/adjudication-panel.mjs';
-import { PANEL_TOOLS, scopeHook } from '../../scripts/lib/panel-scope.mjs';
+import {
+  PANEL_TOOLS,
+  panelSessionOptions,
+} from '../../scripts/lib/panel-scope.mjs';
 import {
   chunk,
   costLine,
@@ -94,19 +97,12 @@ const sitIn = async ({ fixture, model, role, tree }) => {
   const { error, messages, timestamps } = await timedDrain({
     open: () =>
       query({
-        options: {
-          cwd: tree,
-          hooks: { PreToolUse: [{ hooks: [scopeHook({ tree })] }] },
+        options: panelSessionOptions({
           maxTurns: MAX_TURNS,
-          mcpServers: {},
           model,
-          permissionMode: 'dontAsk',
-          persistSession: false,
-          settingSources: [],
-          strictMcpConfig: true,
           systemPrompt: role.systemPrompt,
-          tools: PANEL_TOOLS,
-        },
+          tree,
+        }),
         prompt: dispatchPrompt(fixture.casePath),
       }),
     queuedAt,
