@@ -15,7 +15,7 @@ import type { loader } from './evals-quality.loader';
 import type { QualityDimensionRow } from './EvalsQuality.types';
 
 import { EVALS_SCORED } from '../constants/evalsDashboard.constants';
-import { pageStyles } from '../evalsPage.stylex';
+import { layoutStyles } from '../evalsLayout.stylex';
 import { subjectHref } from '../utils/subjectHref.util';
 import { QUALITY_SPARKLINE, QUALITY_TOP_SCORE } from './EvalsQuality.constants';
 
@@ -57,7 +57,7 @@ export const EvalsQuality = () => {
   const { runs, skills } = useLoaderData<typeof loader>();
 
   return (
-    <div {...stylex.props(pageStyles.page)}>
+    <div {...stylex.props(layoutStyles.page)}>
       <PageHeader title='Quality dimensions' />
       <Text size='sm' tone='secondary'>
         The judge&apos;s mean score per rubric dimension, from 1 to{' '}
@@ -69,7 +69,10 @@ export const EvalsQuality = () => {
       </Text>
       {skills.length === 0 && <Text>No skill-quality run is stored yet.</Text>}
       {skills.map(({ baseline, dimensions, kind, name }) => (
-        <section key={`${kind}/${name}`} {...stylex.props(pageStyles.section)}>
+        <section
+          key={`${kind}/${name}`}
+          {...stylex.props(layoutStyles.section)}
+        >
           <Title level={2} variant='plain'>
             <NavLink to={subjectHref({ kind, name })} variant='inline'>
               {name}

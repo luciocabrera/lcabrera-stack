@@ -21,9 +21,8 @@ export const toSuiteSummaries = (runs: readonly RunFigures[]) => {
         .filter((run) => run.rate !== undefined)
         .toReversed()
         .map((run) => ({
-          href: evalsHref({ runId: run.runId }),
-          key: run.runId,
           label: `Run ${run.runId.slice(0, 8)}, ${run.startedAt.slice(0, 10)} on ${run.branch}: ${passRateLabel(run)}`,
+          to: evalsHref({ runId: run.runId }),
           value: run.rate ?? 0,
         })),
       suite,

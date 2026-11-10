@@ -1,6 +1,16 @@
+import type { BreadcrumbHandle } from '@lcabrera/ui';
 import type { TableColumn } from '@lcabrera/ui/components/Table/Table.types';
 
 import type { TrialTableRow } from '../types/trialTableRow.types';
+
+export const EVALS_RUN_HANDLE = {
+  breadcrumb: ({ params }) => [
+    { label: 'Evals', to: '/evals' },
+    { label: `run ${params.runId ?? ''}` },
+  ],
+} satisfies BreadcrumbHandle;
+
+export const RUN_SPARKLINE = { height: 48, width: 240 } as const;
 
 export const PERSISTENCE_KEY = 'evals-run-trials-table';
 export const TABLE_NAME = 'eval_trial';

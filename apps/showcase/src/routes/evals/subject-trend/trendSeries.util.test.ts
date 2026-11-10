@@ -67,9 +67,8 @@ describe('trendSeries', () => {
       runs: [SKILLS_NEW, QUALITY, SKILLS_OLD],
     });
 
-    expect(series.map(({ marks }) => marks.map(({ index }) => index))).toEqual([
-      [0],
-      [1],
-    ]);
+    expect(
+      series.map(({ marks }) => marks.map(({ startedAt }) => startedAt)),
+    ).toEqual([['2026-10-02T02:00:00.000Z'], ['2026-10-03T02:00:00.000Z']]);
   });
 });

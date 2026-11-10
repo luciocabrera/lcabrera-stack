@@ -79,6 +79,8 @@ export type LineChartPointsMode = 'always' | 'auto' | 'never';
 export type LineChartProps = {
   readonly description?: string;
   readonly hasDataTable?: boolean;
+  /** Draws each marker's label in a list above the plot; `false` leaves the marker named only by its line's `<title>`. Defaults to `true`. */
+  readonly hasMarkerLabels?: boolean;
   readonly height?: number;
   readonly markers?: readonly ChartMarker[];
   /** `auto` draws linked, toned and short-series points; a linked point is drawn in every mode, so its link stays reachable. */

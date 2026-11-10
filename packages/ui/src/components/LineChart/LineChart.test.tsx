@@ -98,6 +98,18 @@ const titledPath = ({ container, name }: TitledPathArgs) =>
 
 describe('LineChart', () => {
   describe('roles and names', () => {
+    it('is a figure named by the title the plot draws', () => {
+      const { container } = renderChart();
+
+      const figure = screen.getByRole('figure', { name: 'Request latency' });
+
+      expect(figure).toBe(container.firstElementChild);
+      expect(figure.getAttribute('aria-labelledby')).toBe(
+        screen.getByRole('img').getAttribute('aria-labelledby'),
+      );
+      expect(container.querySelectorAll('[id]')).toHaveLength(2);
+    });
+
     it('names the chart by its title as an image', () => {
       renderChart();
 
@@ -305,6 +317,26 @@ describe('LineChart', () => {
       expect(label.tagName).toBe('LI');
       expect(label.getAttribute('style')).toContain('50%');
       expect(within(label).queryByRole('link')).toBeNull();
+    });
+
+    it('lists the marker labels when hasMarkerLabels is true', () => {
+      renderChart({
+        hasMarkerLabels: true,
+        markers: [{ label: 'Deploy', x: 2 }],
+      });
+
+      expect(screen.getByRole('listitem').textContent).toBe('Deploy');
+    });
+
+    it('draws no marker label list when hasMarkerLabels is false, keeping the line named', () => {
+      const { container } = renderChart({
+        hasMarkerLabels: false,
+        markers: [{ label: 'Deploy', x: 2 }],
+      });
+
+      expect(container.querySelector('ul')).toBeNull();
+      expect(titledPath({ container, name: 'Deploy' })).toBeDefined();
+      expect(screen.getAllByText('Deploy')).toHaveLength(1);
     });
 
     it('colours markers from their tone, neutral by default', () => {
@@ -933,6 +965,24 @@ describe('LineChart', () => {
 
     it('renders the same markup on the server and the client', () => {
       const tree = <MemoryRouter>{CHART}</MemoryRouter>;
+      const { container } = render(tree);
+
+      expect(normaliseMarkup(renderToString(tree))).toBe(
+        normaliseMarkup(container.firstElementChild?.outerHTML ?? ''),
+      );
+    });
+
+    it('renders the same markup on the server and the client without marker labels', () => {
+      const tree = (
+        <MemoryRouter>
+          <LineChart
+            hasMarkerLabels={false}
+            markers={[{ label: 'Deploy', x: 2 }]}
+            series={[LATENCY]}
+            title='Request latency'
+          />
+        </MemoryRouter>
+      );
       const { container } = render(tree);
 
       expect(normaliseMarkup(renderToString(tree))).toBe(

@@ -6,7 +6,7 @@ import type { loader } from './evals-flaky.loader';
 import type { FlakyTaskRow } from './EvalsFlaky.types';
 
 import { EVALS_FLAKY } from '../constants/evalsDashboard.constants';
-import { pageStyles } from '../evalsPage.stylex';
+import { layoutStyles } from '../evalsLayout.stylex';
 import { FLAKY_TASK_COLUMNS } from './EvalsFlaky.constants';
 import { flakyRunColumn } from './flakyRunColumn.util';
 
@@ -14,7 +14,7 @@ export const EvalsFlaky = () => {
   const { suites } = useLoaderData<typeof loader>();
 
   return (
-    <div {...stylex.props(pageStyles.page)}>
+    <div {...stylex.props(layoutStyles.page)}>
       <PageHeader title='Flaky tasks' />
       <Text size='sm' tone='secondary'>
         Per suite, the tasks the regression rule behind the banner on{' '}
@@ -34,7 +34,7 @@ export const EvalsFlaky = () => {
         const rows: readonly FlakyTaskRow[] = tasks;
 
         return (
-          <section key={suite} {...stylex.props(pageStyles.section)}>
+          <section key={suite} {...stylex.props(layoutStyles.section)}>
             <Title level={2} variant='plain'>
               {suite}
             </Title>

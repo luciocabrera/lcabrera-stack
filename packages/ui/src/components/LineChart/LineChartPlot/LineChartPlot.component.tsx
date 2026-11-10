@@ -19,8 +19,8 @@ export const LineChartPlot = ({
   geometry,
   height,
   title,
+  titleId,
 }: LineChartPlotProps) => {
-  const titleId = useId();
   const descriptionId = useId();
   const clipId = useId();
   const clipPath = `url(#${clipId})`;

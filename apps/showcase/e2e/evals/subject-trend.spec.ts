@@ -125,15 +125,20 @@ it('shades the Wilson band around the pass-rate line', async ({ page }) => {
     name: 'skill react-19 pass rate in skills over time',
   });
   const dot = skills.getByRole('link', { name: /^skills run 54000000, / });
-  const figureBox = await skills.boundingBox();
+  const plotBox = await skills
+    .getByRole('img', {
+      exact: true,
+      name: 'skill react-19 pass rate in skills over time',
+    })
+    .boundingBox();
   const dotBox = await dot.boundingBox();
 
-  if (figureBox === null || dotBox === null) {
+  if (plotBox === null || dotBox === null) {
     throw new Error('the trend chart has no box to sample');
   }
 
   const toFloor =
-    figureBox.y + figureBox.height - (dotBox.y + dotBox.height / 2) - 6;
+    plotBox.y + plotBox.height - (dotBox.y + dotBox.height / 2) - 6;
   const band = await paintAt({ below: 12, target: dot, within: skills });
   const backdrop = await paintAt({
     below: toFloor,

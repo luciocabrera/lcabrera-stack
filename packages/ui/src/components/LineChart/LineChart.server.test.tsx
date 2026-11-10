@@ -32,4 +32,30 @@ describe('LineChart on the server', () => {
     expect(html).toContain('<title');
     expect(html).toContain('M0,100L100,0');
   });
+
+  it('names the figure root by the title id the plot draws', () => {
+    const html = renderToString(
+      <LineChart series={[]} title='Request latency' />,
+    );
+    const labelledBy = /^<figure aria-labelledby="([^"]+)"/u.exec(html)?.[1];
+
+    expect(labelledBy).toBeDefined();
+    expect(html).toContain(
+      `<title id="${String(labelledBy)}">Request latency</title>`,
+    );
+  });
+
+  it('writes no marker label list when hasMarkerLabels is false', () => {
+    const html = renderToString(
+      <LineChart
+        hasMarkerLabels={false}
+        markers={[{ label: 'Deploy', x: 1 }]}
+        series={[]}
+        title='Request latency'
+      />,
+    );
+
+    expect(html).not.toContain('<ul');
+    expect(html).toContain('<title>Deploy</title>');
+  });
 });

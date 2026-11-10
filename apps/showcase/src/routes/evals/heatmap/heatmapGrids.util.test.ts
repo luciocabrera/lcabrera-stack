@@ -36,14 +36,25 @@ describe('heatmapGrids', () => {
     });
 
     expect(grid?.suite).toBe('skill-quality');
-    expect(other?.runs.map(({ runId }) => runId)).toEqual([RUN_1, RUN_2]);
-    expect(other?.subjects.map(({ label }) => label)).toEqual([
-      'epic',
-      'react-19',
+    expect(grid?.title).toBe('skill-quality: 1 subjects over 1 runs');
+    expect(other?.title).toBe('skills: 2 subjects over 2 runs');
+    expect(other?.columns).toEqual([
+      {
+        key: RUN_1,
+        label: 'Run 00000000, 2026-10-01',
+        to: `/evals/runs/${RUN_1}`,
+      },
+      {
+        key: RUN_2,
+        label: 'Run 00000000, 2026-10-02',
+        to: `/evals/runs/${RUN_2}`,
+      },
     ]);
+    expect(other?.rows.map(({ label }) => label)).toEqual(['epic', 'react-19']);
+    expect(other?.cells).toHaveLength(3);
   });
 
-  it('leaves a gap where a subject did not run and links each subject to its trend', () => {
+  it('places only the cells a subject ran, and links each subject to its trend', () => {
     const [grid] = heatmapGrids({
       cells: [
         cell({ runId: RUN_2, startedAt: new Date('2026-10-02T02:00:00Z') }),
@@ -51,12 +62,16 @@ describe('heatmapGrids', () => {
       ],
       flaky: [{ suite: 'skills', taskKey: 't1' }],
     });
-    const epic = grid?.subjects[0];
 
-    expect(epic?.href).toBe('/evals/subjects/skill/epic');
-    expect(epic?.cells.map((entry) => entry?.isFlaky ?? 'gap')).toEqual([
-      true,
-      'gap',
-    ]);
+    expect(grid?.rows[0]).toEqual({
+      key: 'skill/epic',
+      label: 'epic',
+      to: '/evals/subjects/skill/epic',
+    });
+    expect(
+      grid?.cells
+        .filter(({ row }) => row === 'skill/epic')
+        .map(({ column, pattern }) => [column, pattern]),
+    ).toEqual([[RUN_1, 'hatch']]);
   });
 });
