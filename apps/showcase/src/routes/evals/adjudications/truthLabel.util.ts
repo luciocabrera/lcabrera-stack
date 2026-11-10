@@ -4,6 +4,4 @@ export const truthLabel = ({
   truth,
   truthSource,
 }: Pick<AdjudicationCase, 'truth' | 'truthSource'>) =>
-  truth === undefined || truthSource === undefined
-    ? 'none yet'
-    : `${truth} (${truthSource})`;
+  truthSource === undefined ? 'none yet' : `${String(truth)} (${truthSource})`;

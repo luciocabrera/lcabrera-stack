@@ -61,18 +61,18 @@ export const selectedFixtures = ({ expected, names }) => {
     left.localeCompare(right),
   );
   const unknown = names.filter((name) => !fixtures.includes(name));
-  if (unknown.length > 0) {
-    throw new Error(
-      `no fp-panel fixture named ${unknown.join(', ')}; the fixtures are ${fixtures.join(', ')}`,
-    );
+  if (unknown.length === 0) {
+    return fixtures
+      .map((fixture, index) => ({
+        caseId: caseIdOf(index),
+        fixture,
+        truth: expected[fixture],
+      }))
+      .filter(({ fixture }) => names.length === 0 || names.includes(fixture));
   }
-  return fixtures
-    .map((fixture, index) => ({
-      caseId: caseIdOf(index),
-      fixture,
-      truth: expected[fixture],
-    }))
-    .filter(({ fixture }) => names.length === 0 || names.includes(fixture));
+  throw new Error(
+    `no fp-panel fixture named ${unknown.join(', ')}; the fixtures are ${fixtures.join(', ')}`,
+  );
 };
 
 export const seatRunCount = (value) => wholeNumber({ minimum: 1, value });

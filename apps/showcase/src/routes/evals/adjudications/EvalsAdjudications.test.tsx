@@ -129,7 +129,11 @@ describe('EvalsAdjudications', () => {
     expect(
       within(cases).getByText('split').closest('td')?.children,
     ).toHaveLength(1);
-    expect(screen.getByText(/^All 4 cases, newest first\./u)).toBeDefined();
+    expect(
+      screen.getByText(
+        'All 4 cases, newest first. Cost is what the three seats reported; the time is the slowest seat, since the three sit at once.',
+      ),
+    ).toBeDefined();
   });
 
   it('says how many cases it shows when the history is longer', async () => {
@@ -138,7 +142,11 @@ describe('EvalsAdjudications', () => {
       cases: { ...DATA.cases, total: 250 },
     });
 
-    expect(screen.getByText(/^The newest 4 of 250 cases\./u)).toBeDefined();
+    expect(
+      screen.getByText(
+        'The newest 4 of 250 cases. Cost is what the three seats reported; the time is the slowest seat, since the three sit at once.',
+      ),
+    ).toBeDefined();
   });
 
   it('lists each reopened dismissal, or says there is none', async () => {

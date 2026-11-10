@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import { CASES, VERDICTS } from './adjudications.fixtures';
+import { adjudication, CASES, seat, VERDICTS } from './adjudications.fixtures';
 import { ruleHeatmap } from './ruleHeatmap.util';
 import { scoredVerdicts } from './scoredVerdicts.util';
 
@@ -52,6 +52,46 @@ describe('ruleHeatmap', () => {
       },
     ]);
     expect(heatmap.cells).toHaveLength(6);
+  });
+
+  it('leaves a gap where a model never sat on a rule', () => {
+    const partial = ruleHeatmap(
+      scoredVerdicts({
+        cases: [
+          adjudication({
+            caseId: 'FP-0020',
+            truth: 'REAL',
+            truthSource: 'lucio',
+          }),
+          adjudication({
+            analyzer: 'fallow',
+            caseId: 'FP-0021',
+            rule: 'complexity',
+            truth: 'REAL',
+            truthSource: 'lucio',
+          }),
+        ],
+        verdicts: [
+          seat({
+            caseId: 'FP-0020',
+            model: 'model-a',
+            role: 'judge',
+            verdict: 'REAL',
+          }),
+          seat({
+            caseId: 'FP-0021',
+            model: 'model-b',
+            role: 'judge',
+            verdict: 'REAL',
+          }),
+        ],
+      }),
+    );
+
+    expect(partial.cells.map(({ column, row }) => `${row} ${column}`)).toEqual([
+      `model-a biome/${RULE}`,
+      'model-b fallow/complexity',
+    ]);
   });
 
   it('draws no cell for a model and rule with no scored verdict', () => {

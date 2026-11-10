@@ -32,13 +32,32 @@ describe('caseRows', () => {
       rule: 'unicorn/no-nested-ternary',
       truth: 'none yet',
     });
-    expect(rows[2]).toMatchObject({
-      builder: 'not recorded',
-      cost: '$0.20',
-      panel: '2 FALSE_POSITIVE, 1 REAL',
-      pr: '',
-      truth: 'REAL (lucio)',
-    });
+    expect(
+      rows.map(({ builder, cost, panel, pr, truth }) => [
+        builder,
+        cost,
+        panel,
+        pr,
+        truth,
+      ]),
+    ).toEqual([
+      ['claude-opus-5-5', '$1.20', '3 REAL', '#1594', 'none yet'],
+      [
+        'claude-opus-5-5',
+        '$1.20',
+        '3 FALSE_POSITIVE',
+        '#1594',
+        'REAL (reopened)',
+      ],
+      ['not recorded', '$0.20', '2 FALSE_POSITIVE, 1 REAL', '', 'REAL (lucio)'],
+      [
+        'claude-opus-5-5',
+        '$1.20',
+        '3 FALSE_POSITIVE',
+        '#1594',
+        'FALSE_POSITIVE (lucio)',
+      ],
+    ]);
   });
 
   it('shows a case with no verdict stored', () => {

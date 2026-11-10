@@ -34,7 +34,7 @@ export const ruleHeatmap = (verdicts: readonly ScoredVerdict[]) => {
         ),
       })),
     )
-    .filter(({ tally }) => tally.scored > 0)
+    .filter(({ tally }) => tally.scored !== 0)
     .map(({ model, rule, tally }) => ({
       column: rule.key,
       label: `${model.label} on ${rule.label}: ${accuracyLabel(tally)}`,

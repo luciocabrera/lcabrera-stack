@@ -6,24 +6,20 @@
  * Usage: imported by `verify-fp-panel.mjs`.
  */
 import { mkdirSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 
 import { treePathOf } from './fp-panel.mjs';
 
-const posix = (path) => path.replaceAll('\\', '/');
-
-export const readFixtureTree = (directory) => {
-  const root = posix(directory);
-  return Object.fromEntries(
-    readdirSync(root, { recursive: true, withFileTypes: true })
+export const readFixtureTree = (directory) =>
+  Object.fromEntries(
+    readdirSync(directory, { recursive: true, withFileTypes: true })
       .filter((entry) => entry.isFile())
-      .map((entry) => posix(join(entry.parentPath, entry.name)))
-      .map((path) => [path, treePathOf(path.slice(root.length + 1))])
+      .map((entry) => join(entry.parentPath, entry.name))
+      .map((path) => [path, treePathOf(relative(directory, path))])
       .filter(([, treePath]) => treePath !== undefined)
       .map(([path, treePath]) => [treePath, readFileSync(path, 'utf8')])
       .toSorted(([left], [right]) => left.localeCompare(right)),
   );
-};
 
 const writeInto = ({ into, path, text }) => {
   const target = join(into, path);

@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
 import { adjudicationFacts } from './adjudicationFacts.util';
-import { CASES, VERDICTS } from './adjudications.fixtures';
+import { adjudication, CASES, VERDICTS } from './adjudications.fixtures';
 
 describe('adjudicationFacts', () => {
   it('counts the cases, their true answers, dismissals and lone adversary catches', () => {
@@ -13,6 +13,33 @@ describe('adjudicationFacts', () => {
       { term: 'Only the adversary said REAL', value: '1' },
       { term: 'Of those, REAL by the true answer', value: '1' },
     ]);
+  });
+
+  it('counts as reopened only the dismissals a reopened answer turned', () => {
+    const facts = adjudicationFacts({
+      cases: [
+        adjudication({
+          caseId: 'FP-0010',
+          truth: 'REAL',
+          truthSource: 'reopened',
+        }),
+        adjudication({
+          caseId: 'FP-0011',
+          truth: 'REAL',
+          truthSource: 'lucio',
+        }),
+        adjudication({
+          caseId: 'FP-0012',
+          truth: 'FALSE_POSITIVE',
+          truthSource: 'lucio',
+        }),
+      ],
+      verdicts: [],
+    });
+
+    expect(
+      facts.find(({ term }) => term === 'Reopened dismissals')?.value,
+    ).toBe('1');
   });
 
   it('counts nothing on an empty history', () => {

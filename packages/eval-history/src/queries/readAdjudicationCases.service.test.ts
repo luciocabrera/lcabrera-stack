@@ -75,6 +75,19 @@ describe('readAdjudicationCases', () => {
     ]);
   });
 
+  it('rejects a pull request number below 1', async () => {
+    const { client } = scriptedClient({
+      answer: () => [{ ...UNANSWERED, createdAt: OPENED, pr: 0 }],
+      columns: COLUMNS,
+    });
+
+    await expect(readAdjudicationCases({ client })).rejects.toThrow(
+      expect.objectContaining({
+        issues: [expect.objectContaining({ path: [0, 'pr'] })],
+      }),
+    );
+  });
+
   it('rejects an outcome the panel never gives', async () => {
     const { client } = scriptedClient({
       answer: () => [{ ...UNANSWERED, createdAt: OPENED, outcome: 'pending' }],

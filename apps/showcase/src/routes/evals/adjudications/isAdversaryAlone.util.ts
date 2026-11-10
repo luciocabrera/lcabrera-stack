@@ -1,13 +1,9 @@
 import type { AdjudicationVerdict } from './EvalsAdjudications.types';
 
-export const isAdversaryAlone = (seats: readonly AdjudicationVerdict[]) => {
-  const adversaries = seats.filter(({ role }) => role === 'adversary');
-  const judges = seats.filter(({ role }) => role === 'judge');
-
-  return (
-    adversaries.length > 0 &&
-    judges.length > 0 &&
-    adversaries.every(({ verdict }) => verdict === 'REAL') &&
-    judges.every(({ verdict }) => verdict === 'FALSE_POSITIVE')
+export const isAdversaryAlone = (seats: readonly AdjudicationVerdict[]) =>
+  seats.some(({ role }) => role === 'adversary') &&
+  seats.some(({ role }) => role === 'judge') &&
+  seats.every(
+    ({ role, verdict }) =>
+      verdict === (role === 'adversary' ? 'REAL' : 'FALSE_POSITIVE'),
   );
-};

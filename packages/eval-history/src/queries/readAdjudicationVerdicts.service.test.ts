@@ -57,6 +57,22 @@ describe('readAdjudicationVerdicts', () => {
     ]);
   });
 
+  it.each(['costUsd', 'durationMs', 'tokensIn', 'tokensOut'])(
+    'rejects a negative %s',
+    async (field) => {
+      const { client } = scriptedClient({
+        answer: () => [{ ...UNPRICED, [field]: -1 }],
+        columns: COLUMNS,
+      });
+
+      await expect(readAdjudicationVerdicts({ client })).rejects.toThrow(
+        expect.objectContaining({
+          issues: [expect.objectContaining({ path: [0, field] })],
+        }),
+      );
+    },
+  );
+
   it('rejects a verdict that is neither REAL nor FALSE_POSITIVE', async () => {
     const { client } = scriptedClient({
       answer: () => [{ ...UNPRICED, verdict: 'UNSURE' }],

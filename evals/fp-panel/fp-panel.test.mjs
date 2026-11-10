@@ -119,12 +119,15 @@ describe('fixtureCaseFile', () => {
     ]);
     expect(caseFile.case).toMatchObject({
       analyzer: 'oxlint',
+      base_sha: '0'.repeat(40),
       case_id: 'FP-9002',
+      created_at: '2026-11-01T00:00:00.000Z',
       file: 'src/rateTone.ts',
       finding_id: 'src/rateTone.ts:4:unicorn/no-nested-ternary',
       pr: null,
       rule: 'unicorn/no-nested-ternary',
     });
+    expect(caseFile.case.head_sha).toBe('0'.repeat(40));
     expect(caseFile.finding).toEqual(finding.records);
   });
 });
@@ -143,9 +146,9 @@ describe('selectedFixtures', () => {
   });
 
   it('refuses a fixture that does not exist, naming the ones that do', () => {
-    expect(() => selectedFixtures({ expected, names: ['c'] })).toThrow(
-      'no fp-panel fixture named c; the fixtures are a, b',
-    );
+    expect(() =>
+      selectedFixtures({ expected, names: ['b', 'c', 'd'] }),
+    ).toThrow('no fp-panel fixture named c, d; the fixtures are a, b');
   });
 });
 
@@ -224,6 +227,26 @@ const task = (systemPrompt) =>
 const session = (score, problem) => ({ problem, score });
 
 describe('the envelope records', () => {
+  it('records the task under its key, subject and the hashes of its inputs', () => {
+    expect(task('Judge the case.')).toEqual({
+      agent_prompt_hash:
+        '1b1ef0e7288c83eaa19ad9cb98c5a967956eb21b9eaf5f6f473f6378b99f4e5b',
+      expected_hash:
+        'aafcb7553ee47080eedd5360b83b678fda69db14296770fa582fbb571a03f495',
+      fixture_hash:
+        '83629768dc3615efeac8cfc604c2c3ef69d305780d859e0427f55f5f0065dcaf',
+      judge_prompt_hash: null,
+      kind: 'fixture',
+      set: 'regression',
+      source: null,
+      subject: { kind: 'agent', name: 'fp-judge' },
+      tags: [],
+      task_hash:
+        '4066c477a55efed05475f9771d00d5e7383ee10050cec776ee6e5c39b66d4714',
+      task_key: 'fp-panel/used-export/judge',
+    });
+  });
+
   it('moves the task prompt hash when the prompt changes, and only then', () => {
     expect(task('Judge the case.').agent_prompt_hash).toBe(
       task('Judge the case.').agent_prompt_hash,
@@ -305,6 +328,24 @@ describe('the run summary', () => {
         session({ matched: false, verdict: 'REAL' }),
       ]),
     ).toBe(1);
+  });
+});
+
+describe('readFixtureTree', () => {
+  it('reads only the .fixture files, under their real names', () => {
+    const into = mkdtempSync(join(tmpdir(), 'fp-panel-tree-'));
+    scratch.push(into);
+
+    writeCaseTree({
+      caseFile: {},
+      casePath: 'notes/README.md',
+      files: { 'src/a.ts.fixture': 'export const a = 1;\n' },
+      into,
+    });
+
+    expect(readFixtureTree(into)).toEqual({
+      'src/a.ts': 'export const a = 1;\n',
+    });
   });
 });
 
