@@ -5,7 +5,7 @@ import { MemoryRouter } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { EVALS_COST_LABELS } from '../constants/evalsDashboard.constants';
-import { COST_TABLE_COLUMNS } from './costTableColumns.util';
+import { COST_TABLE_COLUMNS } from './EvalsCost.constants';
 
 const ROW = {
   computed: '$0.0244',

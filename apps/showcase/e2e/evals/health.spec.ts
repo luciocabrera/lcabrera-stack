@@ -62,7 +62,7 @@ it('counts runs, trials, errors, timeouts and rate limits per suite', async ({
 it('draws a sparkline of errors and timeouts per run', async ({ page }) => {
   await openEvals(page, '/evals/health');
 
-  const chart = page.getByRole('figure', {
+  const chart = page.getByRole('group', {
     exact: true,
     name: 'skills errors and timeouts per run over its last 6 runs',
   });

@@ -11,10 +11,14 @@ import {
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
+import { breadcrumbTrail, evalsTrail } from '../utils/pageHeader.fixtures';
 import { confusionSelection } from './confusionSelection.util';
-import { handle } from './evals-confusion.handle';
 import { EvalsConfusion } from './EvalsConfusion.component';
-import { CORNER, EMPTY_CELL } from './EvalsConfusion.constants';
+import {
+  CORNER,
+  EMPTY_CELL,
+  EVALS_CONFUSION_HANDLE,
+} from './EvalsConfusion.constants';
 
 const RUN = { label: '2026-10-01 02:00 on main', runId: 'r1' };
 const OTHER = { label: '2026-09-30 02:00 on main', runId: 'r0' };
@@ -48,7 +52,7 @@ const renderAt = async ({ matrix = MATRIX, path }: RenderAtArgs) => {
   const Stub = createRoutesStub([
     {
       Component: EvalsConfusion,
-      handle,
+      handle: EVALS_CONFUSION_HANDLE,
       loader: ({ request }) => {
         const selection = confusionSelection(new URL(request.url).searchParams);
         const selectedRunId =
@@ -85,17 +89,7 @@ describe('EvalsConfusion', () => {
   it('puts the page under a trail of the overview, then its own crumb', async () => {
     await renderAt({ path: '/evals/confusion' });
 
-    expect(
-      within(screen.getByRole('navigation', { name: 'Breadcrumb' }))
-        .getAllByRole('listitem')
-        .map((item) => [
-          item.querySelector('a, [aria-current]')?.textContent,
-          item.querySelector('a')?.getAttribute('href'),
-        ]),
-    ).toEqual([
-      ['Evals', '/evals'],
-      ['confusion', undefined],
-    ]);
+    expect(breadcrumbTrail()).toEqual(evalsTrail('confusion'));
   });
 
   it('offers recent runs and each run by ?run=, marking recent runs as current', async () => {

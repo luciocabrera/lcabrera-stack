@@ -2,7 +2,7 @@ import { Table } from '@lcabrera/ui/components/Table';
 
 import type { CostTableProps } from './EvalsCost.types';
 
-import { COST_TABLE_COLUMNS } from './costTableColumns.util';
+import { COST_TABLE_COLUMNS } from './EvalsCost.constants';
 
 export const CostTable = ({ caption, density, rows }: CostTableProps) => (
   <Table

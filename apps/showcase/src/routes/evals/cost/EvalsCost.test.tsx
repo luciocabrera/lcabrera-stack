@@ -5,8 +5,9 @@ import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { EVALS_COST_LABELS } from '../constants/evalsDashboard.constants';
-import { handle } from './evals-cost.handle';
+import { breadcrumbTrail, evalsTrail } from '../utils/pageHeader.fixtures';
 import { EvalsCost } from './EvalsCost.component';
+import { EVALS_COST_HANDLE } from './EvalsCost.constants';
 
 const CELLS = {
   computed: 'no model price',
@@ -56,7 +57,7 @@ const COLUMNS = [
 const Stub = createRoutesStub([
   {
     Component: EvalsCost,
-    handle,
+    handle: EVALS_COST_HANDLE,
     loader: () => DATA,
     path: '/evals/cost',
   },
@@ -80,12 +81,7 @@ describe('EvalsCost', () => {
   it('heads the page and links back to the evals overview', async () => {
     await renderCost();
 
-    const trail = screen.getByRole('navigation', { name: 'Breadcrumb' });
-
-    expect(
-      within(trail).getByRole('link', { name: 'Evals' }).getAttribute('href'),
-    ).toBe('/evals');
-    expect(within(trail).getByText('cost and latency')).toBeDefined();
+    expect(breadcrumbTrail()).toEqual(evalsTrail('cost and latency'));
   });
 
   it('draws three captioned sparklines in a level-3 card per suite', async () => {
@@ -101,19 +97,30 @@ describe('EvalsCost', () => {
       'p95 duration per run',
     ]) {
       expect(
-        screen.getByRole('figure', { name: `skills: ${caption}` }),
+        screen.getByRole('group', { name: `skills: ${caption}` }),
       ).toBeDefined();
     }
 
     expect(
       within(
-        screen.getByRole('figure', {
+        screen.getByRole('group', {
           name: 'skills: cost per run, reported by the sdk',
         }),
       )
         .getByRole('link', { name: POINT.label })
         .getAttribute('href'),
     ).toBe(POINT.to);
+  });
+
+  it('keeps a chart with no runs named, and draws no point in it', async () => {
+    await renderCost();
+
+    const empty = screen.getByRole('group', {
+      name: 'skills: p95 duration per run',
+    });
+
+    expect(within(empty).queryAllByRole('link')).toEqual([]);
+    expect(empty.getAttribute('aria-hidden')).toBe('false');
   });
 
   it('tabulates per suite, per subject and per run in the same nine columns', async () => {

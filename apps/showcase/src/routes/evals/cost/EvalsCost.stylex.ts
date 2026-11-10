@@ -7,8 +7,7 @@ export const styles = stylex.create({
     display: 'grid',
     gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
   },
-  figure: {
-    margin: 0,
+  chart: {
     gap: spacing.xxs,
     display: 'flex',
     flexDirection: 'column',

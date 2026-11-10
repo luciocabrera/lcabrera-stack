@@ -18,6 +18,8 @@ export type TrendSparklineTone =
   | 'warning';
 
 type TrendSparklineChartProps = {
+  /** The role an empty chart keeps, named by `label`; unset, an empty chart leaves the accessibility tree. */
+  readonly emptyRole?: 'group' | 'img';
   readonly height?: number;
   readonly label: string;
   readonly max?: number;

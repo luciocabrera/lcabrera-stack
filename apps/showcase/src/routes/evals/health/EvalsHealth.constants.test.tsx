@@ -7,7 +7,7 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import {
   HEALTH_CLASS_COLUMNS,
   HEALTH_RUN_COLUMNS,
-} from './healthTableColumns.util';
+} from './EvalsHealth.constants';
 
 const shapeOf = (
   columns: readonly {

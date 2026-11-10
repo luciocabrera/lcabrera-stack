@@ -3,7 +3,7 @@ import type { TableColumn } from '@lcabrera/ui/components/Table/Table.types';
 import type { ConfusionTableRow } from './EvalsConfusion.types';
 
 import { ConfusionCell } from './ConfusionCell.component';
-import { confusionColumnKey } from './confusionTableRows.util';
+import { confusionColumnKey } from './confusionColumnKey.util';
 import { CORNER } from './EvalsConfusion.constants';
 
 export const confusionTableColumns = (

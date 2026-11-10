@@ -1,4 +1,3 @@
-import { useRouteBreadcrumbs } from '@lcabrera/ui/components/Breadcrumbs';
 import { PageHeader } from '@lcabrera/ui/components/PageHeader';
 import { Text } from '@lcabrera/ui/components/Text';
 import * as stylex from '@stylexjs/stylex';
@@ -6,21 +5,17 @@ import { useLoaderData } from 'react-router';
 
 import type { loader } from './evals-cost.loader';
 
-import {
-  EVALS_BREADCRUMB,
-  EVALS_COST_RUNS,
-} from '../constants/evalsDashboard.constants';
+import { EVALS_COST_RUNS } from '../constants/evalsDashboard.constants';
 import { pageStyles } from '../evalsPage.stylex';
 import { CostCharts } from './CostCharts.component';
 import { CostTable } from './CostTable.component';
 
 export const EvalsCost = () => {
   const { charts, runs, subjects, suites } = useLoaderData<typeof loader>();
-  const breadcrumbs = [EVALS_BREADCRUMB, ...useRouteBreadcrumbs()];
 
   return (
     <div {...stylex.props(pageStyles.page)}>
-      <PageHeader breadcrumbs={breadcrumbs} title='Cost and latency' />
+      <PageHeader title='Cost and latency' />
       <Text size='sm' tone='secondary'>
         Over the last {EVALS_COST_RUNS} runs of each suite. The SDK reports a
         cost for each trial it ran; the computed cost multiplies each trial's

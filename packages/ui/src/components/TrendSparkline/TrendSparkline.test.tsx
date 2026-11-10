@@ -254,6 +254,40 @@ describe('TrendSparkline', () => {
     });
   });
 
+  describe('an empty chart with an empty role', () => {
+    it.each([
+      {
+        chart: <TrendSparkline emptyRole='group' label='Runs' points={[]} />,
+        role: 'group',
+      },
+      {
+        chart: <TrendSparkline emptyRole='img' label='Runs' values={[]} />,
+        role: 'img',
+      },
+    ])('keeps its label as the name of the $role role', ({ chart, role }) => {
+      const { container } = render(chart);
+
+      expect(screen.getByRole(role, { name: 'Runs' })).toBeTruthy();
+      expect(container.querySelector('svg')?.getAttribute('aria-hidden')).toBe(
+        'false',
+      );
+      expect(container.querySelector('path')).toBeNull();
+      expect(container.querySelector('circle')).toBeNull();
+    });
+
+    it('takes its populated role once it has something to draw', () => {
+      render(
+        <MemoryRouter>
+          <TrendSparkline emptyRole='img' label='Weekly' points={POINTS} />
+          <TrendSparkline emptyRole='group' label='Trend' values={[1, 2]} />
+        </MemoryRouter>,
+      );
+
+      expect(screen.getByRole('group', { name: 'Weekly' })).toBeTruthy();
+      expect(screen.getByRole('img', { name: 'Trend' })).toBeTruthy();
+    });
+  });
+
   describe('server render', () => {
     it.each([
       {
@@ -267,6 +301,10 @@ describe('TrendSparkline', () => {
         mode: 'points',
       },
       { chart: <TrendSparkline label='Trend' values={[]} />, mode: 'empty' },
+      {
+        chart: <TrendSparkline emptyRole='group' label='Trend' points={[]} />,
+        mode: 'empty named',
+      },
     ])(
       'renders the same $mode markup on the server and the client',
       ({ chart }) => {

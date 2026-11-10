@@ -1,4 +1,3 @@
-import { useRouteBreadcrumbs } from '@lcabrera/ui/components/Breadcrumbs';
 import { NavLink } from '@lcabrera/ui/components/NavLink';
 import { PageHeader } from '@lcabrera/ui/components/PageHeader';
 import { Text } from '@lcabrera/ui/components/Text';
@@ -7,7 +6,6 @@ import { useLoaderData } from 'react-router';
 
 import type { loader } from './evals-confusion.loader';
 
-import { EVALS_BREADCRUMB } from '../constants/evalsDashboard.constants';
 import { pageStyles } from '../evalsPage.stylex';
 import { evalsHref } from '../utils/evalsHref.util';
 import { ConfusionMatrix } from './ConfusionMatrix.component';
@@ -16,7 +14,6 @@ import { ConfusionRunPicker } from './ConfusionRunPicker.component';
 export const EvalsConfusion = () => {
   const { choices, matrix, runs, selectedRunId } =
     useLoaderData<typeof loader>();
-  const breadcrumbs = [EVALS_BREADCRUMB, ...useRouteBreadcrumbs()];
   const [only] = runs;
   const scope =
     selectedRunId === undefined
@@ -25,7 +22,7 @@ export const EvalsConfusion = () => {
 
   return (
     <div {...stylex.props(pageStyles.page)}>
-      <PageHeader breadcrumbs={breadcrumbs} title='Trigger confusion' />
+      <PageHeader title='Trigger confusion' />
       <Text size='sm' tone='secondary'>
         One row per expectation: a trigger task expects its skill to load, a
         near-miss task (<em>not</em> the skill) expects it to stay unloaded. One

@@ -4,14 +4,15 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
-import { handle } from './evals-health.handle';
+import { breadcrumbTrail, evalsTrail } from '../utils/pageHeader.fixtures';
 import { EvalsHealth } from './EvalsHealth.component';
+import { EVALS_HEALTH_HANDLE } from './EvalsHealth.constants';
 
 const renderWith = async (data: unknown) => {
   const Stub = createRoutesStub([
     {
       Component: EvalsHealth,
-      handle,
+      handle: EVALS_HEALTH_HANDLE,
       loader: () => data,
       path: '/evals/health',
     },
@@ -78,10 +79,7 @@ describe('EvalsHealth', () => {
     await renderWith({ suites: [] });
 
     expect(screen.getByText('No eval runs are stored yet.')).toBeDefined();
-    expect(
-      screen.getByRole('link', { name: 'Evals' }).getAttribute('href'),
-    ).toBe('/evals');
-    expect(screen.getByText('health').closest('nav')).not.toBeNull();
+    expect(breadcrumbTrail()).toEqual(evalsTrail('health'));
   });
 
   it('lists the facts of each suite under its level-2 heading', async () => {
@@ -101,7 +99,7 @@ describe('EvalsHealth', () => {
   it('links each sparkline point to its run', async () => {
     await renderWith({ suites: [TROUBLED_SUITE] });
 
-    const chart = screen.getByRole('figure', {
+    const chart = screen.getByRole('group', {
       name: 'skills errors and timeouts per run over its last 1 runs',
     });
 

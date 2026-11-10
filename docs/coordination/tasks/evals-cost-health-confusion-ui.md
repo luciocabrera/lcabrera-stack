@@ -11,10 +11,13 @@ area:
   - packages/ui/src/components/NavLink/**
   - packages/ui/src/components/Table/TableBody/utils/**
   - packages/ui/src/components/Table/TableBodyCell/**
-  - packages/ui/src/components/Table/TableHeaderCell/**
+  - packages/ui/src/components/Table/Table.staticLayout.test.tsx
+  - packages/ui/src/components/TrendSparkline/**
   - apps/showcase/e2e/evals/figures.spec.ts
+  - apps/showcase/e2e/evals/cost.spec.ts
+  - apps/showcase/e2e/evals/health.spec.ts
 started: 2026-11-09
-updated: 2026-11-09
+updated: 2026-11-10
 plan: (none)
 pr: '#1608'
 issue: #1565

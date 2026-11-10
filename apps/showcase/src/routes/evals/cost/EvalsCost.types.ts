@@ -7,6 +7,12 @@ export type CostChartsProps = {
   readonly charts: Awaited<ReturnType<typeof loader>>['charts'];
 };
 
+export type CostFigureColumn = {
+  readonly dataType: 'currency' | 'number';
+  readonly key: Exclude<keyof CostRow, 'href' | 'name'>;
+  readonly label: string;
+};
+
 export type CostRow = ReturnType<typeof costFigureCells> & {
   readonly href?: string;
   readonly name: string;

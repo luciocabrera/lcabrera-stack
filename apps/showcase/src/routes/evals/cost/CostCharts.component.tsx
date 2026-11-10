@@ -18,21 +18,18 @@ export const CostCharts = ({ charts }: CostChartsProps) => (
           {chart.suite}
         </Title>
         {COST_CHARTS.map(({ caption, metric }) => (
-          <figure
-            aria-label={`${chart.suite}: ${caption.toLowerCase()}`}
-            key={metric}
-            {...stylex.props(styles.figure)}
-          >
-            <Text as='figcaption' size='sm' tone='secondary'>
+          <div key={metric} {...stylex.props(styles.chart)}>
+            <Text size='sm' tone='secondary'>
               {caption}
             </Text>
             <TrendSparkline
+              emptyRole='group'
               height={COST_SPARKLINE.height}
               label={`${chart.suite}: ${caption.toLowerCase()}`}
               points={chart[metric]}
               width={COST_SPARKLINE.width}
             />
-          </figure>
+          </div>
         ))}
       </Card>
     ))}

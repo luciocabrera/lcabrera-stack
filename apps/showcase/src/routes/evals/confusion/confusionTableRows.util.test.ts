@@ -1,18 +1,11 @@
 import { describe, expect, it } from 'vite-plus/test';
 
-import {
-  confusionColumnKey,
-  confusionTableRows,
-} from './confusionTableRows.util';
+import { confusionTableRows } from './confusionTableRows.util';
 
 const CELL = { column: 'react-19', count: 2, isMisload: false, label: '2' };
 const NONE = { column: '(none)', count: 1, isMisload: true, label: '1' };
 
 describe('confusionTableRows', () => {
-  it('keys each loaded column apart from the expectation and the trials', () => {
-    expect(confusionColumnKey('trials')).toBe('loaded:trials');
-  });
-
   it('lays one row per expectation, each cell under its loaded column', () => {
     expect(
       confusionTableRows({
