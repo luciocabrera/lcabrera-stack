@@ -53,6 +53,7 @@ explicit extensions are **required**, would be actively wrong.
 | `merge-duplicate-imports`           | ✅      | One import statement per source module                      |
 | `no-habit-return-types`             | ✅      | No return type TypeScript would infer identically           |
 | `no-inline-type-imports`            | ✅      | `import type { X }` over `import { type X }`                |
+| `no-raw-ui-primitives`              |         | Tables, form controls and headings come from a library      |
 | `no-type-definitions-in-components` |         | Types live in `*.types.ts`, not in component files          |
 | `readonly-props`                    | ✅      | Every member of a `*Props` type is `readonly`               |
 | `single-component-export`           |         | One component per `*.component.tsx`                         |
@@ -254,6 +255,47 @@ import type { type User } from './types'; // redundant
 
 ```typescript
 import type { User, Post } from './types';
+```
+
+### `no-raw-ui-primitives`
+
+Reports the raw intrinsic JSX forms of `table`, `select`, `button`, `input`,
+`textarea`, `h1`, `h2` and `h3`. An application renders these through its
+component library, so its tables, controls and headings share one look and one
+behaviour. Enable it for application code only: the component library itself is
+where these elements are rendered.
+
+Only intrinsic elements are reported. A component is never reported, whatever it
+renders internally, and neither is a member expression such as `motion.button`.
+
+An `<input>` whose `type` is the string literal `"hidden"` is not reported: it
+carries form data and draws no control. The last `type` attribute or spread
+decides, so a spread after `type="hidden"`, an expression such as
+`type={kind}` or `type={'hidden'}`, or a missing `type` is reported.
+
+**❌ Disallowed:**
+
+```tsx
+const Summary = () => (
+  <>
+    <h2>Totals</h2>
+    <table>{/* … */}</table>
+    <button type='submit'>Save</button>
+  </>
+);
+```
+
+**✅ Enforced:**
+
+```tsx
+const Summary = () => (
+  <>
+    <Title level={2}>Totals</Title>
+    <Table columns={columns} data={rows} />
+    <Button type='submit'>Save</Button>
+    <input name='redirectTo' type='hidden' value={redirectTo} />
+  </>
+);
 ```
 
 ### `no-habit-return-types`

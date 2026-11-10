@@ -41,6 +41,7 @@
     "@babel/core": "catalog:build",
     "@babel/preset-typescript": "catalog:build",
     "@eslint/js": "catalog:lint",
+    "@lcabrera/eslint-plugin": "workspace:*",
     "@lcabrera/vite-config": "workspace:*",
     "@playwright/test": "catalog:test",
     "@react-router/dev": "catalog:react",
