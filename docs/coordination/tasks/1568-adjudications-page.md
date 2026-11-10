@@ -12,6 +12,7 @@ area:
   - evals/fp-panel/**
   - evals/README.md
   - evals/runner-writes.test.mjs
+  - devkit.config.json
   - apps/showcase/src/routes/evals/.server/evalsHistory.service*
   - apps/showcase/src/routes/evals/.server/evalsPublicPayload.test.ts
   - apps/showcase/src/routes/evals/utils/evalsRouteEntries.util.test.ts
