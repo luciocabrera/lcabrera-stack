@@ -20,4 +20,4 @@ const hasBreadcrumb = (match: UIMatch): match is BreadcrumbMatch => {
 export const useRouteBreadcrumbs = () =>
   useMatches()
     .filter(hasBreadcrumb)
-    .map((match) => match.handle.breadcrumb(match));
+    .flatMap((match) => match.handle.breadcrumb(match));

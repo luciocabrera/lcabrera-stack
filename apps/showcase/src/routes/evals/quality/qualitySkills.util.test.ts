@@ -58,9 +58,9 @@ describe('qualitySkills', () => {
     const clarity = skill?.dimensions[1];
 
     expect(clarity?.band?.mean).toBe(4.5);
-    expect(clarity?.points.map(({ key, tone }) => [key, tone])).toEqual([
-      [BASE_2, 'success'],
-      [NEW, 'error'],
+    expect(clarity?.points.map(({ to, tone }) => [to, tone])).toEqual([
+      [`/evals/runs/${BASE_2}`, 'success'],
+      [`/evals/runs/${NEW}`, 'error'],
     ]);
     expect(clarity?.latest?.value).toBe(2);
   });

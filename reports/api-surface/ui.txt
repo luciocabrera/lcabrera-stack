@@ -6,7 +6,7 @@
 AppDocument [const] ({ children, rootData, stylexCssHref, }: AppDocumentProps) => JSX.Element
 AppProviders [const] ({ appId, children, defaultTheme, }: AppProvidersProps) => JSX.Element
 AppShell [const] () => JSX.Element
-BreadcrumbHandle [type] { readonly breadcrumb?: (match: UIMatch<TLoaderData>) => BreadcrumbItem; }
+BreadcrumbHandle [type] { /** A list is the route's own steps in order, for a route that has no parent route to supply the earlier ones. */ readonly breadcrumb?: ( match: UIMatch<TLoaderData>, ) => BreadcrumbItem | readonly BreadcrumbItem[]; }
 BreadcrumbItem [type] { readonly label: string; /** Omitted for a step that has no page of its own; the last item never links. */ readonly to?: To; }
 Breadcrumbs [const] ({ items, label, }: BreadcrumbsProps) => JSX.Element | undefined
 BreadcrumbsProps [type] { readonly items: readonly BreadcrumbItem[]; /** The accessible name of the `nav` landmark. Defaults to `'Breadcrumb'`. */ readonly label?: string; }
@@ -101,7 +101,7 @@ AppDocument [const] ({ children, rootData, stylexCssHref, }: AppDocumentProps) =
 AppShell [const] () => JSX.Element
 
 ## ./components/Breadcrumbs
-BreadcrumbHandle [type] { readonly breadcrumb?: (match: UIMatch<TLoaderData>) => BreadcrumbItem; }
+BreadcrumbHandle [type] { /** A list is the route's own steps in order, for a route that has no parent route to supply the earlier ones. */ readonly breadcrumb?: ( match: UIMatch<TLoaderData>, ) => BreadcrumbItem | readonly BreadcrumbItem[]; }
 BreadcrumbItem [type] { readonly label: string; /** Omitted for a step that has no page of its own; the last item never links. */ readonly to?: To; }
 Breadcrumbs [const] ({ items, label, }: BreadcrumbsProps) => JSX.Element | undefined
 BreadcrumbsProps [type] { readonly items: readonly BreadcrumbItem[]; /** The accessible name of the `nav` landmark. Defaults to `'Breadcrumb'`. */ readonly label?: string; }

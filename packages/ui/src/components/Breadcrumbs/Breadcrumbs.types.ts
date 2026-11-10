@@ -1,7 +1,10 @@
 import type { To, UIMatch } from 'react-router';
 
 export type BreadcrumbHandle<TLoaderData = unknown> = {
-  readonly breadcrumb?: (match: UIMatch<TLoaderData>) => BreadcrumbItem;
+  /** A list is the route's own steps in order, for a route that has no parent route to supply the earlier ones. */
+  readonly breadcrumb?: (
+    match: UIMatch<TLoaderData>,
+  ) => BreadcrumbItem | readonly BreadcrumbItem[];
 };
 
 export type BreadcrumbItem = {

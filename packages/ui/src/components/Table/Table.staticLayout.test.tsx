@@ -146,6 +146,20 @@ const renderScores = ({ layout = 'static' }: RenderScoresArgs = {}) =>
     </section>,
   );
 
+const headerLabelsWrap = (layout: TableLayoutMode) => {
+  renderScores({ layout });
+
+  const result = screen
+    .getAllByTestId('table-header-label')
+    .map((element) =>
+      hasStylexStyle({ element, style: tableHeaderCellStyles.staticLabel }),
+    );
+
+  cleanup();
+
+  return result;
+};
+
 describe('Table static layout', () => {
   it('renders every row, as a table, under its caption, inside a parent with no height', () => {
     renderScores();
@@ -202,6 +216,11 @@ describe('Table static layout', () => {
         hasStylexStyle({ element, style: virtualContentStyles.wrapper }),
       ),
     ).toBe(true);
+  });
+
+  it('wraps a header label in the static layout and truncates it in the virtual one', () => {
+    expect(headerLabelsWrap('static')).toStrictEqual([true, true, true]);
+    expect(headerLabelsWrap('virtual')).toStrictEqual([false, false, false]);
   });
 
   it('renders no settings button, column menu or resize handle by default', () => {

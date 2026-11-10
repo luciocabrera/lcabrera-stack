@@ -25,6 +25,9 @@ export const getHeaderLayoutStyles = <TData>(
       resolveHeaderSizeStyle(args),
       ...(align === undefined ? [] : [CELL_ALIGN_STYLES[align]]),
     ],
-    label: align === undefined ? [] : [LABEL_ALIGN_STYLES[align]],
+    label: [
+      ...(align === undefined ? [] : [LABEL_ALIGN_STYLES[align]]),
+      ...(args.layout === 'static' ? [tableHeaderCellStyles.staticLabel] : []),
+    ],
   };
 };

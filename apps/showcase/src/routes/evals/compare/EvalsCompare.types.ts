@@ -8,10 +8,12 @@ export type ComparePickerProps = {
 };
 
 export type CompareReportProps = {
-  readonly comparison: NonNullable<
-    Awaited<ReturnType<typeof loader>>['comparison']
-  >;
+  readonly comparison: Comparison;
 };
+
+export type CompareTotal = Comparison['totals'][number];
+
+export type FlippedTask = Comparison['flips'][number];
 
 export type RunComparisonRow = Awaited<
   ReturnType<typeof readRunComparison>
@@ -21,3 +23,5 @@ export type RunInputs = Pick<
   RunSummary,
   'catalogHash' | 'harnessVersion' | 'modelId' | 'sdkVersion'
 >;
+
+type Comparison = NonNullable<Awaited<ReturnType<typeof loader>>['comparison']>;

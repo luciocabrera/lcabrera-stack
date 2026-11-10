@@ -41,7 +41,8 @@ layout all run inside a data router. A `Table` given an array of rows does not
 need one mounted; see [A table from rows](#a-table-from-rows). `NavLink` and
 `Breadcrumbs` need a mounted router of any kind. `useRouteBreadcrumbs()`, and a
 `PageHeader` given no `breadcrumbs`, need a data router: they read each matched
-route's `handle.breadcrumb` through `useMatches()`.
+route's `handle.breadcrumb` through `useMatches()`. A `breadcrumb` returns one
+item or, for a route with no parent route, the list of its steps.
 
 ## Before you install: this package ships TypeScript source
 

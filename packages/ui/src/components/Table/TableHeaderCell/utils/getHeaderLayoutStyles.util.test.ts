@@ -98,4 +98,17 @@ describe('getHeaderLayoutStyles', () => {
       }),
     );
   });
+
+  it('lets a static header label wrap, after its alignment', () => {
+    expect(
+      getHeaderLayoutStyles({ column: {}, layout: 'static' }).label,
+    ).toStrictEqual([tableHeaderCellStyles.staticLabel]);
+    expect(
+      getHeaderLayoutStyles({ column: { align: 'end' }, layout: 'static' })
+        .label,
+    ).toStrictEqual([
+      tableHeaderCellStyles.contentAlignEnd,
+      tableHeaderCellStyles.staticLabel,
+    ]);
+  });
 });
