@@ -2,11 +2,9 @@ import { useRef } from 'react';
 
 import { useToggleOption } from '#ui/components/VirtualList/contexts/data/actions';
 import { useGetSelectedValues } from '#ui/components/VirtualList/contexts/data/selectors';
-import { useGetIsTopAttached } from '#ui/components/VirtualList/contexts/list/selectors';
 
 import { useToggleDropdown } from '../../contexts/meta/actions';
 import {
-  useGetAttachedEdge,
   useGetIsAlwaysOpen,
   useGetIsInert,
   useGetIsOpen,
@@ -29,8 +27,6 @@ export const useVirtualSelectTrigger = () => {
   );
 
   const isAlwaysOpen = useGetIsAlwaysOpen();
-  const attachedEdge = useGetAttachedEdge();
-  const isAttachedBelow = useGetIsTopAttached();
   const isInert = useGetIsInert();
   const isOpen = useGetIsOpen();
   const labelId = useGetLabelId();
@@ -71,10 +67,8 @@ export const useVirtualSelectTrigger = () => {
   const labelProps = getTriggerLabelProps({ labelId });
 
   return {
-    attachedEdge,
     chevron,
     content,
-    isAttachedBelow,
     isInert,
     isOpen,
     labelProps,

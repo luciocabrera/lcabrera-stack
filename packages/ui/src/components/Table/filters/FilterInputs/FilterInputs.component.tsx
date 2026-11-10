@@ -1,5 +1,5 @@
 import * as stylex from '@stylexjs/stylex';
-import { Activity, useState } from 'react';
+import { useState } from 'react';
 
 import { useGetDeclaredColumn } from '#ui/components/Table/contexts/TableConfig/columns/selectors/useGetDeclaredColumn.hook';
 
@@ -7,9 +7,14 @@ import type { FilterInputsProps } from './FilterInputs.types';
 
 import { BooleanFilterInput } from '../BooleanFilterInput';
 import { styles } from './FilterInputs.stylex';
+import { FilterValueSlot } from './FilterValueSlot/FilterValueSlot.component';
 import { InputContent } from './InputContent';
 import { OperatorSelect } from './OperatorSelect/OperatorSelect.component';
-import { getOperatorFromFilter, isValueSelectList } from './utils';
+import {
+  getOperatorFromFilter,
+  resolveOperatorJoin,
+  toBooleanColumnFilter,
+} from './utils';
 
 export const FilterInputs = <TData = Record<string, unknown>,>({
   columnKey,
@@ -26,11 +31,7 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
   if (dataType === 'boolean') {
     return (
       <BooleanFilterInput
-        filter={
-          filter?.type === 'boolean' || filter?.type === 'empty'
-            ? filter
-            : undefined
-        }
+        filter={toBooleanColumnFilter(filter)}
         onChange={onChange}
       />
     );
@@ -51,7 +52,7 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
 
   const operator = getOperatorFromFilter({ dataType, filter });
   const hasFetchableOptions = Boolean(column?.filterOptionsDescriptor);
-  const isJoined = isValueSelectList({
+  const { attachedEdge, containerStyle } = resolveOperatorJoin({
     dataType,
     filter,
     hasFetchableOptions,
@@ -76,27 +77,23 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
       {...stylex.props(
         styles.container,
         shouldFillHeight ? styles.containerFill : undefined,
-        isJoined ? styles.containerJoined : undefined,
+        containerStyle,
       )}
     >
       <OperatorSelect
-        attachedEdge={isJoined ? 'bottom' : undefined}
+        attachedEdge={attachedEdge}
         dataType={dataType}
         filter={filter}
         onChange={onChange}
         onOpenChange={setIsOperatorOpen}
       />
-      {shouldFillHeight ? (
-        <Activity mode={isOperatorOpen || !filter ? 'hidden' : 'visible'}>
-          {inputComponent}
-        </Activity>
-      ) : (
-        filter && (
-          <div {...stylex.props(isOperatorOpen && styles.contentHidden)}>
-            {inputComponent}
-          </div>
-        )
-      )}
+      <FilterValueSlot
+        hasFilter={filter !== undefined}
+        isOperatorOpen={isOperatorOpen}
+        shouldFillHeight={shouldFillHeight}
+      >
+        {inputComponent}
+      </FilterValueSlot>
     </div>
   );
 };

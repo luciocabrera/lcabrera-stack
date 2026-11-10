@@ -1,13 +1,12 @@
+import { useTriggerStyleProps } from './hooks/useTriggerStyleProps.hook';
 import { useVirtualSelectTrigger } from './hooks/useVirtualSelectTrigger.hook';
-import { assignTriggerRef, getTriggerStyleProps } from './utils';
+import { assignTriggerRef } from './utils';
 import { VirtualSelectDivTrigger } from './VirtualSelectDivTrigger/VirtualSelectDivTrigger.component';
 
 export const VirtualSelectTrigger = () => {
   const {
-    attachedEdge,
     chevron,
     content,
-    isAttachedBelow,
     isInert,
     isOpen,
     labelProps,
@@ -17,6 +16,10 @@ export const VirtualSelectTrigger = () => {
     toggleDropdown,
     triggerRef,
   } = useVirtualSelectTrigger();
+  const buttonStyleProps = useTriggerStyleProps({
+    hasTags: false,
+    isStatic: false,
+  });
 
   if (shouldUseDivTrigger) {
     return (
@@ -43,12 +46,7 @@ export const VirtualSelectTrigger = () => {
       }}
       type='button'
       {...labelProps}
-      {...getTriggerStyleProps({
-        attachedEdge,
-        isAttachedBelow,
-        isInert,
-        isOpen,
-      })}
+      {...buttonStyleProps}
     >
       {content}
       {chevron}

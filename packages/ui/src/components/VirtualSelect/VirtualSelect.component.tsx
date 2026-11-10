@@ -33,18 +33,7 @@ export const VirtualSelect = ({
   selected,
   shouldFillHeight = false,
 }: VirtualSelectProps) => {
-  const {
-    closeDropdown,
-    containerRef,
-    effectiveDataState,
-    handleListChange,
-    isMulti,
-    isOpen,
-    labelId,
-    resolvedListboxId,
-    selectedLabels,
-    toggleDropdown,
-  } = useVirtualSelect({
+  const { containerRef, selectedLabels, ...shell } = useVirtualSelect({
     dataState,
     isAlwaysOpen,
     isBusy,
@@ -61,13 +50,13 @@ export const VirtualSelect = ({
   return (
     <VirtualSelectProvider
       anchorRef={containerRef}
-      dataState={effectiveDataState}
+      dataState={shell.effectiveDataState}
       filter={{ type: 'select', values: selectedLabels }}
       listState={{
-        hasCheckboxes: isMulti,
-        hasSelectAll: isMulti,
+        hasCheckboxes: shell.isMulti,
+        hasSelectAll: shell.isMulti,
         listMaxHeight,
-        onChange: handleListChange,
+        onChange: shell.handleListChange,
         onFetchInitial,
         onFetchMore,
         shouldFillHeight,
@@ -78,12 +67,12 @@ export const VirtualSelect = ({
         isAlwaysOpen,
         isBusy,
         isDisabled,
-        isOpen,
-        labelId,
-        listboxId: resolvedListboxId,
+        isOpen: shell.isOpen,
+        labelId: shell.labelId,
+        listboxId: shell.resolvedListboxId,
         mode,
-        onCloseDropdown: closeDropdown,
-        onToggleDropdown: toggleDropdown,
+        onCloseDropdown: shell.closeDropdown,
+        onToggleDropdown: shell.toggleDropdown,
         placeholder,
         placement,
       }}

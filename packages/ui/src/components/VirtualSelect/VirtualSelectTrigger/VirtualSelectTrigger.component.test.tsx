@@ -70,6 +70,14 @@ vi.mock('#ui/components/VirtualList/contexts/data/selectors', () => ({
   useGetSelectedValues: useGetSelectedValuesMock,
 }));
 
+const { useTriggerStylePropsMock } = vi.hoisted(() => ({
+  useTriggerStylePropsMock: vi.fn(() => ({})),
+}));
+
+vi.mock('./hooks/useTriggerStyleProps.hook', () => ({
+  useTriggerStyleProps: useTriggerStylePropsMock,
+}));
+
 vi.mock('../hooks', () => ({
   useVirtualSelectTagOverflow: useVirtualSelectTagOverflowMock,
 }));
@@ -97,6 +105,15 @@ describe('VirtualSelectTrigger', () => {
     fireEvent.click(trigger);
 
     expect(toggleDropdownMock).toHaveBeenCalledTimes(1);
+  });
+
+  it('styles the native button trigger as a plain, untagged, interactive trigger', () => {
+    render(<VirtualSelectTrigger />);
+
+    expect(useTriggerStylePropsMock).toHaveBeenCalledWith({
+      hasTags: false,
+      isStatic: false,
+    });
   });
 
   it('is named by the visible label and then by its own content', () => {

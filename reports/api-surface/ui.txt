@@ -537,7 +537,8 @@ useVirtualSelectDropdown [const] ({ isAlwaysOpen, isInert, onOpenChange, }: UseV
 useVirtualSelectTagOverflow [const] ({ mode, selected, triggerRef, }: UseVirtualSelectTagOverflowArgs) => number
 
 ## ./components/VirtualSelect/VirtualSelectTrigger/hooks
-useVirtualSelectTrigger [const] () => { attachedEdge: VirtualSelectAttachedEdge | undefined; chevron: JSX.Element | undefined; content: ReactNode; isAttachedBelow: boolean; isInert: boolean; isOpen: boolean; labelProps: { 'aria-labelledby'?: undefined; id?: undefined; } | { 'aria-labelledby': string; id: string; }; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; shouldUseTagButtons: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
+useTriggerStyleProps [const] ({ hasTags, isStatic, }: UseTriggerStylePropsArgs) => Readonly<{ className?: string; 'data-style-src'?: string; style?: Readonly<{ [$$Key$$: string]: string | number; }>; }>
+useVirtualSelectTrigger [const] () => { chevron: JSX.Element | undefined; content: ReactNode; isInert: boolean; isOpen: boolean; labelProps: { 'aria-labelledby'?: undefined; id?: undefined; } | { 'aria-labelledby': string; id: string; }; listboxId: string; mode: VirtualSelectMode; shouldUseDivTrigger: boolean; shouldUseTagButtons: boolean; toggleDropdown: () => void; triggerRef: RefObject<HTMLButtonElement | HTMLDivElement | undefined>; }
 
 ## ./contexts/NotificationContext
 AppNotification [type] { readonly durationMs: number; readonly id: string; readonly message: string; readonly placement: NotificationPlacement; readonly title?: string; readonly variant: CardColor; }
