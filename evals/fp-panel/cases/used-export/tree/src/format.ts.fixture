@@ -1,0 +1,4 @@
+export const formatLabel = (name: string, count: number) =>
+  `${name} (${String(count)})`;
+
+export const formatCount = (count: number) => String(count);

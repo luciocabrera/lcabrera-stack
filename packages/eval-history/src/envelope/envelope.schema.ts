@@ -1,12 +1,14 @@
 import { z } from 'zod';
 
 import {
+  ADJUDICATION_VERDICTS,
   DETAIL_SCHEMA_BY_SUITE,
   ENVELOPE_SCHEMA_VERSION,
   OUTCOMES,
   SUBJECT_KINDS,
   SUITES,
   TASK_SETS,
+  VERIFIER_ROLES,
 } from './envelope.constants.ts';
 import { envelopeConsistencyIssues } from './envelopeConsistencyIssues.util.ts';
 
@@ -60,6 +62,15 @@ const verifierTooledDetailSchema = z.object({
   verdict,
 });
 
+const fpPanelDetailSchema = z.object({
+  fixture: z.string(),
+  matched: z.boolean(),
+  role: z.enum(VERIFIER_ROLES),
+  schema: z.literal(DETAIL_SCHEMA_BY_SUITE['fp-panel']),
+  truth: z.enum(ADJUDICATION_VERDICTS),
+  verdict: z.enum(ADJUDICATION_VERDICTS).nullable(),
+});
+
 const dimensionSchema = z.object({
   feedback: z.string(),
   name: z.string(),
@@ -82,6 +93,7 @@ export const trialDetailSchema = z.discriminatedUnion('schema', [
   verifierDetailSchema,
   verifierTooledDetailSchema,
   qualityDetailSchema,
+  fpPanelDetailSchema,
 ]);
 
 const rate = z.number().min(0).max(1).nullable();

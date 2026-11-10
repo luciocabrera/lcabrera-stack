@@ -11,6 +11,10 @@ area:
   - apps/showcase/e2e/evals/seed*
   - evals/fp-panel/**
   - evals/README.md
+  - evals/runner-writes.test.mjs
+  - apps/showcase/src/routes/evals/.server/evalsHistory.service.ts
+  - apps/showcase/src/INVENTORY.md
+  - docs/agents/false-positive-panel.md
   - packages/eval-history/**
   - .github/workflows/agent-evals.yml
   - package.json
@@ -18,7 +22,7 @@ area:
 started: 2026-11-10
 updated: 2026-11-10
 plan: (none)
-pr: (none)
+pr: '#1617'
 issue: #1568
 ---
 
@@ -28,6 +32,6 @@ feat(showcase): add the adjudications page and the fp-panel evals suite
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: eval-history schema, fp-panel suite, then the page
 - Blockers: none
 - Next:

@@ -1,0 +1,28 @@
+{
+  "analyzer": "oxlint",
+  "end": 4,
+  "explain": "unicorn/no-nested-ternary\n\nDisallow nested ternary expressions.\n\nWhy is this bad?\nNesting ternary expressions makes code harder to read: the reader has to hold every condition in mind to find which branch a value comes from. One level of nesting is allowed when it is wrapped in parentheses; anything deeper is reported.\n\nExamples of incorrect code:\nconst foo = i > 5 ? i < 100 ? true : false : true;\nconst foo = i > 5 ? true : (i < 100 ? true : (i < 1000 ? true : false));\n\nExamples of correct code:\nconst foo = i > 5 ? (i < 100 ? true : false) : true;\n\nDocs: https://oxc.rs/docs/guide/usage/linter/rules/unicorn/no-nested-ternary.html",
+  "file": "src/rateTone.ts",
+  "records": [
+    {
+      "message": "Unexpected deeply nested ternary expression.",
+      "code": "unicorn(no-nested-ternary)",
+      "severity": "error",
+      "url": "https://oxc.rs/docs/guide/usage/linter/rules/unicorn/no-nested-ternary.html",
+      "help": "Avoid nesting ternary expressions for more than one level.",
+      "filename": "src/rateTone.ts",
+      "labels": [
+        {
+          "span": {
+            "offset": 176,
+            "length": 27,
+            "line": 4,
+            "column": 56
+          }
+        }
+      ]
+    }
+  ],
+  "rule": "unicorn/no-nested-ternary",
+  "start": 4
+}

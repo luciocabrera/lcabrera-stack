@@ -1,0 +1,6 @@
+{
+  "name": "score-grid",
+  "private": true,
+  "type": "module",
+  "exports": "./src/ScoreGrid.tsx"
+}

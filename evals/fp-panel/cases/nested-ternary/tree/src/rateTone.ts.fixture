@@ -1,0 +1,4 @@
+export type RateTone = 'high' | 'low' | 'mid' | 'none';
+
+export const rateTone = (rate: number | undefined): RateTone =>
+  rate === undefined ? 'none' : rate >= 0.9 ? 'high' : rate >= 0.5 ? 'mid' : 'low';

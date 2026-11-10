@@ -1,0 +1,61 @@
+import type { KeyboardEvent } from 'react';
+
+import { useRef, useState } from 'react';
+
+type ScoreGridProps = {
+  readonly label: string;
+  readonly rows: readonly (readonly number[])[];
+};
+
+const MOVES: Readonly<Record<string, readonly [number, number]>> = {
+  ArrowDown: [1, 0],
+  ArrowLeft: [0, -1],
+  ArrowRight: [0, 1],
+  ArrowUp: [-1, 0],
+};
+
+const clamp = (value: number, size: number) =>
+  Math.min(Math.max(value, 0), size - 1);
+
+export const ScoreGrid = ({ label, rows }: ScoreGridProps) => {
+  const [active, setActive] = useState<readonly [number, number]>([0, 0]);
+  const table = useRef<HTMLTableElement>(null);
+
+  const onKeyDown = (event: KeyboardEvent<HTMLTableElement>) => {
+    const move = MOVES[event.key];
+
+    if (move === undefined) {
+      return;
+    }
+
+    event.preventDefault();
+
+    const row = clamp(active[0] + move[0], rows.length);
+    const column = clamp(active[1] + move[1], rows[row]?.length ?? 1);
+
+    setActive([row, column]);
+    table.current
+      ?.querySelector<HTMLElement>(`[data-cell="${row}-${column}"]`)
+      ?.focus();
+  };
+
+  return (
+    <table aria-label={label} onKeyDown={onKeyDown} ref={table} role='grid'>
+      <tbody>
+        {rows.map((cells, row) => (
+          <tr key={row}>
+            {cells.map((score, column) => (
+              <td
+                data-cell={`${row}-${column}`}
+                key={column}
+                tabIndex={active[0] === row && active[1] === column ? 0 : -1}
+              >
+                {score}
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+  );
+};

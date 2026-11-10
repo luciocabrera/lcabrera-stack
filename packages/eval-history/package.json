@@ -4,6 +4,8 @@
   "private": true,
   "type": "module",
   "exports": {
+    "./adjudications/readAdjudicationAccuracy.service": "./src/adjudications/readAdjudicationAccuracy.service.ts",
+    "./adjudications/adjudications.types": "./src/adjudications/adjudications.types.ts",
     "./baseline/baseline.constants": "./src/baseline/baseline.constants.ts",
     "./baseline/baselineSoFar.service": "./src/baseline/baselineSoFar.service.ts",
     "./baseline/checkBaselineRun.service": "./src/baseline/checkBaselineRun.service.ts",
@@ -74,6 +76,8 @@
     "./queries/readRunTrials.service": "./src/queries/readRunTrials.service.ts",
     "./queries/runProjection.util": "./src/queries/runProjection.util.ts",
     "./queries/readAnnotations.service": "./src/queries/readAnnotations.service.ts",
+    "./queries/readAdjudicationCases.service": "./src/queries/readAdjudicationCases.service.ts",
+    "./queries/readAdjudicationVerdicts.service": "./src/queries/readAdjudicationVerdicts.service.ts",
     "./queries/readRunCosts.service": "./src/queries/readRunCosts.service.ts",
     "./queries/readSubjectRuns.service": "./src/queries/readSubjectRuns.service.ts",
     "./queries/databaseUrl.util": "./src/queries/databaseUrl.util.ts",

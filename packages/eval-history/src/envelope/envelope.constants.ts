@@ -8,6 +8,7 @@ export const SUITES = [
   'verifier-fixtures',
   'verifier-tooled',
   'skill-quality',
+  'fp-panel',
 ] as const;
 
 export const SUBJECT_KINDS = ['skill', 'rule', 'agent', 'prompt'] as const;
@@ -23,6 +24,7 @@ export const OUTCOMES = [
 ] as const;
 
 export const DETAIL_SCHEMA_BY_SUITE = {
+  'fp-panel': 'fp-panel/1',
   'rules-consistency': 'rules/1',
   'skill-quality': 'quality/1',
   skills: 'skills/1',

@@ -72,7 +72,20 @@ describe('ingestAdjudication', () => {
       '2026-10-30T09:00:00.000Z',
       1,
       SHA,
+      'claude-sonnet-5-5',
     ]);
+  });
+
+  it('stores no builder model for an envelope that names none', async () => {
+    const { client, queries } = fakeClient();
+    await ingestAdjudication({
+      client,
+      envelope: { ...envelope, builder_model: undefined },
+      sha256: SHA,
+    });
+
+    expect(queries[1]?.values).toHaveLength(14);
+    expect(queries[1]?.values?.at(-1)).toBeUndefined();
   });
 
   it('stores each verifier as one column per field, in verifier order', async () => {

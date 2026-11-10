@@ -11,6 +11,7 @@ const RAW_WRITE =
   /\b(?:writeFileSync|writeFile|writeSync|appendFileSync|appendFile|createWriteStream|copyFileSync|copyFile|cpSync|cp|renameSync|rename|linkSync|symlinkSync|truncateSync)\b(?=\s*[(,}])|node:fs\/promises/g;
 
 const ALLOWED = {
+  'fp-panel/case-tree.mjs': ['writeFileSync'],
   'skills/verify-skill-triggers.mjs': ['cpSync', 'renameSync', 'symlinkSync'],
   'transcript-scrub.mjs': ['writeFileSync'],
   'verifier-fixtures/tooled-worktree.mjs': ['writeFileSync'],
@@ -53,6 +54,8 @@ describe('runner output', () => {
       expect.arrayContaining([
         'agent-sessions.mjs',
         'baseline-command.mjs',
+        'fp-panel/case-tree.mjs',
+        'fp-panel/verify-fp-panel.mjs',
         'run-baseline.mjs',
         'run-record.mjs',
         'skill-quality/verify-skill-quality.mjs',
