@@ -3,14 +3,18 @@ import { describe, expect, it } from 'vite-plus/test';
 import { HEAT_TONES, HEATMAP_LEGEND } from './EvalsHeatmap.constants';
 
 describe('the heatmap legend', () => {
-  it('names each pass-rate band in the tone its cells take, then the hatch', () => {
-    expect(HEATMAP_LEGEND).toEqual([
-      { label: '90% or more', tone: HEAT_TONES.high },
-      { label: '50% or more', tone: HEAT_TONES.mid },
-      { label: 'Below 50%', tone: HEAT_TONES.low },
-      { label: 'No scored trials', tone: HEAT_TONES.none },
-      { label: 'Holds a flaky task', pattern: 'hatch' },
+  it('names the four pass-rate bands, then the hatched flaky cell', () => {
+    expect(HEATMAP_LEGEND.map(({ label }) => label)).toEqual([
+      '90% or more',
+      '50% or more',
+      'Below 50%',
+      'No scored trials',
+      'Holds a flaky task',
     ]);
+    expect(HEATMAP_LEGEND.at(-1)).toEqual({
+      label: 'Holds a flaky task',
+      pattern: 'hatch',
+    });
   });
 
   it('tones the bands green, amber, red and neutral', () => {

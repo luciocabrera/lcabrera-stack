@@ -79,7 +79,7 @@ export const expectHydratesWithoutMismatch = async ({
 
   const server = elementsOf(container);
 
-  await act(async () => {
+  act(() => {
     render(
       <RouterProvider
         router={createMemoryRouter(routes, {

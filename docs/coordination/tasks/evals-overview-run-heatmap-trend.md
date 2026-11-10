@@ -9,8 +9,13 @@ area:
   - apps/showcase/e2e/evals/**
   - apps/showcase/src/INVENTORY.md
   - packages/ui/src/components/Breadcrumbs/**
+  - packages/ui/src/components/Heatmap/**
+  - packages/ui/src/components/LineChart/**
+  - reports/api-surface/ui.txt
   - packages/ui/src/INVENTORY.md
   - .changeset/breadcrumbs-separator-text.md
+  - .changeset/chart-figure-root.md
+  - .changeset/line-chart-has-marker-labels.md
 started: 2026-11-10
 updated: 2026-11-10
 plan: (none)

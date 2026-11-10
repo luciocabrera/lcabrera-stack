@@ -13,9 +13,9 @@ export const HEAT_TONES = {
 } as const;
 
 export const HEATMAP_LEGEND = [
-  { label: '90% or more', tone: 'success' },
-  { label: '50% or more', tone: 'warning' },
-  { label: 'Below 50%', tone: 'error' },
-  { label: 'No scored trials', tone: 'neutral' },
+  { label: '90% or more', tone: HEAT_TONES.high },
+  { label: '50% or more', tone: HEAT_TONES.mid },
+  { label: 'Below 50%', tone: HEAT_TONES.low },
+  { label: 'No scored trials', tone: HEAT_TONES.none },
   { label: 'Holds a flaky task', pattern: 'hatch' },
 ] as const satisfies readonly HeatmapLegendItem[];
