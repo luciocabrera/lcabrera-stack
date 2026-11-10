@@ -36,6 +36,9 @@ Custom ESLint rules, used across this monorepo and published for use outside it.
   - `no-type-definitions-in-components`
   - `readonly-props`
   - `single-component-export`
+- Application-only rules (enabled for an application's `.tsx` files, never for
+  the component library that renders the elements they ban):
+  - `no-raw-ui-primitives`
 
 `clean-import-paths` is global-eligible but deliberately **off** in the base
 (non-React) config: those workspaces run TypeScript natively or compile with tsc

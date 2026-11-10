@@ -1,3 +1,4 @@
+import localRules from '@lcabrera/eslint-plugin';
 import { createCustomRulesLintConfig } from '@lcabrera/vite-config/eslint-custom-rules';
 import {
   NODE_BUILTIN_IMPORT_BOUNDARY_SYNTAX_RESTRICTIONS,
@@ -25,6 +26,11 @@ const baseConfig = await createCustomRulesLintConfig({
 
 export default [
   ...baseConfig,
+  {
+    files: ['**/*.tsx'],
+    plugins: { 'local-rules': localRules },
+    rules: { 'local-rules/no-raw-ui-primitives': 'error' },
+  },
   {
     // security/detect-unsafe-regex guards against ReDoS on untrusted input;
     // the babel include pattern here only ever tests build-time file paths
