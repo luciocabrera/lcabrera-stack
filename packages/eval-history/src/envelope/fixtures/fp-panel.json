@@ -1,0 +1,193 @@
+{
+  "run": {
+    "actor": "luciocabrera",
+    "baseline_id": null,
+    "branch": "main",
+    "catalog_hash": null,
+    "env": {
+      "arch": "x64",
+      "ci_runner": null,
+      "node": "v26.10.0",
+      "os": "linux"
+    },
+    "finished_at": "2026-10-06T09:05:00.000Z",
+    "git_dirty": false,
+    "git_sha": "edd6b20f1510da64eb03070f4c9398767089db58",
+    "harness_version": "b5548dd720b6",
+    "model_id": "claude-opus-5-5",
+    "pr_number": null,
+    "project": "lcabrera-stack",
+    "run_id": "5f0a1e2b-3c4d-4e5f-8a6b-7c8d9e0f1a2b",
+    "sdk_version": "0.3.289",
+    "settings": {
+      "argv": ["--runs", "1"],
+      "concurrency": 4,
+      "hidden": [],
+      "max_turns": 80,
+      "runs": 1,
+      "selection": ["used-export"],
+      "timeout_ms": null,
+      "tools": ["Read", "Glob", "Grep"]
+    },
+    "started_at": "2026-10-06T09:00:00.000Z",
+    "status": "complete",
+    "suite": "fp-panel",
+    "trigger": "local",
+    "totals": {
+      "by_outcome": {
+        "pass": 1,
+        "fail": 1,
+        "error": 0,
+        "timeout": 0,
+        "skipped": 0
+      },
+      "cost_usd_reported": 0.24,
+      "duration_ms": 24000,
+      "pass_rate": {
+        "k": 1,
+        "lower": 0.09,
+        "n": 2,
+        "rate": 0.5,
+        "upper": 0.91
+      },
+      "tokens": {
+        "cache_read": 20,
+        "cache_write": 4,
+        "input": 200,
+        "output": 40
+      },
+      "trials": 2
+    }
+  },
+  "schema_version": 1,
+  "subjects": [
+    {
+      "content_hash": "1111111111111111111111111111111111111111111111111111111111111111",
+      "kind": "agent",
+      "name": "fp-adversary",
+      "path": ".claude/agents/fp-adversary.md"
+    },
+    {
+      "content_hash": "2222222222222222222222222222222222222222222222222222222222222222",
+      "kind": "agent",
+      "name": "fp-judge",
+      "path": ".claude/agents/fp-judge.md"
+    }
+  ],
+  "tasks": [
+    {
+      "agent_prompt_hash": "7978f506baa16285f4f3f6cee4f425c0bd5e06883e37ede4a8d8e62c03d660ef",
+      "expected_hash": "5312fb609f60384731fcfcb95deef3602239bf61f865a07bd8e08d818d22e9fa",
+      "fixture_hash": "df087996d45b03e7eb8c133c0298fd98d35113fca26aaba58612fef3cc212cad",
+      "judge_prompt_hash": null,
+      "kind": "fixture",
+      "set": "regression",
+      "source": null,
+      "subject": {
+        "kind": "agent",
+        "name": "fp-judge"
+      },
+      "tags": [],
+      "task_hash": "7c8d79d82ee2d8e7d10415157a2f946433e421fce672c2495380dae03198aa61",
+      "task_key": "fp-panel/used-export/judge"
+    },
+    {
+      "agent_prompt_hash": "7978f506baa16285f4f3f6cee4f425c0bd5e06883e37ede4a8d8e62c03d660ef",
+      "expected_hash": "5312fb609f60384731fcfcb95deef3602239bf61f865a07bd8e08d818d22e9fa",
+      "fixture_hash": "df087996d45b03e7eb8c133c0298fd98d35113fca26aaba58612fef3cc212cad",
+      "judge_prompt_hash": null,
+      "kind": "fixture",
+      "set": "regression",
+      "source": null,
+      "subject": {
+        "kind": "agent",
+        "name": "fp-adversary"
+      },
+      "tags": [],
+      "task_hash": "7c8d79d82ee2d8e7d10415157a2f946433e421fce672c2495380dae03198aa61",
+      "task_key": "fp-panel/used-export/adversary"
+    }
+  ],
+  "trials": [
+    {
+      "cost_usd_reported": 0.12,
+      "detail": {
+        "fixture": "used-export",
+        "matched": true,
+        "role": "judge",
+        "schema": "fp-panel/1",
+        "truth": "FALSE_POSITIVE",
+        "verdict": "FALSE_POSITIVE"
+      },
+      "duration_api_ms": 9000,
+      "duration_ms": 12000,
+      "error_class": null,
+      "finished_at": "2026-10-06T09:00:12.000Z",
+      "first_token_at": "2026-10-06T09:00:01.500Z",
+      "model_usage": {
+        "claude-opus-5-5": {
+          "costUSD": 0.12,
+          "inputTokens": 100,
+          "outputTokens": 20
+        }
+      },
+      "outcome": "pass",
+      "queued_at": "2026-10-06T09:00:00.000Z",
+      "started_at": "2026-10-06T09:00:00.100Z",
+      "task_key": "fp-panel/used-export/judge",
+      "tokens": {
+        "cache_read": 10,
+        "cache_write": 2,
+        "input": 100,
+        "output": 20
+      },
+      "transcript": {
+        "bytes": 2048,
+        "sha256": "c91136100a7304fb66490e526a37662611b28da19f4cccc53d41cfcf75207588",
+        "uri": ".tmp/eval-results/x/fp-panel-used-export-judge-1.md"
+      },
+      "trial_index": 0,
+      "turns": 7
+    },
+    {
+      "cost_usd_reported": 0.12,
+      "detail": {
+        "fixture": "used-export",
+        "matched": false,
+        "role": "adversary",
+        "schema": "fp-panel/1",
+        "truth": "FALSE_POSITIVE",
+        "verdict": "REAL"
+      },
+      "duration_api_ms": 9000,
+      "duration_ms": 12000,
+      "error_class": null,
+      "finished_at": "2026-10-06T09:00:12.000Z",
+      "first_token_at": "2026-10-06T09:00:01.500Z",
+      "model_usage": {
+        "claude-opus-5-5": {
+          "costUSD": 0.12,
+          "inputTokens": 100,
+          "outputTokens": 20
+        }
+      },
+      "outcome": "fail",
+      "queued_at": "2026-10-06T09:00:00.000Z",
+      "started_at": "2026-10-06T09:00:00.100Z",
+      "task_key": "fp-panel/used-export/adversary",
+      "tokens": {
+        "cache_read": 10,
+        "cache_write": 2,
+        "input": 100,
+        "output": 20
+      },
+      "transcript": {
+        "bytes": 2048,
+        "sha256": "c91136100a7304fb66490e526a37662611b28da19f4cccc53d41cfcf75207588",
+        "uri": ".tmp/eval-results/x/fp-panel-used-export-adversary-1.md"
+      },
+      "trial_index": 0,
+      "turns": 7
+    }
+  ]
+}

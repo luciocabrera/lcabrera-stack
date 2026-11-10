@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { adjudicationCasesQuery } from './adjudicationCasesQuery.util.ts';
+import { adjudicationVerdictsQuery } from './adjudicationVerdictsQuery.util.ts';
 import { columnsNamed } from './columnsNamed.util.ts';
 import { qualityBaselinesQuery } from './qualityBaselinesQuery.util.ts';
 import { qualityScoresQuery } from './qualityScoresQuery.util.ts';
@@ -9,6 +11,33 @@ import { taskTrialsQuery } from './taskTrialsQuery.util.ts';
 import { triggerConfusionQuery } from './triggerConfusionQuery.util.ts';
 
 const COLUMNS_BY_TABLE = {
+  adjudication_case: [
+    'analyzer',
+    'builder_model',
+    'case_id',
+    'created_at',
+    'outcome',
+    'pr',
+    'rule',
+  ],
+  adjudication_ground_truth: [
+    'case_id',
+    'id',
+    'recorded_at',
+    'source',
+    'truth',
+  ],
+  adjudication_verdict: [
+    'agent_prompt_hash',
+    'case_id',
+    'cost_usd',
+    'duration_ms',
+    'model',
+    'tokens_in',
+    'tokens_out',
+    'verdict',
+    'verifier_role',
+  ],
   eval_baseline: [
     'baseline_id',
     'computed_at',
@@ -46,6 +75,14 @@ const runIds = ['00000000-0000-4000-8000-000000000001'];
 
 describe('the dashboard queries over a set of runs', () => {
   it.each([
+    {
+      name: 'adjudicationCases',
+      query: adjudicationCasesQuery({ publicColumns }),
+    },
+    {
+      name: 'adjudicationVerdicts',
+      query: adjudicationVerdictsQuery({ publicColumns }),
+    },
     {
       name: 'qualityBaselines',
       query: qualityBaselinesQuery({ publicColumns }),

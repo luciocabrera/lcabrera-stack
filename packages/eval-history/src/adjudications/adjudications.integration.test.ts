@@ -183,6 +183,25 @@ describe.skipIf(!DATABASE_URL)('adjudication history against Postgres', () => {
     ]);
   });
 
+  it('stores the builder model a case names, and none for a case that names none', async () => {
+    const unnamed = caseOf({
+      caseId: 'FP-0002',
+      outcome: 'split',
+      verdicts: ['REAL', 'FALSE_POSITIVE', 'FALSE_POSITIVE'],
+    });
+
+    await ingest([fixture, { ...unnamed, builder_model: undefined }]);
+
+    const { rows } = await client.query(
+      'select case_id, builder_model from evals.adjudication_case order by case_id',
+    );
+
+    expect(rows).toEqual([
+      { builder_model: 'claude-sonnet-5-5', case_id: 'FP-0001' },
+      { builder_model: SQL_NULL, case_id: 'FP-0002' },
+    ]);
+  });
+
   it('refuses a different envelope under a stored case id and keeps the first', async () => {
     await ingest([fixture]);
     const changed = await ingest([

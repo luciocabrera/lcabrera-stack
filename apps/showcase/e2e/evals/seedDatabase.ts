@@ -13,6 +13,11 @@ import pg from 'pg';
 import type { evalsE2eServer } from './evalsDatabase';
 
 import { EVALS_E2E_DATABASES, EVALS_E2E_READER } from './evalsDatabase';
+import {
+  INSERT_SEED_TRUTH_SQL,
+  seedAdjudicationFiles,
+  seedTruthValues,
+} from './seedAdjudications';
 import { seedEnvelope, seedGitSha } from './seedEnvelope';
 import {
   SEED_ANNOTATION,
@@ -117,12 +122,15 @@ const migrate = async ({ database, server }: DatabaseArgs) => {
 };
 
 const ingestStory = async (server: Server) => {
-  const files = Object.fromEntries(
-    SEED_STORY.map((run) => [
-      `/seed/${run.runId}.json`,
-      JSON.stringify(seedEnvelope(run)),
-    ]),
-  );
+  const files = {
+    ...Object.fromEntries(
+      SEED_STORY.map((run) => [
+        `/seed/${run.runId}.json`,
+        JSON.stringify(seedEnvelope(run)),
+      ]),
+    ),
+    ...seedAdjudicationFiles(),
+  };
   const ingested = await ingestPaths({
     connectionString: server.urlOf('seeded'),
     fileSystem: memoryFileSystem(files),
@@ -176,6 +184,10 @@ const recordHistory = (server: Server) =>
         13 / 3,
         Math.sqrt(1 / 3),
       ],
+    });
+    await client.query({
+      text: INSERT_SEED_TRUTH_SQL,
+      values: seedTruthValues(),
     });
     await client.query({
       text: `insert into evals.eval_annotation (at, kind, text, author)

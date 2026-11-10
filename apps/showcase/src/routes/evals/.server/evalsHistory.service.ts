@@ -1,4 +1,7 @@
+import { readAdjudicationAccuracy } from '@repo/eval-history/adjudications/readAdjudicationAccuracy.service';
 import { evalsReaderPool } from '@repo/eval-history/queries/evalsReaderPool.service';
+import { readAdjudicationCases } from '@repo/eval-history/queries/readAdjudicationCases.service';
+import { readAdjudicationVerdicts } from '@repo/eval-history/queries/readAdjudicationVerdicts.service';
 import { readAnnotations } from '@repo/eval-history/queries/readAnnotations.service';
 import { readFlakyTasks } from '@repo/eval-history/queries/readFlakyTasks.service';
 import { readQualityBaselines } from '@repo/eval-history/queries/readQualityBaselines.service';
@@ -19,6 +22,15 @@ type ReaderArgs<TRead extends (args: never) => unknown> = Omit<
   Parameters<TRead>[0],
   'client'
 >;
+
+export const selectAdjudicationAccuracy = () =>
+  readAdjudicationAccuracy({ client: evalsReaderPool() });
+
+export const selectAdjudicationCases = () =>
+  readAdjudicationCases({ client: evalsReaderPool() });
+
+export const selectAdjudicationVerdicts = () =>
+  readAdjudicationVerdicts({ client: evalsReaderPool() });
 
 export const selectAnnotations = (args: ReaderArgs<typeof readAnnotations>) =>
   readAnnotations({ ...args, client: evalsReaderPool() });

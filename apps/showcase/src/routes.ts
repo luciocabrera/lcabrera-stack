@@ -37,6 +37,7 @@ export default [
   route('evals/confusion', 'routes/evals/confusion/root.ts'),
   route('evals/quality', 'routes/evals/quality/root.ts'),
   route('evals/health', 'routes/evals/health/root.ts'),
+  route('evals/adjudications', 'routes/evals/adjudications/root.ts'),
   route('enterprise-orders', 'routes/enterprise-orders/root.ts', [
     route('new', 'routes/enterprise-orders/new-order/root.tsx'),
     route('edit/:orderId', 'routes/enterprise-orders/edit-order/root.tsx'),

@@ -1,0 +1,7 @@
+import { formatCount } from './format';
+
+export const renderTitle = (name: string, count: number) =>
+  count === 0 ? `<h1>${name}</h1>` : `<h1>${name} (${String(count)})</h1>`;
+
+export const renderBadge = (count: number) =>
+  `<span>${formatCount(count)}</span>`;

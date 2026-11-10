@@ -52,6 +52,7 @@
     "docs:verify": "repo-verify-docs-paths",
     "evals:annotate": "vp run --fail-if-no-match --filter @repo/eval-history annotate",
     "evals:baseline": "node evals/run-baseline.mjs",
+    "evals:fp-panel": "node evals/fp-panel/verify-fp-panel.mjs",
     "evals:grade": "vp run --fail-if-no-match --filter @repo/eval-history grade",
     "evals:grade-adjudication": "vp run --fail-if-no-match --filter @repo/eval-history grade-adjudication",
     "evals:ingest": "node evals/ingest-envelopes.mjs",

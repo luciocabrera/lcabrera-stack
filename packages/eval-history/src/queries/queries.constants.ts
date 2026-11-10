@@ -38,6 +38,7 @@ export const REPORTING_RELATIONS = [
 export const ALLOWED_TEXT_COLUMNS = [
   'adjudication_case.analyzer',
   'adjudication_case.base_sha',
+  'adjudication_case.builder_model',
   'adjudication_case.case_id',
   'adjudication_case.content_hash',
   'adjudication_case.head_sha',

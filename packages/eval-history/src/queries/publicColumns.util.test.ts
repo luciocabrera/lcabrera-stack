@@ -25,6 +25,15 @@ const jsonb = (qualified: string) =>
   column({ dataType: 'jsonb', qualified, udtName: 'jsonb' });
 
 describe('publicColumns', () => {
+  it('publishes the builder model of a panel case, never the file it flagged', () => {
+    expect(
+      publicColumns([
+        text('adjudication_case.builder_model'),
+        text('adjudication_case.file'),
+      ]),
+    ).toEqual(new Set(['adjudication_case.builder_model']));
+  });
+
   it('keeps a column that carries no free text without listing it', () => {
     expect(
       publicColumns([column({ qualified: 'eval_trial.duration_ms' })]),

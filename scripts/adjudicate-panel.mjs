@@ -52,7 +52,7 @@ import {
   upstreamDraft,
   verdictFileName,
 } from './lib/adjudication-panel.mjs';
-import { PANEL_TOOLS, scopeHook } from './lib/panel-scope.mjs';
+import { PANEL_TOOLS, panelSessionOptions } from './lib/panel-scope.mjs';
 import { exportCaseTree } from './lib/panel-tree.mjs';
 import { caseIdFrom, repoPath } from './lib/tool-paths.mjs';
 
@@ -119,19 +119,12 @@ const sit = async ({ casePath, seat, tree }) => {
   const { error, messages, timestamps } = await timedDrain({
     open: () =>
       query({
-        options: {
-          cwd: tree,
-          hooks: { PreToolUse: [{ hooks: [scopeHook({ tree })] }] },
+        options: panelSessionOptions({
           maxTurns: MAX_TURNS,
-          mcpServers: {},
           model: seat.model,
-          permissionMode: 'dontAsk',
-          persistSession: false,
-          settingSources: [],
-          strictMcpConfig: true,
           systemPrompt: agentBody(definition),
-          tools: PANEL_TOOLS,
-        },
+          tree,
+        }),
         prompt: dispatchPrompt(casePath),
       }),
     queuedAt: Date.now(),

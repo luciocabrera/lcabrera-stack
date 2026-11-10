@@ -95,8 +95,8 @@ export const ADJUDICATION_FILE_PATTERN = /^FP-\d{4,}\.json$/u;
 export const INSERT_ADJUDICATION_CASE_SQL = `
 insert into evals.adjudication_case (
   case_id, finding_id, analyzer, rule, file, content_hash, base_sha, head_sha,
-  pr, outcome, created_at, schema_version, envelope_sha256
-) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+  pr, outcome, created_at, schema_version, envelope_sha256, builder_model
+) values ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 on conflict (case_id) do nothing
 returning case_id`;
 

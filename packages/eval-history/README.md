@@ -278,7 +278,9 @@ it was judged at (`base_sha`, `head_sha`) and the pull request, then one entry
 per verifier with its role (`judge` or `adversary`), model,
 `agent_prompt_hash`, verdict (`REAL` or `FALSE_POSITIVE`), evidence, duration,
 tokens and cost, and last the case's outcome: `dismissed`, `fixed`, `split` or
-`escalated`. A split or fixed case may carry the repository owner's
+`escalated`. It may name the model that built the change under review as
+`builder_model`, which the ingest stores in `evals.adjudication_case`, so the
+verdicts can be compared by builder. A split or fixed case may carry the repository owner's
 `owner_ruling`: a `verdict`, the GitHub login that gave it (`by`), the
 `YYYY-MM-DD` date (`at`) and the `https` URL of the ruling (`reference`). The
 schema refuses a dismissed case that any verifier called `REAL`, a split case
@@ -294,7 +296,8 @@ Every case file is ingested: `vp run evals:ingest` with no path reads
 `docs/agents/adjudications/` as well as `.tmp/eval-results/`, and a file kept on
 disk can be ingested into another database later by naming it.
 
-`migrations/0006-adjudications.sql` stores a case in `evals.adjudication_case`
+`migrations/0006-adjudications.sql` stores a case in `evals.adjudication_case`,
+`migrations/0007-fp-panel-suite-and-builder-model.sql` adds its `builder_model`,
 and its verdicts in `evals.adjudication_verdict`, one row per role and model.
 `evals.adjudication_ground_truth` holds the true answers, which come from
 Lucio's decision on a split case or a spot-check, from a fix released
@@ -318,4 +321,6 @@ data" below that floor; `-- --accuracy` prints it alone. It reads
 
 The reader role can select the view and every column of the three tables
 except `file`, `finding_id`, `envelope_sha256` and the free text: a verdict's `evidence` and a
-true answer's `note`.
+true answer's `note`. `readAdjudicationCases` and `readAdjudicationVerdicts`
+read those columns through that boundary for the dashboard, each case with its
+newest true answer.

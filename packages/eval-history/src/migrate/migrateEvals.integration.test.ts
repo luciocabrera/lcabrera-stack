@@ -89,6 +89,7 @@ const INGEST_TABLES = [
 ];
 
 const PLAN_SUITES = [
+  'fp-panel',
   'rules-consistency',
   'skill-quality',
   'skills',

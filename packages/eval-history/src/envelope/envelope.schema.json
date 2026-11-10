@@ -186,7 +186,8 @@
             "skills",
             "verifier-fixtures",
             "verifier-tooled",
-            "skill-quality"
+            "skill-quality",
+            "fp-panel"
           ]
         },
         "totals": {
@@ -715,6 +716,48 @@
                   "reply_sha256",
                   "schema",
                   "summary"
+                ]
+              },
+              {
+                "type": "object",
+                "properties": {
+                  "fixture": {
+                    "type": "string"
+                  },
+                  "matched": {
+                    "type": "boolean"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["judge", "adversary"]
+                  },
+                  "schema": {
+                    "type": "string",
+                    "const": "fp-panel/1"
+                  },
+                  "truth": {
+                    "type": "string",
+                    "enum": ["REAL", "FALSE_POSITIVE"]
+                  },
+                  "verdict": {
+                    "anyOf": [
+                      {
+                        "type": "string",
+                        "enum": ["REAL", "FALSE_POSITIVE"]
+                      },
+                      {
+                        "type": "null"
+                      }
+                    ]
+                  }
+                },
+                "required": [
+                  "fixture",
+                  "matched",
+                  "role",
+                  "schema",
+                  "truth",
+                  "verdict"
                 ]
               }
             ]

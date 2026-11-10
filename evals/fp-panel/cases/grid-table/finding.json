@@ -1,0 +1,27 @@
+{
+  "analyzer": "biome",
+  "end": 43,
+  "explain": "Summary\n\n- Name: noNoninteractiveElementToInteractiveRole\n- Fix: unsafe\n- Default severity: error\n- Available from version: 1.0.0\n- Diagnostic category: lint/a11y/noNoninteractiveElementToInteractiveRole\n- This rule is recommended\n\nDescription\n\n Enforce that interactive ARIA roles are not assigned to non-interactive HTML elements.\n\n Non-interactive HTML elements indicate _content_ and _containers_ in the user interface.\n Non-interactive elements include `<main>`, `<area>`, `<h1>` (,`<h2>`, etc), `<img>`, `<li>`, `<ul>` and `<ol>`.\n\n Interactive HTML elements indicate _controls_ in the user interface.\n Interactive elements include `<a href>`, `<button>`, `<input>`, `<select>`, `<textarea>`.\n\n [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro) should not be used to convert a non-interactive element to an interactive element.\n Interactive ARIA roles include `button`, `link`, `checkbox`, `menuitem`, `menuitemcheckbox`, `menuitemradio`, `option`, `radio`, `searchbox`, `switch` and `textbox`.\n\nExamples\n\nInvalid\n\n ```jsx,expect_diagnostic\n <h1 role=\"button\">Some text</h1>\n ```\n\nValid\n\n\n ```jsx\n <span role=\"button\">Some text</span>\n ```\n\nAccessibility guidelines\n\n - [WCAG 4.1.2](https://www.w3.org/WAI/WCAG21/Understanding/name-role-value)\n\nResources\n\n - [WAI-ARIA roles](https://www.w3.org/TR/wai-aria-1.1/#usage_intro)\n - [WAI-ARIA Authoring Practices Guide - Design Patterns and Widgets](https://www.w3.org/TR/wai-aria-practices-1.1/#aria_ex)\n - [Fundamental Keyboard Navigation Conventions](https://www.w3.org/TR/wai-aria-practices-1.1/#kbd_generalnav)\n - [Mozilla Developer Network - ARIA Techniques](https://developer.mozilla.org/en-US/docs/Web/Accessibility/ARIA/ARIA_Techniques/Using_the_button_role#Keyboard_and_focus)",
+  "file": "src/ScoreGrid.tsx",
+  "records": [
+    {
+      "severity": "error",
+      "message": "The HTML element table is non-interactive and should not have an interactive role.",
+      "category": "lint/a11y/noNoninteractiveElementToInteractiveRole",
+      "location": {
+        "path": "src/ScoreGrid.tsx",
+        "start": {
+          "line": 43,
+          "column": 65
+        },
+        "end": {
+          "line": 43,
+          "column": 76
+        }
+      },
+      "advices": []
+    }
+  ],
+  "rule": "lint/a11y/noNoninteractiveElementToInteractiveRole",
+  "start": 43
+}

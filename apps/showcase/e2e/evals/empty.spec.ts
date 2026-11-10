@@ -12,7 +12,7 @@ it('says no run is stored yet on the overview, and draws no card or alert', asyn
   await expect(mainOf(page).getByRole('heading', { level: 2 })).toHaveCount(0);
   await expect(
     page.getByRole('navigation', { name: 'Eval views' }).getByRole('link'),
-  ).toHaveCount(7);
+  ).toHaveCount(8);
 });
 
 it('says no skill-quality run is stored yet on the quality page', async ({

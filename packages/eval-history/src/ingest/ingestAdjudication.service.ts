@@ -37,6 +37,7 @@ const caseValues = ({ envelope, sha256 }: IngestAdjudicationArgs) => {
     adjudicated.created_at,
     envelope.schema_version,
     sha256,
+    envelope.builder_model,
   ];
 };
 

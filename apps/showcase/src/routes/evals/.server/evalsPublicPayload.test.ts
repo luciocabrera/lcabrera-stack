@@ -163,6 +163,7 @@ describe.skipIf(!DATABASE_URL)('the public /evals payload', () => {
     loaded: new Map() as Awaited<ReturnType<typeof loadEvalsRouteModules>>,
   };
   const seeded = {
+    caseId: 'FP-0001',
     otherRunId: '',
     runId: '',
     subjectKind: '',
@@ -434,8 +435,8 @@ limit 1`);
       expect(status, payload.slice(0, 400)).toBeGreaterThanOrEqual(200);
       expect(status, payload.slice(0, 400)).toBeLessThan(300);
       expect(
-        [seeded.runId, seeded.taskKey, seeded.triggerRunId].some((value) =>
-          payload.includes(value),
+        [seeded.caseId, seeded.runId, seeded.taskKey, seeded.triggerRunId].some(
+          (value) => payload.includes(value),
         ),
         'the answer carries none of the seeded rows',
       ).toBe(true);

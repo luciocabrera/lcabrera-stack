@@ -218,8 +218,7 @@ Tracked, not fixed here:
   placeholder `<one-line reason>` passes the gate as a reason, so replace it
   yourself. Nothing binds a panel record to a real session. One seat that
   breaks the verdict format fails the whole run, with no retry, so the other
-  two verdicts are lost. The envelope schema does not declare
-  `builder_model`, so a validated envelope drops it.
+  two verdicts are lost.
 - [#1574](https://github.com/luciocabrera/lcabrera-stack/issues/1574):
   `fallow similar-code` can finish a run as `partial`, and fallow's issue
   registry has no `similar-code` marker. A dismissed `similar-code` case still

@@ -1,0 +1,6 @@
+{
+  "name": "rate-tones",
+  "private": true,
+  "type": "module",
+  "exports": "./src/rateTone.ts"
+}

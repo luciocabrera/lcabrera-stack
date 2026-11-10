@@ -50,6 +50,7 @@ const ownerRulingSchema = z.object({
 });
 
 export const adjudicationShapeSchema = z.object({
+  builder_model: name.optional(),
   case: caseSchema,
   outcome: z.enum(ADJUDICATION_OUTCOMES),
   owner_ruling: ownerRulingSchema.optional(),

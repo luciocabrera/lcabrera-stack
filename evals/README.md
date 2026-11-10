@@ -17,6 +17,7 @@ suites' own tests.
 | [Skill triggers](./skills)               | `vp run evals:skills`         | yes           |
 | [Skill quality](./skill-quality)         | `vp run evals:skills:quality` | yes           |
 | [Verifier fixtures](./verifier-fixtures) | `vp run evals:verifier`       | yes           |
+| [False-positive panel](./fp-panel)       | `vp run evals:fp-panel`       | yes           |
 | The suites' own tests                    | `vp run test:evals`           | no            |
 
 ## What a run leaves behind

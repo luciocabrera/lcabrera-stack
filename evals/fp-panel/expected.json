@@ -1,0 +1,6 @@
+{
+  "grid-table": "FALSE_POSITIVE",
+  "nested-ternary": "REAL",
+  "unused-export": "REAL",
+  "used-export": "FALSE_POSITIVE"
+}
