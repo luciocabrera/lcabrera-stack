@@ -17,15 +17,24 @@ const baseDataState: VirtualListDataState = {
   isLoadingMore: false,
 };
 
-const renderContent = () =>
+const renderContent = (shouldFillHeight = false) =>
   render(
     <VirtualListProvider
       dataState={baseDataState}
-      listState={{ hasCheckboxes: true, hasSelectAll: true, onChange: vi.fn() }}
+      listState={{
+        hasCheckboxes: true,
+        hasSelectAll: true,
+        onChange: vi.fn(),
+        shouldFillHeight,
+      }}
     >
       <VirtualListContent />
     </VirtualListProvider>,
   );
+
+const groupClassName = () =>
+  screen.getByPlaceholderText('Search options...').parentElement?.parentElement
+    ?.className;
 
 describe('VirtualListContent', () => {
   it('composes the search header, the options body, and the footer', () => {
@@ -44,5 +53,14 @@ describe('VirtualListContent', () => {
 
     expect(container.querySelectorAll('input[type="text"]')).toHaveLength(1);
     expect(screen.getAllByRole('checkbox').length).toBeGreaterThan(0);
+  });
+
+  it('lets the search-and-list group fill the height only in fill mode', () => {
+    renderContent();
+    const contentSized = groupClassName();
+    cleanup();
+    renderContent(true);
+
+    expect(groupClassName()).not.toBe(contentSized);
   });
 });

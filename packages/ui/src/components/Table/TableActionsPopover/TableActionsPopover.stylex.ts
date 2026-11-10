@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import {
+  backdropBlur,
   borderRadius,
   shadows,
   spacing,
@@ -18,6 +19,7 @@ export const styles = stylex.create({
     borderRadius: borderRadius.sm,
     borderStyle: 'solid',
     borderWidth: '1px',
+    backdropFilter: backdropBlur.floating,
     boxShadow: shadows.md,
     zIndex: zIndex.popover,
     minWidth: '12rem',

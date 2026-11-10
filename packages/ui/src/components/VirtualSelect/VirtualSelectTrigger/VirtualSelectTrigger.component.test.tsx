@@ -47,6 +47,7 @@ vi.mock('../contexts/meta/actions', () => ({
 }));
 
 vi.mock('../contexts/meta/selectors', () => ({
+  useGetAttachedEdge: () => undefined,
   useGetIsAlwaysOpen: () => metaState.current.isAlwaysOpen,
   useGetIsBusy: () => metaState.current.isBusy,
   useGetIsInert: () => metaState.current.isBusy || metaState.current.isDisabled,
@@ -55,6 +56,10 @@ vi.mock('../contexts/meta/selectors', () => ({
   useGetListboxId: () => metaState.current.listboxId,
   useGetMode: () => metaState.current.mode,
   useGetPlaceholder: () => metaState.current.placeholder,
+}));
+
+vi.mock('#ui/components/VirtualList/contexts/list/selectors', () => ({
+  useGetIsTopAttached: () => false,
 }));
 
 vi.mock('#ui/components/VirtualList/contexts/data/actions', () => ({

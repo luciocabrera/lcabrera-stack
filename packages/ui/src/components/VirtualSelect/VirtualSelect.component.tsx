@@ -12,6 +12,7 @@ import { VirtualSelectLabel } from './VirtualSelectLabel/VirtualSelectLabel.comp
 
 // fallow-ignore-next-line complexity -- false positive, case FP-0002: prop count of a required public API; no branching to remove
 export const VirtualSelect = ({
+  attachedEdge,
   customStylex,
   dataState,
   isAlwaysOpen = false,
@@ -28,6 +29,7 @@ export const VirtualSelect = ({
   onOpenChange,
   options = [],
   placeholder = 'Select...',
+  placement,
   selected,
   shouldFillHeight = false,
 }: VirtualSelectProps) => {
@@ -71,6 +73,7 @@ export const VirtualSelect = ({
         shouldFillHeight,
       }}
       metaState={{
+        attachedEdge,
         customStylex,
         isAlwaysOpen,
         isBusy,
@@ -82,6 +85,7 @@ export const VirtualSelect = ({
         onCloseDropdown: closeDropdown,
         onToggleDropdown: toggleDropdown,
         placeholder,
+        placement,
       }}
     >
       <div

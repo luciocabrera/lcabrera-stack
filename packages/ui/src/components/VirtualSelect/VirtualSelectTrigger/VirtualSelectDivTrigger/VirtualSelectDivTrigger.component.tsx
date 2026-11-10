@@ -1,15 +1,17 @@
 import type { KeyboardEvent } from 'react';
 
+import { useGetIsTopAttached } from '#ui/components/VirtualList/contexts/list/selectors';
+
 import type { VirtualSelectDivTriggerProps } from './VirtualSelectDivTrigger.types';
 
 import { useToggleDropdown } from '../../contexts/meta/actions';
 import {
+  useGetAttachedEdge,
   useGetIsAlwaysOpen,
   useGetIsInert,
   useGetIsOpen,
   useGetLabelId,
   useGetListboxId,
-  useGetMode,
 } from '../../contexts/meta/selectors';
 import {
   assignTriggerRef,
@@ -20,14 +22,16 @@ import {
 
 export const VirtualSelectDivTrigger = ({
   children,
+  hasTags,
   triggerRef,
 }: VirtualSelectDivTriggerProps) => {
   const isAlwaysOpen = useGetIsAlwaysOpen();
+  const attachedEdge = useGetAttachedEdge();
+  const isAttachedBelow = useGetIsTopAttached();
   const isInert = useGetIsInert();
   const isOpen = useGetIsOpen();
   const labelId = useGetLabelId();
   const listboxId = useGetListboxId();
-  const mode = useGetMode();
   const toggleDropdown = useToggleDropdown();
 
   const shouldDisableInteraction = isInert || isAlwaysOpen;
@@ -56,10 +60,12 @@ export const VirtualSelectDivTrigger = ({
       }}
       {...interactionProps}
       {...getTriggerStyleProps({
+        attachedEdge,
+        hasTags,
+        isAttachedBelow,
         isInert,
         isOpen,
         isStatic: isAlwaysOpen,
-        mode,
       })}
     >
       {children}

@@ -47,6 +47,7 @@ export const VirtualListProvider = ({
     syncStoreFromProps({
       next: getInitialListState({
         ...listState,
+        isTopAttached: uiState.isTopAttached,
         listFilterMode: uiState.listFilterMode,
         searchTerm: uiState.searchTerm,
       }),

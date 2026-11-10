@@ -9,7 +9,7 @@ import { BooleanFilterInput } from '../BooleanFilterInput';
 import { styles } from './FilterInputs.stylex';
 import { InputContent } from './InputContent';
 import { OperatorSelect } from './OperatorSelect/OperatorSelect.component';
-import { getOperatorFromFilter } from './utils';
+import { getOperatorFromFilter, isValueSelectList } from './utils';
 
 export const FilterInputs = <TData = Record<string, unknown>,>({
   columnKey,
@@ -49,15 +49,24 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
     );
   }
 
+  const operator = getOperatorFromFilter({ dataType, filter });
+  const hasFetchableOptions = Boolean(column?.filterOptionsDescriptor);
+  const isJoined = isValueSelectList({
+    dataType,
+    filter,
+    hasFetchableOptions,
+    operator,
+  });
+
   const inputComponent = (
     <InputContent
       columnKey={columnKey}
       dataType={dataType}
       filter={filter}
-      hasFetchableOptions={Boolean(column?.filterOptionsDescriptor)}
+      hasFetchableOptions={hasFetchableOptions}
       listMaxHeight={listMaxHeight}
       onChange={onChange}
-      operator={getOperatorFromFilter({ dataType, filter })}
+      operator={operator}
       shouldFillHeight={shouldFillHeight}
     />
   );
@@ -67,9 +76,11 @@ export const FilterInputs = <TData = Record<string, unknown>,>({
       {...stylex.props(
         styles.container,
         shouldFillHeight ? styles.containerFill : undefined,
+        isJoined ? styles.containerJoined : undefined,
       )}
     >
       <OperatorSelect
+        attachedEdge={isJoined ? 'bottom' : undefined}
         dataType={dataType}
         filter={filter}
         onChange={onChange}

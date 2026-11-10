@@ -8,12 +8,14 @@ import { ICON_SIZE_MD } from '#ui/design-system/constants';
 
 import { useClearSearch, useSetSearchTerm } from '../contexts/list/actions';
 import {
+  useGetIsTopAttached,
   useGetSearchInputName,
   useGetSearchTerm,
 } from '../contexts/list/selectors';
 import { styles } from './VirtualListHeader.stylex';
 
 export const VirtualListHeader = () => {
+  const isTopAttached = useGetIsTopAttached();
   const name = useGetSearchInputName();
   const searchTerm = useGetSearchTerm();
   const clearSearch = useClearSearch();
@@ -40,6 +42,8 @@ export const VirtualListHeader = () => {
         value={searchTerm}
         {...stylex.props(
           styles.searchInput,
+          styles.searchInputGrouped,
+          isTopAttached ? styles.searchInputTopAttached : undefined,
           searchTerm ? styles.searchInputWithClear : undefined,
         )}
       />

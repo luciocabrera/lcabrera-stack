@@ -13,11 +13,19 @@ export const VirtualListContent = () => {
     <div
       {...stylex.props(
         styles.container,
+        styles.containerShrinkable,
         shouldFillHeight ? styles.containerFill : undefined,
       )}
     >
-      <VirtualListHeader />
-      <VirtualListBody />
+      <div
+        {...stylex.props(
+          styles.group,
+          shouldFillHeight ? styles.containerFill : undefined,
+        )}
+      >
+        <VirtualListHeader />
+        <VirtualListBody />
+      </div>
       <VirtualListFooter />
     </div>
   );

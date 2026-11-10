@@ -45,6 +45,7 @@ const setup = ({ context = {}, dataState = {} }: SetupArgs = {}) => {
     hasFetchInitial: false,
     hasFetchMore: false,
     hasSelectAll: true,
+    isTopAttached: false,
     listFilterMode: 'all',
     listMaxHeight: '18.75rem',
     searchTerm: '',

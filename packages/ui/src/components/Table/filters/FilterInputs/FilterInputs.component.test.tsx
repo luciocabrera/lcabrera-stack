@@ -44,13 +44,16 @@ const { MockBooleanFilterInput, MockInputContent, MockOperatorSelect } =
       </div>
     ),
     MockOperatorSelect: ({
+      attachedEdge = 'none',
       dataType,
       onOpenChange,
     }: {
+      readonly attachedEdge?: string;
       readonly dataType?: string;
       readonly onOpenChange: (isOpen: boolean) => void;
     }) => (
       <div data-testid='operator-select'>
+        <span data-testid='operator-select-attached'>{attachedEdge}</span>
         <span data-testid='operator-select-datatype'>{String(dataType)}</span>
         <button
           onClick={() => {
@@ -102,7 +105,7 @@ const renderFilterInputs = ({
   onChange = vi.fn(),
   shouldFillHeight,
 }: {
-  readonly column: TableColumn<Row>;
+  readonly column: TableColumn<Row> | undefined;
   readonly filter?: ColumnFilter;
   readonly listMaxHeight?: string;
   readonly onChange?: (filter?: ColumnFilter) => void;
@@ -327,6 +330,52 @@ describe('FilterInputs', () => {
 
       expect(screen.getByTestId('input-content-filter').textContent).toBe(
         JSON.stringify({ operator: 'equals', type: 'number', value: 7 }),
+      );
+    });
+  });
+
+  describe('an operator stacked on an option list', () => {
+    const optionColumn: TableColumn<Row> = {
+      ...stringColumn,
+      filterOptionsDescriptor: { kind: 'static', values: ['Open'] },
+    };
+
+    it('attaches the operator select to the option list beneath it', () => {
+      const { container } = renderFilterInputs({
+        column: optionColumn,
+        filter: { type: 'select', values: ['Open'] },
+      });
+      const joinedClassName = (container.firstChild as HTMLElement).className;
+
+      expect(screen.getByTestId('operator-select-attached').textContent).toBe(
+        'bottom',
+      );
+
+      cleanup();
+      const { container: textContainer } = renderFilterInputs({
+        column: stringColumn,
+        filter: { operator: 'contains', type: 'text', value: 'op' },
+      });
+
+      expect(screen.getByTestId('operator-select-attached').textContent).toBe(
+        'none',
+      );
+      expect((textContainer.firstChild as HTMLElement).className).not.toBe(
+        joinedClassName,
+      );
+    });
+
+    it('treats an undeclared column as one with no options to fetch', () => {
+      renderFilterInputs({
+        column: undefined,
+        filter: { operator: 'contains', type: 'text', value: 'op' },
+      });
+
+      expect(screen.getByTestId('input-content-props').textContent).toContain(
+        'fetchable:false',
+      );
+      expect(screen.getByTestId('operator-select-attached').textContent).toBe(
+        'none',
       );
     });
   });

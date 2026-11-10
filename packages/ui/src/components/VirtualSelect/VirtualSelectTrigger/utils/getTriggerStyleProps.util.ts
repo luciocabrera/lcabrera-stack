@@ -1,26 +1,33 @@
 import * as stylex from '@stylexjs/stylex';
 
-import type { VirtualSelectMode } from '../../VirtualSelect.types';
+import type { VirtualSelectAttachedEdge } from '../../VirtualSelect.types';
 
 import { styles } from '../VirtualSelectTrigger.stylex';
 
 type GetTriggerStylePropsArgs = {
+  attachedEdge?: VirtualSelectAttachedEdge;
+  hasTags?: boolean;
+  isAttachedBelow?: boolean;
   isInert?: boolean;
   isOpen: boolean;
   isStatic?: boolean;
-  mode: VirtualSelectMode;
 };
 
 export const getTriggerStyleProps = ({
+  attachedEdge,
+  hasTags = false,
+  isAttachedBelow = false,
   isInert = false,
   isOpen,
   isStatic = false,
-  mode,
 }: GetTriggerStylePropsArgs) =>
   stylex.props(
     styles.trigger,
     isInert && styles.triggerBusy,
     isOpen && styles.triggerOpen,
-    mode === 'multi' && styles.triggerClamped,
+    ((isOpen && isAttachedBelow) || attachedEdge === 'bottom') &&
+      styles.triggerAttachedBelow,
+    hasTags && styles.triggerClamped,
     isStatic && styles.triggerStatic,
+    attachedEdge === 'top' && styles.triggerAttachedAbove,
   );

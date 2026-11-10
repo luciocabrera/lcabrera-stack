@@ -6,6 +6,7 @@ import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { VirtualListProvider } from '../contexts';
+import { useSetIsTopAttached } from '../contexts/list/actions';
 import { VirtualListHeader } from './VirtualListHeader.component';
 
 afterEach(cleanup);
@@ -33,6 +34,21 @@ const ProviderShell = ({ children, name }: ProviderShellProps) => (
     {children}
   </VirtualListProvider>
 );
+
+const AttachButton = () => {
+  const setIsTopAttached = useSetIsTopAttached();
+
+  return (
+    <button
+      onClick={() => {
+        setIsTopAttached(true);
+      }}
+      type='button'
+    >
+      attach
+    </button>
+  );
+};
 
 describe('VirtualListHeader', () => {
   it('renders the search input with the configured name', () => {
@@ -80,5 +96,20 @@ describe('VirtualListHeader', () => {
     expect(
       screen.getByPlaceholderText<HTMLInputElement>('Search options...').value,
     ).toBe('');
+  });
+
+  it('squares its top corners once a control is attached on top of the list', () => {
+    render(
+      <ProviderShell>
+        <AttachButton />
+        <VirtualListHeader />
+      </ProviderShell>,
+    );
+    const input = screen.getByPlaceholderText('Search options...');
+    const detachedClassName = input.className;
+
+    fireEvent.click(screen.getByRole('button', { name: 'attach' }));
+
+    expect(input.className).not.toBe(detachedClassName);
   });
 });

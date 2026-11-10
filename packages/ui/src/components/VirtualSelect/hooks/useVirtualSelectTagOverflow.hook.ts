@@ -19,20 +19,30 @@ export const useVirtualSelectTagOverflow = ({
   selected,
   triggerRef,
 }: UseVirtualSelectTagOverflowArgs) => {
-  const [visibleTagCount, setVisibleTagCount] = useState(selected.length);
+  const [measurement, setMeasurement] = useState({
+    count: selected.length,
+    selected,
+  });
+
+  if (measurement.selected !== selected) {
+    setMeasurement({ count: selected.length, selected });
+  }
 
   useEffect(() => {
     const trigger = triggerRef.current;
     if (mode !== 'multi' || !trigger) return;
 
     const measure = () => {
-      setVisibleTagCount(
-        countVisibleTags({ totalCount: selected.length, trigger }),
-      );
+      const count = countVisibleTags({ totalCount: selected.length, trigger });
+
+      setMeasurement({ count, selected });
     };
 
-    const observer = new ResizeObserver(measure);
-    observer.observe(trigger);
+    const resizeObserver = new ResizeObserver(measure);
+    resizeObserver.observe(trigger);
+
+    const mutationObserver = new MutationObserver(measure);
+    mutationObserver.observe(trigger, { childList: true });
 
     let isMeasureCancelled = false;
     queueMicrotask(() => {
@@ -41,9 +51,10 @@ export const useVirtualSelectTagOverflow = ({
 
     return () => {
       isMeasureCancelled = true;
-      observer.disconnect();
+      resizeObserver.disconnect();
+      mutationObserver.disconnect();
     };
   }, [mode, selected, triggerRef]);
 
-  return visibleTagCount;
+  return measurement.count;
 };

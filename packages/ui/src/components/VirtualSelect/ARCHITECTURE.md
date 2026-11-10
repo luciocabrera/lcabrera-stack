@@ -28,7 +28,7 @@ VirtualSelect/
 │                                        owns triggerRef + overflow)
 │   ├── index.ts
 │   ├── VirtualSelectTrigger.component.tsx
-│   ├── VirtualSelectTrigger.stylex.ts   (exports TRIGGER_MAX_HEIGHT)
+│   ├── VirtualSelectTrigger.stylex.ts
 │   └── VirtualSelectTrigger.types.ts
 │
 ├── hooks/
@@ -59,15 +59,15 @@ graph TD
 
 Every store slice is read — and every action dispatched — inside the component that renders it, and **each piece of state has exactly one owning store** (select metadata → meta store; list config/callbacks + search/filter-mode → list store; data + selection → list data store). The shell holds no store wiring; it owns only the select-level concerns it mirrors into the provider.
 
-| Delegate                    | Selectors read                                                                                                                                                    | Actions dispatched                                   | Props kept                                |
-| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------- |
-| `VirtualSelect` (shell)     | — (mounts the provider)                                                                                                                                           | — (`onChange` mapping lives on the `listState`)      | public API (unchanged)                    |
-| `VirtualSelectHeader`       | `useGetIsBusy` (meta) — only what it renders itself (the overlay)                                                                                                 | —                                                    | none                                      |
-| `VirtualSelectTrigger`      | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetLabelId`, `useGetListboxId`, `useGetMode`, `useGetPlaceholder` (meta); `useGetSelectedValues` (data) | `useToggleDropdown` (meta), `useToggleOption` (data) | none (owns `triggerRef` + overflow)       |
-| `VirtualSelectDivTrigger`   | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetLabelId`, `useGetListboxId`, `useGetMode` (meta)                                                     | `useToggleDropdown` (meta)                           | `children`, `triggerRef` (producer→child) |
-| `VirtualSelectLabel`        | `useGetLabelId` (meta)                                                                                                                                            | —                                                    | `label` (shell prop)                      |
-| `VirtualSelectHiddenInputs` | —                                                                                                                                                                 | —                                                    | `name`, `selected` (shell props)          |
-| `VirtualSelectDropdown`     | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetLabelId`, `useGetListboxId` (meta); `useGetShouldFillHeight` (list)                     | —                                                    | none                                      |
+| Delegate                    | Selectors read                                                                                                                                                                                        | Actions dispatched                                   | Props kept                                |
+| --------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------- |
+| `VirtualSelect` (shell)     | — (mounts the provider)                                                                                                                                                                               | — (`onChange` mapping lives on the `listState`)      | public API (unchanged)                    |
+| `VirtualSelectHeader`       | `useGetIsBusy` (meta) — only what it renders itself (the overlay)                                                                                                                                     | —                                                    | none                                      |
+| `VirtualSelectTrigger`      | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetLabelId`, `useGetListboxId`, `useGetMode`, `useGetPlaceholder` (meta); `useGetSelectedValues` (data); `useGetIsTopAttached` (list)       | `useToggleDropdown` (meta), `useToggleOption` (data) | none (owns `triggerRef` + overflow)       |
+| `VirtualSelectDivTrigger`   | `useGetIsAlwaysOpen`, `useGetIsBusy`, `useGetIsOpen`, `useGetLabelId`, `useGetListboxId`, `useGetMode` (meta); `useGetIsTopAttached` (list)                                                           | `useToggleDropdown` (meta)                           | `children`, `triggerRef` (producer→child) |
+| `VirtualSelectLabel`        | `useGetLabelId` (meta)                                                                                                                                                                                | —                                                    | `label` (shell prop)                      |
+| `VirtualSelectHiddenInputs` | —                                                                                                                                                                                                     | —                                                    | `name`, `selected` (shell props)          |
+| `VirtualSelectDropdown`     | `useGetCustomStylex`, `useGetIsAlwaysOpen`, `useGetIsListVisible`, `useGetLabelId`, `useGetListboxId`, `useGetPlacement` (meta); `useGetShouldFillHeight` (list); writes `useSetIsTopAttached` (list) | —                                                    | none                                      |
 
 ## Data Flow
 
@@ -111,6 +111,10 @@ The provider lives for the **select's lifetime**, not per dropdown open:
 ## Dropdown Positioning
 
 Owned by `VirtualSelectDropdown`: `getDropdownStyle({ isAlwaysOpen, shouldFillHeight })` picks between floating (`dropdownFloatingPosition` — promoted to the top layer so no scrolling ancestor can clip it), inline (`dropdownStatic`), and fill-height (`dropdownStaticFill`) positioning. The shell supplies the anchor: its `containerRef` is passed to the provider as `anchorRef`, and the dropdown measures against it.
+
+Where a floating dropdown opens is the `placement` prop. `resolveDropdownPlacement` returns a `top`, a `maxHeight` and the `side` it picks, and the list shrinks to the cap and scrolls. Below, the list attaches flush to the trigger: the dropdown writes the list store's `isTopAttached` (also true when `isAlwaysOpen`), the search box squares its top corners, and an open trigger reading the same flag drops its bottom border and corners. Above, it keeps `DROPDOWN_GAP_PX` of space, because the footer sits between the list and the trigger there.
+
+`attachedEdge` (`'top' | 'bottom'`) is for a select stacked flush against another control. It goes through the meta store to both triggers: `bottom` drops the trigger's bottom border and corners, so the control below draws the dividing line; `top` squares the top corners, after the always-open trigger's own rounding. The table's filter inputs use it to join the operator select to an always-open value list beneath it. `bottom` and `top` fix the side. `auto`, the default, opens below and moves above only when the list overflows a space below smaller than `DROPDOWN_MIN_USABLE_HEIGHT_PX` and above has more room (`shouldOpenAbove`). The comparison is strict on purpose: once the cap applies, the measured height equals the space below, and a `>=` would read that as overflowing and flip a list that had settled.
 
 The container and dropdown use explicit `border-box`, `min-width: 0`, and
 `max-width: 100%` sizing so both floating and always-open variants remain

@@ -2,7 +2,7 @@
 id: virtual-select-placement-layout
 title: VirtualSelect placement, joined layout and stable list height
 owner: agent:claude
-status: active
+status: review
 branch: feat/1614-virtual-select-placement-layout
 area:
   - packages/ui/src/components/VirtualSelect/**
@@ -14,7 +14,7 @@ area:
 started: 2026-11-10
 updated: 2026-11-10
 plan: (none)
-pr: (none)
+pr: '#1615'
 issue: #1614
 ---
 
@@ -24,6 +24,6 @@ VirtualSelect placement, joined layout and stable list height
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: PR #1615 ready for review, CI running
 - Blockers: none
-- Next:
+- Next: merge, then delete this file

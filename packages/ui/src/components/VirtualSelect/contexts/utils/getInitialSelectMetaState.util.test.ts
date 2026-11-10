@@ -10,6 +10,7 @@ const baseArgs = {
   listboxId: 'listbox-id',
   mode: 'single' as const,
   placeholder: 'Select...',
+  placement: 'auto' as const,
 };
 
 describe('getInitialSelectMetaState', () => {
@@ -36,5 +37,12 @@ describe('getInitialSelectMetaState', () => {
       getInitialSelectMetaState({ ...baseArgs, isAlwaysOpen: true })
         .isListVisible,
     ).toBe(true);
+  });
+
+  it('opens the floating list on the auto placement when none is given', () => {
+    expect(
+      getInitialSelectMetaState({ ...baseArgs, placement: undefined })
+        .placement,
+    ).toBe('auto');
   });
 });

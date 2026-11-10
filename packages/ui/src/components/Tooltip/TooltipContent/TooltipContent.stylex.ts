@@ -1,6 +1,7 @@
 import * as stylex from '@stylexjs/stylex';
 
 import {
+  backdropBlur,
   borderRadius,
   easing,
   shadows,
@@ -25,7 +26,7 @@ export const styles = stylex.create({
     paddingBlock: spacing.sm,
     paddingInline: spacing.sm,
     transition: `opacity ${transitions.fast} ${easing.easeInOut}, transform ${transitions.fast} ${easing.easeInOut}`,
-    backdropFilter: 'blur(8px)',
+    backdropFilter: backdropBlur.floating,
     backgroundColor: colors.surfaceElevated,
     boxShadow: shadows.md,
     color: colors.textPrimary,

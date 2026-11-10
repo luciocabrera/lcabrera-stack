@@ -63,6 +63,7 @@ describe('VirtualSelectProvider', () => {
         onCloseDropdown: vi.fn(),
         onToggleDropdown: vi.fn(),
         placeholder: 'Pick...',
+        placement: 'auto',
       },
     });
 
@@ -96,6 +97,7 @@ describe('VirtualSelectProvider', () => {
         onCloseDropdown: vi.fn(),
         onToggleDropdown: vi.fn(),
         placeholder: 'Pick...',
+        placement: 'auto',
       },
     });
 
@@ -128,6 +130,7 @@ describe('VirtualSelectProvider', () => {
           onCloseDropdown: vi.fn(),
           onToggleDropdown: vi.fn(),
           placeholder: 'Pick...',
+          placement: 'auto',
         }}
       >
         {children}

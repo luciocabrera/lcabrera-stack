@@ -25,6 +25,7 @@ import {
   useGetListboxId,
   useGetMode,
   useGetPlaceholder,
+  useGetPlacement,
 } from './selectors';
 
 type WrapperProps = {
@@ -41,6 +42,7 @@ const setup = (metaState: Partial<VirtualSelectMetaState> = {}) => {
     listboxId: 'listbox-id',
     mode: 'multi',
     placeholder: 'Pick a fruit...',
+    placement: 'auto',
     ...metaState,
   });
   const onCloseDropdown = vi.fn();
@@ -103,6 +105,9 @@ describe('VirtualSelect meta hooks', () => {
     expect(
       renderHook(() => useGetPlaceholder(), { wrapper }).result.current,
     ).toBe('Pick a fruit...');
+    expect(
+      renderHook(() => useGetPlacement(), { wrapper }).result.current,
+    ).toBe('auto');
 
     expect(
       renderHook(() => useGetLabelId(), { wrapper }).result.current,

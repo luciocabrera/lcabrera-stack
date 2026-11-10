@@ -2,16 +2,21 @@ import type { RefObject } from 'react';
 
 import { useEffect, useState } from 'react';
 
+import type { VirtualSelectPlacement } from '../VirtualSelect.types';
 import type { DropdownPlacement } from './VirtualSelectDropdown.types';
 
 import { resolveDropdownPlacement } from './utils/resolveDropdownPlacement.util';
-import { DROPDOWN_GAP_PX } from './VirtualSelectDropdown.constants';
+import {
+  DROPDOWN_GAP_PX,
+  DROPDOWN_MIN_USABLE_HEIGHT_PX,
+} from './VirtualSelectDropdown.constants';
 
 type UseVirtualSelectDropdownPositionArgs = {
   readonly anchorRef: RefObject<HTMLDivElement | null>;
   readonly dropdownRef: RefObject<HTMLDivElement | null>;
   readonly isEnabled: boolean;
   readonly onScrollAway: () => void;
+  readonly placement: VirtualSelectPlacement;
 };
 
 export const useVirtualSelectDropdownPosition = ({
@@ -19,6 +24,7 @@ export const useVirtualSelectDropdownPosition = ({
   dropdownRef,
   isEnabled,
   onScrollAway,
+  placement: preferredPlacement,
 }: UseVirtualSelectDropdownPositionArgs) => {
   const [placement, setPlacement] = useState<DropdownPlacement>();
 
@@ -40,11 +46,15 @@ export const useVirtualSelectDropdownPosition = ({
         anchorRect: anchorElement.getBoundingClientRect(),
         dropdownHeight: dropdownElement.getBoundingClientRect().height,
         gap: DROPDOWN_GAP_PX,
+        minUsableHeight: DROPDOWN_MIN_USABLE_HEIGHT_PX,
+        placement: preferredPlacement,
         viewportHeight: globalThis.innerHeight,
       });
 
       setPlacement((current) =>
         current?.left === next.left &&
+        current.maxHeight === next.maxHeight &&
+        current.side === next.side &&
         current.top === next.top &&
         current.width === next.width
           ? current
@@ -79,7 +89,7 @@ export const useVirtualSelectDropdownPosition = ({
       });
       resizeObserver?.disconnect();
     };
-  }, [anchorRef, dropdownRef, isEnabled, onScrollAway]);
+  }, [anchorRef, dropdownRef, isEnabled, onScrollAway, preferredPlacement]);
 
   return placement;
 };

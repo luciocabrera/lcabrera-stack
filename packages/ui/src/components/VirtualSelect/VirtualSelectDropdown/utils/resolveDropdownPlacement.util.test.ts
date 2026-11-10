@@ -3,71 +3,131 @@ import { describe, expect, it } from 'vite-plus/test';
 import { resolveDropdownPlacement } from './resolveDropdownPlacement.util';
 
 const anchorRect = { bottom: 140, left: 32, top: 108, width: 240 };
+const baseArgs = {
+  anchorRect,
+  gap: 8,
+  minUsableHeight: 160,
+  placement: 'auto' as const,
+  viewportHeight: 900,
+};
 
 describe('resolveDropdownPlacement', () => {
-  it('places the dropdown below the anchor, offset by the gap', () => {
+  it('attaches the dropdown flush below the anchor, capped to the space left below', () => {
     const placement = resolveDropdownPlacement({
-      anchorRect,
+      ...baseArgs,
       dropdownHeight: 200,
-      gap: 8,
-      viewportHeight: 900,
     });
 
-    expect(placement).toStrictEqual({ left: 32, top: 148, width: 240 });
+    expect(placement).toStrictEqual({
+      left: 32,
+      maxHeight: 900 - 140 - 8,
+      side: 'below',
+      top: 140,
+      width: 240,
+    });
   });
 
   it('matches the anchor width so the dropdown lines up with the trigger', () => {
     const placement = resolveDropdownPlacement({
+      ...baseArgs,
       anchorRect: { ...anchorRect, width: 517 },
       dropdownHeight: 100,
-      gap: 8,
-      viewportHeight: 900,
     });
 
     expect(placement.width).toBe(517);
   });
 
-  it('flips above the anchor when the list does not fit below', () => {
+  it('shrinks below rather than flipping while the space below is usable', () => {
     const placement = resolveDropdownPlacement({
+      ...baseArgs,
+      anchorRect: { bottom: 500, left: 32, top: 468, width: 240 },
+      dropdownHeight: 450,
+      viewportHeight: 800,
+    });
+
+    expect(placement).toMatchObject({
+      maxHeight: 800 - 500 - 8,
+      side: 'below',
+      top: 500,
+    });
+  });
+
+  it('flips above, capped to the space above, when below cannot fit a usable list', () => {
+    const placement = resolveDropdownPlacement({
+      ...baseArgs,
       anchorRect: { bottom: 620, left: 32, top: 588, width: 240 },
       dropdownHeight: 300,
-      gap: 8,
       viewportHeight: 700,
     });
 
-    expect(placement.top).toBe(588 - 8 - 300);
-  });
-
-  it('stays below when it does not fit either way but below has more room', () => {
-    const placement = resolveDropdownPlacement({
-      anchorRect: { bottom: 200, left: 32, top: 168, width: 240 },
-      dropdownHeight: 900,
-      gap: 8,
-      viewportHeight: 700,
+    expect(placement).toMatchObject({
+      maxHeight: 588 - 16,
+      side: 'above',
+      top: 588 - 8 - 300,
     });
-
-    expect(placement.top).toBe(208);
   });
 
-  it('clamps a flipped dropdown to the viewport top rather than off-screen', () => {
+  it('keeps a flipped dropdown inside the viewport top when it is capped', () => {
     const placement = resolveDropdownPlacement({
+      ...baseArgs,
       anchorRect: { bottom: 320, left: 32, top: 300, width: 240 },
       dropdownHeight: 400,
-      gap: 8,
       viewportHeight: 360,
     });
 
     expect(placement.top).toBe(8);
   });
 
-  it('treats an unmeasured (hidden) dropdown as fitting below', () => {
+  it('stays below under the bottom placement however little room there is', () => {
     const placement = resolveDropdownPlacement({
-      anchorRect: { bottom: 690, left: 32, top: 658, width: 240 },
-      dropdownHeight: 0,
-      gap: 8,
+      ...baseArgs,
+      anchorRect: { bottom: 620, left: 32, top: 588, width: 240 },
+      dropdownHeight: 300,
+      placement: 'bottom',
       viewportHeight: 700,
     });
 
-    expect(placement.top).toBe(698);
+    expect(placement).toMatchObject({
+      maxHeight: 700 - 620 - 8,
+      side: 'below',
+      top: 620,
+    });
+  });
+
+  it('opens above under the top placement even with room below', () => {
+    const placement = resolveDropdownPlacement({
+      ...baseArgs,
+      anchorRect: { bottom: 340, left: 32, top: 308, width: 240 },
+      dropdownHeight: 120,
+      placement: 'top',
+    });
+
+    expect(placement).toMatchObject({
+      maxHeight: 308 - 16,
+      side: 'above',
+      top: 308 - 8 - 120,
+    });
+  });
+
+  it('treats an unmeasured (hidden) dropdown as fitting below', () => {
+    const placement = resolveDropdownPlacement({
+      ...baseArgs,
+      anchorRect: { bottom: 690, left: 32, top: 658, width: 240 },
+      dropdownHeight: 0,
+      viewportHeight: 700,
+    });
+
+    expect(placement.top).toBe(690);
+  });
+
+  it('never reports a negative cap when the anchor sits past the viewport edge', () => {
+    const placement = resolveDropdownPlacement({
+      ...baseArgs,
+      anchorRect: { bottom: 720, left: 32, top: 690, width: 240 },
+      dropdownHeight: 0,
+      viewportHeight: 700,
+    });
+
+    expect(placement.maxHeight).toBe(0);
   });
 });

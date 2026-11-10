@@ -15,11 +15,12 @@ export type VirtualSelectContextValue = {
 
 export type VirtualSelectMetaStateProps = Omit<
   VirtualSelectMetaState,
-  'isListVisible'
-> & {
-  readonly onCloseDropdown: () => void;
-  readonly onToggleDropdown: () => void;
-};
+  'isListVisible' | 'placement'
+> &
+  Partial<Pick<VirtualSelectMetaState, 'placement'>> & {
+    readonly onCloseDropdown: () => void;
+    readonly onToggleDropdown: () => void;
+  };
 
 export type VirtualSelectProviderProps = VirtualListProviderProps & {
   readonly anchorRef: VirtualSelectContextValue['anchorRef'];
