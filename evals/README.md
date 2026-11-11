@@ -59,7 +59,10 @@ envelope's `totals.pass_rate` holds the same figures, with `rate`, `lower` and
 `upper` set to null when the data is insufficient.
 
 A complete or partial envelope is then sent to the eval-history database that
-`EVALS_DATABASE_URL` names. When the variable is unset or the database is down,
+`EVALS_DATABASE_URL` names. Every `vp run evals:*` command loads
+`docker/local/.env` first, so a local run finds it there, and a variable
+already set in the environment, as in CI, wins over the file. When the
+variable is unset or the database is down,
 the runner warns and still exits as its results say; `vp run evals:ingest`
 sends whatever is under `.tmp/eval-results/` later, and skips a run already
 stored. An aborted run is left for that command too.
