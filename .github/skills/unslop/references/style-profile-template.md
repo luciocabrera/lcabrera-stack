@@ -9,7 +9,9 @@ Rules for filling it in:
 - Every entry is backed by an observation from the samples, not a guess.
   No observation: leave it empty; the default stands.
 - Describe how the author actually writes, including rough edges. The rough
-  edges are the signature.
+  edges are the signature. Typos, doubled punctuation, and a sentence that
+  starts lowercase because of a slip are mistakes, not signature. Correct
+  them.
 - Cannot: enable invented facts or norms, switch off epistemics, or request
   imitation of another named author.
 - Editable by hand. On "learn from this text too", append; conflicts
