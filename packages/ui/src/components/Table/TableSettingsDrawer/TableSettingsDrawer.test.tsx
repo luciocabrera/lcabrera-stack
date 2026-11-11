@@ -278,14 +278,18 @@ describe('TableSettingsDrawer', () => {
   it('renders the expected section tabs', () => {
     render(<TableSettingsDrawer />);
 
-    expect(screen.getByText('Details').textContent).toBe('Details');
-    expect(screen.getByText('General').textContent).toBe('General');
-    expect(screen.getByText('Filters').textContent).toBe('Filters');
-    expect(screen.getByRole('heading', { name: 'Sorting' }).textContent).toBe(
-      'Sorting',
+    expect(
+      screen.getAllByRole('heading').map((heading) => heading.textContent),
+    ).toStrictEqual(
+      expect.arrayContaining([
+        'General',
+        'Columns',
+        'Filters',
+        'Sorting',
+        'Details',
+        'Display',
+      ]),
     );
-    expect(screen.getByText('Columns').textContent).toBe('Columns');
-    expect(screen.getByText('Display').textContent).toBe('Display');
   });
 
   it('wires the panel width reset to the action that clears it', () => {
