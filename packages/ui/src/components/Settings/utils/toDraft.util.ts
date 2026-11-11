@@ -7,6 +7,7 @@ import type {
 } from '#ui/contexts/GlobalSettingsContext/selectors';
 
 import { resolveSettingsTabOrder } from '#ui/components/Table/utils/resolveSettingsTabOrder.util';
+import { SAME_AS_ROWS_PREFERENCE } from '#ui/constants/tableDisplayPreferences.constants';
 
 import type { SettingsDraft } from '../Settings.types';
 
@@ -17,8 +18,6 @@ import {
   DEFAULT_NAVIGATION_SIZE_PREFERENCE,
   DEFAULT_PINNING_PREFERENCE,
   DEFAULT_TABLE_DENSITY_PREFERENCE,
-  DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE,
-  DEFAULT_TABLE_TITLE_DENSITY_PREFERENCE,
   DEFAULT_TOTALS_PLACEMENT_PREFERENCE,
 } from '../Settings.constants';
 
@@ -66,11 +65,9 @@ export const toDraft = ({
     tableDensity:
       tableDisplayPreferences.density ?? DEFAULT_TABLE_DENSITY_PREFERENCE,
     tableHeaderDensity:
-      tableDisplayPreferences.headerDensity ??
-      DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE,
+      tableDisplayPreferences.headerDensity ?? SAME_AS_ROWS_PREFERENCE,
     tableTitleDensity:
-      tableDisplayPreferences.titleDensity ??
-      DEFAULT_TABLE_TITLE_DENSITY_PREFERENCE,
+      tableDisplayPreferences.titleDensity ?? SAME_AS_ROWS_PREFERENCE,
     totalsPlacement:
       groupingPreferences.totalsPlacement ??
       DEFAULT_TOTALS_PLACEMENT_PREFERENCE,

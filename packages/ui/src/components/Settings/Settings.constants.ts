@@ -23,8 +23,3 @@ export const DEFAULT_GROUP_FOLD_PREFERENCE: TableGroupFold = 'expanded';
 
 export const DEFAULT_TABLE_DENSITY_PREFERENCE: TableDensity =
   DEFAULT_TABLE_DENSITY;
-
-export {
-  SAME_AS_ROWS_PREFERENCE as DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE,
-  SAME_AS_ROWS_PREFERENCE as DEFAULT_TABLE_TITLE_DENSITY_PREFERENCE,
-} from '#ui/constants/tableDisplayPreferences.constants';
