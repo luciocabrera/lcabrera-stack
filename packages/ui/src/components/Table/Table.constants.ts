@@ -120,6 +120,7 @@ export const TABLE_SETTINGS_TAB_ROLE_BY_KEY: Readonly<
 > = {
   columns: 'columns',
   details: 'details',
+  display: 'display',
   filter: 'filters',
   filters: 'filters',
   general: 'general',
