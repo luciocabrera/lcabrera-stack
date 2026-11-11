@@ -5,6 +5,8 @@ import { renderCellContent } from '#ui/components/Table/TableBodyCell/utils/rend
 
 import type { TableCellCallBinding } from './cellRenderers.types';
 
+import { isEmptyCellValue } from './isEmptyCellValue.util';
+
 type RenderTableCellCallArgs<TData> = {
   readonly cellCall: TableCellCallBinding | undefined;
   readonly col: TableColumn<TData>;
@@ -20,7 +22,8 @@ export const renderTableCellCall = <TData>({
   row,
   value,
 }: RenderTableCellCallArgs<TData>) => {
-  if (isLoadingState || cellCall?.outcome?.status !== 'resolved') return;
+  if (isLoadingState && isEmptyCellValue(value)) return;
+  if (cellCall?.outcome?.status !== 'resolved') return;
 
   const { outcome, tone } = cellCall;
 
