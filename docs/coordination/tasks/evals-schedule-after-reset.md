@@ -2,7 +2,7 @@
 id: evals-schedule-after-reset
 title: Run the weekly model evals after the subscription's weekly reset
 owner: agent:claude
-status: active
+status: review
 branch: ci/1635-evals-schedule-after-reset
 area:
   - .github/workflows/evals-scheduled.yml
