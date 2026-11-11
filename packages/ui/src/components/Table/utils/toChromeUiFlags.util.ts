@@ -5,6 +5,7 @@ type ChromeUiFlags = Omit<PersistedUiState, 'totalsPlacement'>;
 const CHROME_UI_FLAG_KEYS: Record<keyof ChromeUiFlags, true> = {
   columnSettingsSelectedTab: true,
   density: true,
+  headerDensity: true,
   isColumnSettingsOpen: true,
   isColumnSettingsPinned: true,
   isTableSettingsOpen: true,

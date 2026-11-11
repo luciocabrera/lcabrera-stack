@@ -1,4 +1,5 @@
 import type {
+  TableDensity,
   TableGroupFold,
   TableGroupingMode,
   TableSettingsTabRole,
@@ -41,7 +42,13 @@ export type GlobalSettingsState = {
   readonly grouping: GlobalGroupingPreferences;
   readonly navigation: GlobalNavigationPreferences;
   readonly pinning: GlobalPinningPreferences;
+  readonly tableDisplay: GlobalTableDisplayPreferences;
   readonly tablePanel: GlobalTablePanelPreferences;
+};
+
+export type GlobalTableDisplayPreferences = {
+  readonly density?: TableDensity;
+  readonly headerDensity?: TableDensity;
 };
 
 export type GlobalTablePanelPreferences = {

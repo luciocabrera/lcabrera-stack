@@ -16,6 +16,7 @@ import type { TableSettingsDrawerBodyProps } from './TableSettingsDrawerBody.typ
 import { ColumnOrderSection } from '../ColumnOrderSection';
 import { ColumnOrderSectionProvider } from '../ColumnOrderSection/ColumnOrderSectionContext/ColumnOrderSectionContext.provider';
 import { DetailsSection } from '../DetailsSection';
+import { DisplaySettingsSection } from '../DisplaySettingsSection';
 import { FiltersSection } from '../FiltersSection';
 import { GeneralSettingsSection } from '../GeneralSettingsSection';
 import { GroupingSection } from '../GroupingSection';
@@ -68,6 +69,11 @@ export const TableSettingsDrawerBody = ({
         children: <DetailsSection isBusy={isBusy} />,
         header: 'Details',
         key: 'details',
+      },
+      {
+        children: <DisplaySettingsSection isBusy={isBusy} />,
+        header: 'Display',
+        key: 'display',
       },
     ],
   });

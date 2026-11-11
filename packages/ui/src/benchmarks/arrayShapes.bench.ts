@@ -11,7 +11,7 @@ import type {
 
 import { appendPrimaryKeySorting } from '#ui/routing/shared/appendPrimaryKeySorting.util';
 
-import { buildPresetColumnSizing } from '../components/Table/TableSettingsDrawer/GeneralSettingsSection/utils/buildPresetColumnSizing.util';
+import { buildPresetColumnSizing } from '../components/Table/TableSettingsDrawer/DisplaySettingsSection/utils/buildPresetColumnSizing.util';
 import { getStaticColumnKeys } from '../components/Table/utils/getStaticColumnKeys.util';
 import { resolvePrimaryKeyColumnKeys } from '../components/Table/utils/resolvePrimaryKeyColumnKeys.util';
 

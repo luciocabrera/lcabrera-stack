@@ -10,13 +10,13 @@ import {
 } from '#ui/components/Table/Table.constants';
 import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 
-import type { DensitySectionProps } from './DensitySection.types';
+import type {
+  DensityChoice,
+  DensitySectionProps,
+} from './DensitySection.types';
 
 import { drawerFieldsetStyles } from '../../drawerFieldset.stylex';
-import { useSetDensity } from '../../TableDrawerContext/actions';
-import { useGetDensity } from '../../TableDrawerContext/selectors';
-
-const SECTION_TITLE = 'Density';
+import { DEFAULT_DENSITY_CHOICE } from './DensitySection.constants';
 
 const LABELLED_OPTIONS = TABLE_DENSITY_LEVELS.map((value) => ({
   label: TABLE_DENSITY_LABELS[value],
@@ -28,10 +28,22 @@ const DESCRIBED_OPTIONS = LABELLED_OPTIONS.map((option) => ({
   description: `${TABLE_DENSITY_SCALE[option.value].rowHeight}px rows`,
 }));
 
-export const DensitySection = ({ isBusy = false }: DensitySectionProps) => {
-  const density = useGetDensity();
-  const setDensity = useSetDensity();
+export const DensitySection = ({
+  defaultLabel,
+  isBusy = false,
+  name,
+  onChange,
+  title,
+  value,
+}: DensitySectionProps) => {
   const hasExplicitRowHeight = useGetTableHasExplicitRowHeight();
+  const levelOptions = hasExplicitRowHeight
+    ? LABELLED_OPTIONS
+    : DESCRIBED_OPTIONS;
+
+  const handleChange = (choice: DensityChoice) => {
+    onChange(choice === DEFAULT_DENSITY_CHOICE ? undefined : choice);
+  };
 
   return (
     <fieldset
@@ -41,15 +53,16 @@ export const DensitySection = ({ isBusy = false }: DensitySectionProps) => {
         drawerFieldsetStyles.fieldsetReset,
       )}
     >
-      <legend {...stylex.props(accessibility.visuallyHidden)}>
-        {SECTION_TITLE}
-      </legend>
-      <SidePanelSectionHeader title={SECTION_TITLE} />
-      <RadioOptionGroup
-        name='table-density'
-        onChange={setDensity}
-        options={hasExplicitRowHeight ? LABELLED_OPTIONS : DESCRIBED_OPTIONS}
-        value={density}
+      <legend {...stylex.props(accessibility.visuallyHidden)}>{title}</legend>
+      <SidePanelSectionHeader title={title} />
+      <RadioOptionGroup<DensityChoice>
+        name={name}
+        onChange={handleChange}
+        options={[
+          { label: defaultLabel, value: DEFAULT_DENSITY_CHOICE },
+          ...levelOptions,
+        ]}
+        value={value ?? DEFAULT_DENSITY_CHOICE}
       />
     </fieldset>
   );

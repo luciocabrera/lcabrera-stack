@@ -44,7 +44,7 @@ describe('resolveBatchSettingsWrite', () => {
 
   it('writes a staged density into the patch and the flag cookie, even on a pinned panel', () => {
     const result = write({
-      density: 'spacious',
+      densityPatch: { density: 'spacious' },
       hasLiveQueryChanged: false,
       metaState: { isTableSettingsPinned: true, persistenceKey: 'orders' },
     });

@@ -99,6 +99,7 @@ export const TABLE_SETTINGS_TAB_ROLES: readonly TableSettingsTabRole[] = [
   'sorting',
   'grouping',
   'details',
+  'display',
 ];
 
 export const TABLE_SETTINGS_TAB_ROLE_LABELS: Record<
@@ -107,6 +108,7 @@ export const TABLE_SETTINGS_TAB_ROLE_LABELS: Record<
 > = {
   columns: 'Columns',
   details: 'Details',
+  display: 'Display',
   filters: 'Filters',
   general: 'General',
   grouping: 'Grouping',
@@ -118,6 +120,7 @@ export const TABLE_SETTINGS_TAB_ROLE_BY_KEY: Readonly<
 > = {
   columns: 'columns',
   details: 'details',
+  display: 'display',
   filter: 'filters',
   filters: 'filters',
   general: 'general',

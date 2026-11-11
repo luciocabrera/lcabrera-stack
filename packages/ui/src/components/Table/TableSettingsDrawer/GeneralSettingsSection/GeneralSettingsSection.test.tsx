@@ -1,7 +1,5 @@
 // @vitest-environment jsdom
 
-import type { ReactNode } from 'react';
-
 import { cleanup, render, screen } from '@testing-library/react';
 import {
   afterEach,
@@ -19,12 +17,6 @@ type MockToolbarProps = {
 const { isGroupingEnabledRef, isGroupingLockedRef } = vi.hoisted(() => ({
   isGroupingEnabledRef: { current: true },
   isGroupingLockedRef: { current: false },
-}));
-
-vi.mock('#ui/components/InfoBox', () => ({
-  InfoBox: ({ children }: { readonly children: ReactNode }) => (
-    <aside>{children}</aside>
-  ),
 }));
 
 vi.mock('#ui/components/SidePanel', async () => {
@@ -69,18 +61,6 @@ vi.mock('./AllSettingsSection/AllSettingsSection.component', () => ({
   ),
 }));
 
-vi.mock('./ColumnWidthsSection/ColumnWidthsSection.component', () => ({
-  ColumnWidthsSection: ({ isBusy }: MockToolbarProps) => (
-    <div data-busy={String(isBusy)}>Column widths section</div>
-  ),
-}));
-
-vi.mock('./DensitySection/DensitySection.component', () => ({
-  DensitySection: ({ isBusy }: MockToolbarProps) => (
-    <div data-busy={String(isBusy)}>Density section</div>
-  ),
-}));
-
 import { GeneralSettingsSection } from './GeneralSettingsSection.component';
 
 afterEach(() => {
@@ -93,11 +73,11 @@ beforeEach(() => {
 });
 
 describe('GeneralSettingsSection', () => {
-  it('composes width presets, section toolbars, and all-settings actions', () => {
+  it('composes the section toolbars and all-settings actions, and nothing about display', () => {
     render(<GeneralSettingsSection />);
 
-    expect(screen.getByText('Column widths section')).not.toBeNull();
-    expect(screen.getByText('Density section')).not.toBeNull();
+    expect(screen.queryByRole('heading', { name: 'Column Widths' })).toBeNull();
+    expect(screen.queryByRole('group', { name: /Density/ })).toBeNull();
     expect(screen.getByRole('heading', { name: 'Filters' })).not.toBeNull();
     expect(screen.getByText('Filters toolbar')).not.toBeNull();
     expect(screen.getByRole('heading', { name: 'Sorting' })).not.toBeNull();
@@ -107,17 +87,12 @@ describe('GeneralSettingsSection', () => {
     expect(screen.getByRole('heading', { name: 'Grouping' })).not.toBeNull();
     expect(screen.getByText('Grouping toolbar')).not.toBeNull();
     expect(screen.getByText('All settings section')).not.toBeNull();
-    expect(
-      screen.getByText(/Select a preset to adjust all column widths/),
-    ).not.toBeNull();
   });
 
   it('forwards the busy flag to every subsection', () => {
     render(<GeneralSettingsSection isBusy />);
 
     const busyNodes = [
-      'Column widths section',
-      'Density section',
       'Filters toolbar',
       'Sorting toolbar',
       'Column order toolbar',

@@ -24,7 +24,7 @@ const {
   setDrawerState,
   setDrawerTotalsPlacement,
 } = vi.hoisted(() => {
-  let drawerDensity = 'compact';
+  let drawerDensity: string | undefined = 'compact';
   let drawerState: Record<string, unknown> | undefined;
   let drawerGrouping: Record<string, unknown> = {
     aggregates: [],
@@ -44,7 +44,7 @@ const {
     drawerTotalsPlacementStore: {
       get: vi.fn(() => ({ totalsPlacement: drawerTotalsPlacement })),
     },
-    setDrawerDensity: (next: string) => {
+    setDrawerDensity: (next: string | undefined) => {
       drawerDensity = next;
     },
     setDrawerGrouping: (next: Record<string, unknown>) => {
@@ -68,14 +68,14 @@ vi.mock('../useTableDrawerContextValue.hook', () => ({
   }),
 }));
 
-const { readDensityMock } = vi.hoisted(() => ({
-  readDensityMock: () => ({ density: 'compact' }),
+const { tableMetaStore } = vi.hoisted(() => ({
+  tableMetaStore: { get: () => ({ density: 'compact' }) },
 }));
 
 vi.mock(
-  '#ui/components/Table/contexts/TableConfig/meta/useReadTableDensity.hook',
+  '#ui/components/Table/contexts/TableConfig/useTableConfigContextValue.hook',
   () => ({
-    useReadTableDensity: () => readDensityMock,
+    useTableConfigContextValue: () => ({ metaStore: tableMetaStore }),
   }),
 );
 
@@ -109,7 +109,7 @@ const expectedBatch = ({
   grouping = EMPTY_GROUPING,
   sorting = [],
 }: ExpectedBatchArgs = {}) => ({
-  density: undefined,
+  densityPatch: {},
   grouping,
   settings: {
     columnFilters: {},
@@ -169,13 +169,23 @@ describe('useBatchSetTableDrawerSettings', () => {
     );
   });
 
-  it('sends a staged density only when it differs from the level the table renders', () => {
+  it('sends a staged density only when it differs from the level the table holds', () => {
     setDrawerDensity('spacious');
 
     commitDrawer();
 
     expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith(
-      expect.objectContaining({ density: 'spacious' }),
+      expect.objectContaining({ densityPatch: { density: 'spacious' } }),
+    );
+  });
+
+  it('sends a cleared density as undefined, so the table takes its default again', () => {
+    setDrawerDensity(undefined);
+
+    commitDrawer();
+
+    expect(batchSetTableSettings).toHaveBeenCalledExactlyOnceWith(
+      expect.objectContaining({ densityPatch: { density: undefined } }),
     );
   });
 });

@@ -1,4 +1,3 @@
-import { InfoBox } from '#ui/components/InfoBox';
 import {
   SidePanelSection,
   SidePanelSectionHeader,
@@ -16,8 +15,6 @@ import { FiltersSectionToolbar } from '../FiltersSection/FiltersSectionToolbar';
 import { GroupingSectionToolbar } from '../GroupingSection/GroupingSectionToolbar';
 import { SortingSectionToolbar } from '../SortingSection/SortingSectionToolbar';
 import { AllSettingsSection } from './AllSettingsSection/AllSettingsSection.component';
-import { ColumnWidthsSection } from './ColumnWidthsSection/ColumnWidthsSection.component';
-import { DensitySection } from './DensitySection/DensitySection.component';
 
 export const GeneralSettingsSection = ({
   isBusy = false,
@@ -28,15 +25,6 @@ export const GeneralSettingsSection = ({
 
   return (
     <SidePanelSectionMain {...props}>
-      <ColumnWidthsSection isBusy={isBusy} />
-
-      <InfoBox>
-        Select a preset to adjust all column widths at once. Changes will be
-        reflected after clicking Accept.
-      </InfoBox>
-
-      <DensitySection isBusy={isBusy} />
-
       <SidePanelSection>
         <SidePanelSectionHeader title='Filters' />
         <FiltersSectionToolbar isBusy={isBusy} />

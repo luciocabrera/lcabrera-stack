@@ -14,20 +14,24 @@ const {
   setGlobalGroupingPreferencesMock,
   setGlobalNavigationPreferencesMock,
   setGlobalPinningPreferencesMock,
+  setGlobalTableDisplayPreferencesMock,
   setGlobalTablePanelPreferencesMock,
   useGetGlobalGroupingPreferencesMock,
   useGetGlobalNavigationPreferencesMock,
   useGetGlobalPinningPreferencesMock,
+  useGetGlobalTableDisplayPreferencesMock,
   useGetGlobalTablePanelPreferencesMock,
 } = vi.hoisted(() => {
   return {
     setGlobalGroupingPreferencesMock: vi.fn(),
     setGlobalNavigationPreferencesMock: vi.fn(),
     setGlobalPinningPreferencesMock: vi.fn(),
+    setGlobalTableDisplayPreferencesMock: vi.fn(),
     setGlobalTablePanelPreferencesMock: vi.fn(),
     useGetGlobalGroupingPreferencesMock: vi.fn(),
     useGetGlobalNavigationPreferencesMock: vi.fn(),
     useGetGlobalPinningPreferencesMock: vi.fn(),
+    useGetGlobalTableDisplayPreferencesMock: vi.fn(),
     useGetGlobalTablePanelPreferencesMock: vi.fn(),
   };
 });
@@ -36,6 +40,8 @@ vi.mock('#ui/contexts/GlobalSettingsContext/actions', () => ({
   useSetGlobalGroupingPreferences: () => setGlobalGroupingPreferencesMock,
   useSetGlobalNavigationPreferences: () => setGlobalNavigationPreferencesMock,
   useSetGlobalPinningPreferences: () => setGlobalPinningPreferencesMock,
+  useSetGlobalTableDisplayPreferences: () =>
+    setGlobalTableDisplayPreferencesMock,
   useSetGlobalTablePanelPreferences: () => setGlobalTablePanelPreferencesMock,
 }));
 
@@ -43,6 +49,7 @@ vi.mock('#ui/contexts/GlobalSettingsContext/selectors', () => ({
   useGetGlobalGroupingPreferences: useGetGlobalGroupingPreferencesMock,
   useGetGlobalNavigationPreferences: useGetGlobalNavigationPreferencesMock,
   useGetGlobalPinningPreferences: useGetGlobalPinningPreferencesMock,
+  useGetGlobalTableDisplayPreferences: useGetGlobalTableDisplayPreferencesMock,
   useGetGlobalTablePanelPreferences: useGetGlobalTablePanelPreferencesMock,
 }));
 
@@ -50,15 +57,41 @@ import { Settings } from './Settings.component';
 
 afterEach(cleanup);
 
+const ROW_DENSITY_FIELD = 'settings-table-density-preference';
+const HEADER_DENSITY_FIELD = 'settings-table-header-density-preference';
+
+type RadioInArgs = {
+  readonly field: string;
+  readonly label: string;
+};
+
+const radioIn = ({ field, label }: RadioInArgs) => {
+  const radio = screen
+    .getAllByRole<HTMLInputElement>('radio', { name: label })
+    .find((candidate) => candidate.name === field);
+
+  if (radio === undefined) {
+    throw new Error(`No "${label}" option in ${field}`);
+  }
+
+  return radio;
+};
+
 describe('Settings', () => {
   beforeEach(() => {
     setGlobalGroupingPreferencesMock.mockReset();
     setGlobalNavigationPreferencesMock.mockReset();
     setGlobalPinningPreferencesMock.mockReset();
+    setGlobalTableDisplayPreferencesMock.mockReset();
     setGlobalTablePanelPreferencesMock.mockReset();
     useGetGlobalGroupingPreferencesMock.mockReset();
     useGetGlobalNavigationPreferencesMock.mockReset();
     useGetGlobalPinningPreferencesMock.mockReset();
+    useGetGlobalTableDisplayPreferencesMock.mockReset();
+    useGetGlobalTableDisplayPreferencesMock.mockReturnValue({
+      density: undefined,
+      headerDensity: undefined,
+    });
     useGetGlobalTablePanelPreferencesMock.mockReset();
     useGetGlobalTablePanelPreferencesMock.mockReturnValue({
       settingsTabOrder: undefined,
@@ -195,6 +228,9 @@ describe('Settings', () => {
     fireEvent.click(screen.getByRole('tab', { name: 'Table Panel' }));
 
     const roles = screen.getAllByRole('listitem');
+
+    expect(roles.at(-1)?.textContent).toMatch(/Display$/);
+
     const [general, , filters] = roles;
 
     if (!general || !filters) throw new Error('Expected the tab role list');
@@ -215,6 +251,7 @@ describe('Settings', () => {
         'sorting',
         'grouping',
         'details',
+        'display',
       ],
     });
   });
@@ -240,6 +277,7 @@ describe('Settings', () => {
     });
     expect(setGlobalNavigationPreferencesMock).not.toHaveBeenCalled();
     expect(setGlobalPinningPreferencesMock).not.toHaveBeenCalled();
+    expect(setGlobalTableDisplayPreferencesMock).not.toHaveBeenCalled();
   });
 
   it('writes a preference back to undefined when it returns to the default', () => {
@@ -271,6 +309,77 @@ describe('Settings', () => {
       defaultFold: undefined,
       mode: undefined,
       totalsPlacement: undefined,
+    });
+  });
+
+  it('persists the table density defaults from the Table Display tab', () => {
+    useGetGlobalPinningPreferencesMock.mockReturnValue({
+      orderConflictResolution: undefined,
+      pinConflictResolution: undefined,
+      pinSide: undefined,
+      unpinConflictResolution: undefined,
+    });
+
+    render(<Settings />);
+
+    const tableDisplayTab = screen.getByRole('tab', { name: 'Table Display' });
+
+    fireEvent.click(tableDisplayTab);
+
+    expect(tableDisplayTab.getAttribute('aria-controls')).toBe(
+      'tabpanel-table-display',
+    );
+    expect(
+      screen.getByText('The header row takes the same height as the rows.'),
+    ).not.toBeNull();
+    expect(
+      radioIn({ field: ROW_DENSITY_FIELD, label: 'Compact' }).checked,
+    ).toBe(true);
+    expect(
+      radioIn({ field: HEADER_DENSITY_FIELD, label: 'Same as rows' }).checked,
+    ).toBe(true);
+
+    fireEvent.click(
+      radioIn({ field: ROW_DENSITY_FIELD, label: 'Comfortable' }),
+    );
+    fireEvent.click(radioIn({ field: HEADER_DENSITY_FIELD, label: 'Dense' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(
+      setGlobalTableDisplayPreferencesMock,
+    ).toHaveBeenCalledExactlyOnceWith({
+      density: 'comfortable',
+      headerDensity: 'dense',
+    });
+    expect(setGlobalGroupingPreferencesMock).not.toHaveBeenCalled();
+  });
+
+  it('clears a table density default that returns to the shipped one', () => {
+    useGetGlobalTableDisplayPreferencesMock.mockReturnValue({
+      density: 'spacious',
+      headerDensity: 'dense',
+    });
+    useGetGlobalPinningPreferencesMock.mockReturnValue({
+      orderConflictResolution: undefined,
+      pinConflictResolution: undefined,
+      pinSide: undefined,
+      unpinConflictResolution: undefined,
+    });
+
+    render(<Settings />);
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Table Display' }));
+    fireEvent.click(radioIn({ field: ROW_DENSITY_FIELD, label: 'Compact' }));
+    fireEvent.click(
+      radioIn({ field: HEADER_DENSITY_FIELD, label: 'Same as rows' }),
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
+
+    expect(
+      setGlobalTableDisplayPreferencesMock,
+    ).toHaveBeenCalledExactlyOnceWith({
+      density: undefined,
+      headerDensity: undefined,
     });
   });
 

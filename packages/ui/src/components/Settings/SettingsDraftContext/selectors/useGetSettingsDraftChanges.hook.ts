@@ -2,6 +2,7 @@ import {
   useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
+  useGetGlobalTableDisplayPreferences,
   useGetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
 
@@ -13,12 +14,14 @@ export const useGetSettingsDraftChanges = () => {
   const groupingPreferences = useGetGlobalGroupingPreferences();
   const navigationPreferences = useGetGlobalNavigationPreferences();
   const pinningPreferences = useGetGlobalPinningPreferences();
+  const tableDisplayPreferences = useGetGlobalTableDisplayPreferences();
   const tablePanelPreferences = useGetGlobalTablePanelPreferences();
 
   const baseline = toDraft({
     groupingPreferences,
     navigationPreferences,
     pinningPreferences,
+    tableDisplayPreferences,
     tablePanelPreferences,
   });
 

@@ -5,7 +5,7 @@ import { useTableDrawerContextValue } from '../useTableDrawerContextValue.hook';
 export const useSetDensity = () => {
   const { densityStore } = useTableDrawerContextValue();
 
-  return (density: TableDensity) => {
+  return (density: TableDensity | undefined) => {
     densityStore.set({ density });
   };
 };

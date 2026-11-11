@@ -1,6 +1,6 @@
 import type { resolveTableGroupingUpdate } from '#ui/components/Table/contexts/TableConfig/grouping/actions/utils';
 import type {
-  TableDensity,
+  TableDensityPatch,
   TableGroupingState,
   TableMetaState,
   TablePersistenceEntry,
@@ -14,7 +14,7 @@ import { resolveSettingsStatePatch } from './resolveSettingsStatePatch.util';
 
 type ResolveBatchSettingsWriteArgs = {
   readonly currentGrouping: TableGroupingState;
-  readonly density?: TableDensity;
+  readonly densityPatch?: TableDensityPatch;
   readonly groupingUpdate: ReturnType<typeof resolveTableGroupingUpdate>;
   readonly hasLiveQueryChanged: boolean;
   readonly hasPlacementChanged: boolean;
@@ -25,7 +25,7 @@ type ResolveBatchSettingsWriteArgs = {
 
 export const resolveBatchSettingsWrite = ({
   currentGrouping,
-  density,
+  densityPatch,
   groupingUpdate,
   hasLiveQueryChanged,
   hasPlacementChanged,
@@ -34,7 +34,7 @@ export const resolveBatchSettingsWrite = ({
   totalsPlacement,
 }: ResolveBatchSettingsWriteArgs) => {
   const { closesSettings, hasDensityChanged, nextStatePatch } =
-    resolveSettingsStatePatch({ density, metaState });
+    resolveSettingsStatePatch({ densityPatch, metaState });
   const shouldPersistUiFlags =
     hasPlacementChanged || closesSettings || hasDensityChanged;
   const uiFlagsEntry = shouldPersistUiFlags

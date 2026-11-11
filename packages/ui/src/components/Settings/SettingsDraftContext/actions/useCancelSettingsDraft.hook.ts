@@ -2,6 +2,7 @@ import {
   useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
+  useGetGlobalTableDisplayPreferences,
   useGetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
 
@@ -13,6 +14,7 @@ export const useCancelSettingsDraft = () => {
   const groupingPreferences = useGetGlobalGroupingPreferences();
   const navigationPreferences = useGetGlobalNavigationPreferences();
   const pinningPreferences = useGetGlobalPinningPreferences();
+  const tableDisplayPreferences = useGetGlobalTableDisplayPreferences();
   const tablePanelPreferences = useGetGlobalTablePanelPreferences();
 
   return () => {
@@ -21,6 +23,7 @@ export const useCancelSettingsDraft = () => {
         groupingPreferences,
         navigationPreferences,
         pinningPreferences,
+        tableDisplayPreferences,
         tablePanelPreferences,
       }),
     );

@@ -234,10 +234,16 @@ was when it could only mean one thing. `defaultFold` is the one part of
 expansion that does cross the loader boundary — it is a Global Settings answer,
 read off the settings cookie.
 
-Density is resolved in one place, `resolveTableDensity`, from three sources in
+Density is resolved in one place, `resolveTableDensity`, from four sources in
 order: the `metaStore`'s `density`/`headerDensity`, then the `Table`'s own
-`density`/`headerDensity` props, then `compact`. The props are not written to the
-store; `TableGridContent` provides them through `TableDensityContext`, so they
+`density`/`headerDensity` props, then the Global Settings default
+(`tableDisplay.density`/`headerDensity`), then `compact` for the rows and the
+resolved row level for the header
+([ADR-148](../../../../../docs/decisions/ADR-148-table-density-falls-back-from-the-table-to-its-prop-to-the-global-default.md)).
+The global default enters where the props do: `TableGridContent` provides
+`prop ?? global` for each level through `TableDensityContext`, read by
+`useGlobalTableDensityDefaults`, which reads no default when no
+`GlobalSettingsProvider` is mounted. Neither is written to the store, so they
 reach the rows on the first render, on the server as on the client, and a level
 the settings drawer commits on Accept, which it also writes to the UI-flags
 cookie, still wins over them. The resolved level gives the default row height,

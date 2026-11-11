@@ -1,26 +1,26 @@
 import type {
-  TableDensity,
+  TableDensityPatch,
   TableMetaState,
 } from '#ui/components/Table/Table.types';
 
 type ResolveSettingsStatePatchArgs = {
-  readonly density: TableDensity | undefined;
+  readonly densityPatch: TableDensityPatch | undefined;
   readonly metaState: Partial<TableMetaState> | undefined;
 };
 
 export const resolveSettingsStatePatch = ({
-  density,
+  densityPatch = {},
   metaState,
 }: ResolveSettingsStatePatchArgs) => {
   const isClosesSettings = metaState?.isTableSettingsPinned !== true;
   const closePatch = isClosesSettings
     ? { isTableSettingsOpen: false as const }
     : {};
-  const densityPatch = density === undefined ? {} : { density };
 
   return {
     closesSettings: isClosesSettings,
-    hasDensityChanged: density !== undefined,
+    hasDensityChanged:
+      'density' in densityPatch || 'headerDensity' in densityPatch,
     nextStatePatch: { ...closePatch, ...densityPatch },
   };
 };

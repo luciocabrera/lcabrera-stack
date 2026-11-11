@@ -206,10 +206,10 @@ export type TableChromeState = {
   readonly columnSelectedKey?: string;
   readonly columnSettingsSelectedTab: string;
   readonly defaultGroupFold?: TableGroupFold;
-  /** Unset falls back to the `Table`'s `density` prop, then to `compact`. */
+  /** Unset falls back to the `Table`'s `density` prop, then to the global default, then to `compact`. */
   readonly density?: TableDensity;
   readonly drawersSyncNonce?: number;
-  /** Unset falls back to the `Table`'s `headerDensity` prop, then to the density. */
+  /** Unset falls back to the `Table`'s `headerDensity` prop, then to the global default, then to the density. */
   readonly headerDensity?: TableDensity;
   readonly initialPageSize: number;
   readonly isBordered: boolean;
@@ -356,6 +356,12 @@ export type TableDensityDefaults = Pick<
 >;
 
 export type TableDensityFontSize = 'fontSizeMd' | 'fontSizeSm' | 'fontSizeXs';
+
+/** A key present with `undefined` clears that level; an absent key leaves it. */
+export type TableDensityPatch = Pick<
+  TableChromeState,
+  'density' | 'headerDensity'
+>;
 
 export type TableDensitySpacing = 'md' | 'sm' | 'xs' | 'xxs';
 
@@ -509,13 +515,13 @@ export type TableProps<
     readonly caption?: ReactNode;
     /** Seeds the providers the Table mounts when none are above it. */
     readonly columns: readonly TableColumn<TData>[];
-    /** The level when the meta state holds none. */
+    /** The level when the meta state holds none; outranks the global default. */
     readonly density?: TableDensity;
     /** Each one unset is on in the virtual layout and off in the static one. */
     readonly features?: TableFeatures;
     /** One row spanning every column, in `<tfoot>`. */
     readonly footer?: ReactNode;
-    /** The header row's level when the meta state holds none; defaults to the density. */
+    /** The header row's level when the meta state holds none; outranks the global default, then defaults to the density. */
     readonly headerDensity?: TableDensity;
     /** Defaults to on in the virtual layout and off in the static one. */
     readonly isFlexWrapperEnabled?: boolean;
@@ -592,6 +598,7 @@ export type TableSelectedSource<TData, TResponse, TInput> = {
 export type TableSettingsTabRole =
   | 'columns'
   | 'details'
+  | 'display'
   | 'filters'
   | 'general'
   | 'grouping'

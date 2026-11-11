@@ -1,6 +1,6 @@
 import type {
   TableColumnsState,
-  TableDensity,
+  TableDensityPatch,
   TableGroupingState,
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
@@ -23,9 +23,7 @@ export type TableDrawerContextValue<TData = Record<string, unknown>> = {
   readonly totalsPlacementStore: TStore<TableDrawerTotalsPlacementState>;
 };
 
-export type TableDrawerDensityState = {
-  readonly density: TableDensity;
-};
+export type TableDrawerDensityState = TableDensityPatch;
 
 export type TableDrawerProviderProps = {
   readonly children: React.ReactNode;

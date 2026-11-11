@@ -22,6 +22,7 @@ export type PersistedState<TData = Record<string, unknown>> = {
 export type PersistedUiState = {
   readonly columnSettingsSelectedTab?: string;
   readonly density?: TableDensity;
+  readonly headerDensity?: TableDensity;
   readonly isColumnSettingsOpen?: boolean;
   readonly isColumnSettingsPinned?: boolean;
   readonly isTableSettingsOpen?: boolean;
