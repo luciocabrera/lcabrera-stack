@@ -14,7 +14,7 @@ type ResolveTableDensityArgs = {
   readonly defaults: TableDensityDefaults;
   readonly state: Pick<
     TableChromeState,
-    'density' | 'headerDensity' | 'rowHeight'
+    'density' | 'headerDensity' | 'rowHeight' | 'titleDensity'
   >;
 };
 
@@ -28,6 +28,8 @@ export const resolveTableDensity = ({
   const namedHeaderDensity = [state.headerDensity, defaults.headerDensity].find(
     isTableDensity,
   );
+  const titleDensity =
+    [state.titleDensity, defaults.titleDensity].find(isTableDensity) ?? density;
   const rowHeight = state.rowHeight ?? TABLE_DENSITY_SCALE[density].rowHeight;
 
   return {
@@ -38,5 +40,6 @@ export const resolveTableDensity = ({
         ? rowHeight
         : TABLE_DENSITY_SCALE[namedHeaderDensity].rowHeight,
     rowHeight,
+    titleDensity,
   };
 };

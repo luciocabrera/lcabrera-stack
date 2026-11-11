@@ -36,6 +36,7 @@ export type SettingsDraft = {
   readonly settingsTabOrder: readonly TableSettingsTabRole[];
   readonly tableDensity: TableDensity;
   readonly tableHeaderDensity: TableDensity | typeof SAME_AS_ROWS_PREFERENCE;
+  readonly tableTitleDensity: TableDensity | typeof SAME_AS_ROWS_PREFERENCE;
   readonly totalsPlacement: TableTotalsPlacement;
   readonly unpinConflictResolution: UnpinConflictResolutionPreferenceOption;
 };

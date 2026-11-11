@@ -27,6 +27,7 @@ const PERSISTED_UI_STATE_KEYS: Record<keyof PersistedUiState, true> = {
   settingsPanelWidth: true,
   tableSettingsExpandedFilters: true,
   tableSettingsSelectedTab: true,
+  titleDensity: true,
   totalsPlacement: true,
 };
 

@@ -34,6 +34,7 @@ const OWN_KEYS = [
   'onLoadMore',
   'response',
   'title',
+  'titleDensity',
 ] as const;
 
 const toArgs = (props: Readonly<Record<string, unknown>>) =>

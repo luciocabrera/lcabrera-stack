@@ -14,10 +14,10 @@ export const useResetTableSettings = () => {
 
   return () => {
     const columnsState = columnsStore.get();
-    const { density, headerDensity } = metaStore.get();
+    const { density, headerDensity, titleDensity } = metaStore.get();
 
     columnsDrawerStore.set(buildBatchTableSettingsUpdate(columnsState));
     groupingDrawerStore.set(groupingStore.get());
-    densityDrawerStore.set({ density, headerDensity });
+    densityDrawerStore.set({ density, headerDensity, titleDensity });
   };
 };

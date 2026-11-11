@@ -3,6 +3,7 @@ import type { SettingsDraft } from '../Settings.types';
 import {
   DEFAULT_TABLE_DENSITY_PREFERENCE,
   DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE,
+  DEFAULT_TABLE_TITLE_DENSITY_PREFERENCE,
 } from '../Settings.constants';
 
 type ToGlobalTableDisplayPreferencesUpdateArgs = {
@@ -21,5 +22,9 @@ export const toGlobalTableDisplayPreferencesUpdate = ({
       draft.tableHeaderDensity === DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE
         ? undefined
         : draft.tableHeaderDensity,
+    titleDensity:
+      draft.tableTitleDensity === DEFAULT_TABLE_TITLE_DENSITY_PREFERENCE
+        ? undefined
+        : draft.tableTitleDensity,
   };
 };

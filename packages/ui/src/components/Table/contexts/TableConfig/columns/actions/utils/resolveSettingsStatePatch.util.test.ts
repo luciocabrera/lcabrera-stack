@@ -58,4 +58,17 @@ describe('resolveSettingsStatePatch', () => {
       nextStatePatch: { headerDensity: undefined },
     });
   });
+
+  it('carries a title bar level as a density change', () => {
+    expect(
+      resolveSettingsStatePatch({
+        densityPatch: { titleDensity: 'spacious' },
+        metaState: { isTableSettingsPinned: true },
+      }),
+    ).toStrictEqual({
+      closesSettings: false,
+      hasDensityChanged: true,
+      nextStatePatch: { titleDensity: 'spacious' },
+    });
+  });
 });

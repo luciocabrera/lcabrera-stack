@@ -41,10 +41,11 @@ export const TableDrawerProvider = ({ children }: TableDrawerProviderProps) => {
     sorting,
   });
   const groupingStore = useStore<TableGroupingState>(grouping);
-  const { density, headerDensity } = metaStore.get();
+  const { density, headerDensity, titleDensity } = metaStore.get();
   const densityStore = useStore<TableDrawerDensityState>({
     density,
     headerDensity,
+    titleDensity,
   });
   const totalsPlacementStore = useStore<TableDrawerTotalsPlacementState>({
     totalsPlacement: grouping.totalsPlacement,

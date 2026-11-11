@@ -1,5 +1,7 @@
 import { OLAP_GROUP_ROW_FIELD } from '@lcabrera/api/olap/olap.constants';
 
+import type { TitleSize } from '#ui/components/Title/Title.types';
+
 import type {
   TableAggregateFn,
   TableColumnLayoutLock,
@@ -76,6 +78,13 @@ export const TABLE_DENSITY_SCALE = {
     rowHeight: 48,
   },
 } as const satisfies Readonly<Record<TableDensity, TableDensityStep>>;
+
+export const TABLE_TITLE_DENSITY_SIZE = {
+  comfortable: 'lg',
+  compact: 'md',
+  dense: 'sm',
+  spacious: 'xl',
+} as const satisfies Readonly<Record<TableDensity, TitleSize>>;
 
 export const INITIAL_PAGE_SIZE = 50;
 export const LOAD_MORE_PAGE_SIZE = 150;

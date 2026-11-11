@@ -27,7 +27,8 @@ export const getSettingsDraftChanges = ({
 
   const hasTableDisplayChanges =
     draft.tableDensity !== baseline.tableDensity ||
-    draft.tableHeaderDensity !== baseline.tableHeaderDensity;
+    draft.tableHeaderDensity !== baseline.tableHeaderDensity ||
+    draft.tableTitleDensity !== baseline.tableTitleDensity;
 
   const hasTablePanelChanges =
     draft.settingsTabOrder.length !== baseline.settingsTabOrder.length ||

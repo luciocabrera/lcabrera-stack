@@ -9,6 +9,7 @@ describe('resolveTableDensity', () => {
       headerDensity: 'compact',
       headerRowHeight: 32,
       rowHeight: 32,
+      titleDensity: 'compact',
     });
   });
 
@@ -23,6 +24,7 @@ describe('resolveTableDensity', () => {
       headerDensity: 'spacious',
       headerRowHeight: 48,
       rowHeight: 24,
+      titleDensity: 'dense',
     });
   });
 
@@ -37,6 +39,7 @@ describe('resolveTableDensity', () => {
       headerDensity: 'spacious',
       headerRowHeight: 48,
       rowHeight: 40,
+      titleDensity: 'comfortable',
     });
   });
 
@@ -60,6 +63,7 @@ describe('resolveTableDensity', () => {
       headerDensity: 'dense',
       headerRowHeight: 36,
       rowHeight: 36,
+      titleDensity: 'dense',
     });
   });
 
@@ -74,6 +78,7 @@ describe('resolveTableDensity', () => {
       headerDensity: 'spacious',
       headerRowHeight: 48,
       rowHeight: 36,
+      titleDensity: 'dense',
     });
     expect(
       resolveTableDensity({
@@ -90,6 +95,7 @@ describe('resolveTableDensity', () => {
         state: {
           density: 'tight' as never,
           headerDensity: 'tiny' as never,
+          titleDensity: 'small' as never,
         },
       }),
     ).toStrictEqual({
@@ -97,6 +103,31 @@ describe('resolveTableDensity', () => {
       headerDensity: 'spacious',
       headerRowHeight: 48,
       rowHeight: 48,
+      titleDensity: 'spacious',
     });
+  });
+
+  it('lets the title bar follow the resolved density when nothing names its own', () => {
+    expect(
+      resolveTableDensity({
+        defaults: { density: 'dense', headerDensity: 'spacious' },
+        state: { density: 'comfortable' },
+      }),
+    ).toMatchObject({ titleDensity: 'comfortable' });
+  });
+
+  it('prefers the state title density over the default, and either over the rows', () => {
+    expect(
+      resolveTableDensity({
+        defaults: { titleDensity: 'dense' },
+        state: { density: 'spacious', titleDensity: 'comfortable' },
+      }),
+    ).toMatchObject({ density: 'spacious', titleDensity: 'comfortable' });
+    expect(
+      resolveTableDensity({
+        defaults: { titleDensity: 'dense' },
+        state: { density: 'spacious' },
+      }),
+    ).toMatchObject({ density: 'spacious', titleDensity: 'dense' });
   });
 });

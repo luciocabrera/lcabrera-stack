@@ -10,6 +10,7 @@ export const Title = ({
   customStylex,
   icon,
   level = 2,
+  size = 'md',
   variant = 'toolbar',
   ...props
 }: TitleProps) => {
@@ -23,7 +24,7 @@ export const Title = ({
       {...props}
       {...stylex.props(
         styles.container,
-        isToolbar && styles.toolbar,
+        isToolbar && [styles.toolbar, styles.toolbarSize[size]],
         customStylex,
       )}
     >
@@ -33,7 +34,7 @@ export const Title = ({
           <Heading
             {...stylex.props(
               isToolbar
-                ? styles.title
+                ? [styles.title, styles.toolbarTitleSize[size]]
                 : [styles.plainTitle, styles.plainLevel[level]],
             )}
           >

@@ -8,7 +8,11 @@ export type TitleProps = Omit<ComponentProps<'div'>, 'className' | 'style'> & {
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
   readonly level?: TitleLevel;
+  /** The `toolbar` variant's padding and title size, `'md'` when unset; `plain` ignores it. */
+  readonly size?: TitleSize;
   readonly variant?: TitleVariant;
 };
+
+export type TitleSize = 'lg' | 'md' | 'sm' | 'xl';
 
 export type TitleVariant = 'plain' | 'toolbar';

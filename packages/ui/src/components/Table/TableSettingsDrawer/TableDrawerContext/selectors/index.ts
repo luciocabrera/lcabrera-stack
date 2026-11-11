@@ -11,4 +11,5 @@ export { useGetGroupingMode } from './useGetGroupingMode.hook';
 export { useGetGroupingPeriods } from './useGetGroupingPeriods.hook';
 export { useGetGroupingShares } from './useGetGroupingShares.hook';
 export { useGetHeaderDensity } from './useGetHeaderDensity.hook';
+export { useGetTitleDensity } from './useGetTitleDensity.hook';
 export { useGetTotalsPlacement } from './useGetTotalsPlacement.hook';

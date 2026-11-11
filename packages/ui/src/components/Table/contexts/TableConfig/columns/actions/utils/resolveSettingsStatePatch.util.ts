@@ -20,7 +20,9 @@ export const resolveSettingsStatePatch = ({
   return {
     closesSettings: isClosesSettings,
     hasDensityChanged:
-      'density' in densityPatch || 'headerDensity' in densityPatch,
+      'density' in densityPatch ||
+      'headerDensity' in densityPatch ||
+      'titleDensity' in densityPatch,
     nextStatePatch: { ...closePatch, ...densityPatch },
   };
 };

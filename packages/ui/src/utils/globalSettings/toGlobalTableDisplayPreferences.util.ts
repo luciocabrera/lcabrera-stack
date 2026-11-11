@@ -11,6 +11,9 @@ export const toGlobalTableDisplayPreferences = (value: unknown) => {
   const headerDensity = isTableDensity(value.headerDensity)
     ? value.headerDensity
     : undefined;
+  const titleDensity = isTableDensity(value.titleDensity)
+    ? value.titleDensity
+    : undefined;
 
-  return { density, headerDensity };
+  return { density, headerDensity, titleDensity };
 };

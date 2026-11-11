@@ -18,6 +18,7 @@ import {
   DEFAULT_PINNING_PREFERENCE,
   DEFAULT_TABLE_DENSITY_PREFERENCE,
   DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE,
+  DEFAULT_TABLE_TITLE_DENSITY_PREFERENCE,
   DEFAULT_TOTALS_PLACEMENT_PREFERENCE,
 } from '../Settings.constants';
 
@@ -67,6 +68,9 @@ export const toDraft = ({
     tableHeaderDensity:
       tableDisplayPreferences.headerDensity ??
       DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE,
+    tableTitleDensity:
+      tableDisplayPreferences.titleDensity ??
+      DEFAULT_TABLE_TITLE_DENSITY_PREFERENCE,
     totalsPlacement:
       groupingPreferences.totalsPlacement ??
       DEFAULT_TOTALS_PLACEMENT_PREFERENCE,

@@ -29,4 +29,13 @@ describe('toTableDensityPatch', () => {
       }),
     ).toStrictEqual({ density: undefined });
   });
+
+  it('names a moved title bar level on its own', () => {
+    expect(
+      toTableDensityPatch({
+        current: { density: 'dense', titleDensity: 'dense' },
+        staged: { density: 'dense', titleDensity: 'spacious' },
+      }),
+    ).toStrictEqual({ titleDensity: 'spacious' });
+  });
 });

@@ -17,6 +17,7 @@ const baseline: SettingsDraft = {
   settingsTabOrder: TABLE_SETTINGS_TAB_ROLES,
   tableDensity: 'compact',
   tableHeaderDensity: 'same-as-rows',
+  tableTitleDensity: 'same-as-rows',
   totalsPlacement: 'last',
   unpinConflictResolution: 'always-ask',
 };
@@ -150,6 +151,7 @@ describe('getSettingsDraftChanges — table panel', () => {
   it.each([
     { tableDensity: 'spacious' },
     { tableHeaderDensity: 'dense' },
+    { tableTitleDensity: 'spacious' },
   ] as const)('flags a table display change on its own: %o', (change) => {
     const draft: SettingsDraft = { ...baseline, ...change };
 

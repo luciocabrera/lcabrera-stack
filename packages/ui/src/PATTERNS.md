@@ -661,7 +661,8 @@ figures from a `number` or `currency` `dataType`, so declare that too.
 `density` picks one of four levels, and each level sets the row height and the
 font size first; the cell padding follows from them
 ([ADR-146](../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (a)).
-`headerDensity` sets the header row on its own and defaults to `density`.
+`headerDensity` sets the header row on its own and defaults to `density`;
+`titleDensity` does the same for the title bar, through `Title`'s `size`.
 
 | Level         | Use it for                                                             |
 | ------------- | ---------------------------------------------------------------------- |

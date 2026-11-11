@@ -13,4 +13,7 @@ export const toTableDensityPatch = ({
   ...(staged.headerDensity !== current.headerDensity && {
     headerDensity: staged.headerDensity,
   }),
+  ...(staged.titleDensity !== current.titleDensity && {
+    titleDensity: staged.titleDensity,
+  }),
 });

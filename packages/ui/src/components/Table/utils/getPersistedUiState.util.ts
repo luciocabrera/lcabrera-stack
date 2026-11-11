@@ -19,5 +19,6 @@ export const getPersistedUiState = ({
   settingsPanelWidth: chrome?.settingsPanelWidth,
   tableSettingsExpandedFilters: chrome?.tableSettingsExpandedFilters,
   tableSettingsSelectedTab: chrome?.tableSettingsSelectedTab,
+  titleDensity: chrome?.titleDensity,
   totalsPlacement,
 });

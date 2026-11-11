@@ -59,6 +59,7 @@ afterEach(cleanup);
 
 const ROW_DENSITY_FIELD = 'settings-table-density-preference';
 const HEADER_DENSITY_FIELD = 'settings-table-header-density-preference';
+const TITLE_DENSITY_FIELD = 'settings-table-title-density-preference';
 
 type RadioInArgs = {
   readonly field: string;
@@ -330,7 +331,12 @@ describe('Settings', () => {
       'tabpanel-table-display',
     );
     expect(
-      screen.getByText('The header row takes the same height as the rows.'),
+      screen.getByText(
+        'The column header row takes the same height as the rows.',
+      ),
+    ).not.toBeNull();
+    expect(
+      screen.getByText('The title bar follows the row density.'),
     ).not.toBeNull();
     expect(
       radioIn({ field: ROW_DENSITY_FIELD, label: 'Compact' }).checked,
@@ -338,11 +344,15 @@ describe('Settings', () => {
     expect(
       radioIn({ field: HEADER_DENSITY_FIELD, label: 'Same as rows' }).checked,
     ).toBe(true);
+    expect(
+      radioIn({ field: TITLE_DENSITY_FIELD, label: 'Same as rows' }).checked,
+    ).toBe(true);
 
     fireEvent.click(
       radioIn({ field: ROW_DENSITY_FIELD, label: 'Comfortable' }),
     );
     fireEvent.click(radioIn({ field: HEADER_DENSITY_FIELD, label: 'Dense' }));
+    fireEvent.click(radioIn({ field: TITLE_DENSITY_FIELD, label: 'Spacious' }));
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
 
     expect(
@@ -350,6 +360,7 @@ describe('Settings', () => {
     ).toHaveBeenCalledExactlyOnceWith({
       density: 'comfortable',
       headerDensity: 'dense',
+      titleDensity: 'spacious',
     });
     expect(setGlobalGroupingPreferencesMock).not.toHaveBeenCalled();
   });
@@ -358,6 +369,7 @@ describe('Settings', () => {
     useGetGlobalTableDisplayPreferencesMock.mockReturnValue({
       density: 'spacious',
       headerDensity: 'dense',
+      titleDensity: 'comfortable',
     });
     useGetGlobalPinningPreferencesMock.mockReturnValue({
       orderConflictResolution: undefined,
@@ -373,6 +385,9 @@ describe('Settings', () => {
     fireEvent.click(
       radioIn({ field: HEADER_DENSITY_FIELD, label: 'Same as rows' }),
     );
+    fireEvent.click(
+      radioIn({ field: TITLE_DENSITY_FIELD, label: 'Same as rows' }),
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
 
     expect(
@@ -380,6 +395,7 @@ describe('Settings', () => {
     ).toHaveBeenCalledExactlyOnceWith({
       density: undefined,
       headerDensity: undefined,
+      titleDensity: undefined,
     });
   });
 

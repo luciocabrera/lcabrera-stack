@@ -36,6 +36,7 @@ export const TableGridContent = <
     icon,
     layout,
     onLoadMore,
+    titleDensity,
   } = own;
   const globalDensity = useGlobalTableDensityDefaults();
   const presentation = resolveTablePresentation({ features, layout });
@@ -60,6 +61,7 @@ export const TableGridContent = <
             value={{
               density: density ?? globalDensity.density,
               headerDensity: headerDensity ?? globalDensity.headerDensity,
+              titleDensity: titleDensity ?? globalDensity.titleDensity,
             }}
           >
             <TablePresentationContext value={presentation}>
