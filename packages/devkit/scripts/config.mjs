@@ -289,7 +289,7 @@ const valueAt = ({ config, path }) => {
 
 export const hasConfigKey = ({ config, path }) => {
   const value = valueAt({ config, path });
-  return value !== undefined && value !== null && value !== '';
+  return !['', null, undefined].includes(value);
 };
 
 export const allowedConfigKeys = (config) => [

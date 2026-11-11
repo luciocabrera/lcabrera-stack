@@ -10,7 +10,6 @@ export const TITLE = {
   singular: 'Row',
 };
 
-// fallow-ignore-next-line complexity -- temporary testing suppression
 const getColDataType = (index: number) => {
   const mod = index % 20;
   if (mod === 6) return 'boolean';
@@ -57,7 +56,7 @@ const buildGeneratedColumn = ({ index }: BuildGeneratedColumnArgs) => {
   const mod = index % 20;
   const key = `c_${String(index).padStart(3, '0')}` as keyof WideAlltypes150;
   const typeLabel = PG_TYPE_LABELS[mod] ?? 'Col';
-  const isFilterable = mod !== 15 && mod !== 18 && mod !== 19;
+  const isFilterable = ![15, 18, 19].includes(mod);
 
   return {
     dataType: getColDataType(index),

@@ -20,6 +20,21 @@ describe('wide_alltypes_150 entity configuration', () => {
     expect(missing).toEqual([]);
   });
 
+  it('turns filtering off for the generated columns whose type slot is 15, 18 or 19', () => {
+    const unfilterable = COLUMNS.slice(1, 41)
+      .filter((column) => column.isFilterable === false)
+      .map((column) => String(column.key));
+
+    expect(unfilterable).toEqual([
+      'c_015',
+      'c_018',
+      'c_019',
+      'c_035',
+      'c_038',
+      'c_039',
+    ]);
+  });
+
   it('names the key plus c_001 … c_149, in that order', () => {
     expect(WIDE_ALLTYPES_COLUMNS.at(0)).toBe(WIDE_ALLTYPES_PRIMARY_KEY);
     expect(WIDE_ALLTYPES_COLUMNS.at(1)).toBe('c_001');

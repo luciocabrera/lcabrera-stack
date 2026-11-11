@@ -92,12 +92,13 @@ const succeeded = ({ args, binary, cwd, env, stdio = 'inherit' }) => {
 
 /**
  * @param {{ absolute: string, packageName: string }} args
- * @returns {boolean} whether the template was copied
+ * @returns {string | undefined} the environment file the template was copied
+ *   to, relative to `absolute`, or `undefined` when nothing was copied
  */
 export const copyEnvironmentTemplate = ({ absolute, packageName }) => {
   const template = join(absolute, ENVIRONMENT_TEMPLATE);
   const file = join(absolute, ENVIRONMENT_FILE);
-  if (!existsSync(template) || existsSync(file)) return false;
+  if (!existsSync(template) || existsSync(file)) return;
   writeFileSync(
     file,
     environmentFromTemplate({
@@ -105,7 +106,7 @@ export const copyEnvironmentTemplate = ({ absolute, packageName }) => {
       template: readFileSync(template, 'utf8'),
     }),
   );
-  return true;
+  return ENVIRONMENT_FILE;
 };
 
 const announced = ({ args, binary, cwd, env, label }) => {

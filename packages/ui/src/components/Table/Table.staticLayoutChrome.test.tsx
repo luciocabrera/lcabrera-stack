@@ -167,19 +167,19 @@ describe('Table static layout chrome', () => {
   it('wraps a virtual table in the flex wrapper by default, and a static one not', () => {
     render(<Table columns={COLUMNS} response={ROWS} />);
 
-    const wrapped = ancestorsOf(screen.getByTestId('table')).some((element) =>
+    const isWrapped = ancestorsOf(screen.getByTestId('table')).some((element) =>
       hasStylexStyle({ element, style: flexWrapperStyles.wrapper }),
     );
 
     cleanup();
     render(<Table columns={COLUMNS} layout='static' response={ROWS} />);
 
-    const staticWrapped = ancestorsOf(screen.getByTestId('table')).some(
+    const isStaticWrapped = ancestorsOf(screen.getByTestId('table')).some(
       (element) =>
         hasStylexStyle({ element, style: flexWrapperStyles.wrapper }),
     );
 
-    expect([wrapped, staticWrapped]).toStrictEqual([true, false]);
+    expect([isWrapped, isStaticWrapped]).toStrictEqual([true, false]);
   });
 
   it('leaves Manage Column out of the column menu while settings are off', () => {
