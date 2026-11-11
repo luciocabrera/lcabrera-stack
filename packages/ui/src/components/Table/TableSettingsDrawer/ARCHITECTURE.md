@@ -240,6 +240,9 @@ graph TD
   K --> L["ColumnOrderSectionProvider"]
   L --> M["ColumnOrderSection"]
 
+  D --> K2["Tab: Display"]
+  K2 --> M2["DisplaySettingsSection"]
+
   Q --> R{"Accept?"}
   R -->|Yes + invalid filters| S["notify('Invalid filters') + keep drawer open"]
   R -->|Yes + valid filters| T["batchSetTableDrawerSettings()"]
@@ -257,8 +260,8 @@ graph TD
 
 ## State Management: TableDrawerContext
 
-Store-based context pattern using `useStore` + `useSyncExternalStore` with
-17 action hooks and 5 selector hooks.
+Store-based context pattern using `useStore` + `useSyncExternalStore`, with
+one action hook per staged change and one selector hook per staged value.
 
 See [TableDrawerContext/ARCHITECTURE.md](TableDrawerContext/ARCHITECTURE.md) for full details.
 
@@ -302,12 +305,13 @@ a toolbar in dual-variant mode.
 
 | Section                  | Tab      | Features                                                                                                                                                                                                                                                                         |
 | ------------------------ | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GeneralSettingsSection` | General  | Width presets, and the clear/reset pair for filters, sorting, columns and grouping (the last only where the route declared `isGroupingEnabled`), plus all-settings clear/reset                                                                                                   |
+| `GeneralSettingsSection` | General  | The clear/reset pair for filters, sorting, columns and grouping (the last only where the route declared `isGroupingEnabled`), plus all-settings clear/reset                                                                                                                      |
 | `DetailsSection`         | Details  | Required row counts, optional table/schema, technical metadata                                                                                                                                                                                                                   |
 | `FiltersSection`         | Filters  | Add/remove/expand filters, FilterInputs, validation, plus the read-only restrictions below                                                                                                                                                                                       |
 | `SortingSection`         | Sorting  | Add/remove/reorder sorts, direction toggle                                                                                                                                                                                                                                       |
 | `GroupingSection`        | Grouping | Its own sub-tab strip — Group Keys, Aggregates, Advanced (the last only where `useHasAdvancedSettings` says a totals control can render). Tab present only where the route declared `isGroupingEnabled`. See [GroupingSection/ARCHITECTURE.md](GroupingSection/ARCHITECTURE.md). |
 | `ColumnOrderSection`     | Columns  | Drag-drop reorder, pin toggle, visibility toggle, conflict and grouping-prompt modals. See [ColumnOrderSection/ARCHITECTURE.md](ColumnOrderSection/ARCHITECTURE.md).                                                                                                             |
+| `DisplaySettingsSection` | Display  | Column-width presets, row density and header density; each density group leads with a default option that clears the table's own level                                                                                                                                           |
 
 ### A filter the table cannot change
 

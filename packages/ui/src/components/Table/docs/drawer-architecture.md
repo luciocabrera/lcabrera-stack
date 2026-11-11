@@ -23,7 +23,8 @@ graph TB
 
         subgraph TblTabs["Tabs"]
             direction LR
-            GSS["GeneralSettingsSection<br/><small>Density · Borders<br/>Stripes · Title</small>"]
+            GSS["GeneralSettingsSection<br/><small>Clear · Reset<br/>per section and all</small>"]
+            DSS["DisplaySettingsSection<br/><small>Width presets<br/>Row · Header density</small>"]
             TSS["SortingSection<br/><small>Multi-column sort<br/>Add · Remove · Reorder</small>"]
             FSS["FiltersSection<br/><small>All active filters<br/>Add · Remove · Edit</small>"]
             COS["ColumnOrderSection<br/><small>Visibility toggles<br/>Drag reorder · Pinning</small>"]
@@ -61,7 +62,7 @@ graph TB
     classDef filter fill:#fff9c4,stroke:#f9a825
 
     class CDP2,TDP3 drawer
-    class GS,DS,FS,SS,GSS,TSS,FSS,COS tab
+    class GS,DS,FS,SS,GSS,DSS,TSS,FSS,COS tab
     class OPEN,EDIT,ACCEPT,CANCEL lifecycle
     class TFI,NFI,DFI,BFI,SFI filter
 ```

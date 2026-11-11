@@ -9,10 +9,12 @@ search param ([ADR-061](../../../../../../../docs/decisions/ADR-061-grouping-con
 and `totalsPlacementStore` to the `totals` search param **and** the cookie —
 it has to reach the emitted `ORDER BY` and outlive the session, and no single
 channel does both ([ADR-085](../../../../../../../docs/decisions/ADR-085-a-preset-makes-ungrouped-a-real-state.md)).
-`densityStore` commits to the meta state and the UI-flags cookie, and only when
-the staged level differs from the one the table renders; it seeds from the
-resolved level, so a level the `Table`'s own props supply reads as unchanged
-([ADR-146](../../../../../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (a)).
+`densityStore` holds the table's own `density` and `headerDensity`, either of
+which may be unset, and commits to the meta state and the UI-flags cookie only
+the levels that differ from the table's own (`toTableDensityPatch`). A level
+cleared back to the default travels as `undefined`, so the table falls back to
+its props, then the Global Settings default
+([ADR-148](../../../../../../../docs/decisions/ADR-148-table-density-falls-back-from-the-table-to-its-prop-to-the-global-default.md)).
 Reset re-seeds it with the other drafts.
 All four seed at mount — which is when the drawer opens, since `TableDrawersSection`
 mounts the provider only while it is — so Cancel has a baseline to restore even
@@ -196,24 +198,26 @@ and calls `set(partial)` on it — `columnsStore` for the column draft,
 | `useResetGroupKeys`                | `TableConfigContext` | `groupingStore`        | Restores keys and periods from the table through the reducer, leaving the staged aggregates; takes the mode too when the draft has no keys |
 | `useResetColumnAggregates`         | `TableConfigContext` | `groupingStore`        | Restores aggregates and shares from the table through the reducer, leaving the staged keys; a no-op while no key is staged                 |
 | `useSetTotalsPlacement`            | —                    | `totalsPlacementStore` | Stages where subtotals sit relative to the rows they total                                                                                 |
-| `useSetDensity`                    | —                    | `densityStore`         | Stages a density level                                                                                                                     |
+| `useSetDensity`                    | —                    | `densityStore`         | Stages the row level; `undefined` clears the table's own                                                                                   |
+| `useSetHeaderDensity`              | —                    | `densityStore`         | Stages the header level; `undefined` clears the table's own                                                                                |
 | `useBatchSetTableDrawerSettings`   | every drawer store   | `TableConfig`          | Pushes every draft to the table in **one** commit — see below                                                                              |
 
 ## Selectors
 
-| Hook                       | Returns                            | Description                       |
-| -------------------------- | ---------------------------------- | --------------------------------- |
-| `useGetColumnFilters`      | `ColumnFilters`                    | Current filter map                |
-| `useGetColumnOrder`        | `ColumnOrderState`                 | Current column order array        |
-| `useGetColumnPinning`      | `ColumnPinningState`               | Current pinning `{ left, right }` |
-| `useGetColumnsSorting`     | `SortingState[]`                   | Current sorting array             |
-| `useGetColumnVisibility`   | `Set<string>`                      | Set of hidden column keys         |
-| `useGetGroupingKeys`       | `readonly string[]`                | Staged group keys, nesting order  |
-| `useGetGroupingAggregates` | `Record<string, TableAggregateFn>` | Staged aggregates by column       |
-| `useGetGroupingMode`       | `TableGroupingMode`                | Staged grouping mode              |
-| `useGetGroupingPeriods`    | `Record<string, TableGroupPeriod>` | Staged per-key granularity        |
-| `useGetTotalsPlacement`    | `TableTotalsPlacement`             | Staged totals position            |
-| `useGetDensity`            | `TableDensity`                     | Staged density level              |
+| Hook                       | Returns                            | Description                                      |
+| -------------------------- | ---------------------------------- | ------------------------------------------------ |
+| `useGetColumnFilters`      | `ColumnFilters`                    | Current filter map                               |
+| `useGetColumnOrder`        | `ColumnOrderState`                 | Current column order array                       |
+| `useGetColumnPinning`      | `ColumnPinningState`               | Current pinning `{ left, right }`                |
+| `useGetColumnsSorting`     | `SortingState[]`                   | Current sorting array                            |
+| `useGetColumnVisibility`   | `Set<string>`                      | Set of hidden column keys                        |
+| `useGetGroupingKeys`       | `readonly string[]`                | Staged group keys, nesting order                 |
+| `useGetGroupingAggregates` | `Record<string, TableAggregateFn>` | Staged aggregates by column                      |
+| `useGetGroupingMode`       | `TableGroupingMode`                | Staged grouping mode                             |
+| `useGetGroupingPeriods`    | `Record<string, TableGroupPeriod>` | Staged per-key granularity                       |
+| `useGetTotalsPlacement`    | `TableTotalsPlacement`             | Staged totals position                           |
+| `useGetDensity`            | `TableDensity \| undefined`        | Staged row level; unset is the default option    |
+| `useGetHeaderDensity`      | `TableDensity \| undefined`        | Staged header level; unset is the default option |
 
 ## One commit, one navigation
 
