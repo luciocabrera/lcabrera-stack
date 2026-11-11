@@ -27,7 +27,7 @@ import { buildPlan } from './command-materialise.mjs';
 import {
   allowedConfigKeys,
   configuredCommandWords,
-  includesRung,
+  doesProfileIncludeRung,
   PROFILES,
   targetPathFor,
 } from './config.mjs';
@@ -71,7 +71,7 @@ const dependencyNamesIn = (content) => {
  * @returns {string[]}
  */
 const providedPackages = ({ entries, profile }) => {
-  if (!includesRung({ profile, rung: 'monorepo' })) return [];
+  if (!doesProfileIncludeRung({ profile, rung: 'monorepo' })) return [];
   return [
     ...new Set([
       ...Object.keys(WORKSPACE_DEPENDENCIES),

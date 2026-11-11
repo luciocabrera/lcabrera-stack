@@ -102,7 +102,7 @@ const rungIndex = (name) => PROFILE_LADDER.indexOf(name);
  * @returns {boolean} whether `profile` is `rung` or a rung above it; `false`
  * for a name off the ladder on either side
  */
-export const includesRung = ({ profile, rung }) => {
+export const doesProfileIncludeRung = ({ profile, rung }) => {
   const held = rungIndex(profile);
   const asked = rungIndex(rung);
   return held !== -1 && asked !== -1 && asked <= held;
@@ -115,7 +115,7 @@ export const includesRung = ({ profile, rung }) => {
  */
 export const retiredAssetsFor = ({ profile, retirements = RUNG_RETIREMENTS }) =>
   retirements
-    .filter(([rung]) => includesRung({ profile, rung }))
+    .filter(([rung]) => doesProfileIncludeRung({ profile, rung }))
     .flatMap(([, assetPaths]) => assetPaths);
 
 export const PROFILES = Object.freeze(
@@ -124,7 +124,7 @@ export const PROFILES = Object.freeze(
       name,
       Object.freeze(
         PROFILE_LADDER.filter((rung) =>
-          includesRung({ profile: name, rung }),
+          doesProfileIncludeRung({ profile: name, rung }),
         ).flatMap((rung) => GROUPS_BY_RUNG.get(rung) ?? []),
       ),
     ]),

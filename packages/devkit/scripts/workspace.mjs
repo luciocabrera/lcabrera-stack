@@ -32,7 +32,7 @@
  * would leave `build` passing having built nothing.
  */
 
-import { includesRung } from './config.mjs';
+import { doesProfileIncludeRung } from './config.mjs';
 
 export const NODE_VERSION = '26.13.0';
 
@@ -152,9 +152,9 @@ export const BLUEPRINT_TASK_NAMES = RUNG_TASKS.flatMap(([, tasks]) =>
  */
 export const workspaceScriptsFor = ({ profile }) =>
   asScripts(
-    RUNG_TASKS.filter(([rung]) => includesRung({ profile, rung })).flatMap(
-      ([, tasks]) => tasks,
-    ),
+    RUNG_TASKS.filter(([rung]) =>
+      doesProfileIncludeRung({ profile, rung }),
+    ).flatMap(([, tasks]) => tasks),
   );
 
 /**

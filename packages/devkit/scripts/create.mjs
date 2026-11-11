@@ -13,7 +13,7 @@ import { dirname } from 'node:path';
 import { inc } from 'semver';
 
 import ownManifest from '../package.json' with { type: 'json' };
-import { includesRung } from './config.mjs';
+import { doesProfileIncludeRung } from './config.mjs';
 import { gateBinNames } from './init.mjs';
 import { withWorkspaceFields } from './workspace.mjs';
 
@@ -224,7 +224,7 @@ export const initialManifest = ({ name, profile = '' }) => {
     type: 'module',
     version: '0.0.0',
   };
-  const manifest = includesRung({ profile, rung: 'monorepo' })
+  const manifest = doesProfileIncludeRung({ profile, rung: 'monorepo' })
     ? withWorkspaceFields({ manifest: base, profile })
     : base;
   return inFormatterOrder({

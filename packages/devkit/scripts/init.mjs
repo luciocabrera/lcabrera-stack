@@ -10,7 +10,7 @@
  * The effects live in `command-init.mjs`.
  */
 
-import { includesRung } from './config.mjs';
+import { doesProfileIncludeRung } from './config.mjs';
 
 /**
  * A repository that already holds a config was initialised before, and the
@@ -369,7 +369,7 @@ const commandLine = ({ args = [], bin, input }) => {
 
 const rungTasks = (profile) =>
   Object.entries(GATE_TASKS).filter(([, task]) =>
-    includesRung({ profile, rung: task.rung }),
+    doesProfileIncludeRung({ profile, rung: task.rung }),
   );
 
 /**

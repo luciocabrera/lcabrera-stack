@@ -21,7 +21,7 @@ import { fileURLToPath } from 'node:url';
 import { ACCEPTED_FILE, parseAccepted } from './accepted.mjs';
 import {
   CONFIG_FILE_NAME,
-  includesRung,
+  doesProfileIncludeRung,
   isExecutableAsset,
   placementNotice,
   resolveConfig,
@@ -111,7 +111,7 @@ const taskGroups = ({
   scripts,
 }) => {
   const { profile } = config;
-  const blueprint = includesRung({ profile, rung: 'monorepo' });
+  const blueprint = doesProfileIncludeRung({ profile, rung: 'monorepo' });
   const withoutBlueprint =
     blueprint &&
     hasTasksFromKit({ recorded, scripts, tasks: WORKSPACE_SCRIPTS })
