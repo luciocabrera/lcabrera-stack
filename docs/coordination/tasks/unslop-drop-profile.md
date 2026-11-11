@@ -1,13 +1,13 @@
 ---
 id: unslop-drop-profile
 title: Drop the unslop style profile
-owner: agent:grok
-status: active
+owner: agent:claude
+status: review
 branch: docs/914-unslop-drop-profile
 area:
   - .github/skills/unslop/**
 started: 2026-08-24
-updated: 2026-08-24
+updated: 2026-11-11
 plan: (none)
 pr: (none)
 issue: #914
