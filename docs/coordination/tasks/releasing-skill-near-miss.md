@@ -2,7 +2,7 @@
 id: releasing-skill-near-miss
 title: Keep the releasing skill off plain git tag and npm version questions
 owner: agent:claude
-status: active
+status: review
 branch: fix/1633-releasing-skill-near-miss
 area:
   - .github/skills/releasing/**

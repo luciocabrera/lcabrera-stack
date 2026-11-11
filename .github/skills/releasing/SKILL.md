@@ -1,6 +1,6 @@
 ---
 name: releasing
-description: Release the public @lcabrera/* packages with Changesets, regenerate CHANGELOG.md, and maintain the PR label taxonomy. Use when cutting a release, adding a changeset, tagging a repo-level `v*` milestone, editing release.yml/changelog.yml/sync-labels.yml/labeler.yml, or when a publish or changelog automation misbehaves.
+description: Release the public @lcabrera/* packages with Changesets, regenerate CHANGELOG.md, and maintain the PR label taxonomy. Use when cutting a release, adding a changeset, tagging a repo-level `v*` milestone, editing release.yml/changelog.yml/sync-labels.yml/labeler.yml, or when a publish or changelog automation misbehaves. Not for a general git or npm command, such as listing tags or looking up a package's published version.
 user-invocable: true
 allowed-tools: Read, Grep, Glob, Bash(vp:*), Bash(gh:*)
 ---
