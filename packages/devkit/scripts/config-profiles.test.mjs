@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vite-plus/test';
 
 import {
   DEFAULT_CONFIG,
-  includesRung,
+  doesProfileIncludeRung,
   placementNotice,
   PROFILE_LADDER,
   PROFILES,
@@ -71,21 +71,35 @@ describe('profiles', () => {
   });
 });
 
-describe('includesRung', () => {
+describe('doesProfileIncludeRung', () => {
   test('a rung includes itself and every rung below it', () => {
-    expect(includesRung({ profile: 'repo', rung: 'repo' })).toBe(true);
-    expect(includesRung({ profile: 'repo', rung: 'agent' })).toBe(true);
-    expect(includesRung({ profile: 'full', rung: 'agent' })).toBe(true);
+    expect(doesProfileIncludeRung({ profile: 'repo', rung: 'repo' })).toBe(
+      true,
+    );
+    expect(doesProfileIncludeRung({ profile: 'repo', rung: 'agent' })).toBe(
+      true,
+    );
+    expect(doesProfileIncludeRung({ profile: 'full', rung: 'agent' })).toBe(
+      true,
+    );
   });
 
   test('a rung does not include the one above it', () => {
-    expect(includesRung({ profile: 'agent', rung: 'repo' })).toBe(false);
-    expect(includesRung({ profile: 'monorepo', rung: 'full' })).toBe(false);
+    expect(doesProfileIncludeRung({ profile: 'agent', rung: 'repo' })).toBe(
+      false,
+    );
+    expect(doesProfileIncludeRung({ profile: 'monorepo', rung: 'full' })).toBe(
+      false,
+    );
   });
 
   test('a name off the ladder includes nothing and is included by nothing', () => {
-    expect(includesRung({ profile: 'agnet', rung: 'agent' })).toBe(false);
-    expect(includesRung({ profile: 'full', rung: 'publishing' })).toBe(false);
+    expect(doesProfileIncludeRung({ profile: 'agnet', rung: 'agent' })).toBe(
+      false,
+    );
+    expect(
+      doesProfileIncludeRung({ profile: 'full', rung: 'publishing' }),
+    ).toBe(false);
   });
 });
 

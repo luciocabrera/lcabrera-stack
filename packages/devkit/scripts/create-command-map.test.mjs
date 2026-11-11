@@ -21,7 +21,7 @@ import {
 } from 'vite-plus/test';
 
 import { runCreate } from './command-create.mjs';
-import { includesRung, PROFILE_LADDER } from './config.mjs';
+import { doesProfileIncludeRung, PROFILE_LADDER } from './config.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 
 const readJson = (path) => JSON.parse(readFileSync(path, 'utf8'));
@@ -50,7 +50,7 @@ const taskNamedBy = ({ command, prefix }) =>
     : undefined;
 
 const BLUEPRINT_PROFILES = PROFILE_LADDER.filter((profile) =>
-  includesRung({ profile, rung: 'monorepo' }),
+  doesProfileIncludeRung({ profile, rung: 'monorepo' }),
 );
 
 describe.each(BLUEPRINT_PROFILES)('a tree created at %s', (profile) => {
