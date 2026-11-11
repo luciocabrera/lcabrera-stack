@@ -71,7 +71,19 @@ describe('renderTableCellCall', () => {
     ).toBeUndefined();
   });
 
-  it('renders nothing for a loading placeholder row', () => {
+  it('renders nothing for a loading placeholder cell', () => {
+    expect(
+      renderTableCellCall({
+        cellCall: { outcome: RESOLVED, tone },
+        col: COLUMN,
+        isLoadingState: true,
+        row: ROW,
+        value: '',
+      }),
+    ).toBeUndefined();
+  });
+
+  it('keeps drawing a real value while the table is loading', () => {
     expect(
       renderTableCellCall({
         cellCall: { outcome: RESOLVED, tone },
@@ -80,7 +92,7 @@ describe('renderTableCellCall', () => {
         row: ROW,
         value: 3,
       }),
-    ).toBeUndefined();
+    ).toEqual({ content: 'drawn' });
   });
 
   it('hands the cell back to the default path when the renderer draws nothing', () => {

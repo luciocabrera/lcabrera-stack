@@ -288,8 +288,20 @@ describe('buildTableBodyCellDescriptor', () => {
           cellCall: resolvedCall(CALLED),
           col: CALLED,
           isLoadingState: true,
+          row: {},
         }).kind,
       ).toBe('default');
+    });
+
+    it('keeps rendering the call for a real row while the table is loading', () => {
+      expect(
+        buildTableBodyCellDescriptor({
+          ...baseArgs,
+          cellCall: resolvedCall(CALLED),
+          col: CALLED,
+          isLoadingState: true,
+        }).kind,
+      ).toBe('custom');
     });
   });
 });
