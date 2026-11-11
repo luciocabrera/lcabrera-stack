@@ -188,7 +188,7 @@ jobs:
             --no-subagents \
             --disable-web-search \
             --tools 'read_file,grep,list_dir,search_replace' \
-            --max-turns 40 \
+            --max-turns 60 \
             --cwd "$GITHUB_WORKSPACE" \
             --no-alt-screen
 

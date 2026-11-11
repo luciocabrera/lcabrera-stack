@@ -2,7 +2,7 @@
 id: grok-max-turns
 title: Give the Grok subscription review 60 turns
 owner: agent:claude
-status: active
+status: review
 branch: ci/1629-grok-max-turns
 area:
   - .github/workflows/grok-pr-review.yml
