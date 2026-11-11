@@ -2,7 +2,7 @@
 id: table-display-tab
 title: Move table density to a Display tab with header density and a global default
 owner: agent:claude
-status: active
+status: review
 branch: feat/1622-table-display-tab
 area:
   - packages/ui/src/components/Table/**
@@ -25,6 +25,6 @@ Move table density to a Display tab with header density and a global default
 
 ## Status / next
 
-- Current step: implementation and docs done; running check:safe
+- Current step: in review; fallow:mutation needs the owner ruling on two equivalent mutants
 - Blockers: none
-- Next: push, fill the PR body, flip to review
+- Next: address review findings, merge
