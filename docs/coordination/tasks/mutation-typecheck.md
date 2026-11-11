@@ -2,7 +2,7 @@
 id: mutation-typecheck
 title: Type-check surviving mutants in the mutation gate
 owner: agent:claude
-status: active
+status: review
 branch: feat/1624-mutation-typecheck
 area:
   - packages/repo-standards/scripts/fallow-gate*

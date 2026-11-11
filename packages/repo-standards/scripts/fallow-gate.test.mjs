@@ -188,6 +188,7 @@ describe('mutationArgs', () => {
       '/tmp/x.diff',
       '--min-score',
       '100',
+      '--typecheck',
       '--setup-timeout',
       '30m',
       '--allow-dirty',
