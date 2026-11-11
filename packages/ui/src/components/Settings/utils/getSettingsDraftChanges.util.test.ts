@@ -147,8 +147,11 @@ describe('getSettingsDraftChanges — table panel', () => {
     ).toBe(true);
   });
 
-  it('flags a table display change on its own', () => {
-    const draft: SettingsDraft = { ...baseline, tableHeaderDensity: 'dense' };
+  it.each([
+    { tableDensity: 'spacious' },
+    { tableHeaderDensity: 'dense' },
+  ] as const)('flags a table display change on its own: %o', (change) => {
+    const draft: SettingsDraft = { ...baseline, ...change };
 
     expect(getSettingsDraftChanges({ baseline, draft })).toEqual({
       hasChanges: true,
