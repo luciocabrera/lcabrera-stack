@@ -70,17 +70,17 @@ const dependencyNamesIn = (content) => {
  * @param {{ entries: { path: string, content: string }[], profile: string }} args
  * @returns {string[]}
  */
-const providedPackages = ({ entries, profile }) => {
-  if (!doesProfileIncludeRung({ profile, rung: 'monorepo' })) return [];
-  return [
-    ...new Set([
-      ...Object.keys(WORKSPACE_DEPENDENCIES),
-      ...entries
-        .filter((entry) => isManifest(entry.path))
-        .flatMap((entry) => dependencyNamesIn(entry.content)),
-    ]),
-  ];
-};
+const providedPackages = ({ entries, profile }) =>
+  doesProfileIncludeRung({ profile, rung: 'monorepo' })
+    ? [
+        ...new Set([
+          ...Object.keys(WORKSPACE_DEPENDENCIES),
+          ...entries
+            .filter((entry) => isManifest(entry.path))
+            .flatMap((entry) => dependencyNamesIn(entry.content)),
+        ]),
+      ]
+    : [];
 
 const COMMAND_REFERENCE_ASSETS = ['full/COMMANDS.md', 'root/COMMANDS.md'];
 

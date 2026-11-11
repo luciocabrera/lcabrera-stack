@@ -181,6 +181,21 @@ describe('a blueprint import only the created manifest declares', () => {
   });
 });
 
+describe('a workspace dependency imported below the monorepo rung', () => {
+  test('is an escape, because only the monorepo rung declares it', () => {
+    const root = copyOfPackage();
+    writeFileSync(
+      join(root, 'assets', 'workflows', 'planted.mjs'),
+      "import { defineConfig } from 'vite-plus';\n\nexport const planted = defineConfig;\n",
+    );
+    const { status, stderr, stdout } = shippedClosure(root, 'repo');
+
+    expect(Object.keys(WORKSPACE_DEPENDENCIES)).toContain('vite-plus');
+    expect(status).toBe(1);
+    expect(`${stdout}${stderr}`).toContain('planted.mjs:1  imports vite-plus');
+  });
+});
+
 const skill = (root) =>
   join(root, 'assets', 'skills', 'worktree-housekeeping', 'SKILL.md');
 
