@@ -28,21 +28,27 @@ const renderSection = ({ features, isBusy }: RenderSectionArgs = {}) =>
     </TableConfigProvider>,
   );
 
-const radios = () => screen.getAllByRole<HTMLInputElement>('radio');
-
 afterEach(cleanup);
 
 describe('TitleBarDensitySection', () => {
-  it('offers the title bar levels, enabled unless the table is busy', () => {
+  it('offers the title bar levels in a fieldset that is enabled by default', () => {
     renderSection();
 
-    expect(screen.getByRole('group', { name: 'Title bar' })).not.toBeNull();
-    expect(radios().every((radio) => radio.matches(':enabled'))).toBe(true);
+    expect(
+      screen
+        .getByRole<HTMLFieldSetElement>('group', { name: 'Title bar' })
+        .hasAttribute('disabled'),
+    ).toBe(false);
+  });
 
-    cleanup();
+  it('disables its fieldset while the table is busy', () => {
     renderSection({ isBusy: true });
 
-    expect(radios().every((radio) => radio.matches(':disabled'))).toBe(true);
+    expect(
+      screen
+        .getByRole<HTMLFieldSetElement>('group', { name: 'Title bar' })
+        .hasAttribute('disabled'),
+    ).toBe(true);
   });
 
   it('renders nothing when the table has no title bar', () => {

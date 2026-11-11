@@ -78,6 +78,15 @@ const radioIn = ({ field, label }: RadioInArgs) => {
   return radio;
 };
 
+const mockUnsetPinningPreferences = () => {
+  useGetGlobalPinningPreferencesMock.mockReturnValue({
+    orderConflictResolution: undefined,
+    pinConflictResolution: undefined,
+    pinSide: undefined,
+    unpinConflictResolution: undefined,
+  });
+};
+
 describe('Settings', () => {
   beforeEach(() => {
     setGlobalGroupingPreferencesMock.mockReset();
@@ -109,12 +118,7 @@ describe('Settings', () => {
   });
 
   it('stages changes locally and persists only after clicking Accept', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -173,12 +177,7 @@ describe('Settings', () => {
   });
 
   it('persists navbar size from Navigation tab after clicking Accept', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -193,12 +192,7 @@ describe('Settings', () => {
   });
 
   it('persists order conflict preference from the Pinning tab', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -217,12 +211,7 @@ describe('Settings', () => {
   });
 
   it('persists the settings tab order from the Table Panel tab', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -258,12 +247,7 @@ describe('Settings', () => {
   });
 
   it('persists a grouping preference from the Grouping tab', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -287,12 +271,7 @@ describe('Settings', () => {
       mode: undefined,
       totalsPlacement: undefined,
     });
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -314,12 +293,7 @@ describe('Settings', () => {
   });
 
   it('persists the table density defaults from the Table Display tab', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -371,12 +345,7 @@ describe('Settings', () => {
       headerDensity: 'dense',
       titleDensity: 'comfortable',
     });
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -400,12 +369,7 @@ describe('Settings', () => {
   });
 
   it('does nothing when Accept is clicked without changes', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -421,12 +385,7 @@ describe('Settings', () => {
       collapsed: 'expanded',
       size: 'small',
     });
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 

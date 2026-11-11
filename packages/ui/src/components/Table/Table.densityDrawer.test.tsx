@@ -158,6 +158,22 @@ const collectUiFlagsEntries = (persistence: TablePersistence) =>
     .filter((entry: PersistCookieEntry) => entry.key?.endsWith('uiFlags'))
     .map(({ key = '', value = '' }: PersistCookieEntry) => ({ key, value }));
 
+const readPersistedChromeFlags = (persistence: TablePersistence) => {
+  const cookieString = (
+    buildSetCookieHeaders({
+      entries: collectUiFlagsEntries(persistence),
+      expiresAt: new Date('2100-01-01T00:00:00.000Z'),
+    }).get('Set-Cookie') ?? ''
+  ).split(';', 1)[0];
+
+  return toChromeUiFlags(
+    readPersistedUiFlagsFromCookie({
+      cookieString,
+      persistenceKey: 'readings',
+    }),
+  );
+};
+
 const createPersistence = () =>
   ({
     columnSizing: vi.fn(),
@@ -257,21 +273,9 @@ describe('the settings drawer density choice', () => {
     expect(headerRowHeight()).toBe('48px');
     expect(bodyRowHeight()).toBe('32px');
 
-    const cookieString = (
-      buildSetCookieHeaders({
-        entries: collectUiFlagsEntries(persistence),
-        expiresAt: new Date('2100-01-01T00:00:00.000Z'),
-      }).get('Set-Cookie') ?? ''
-    ).split(';', 1)[0];
-
-    expect(
-      toChromeUiFlags(
-        readPersistedUiFlagsFromCookie({
-          cookieString,
-          persistenceKey: 'readings',
-        }),
-      ).headerDensity,
-    ).toBe('spacious');
+    expect(readPersistedChromeFlags(persistence).headerDensity).toBe(
+      'spacious',
+    );
   });
 
   it('resizes the title bar alone on Accept, and persists it', () => {
@@ -299,21 +303,7 @@ describe('the settings drawer density choice', () => {
     expect(headerRowHeight()).toBe('32px');
     expect(checkedLevel(TITLE_DENSITY)).toBe('spacious');
 
-    const cookieString = (
-      buildSetCookieHeaders({
-        entries: collectUiFlagsEntries(persistence),
-        expiresAt: new Date('2100-01-01T00:00:00.000Z'),
-      }).get('Set-Cookie') ?? ''
-    ).split(';', 1)[0];
-
-    expect(
-      toChromeUiFlags(
-        readPersistedUiFlagsFromCookie({
-          cookieString,
-          persistenceKey: 'readings',
-        }),
-      ).titleDensity,
-    ).toBe('spacious');
+    expect(readPersistedChromeFlags(persistence).titleDensity).toBe('spacious');
   });
 
   it('drops the table level on Default, so the rows fall back to the global default', () => {
