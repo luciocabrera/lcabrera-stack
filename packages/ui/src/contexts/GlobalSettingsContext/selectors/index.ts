@@ -5,4 +5,5 @@ export { useGetGlobalNavigationSizePreference } from './useGetGlobalNavigationSi
 export { useGetGlobalOrderConflictResolutionPreference } from './useGetGlobalOrderConflictResolutionPreference.hook';
 export { useGetGlobalPinConflictResolutionPreference } from './useGetGlobalPinConflictResolutionPreference.hook';
 export { useGetGlobalPinningPreferences } from './useGetGlobalPinningPreferences.hook';
+export { useGetGlobalTableDisplayPreferences } from './useGetGlobalTableDisplayPreferences.hook';
 export { useGetGlobalTablePanelPreferences } from './useGetGlobalTablePanelPreferences.hook';

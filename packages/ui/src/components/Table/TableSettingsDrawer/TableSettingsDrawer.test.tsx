@@ -243,6 +243,10 @@ vi.mock(
   }),
 );
 
+vi.mock('./DisplaySettingsSection', () => ({
+  DisplaySettingsSection: () => <div>Display section</div>,
+}));
+
 vi.mock('./FiltersSection', () => ({
   FiltersSection: () => <div>Filters section</div>,
 }));
@@ -281,6 +285,7 @@ describe('TableSettingsDrawer', () => {
       'Sorting',
     );
     expect(screen.getByText('Columns').textContent).toBe('Columns');
+    expect(screen.getByText('Display').textContent).toBe('Display');
   });
 
   it('wires the panel width reset to the action that clears it', () => {

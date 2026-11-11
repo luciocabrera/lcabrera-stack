@@ -25,6 +25,10 @@ export const getSettingsDraftChanges = ({
     draft.pinConflictResolution !== baseline.pinConflictResolution ||
     draft.unpinConflictResolution !== baseline.unpinConflictResolution;
 
+  const hasTableDisplayChanges =
+    draft.tableDensity !== baseline.tableDensity ||
+    draft.tableHeaderDensity !== baseline.tableHeaderDensity;
+
   const hasTablePanelChanges =
     draft.settingsTabOrder.length !== baseline.settingsTabOrder.length ||
     draft.settingsTabOrder.some(
@@ -36,10 +40,12 @@ export const getSettingsDraftChanges = ({
       hasGroupingChanges ||
       hasNavigationChanges ||
       hasPinningChanges ||
+      hasTableDisplayChanges ||
       hasTablePanelChanges,
     hasGroupingChanges,
     hasNavigationChanges,
     hasPinningChanges,
+    hasTableDisplayChanges,
     hasTablePanelChanges,
   };
 };

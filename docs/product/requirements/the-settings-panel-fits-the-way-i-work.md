@@ -71,10 +71,11 @@ other is the same cost as reaching past a tab.
   storing it. Decided by `toGlobalTablePanelPreferencesUpdate.util.test.ts` →
   "writes the order back to undefined when it is the declared one".
 - The General tab holds the clear and the reset for each part of the table's
-  query state, including grouping, and holds nothing that writes a search param.
-  Decided by `GeneralSettingsSection.test.tsx` → "composes width presets, section
-  toolbars, and all-settings actions" and "offers no grouping actions for a route
-  that cannot group".
+  query state, including grouping, and holds nothing that writes a search param
+  and nothing about how the table looks. Decided by
+  `GeneralSettingsSection.test.tsx` → "composes the section toolbars and
+  all-settings actions, and nothing about display" and "offers no grouping
+  actions for a route that cannot group".
 - The Advanced tab carries the two totals controls, and is absent rather than
   empty wherever both of them render nothing. Decided by
   `AdvancedSettingsSection.test.tsx` → "composes the two totals controls", by

@@ -1,5 +1,5 @@
 import type {
-  TableDensity,
+  TableDensityPatch,
   TableGroupingState,
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
@@ -14,7 +14,7 @@ import { usePersistTableStateAction } from './hooks/usePersistTableStateAction.h
 import { resolveBatchSettingsPlan } from './utils';
 
 type BatchSetTableSettingsArgs<TData> = {
-  readonly density?: TableDensity;
+  readonly densityPatch?: TableDensityPatch;
   readonly grouping: TableGroupingState;
   readonly settings: BatchTableSettingsUpdate<TData>;
   readonly totalsPlacement: TableTotalsPlacement;
@@ -28,7 +28,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
   const persistUiFlags = usePersistTableUiFlagsAction();
 
   return ({
-    density,
+    densityPatch,
     grouping,
     settings,
     totalsPlacement,
@@ -37,7 +37,7 @@ export const useBatchSetTableSettings = <TData = Record<string, unknown>>() => {
       columnsState: columnsStore.get(),
       currentGrouping: groupingStore.get(),
       data: dataStore.get().data,
-      density,
+      densityPatch,
       grouping,
       metaState: metaStore.get(),
       settings,

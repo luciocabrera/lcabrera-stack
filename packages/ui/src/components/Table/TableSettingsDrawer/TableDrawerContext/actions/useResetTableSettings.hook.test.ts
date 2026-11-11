@@ -14,6 +14,7 @@ const {
   tableColumnsState,
   tableColumnsStore,
   tableGroupingStore,
+  tableMetaStore,
 } = vi.hoisted(() => {
   let state:
     | undefined
@@ -75,6 +76,9 @@ const {
     tableGroupingStore: {
       get: vi.fn(() => grouping),
     },
+    tableMetaStore: {
+      get: vi.fn(() => ({ density: 'comfortable' })),
+    },
   };
 });
 
@@ -84,6 +88,7 @@ vi.mock(
     useTableConfigContextValue: () => ({
       columnsStore: tableColumnsStore,
       groupingStore: tableGroupingStore,
+      metaStore: tableMetaStore,
     }),
   }),
 );
@@ -95,17 +100,6 @@ vi.mock('../useTableDrawerContextValue.hook', () => ({
     groupingStore: drawerGroupingStore,
   }),
 }));
-
-const { readDensityMock } = vi.hoisted(() => ({
-  readDensityMock: () => ({ density: 'comfortable' }),
-}));
-
-vi.mock(
-  '#ui/components/Table/contexts/TableConfig/meta/useReadTableDensity.hook',
-  () => ({
-    useReadTableDensity: () => readDensityMock,
-  }),
-);
 
 describe('useResetTableSettings', () => {
   beforeEach(() => {
@@ -185,7 +179,7 @@ describe('useResetTableSettings', () => {
     expect(drawerGroupingStore.set).toHaveBeenCalledWith(grouping);
   });
 
-  it('drops a staged density back to the level the table renders', () => {
+  it('drops the staged levels back to the ones the table holds', () => {
     const { result } = renderHook(() => useResetTableSettings());
 
     act(() => {
@@ -194,6 +188,7 @@ describe('useResetTableSettings', () => {
 
     expect(drawerDensityStore.set).toHaveBeenCalledWith({
       density: 'comfortable',
+      headerDensity: undefined,
     });
   });
 });

@@ -15,6 +15,8 @@ const baseline: SettingsDraft = {
   pinConflictResolution: 'always-ask',
   pinSide: 'always-ask',
   settingsTabOrder: TABLE_SETTINGS_TAB_ROLES,
+  tableDensity: 'compact',
+  tableHeaderDensity: 'same-as-rows',
   totalsPlacement: 'last',
   unpinConflictResolution: 'always-ask',
 };
@@ -26,6 +28,7 @@ describe('getSettingsDraftChanges', () => {
       hasGroupingChanges: false,
       hasNavigationChanges: false,
       hasPinningChanges: false,
+      hasTableDisplayChanges: false,
       hasTablePanelChanges: false,
     });
   });
@@ -38,6 +41,7 @@ describe('getSettingsDraftChanges', () => {
       hasGroupingChanges: false,
       hasNavigationChanges: true,
       hasPinningChanges: false,
+      hasTableDisplayChanges: false,
       hasTablePanelChanges: false,
     });
   });
@@ -50,6 +54,7 @@ describe('getSettingsDraftChanges', () => {
       hasGroupingChanges: false,
       hasNavigationChanges: false,
       hasPinningChanges: true,
+      hasTableDisplayChanges: false,
       hasTablePanelChanges: false,
     });
   });
@@ -66,6 +71,7 @@ describe('getSettingsDraftChanges', () => {
       hasGroupingChanges: false,
       hasNavigationChanges: true,
       hasPinningChanges: true,
+      hasTableDisplayChanges: false,
       hasTablePanelChanges: false,
     });
   });
@@ -82,6 +88,7 @@ describe('getSettingsDraftChanges — grouping', () => {
       hasGroupingChanges: true,
       hasNavigationChanges: false,
       hasPinningChanges: false,
+      hasTableDisplayChanges: false,
       hasTablePanelChanges: false,
     });
   });
@@ -102,6 +109,7 @@ describe('getSettingsDraftChanges — grouping', () => {
       hasGroupingChanges: true,
       hasNavigationChanges: true,
       hasPinningChanges: true,
+      hasTableDisplayChanges: false,
       hasTablePanelChanges: false,
     });
   });
@@ -119,6 +127,7 @@ describe('getSettingsDraftChanges — table panel', () => {
       hasGroupingChanges: false,
       hasNavigationChanges: false,
       hasPinningChanges: false,
+      hasTableDisplayChanges: false,
       hasTablePanelChanges: true,
     });
   });
@@ -136,5 +145,18 @@ describe('getSettingsDraftChanges — table panel', () => {
     expect(
       getSettingsDraftChanges({ baseline, draft }).hasTablePanelChanges,
     ).toBe(true);
+  });
+
+  it('flags a table display change on its own', () => {
+    const draft: SettingsDraft = { ...baseline, tableHeaderDensity: 'dense' };
+
+    expect(getSettingsDraftChanges({ baseline, draft })).toEqual({
+      hasChanges: true,
+      hasGroupingChanges: false,
+      hasNavigationChanges: false,
+      hasPinningChanges: false,
+      hasTableDisplayChanges: true,
+      hasTablePanelChanges: false,
+    });
   });
 });

@@ -11,6 +11,7 @@ export const getPersistedUiState = ({
 }: GetPersistedUiStateArgs = {}) => ({
   columnSettingsSelectedTab: chrome?.columnSettingsSelectedTab,
   density: chrome?.density,
+  headerDensity: chrome?.headerDensity,
   isColumnSettingsOpen: chrome?.isColumnSettingsOpen,
   isColumnSettingsPinned: chrome?.isColumnSettingsPinned,
   isTableSettingsOpen: chrome?.isTableSettingsOpen,

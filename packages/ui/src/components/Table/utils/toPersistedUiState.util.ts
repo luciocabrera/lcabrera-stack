@@ -19,6 +19,7 @@ import type { PersistedUiState } from './persistence.types';
 const PERSISTED_UI_STATE_KEYS: Record<keyof PersistedUiState, true> = {
   columnSettingsSelectedTab: true,
   density: true,
+  headerDensity: true,
   isColumnSettingsOpen: true,
   isColumnSettingsPinned: true,
   isTableSettingsOpen: true,

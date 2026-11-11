@@ -1,9 +1,11 @@
 import type {
+  TableDensity,
   TableGroupFold,
   TableGroupingMode,
   TableSettingsTabRole,
   TableTotalsPlacement,
 } from '#ui/components/Table/Table.types';
+import type { SAME_AS_ROWS_PREFERENCE } from '#ui/constants/tableDisplayPreferences.constants';
 import type { useGetGlobalNavigationPreferences } from '#ui/contexts/GlobalSettingsContext/selectors';
 import type {
   GlobalNavigationCollapsedPreference,
@@ -32,6 +34,8 @@ export type SettingsDraft = {
   readonly pinConflictResolution: PinConflictResolutionPreferenceOption;
   readonly pinSide: PinSidePreferenceOption;
   readonly settingsTabOrder: readonly TableSettingsTabRole[];
+  readonly tableDensity: TableDensity;
+  readonly tableHeaderDensity: TableDensity | typeof SAME_AS_ROWS_PREFERENCE;
   readonly totalsPlacement: TableTotalsPlacement;
   readonly unpinConflictResolution: UnpinConflictResolutionPreferenceOption;
 };

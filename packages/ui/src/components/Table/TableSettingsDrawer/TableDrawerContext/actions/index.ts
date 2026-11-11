@@ -24,6 +24,7 @@ export { useSetGroupingColumnAxis } from './useSetGroupingColumnAxis.hook';
 export { useSetGroupingMode } from './useSetGroupingMode.hook';
 export { useSetGroupKeyPeriod } from './useSetGroupKeyPeriod.hook';
 export { useSetGroupKeys } from './useSetGroupKeys.hook';
+export { useSetHeaderDensity } from './useSetHeaderDensity.hook';
 export { useSetTotalsPlacement } from './useSetTotalsPlacement.hook';
 export { useSortByColumnOrder } from './useSortByColumnOrder.hook';
 export { useToggleGroupKey } from './useToggleGroupKey.hook';

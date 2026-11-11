@@ -2,12 +2,14 @@ import {
   useSetGlobalGroupingPreferences,
   useSetGlobalNavigationPreferences,
   useSetGlobalPinningPreferences,
+  useSetGlobalTableDisplayPreferences,
   useSetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/actions';
 import {
   useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
+  useGetGlobalTableDisplayPreferences,
   useGetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
 
@@ -17,6 +19,7 @@ import {
   toGlobalGroupingPreferencesUpdate,
   toGlobalNavigationPreferencesUpdate,
   toGlobalPinningPreferencesUpdate,
+  toGlobalTableDisplayPreferencesUpdate,
   toGlobalTablePanelPreferencesUpdate,
 } from '../../utils';
 import { useSettingsDraftContextValue } from '../useSettingsDraftContextValue.hook';
@@ -26,10 +29,13 @@ export const useAcceptSettingsDraft = () => {
   const groupingPreferences = useGetGlobalGroupingPreferences();
   const navigationPreferences = useGetGlobalNavigationPreferences();
   const pinningPreferences = useGetGlobalPinningPreferences();
+  const tableDisplayPreferences = useGetGlobalTableDisplayPreferences();
   const tablePanelPreferences = useGetGlobalTablePanelPreferences();
   const setGlobalGroupingPreferences = useSetGlobalGroupingPreferences();
   const setGlobalNavigationPreferences = useSetGlobalNavigationPreferences();
   const setGlobalPinningPreferences = useSetGlobalPinningPreferences();
+  const setGlobalTableDisplayPreferences =
+    useSetGlobalTableDisplayPreferences();
   const setGlobalTablePanelPreferences = useSetGlobalTablePanelPreferences();
 
   return () => {
@@ -40,6 +46,7 @@ export const useAcceptSettingsDraft = () => {
       groupingPreferences,
       navigationPreferences,
       pinningPreferences,
+      tableDisplayPreferences,
       tablePanelPreferences,
     });
     const {
@@ -47,6 +54,7 @@ export const useAcceptSettingsDraft = () => {
       hasGroupingChanges,
       hasNavigationChanges,
       hasPinningChanges,
+      hasTableDisplayChanges,
       hasTablePanelChanges,
     } = getSettingsDraftChanges({ baseline, draft });
 
@@ -71,6 +79,12 @@ export const useAcceptSettingsDraft = () => {
 
     if (hasPinningChanges) {
       setGlobalPinningPreferences(toGlobalPinningPreferencesUpdate({ draft }));
+    }
+
+    if (hasTableDisplayChanges) {
+      setGlobalTableDisplayPreferences(
+        toGlobalTableDisplayPreferencesUpdate({ draft }),
+      );
     }
 
     if (hasTablePanelChanges) {

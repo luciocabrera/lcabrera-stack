@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 import type { TableGridContentProps } from './TableGrid.types';
 
 import { TableCellRenderingProvider, TableDataProvider } from '../contexts';
+import { useGlobalTableDensityDefaults } from '../contexts/TableConfig/meta/useGlobalTableDensityDefaults.hook';
 import { TableDensityContext } from '../contexts/TableConfig/TableDensityContext.context';
 import { TableOwnStackContext } from '../contexts/TableConfig/TableOwnStackContext.context';
 import { TablePresentationContext } from '../contexts/TableConfig/TablePresentationContext.context';
@@ -36,6 +37,7 @@ export const TableGridContent = <
     layout,
     onLoadMore,
   } = own;
+  const globalDensity = useGlobalTableDensityDefaults();
   const presentation = resolveTablePresentation({ features, layout });
   const isStatic = presentation.layout === 'static';
   const { isFlexWrapperEnabled = !isStatic } = own;
@@ -54,7 +56,12 @@ export const TableGridContent = <
         cellRenderers={cellRenderers}
       >
         <TableDataProvider<TData> dataState={dataState}>
-          <TableDensityContext value={{ density, headerDensity }}>
+          <TableDensityContext
+            value={{
+              density: density ?? globalDensity.density,
+              headerDensity: headerDensity ?? globalDensity.headerDensity,
+            }}
+          >
             <TablePresentationContext value={presentation}>
               {isStatic ? (
                 <TableStaticContent<TData, TResponse> {...contentProps} />

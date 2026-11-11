@@ -26,6 +26,7 @@ import { useClearGrouping } from './actions/useClearGrouping.hook';
 import { useSetColumnsOrder } from './actions/useSetColumnsOrder.hook';
 import { useSetDensity } from './actions/useSetDensity.hook';
 import { useSetGroupKeys } from './actions/useSetGroupKeys.hook';
+import { useSetHeaderDensity } from './actions/useSetHeaderDensity.hook';
 import { useToggleGroupKey } from './actions/useToggleGroupKey.hook';
 import { useGetColumnFilters } from './selectors/useGetColumnFilters.hook';
 import { useGetColumnOrder } from './selectors/useGetColumnOrder.hook';
@@ -35,6 +36,7 @@ import { useGetColumnVisibility } from './selectors/useGetColumnVisibility.hook'
 import { useGetDensity } from './selectors/useGetDensity.hook';
 import { useGetGroupingAggregates } from './selectors/useGetGroupingAggregates.hook';
 import { useGetGroupingKeys } from './selectors/useGetGroupingKeys.hook';
+import { useGetHeaderDensity } from './selectors/useGetHeaderDensity.hook';
 import { TableDrawerContext } from './TableDrawerContext.context';
 import { useColumnsStore } from './useColumnsStore.hook';
 import { useTableDrawerContextValue } from './useTableDrawerContextValue.hook';
@@ -167,6 +169,28 @@ describe('TableDrawerContext hooks', () => {
 
     expect(result.current.density).toBe('spacious');
     expect(densityStore.get()).toStrictEqual({ density: 'spacious' });
+  });
+
+  it('stages a header level apart from the body, and clears it back to unset', () => {
+    const { result } = renderHook(
+      () => ({
+        headerDensity: useGetHeaderDensity(),
+        setHeaderDensity: useSetHeaderDensity(),
+      }),
+      { wrapper: Wrapper },
+    );
+
+    act(() => {
+      result.current.setHeaderDensity('dense');
+    });
+
+    expect(result.current.headerDensity).toBe('dense');
+
+    act(() => {
+      result.current.setHeaderDensity(undefined);
+    });
+
+    expect(result.current.headerDensity).toBeUndefined();
   });
 });
 

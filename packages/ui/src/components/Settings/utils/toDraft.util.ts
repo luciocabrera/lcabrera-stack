@@ -2,6 +2,7 @@ import type {
   useGetGlobalGroupingPreferences,
   useGetGlobalNavigationPreferences,
   useGetGlobalPinningPreferences,
+  useGetGlobalTableDisplayPreferences,
   useGetGlobalTablePanelPreferences,
 } from '#ui/contexts/GlobalSettingsContext/selectors';
 
@@ -15,6 +16,8 @@ import {
   DEFAULT_NAVIGATION_COLLAPSED_PREFERENCE,
   DEFAULT_NAVIGATION_SIZE_PREFERENCE,
   DEFAULT_PINNING_PREFERENCE,
+  DEFAULT_TABLE_DENSITY_PREFERENCE,
+  DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE,
   DEFAULT_TOTALS_PLACEMENT_PREFERENCE,
 } from '../Settings.constants';
 
@@ -28,6 +31,9 @@ type ToDraftArgs = {
   readonly pinningPreferences: ReturnType<
     typeof useGetGlobalPinningPreferences
   >;
+  readonly tableDisplayPreferences: ReturnType<
+    typeof useGetGlobalTableDisplayPreferences
+  >;
   readonly tablePanelPreferences: ReturnType<
     typeof useGetGlobalTablePanelPreferences
   >;
@@ -37,6 +43,7 @@ export const toDraft = ({
   groupingPreferences,
   navigationPreferences,
   pinningPreferences,
+  tableDisplayPreferences,
   tablePanelPreferences,
 }: ToDraftArgs): SettingsDraft => {
   return {
@@ -55,6 +62,11 @@ export const toDraft = ({
     settingsTabOrder: resolveSettingsTabOrder(
       tablePanelPreferences.settingsTabOrder,
     ),
+    tableDensity:
+      tableDisplayPreferences.density ?? DEFAULT_TABLE_DENSITY_PREFERENCE,
+    tableHeaderDensity:
+      tableDisplayPreferences.headerDensity ??
+      DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE,
     totalsPlacement:
       groupingPreferences.totalsPlacement ??
       DEFAULT_TOTALS_PLACEMENT_PREFERENCE,

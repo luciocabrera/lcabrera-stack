@@ -12,6 +12,7 @@ const fallbackSettings: GlobalSettingsState = {
   grouping: {},
   navigation: {},
   pinning: {},
+  tableDisplay: {},
   tablePanel: {},
 };
 
@@ -59,6 +60,7 @@ describe('getGlobalSettingsFromCookie', () => {
         pinSide: 'right',
         unpinConflictResolution: 'reorder-to-fill',
       },
+      tableDisplay: {},
       tablePanel: {},
     });
   });
@@ -154,6 +156,7 @@ describe('getGlobalSettingsFromCookie', () => {
         pinSide: undefined,
         unpinConflictResolution: undefined,
       },
+      tableDisplay: {},
       tablePanel: {},
     });
   });

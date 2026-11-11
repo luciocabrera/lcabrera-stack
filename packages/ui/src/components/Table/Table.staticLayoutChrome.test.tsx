@@ -298,15 +298,23 @@ describe('Table column width in the virtual layout', () => {
   });
 });
 
+const DISPLAY_TAB_OPEN = {
+  isTableSettingsOpen: true,
+  isTableSettingsPinned: true,
+  tableSettingsSelectedTab: 'display',
+} as const;
+
 describe('Table static layout inside a provided stack', () => {
   it('opens no settings drawer the meta state asks for while settings are off', () => {
     renderInStack({
       columns: COLUMNS,
-      metaState: { isTableSettingsOpen: true, isTableSettingsPinned: true },
+      metaState: DISPLAY_TAB_OPEN,
       rows: ROWS,
     });
 
-    expect(screen.queryByRole('radio', { name: 'Spacious' })).toBeNull();
+    expect(screen.queryAllByRole('radio', { name: 'Spacious' })).toHaveLength(
+      0,
+    );
   });
 
   it('opens no settings drawer in the virtual layout either while settings are off', () => {
@@ -314,22 +322,26 @@ describe('Table static layout inside a provided stack', () => {
       columns: COLUMNS,
       features: { settings: false },
       layout: 'virtual',
-      metaState: { isTableSettingsOpen: true, isTableSettingsPinned: true },
+      metaState: DISPLAY_TAB_OPEN,
       rows: ROWS,
     });
 
-    expect(screen.queryByRole('radio', { name: 'Spacious' })).toBeNull();
+    expect(screen.queryAllByRole('radio', { name: 'Spacious' })).toHaveLength(
+      0,
+    );
   });
 
   it('opens it once settings are on', () => {
     renderInStack({
       columns: COLUMNS,
       features: { settings: true },
-      metaState: { isTableSettingsOpen: true, isTableSettingsPinned: true },
+      metaState: DISPLAY_TAB_OPEN,
       rows: ROWS,
     });
 
-    expect(screen.getByRole('radio', { name: 'Spacious' })).toBeDefined();
+    expect(
+      screen.getAllByRole('radio', { name: 'Spacious' }).length,
+    ).toBeGreaterThan(0);
   });
 
   it('paints the column-axis measures of a grouped read', async () => {

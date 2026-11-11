@@ -70,12 +70,17 @@ TableSettingsDrawer/
 │       ├── useGetGroupingAggregates
 │       └── useGetGroupingKeys
 │
-├── GeneralSettingsSection/                → Width presets, density + cross-section toolbars
+├── GeneralSettingsSection/                → Cross-section clear/reset toolbars
 │   ├── GeneralSettingsSection.component.tsx → Thin composition
 │   ├── GeneralSettingsSection.types.ts
-│   ├── ColumnWidthsSection/               → Width preset toggles (owns preset state)
-│   ├── DensitySection/                    → The four density levels, staged until Accept
 │   ├── AllSettingsSection/                → Clear/reset-all buttons
+│   └── index.ts
+│
+├── DisplaySettingsSection/                → Width presets, row density, header density
+│   ├── DisplaySettingsSection.component.tsx → Thin composition
+│   ├── DisplaySettingsSection.types.ts
+│   ├── ColumnWidthsSection/               → Width preset toggles (owns preset state)
+│   ├── DensitySection/                    → A default option plus the four levels, staged until Accept
 │   ├── utils/                             → buildPresetColumnSizing
 │   └── index.ts
 │
@@ -168,6 +173,10 @@ graph LR
   GeneralSettingsSection --> SortingSectionToolbar
   GeneralSettingsSection --> ColumnOrderSectionToolbar
   GeneralSettingsSection --> GroupingSectionToolbar
+
+  DisplaySettingsSection --> TableDrawerContext
+  DisplaySettingsSection --> TableConfigContext
+  DisplaySettingsSection --> TableDensityContext
 
   GroupingSection --> TableDrawerContext
   GroupingSection --> TableConfigContext

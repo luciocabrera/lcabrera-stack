@@ -95,6 +95,10 @@ vi.mock('../DetailsSection', () => ({
   DetailsSection: () => <div>Details section</div>,
 }));
 
+vi.mock('../DisplaySettingsSection', () => ({
+  DisplaySettingsSection: () => <div>Display section</div>,
+}));
+
 vi.mock('../FiltersSection', () => ({
   FiltersSection: () => <div>Filters section</div>,
 }));
@@ -136,6 +140,8 @@ describe('TableSettingsDrawerBody', () => {
     );
     expect(screen.getByText('Columns').textContent).toBe('Columns');
     expect(screen.getByText('Details').textContent).toBe('Details');
+    expect(screen.getByText('Display').textContent).toBe('Display');
+    expect(screen.getByText('Display section')).not.toBeNull();
   });
 
   it('paints no top-level Advanced tab, which the Grouping tab now holds', () => {
@@ -179,10 +185,11 @@ describe('TableSettingsDrawerBody', () => {
       'Sorting',
       'Grouping',
       'Details',
+      'Display',
     ]);
   });
 
-  it('paints the tabs in the order the reader arranged them', () => {
+  it('appends the Display tab to an order stored before it existed', () => {
     isGroupingEnabledRef.current = true;
     tabOrderRef.current = ['details', 'grouping', 'general'];
 
@@ -199,6 +206,7 @@ describe('TableSettingsDrawerBody', () => {
       'Columns',
       'Filters',
       'Sorting',
+      'Display',
     ]);
   });
 
@@ -217,6 +225,7 @@ describe('TableSettingsDrawerBody', () => {
       'Columns',
       'Filters',
       'Details',
+      'Display',
     ]);
   });
 

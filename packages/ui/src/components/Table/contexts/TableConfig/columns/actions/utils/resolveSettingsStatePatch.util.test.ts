@@ -6,7 +6,7 @@ describe('resolveSettingsStatePatch', () => {
   it('closes an unpinned panel and leaves the density alone when none is staged', () => {
     expect(
       resolveSettingsStatePatch({
-        density: undefined,
+        densityPatch: undefined,
         metaState: { isTableSettingsPinned: false },
       }),
     ).toStrictEqual({
@@ -19,7 +19,7 @@ describe('resolveSettingsStatePatch', () => {
   it('keeps a pinned panel open and carries a staged density', () => {
     expect(
       resolveSettingsStatePatch({
-        density: 'dense',
+        densityPatch: { density: 'dense' },
         metaState: { isTableSettingsPinned: true },
       }),
     ).toStrictEqual({
@@ -29,13 +29,33 @@ describe('resolveSettingsStatePatch', () => {
     });
   });
 
-  it('closes an unpinned panel and carries the density in one patch', () => {
+  it('closes an unpinned panel and carries both levels in one patch', () => {
     expect(
-      resolveSettingsStatePatch({ density: 'spacious', metaState: undefined }),
+      resolveSettingsStatePatch({
+        densityPatch: { density: 'spacious', headerDensity: 'dense' },
+        metaState: undefined,
+      }),
     ).toStrictEqual({
       closesSettings: true,
       hasDensityChanged: true,
-      nextStatePatch: { density: 'spacious', isTableSettingsOpen: false },
+      nextStatePatch: {
+        density: 'spacious',
+        headerDensity: 'dense',
+        isTableSettingsOpen: false,
+      },
+    });
+  });
+
+  it('carries a cleared level as a change, so the table falls back to its default', () => {
+    expect(
+      resolveSettingsStatePatch({
+        densityPatch: { headerDensity: undefined },
+        metaState: { isTableSettingsPinned: true },
+      }),
+    ).toStrictEqual({
+      closesSettings: false,
+      hasDensityChanged: true,
+      nextStatePatch: { headerDensity: undefined },
     });
   });
 });

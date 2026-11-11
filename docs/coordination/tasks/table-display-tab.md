@@ -10,10 +10,12 @@ area:
   - packages/ui/src/contexts/GlobalSettingsContext/**
   - packages/ui/src/types/globalSettings.types.ts
   - docs/product/requirements/**
+  - docs/decisions/ADR-148-*
+  - .changeset/table-display-tab-density-defaults.md
 started: 2026-11-11
 updated: 2026-11-11
 plan: (none)
-pr: (none)
+pr: #1623
 issue: #1622
 ---
 
@@ -23,6 +25,6 @@ Move table density to a Display tab with header density and a global default
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: implementation and docs done; running check:safe
 - Blockers: none
-- Next:
+- Next: push, fill the PR body, flip to review

@@ -14,6 +14,7 @@ import {
 import { toGlobalGroupingPreferences } from './toGlobalGroupingPreferences.util';
 import { toGlobalNavigationPreferences } from './toGlobalNavigationPreferences.util';
 import { toGlobalPinningPreferences } from './toGlobalPinningPreferences.util';
+import { toGlobalTableDisplayPreferences } from './toGlobalTableDisplayPreferences.util';
 import { toGlobalTablePanelPreferences } from './toGlobalTablePanelPreferences.util';
 
 type GetGlobalSettingsFromCookieArgs = {
@@ -56,6 +57,9 @@ export const getGlobalSettingsFromCookie = ({
       payload.value.navigation,
     );
     const parsedGrouping = toGlobalGroupingPreferences(payload.value.grouping);
+    const parsedTableDisplay = toGlobalTableDisplayPreferences(
+      payload.value.tableDisplay,
+    );
     const parsedTablePanel = toGlobalTablePanelPreferences(
       payload.value.tablePanel,
     );
@@ -64,6 +68,7 @@ export const getGlobalSettingsFromCookie = ({
       grouping: parsedGrouping ?? fallback.grouping,
       navigation: parsedNavigation ?? fallback.navigation,
       pinning: parsedPinning ?? fallback.pinning,
+      tableDisplay: parsedTableDisplay ?? fallback.tableDisplay,
       tablePanel: parsedTablePanel ?? fallback.tablePanel,
     };
   } catch (error) {

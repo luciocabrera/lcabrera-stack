@@ -18,6 +18,7 @@ describe('resolveSettingsTabOrder', () => {
       'columns',
       'filters',
       'sorting',
+      'display',
     ]);
   });
 
@@ -31,6 +32,7 @@ describe('resolveSettingsTabOrder', () => {
       'columns',
       'filters',
       'sorting',
+      'display',
     ]);
   });
 
