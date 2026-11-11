@@ -2,7 +2,7 @@
 id: table-loading-cell-renderer
 title: Keep a column's cell renderer while the table is loading
 owner: agent:claude
-status: active
+status: review
 branch: fix/1620-table-loading-cell-renderer
 area:
   - packages/ui/src/components/Table/cellRenderers/**
@@ -11,7 +11,7 @@ area:
 started: 2026-11-11
 updated: 2026-11-11
 plan: (none)
-pr: (none)
+pr: #1621
 issue: #1620
 ---
 
