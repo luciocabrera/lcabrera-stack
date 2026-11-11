@@ -66,7 +66,7 @@ const travelsWith = ({ path, rootDirectory, shipped }) =>
  * @param {{ path: string, rootDirectory: string, shipped: Set<string> }} args
  * @returns {boolean}
  */
-const resolvesAsModule = ({ path, rootDirectory, shipped }) =>
+const doesResolveAsModule = ({ path, rootDirectory, shipped }) =>
   shipped.has(path) || isUnderRoot({ path, rootDirectory });
 
 const resolveFrom = (base, target) =>
@@ -163,7 +163,7 @@ const moduleCandidates = (path) => [
 
 const classifyModulePath = ({ path, rootDirectory, shipped }) => {
   const resolved = moduleCandidates(path).find((candidate) =>
-    resolvesAsModule({ path: candidate, rootDirectory, shipped }),
+    doesResolveAsModule({ path: candidate, rootDirectory, shipped }),
   );
   return resolved === undefined
     ? { kind: 'escape', resolved: path }

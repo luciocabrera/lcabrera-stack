@@ -60,7 +60,7 @@ export const importSpecifiers = ({ manifest, name }) =>
 export const selfContained = (packages) => {
   const packed = new Map(packages.map((entry) => [entry.name, entry]));
 
-  const closureIsPacked = (entry, seen) =>
+  const isClosurePacked = (entry, seen) =>
     Object.keys(entry.manifest.dependencies ?? {}).every((dependency) => {
       const packedDependency = packed.get(dependency);
       if (packedDependency === undefined) {
@@ -70,10 +70,10 @@ export const selfContained = (packages) => {
         return true;
       }
       seen.add(dependency);
-      return closureIsPacked(packedDependency, seen);
+      return isClosurePacked(packedDependency, seen);
     });
 
-  return packages.filter((entry) => closureIsPacked(entry, new Set()));
+  return packages.filter((entry) => isClosurePacked(entry, new Set()));
 };
 
 export const unimportableProblems = (smoked) =>

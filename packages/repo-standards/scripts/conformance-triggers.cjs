@@ -143,7 +143,7 @@ const quantifiedPhrase = (tokens, index) => {
  * @param {readonly string[]} phrase
  * @returns {boolean}
  */
-const startsWith = (tokens, index, phrase) =>
+const hasPhraseAt = (tokens, index, phrase) =>
   phrase.every((word, offset) => tokens[index + offset] === word);
 
 /**
@@ -152,8 +152,8 @@ const startsWith = (tokens, index, phrase) =>
  * @param {readonly string[]} phrase
  * @returns {boolean}
  */
-const endsClauseWith = (tokens, index, phrase) =>
-  startsWith(tokens, index, phrase) &&
+const hasClosingPhraseAt = (tokens, index, phrase) =>
+  hasPhraseAt(tokens, index, phrase) &&
   !WORD.test(tokens[index + phrase.length] ?? '');
 
 /**
@@ -163,8 +163,10 @@ const endsClauseWith = (tokens, index, phrase) =>
  */
 const openEndedPhrase = (tokens, index) =>
   (
-    OPEN_ENDED_PHRASES.find((phrase) => startsWith(tokens, index, phrase)) ??
-    CLAUSE_FINAL_PHRASES.find((phrase) => endsClauseWith(tokens, index, phrase))
+    OPEN_ENDED_PHRASES.find((phrase) => hasPhraseAt(tokens, index, phrase)) ??
+    CLAUSE_FINAL_PHRASES.find((phrase) =>
+      hasClosingPhraseAt(tokens, index, phrase),
+    )
   )?.join(' ');
 
 /**

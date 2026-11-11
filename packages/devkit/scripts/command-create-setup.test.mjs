@@ -12,7 +12,11 @@ import { afterEach, describe, expect, test, vi } from 'vite-plus/test';
 import { copyEnvironmentTemplate, runSetup } from './command-create-setup.mjs';
 import { scratchDirectories } from './create-fixtures.mjs';
 import { loggedSteps, writeStubs } from './create-setup-fixtures.mjs';
-import { DOCKER_MISSING, DOCKER_STOPPED } from './create-setup.mjs';
+import {
+  DOCKER_MISSING,
+  DOCKER_STOPPED,
+  ENVIRONMENT_FILE,
+} from './create-setup.mjs';
 import { silencedConsole } from './test-fixtures.mjs';
 
 const scratches = scratchDirectories('devkit-setup-');
@@ -132,7 +136,7 @@ describe('copyEnvironmentTemplate', () => {
 
     expect(
       copyEnvironmentTemplate({ absolute: root, packageName: 'my.app' }),
-    ).toBe(true);
+    ).toBe(ENVIRONMENT_FILE);
     expect(readFileSync(realFile(root), 'utf8')).toBe(
       'COMPOSE_PROJECT_NAME=my-app\nDB_USER=fixture_user\n',
     );
@@ -144,7 +148,7 @@ describe('copyEnvironmentTemplate', () => {
 
     expect(
       copyEnvironmentTemplate({ absolute: root, packageName: 'demo' }),
-    ).toBe(false);
+    ).toBeUndefined();
     expect(readFileSync(realFile(root), 'utf8')).toBe('DB_USER=kept\n');
   });
 
@@ -154,6 +158,6 @@ describe('copyEnvironmentTemplate', () => {
         absolute: scratches.make(),
         packageName: 'demo',
       }),
-    ).toBe(false);
+    ).toBeUndefined();
   });
 });

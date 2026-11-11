@@ -30,11 +30,7 @@ import {
   resolveConfig,
   withProfile,
 } from './config.mjs';
-import {
-  ENVIRONMENT_FILE,
-  readSetupFlags,
-  SEED_TASK,
-} from './create-setup.mjs';
+import { readSetupFlags, SEED_TASK } from './create-setup.mjs';
 import {
   abandonedNotice,
   ancestorsOf,
@@ -179,9 +175,7 @@ const halted = ({ failure, notice }) => {
 };
 
 const finishedSetup = ({ absolute, flags, hooksPath, packageName, target }) => {
-  const environmentCopied = copyEnvironmentTemplate({ absolute, packageName })
-    ? ENVIRONMENT_FILE
-    : undefined;
+  const environmentCopied = copyEnvironmentTemplate({ absolute, packageName });
   const commands = configuredCommands(absolute);
   const tasks = wiredTasks(absolute);
   const setup = runSetup({

@@ -96,7 +96,7 @@ const withoutFragment = (link) => link.split('#', 1)[0]?.split('?', 1)[0] ?? '';
  * @param {{ fromFile: string, reference: string, repoRoot: string }} args
  * @returns {boolean}
  */
-const linkResolves = ({ fromFile, reference, repoRoot }) =>
+const doesLinkResolve = ({ fromFile, reference, repoRoot }) =>
   fs.existsSync(
     reference.startsWith('/')
       ? path.resolve(repoRoot, reference.slice(1))
@@ -107,7 +107,7 @@ const linkResolves = ({ fromFile, reference, repoRoot }) =>
  * @param {{ fromFile: string, reference: string, repoRoot: string }} args
  * @returns {boolean}
  */
-const scriptPathResolves = ({ fromFile, reference, repoRoot }) =>
+const doesScriptPathResolve = ({ fromFile, reference, repoRoot }) =>
   fs.existsSync(
     path.resolve(
       reference.startsWith('./') || reference.startsWith('../')
@@ -132,7 +132,7 @@ const referenceFindings = ({ body, contents, filePath, label, repoRoot }) => {
     .filter((link) => withoutFragment(link).length > 0)
     .filter(
       (link) =>
-        !linkResolves({
+        !doesLinkResolve({
           fromFile: filePath,
           reference: withoutFragment(link),
           repoRoot,
@@ -146,7 +146,7 @@ const referenceFindings = ({ body, contents, filePath, label, repoRoot }) => {
   const scripts = extractScriptPaths(contents)
     .filter(
       (scriptPath) =>
-        !scriptPathResolves({
+        !doesScriptPathResolve({
           fromFile: filePath,
           reference: scriptPath,
           repoRoot,
