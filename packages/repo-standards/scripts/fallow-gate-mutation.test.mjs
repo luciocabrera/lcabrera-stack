@@ -108,6 +108,7 @@ describe('runGate — mutation', () => {
       '/tmp/gate/changes.diff',
       '--min-score',
       '100',
+      '--typecheck',
       '--setup-timeout',
       '30m',
       '--allow-dirty',

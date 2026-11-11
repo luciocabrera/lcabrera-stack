@@ -122,6 +122,7 @@ export const mutationArgs = ({
   diffFile,
   '--min-score',
   '100',
+  '--typecheck',
   '--setup-timeout',
   setupTimeout,
   '--allow-dirty',
