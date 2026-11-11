@@ -2,7 +2,7 @@
 id: evals-load-local-env
 title: Load docker/local/.env in the eval commands so local runs reach eval history
 owner: agent:claude
-status: active
+status: review
 branch: feat/1631-evals-load-local-env
 area:
   - package.json
