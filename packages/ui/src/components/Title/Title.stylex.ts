@@ -11,6 +11,8 @@ const base = stylex.create({
     justifyContent: 'space-between',
   },
   toolbar: {
+    paddingBlock: spacing.lg,
+    paddingInline: spacing.lg,
     backgroundImage: `linear-gradient(to bottom, ${colors.backgroundPrimary}, transparent)`,
     borderBottomColor: colors.borderPrimary,
     borderBottomStyle: 'solid',
@@ -51,19 +53,19 @@ const base = stylex.create({
 
 const toolbarSizeVariants = stylex.create({
   sm: {
-    paddingBlock: spacing.sm,
+    paddingBlock: spacing.xxs,
     paddingInline: spacing.md,
   },
   md: {
-    paddingBlock: spacing.lg,
+    paddingBlock: spacing.xs,
     paddingInline: spacing.lg,
   },
   lg: {
-    paddingBlock: spacing.xl,
+    paddingBlock: spacing.sm,
     paddingInline: spacing.lg,
   },
   xl: {
-    paddingBlock: spacing.xxl,
+    paddingBlock: spacing.md,
     paddingInline: spacing.xl,
   },
 });

@@ -8,7 +8,7 @@ export type TitleProps = Omit<ComponentProps<'div'>, 'className' | 'style'> & {
   readonly customStylex?: StyleXStyles;
   readonly icon?: ReactNode;
   readonly level?: TitleLevel;
-  /** The `toolbar` variant's padding and title size, `'md'` when unset; `plain` ignores it. */
+  /** The `toolbar` variant's density: a tighter block padding and a title size per step. Unset keeps the roomy toolbar with the `md` title size; `plain` ignores it. */
   readonly size?: TitleSize;
   readonly variant?: TitleVariant;
 };
