@@ -1,5 +1,6 @@
 import type { Linter } from 'eslint';
 
+import { ESLint } from 'eslint';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -47,5 +48,16 @@ describe('the shared ESLint configs', () => {
       'utils/**',
       'extra/**',
     ]);
+  });
+
+  it('turns unicorn/prefer-smaller-scope off for a TypeScript file', async () => {
+    const eslint = new ESLint({
+      cwd: WORKSPACE,
+      overrideConfig: [...createBaseCustomRulesLintConfig({})],
+      overrideConfigFile: true,
+    });
+    const resolved = await eslint.calculateConfigForFile('src/probe.ts');
+
+    expect(resolved.rules['unicorn/prefer-smaller-scope']).toEqual([0]);
   });
 });
