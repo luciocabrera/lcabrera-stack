@@ -50,14 +50,32 @@ describe('the shared ESLint configs', () => {
     ]);
   });
 
-  it('turns unicorn/prefer-smaller-scope off for a TypeScript file', async () => {
-    const eslint = new ESLint({
-      cwd: WORKSPACE,
-      overrideConfig: [...createBaseCustomRulesLintConfig({})],
-      overrideConfigFile: true,
-    });
-    const resolved = await eslint.calculateConfigForFile('src/probe.ts');
+  it.each([
+    {
+      code: 'type Shape = { readonly a: number };\nexport const read = (value: unknown) => {\n  const shape = value as Shape;\n  return shape.a;\n};\n',
+      filePath: 'src/probe.ts',
+      reported: false,
+    },
+    {
+      code: 'let total;\nif (globalThis.flag) {\n  total = 1;\n  globalThis.report(total);\n}\n',
+      filePath: 'src/probe.mjs',
+      reported: true,
+    },
+  ])(
+    'reports unicorn/prefer-smaller-scope in $filePath: $reported',
+    async ({ code, filePath, reported }) => {
+      const eslint = new ESLint({
+        cwd: WORKSPACE,
+        overrideConfig: createBaseCustomRulesLintConfig(),
+        overrideConfigFile: true,
+      });
+      const [result] = await eslint.lintText(code, { filePath });
 
-    expect(resolved.rules['unicorn/prefer-smaller-scope']).toEqual([0]);
-  });
+      expect(
+        result?.messages.some(
+          ({ ruleId }) => ruleId === 'unicorn/prefer-smaller-scope',
+        ),
+      ).toBe(reported);
+    },
+  );
 });
