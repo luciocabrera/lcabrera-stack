@@ -231,8 +231,5 @@ export const parsePlan = (markdown, { milestoneNames = [] } = {}) =>
 
 export const parseMilestoneNames = (markdown) =>
   [...markdown.matchAll(/^###\s+(?<title>M\d\s.*)$/gm)].map(({ groups }) =>
-    groups.title
-      .replaceAll(/[‐-―]/g, '-')
-      .replaceAll(/\s+/g, ' ')
-      .trim(),
+    groups.title.replaceAll(/[‐-―]/g, '-').replaceAll(/\s+/g, ' ').trim(),
   );
