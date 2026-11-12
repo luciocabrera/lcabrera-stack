@@ -86,6 +86,7 @@ export const SHARED_PLUGIN_RULE_SEVERITIES = {
   // that an http origin is rejected became https, and the test inverted.
   'unicorn/prefer-https': 'off',
   'unicorn/prefer-query-selector': 'off',
+  'unicorn/prefer-smaller-scope': 'off',
   // The rule merges an `if` that returns with the `return` after it.
   // `only-single-line` keeps that where the condition and both values each fit
   // on one line, and leaves a multi-line guard as it is.
