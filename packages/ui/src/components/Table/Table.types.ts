@@ -235,6 +235,8 @@ export type TableChromeState = {
   readonly tableSettingsExpandedFilters: readonly string[];
   readonly tableSettingsSelectedTab: string;
   readonly threshold: number;
+  /** Unset falls back to the `Table`'s `titleDensity` prop, then to the global default, then to the density. */
+  readonly titleDensity?: TableDensity;
   readonly wasTableSettingsOpenBeforeColumnSettings?: boolean;
 };
 
@@ -352,7 +354,7 @@ export type TableDensity = 'comfortable' | 'compact' | 'dense' | 'spacious';
 
 export type TableDensityDefaults = Pick<
   TableChromeState,
-  'density' | 'headerDensity'
+  'density' | 'headerDensity' | 'titleDensity'
 >;
 
 export type TableDensityFontSize = 'fontSizeMd' | 'fontSizeSm' | 'fontSizeXs';
@@ -360,7 +362,7 @@ export type TableDensityFontSize = 'fontSizeMd' | 'fontSizeSm' | 'fontSizeXs';
 /** A key present with `undefined` clears that level; an absent key leaves it. */
 export type TableDensityPatch = Pick<
   TableChromeState,
-  'density' | 'headerDensity'
+  'density' | 'headerDensity' | 'titleDensity'
 >;
 
 export type TableDensitySpacing = 'md' | 'sm' | 'xs' | 'xxs';
@@ -530,6 +532,8 @@ export type TableProps<
     readonly layout?: TableLayoutMode;
     /** Read only when the Table mounts its own providers. */
     readonly title?: string;
+    /** The title bar's level when the meta state holds none; outranks the global default, then defaults to the density. */
+    readonly titleDensity?: TableDensity;
   };
 
 export type TableQueryRefusalReason =

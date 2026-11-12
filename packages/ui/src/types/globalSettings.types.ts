@@ -49,6 +49,7 @@ export type GlobalSettingsState = {
 export type GlobalTableDisplayPreferences = {
   readonly density?: TableDensity;
   readonly headerDensity?: TableDensity;
+  readonly titleDensity?: TableDensity;
 };
 
 export type GlobalTablePanelPreferences = {

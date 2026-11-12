@@ -1,9 +1,8 @@
+import { SAME_AS_ROWS_PREFERENCE } from '#ui/constants/tableDisplayPreferences.constants';
+
 import type { SettingsDraft } from '../Settings.types';
 
-import {
-  DEFAULT_TABLE_DENSITY_PREFERENCE,
-  DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE,
-} from '../Settings.constants';
+import { DEFAULT_TABLE_DENSITY_PREFERENCE } from '../Settings.constants';
 
 type ToGlobalTableDisplayPreferencesUpdateArgs = {
   readonly draft: SettingsDraft;
@@ -18,8 +17,12 @@ export const toGlobalTableDisplayPreferencesUpdate = ({
         ? undefined
         : draft.tableDensity,
     headerDensity:
-      draft.tableHeaderDensity === DEFAULT_TABLE_HEADER_DENSITY_PREFERENCE
+      draft.tableHeaderDensity === SAME_AS_ROWS_PREFERENCE
         ? undefined
         : draft.tableHeaderDensity,
+    titleDensity:
+      draft.tableTitleDensity === SAME_AS_ROWS_PREFERENCE
+        ? undefined
+        : draft.tableTitleDensity,
   };
 };

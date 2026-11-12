@@ -235,10 +235,10 @@ expansion that does cross the loader boundary — it is a Global Settings answer
 read off the settings cookie.
 
 Density is resolved in one place, `resolveTableDensity`, from four sources in
-order: the `metaStore`'s `density`/`headerDensity`, then the `Table`'s own
-`density`/`headerDensity` props, then the Global Settings default
-(`tableDisplay.density`/`headerDensity`), then `compact` for the rows and the
-resolved row level for the header
+order: the `metaStore`'s `density`/`headerDensity`/`titleDensity`, then the
+`Table`'s own props of the same names, then the Global Settings default
+(`tableDisplay.density`/`headerDensity`/`titleDensity`), then `compact` for the
+rows and the resolved row level for the header and the title bar
 ([ADR-148](../../../../../docs/decisions/ADR-148-table-density-falls-back-from-the-table-to-its-prop-to-the-global-default.md)).
 The global default enters where the props do: `TableGridContent` provides
 `prop ?? global` for each level through `TableDensityContext`, read by
@@ -253,7 +253,9 @@ header unless a header level is named. `TableBase` reads each level's step from 
 row heights and token names, and sets the body font, the header font, the header
 band's font and the inline padding on `<table>`, as values of `tableDensityVars`
 (`TableBase/tableDensity.stylex.ts`), whose defaults are the compact level; every
-cell reads its padding and font from those variables
+cell reads its padding and font from those variables. The title bar has no row
+height: `TableTitle` maps its level to a `Title` `size` through
+`TABLE_TITLE_DENSITY_SIZE`, and `compact` maps to the size `Title` defaults to
 ([ADR-146](../../../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (a)).
 
 ## Data Flow

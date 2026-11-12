@@ -1,17 +1,35 @@
 // @vitest-environment jsdom
 
-import { render, screen } from '@testing-library/react';
+import { cleanup, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { TableTitle } from './TableTitle.component';
 
-const { useGetTableTitlePluralMock } = vi.hoisted(() => ({
-  useGetTableTitlePluralMock: vi.fn(),
-}));
+const { useGetTableTitleDensityMock, useGetTableTitlePluralMock } = vi.hoisted(
+  () => ({
+    useGetTableTitleDensityMock: vi.fn(() => 'compact'),
+    useGetTableTitlePluralMock: vi.fn(),
+  }),
+);
 
 vi.mock('../contexts/TableConfig/meta/selectors', () => ({
+  useGetTableTitleDensity: useGetTableTitleDensityMock,
   useGetTableTitlePlural: useGetTableTitlePluralMock,
 }));
+
+const renderTitleBarClass = (density: string) => {
+  cleanup();
+  useGetTableTitleDensityMock.mockReturnValue(density);
+  useGetTableTitlePluralMock.mockReturnValue('Enterprise Orders');
+
+  const { unmount } = render(<TableTitle />);
+  const heading = screen.getByRole('heading', { name: 'Enterprise Orders' });
+  const classes = `${heading.parentElement?.parentElement?.className} ${heading.className}`;
+
+  unmount();
+
+  return classes;
+};
 
 describe('TableTitle', () => {
   it('renders nothing when title, icon, and actions are all missing', () => {
@@ -44,5 +62,13 @@ describe('TableTitle', () => {
     expect(screen.getByRole('button', { name: 'Refresh' }).tagName).toBe(
       'BUTTON',
     );
+  });
+
+  it('sizes the title bar by its density, the same for the same level', () => {
+    const compact = renderTitleBarClass('compact');
+
+    expect(renderTitleBarClass('compact')).toBe(compact);
+    expect(renderTitleBarClass('dense')).not.toBe(compact);
+    expect(renderTitleBarClass('spacious')).not.toBe(compact);
   });
 });

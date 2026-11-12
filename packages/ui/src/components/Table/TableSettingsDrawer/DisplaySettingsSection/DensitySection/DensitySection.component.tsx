@@ -1,14 +1,12 @@
 import * as stylex from '@stylexjs/stylex';
 
 import { RadioOptionGroup } from '#ui/components/RadioOptionGroup';
-import { SidePanelSectionHeader } from '#ui/components/SidePanel';
 import { useGetTableHasExplicitRowHeight } from '#ui/components/Table/contexts/TableConfig/meta/selectors';
 import {
   TABLE_DENSITY_LABELS,
   TABLE_DENSITY_LEVELS,
   TABLE_DENSITY_SCALE,
 } from '#ui/components/Table/Table.constants';
-import { accessibility } from '#ui/design-system/tokens/commons.stylex';
 
 import type {
   DensityChoice,
@@ -17,19 +15,22 @@ import type {
 
 import { drawerFieldsetStyles } from '../../drawerFieldset.stylex';
 import { DEFAULT_DENSITY_CHOICE } from './DensitySection.constants';
+import { styles } from './DensitySection.stylex';
 
 const LABELLED_OPTIONS = TABLE_DENSITY_LEVELS.map((value) => ({
   label: TABLE_DENSITY_LABELS[value],
   value,
 }));
 
-const DESCRIBED_OPTIONS = LABELLED_OPTIONS.map((option) => ({
-  ...option,
-  description: `${TABLE_DENSITY_SCALE[option.value].rowHeight}px rows`,
-}));
+const toDescribedOptions = (heightSuffix: string) =>
+  LABELLED_OPTIONS.map((option) => ({
+    ...option,
+    description: `${TABLE_DENSITY_SCALE[option.value].rowHeight}px ${heightSuffix}`,
+  }));
 
 export const DensitySection = ({
   defaultLabel,
+  heightSuffix,
   isBusy = false,
   name,
   onChange,
@@ -37,9 +38,10 @@ export const DensitySection = ({
   value,
 }: DensitySectionProps) => {
   const hasExplicitRowHeight = useGetTableHasExplicitRowHeight();
-  const levelOptions = hasExplicitRowHeight
-    ? LABELLED_OPTIONS
-    : DESCRIBED_OPTIONS;
+  const levelOptions =
+    heightSuffix === undefined || hasExplicitRowHeight
+      ? LABELLED_OPTIONS
+      : toDescribedOptions(heightSuffix);
 
   const handleChange = (choice: DensityChoice) => {
     onChange(choice === DEFAULT_DENSITY_CHOICE ? undefined : choice);
@@ -53,8 +55,7 @@ export const DensitySection = ({
         drawerFieldsetStyles.fieldsetReset,
       )}
     >
-      <legend {...stylex.props(accessibility.visuallyHidden)}>{title}</legend>
-      <SidePanelSectionHeader title={title} />
+      <legend {...stylex.props(styles.legend)}>{title}</legend>
       <RadioOptionGroup<DensityChoice>
         name={name}
         onChange={handleChange}

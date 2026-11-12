@@ -6,7 +6,7 @@ import { afterEach, describe, expect, expectTypeOf, it } from 'vite-plus/test';
 import { expectServerMarkupMatchesClient } from '#ui/utils/tests/expectServerMarkupMatchesClient.util';
 import { hasStylexStyle } from '#ui/utils/tests/hasStylexStyle.util';
 
-import type { TitleLevel, TitleProps } from './Title.types';
+import type { TitleLevel, TitleProps, TitleSize } from './Title.types';
 
 import { Title } from './Title.component';
 import { styles } from './Title.stylex';
@@ -14,6 +14,7 @@ import { styles } from './Title.stylex';
 afterEach(cleanup);
 
 const LEVELS: readonly TitleLevel[] = [1, 2, 3];
+const SIZES: readonly TitleSize[] = ['sm', 'md', 'lg', 'xl'];
 
 describe('Title', () => {
   it('renders nothing when title, icon, and actions are all missing', () => {
@@ -126,6 +127,27 @@ describe('Title', () => {
         hasStylexStyle({ element: heading, style: styles.plainLevel[other] }),
       ),
     ).toBe(false);
+  });
+
+  it('renders the plain variant the same at every size, since size belongs to the toolbar', () => {
+    const renderings = SIZES.map((size) => {
+      const { container } = render(
+        <Title size={size} variant='plain'>
+          Plain
+        </Title>,
+      );
+      const root = container.firstElementChild;
+      const classes = [root?.className, root?.querySelector('h2')?.className];
+
+      cleanup();
+
+      return classes;
+    });
+
+    expect(renderings[0]?.[1]).toBeDefined();
+    expect(new Set(renderings.map((classes) => classes.join('|'))).size).toBe(
+      1,
+    );
   });
 
   it('passes div props through to the container', () => {

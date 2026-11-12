@@ -109,14 +109,20 @@ const headerRowHeight = () =>
     .find((row) => row.closest('thead') !== null)
     ?.style.getPropertyValue('--x-height');
 
+const READINGS_TITLE = { plural: 'Readings', singular: 'Reading' } as const;
+
+const titleBarClass = () =>
+  screen.getByRole('heading', { name: 'Readings' }).className;
+
 const PINNED_OPEN = {
   isTableSettingsOpen: true,
   isTableSettingsPinned: true,
   tableSettingsSelectedTab: 'display',
 } as const;
 
-const ROW_DENSITY = 'Row Density';
-const HEADER_DENSITY = 'Header Density';
+const ROW_DENSITY = 'Rows';
+const HEADER_DENSITY = 'Column headers';
+const TITLE_DENSITY = 'Title bar';
 
 type PickLevelArgs = {
   readonly group?: string;
@@ -151,6 +157,22 @@ const collectUiFlagsEntries = (persistence: TablePersistence) =>
   ]
     .filter((entry: PersistCookieEntry) => entry.key?.endsWith('uiFlags'))
     .map(({ key = '', value = '' }: PersistCookieEntry) => ({ key, value }));
+
+const readPersistedChromeFlags = (persistence: TablePersistence) => {
+  const cookieString = (
+    buildSetCookieHeaders({
+      entries: collectUiFlagsEntries(persistence),
+      expiresAt: new Date('2100-01-01T00:00:00.000Z'),
+    }).get('Set-Cookie') ?? ''
+  ).split(';', 1)[0];
+
+  return toChromeUiFlags(
+    readPersistedUiFlagsFromCookie({
+      cookieString,
+      persistenceKey: 'readings',
+    }),
+  );
+};
 
 const createPersistence = () =>
   ({
@@ -251,21 +273,54 @@ describe('the settings drawer density choice', () => {
     expect(headerRowHeight()).toBe('48px');
     expect(bodyRowHeight()).toBe('32px');
 
-    const cookieString = (
-      buildSetCookieHeaders({
-        entries: collectUiFlagsEntries(persistence),
-        expiresAt: new Date('2100-01-01T00:00:00.000Z'),
-      }).get('Set-Cookie') ?? ''
-    ).split(';', 1)[0];
+    expect(readPersistedChromeFlags(persistence).headerDensity).toBe(
+      'spacious',
+    );
+  });
 
-    expect(
-      toChromeUiFlags(
-        readPersistedUiFlagsFromCookie({
-          cookieString,
-          persistenceKey: 'readings',
-        }),
-      ).headerDensity,
-    ).toBe('spacious');
+  it('resizes the title bar alone on Accept, and persists it', () => {
+    const persistence = createPersistence();
+
+    renderReadings({
+      metaState: {
+        ...PINNED_OPEN,
+        persistenceKey: 'readings',
+        title: READINGS_TITLE,
+      },
+      persistence,
+    });
+
+    const before = titleBarClass();
+
+    pickLevel({ group: TITLE_DENSITY, label: 'Spacious' });
+
+    expect(titleBarClass()).toBe(before);
+
+    clickFooter('Accept');
+
+    expect(titleBarClass()).not.toBe(before);
+    expect(bodyRowHeight()).toBe('32px');
+    expect(headerRowHeight()).toBe('32px');
+    expect(checkedLevel(TITLE_DENSITY)).toBe('spacious');
+
+    expect(readPersistedChromeFlags(persistence).titleDensity).toBe('spacious');
+  });
+
+  it('keeps the title bar, and its level, on a table with no title, icon or actions', () => {
+    renderReadings({ metaState: PINNED_OPEN });
+
+    const titleBar = () =>
+      screen.getByRole('button', { name: 'Table settings' }).parentElement
+        ?.parentElement?.className;
+    const before = titleBar();
+
+    expect(screen.queryByRole('heading', { name: 'Readings' })).toBeNull();
+    expect(before).toBeDefined();
+
+    pickLevel({ group: TITLE_DENSITY, label: 'Spacious' });
+    clickFooter('Accept');
+
+    expect(titleBar()).not.toBe(before);
   });
 
   it('drops the table level on Default, so the rows fall back to the global default', () => {
@@ -301,5 +356,25 @@ describe('the settings drawer density choice', () => {
     });
 
     expect(bodyRowHeight()).toBe('24px');
+  });
+
+  it('sizes the title bar from the global default, and from the rows when that is unset', () => {
+    renderReadings({ metaState: { title: READINGS_TITLE } });
+
+    const followingCompactRows = titleBarClass();
+
+    cleanup();
+    renderReadings({
+      globalDisplay: { titleDensity: 'dense' },
+      metaState: { title: READINGS_TITLE },
+    });
+
+    const dense = titleBarClass();
+
+    cleanup();
+    renderReadings({ density: 'dense', metaState: { title: READINGS_TITLE } });
+
+    expect(dense).not.toBe(followingCompactRows);
+    expect(titleBarClass()).toBe(dense);
   });
 });

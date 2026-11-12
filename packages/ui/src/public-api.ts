@@ -90,6 +90,7 @@ export { Title } from './components/Title/Title.component';
 export type {
   TitleLevel,
   TitleProps,
+  TitleSize,
   TitleVariant,
 } from './components/Title/Title.types';
 export { Tooltip } from './components/Tooltip/Tooltip.component';

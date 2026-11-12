@@ -9,22 +9,37 @@ import {
 
 export const SAME_AS_ROWS_PREFERENCE = 'same-as-rows';
 
-const DENSITY_LEVEL_OPTIONS: readonly RadioOption<TableDensity>[] =
+const toDensityLevelOptions = (
+  heightSuffix?: string,
+): readonly RadioOption<TableDensity>[] =>
   TABLE_DENSITY_LEVELS.map((value) => ({
-    description: `${TABLE_DENSITY_SCALE[value].rowHeight}px rows`,
+    ...(heightSuffix !== undefined && {
+      description: `${TABLE_DENSITY_SCALE[value].rowHeight}px ${heightSuffix}`,
+    }),
     label: TABLE_DENSITY_LABELS[value],
     value,
   }));
 
-export const TABLE_DENSITY_PREFERENCE_OPTIONS = DENSITY_LEVEL_OPTIONS;
+export const TABLE_DENSITY_PREFERENCE_OPTIONS = toDensityLevelOptions('rows');
 
 export const TABLE_HEADER_DENSITY_PREFERENCE_OPTIONS: readonly RadioOption<
   TableDensity | typeof SAME_AS_ROWS_PREFERENCE
 >[] = [
   {
-    description: 'The header row takes the same height as the rows.',
+    description: 'The column header row takes the same height as the rows.',
     label: 'Same as rows',
     value: SAME_AS_ROWS_PREFERENCE,
   },
-  ...DENSITY_LEVEL_OPTIONS,
+  ...toDensityLevelOptions('tall'),
+];
+
+export const TABLE_TITLE_DENSITY_PREFERENCE_OPTIONS: readonly RadioOption<
+  TableDensity | typeof SAME_AS_ROWS_PREFERENCE
+>[] = [
+  {
+    description: 'The title bar follows the row density.',
+    label: 'Same as rows',
+    value: SAME_AS_ROWS_PREFERENCE,
+  },
+  ...toDensityLevelOptions(),
 ];

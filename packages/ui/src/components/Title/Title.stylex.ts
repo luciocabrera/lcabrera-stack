@@ -11,8 +11,6 @@ const base = stylex.create({
     justifyContent: 'space-between',
   },
   toolbar: {
-    paddingBlock: spacing.lg,
-    paddingInline: spacing.lg,
     backgroundImage: `linear-gradient(to bottom, ${colors.backgroundPrimary}, transparent)`,
     borderBottomColor: colors.borderPrimary,
     borderBottomStyle: 'solid',
@@ -36,7 +34,6 @@ const base = stylex.create({
     backgroundClip: 'text',
     backgroundImage: colors.textGradient,
     color: 'transparent',
-    fontSize: typography.fontSizeLg,
     fontWeight: typography.fontWeightSemibold,
     lineHeight: 1.2,
   },
@@ -49,6 +46,40 @@ const base = stylex.create({
     gap: spacing.sm,
     alignItems: 'center',
     display: 'flex',
+  },
+});
+
+const toolbarSizeVariants = stylex.create({
+  sm: {
+    paddingBlock: spacing.sm,
+    paddingInline: spacing.md,
+  },
+  md: {
+    paddingBlock: spacing.lg,
+    paddingInline: spacing.lg,
+  },
+  lg: {
+    paddingBlock: spacing.xl,
+    paddingInline: spacing.lg,
+  },
+  xl: {
+    paddingBlock: spacing.xxl,
+    paddingInline: spacing.xl,
+  },
+});
+
+const toolbarTitleSizeVariants = stylex.create({
+  sm: {
+    fontSize: typography.fontSizeMd,
+  },
+  md: {
+    fontSize: typography.fontSizeLg,
+  },
+  lg: {
+    fontSize: typography.fontSizeXl,
+  },
+  xl: {
+    fontSize: typography.fontSize2xl,
   },
 });
 
@@ -76,4 +107,6 @@ export const styles = {
   title: base.title,
   titleSection: base.titleSection,
   toolbar: base.toolbar,
+  toolbarSize: toolbarSizeVariants,
+  toolbarTitleSize: toolbarTitleSizeVariants,
 };

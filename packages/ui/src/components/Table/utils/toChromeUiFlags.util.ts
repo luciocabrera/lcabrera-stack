@@ -13,6 +13,7 @@ const CHROME_UI_FLAG_KEYS: Record<keyof ChromeUiFlags, true> = {
   settingsPanelWidth: true,
   tableSettingsExpandedFilters: true,
   tableSettingsSelectedTab: true,
+  titleDensity: true,
 };
 
 export const toChromeUiFlags = (uiFlags: PersistedUiState): ChromeUiFlags =>

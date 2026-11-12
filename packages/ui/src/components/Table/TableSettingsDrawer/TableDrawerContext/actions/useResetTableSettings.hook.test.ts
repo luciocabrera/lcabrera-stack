@@ -77,7 +77,7 @@ const {
       get: vi.fn(() => grouping),
     },
     tableMetaStore: {
-      get: vi.fn(() => ({ density: 'comfortable' })),
+      get: vi.fn(() => ({ density: 'comfortable', titleDensity: 'dense' })),
     },
   };
 });
@@ -189,6 +189,7 @@ describe('useResetTableSettings', () => {
     expect(drawerDensityStore.set).toHaveBeenCalledWith({
       density: 'comfortable',
       headerDensity: undefined,
+      titleDensity: 'dense',
     });
   });
 });

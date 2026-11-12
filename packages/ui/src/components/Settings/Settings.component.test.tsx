@@ -59,6 +59,7 @@ afterEach(cleanup);
 
 const ROW_DENSITY_FIELD = 'settings-table-density-preference';
 const HEADER_DENSITY_FIELD = 'settings-table-header-density-preference';
+const TITLE_DENSITY_FIELD = 'settings-table-title-density-preference';
 
 type RadioInArgs = {
   readonly field: string;
@@ -75,6 +76,15 @@ const radioIn = ({ field, label }: RadioInArgs) => {
   }
 
   return radio;
+};
+
+const mockUnsetPinningPreferences = () => {
+  useGetGlobalPinningPreferencesMock.mockReturnValue({
+    orderConflictResolution: undefined,
+    pinConflictResolution: undefined,
+    pinSide: undefined,
+    unpinConflictResolution: undefined,
+  });
 };
 
 describe('Settings', () => {
@@ -108,12 +118,7 @@ describe('Settings', () => {
   });
 
   it('stages changes locally and persists only after clicking Accept', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -172,12 +177,7 @@ describe('Settings', () => {
   });
 
   it('persists navbar size from Navigation tab after clicking Accept', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -192,12 +192,7 @@ describe('Settings', () => {
   });
 
   it('persists order conflict preference from the Pinning tab', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -216,12 +211,7 @@ describe('Settings', () => {
   });
 
   it('persists the settings tab order from the Table Panel tab', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -257,12 +247,7 @@ describe('Settings', () => {
   });
 
   it('persists a grouping preference from the Grouping tab', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -286,12 +271,7 @@ describe('Settings', () => {
       mode: undefined,
       totalsPlacement: undefined,
     });
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -313,12 +293,7 @@ describe('Settings', () => {
   });
 
   it('persists the table density defaults from the Table Display tab', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -330,7 +305,12 @@ describe('Settings', () => {
       'tabpanel-table-display',
     );
     expect(
-      screen.getByText('The header row takes the same height as the rows.'),
+      screen.getByText(
+        'The column header row takes the same height as the rows.',
+      ),
+    ).not.toBeNull();
+    expect(
+      screen.getByText('The title bar follows the row density.'),
     ).not.toBeNull();
     expect(
       radioIn({ field: ROW_DENSITY_FIELD, label: 'Compact' }).checked,
@@ -338,11 +318,15 @@ describe('Settings', () => {
     expect(
       radioIn({ field: HEADER_DENSITY_FIELD, label: 'Same as rows' }).checked,
     ).toBe(true);
+    expect(
+      radioIn({ field: TITLE_DENSITY_FIELD, label: 'Same as rows' }).checked,
+    ).toBe(true);
 
     fireEvent.click(
       radioIn({ field: ROW_DENSITY_FIELD, label: 'Comfortable' }),
     );
     fireEvent.click(radioIn({ field: HEADER_DENSITY_FIELD, label: 'Dense' }));
+    fireEvent.click(radioIn({ field: TITLE_DENSITY_FIELD, label: 'Spacious' }));
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
 
     expect(
@@ -350,6 +334,7 @@ describe('Settings', () => {
     ).toHaveBeenCalledExactlyOnceWith({
       density: 'comfortable',
       headerDensity: 'dense',
+      titleDensity: 'spacious',
     });
     expect(setGlobalGroupingPreferencesMock).not.toHaveBeenCalled();
   });
@@ -358,13 +343,9 @@ describe('Settings', () => {
     useGetGlobalTableDisplayPreferencesMock.mockReturnValue({
       density: 'spacious',
       headerDensity: 'dense',
+      titleDensity: 'comfortable',
     });
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -373,6 +354,9 @@ describe('Settings', () => {
     fireEvent.click(
       radioIn({ field: HEADER_DENSITY_FIELD, label: 'Same as rows' }),
     );
+    fireEvent.click(
+      radioIn({ field: TITLE_DENSITY_FIELD, label: 'Same as rows' }),
+    );
     fireEvent.click(screen.getByRole('button', { name: 'Accept' }));
 
     expect(
@@ -380,16 +364,12 @@ describe('Settings', () => {
     ).toHaveBeenCalledExactlyOnceWith({
       density: undefined,
       headerDensity: undefined,
+      titleDensity: undefined,
     });
   });
 
   it('does nothing when Accept is clicked without changes', () => {
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 
@@ -405,12 +385,7 @@ describe('Settings', () => {
       collapsed: 'expanded',
       size: 'small',
     });
-    useGetGlobalPinningPreferencesMock.mockReturnValue({
-      orderConflictResolution: undefined,
-      pinConflictResolution: undefined,
-      pinSide: undefined,
-      unpinConflictResolution: undefined,
-    });
+    mockUnsetPinningPreferences();
 
     render(<Settings />);
 

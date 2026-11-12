@@ -30,5 +30,6 @@ export type PersistedUiState = {
   readonly settingsPanelWidth?: number;
   readonly tableSettingsExpandedFilters?: readonly string[];
   readonly tableSettingsSelectedTab?: string;
+  readonly titleDensity?: TableDensity;
   readonly totalsPlacement?: TableTotalsPlacement;
 };

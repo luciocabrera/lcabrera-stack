@@ -17,6 +17,7 @@ const baseline: SettingsDraft = {
   settingsTabOrder: TABLE_SETTINGS_TAB_ROLES,
   tableDensity: 'compact',
   tableHeaderDensity: 'same-as-rows',
+  tableTitleDensity: 'same-as-rows',
   totalsPlacement: 'last',
   unpinConflictResolution: 'always-ask',
 };
@@ -29,14 +30,23 @@ describe('toGlobalTableDisplayPreferencesUpdate', () => {
           ...baseline,
           tableDensity: 'spacious',
           tableHeaderDensity: 'dense',
+          tableTitleDensity: 'comfortable',
         },
       }),
-    ).toStrictEqual({ density: 'spacious', headerDensity: 'dense' });
+    ).toStrictEqual({
+      density: 'spacious',
+      headerDensity: 'dense',
+      titleDensity: 'comfortable',
+    });
   });
 
   it('writes the shipped defaults back to undefined rather than storing them', () => {
     expect(
       toGlobalTableDisplayPreferencesUpdate({ draft: baseline }),
-    ).toStrictEqual({ density: undefined, headerDensity: undefined });
+    ).toStrictEqual({
+      density: undefined,
+      headerDensity: undefined,
+      titleDensity: undefined,
+    });
   });
 });

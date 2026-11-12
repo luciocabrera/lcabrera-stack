@@ -1,7 +1,10 @@
 import { use } from 'react';
 
 import { InfoBox } from '#ui/components/InfoBox';
-import { SidePanelSectionMain } from '#ui/components/SidePanel';
+import {
+  SidePanelSectionHeader,
+  SidePanelSectionMain,
+} from '#ui/components/SidePanel';
 import { TableDensityContext } from '#ui/components/Table/contexts/TableConfig/TableDensityContext.context';
 import { TABLE_DENSITY_LABELS } from '#ui/components/Table/Table.constants';
 import { resolveTableDensity } from '#ui/components/Table/utils/resolveTableDensity.util';
@@ -18,6 +21,8 @@ import {
 } from '../TableDrawerContext/selectors';
 import { ColumnWidthsSection } from './ColumnWidthsSection/ColumnWidthsSection.component';
 import { DensitySection } from './DensitySection/DensitySection.component';
+import { TitleBarDensitySection } from './TitleBarDensitySection/TitleBarDensitySection.component';
+import { toFollowsRowsLabel } from './utils/toFollowsRowsLabel.util';
 
 export const DisplaySettingsSection = ({
   isBusy = false,
@@ -29,10 +34,6 @@ export const DisplaySettingsSection = ({
   const setDensity = useSetDensity();
   const setHeaderDensity = useSetHeaderDensity();
   const defaultDensity = resolveTableDensity({ defaults, state: {} }).density;
-  const headerDefaultLabel =
-    defaults.headerDensity === undefined
-      ? 'Same as rows'
-      : `Default (${TABLE_DENSITY_LABELS[defaults.headerDensity]})`;
 
   return (
     <SidePanelSectionMain {...props}>
@@ -43,23 +44,29 @@ export const DisplaySettingsSection = ({
         reflected after clicking Accept.
       </InfoBox>
 
+      <SidePanelSectionHeader title='Density' />
+
       <DensitySection
         defaultLabel={`Default (${TABLE_DENSITY_LABELS[defaultDensity]})`}
+        heightSuffix='rows'
         isBusy={isBusy}
         name='table-density'
         onChange={setDensity}
-        title='Row Density'
+        title='Rows'
         value={density}
       />
 
       <DensitySection
-        defaultLabel={headerDefaultLabel}
+        defaultLabel={toFollowsRowsLabel(defaults.headerDensity)}
+        heightSuffix='tall'
         isBusy={isBusy}
         name='table-header-density'
         onChange={setHeaderDensity}
-        title='Header Density'
+        title='Column headers'
         value={headerDensity}
       />
+
+      <TitleBarDensitySection isBusy={isBusy} />
     </SidePanelSectionMain>
   );
 };

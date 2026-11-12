@@ -35,13 +35,19 @@ and then go back to my default without guessing what it was.
 ## Acceptance
 
 - The table settings drawer has a Display tab, after Details, holding the
-  column-width presets, the row density and the header density. Decided by
-  `TableSettingsDrawerBody.test.tsx` → "puts Columns after General and Grouping
-  after Sorting" and `DisplaySettingsSection.test.tsx` → "holds the width
-  presets, the row density and the header density".
+  column-width presets and a Density group for the rows, the column headers and
+  the title bar. Decided by `TableSettingsDrawerBody.test.tsx` → "puts Columns
+  after General and Grouping after Sorting" and
+  `DisplaySettingsSection.test.tsx` → "holds the width presets, then the density
+  of the rows, column headers and title bar".
 - The header level changes the header row apart from the body and survives a
   reload. Decided by `Table.densityDrawer.test.tsx` → "sets the header row apart
   from the body, and persists it".
+- The title bar level resizes the title bar alone and survives a reload, and a
+  table without a title bar offers no such level. Decided by
+  `Table.densityDrawer.test.tsx` → "resizes the title bar alone on Accept, and
+  persists it" and `DisplaySettingsSection.test.tsx` → "leaves the title bar
+  out when the table has none".
 - Each density group leads with a default option that names the level it falls
   back to, and choosing it drops the table's own level. Decided by
   `DisplaySettingsSection.test.tsx` → "names the level a cleared row density
@@ -51,7 +57,8 @@ and then go back to my default without guessing what it was.
   a `density` prop outranks it. Decided by `Table.densityDrawer.test.tsx` →
   "takes the global default when neither the table nor the prop names a level"
   and "lets the density prop outrank the global default".
-- Settings carries a Table Display tab holding both defaults, Accept persists
+- Settings carries a Table Display tab holding the row, column header and title
+  bar defaults, Accept persists
   them, and choosing the shipped default clears the preference rather than
   storing it. Decided by `Settings.component.test.tsx` → "persists the table
   density defaults from the Table Display tab" and "clears a table density

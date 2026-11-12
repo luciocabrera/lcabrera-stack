@@ -1,8 +1,10 @@
 import * as stylex from '@stylexjs/stylex';
 
+import { SectionCard } from '#ui/components/SectionCard';
 import {
   TABLE_DENSITY_PREFERENCE_OPTIONS,
   TABLE_HEADER_DENSITY_PREFERENCE_OPTIONS,
+  TABLE_TITLE_DENSITY_PREFERENCE_OPTIONS,
 } from '#ui/constants/tableDisplayPreferences.constants';
 
 import type { SettingsDraft } from '../Settings.types';
@@ -10,7 +12,7 @@ import type { SettingsDraft } from '../Settings.types';
 import { styles } from '../Settings.stylex';
 import { useSetSettingsDraftField } from '../SettingsDraftContext/actions';
 import { useGetSettingsDraft } from '../SettingsDraftContext/selectors';
-import { SettingsOptionSection } from '../SettingsOptionSection';
+import { SettingsOptionGroup } from '../SettingsOptionGroup/SettingsOptionGroup.component';
 
 export const TableDisplaySettingsTab = () => {
   const draft = useGetSettingsDraft();
@@ -26,25 +28,44 @@ export const TableDisplaySettingsTab = () => {
     setSettingsDraftField({ key: 'tableHeaderDensity', value });
   };
 
+  const handleTableTitleDensityChange = (
+    value: SettingsDraft['tableTitleDensity'],
+  ) => {
+    setSettingsDraftField({ key: 'tableTitleDensity', value });
+  };
+
   return (
     <div {...stylex.props(styles.tabSections)}>
-      <SettingsOptionSection
-        description='How tall each table row is. A table that sets its own density, or one you changed in its settings, keeps that one.'
-        name='settings-table-density-preference'
-        onChange={handleTableDensityChange}
-        options={TABLE_DENSITY_PREFERENCE_OPTIONS}
-        title='Row Density'
-        value={draft.tableDensity}
-      />
+      <SectionCard
+        description='How tall each part of a table is. A table that sets its own density, or one you changed in its settings, keeps that one.'
+        title='Density'
+      >
+        <div {...stylex.props(styles.tabSections)}>
+          <SettingsOptionGroup
+            name='settings-table-density-preference'
+            onChange={handleTableDensityChange}
+            options={TABLE_DENSITY_PREFERENCE_OPTIONS}
+            title='Rows'
+            value={draft.tableDensity}
+          />
 
-      <SettingsOptionSection
-        description='How tall the header row is. A table that sets its own header density, or one you changed in its settings, keeps that one.'
-        name='settings-table-header-density-preference'
-        onChange={handleTableHeaderDensityChange}
-        options={TABLE_HEADER_DENSITY_PREFERENCE_OPTIONS}
-        title='Header Density'
-        value={draft.tableHeaderDensity}
-      />
+          <SettingsOptionGroup
+            name='settings-table-header-density-preference'
+            onChange={handleTableHeaderDensityChange}
+            options={TABLE_HEADER_DENSITY_PREFERENCE_OPTIONS}
+            title='Column headers'
+            value={draft.tableHeaderDensity}
+          />
+
+          <SettingsOptionGroup
+            name='settings-table-title-density-preference'
+            onChange={handleTableTitleDensityChange}
+            options={TABLE_TITLE_DENSITY_PREFERENCE_OPTIONS}
+            title='Title bar'
+            value={draft.tableTitleDensity}
+          />
+        </div>
+      </SectionCard>
     </div>
   );
 };

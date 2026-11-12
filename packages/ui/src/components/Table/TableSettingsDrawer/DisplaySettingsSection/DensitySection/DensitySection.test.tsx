@@ -25,9 +25,10 @@ const renderSection = ({
     <TableConfigProvider columnsState={{ columns: [] }} metaState={metaState}>
       <DensitySection
         defaultLabel='Default (Compact)'
+        heightSuffix='rows'
         name='table-density'
         onChange={onChange}
-        title='Row Density'
+        title='Rows'
         value={undefined}
         {...props}
       />
@@ -47,7 +48,7 @@ describe('DensitySection', () => {
   it('leads with the default, then lists the four levels tightest first, each with its row height', () => {
     renderSection();
 
-    expect(screen.getByRole('group', { name: 'Row Density' })).not.toBeNull();
+    expect(screen.getByRole('group', { name: 'Rows' })).not.toBeNull();
     expect(
       screen
         .getAllByRole<HTMLInputElement>('radio')
@@ -106,5 +107,12 @@ describe('DensitySection', () => {
 
     expect(screen.getByRole('radio', { name: 'Spacious' })).not.toBeNull();
     expect(screen.queryByText(/px rows/)).toBeNull();
+  });
+
+  it('names each level with no height when no suffix describes one', () => {
+    renderSection({ heightSuffix: undefined });
+
+    expect(screen.getByRole('radio', { name: 'Dense' })).not.toBeNull();
+    expect(screen.queryByText(/px/)).toBeNull();
   });
 });

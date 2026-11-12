@@ -37,5 +37,6 @@ export { useGetTableSettingsSelectedTab } from './useGetTableSettingsSelectedTab
 export { useGetTableSettingsTabOrder } from './useGetTableSettingsTabOrder.hook';
 export { useGetTableTableName } from './useGetTableTableName.hook';
 export { useGetTableThreshold } from './useGetTableThreshold.hook';
+export { useGetTableTitleDensity } from './useGetTableTitleDensity.hook';
 export { useGetTableTitlePlural } from './useGetTableTitlePlural.hook';
 export { useGetTableTitleSingular } from './useGetTableTitleSingular.hook';
