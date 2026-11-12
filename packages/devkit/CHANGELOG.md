@@ -1,5 +1,23 @@
 # @lcabrera/devkit
 
+## 0.11.0
+
+### Minor Changes
+
+- 2efb4f3: The `workspace` blueprint's catalog declares `jsdom` `^31.0.0`, so a repository devkit creates starts its DOM tests on jsdom 31 instead of 30.
+
+  `devkit create` copies the environment template exactly as before. Predicates internal to the closure and create commands are renamed, and `hasConfigKey` from `./config` returns the same result for every input.
+
+- 4bf0ef8: `includesRung` from `./config` is now `doesProfileIncludeRung`. It takes the same `{ profile, rung }` argument and returns the same boolean: `true` when `profile` is `rung` or a rung above it, and `false` for a name off the ladder on either side.
+
+  **This is the breaking part:** `includesRung` is removed, with no alias. An import of it from `@lcabrera/devkit/config` fails until it names `doesProfileIncludeRung` instead.
+
+### Patch Changes
+
+- 937d571: The workspace `pnpm-workspace.yaml` that devkit writes into a new tree overrides `minimatch@10` to `^11.0.1`, which clears GHSA-g3hv-75wg-m249. eslint, typescript-eslint and ts-morph all bring in minimatch 10, and no 10.x release carries the fix, so a new tree used to fail its own `deps:audit` on the day it was created. The override has to sit in the installing root's file, because pnpm ignores overrides declared by a dependency.
+- 36e2848: In a repository it writes, `@lcabrera/devkit` now pins Node 26.13.1 in `.node-version`, and the `workspace` blueprint pins Vite+ 1.6.0 with the matching `vite` core alias and Vitest 5.1.0.
+- d956ffa: A repository devkit creates now pins pnpm 12.18.0 in the root manifest's `packageManager`. This package's `semver` dependency moves from `^7.8.5` to `^7.8.6`.
+
 ## 0.10.0
 
 ### Minor Changes

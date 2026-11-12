@@ -1,5 +1,28 @@
 # @lcabrera/vite-config
 
+## 0.10.0
+
+### Minor Changes
+
+- 36e2848: The `vite-plus` peer moves to `1.6.0`, the version this package is now exercised against.
+
+  **This is the breaking part:** `vite-plus` is pinned exactly, so a consumer on 1.4.0 gets an unmet peer until it moves to 1.6.0.
+
+- 2efb4f3: The peer floors move to the versions this package is exercised against: `eslint-plugin-react-dom` and `eslint-plugin-react-x` `^5.30.1`, and `typescript-eslint` `^8.72.2`. A consumer below one of those, such as `typescript-eslint` 8.72.1, gets an unmet peer and has to move up to the floor. The other peers are unchanged.
+- d956ffa: The peer floors move to the versions this package is exercised against: `eslint` `^10.14.0`, `eslint-plugin-security` `^4.2.1`, and `globals` `^17.14.0`. A consumer below one of those, such as `eslint` 10.13.0, gets an unmet peer and has to move up to the floor. The other peers are unchanged.
+- 9b6ef32: The `eslint-plugin-unicorn` peer moves to `^79.0.0`, and the shared configs turn `unicorn/prefer-smaller-scope` off in TypeScript files (`.ts`, `.mts`, `.cts`, `.tsx`).
+
+  79 extends that rule to type aliases: it asks for a type used by one function to move inside that function's body. These configs keep argument and props types as named module-level types, so in TypeScript the rule reports the shape they ask for. The rule takes no options, so the entry is scoped by file instead. JavaScript files keep the rule's variable check.
+
+  **This is the breaking part:** a consumer on `eslint-plugin-unicorn` 78 gets an unmet peer until it moves to 79, and 79's new recommended rule `prefer-includes-over-repeated-comparisons` may report on its code. `consistent-boolean-name` was already on in these configs, so its move into the recommended set changes nothing.
+
+### Patch Changes
+
+- 9ce601d: Both ESLint configs ignore `.fallow/`. fallow writes its run state there, including instrumented copies of the sources it mutates, in whichever root it analyses, so after `fallow mutation --root <package>` the ESLint pass in that package read those copies as source and failed on them.
+- Updated dependencies [3117ab4]
+- Updated dependencies [2efb4f3]
+  - @lcabrera/eslint-plugin@0.4.0
+
 ## 0.9.0
 
 ### Minor Changes
