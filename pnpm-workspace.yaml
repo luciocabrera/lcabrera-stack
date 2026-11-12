@@ -42,9 +42,9 @@ catalogs:
     # peer and the graph splits across separate Vite+, Vite, and Vitest copies.
     # Keep this in lockstep with the `vite-plus` version (same Vite+ release).
     # See node_modules/vite-plus/docs/guide/migrate-rules.md "Vite and Overrides".
-    vite: npm:@voidzero-dev/vite-plus-core@1.4.0
+    vite: npm:@voidzero-dev/vite-plus-core@1.6.0
     vite-plugin-babel: ^1.7.3
-    vite-plus: 1.4.0
+    vite-plus: 1.6.0
   lint:
     # Held on 2.5 until #1541: Biome 2.6 fails the Biome pass on this tree.
     '@biomejs/biome': ~2.5.15
@@ -109,8 +109,8 @@ catalogs:
     # 1.10.0 because the `@opentelemetry/core` line react-doctor reaches through
     # `@sentry/node` peers on `<1.10.0`, and a root 1.10.0 leaves that unmet.
     '@opentelemetry/api': ~1.9.1
-    '@vitest/coverage-v8': 5.0.5
-    vitest: 5.0.5
+    '@vitest/coverage-v8': 5.1.0
+    vitest: 5.1.0
 
   tooling:
     '@arethetypeswrong/core': ^0.18.5

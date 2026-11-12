@@ -53,9 +53,9 @@ catalogs:
     # instance; the `overrides` below redirect every `vite` edge here. Without
     # it the graph splits across separate Vite+, Vite and Vitest copies. Keep in
     # lockstep with `vite-plus` (same Vite+ release).
-    vite: npm:@voidzero-dev/vite-plus-core@1.4.0
+    vite: npm:@voidzero-dev/vite-plus-core@1.6.0
     vite-plugin-babel: ^1.7.3
-    vite-plus: 1.4.0
+    vite-plus: 1.6.0
 
   lint:
     '@biomejs/biome': ^2.5.11
@@ -81,7 +81,7 @@ catalogs:
     jsdom: ^31.0.0
     # Declared because the test scripts run its binary by name, and pnpm only
     # links a binary for a direct dependency.
-    vitest: 5.0.5
+    vitest: 5.1.0
 
   types:
     '@types/node': ^26.4.1
