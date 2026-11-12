@@ -2,7 +2,7 @@
 id: deps-refresh-1639
 title: Refresh the catalog, Vite+ 1.6 and Node 26.13.1
 owner: agent:claude
-status: active
+status: review
 branch: build/1639-deps-refresh
 area:
   - pnpm-workspace.yaml
@@ -15,7 +15,7 @@ area:
 started: 2026-11-12
 updated: 2026-11-12
 plan: (none)
-pr: (none)
+pr: #1642
 issue: #1639
 ---
 
