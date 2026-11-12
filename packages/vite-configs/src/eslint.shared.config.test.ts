@@ -55,15 +55,23 @@ describe('the shared ESLint configs', () => {
       code: 'type Shape = { readonly a: number };\nexport const read = (value: unknown) => {\n  const shape = value as Shape;\n  return shape.a;\n};\n',
       filePath: 'src/probe.ts',
       reported: false,
+      rule: 'unicorn/prefer-smaller-scope',
+    },
+    {
+      code: 'export const empty = () => null;\n',
+      filePath: 'src/probe.ts',
+      reported: true,
+      rule: 'unicorn/no-null',
     },
     {
       code: 'let total;\nif (globalThis.flag) {\n  total = 1;\n  globalThis.report(total);\n}\n',
       filePath: 'src/probe.mjs',
       reported: true,
+      rule: 'unicorn/prefer-smaller-scope',
     },
   ])(
-    'reports unicorn/prefer-smaller-scope in $filePath: $reported',
-    async ({ code, filePath, reported }) => {
+    'reports $rule in $filePath: $reported',
+    async ({ code, filePath, reported, rule }) => {
       const eslint = new ESLint({
         cwd: WORKSPACE,
         overrideConfig: createBaseCustomRulesLintConfig(),
@@ -71,11 +79,9 @@ describe('the shared ESLint configs', () => {
       });
       const [result] = await eslint.lintText(code, { filePath });
 
-      expect(
-        result?.messages.some(
-          ({ ruleId }) => ruleId === 'unicorn/prefer-smaller-scope',
-        ),
-      ).toBe(reported);
+      expect(result?.messages.some(({ ruleId }) => ruleId === rule)).toBe(
+        reported,
+      );
     },
   );
 });
