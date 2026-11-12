@@ -236,3 +236,10 @@ export const createTestFileConfig = () => ({
     'unicorn/no-unnecessary-parameters': 'off',
   },
 });
+
+export const createTypeScriptFileConfig = () => ({
+  files: ['**/*.{ts,mts,cts,tsx}'],
+  rules: {
+    'unicorn/prefer-smaller-scope': 'off',
+  },
+});

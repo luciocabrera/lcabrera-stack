@@ -1,5 +1,6 @@
 import type { Linter } from 'eslint';
 
+import { ESLint } from 'eslint';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -48,4 +49,39 @@ describe('the shared ESLint configs', () => {
       'extra/**',
     ]);
   });
+
+  it.each([
+    {
+      code: 'type Shape = { readonly a: number };\nexport const read = (value: unknown) => {\n  const shape = value as Shape;\n  return shape.a;\n};\n',
+      filePath: 'src/probe.ts',
+      reported: false,
+      rule: 'unicorn/prefer-smaller-scope',
+    },
+    {
+      code: 'export const empty = () => null;\n',
+      filePath: 'src/probe.ts',
+      reported: true,
+      rule: 'unicorn/no-null',
+    },
+    {
+      code: 'let total;\nif (globalThis.flag) {\n  total = 1;\n  globalThis.report(total);\n}\n',
+      filePath: 'src/probe.mjs',
+      reported: true,
+      rule: 'unicorn/prefer-smaller-scope',
+    },
+  ])(
+    'reports $rule in $filePath: $reported',
+    async ({ code, filePath, reported, rule }) => {
+      const eslint = new ESLint({
+        cwd: WORKSPACE,
+        overrideConfig: createBaseCustomRulesLintConfig(),
+        overrideConfigFile: true,
+      });
+      const [result] = await eslint.lintText(code, { filePath });
+
+      expect(result?.messages.some(({ ruleId }) => ruleId === rule)).toBe(
+        reported,
+      );
+    },
+  );
 });

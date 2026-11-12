@@ -14,6 +14,7 @@ import {
   createNodeScriptFileConfig,
   createTestFileConfig,
   createToolingScriptFileConfig,
+  createTypeScriptFileConfig,
   SHARED_PLUGIN_RULE_SEVERITIES,
 } from './eslint.rules.shared.mjs';
 
@@ -214,6 +215,7 @@ export const createCustomRulesLintConfig = async ({
     createToolingScriptFileConfig(toolingScriptPatterns),
     createCommonJsFileConfig(),
     createTestFileConfig(),
+    createTypeScriptFileConfig(),
     {
       ignores: [...GLOBAL_IGNORES, ...ignorePatterns],
     },
