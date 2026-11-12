@@ -34,7 +34,7 @@
 
 import { doesProfileIncludeRung } from './config.mjs';
 
-export const NODE_VERSION = '26.13.0';
+export const NODE_VERSION = '26.13.1';
 
 export const PACKAGE_MANAGER =
   'pnpm@12.18.0+sha256.29d1d7d99bf6ec6d0a3dbb0ec5656f0d16e997e8be676ca45c581d11cb71f753';
