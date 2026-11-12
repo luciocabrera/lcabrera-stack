@@ -79,11 +79,7 @@ export const judgeFixture = ({ expectedNotMet, fixture, runs: sessions }) => {
   return { expectedNotMet, fixture, matched, runs, stable };
 };
 
-export const describeRun = ({
-  error,
-  notMet,
-  verdict = '(no verdict line)',
-}) =>
+export const describeRun = ({ error, notMet, verdict = '(no verdict line)' }) =>
   error === undefined
     ? `not-met [${notMet.join(',')}], verdict ${verdict.slice(0, 30)}`
     : `error: ${error}`;
