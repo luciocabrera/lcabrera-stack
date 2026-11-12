@@ -22,7 +22,7 @@ import {
 import { ColumnWidthsSection } from './ColumnWidthsSection/ColumnWidthsSection.component';
 import { DensitySection } from './DensitySection/DensitySection.component';
 import { TitleBarDensitySection } from './TitleBarDensitySection/TitleBarDensitySection.component';
-import { toFollowsRowsLabel } from './toFollowsRowsLabel.util';
+import { toFollowsRowsLabel } from './utils/toFollowsRowsLabel.util';
 
 export const DisplaySettingsSection = ({
   isBusy = false,

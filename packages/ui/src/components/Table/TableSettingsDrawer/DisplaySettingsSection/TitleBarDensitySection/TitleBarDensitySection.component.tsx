@@ -8,7 +8,7 @@ import type { TitleBarDensitySectionProps } from './TitleBarDensitySection.types
 import { useSetTitleDensity } from '../../TableDrawerContext/actions';
 import { useGetTitleDensity } from '../../TableDrawerContext/selectors';
 import { DensitySection } from '../DensitySection/DensitySection.component';
-import { toFollowsRowsLabel } from '../toFollowsRowsLabel.util';
+import { toFollowsRowsLabel } from '../utils/toFollowsRowsLabel.util';
 
 export const TitleBarDensitySection = ({
   isBusy = false,
