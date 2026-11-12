@@ -11,9 +11,9 @@ area:
   - evals/README.md
   - packages/eval-history/README.md
 started: 2026-11-11
-updated: 2026-11-11
+updated: 2026-11-12
 plan: (none)
-pr: (none)
+pr: '#1632'
 issue: #1631
 ---
 
@@ -23,6 +23,6 @@ Load docker/local/.env in the eval commands so local runs reach eval history
 
 ## Status / next
 
-- Current step: just claimed
+- Current step: in review, required checks green
 - Blockers: none
-- Next:
+- Next: merge
