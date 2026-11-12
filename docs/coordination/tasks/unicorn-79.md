@@ -2,7 +2,7 @@
 id: unicorn-79
 title: Take eslint-plugin-unicorn 79 and turn prefer-smaller-scope off
 owner: agent:claude
-status: active
+status: review
 branch: build/1542-unicorn-79
 area:
   - packages/vite-configs/src/eslint.rules.shared.mjs
