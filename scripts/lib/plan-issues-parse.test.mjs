@@ -377,4 +377,10 @@ describe('parseMilestoneNames', () => {
       'M3 - Cross-App',
     ]);
   });
+
+  it('collapses a run of whitespace inside a title to one space', () => {
+    expect(parseMilestoneNames('### M2   Data \t layer\n')).toEqual([
+      'M2 Data layer',
+    ]);
+  });
 });
