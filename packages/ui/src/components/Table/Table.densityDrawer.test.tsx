@@ -306,6 +306,23 @@ describe('the settings drawer density choice', () => {
     expect(readPersistedChromeFlags(persistence).titleDensity).toBe('spacious');
   });
 
+  it('keeps the title bar, and its level, on a table with no title, icon or actions', () => {
+    renderReadings({ metaState: PINNED_OPEN });
+
+    const titleBar = () =>
+      screen.getByRole('button', { name: 'Table settings' }).parentElement
+        ?.parentElement?.className;
+    const before = titleBar();
+
+    expect(screen.queryByRole('heading', { name: 'Readings' })).toBeNull();
+    expect(before).toBeDefined();
+
+    pickLevel({ group: TITLE_DENSITY, label: 'Spacious' });
+    clickFooter('Accept');
+
+    expect(titleBar()).not.toBe(before);
+  });
+
   it('drops the table level on Default, so the rows fall back to the global default', () => {
     renderReadings({
       globalDisplay: { density: 'comfortable' },
