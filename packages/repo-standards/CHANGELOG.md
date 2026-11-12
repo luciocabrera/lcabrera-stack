@@ -1,5 +1,41 @@
 # @lcabrera/repo-standards
 
+## 0.11.0
+
+### Minor Changes
+
+- 9ce601d: Add the `repo-fallow-gate` bin. It runs one fallow analysis (`architecture`, `coverage-gaps`, `guard`, `mutation`, `security`, `similar-code` or `suppressions`) over the changed files read from stdin, or over files named on the command line as a pre-commit hook passes them, and exits non-zero on a finding: 1, or 8 for a new security candidate, as fallow reports it. When the analysis could not run, it exits 4, a code fallow does not use, and any other exit fallow gives is reported the same way. `suppressions`, `coverage-gaps` and `similar-code` exit 0 on a finding when fallow runs them directly, so the bin reads their JSON report to decide. `coverage-gaps`, `security` and `mutation` judge only what the change introduced, against the merge base in `CHANGED_FILES_BASE`: a coverage gap counts when its file is new or its export sits on a changed line, and a renamed file is not new. With no file named and stdin a terminal, the bin exits 4 rather than check nothing. `security` runs whenever any file changed, a workflow or shell script included, because it judges the changed lines itself. `mutation` runs once per workspace root so that each workspace's own test configuration resolves its imports. Changed files outside every workspace get one more run from the repository root, narrowed by a diff of those files, so a repository with no workspaces is mutated from its root alone. Every run passes `--allow-dirty`, so uncommitted changes are mutated as well. fallow is resolved from the repository's `node_modules` rather than from `PATH`, git runs with a fixed system `PATH`, and fallow is needed only when the bin runs.
+
+  `repo-verify-script-exits` no longer walks `.fallow/`. fallow keeps its run state there, including the runtime it installs for `fallow mutation`, whose scripts call `process.exit()`, so the gate failed after any mutation run.
+
+  The workspace graph the change-scoped runners read (`repo-test-changed`, `repo-run-changed`, `repo-merge-coverage`, `repo-coverage-report` and this bin) now takes each workspace's directory from the `pnpm-workspace.yaml` glob it matched. A workspace under `tools/*`, `libs/core` or a nested `packages/group/*` was looked up as `packages/<name>` before, which does not exist.
+
+  `runGitStatus` takes an optional `maxBuffer`, and its result carries `exceeded` when the output overran it.
+
+  `workspacesForFiles` matches a file against each workspace's real directory, so `repo-test-changed` and `repo-run-changed` select a workspace under `tools/*` or a nested `packages/group/*` instead of running nothing. Every `git diff` the gate parses pins its output format (`--no-ext-diff`, `--no-relative`, `--src-prefix=a/`, `--dst-prefix=b/`), so `diff.noprefix`, `diff.mnemonicPrefix` or `diff.relative` in a user's config cannot change the paths it reads. `buildGitEnv` also drops `GIT_EXTERNAL_DIFF` and `GIT_DIFF_OPTS`.
+
+  The diffs also run with `core.quotePath=false`, so a non-ASCII path is read as written. When one mutation root finds a surviving mutant and another could not run, the bin exits 1 and still names the root that could not run.
+
+- f47f84f: `repo-fallow-gate suppressions` accepts a `fallow-ignore` marker that a live entry of the repository's false-positive list confirms, and still fails every other marker in a changed file.
+
+  The marker's reason has to read `false positive, case FP-nnnn: <reason>`, and the list has to hold an entry for that case with `analyzer` `fallow`, the marker's kind as `rule`, the marker's file as `file`, and an `expires` that is a real `YYYY-MM-DD` calendar day not yet past. `never`, `2027-02-30` or a timestamp count as no expiry, so the marker fails. The list is a JSON array read from `registers.falsePositives` in `devkit.config.json`, which defaults to `docs/agents/false-positives.json`. With no list, every marker fails as before. The gate checks only the list. It does not read the evidence an entry points at, so the models that ruled, whether they agreed, and whether the flagged lines changed are a check the repository runs itself.
+
+- d2902c8: `repo-fallow-gate mutation` passes `--typecheck` to `fallow mutation`. A surviving mutant whose program does not type-check is classed `compile_error` and leaves the score, because no test can kill a program the type checker already rejects. A surviving mutant that does type-check still fails the gate at `--min-score 100`.
+
+  The gate takes longer where mutants survive, since fallow type-checks each survivor.
+
+### Patch Changes
+
+- dc549d8: `repo-verify-docs-paths` now checks a path written with a line suffix (`path:12`, `path:12-30` or `path:12:4`) against the path alone. Before, it looked for a file whose name included the suffix and reported the reference as missing even though the file existed. A suffixed reference to a file that does not exist is still reported, under the path without its suffix. The suffix is stripped only when the text before it contains a `/` and does not start with a URL scheme, so `http://localhost:3001`, `localhost:3001` and a bare `name.json:3` are read the same way as before. `repo-verify-shipped-docs` and `repo-verify-renamed-mentions` normalise a reference the same way, so they read a suffixed path as the path too. The line numbers themselves are not checked.
+- bdc16df: `repo-fallow-gate mutation` now passes fallow `--setup-timeout 30m`. fallow waits 2 minutes by default for each test-runner process to start and finish its baseline run without mutants. A change that reaches a few hundred test files can take longer than that, and then the gate exits 4 (could not run) before a single mutant is tested. Set `REPO_FALLOW_GATE_MUTATION_SETUP_TIMEOUT` to any duration fallow accepts (`10m`, `1h`) to use a different value. An empty value keeps the default.
+- a1f1741: `repo-fallow-gate mutation` no longer mutates a changed `*.stylex.ts` file. The StyleX babel plugin cannot compile a module after fallow has rewritten it, so every test that imported the module failed before the first mutant ran, and the gate exited 4 (could not run) on any change that touched one. The bin now names each skipped file as `not mutated (style module)` and mutates the rest of the change. The only mutants that go are changes to CSS values, which a jsdom test cannot observe.
+
+  Each workspace-root run now gets a `--diff-file` too, as the repository-root run already did, built from that root's own changed files with the style modules left out. An untracked file in a workspace is added to that diff as a new file.
+
+  `coverage-gaps` is unchanged. It already read the whole merge-base diff with no pathspec, so a renamed file arrives under its new path as not new, and a gap it inherited is not reported.
+
+- 2efb4f3: Predicates internal to the conformance and publish-smoke checks take an `is`/`has`/`does` prefix. No check changes what it accepts or reports.
+
 ## 0.10.0
 
 ### Minor Changes

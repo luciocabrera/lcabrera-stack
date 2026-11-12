@@ -1,5 +1,358 @@
 # @lcabrera/ui
 
+## 0.13.0
+
+### Minor Changes
+
+- 6ddd0e6: Add the `backdropBlur` token group to `design-system/tokens/base.stylex`, with
+  one entry, `floating` (`blur(10px)`), for small panels that float over content.
+
+  The table actions popover, used by the column header and row action menus, now
+  blurs what is behind it with `backdropBlur.floating` in place of the glass
+  panel's heavier filter, so the grid stays faintly readable through an open
+  menu; the panel's fill colour is unchanged. The tooltip moves to the same token,
+  so its blur goes from 8px to 10px.
+
+- ff0ba88: `Breadcrumbs` writes its separator as `/`, with a space on each side, so the trail's `textContent` reads as it is drawn: `Home / Projects / Reports` rather than `Home/Projects/Reports`. Code or snapshots that read the trail's text will see the spaces. The separator stays `aria-hidden` and unselectable, and the flex gap still sets the spacing on screen.
+- ff0ba88: `Heatmap` and `LineChart` now render their root as a `<figure>` instead of a `<div>`, named through `aria-labelledby` by the title the plot already draws. A chart, its axis labels, its legend and its links now sit inside one named figure, and the accessibility tree gains a `figure` for each chart. Markup that selects the root by element name, snapshots of the rendered output and queries by role will see the change. No new id is generated: the figure points at the same `<title>` id the plot or grid uses. The root keeps its layout, with the figure's default margin reset to zero.
+- 213bdea: Add `Heatmap`, exported from the package root and from
+  `@lcabrera/ui/components/Heatmap`, with the `HeatmapAxisItem`, `HeatmapCell`,
+  `HeatmapLegendItem`, `HeatmapPattern`, `HeatmapProps` and `HeatmapScale` types.
+  It draws a value across two dimensions from `rows`, `columns` and a flat array
+  of `cells` that a loader can return as it is. A position with no cell is drawn
+  as an empty, dashed outline, and a cell whose row or column is not on an axis is
+  not drawn.
+
+  `scale` is `{ kind: 'tone' }` by default, which fills a cell with its `tone`, or
+  `{ kind: 'sequential', domain }`, which mixes two colour tokens at the place of
+  `value` in the domain, clamped to its ends. Under a sequential scale a cell
+  without a finite `value` falls back to its `tone`. A cell's `pattern` (`hatch` or
+  `dots`) is painted over its fill, and `legend` lists swatches using the same
+  patterns; a sequential scale adds a ramp between its two domain values, so colour
+  is never the only signal. `hasDataTable` adds a visually hidden table of every
+  position, which holds no links.
+
+  The chart is one SVG sized by `cellSize`, with its cells as `rect`s in one group
+  and each pattern defined once, with ids from `useId`. It reads no size and uses
+  no effect, so the server and the client render the same markup. With no linked
+  cell the SVG is `role="img"`, named by `title` and described by `description`. A
+  cell with `to` hides the SVG from the accessibility tree and lays an HTML
+  `role="grid"` table over it with the same name and description: that cell holds a
+  router `Link` named by its `label`, every other cell is named by its `title`, and
+  the links share one tab stop that moves with the arrow keys, `Home`, `End`,
+  `PageUp` and `PageDown`, and with `Ctrl` or `Cmd` plus `Home` or `End`, skipping
+  any cell without a link. A row or column label with `to` is a router `Link` too.
+  Only a `to` needs a router context.
+
+- ff0ba88: `LineChart` takes an optional `hasMarkerLabels`. Set to `false`, it does not render the list of marker labels above the plot, and each marker stays named by its dashed line's `<title>`. Leave it out, or set it to `true`, and the labels render as before.
+- cd45409: Add `LineChart`, exported from the package root and from
+  `@lcabrera/ui/components/LineChart`. It draws one or more series of
+  `{ x, y }` points, where `x` is a number or a `Date` and a `null` `y` leaves a
+  gap the line does not bridge. A series can carry a `band` of `lower` and
+  `upper` bounds, shaded behind its line; the chart computes no statistic, so the
+  bounds are the caller's. `isDashed` dashes a series and `tone` colours it, and
+  a series without a tone takes the next palette tone. `markers` draw a dashed
+  vertical line at an `x`, labelled above the plot and linked when the marker has
+  `to`.
+
+  `xAxis` and `yAxis` take a `label`, a `domain`, `ticks` and a `format`. A
+  `domain` narrower than the data clips the line and band and drops the dots and
+  links outside it; the data table still lists every point. Without these the domain spans every point, band and marker and the ticks are nice
+  values. On a date axis the step follows the span, from milliseconds through
+  hours and days up to months and years, and the default format adds the UTC time
+  to any date that is not at midnight, so a sub-day axis has distinct labels. `points`
+  chooses which points get a dot: `auto` draws a linked point, a toned point, or
+  every point of a short series; `always` draws every point; `never` draws only
+  the linked ones, so a link is always reachable. A linked dot is a router `Link`
+  in an HTML list over the plot, named by the point's `label`, or by its series
+  and formatted values. A point's `tone` is a `ChartTone`. A series
+  longer than the plot is wide is thinned with largest-triangle-three-buckets.
+
+  The chart is a single SVG with a `viewBox` and `preserveAspectRatio="none"`,
+  with non-scaling strokes and its text in HTML placed by percentage, so it
+  measures nothing and renders the same markup on the server and the client.
+  The SVG is `role="img"`, named by `title` and described by `description`,
+  and holds nothing interactive. More than one series adds a legend, and
+  `hasDataTable` adds a visually hidden table of every point. Colours come from
+  the theme tokens.
+
+- d573896: `NavLink` takes an optional `isActive`. When it is set, it decides
+  `aria-current` and the active style in place of the router's match, which
+  compares only the pathname: a row of links to `?view=a` and `?view=b` on one
+  page all match it, so without the override every one of them reads as the
+  current page. A link with the override set never takes the pending style,
+  because the router's pending match compares the same pathname and would mark
+  every such link pending at once. Unset, the router decides both as before.
+
+  `Table` sets every cell of a `number` or `currency` column in tabular figures,
+  so the digits line up from row to row. That includes a `render` cell, which
+  still takes its alignment from `align` and not from the `dataType`.
+
+- b79a39c: A route's `handle.breadcrumb` may return a list of `BreadcrumbItem`s as well as
+  one. `useRouteBreadcrumbs()`, and a `PageHeader` given no `breadcrumbs`, spread
+  the list in place, in order, between the items of the routes around it, and an
+  empty list adds nothing. A route declared as a sibling of the page its trail
+  starts from, rather than as its child, has no parent route to supply that step;
+  it can now name the whole trail from its own handle. A handle that returns one
+  item behaves as before, so `BreadcrumbHandle` only widens.
+- d6967de: Status text now uses the wash foreground. `StatusBadge`, `InfoBox`, `Text` with
+  an `error`, `info`, `success` or `warning` tone, `FormFieldChrome`'s error
+  message and required marker, the status dismiss buttons in `NotificationItem`
+  and the yes/no badges in the Table's column details drew their text with
+  `errorText`, `infoText`, `successText` or `warningText`. Those tokens are white,
+  the foreground for a solid status fill, so on the pale `*Background` wash or the
+  page they measured about 1.1:1 in the light theme. They now use the matching
+  `*CardText` token and reach WCAG AA (4.5:1) in both themes, except the
+  `NotificationItem` dismiss buttons. Those sit on a gradient that runs toward the
+  solid status colour, and they reach 4.5:1 only on the base `surfacePrimary`; on
+  the gradient their contrast is not measured and can be lower (tracked in #1612).
+
+  A new `infoCardText` token completes the set: `oklch(40% 0.07 230)` in the light
+  theme and `oklch(91% 0.05 230)` in the dark one.
+
+  The dark theme's `*CardText` tokens are lighter. A translucent wash laid over
+  one of the lighter dark surfaces, such as `surfaceElevated`, comes out lighter
+  than over the page, and there the old values fell below 4.5:1: `errorCardText`
+  measured 4.09:1 and `warningCardText` 4.26:1, and `successCardText` was lower
+  still. The new dark values are `errorCardText` `oklch(91% 0.04 25)` (was
+  `oklch(87.1% 0.068 25.8)`), `warningCardText` `oklch(91% 0.075 80)` (was
+  `oklch(88% 0.09 80)`) and `successCardText` `oklch(91% 0.06 160)` (was
+  `oklch(85% 0.07 160)`). Over `surfaceElevated` the four dark tokens now measure
+  between 4.67:1 and 4.79:1 on their washes, and every other surface measures
+  higher. `Card`'s error, success and warning variants use these tokens, so they
+  are lighter in the dark theme too.
+
+  Components that draw on a solid status fill keep the white `*Text` tokens: the
+  `error`, `success` and `warning` button variants, the `danger-ghost` hover, and
+  the Table cell badge tones.
+
+  This is a minor release for two reasons. `infoCardText` is a new key on the
+  exported `colors` var group. And a theme override changes what it reaches. A
+  theme that sets `errorText`, `infoText`, `successText` or `warningText` no
+  longer colours the status text of `StatusBadge`, `InfoBox`, `Text`,
+  `FormFieldChrome`, the `NotificationItem` dismiss buttons or the column-details
+  badges; to restyle that text, set the matching `*CardText` token instead. An
+  override of a `*Text` token still reaches the solid-fill components above.
+
+- 19818b7: The table settings panel gains a **Display** tab, after Details, holding the
+  column-width presets, the row density and a new header density control. General
+  keeps only the clear and reset actions.
+
+  Each density group leads with a default option named for the level it falls
+  back to. Choosing it clears the table's own level, which the panel could not do
+  before. The header level is persisted in the UI-flags cookie beside the row
+  level.
+
+  Settings gains a **Table Display** tab with a default row density and a default
+  header density. A table resolves each level in this order: its own setting, its
+  `density` / `headerDensity` prop, the Global Settings default, then `compact`
+  (rows) or the row level (header). A table rendered without a
+  `GlobalSettingsProvider` resolves as if no default were set.
+
+  **Breaking for a consumer that builds `GlobalSettingsState` by hand**, for
+  example to pass `initialSettings` or `globalSettings`: the type has a new
+  required `tableDisplay` member. Add `tableDisplay: {}` to keep today's
+  behaviour. `TableSettingsTabRole` gains `'display'`, so an exhaustive `switch`
+  over it needs a new case.
+
+- e03ef98: `Table` density now has four levels: `'dense' | 'compact' | 'comfortable' | 'spacious'`. Each level sets the row height (24, 32, 40 and 48px), the body font (`fontSizeXs`, `fontSizeSm`, `fontSizeSm`, `fontSizeMd`) and the cell inline padding (`spacing.xxs`, `spacing.xs`, `spacing.sm`, `spacing.md`). The header font is `fontSizeXs` at `dense` and `fontSizeSm` at every other level, and the header band stays one step below the header: `fontSizeXs` at every level, the smallest size there is, so at `dense` it matches the header. `TABLE_DENSITY_SCALE` holds each level's row height and token names in one exported table.
+
+  - `Table` takes `density` and `headerDensity` props for both data sources. They set the level when the meta state holds none. A level in the meta state, whether passed in or chosen in the settings drawer, wins over them.
+  - `headerDensity` sets the header row's level on its own and defaults to `density`. A named header level sets the header row's height even when the meta state holds a `rowHeight`.
+  - The level gives the default row height, and the virtualizer and the rows read that same value. A `rowHeight` set in the meta state still wins.
+  - The table settings drawer lists all four levels. A choice is staged with the drawer's other settings: Accept applies it and Cancel drops it. An accepted level is written to the UI-flags cookie, so a route table renders it again on reload.
+  - Cells no longer set their own padding or font size. They read StyleX variables that `<table>` sets from the level, and whose defaults are the `compact` values, so a cell rendered outside a table falls back to `compact` rather than to no size at all.
+
+  The one visible change to a table that keeps the default `compact` level: cell inline padding goes from a fixed `6px` to `spacing.xs`. Row height, body font and the `fontSizeSm` header stay as they were.
+
+  A meta state saved with `density: 'comfortable'` loads unchanged, with no migration, and now renders at 40px instead of 32px with `spacing.sm` padding. Set `compact` to keep the old look.
+
+  `TableChromeState.density` and `TableChromeState.rowHeight` are now optional, and `getInitialMetaState` leaves both unset, so the density and the `Table` props can resolve them. Code that reads either field from a meta state should expect `undefined`. Code that switches on `TableDensity` exhaustively must handle `dense` and `spacious`.
+
+- 1b7f920: `Table` gains a static layout for short read-only tables, feature switches for its chrome, column alignment and width, and a caption and footer.
+
+  - `layout='static'` renders every row with no virtualization. The table is as tall as its rows, so it renders inside a parent with no height. It renders `role="table"` with the normal tab order and no roving focus, so a link in a cell is one Tab stop. A row is at least its density's row height and grows to fit a taller cell. A tree of group rows renders flat, every row shown, with nothing that folds. `layout` defaults to `'virtual'`, which is unchanged.
+  - `features` switches the chrome: `toolbar` (the title bar), `settings` (the settings button and its drawers), `columnMenu` and `resize`. Each unset switch is on in the virtual layout and off in the static one. With all four off, a `Table` that mounts its own providers mounts no filter, global-settings or notification provider.
+  - A column takes `align` (`'start'`, `'center'` or `'end'`), which wins over the alignment its `dataType` gives and applies to a `render` cell too, and `width`: a starting width in pixels, or `'fill'` for the width the other columns leave. In the static layout a column with no `width` sizes to its content.
+  - `caption` renders as the table's `<caption>`, and `footer` as one `<tfoot>` row spanning every column, in either layout.
+  - Fixed: the `<table>` props and `customStylex` a `Table` was given were typed but never reached the rendered `<table>`. They now do in both layouts, along with a `ref`. In the virtual layout, `onFocus`, `onBlur` and `onKeyDown` run together with the grid's own handlers, the consumer's first. Some props do not pass through: `role` in either layout, because the layout decides it (`table`, or `grid` and `treegrid`); `tabIndex` and `aria-rowcount` in the virtual layout, because the grid owns its roving tab stop and row count; and `className` and `style` in either layout, which the table's own styles replace, so style the table through `customStylex`.
+
+  New types: `TableLayoutMode`, `TableFeatures` and `TableColumnAlign`. `isFlexWrapperEnabled` now defaults to off in the static layout.
+
+- 3494802: The title bar above a `Table` gets a density level of its own. `titleDensity`
+  on `Table` sets it, and a table resolves it the same way it resolves
+  `headerDensity`: its own setting, the prop, the Global Settings default, then
+  the row level.
+
+  **A table whose rows are not `compact` now gets a matching title bar.** A
+  `dense` table's title bar is shorter than before and a `spacious` one's is
+  taller. A `compact` table, the default, looks the same. To keep the old title
+  bar on a table with a different row level, pass `titleDensity='compact'`.
+
+  `Title` gains `size` (`'sm'`, `'md'`, `'lg'` or `'xl'`, default `'md'`), which
+  sets the `toolbar` variant's padding and title size. `'md'` is the size it had
+  before. The `plain` variant ignores it. `TitleSize` is exported.
+
+  The table settings panel's Display tab and the Settings page's Table Display tab
+  group the three levels under one **Density** heading as Rows, Column headers and
+  Title bar, replacing the "Row Density" and "Header Density" labels. The panel
+  leaves out Title bar when the table has no title bar. Column header levels are
+  now described by height ("24px tall"), and title bar levels by name only. The
+  title bar level is persisted in the UI-flags cookie beside the other two, and
+  `GlobalTableDisplayPreferences` gains `titleDensity`.
+
+- d573896: `TrendSparkline` takes an optional `emptyRole`, `'group'` or `'img'`. A chart
+  with nothing to draw used to leave the accessibility tree; with `emptyRole` set
+  it keeps that role, named by its `label`, so a row of charts announces every
+  chart even when one series has no points. Unset, an empty chart is hidden as
+  before.
+- dd2e715: `TrendSparkline` is drawn on the `@lcabrera/utils` chart geometry and gains a
+  points mode. Pass `points` instead of `values` to draw one dot per point,
+  coloured from the point's `tone` or else the chart's. A point with `to` renders
+  as a router `Link` named by its `label`, or by its value when it has none, and
+  a chart with a linked dot takes the `group` role so the links stay reachable.
+  Points sit on a scale that starts at zero. A value that is not finite is a
+  gap: it draws no dot, the line breaks there, and the scale is taken from the
+  finite values only, in either mode. `max` fixes the top of the scale in
+  either mode and holds a higher value at the top edge; a `max` that is not above
+  the bottom of the scale gives a one-unit scale from the bottom in both modes, and on a points chart
+  `isConnected={false}` leaves the dots unjoined. A chart takes either `values` or `points`:
+  `TrendSparklineProps` is a union, so passing both, or neither, is a type error,
+  and so is `isConnected` on a values chart.
+
+  A `values` chart draws the same line as before, but as a `<path>` rather than a
+  `<polyline>`, so a stylesheet that targets `polyline` inside the chart no longer
+  matches. `TrendSparkline` and its `TrendPoint`, `TrendSparklineProps` and
+  `TrendSparklineTone` types
+  are also exported from the package root.
+
+- 8bdf652: Add `Breadcrumbs`, `useRouteBreadcrumbs()` and `PageHeader`, and give `NavLink` an `inline` text-link variant.
+
+  `Breadcrumbs` takes `items` (`{ label, to? }`) and an optional `label` for its landmark (default `'Breadcrumb'`). It renders a `nav` holding an `ol`. An earlier item with a `to` is a router `Link`, an earlier item without one is text, and the last item is always text with `aria-current='page'`. The separator between items is `aria-hidden`. An empty trail renders nothing. It needs a mounted router.
+
+  `useRouteBreadcrumbs()` builds the same items from the matched routes. A route opts in by exporting `handle = { breadcrumb: (match) => ({ label, to }) }`, typed by `BreadcrumbHandle` (generic over the route's loader data). Routes with no `breadcrumb` are skipped; a handle created with `Object.create(null)` is read like any other object. It reads `useMatches()`, so it needs a data router.
+
+  `PageHeader` takes `title`, `breadcrumbs`, `breadcrumbLabel`, `description` and `actions`, and renders the breadcrumbs (their landmark named by `breadcrumbLabel`), one plain level-1 `Title` with the actions beside it, and the description as secondary `Text`. A description of `0` or `0n` renders; `undefined`, `null`, a boolean or `''` renders none. With no `breadcrumbs` it uses `useRouteBreadcrumbs()`, which needs a data router; explicit `breadcrumbs` need only a router. It never sets the document title, which stays with each route's `meta` export.
+
+  `NavLink` takes `variant='inline'` for a link in running text: brand-tinted text that takes the surrounding font and is underlined at rest, so it is not told apart from body text by colour alone. The underline thickens on hover and focus-visible. It has no button padding or border, a semibold active state with a thicker underline, and a dotted-underline pending state. Its text and focus colour is `brandPrimaryCardText`. `size` and `orientation` do not apply to it. `isIconOnly` cannot be combined with it, because an inline link's text is its accessible name; passing both is a type error. It still wraps the router's `NavLink`, so `prefetch` (default `'intent'`), `viewTransition`, `reloadDocument` and `state` pass through. The other variants are unchanged.
+
+  `Breadcrumbs`, `PageHeader`, `useRouteBreadcrumbs` and the `BreadcrumbHandle`, `BreadcrumbItem`, `BreadcrumbsProps`, `NavLinkProps`, `NavLinkVariant` and `PageHeaderProps` types are exported from the package root. The new `./components/Breadcrumbs` and `./components/PageHeader` subpaths export them as well, and `./components/NavLink` now exports `NavLinkProps` and `NavLinkVariant`.
+
+  The test utilities under `src/utils/tests/` no longer ship in the package, except `./utils/tests/mockDialogElement.util`, which is a published subpath.
+
+  `NavLinkProps` no longer declares `isActive`. The prop was never implemented: a value passed in reached the router's `NavLink` and was ignored. It is removed before `NavLinkProps` is first exported, so its removal breaks no consumer.
+
+- b391354: Add `Select`, `TextInput` and `DescriptionList`, and export `Card`, `InfoBox`,
+  `Tag` and `Tooltip`. Each is exported from the package root and from its own
+  `@lcabrera/ui/components/<Name>` subpath; `TrendSparkline` already was.
+
+  `Select` and `TextInput` each render one native element and take its
+  attributes and `ref`. Give them a `name` and a `defaultValue` and a router
+  `<Form method="get">` submits them before hydration as well as after, with no
+  value held in state. `Select` takes `options` of `{ value, label }`. Both take
+  an optional visible `label`, tied to the control by a `useId` id unless you
+  pass `id`, a `size` on the `Button` scale, and `customStylex`, which is applied
+  last. Their sizes come from `controlSizeVariants`, a new export of
+  `@lcabrera/ui/design-system/tokens/commons.stylex`. It shares each size's
+  height, font size and border radius with `sizeVariants`, so a control and a
+  `Button` of the same size line up; only the padding differs.
+
+  `VirtualSelect` takes `name` and `label`. With `name` it renders one hidden
+  input per selected value, so a form submits its selection once the page is
+  hydrated. `label` draws a visible label that names the trigger.
+
+  `DescriptionList` renders `items` of `{ term, value }` as `dt` and `dd` pairs in
+  a `dl`. `layout` is `grid` (the default) or `inline`, and a value can be any
+  React node.
+
+  `InfoBox` takes `tone` (`neutral`, the default, or `info`, `success`, `warning`
+  or `error`) and passes `role` and the other `div` attributes through. `Tag`'s
+  `onRemove` is optional, and without it the chip has no remove button.
+
+- 5e7563f: Add `Text`, a typography primitive, and give `Title` heading levels and a plain variant.
+
+  `Text` renders a `p` by default, or a `span`, `div`, `label`, `figcaption`, `dt` or `dd` through `as`. `size` (`xs`, `sm`, `md`, `lg`; default `md`), `tone` (`primary`, `secondary`, `tertiary`, `error`, `info`, `success`, `warning`; default `primary`) and `weight` (`normal`, `medium`, `semibold`, `bold`) each map to a typography or colour token. `isMono` switches to the monospace family, `isTabular` turns on tabular figures, and `customStylex` is applied last. `Text` takes the native attributes of the element `as` names, so `<Text as='label' htmlFor='…'>` labels its control, and an attribute the element does not have is a type error. It takes no `className` or `style`: StyleX owns them, and `customStylex` is the override.
+
+  `Title` takes `level` (`1`, `2` or `3`; default `2`) and `variant` (`toolbar`, the default, or `plain`). The defaults render the same `h2` toolbar heading as before. `plain` drops the padding, the bottom border and both gradients, and sizes the heading from its level: `fontSize2xl` bold at 1, `fontSizeLg` semibold at 2, `fontSizeMd` semibold at 3. `Title` now passes the `div` props it receives, such as `id`, `aria-*` and `data-*` attributes and event handlers, to its container instead of dropping them.
+
+  Type-level change to `Title`: `TitleProps` no longer accepts `className` or `style`. Neither ever reached the rendered element, and StyleX governs both, so passing one is now a compile error instead of a silent no-op. Use `customStylex` to restyle a `Title`.
+
+  Both components, with their prop and variant types (`TextElement`, `TextProps`, `TextSize`, `TextTone`, `TextWeight`, `TitleLevel`, `TitleProps`, `TitleVariant`), are exported from the package root and from the new `./components/Text` and `./components/Title` subpaths.
+
+- 6ddd0e6: `VirtualSelect` takes a `placement` prop, `'auto' | 'bottom' | 'top'`, for the
+  side its floating list opens on. `'bottom'` and `'top'` fix the side; with
+  little room on it, the list keeps a few rows' height rather than shrinking to
+  nothing, and moves over its own trigger to stay inside the viewport. `'auto'`,
+  the default, opens below and flips above only when the list does not fit below
+  and the room there cannot show a few rows.
+
+  On either side the list now shrinks to the room left in the viewport and
+  scrolls, where before it kept its full height and flipped above whenever it did
+  not fit below. A select in the lower half of a drawer or form now opens below
+  it, as long as there is room for a few rows.
+
+  `VirtualList` sizes its scroll area to its loaded options up to
+  `listMaxHeight`, where before it always took the full `listMaxHeight`. A short
+  list no longer leaves an empty band under its last option. The height counts
+  every loaded option rather than the ones a search or filter mode leaves, so
+  filtering never changes it. No call site needs to change.
+
+  `VirtualList` draws its search box and option list as one bordered group with
+  no gap between them. `VirtualSelect` joins its trigger to the top of that
+  group whenever the list sits below it, always-open or floating, so trigger,
+  search box and list read as a single box with rounded outer corners. A floating
+  list that opens above keeps a gap, since the list footer sits next to the
+  trigger on that side. The trigger's corner radius matches the list's.
+
+  `VirtualList` option rows are now exactly the row height its virtualization
+  assumes, 36px. They used to take their height from padding and content and
+  came out taller, so a short list showed a scrollbar it did not need.
+
+  An empty multi `VirtualSelect` trigger now lines up exactly like a single one.
+  With a selection, it keeps its tags on one row at the trigger's
+  usual height, collapsing the rest into the `+N more` badge, so selecting and
+  clearing options no longer changes the trigger's height. The number of tags
+  shown no longer drops by one each time the trigger is measured again.
+
+  `VirtualSelect` takes an `attachedEdge` prop, `'top' | 'bottom'`, for a select
+  stacked flush against another control: the trigger squares that edge, and on
+  `bottom` drops its border so the control below draws the dividing line. A
+  table filter whose value is picked from an option list now draws its operator
+  select and that list as one box, with no gap between them.
+
+### Patch Changes
+
+- 72493d7: Every icon now renders through the shared `IconBase` svg wrapper. Icons drawn
+  on a 16×16, 12×12 or 10×10 grid pass their own `viewBox` and default `size`,
+  and clear the wrapper's stroke defaults so their markup is unchanged. Each
+  icon's rendered attributes and children are the same as before.
+- 0e73ab9: The light theme's `textSecondary` is now `lab(44 20 -30)`, opaque, in place of the translucent `lab(45 20 -30 / 0.8)`. The old value measured 3.47:1 on `backgroundPrimary` and lower on `backgroundSecondary` and `backgroundTertiary`, below the 4.5:1 WCAG AA asks of body text. The new one clears 4.5:1 on all three.
+
+  This is a visible change: secondary text in the light theme is slightly darker, and it no longer lets the surface beneath it show through. The dark theme's `textSecondary` already passed and is unchanged. A theme that overrides `textSecondary` is not affected.
+
+- df191ec: A column's `cell` renderer now keeps drawing a row's real value while the table
+  is loading. It used to be skipped for every row in the loading state, so a
+  reload with rows already on screen showed the plain default (a badge became
+  text) and the cell changed shape when loading ended. Placeholder cells, whose
+  value is empty, still take the default path.
+- b79a39c: In `Table`'s static layout a header label now wraps onto more lines instead of
+  being cut off with an ellipsis. A static column sizes to its content, so a
+  label wider than the column's values used to set the column's width; it now
+  breaks, and the header row grows to fit, the way a static body row grows with
+  its cells. The virtual layout still keeps each header label to one line.
+- 19bf0d0: Bring `textTertiary` to WCAG AA in both themes, at 4.5:1 on the background tokens,
+  `surfaceSecondary` and `surfaceElevated`, because it colours `Text` with `tone='tertiary'` and
+  table header band labels. The light value was also far outside the sRGB gamut and
+  is now a neutral. Every other literal `oklch()` or `lab()` theme token outside
+  sRGB moves to the colour an sRGB display already painted for it, within three
+  8-bit levels per channel: `info` in both themes, light `successCardText` and
+  `warningCardText`, dark `brandPrimaryCardText`, `brandPrimaryTextActive` and
+  `errorCardText`. A wide-gamut display loses the extra saturation those tokens
+  had there.
+- Updated dependencies [dd2e715]
+  - @lcabrera/utils@0.4.0
+  - @lcabrera/api@0.6.1
+
 ## 0.12.0
 
 ### Minor Changes
