@@ -150,6 +150,32 @@ describe('Title', () => {
     );
   });
 
+  it('keeps the roomy toolbar padding when no size is given', () => {
+    render(<Title data-testid='title'>Roomy</Title>);
+
+    const root = screen.getByTestId('title');
+
+    expect(
+      SIZES.some((size) =>
+        hasStylexStyle({ element: root, style: styles.toolbarSize[size] }),
+      ),
+    ).toBe(false);
+  });
+
+  it.each(SIZES)('applies the %s density step to a sized toolbar', (size) => {
+    render(
+      <Title data-testid='title' size={size}>
+        Sized
+      </Title>,
+    );
+
+    const root = screen.getByTestId('title');
+
+    expect(
+      hasStylexStyle({ element: root, style: styles.toolbarSize[size] }),
+    ).toBe(true);
+  });
+
   it('passes div props through to the container', () => {
     render(
       <Title aria-label='Region heading' data-testid='title' id='page-title'>

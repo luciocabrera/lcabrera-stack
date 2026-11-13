@@ -255,7 +255,9 @@ band's font and the inline padding on `<table>`, as values of `tableDensityVars`
 (`TableBase/tableDensity.stylex.ts`), whose defaults are the compact level; every
 cell reads its padding and font from those variables. The title bar has no row
 height: `TableTitle` maps its level to a `Title` `size` through
-`TABLE_TITLE_DENSITY_SIZE`, and `compact` maps to the size `Title` defaults to
+`TABLE_TITLE_DENSITY_SIZE`, whose block padding per size keeps the bar close to
+the row height of the same level. A `Title` with no `size` keeps a roomier padding
+that no density level reaches
 ([ADR-146](../../../../../docs/decisions/ADR-146-build-application-ui-from-the-component-library.md) (a)).
 
 ## Data Flow

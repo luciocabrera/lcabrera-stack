@@ -83,7 +83,7 @@ TextTone [type] | 'error' | 'info' | 'primary' | 'secondary' | 'success' | 'tert
 TextWeight [type] 'bold' | 'medium' | 'normal' | 'semibold'
 Title [const] ({ actions, children, customStylex, icon, level, size, variant, ...props }: TitleProps) => JSX.Element | undefined
 TitleLevel [type] 1 | 2 | 3
-TitleProps [type] Omit<ComponentProps<'div'>, 'className' | 'style'> & { readonly actions?: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly level?: TitleLevel; /** The `toolbar` variant's padding and title size, `'md'` when unset; `plain` ignores it. */ readonly size?: TitleSize; readonly variant?: TitleVariant; }
+TitleProps [type] Omit<ComponentProps<'div'>, 'className' | 'style'> & { readonly actions?: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly level?: TitleLevel; /** The `toolbar` variant's density: a tighter block padding and a title size per step. Unset keeps the roomy toolbar with the `md` title size; `plain` ignores it. */ readonly size?: TitleSize; readonly variant?: TitleVariant; }
 TitleSize [type] 'lg' | 'md' | 'sm' | 'xl'
 TitleVariant [type] 'plain' | 'toolbar'
 Tooltip [const] ({ children, content, placement, }: TooltipProps) => JSX.Element
@@ -514,7 +514,7 @@ TextInputProps [type] Omit< ComponentPropsWithRef<'input'>, 'className' | 'size'
 ## ./components/Title
 Title [const] ({ actions, children, customStylex, icon, level, size, variant, ...props }: TitleProps) => JSX.Element | undefined
 TitleLevel [type] 1 | 2 | 3
-TitleProps [type] Omit<ComponentProps<'div'>, 'className' | 'style'> & { readonly actions?: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly level?: TitleLevel; /** The `toolbar` variant's padding and title size, `'md'` when unset; `plain` ignores it. */ readonly size?: TitleSize; readonly variant?: TitleVariant; }
+TitleProps [type] Omit<ComponentProps<'div'>, 'className' | 'style'> & { readonly actions?: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; readonly level?: TitleLevel; /** The `toolbar` variant's density: a tighter block padding and a title size per step. Unset keeps the roomy toolbar with the `md` title size; `plain` ignores it. */ readonly size?: TitleSize; readonly variant?: TitleVariant; }
 TitleSize [type] 'lg' | 'md' | 'sm' | 'xl'
 TitleVariant [type] 'plain' | 'toolbar'
 
