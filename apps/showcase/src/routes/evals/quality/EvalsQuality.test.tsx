@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -114,10 +120,10 @@ describe('EvalsQuality', () => {
     ]);
     expect(clarity?.[1]?.className).toBe(clarity?.[2]?.className);
     expect(clarity?.[1]?.className).not.toBe(clarity?.[3]?.className);
-    expect(screen.getByText('Baseline of 5 runs on model-a.')).toBeDefined();
     expect(
-      screen.getByText('No quality baseline is recorded for this skill.'),
-    ).toBeDefined();
+      screen.getAllByRole('tab').map(({ textContent }) => textContent),
+    ).toEqual(['react-19', 'unslop']);
+    expect(screen.getByText('Baseline of 5 runs on model-a.')).toBeDefined();
 
     const heading = screen.getByRole('heading', { level: 2, name: 'react-19' });
 
@@ -138,6 +144,16 @@ describe('EvalsQuality', () => {
     ).toBe('/evals/runs/r1');
 
     expect(breadcrumbTrail()).toEqual(evalsTrail('quality'));
+    expect(screen.queryByRole('button', { name: /^Settings for / })).toBeNull();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'unslop' }));
+
+    expect(
+      await screen.findByText(
+        'No quality baseline is recorded for this skill.',
+      ),
+    ).toBeDefined();
+    expect(screen.queryByRole('heading', { name: 'react-19' })).toBeNull();
   });
 
   it('says when no quality run is stored', async () => {

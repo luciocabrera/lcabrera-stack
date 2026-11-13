@@ -1,59 +1,33 @@
-import * as stylex from '@stylexjs/stylex';
+import { ChartSettings } from '#ui/components/ChartSettings/ChartSettings.component';
+import { CHART_DEFAULT_DENSITY } from '#ui/components/ChartSettings/ChartSettings.constants';
 
 import type { TrendSparklineProps } from './TrendSparkline.types';
 
-import { styles } from './TrendSparkline.stylex';
-import { TrendSparklineDot } from './TrendSparklineDot/TrendSparklineDot.component';
-import { getTrendPointsGeometry, getTrendValuesLine } from './utils';
+import { TrendSparklineFigure } from './TrendSparklineFigure/TrendSparklineFigure.component';
 
 export const TrendSparkline = ({
-  emptyRole,
-  height = 24,
-  isConnected = true,
-  label,
-  max,
-  tone = 'neutral',
-  width = 100,
-  ...series
+  density = CHART_DEFAULT_DENSITY,
+  features,
+  ...props
 }: TrendSparklineProps) => {
-  const { dots, line } =
-    series.points === undefined
-      ? {
-          dots: [],
-          line: getTrendValuesLine({
-            height,
-            max,
-            values: series.values,
-            width,
-          }),
-        }
-      : getTrendPointsGeometry({
-          height,
-          isConnected,
-          max,
-          points: series.points,
-          width,
-        });
-  const isEmpty = line === '' && dots.length === 0;
-  const populatedRole = dots.some(({ to }) => to !== undefined)
-    ? 'group'
-    : 'img';
+  const initialSettings = {
+    density,
+    isConnected:
+      props.points === undefined ? undefined : (props.isConnected ?? true),
+  };
+
+  if (features?.settings === false) {
+    return <TrendSparklineFigure {...props} settings={initialSettings} />;
+  }
 
   return (
-    <svg
-      aria-hidden={isEmpty && emptyRole === undefined}
-      height={height}
-      role={isEmpty ? emptyRole : populatedRole}
-      viewBox={`0 0 ${String(width)} ${String(height)}`}
-      width={width}
-    >
-      <title>{label}</title>
-      {line !== '' && (
-        <path d={line} {...stylex.props(styles.line, styles.tone[tone])} />
+    <ChartSettings
+      initialSettings={initialSettings}
+      label={`Settings for ${props.label}`}
+      layout='inline'
+      renderChart={(settings) => (
+        <TrendSparklineFigure {...props} settings={settings} />
       )}
-      {dots.map(({ position, ...dot }) => (
-        <TrendSparklineDot key={position} {...dot} tone={dot.tone ?? tone} />
-      ))}
-    </svg>
+    />
   );
 };

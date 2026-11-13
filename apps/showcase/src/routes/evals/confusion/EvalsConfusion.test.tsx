@@ -73,13 +73,13 @@ const renderAt = async ({ matrix = MATRIX, path }: RenderAtArgs) => {
   await screen.findByRole('heading', { level: 1, name: 'Trigger confusion' });
 };
 
-const runPicker = () => screen.getByRole('navigation', { name: 'Runs' });
+const runTrigger = () => screen.getByRole('button', { name: /^Run / });
 
-const currentEntries = () =>
-  within(runPicker())
-    .getAllByRole('link')
-    .filter((link) => link.getAttribute('aria-current') === 'page')
-    .map(({ textContent }) => textContent);
+const openRunList = () => {
+  fireEvent.click(runTrigger());
+
+  return within(screen.getByRole('listbox', { name: 'Run' }));
+};
 
 afterEach(() => {
   cleanup();
@@ -92,46 +92,43 @@ describe('EvalsConfusion', () => {
     expect(breadcrumbTrail()).toEqual(evalsTrail('confusion'));
   });
 
-  it('offers recent runs and each run by ?run=, marking recent runs as current', async () => {
+  it('offers recent runs and each run, with recent runs picked', async () => {
     await renderAt({ path: '/evals/confusion' });
 
+    expect(runTrigger().textContent).toContain('Recent runs');
     expect(
-      within(runPicker())
-        .getAllByRole('listitem')
+      openRunList()
+        .getAllByRole('button')
         .map(({ textContent }) => textContent),
     ).toEqual(['Recent runs', RUN.label, OTHER.label]);
-    expect(
-      within(runPicker())
-        .getAllByRole('link')
-        .map((link) => link.getAttribute('href')),
-    ).toEqual([
-      '/evals/confusion',
-      '/evals/confusion?run=r1',
-      '/evals/confusion?run=r0',
-    ]);
-    expect(currentEntries()).toEqual(['Recent runs']);
     expect(screen.queryByRole('link', { name: 'Open the run' })).toBeNull();
   });
 
-  it('marks the run named by ?run= as current and links to open it', async () => {
+  it('picks the run named by ?run= and links to open it', async () => {
     await renderAt({ path: '/evals/confusion?run=r1' });
 
-    expect(currentEntries()).toEqual([RUN.label]);
+    expect(runTrigger().textContent).toContain(RUN.label);
     expect(
       screen.getByRole('link', { name: 'Open the run' }).getAttribute('href'),
     ).toBe('/evals/runs/r1');
   });
 
-  it('moves the current mark when another run is picked', async () => {
+  it.each([
+    { label: OTHER.label, link: '/evals/runs/r0' },
+    { label: 'Recent runs', link: undefined },
+  ])('navigates to $label when it is picked', async ({ label, link }) => {
     await renderAt({ path: '/evals/confusion?run=r1' });
 
-    fireEvent.click(
-      within(runPicker()).getByRole('link', { name: OTHER.label }),
-    );
+    fireEvent.click(openRunList().getByRole('button', { name: label }));
 
     await waitFor(() => {
-      expect(currentEntries()).toEqual([OTHER.label]);
+      expect(runTrigger().textContent).toContain(label);
     });
+    expect(
+      screen
+        .queryByRole('link', { name: 'Open the run' })
+        ?.getAttribute('href'),
+    ).toBe(link);
   });
 
   it('draws the matrix, badging a misload and dimming an empty cell', async () => {

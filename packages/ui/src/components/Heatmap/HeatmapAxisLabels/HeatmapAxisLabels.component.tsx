@@ -1,14 +1,15 @@
 import * as stylex from '@stylexjs/stylex';
-import { Link } from 'react-router';
 
 import type { HeatmapAxisLabelsProps } from './HeatmapAxisLabels.types';
 
+import { HeatmapAxisLabelText } from '../HeatmapAxisLabelText/HeatmapAxisLabelText.component';
 import { heatmapAxisLabelStyles } from './HeatmapAxisLabels.stylex';
 
 export const HeatmapAxisLabels = ({
   axis,
   cellSize,
   items,
+  step = 1,
 }: HeatmapAxisLabelsProps) => (
   <ul
     {...stylex.props(
@@ -16,7 +17,7 @@ export const HeatmapAxisLabels = ({
       heatmapAxisLabelStyles[axis](`${String(cellSize)}px`),
     )}
   >
-    {items.map(({ key, label, to }) => (
+    {items.map(({ key, label, to }, index) => (
       <li
         key={key}
         title={label}
@@ -25,13 +26,11 @@ export const HeatmapAxisLabels = ({
           axis === 'column' && heatmapAxisLabelStyles.columnItem,
         )}
       >
-        {to === undefined ? (
-          label
-        ) : (
-          <Link to={to} {...stylex.props(heatmapAxisLabelStyles.link)}>
-            {label}
-          </Link>
-        )}
+        <HeatmapAxisLabelText
+          isHidden={index % step !== 0}
+          label={label}
+          to={to}
+        />
       </li>
     ))}
   </ul>

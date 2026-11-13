@@ -31,9 +31,13 @@ it('says no skill-quality run is stored yet on the quality page', async ({
 it('offers no run to compare on an empty history', async ({ page }) => {
   await openEvals(page, '/evals/compare');
 
-  await expect(
-    page.getByRole('combobox', { name: 'Run A' }).getByRole('option'),
-  ).toHaveCount(0);
+  for (const trigger of [/^Run A/u, /^Run B/u]) {
+    await expect(
+      mainOf(page).getByRole('button', { name: trigger }),
+    ).toContainText('Select a run...');
+  }
+
+  await expect(page.locator('input[type=hidden][name=a]')).toHaveCount(0);
 });
 
 for (const path of ['/evals/flaky', '/evals/health', '/evals/heatmap']) {

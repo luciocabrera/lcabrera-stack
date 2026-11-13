@@ -234,6 +234,7 @@ describe('EvalsOverview', () => {
         name: 'rules-consistency pass rate over its last 0 runs',
       }),
     ).toBeDefined();
+    expect(screen.queryByRole('button', { name: /^Settings for / })).toBeNull();
   });
 
   it('hydrates the server markup of a populated overview without a mismatch', async () => {

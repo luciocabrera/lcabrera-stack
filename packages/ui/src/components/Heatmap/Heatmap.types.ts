@@ -1,5 +1,10 @@
 import type { To } from 'react-router';
 
+import type {
+  ChartDensity,
+  ChartFeatures,
+  ChartSettingsValues,
+} from '#ui/components/ChartSettings/ChartSettings.types';
 import type { ChartTone } from '#ui/components/LineChart/LineChart.types';
 
 export type HeatmapAxisItem = {
@@ -31,6 +36,10 @@ export type HeatmapCellGeometry = {
   readonly y: number;
 };
 
+export type HeatmapFigureProps = Omit<HeatmapProps, 'density' | 'features'> & {
+  readonly settings: ChartSettingsValues;
+};
+
 export type HeatmapFill =
   | { readonly kind: 'empty' }
   | { readonly kind: 'sequential'; readonly percent: string }
@@ -50,9 +59,14 @@ export type HeatmapPatternIds = Readonly<Record<HeatmapPattern, string>>;
 
 export type HeatmapProps = {
   readonly cells: readonly HeatmapCell[];
+  /** The cell size at the `compact` density; the other levels scale it. */
   readonly cellSize?: number;
   readonly columns: readonly HeatmapAxisItem[];
+  /** The density the chart opens at; the reader can change it in the settings. */
+  readonly density?: ChartDensity;
   readonly description?: string;
+  /** Each one unset is on. */
+  readonly features?: ChartFeatures;
   readonly hasDataTable?: boolean;
   readonly legend?: readonly HeatmapLegendItem[];
   readonly rows: readonly HeatmapAxisItem[];

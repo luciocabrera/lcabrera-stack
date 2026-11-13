@@ -1,3 +1,4 @@
+import { Tabs } from '@lcabrera/ui';
 import { PageHeader } from '@lcabrera/ui/components/PageHeader';
 import { Text } from '@lcabrera/ui/components/Text';
 import * as stylex from '@stylexjs/stylex';
@@ -24,27 +25,38 @@ export const EvalsCost = () => {
         slowest trial.
       </Text>
       <CostCharts charts={charts} />
-      <CostTable
-        caption='Per suite'
-        density='compact'
-        rows={suites.map(({ cells, label }) => ({ ...cells, name: label }))}
-      />
-      <CostTable
-        caption='Per subject'
-        density='compact'
-        rows={subjects.map(({ cells, href, label }) => ({
-          ...cells,
-          href,
-          name: label,
-        }))}
-      />
-      <CostTable
-        caption='Per run'
-        density='dense'
-        rows={runs.map(({ cells, href, label }) => ({
-          ...cells,
-          href,
-          name: label,
+      <Tabs
+        label='Cost tables'
+        tabs={[
+          {
+            caption: 'Per suite',
+            density: 'compact' as const,
+            rows: suites.map(({ cells, label }) => ({ ...cells, name: label })),
+          },
+          {
+            caption: 'Per subject',
+            density: 'compact' as const,
+            rows: subjects.map(({ cells, href, label }) => ({
+              ...cells,
+              href,
+              name: label,
+            })),
+          },
+          {
+            caption: 'Per run',
+            density: 'dense' as const,
+            rows: runs.map(({ cells, href, label }) => ({
+              ...cells,
+              href,
+              name: label,
+            })),
+          },
+        ].map(({ caption, density, rows }) => ({
+          children: (
+            <CostTable caption={caption} density={density} rows={rows} />
+          ),
+          header: caption,
+          key: caption,
         }))}
       />
     </div>

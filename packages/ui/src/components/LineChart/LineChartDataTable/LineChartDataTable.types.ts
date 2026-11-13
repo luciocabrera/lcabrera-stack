@@ -5,6 +5,7 @@ import type {
 
 export type LineChartDataTableProps = {
   readonly formatters: LineChartFormatters;
+  readonly isVisible: boolean;
   readonly series: readonly LineSeries[];
   readonly title: string;
   readonly xLabel?: string;

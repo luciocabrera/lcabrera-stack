@@ -5,6 +5,7 @@ import type {
 
 export type HeatmapDataTableProps = {
   readonly columns: readonly HeatmapAxisItem[];
+  readonly isVisible: boolean;
   readonly rows: readonly HeatmapRowGeometry[];
   readonly title: string;
 };

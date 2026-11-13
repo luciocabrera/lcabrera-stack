@@ -1,6 +1,12 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -53,9 +59,9 @@ describe('EvalsHeatmap', () => {
   it('draws a figure per suite named by its shape, with linked axes and cells', async () => {
     renderWith({ flaky: [], grids: [GRID] });
 
-    expect(
-      await screen.findByRole('heading', { level: 2, name: 'skills' }),
-    ).toBeDefined();
+    const tab = await screen.findByRole('tab', { name: 'skills' });
+
+    expect(tab.getAttribute('aria-selected')).toBe('true');
 
     const figure = screen.getByRole('figure', {
       name: 'skills: 1 subjects over 1 runs',
@@ -77,6 +83,28 @@ describe('EvalsHeatmap', () => {
       ],
     ]);
     expect(within(figure).getByText('Holds a flaky task')).toBeDefined();
+  });
+
+  it('puts each suite under its own tab', async () => {
+    renderWith({
+      flaky: [],
+      grids: [GRID, { ...GRID, suite: 'skill-quality', title: 'other' }],
+    });
+
+    fireEvent.click(await screen.findByRole('tab', { name: 'skill-quality' }));
+
+    expect(screen.getByRole('figure', { name: 'other' })).toBeDefined();
+    expect(screen.queryByRole('figure', { name: GRID.title })).toBeNull();
+  });
+
+  it('gives each heatmap its own settings button', async () => {
+    renderWith({ flaky: [], grids: [GRID] });
+
+    expect(
+      await screen.findByRole('button', {
+        name: `Settings for ${GRID.title}`,
+      }),
+    ).toBeDefined();
   });
 
   it('says when no run is stored', async () => {

@@ -7,6 +7,7 @@ import {
   expectRightAligned,
   mainOf,
   openEvals,
+  openTab,
   paintOf,
   rowOf,
 } from './evalsPage';
@@ -25,12 +26,17 @@ it('explains the scores and the bands', async ({ page }) => {
   );
 });
 
-it('gives each skill a section headed by a link to the skill, with its baseline note', async ({
+it('gives each skill a tab headed by a link to the skill, with its baseline note', async ({
   page,
 }) => {
   await openEvals(page, '/evals/quality');
 
-  for (const name of ['react-19', 'unslop']) {
+  for (const [name, note] of [
+    ['react-19', 'Baseline of 3 runs on claude-opus-5-5.'],
+    ['unslop', 'No quality baseline is recorded for this skill.'],
+  ] as const) {
+    await openTab(page, name);
+
     const heading = mainOf(page).getByRole('heading', { exact: true, name });
 
     await expect(heading).toBeVisible();
@@ -39,14 +45,9 @@ it('gives each skill a section headed by a link to the skill, with its baseline 
       name,
       scope: heading,
     });
+    await expect(mainOf(page).getByText(note, { exact: true })).toBeVisible();
   }
 
-  await expect(mainOf(page)).toContainText(
-    'Baseline of 3 runs on claude-opus-5-5.',
-  );
-  await expect(mainOf(page)).toContainText(
-    'No quality baseline is recorded for this skill.',
-  );
   await expect(mainOf(page)).not.toContainText(
     'No skill-quality run is stored yet.',
   );
@@ -57,11 +58,16 @@ it('lists each dimension with its latest score and baseline band', async ({
 }) => {
   await openEvals(page, '/evals/quality');
 
-  for (const name of ['Dimension', 'Latest', 'Baseline band']) {
-    await expect(
-      page.getByRole('columnheader', { exact: true, name }),
-    ).toHaveCount(2);
-  }
+  await expect(
+    mainOf(page)
+      .getByRole('table', { name: 'react-19: rubric dimensions' })
+      .getByTestId('table-header-label'),
+  ).toHaveText([
+    'Dimension',
+    'Latest',
+    'Baseline band',
+    'Over the recent runs',
+  ]);
 
   const description = rowOf(
     page,
@@ -75,14 +81,16 @@ it('lists each dimension with its latest score and baseline band', async ({
       'examples 4.00 none react-19 examples over its last 2 scored runs',
     ),
   ).toBeVisible();
+  await expectRightAligned(cellsOf(description).nth(1));
+  await expectRightAligned(cellsOf(description).nth(2));
+
+  await openTab(page, 'unslop');
   await expect(
     rowOf(
       page,
       'description 3.00 none unslop description over its last 5 scored runs',
     ),
   ).toBeVisible();
-  await expectRightAligned(cellsOf(description).nth(1));
-  await expectRightAligned(cellsOf(description).nth(2));
 });
 
 it('draws a sparkline per dimension with red, green and grey points that open their runs', async ({
@@ -132,6 +140,9 @@ it('draws a sparkline per dimension with red, green and grey points that open th
       }),
     ),
   ).toBe(tones[1]);
+
+  await openTab(page, 'unslop');
+
   expect(
     await paintOf(
       page

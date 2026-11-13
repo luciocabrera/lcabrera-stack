@@ -1,4 +1,4 @@
-import type { Locator } from '@playwright/test';
+import type { Page } from '@playwright/test';
 
 import { expect, test as it } from '@playwright/test';
 
@@ -24,73 +24,46 @@ const CHOICES = [
   ['2026-10-03 02:00 on feat/skipped', SEED_RUNS.skippedSkills],
 ] as const;
 
-type CurrentArgs = {
-  readonly name: string;
-  readonly scope: Locator;
-};
+const runTrigger = (page: Page) =>
+  mainOf(page).getByRole('button', { name: /^Run /u });
 
-const expectCurrentEntry = async ({ name, scope }: CurrentArgs) => {
-  const matches = scope.getByText(name, { exact: true });
-
-  await expect(matches).toHaveCount(1);
-  expect(
-    await matches.evaluateAll(
-      (entries) =>
-        entries.filter((entry) => {
-          const link = entry.closest('[href]');
-
-          return link === null || link.getAttribute('aria-current') === 'page';
-        }).length,
-    ),
-  ).toBe(1);
+const pickRun = async (page: Page, name: string) => {
+  await runTrigger(page).click();
+  await page.getByPlaceholder('Search options...').fill(name);
+  await page
+    .getByRole('listbox', { name: 'Run' })
+    .getByRole('button', { exact: true, name })
+    .click();
 };
 
 const TRIGGERED = 'react-19 38 · 7 · 45';
 const NEAR_MISS = 'not store-pattern · 3 12 · 15';
 const ERRORED = 'store-pattern · 9 3 3 15';
 
-it('offers the recent runs, marking the current one and linking the rest by ?run=', async ({
+it('offers the recent runs, picking one by ?run= and back', async ({
   page,
 }) => {
   await openEvals(page, '/evals/confusion');
 
-  const runs = page.getByRole('navigation', { exact: true, name: 'Runs' });
-
-  await expect(runs.getByRole('listitem')).toHaveText([
-    'Recent runs',
-    ...CHOICES.map(([label]) => label),
-  ]);
-  await expectCurrentEntry({ name: 'Recent runs', scope: runs });
-
-  for (const [name, runId] of CHOICES) {
-    await expectLink({ href: confusion(runId), name, scope: runs });
-  }
-
+  await expect(runTrigger(page)).toContainText('Recent runs');
   await expect(
     mainOf(page).getByRole('link', { exact: true, name: 'Open the run' }),
   ).toHaveCount(0);
 
-  await runs
-    .getByRole('link', {
-      exact: true,
-      name: '2026-10-14 02:00 on feat/trigger-wording',
-    })
-    .click();
-  await expect(page).toHaveURL(confusion(SEED_RUNS.featureSkills));
-  await expectCurrentEntry({
-    name: '2026-10-14 02:00 on feat/trigger-wording',
-    scope: runs,
-  });
-  await expectLink({
-    href: '/evals/confusion',
-    name: 'Recent runs',
-    scope: runs,
-  });
-  await expectLink({
-    href: `/evals/runs/${SEED_RUNS.featureSkills}`,
-    name: 'Open the run',
-    scope: mainOf(page),
-  });
+  for (const [name, runId] of CHOICES) {
+    await pickRun(page, name);
+    await expect(page).toHaveURL(confusion(runId));
+    await expect(runTrigger(page)).toContainText(name);
+    await expectLink({
+      href: `/evals/runs/${runId}`,
+      name: 'Open the run',
+      scope: mainOf(page),
+    });
+  }
+
+  await pickRun(page, 'Recent runs');
+  await expect(page).toHaveURL('/evals/confusion');
+  await expect(runTrigger(page)).toContainText('Recent runs');
 });
 
 it('draws the matrix with one column per loaded skill plus Trials', async ({

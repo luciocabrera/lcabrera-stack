@@ -1,0 +1,174 @@
+// @vitest-environment jsdom
+
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
+
+import {
+  acceptChartSettings,
+  openChartSettings,
+  showChartDataTable,
+} from '#ui/components/ChartSettings/ChartSettings.fixtures';
+import { mockDialogElement } from '#ui/utils/tests/mockDialogElement.util';
+
+import { LineChart } from './LineChart.component';
+
+const SERIES = [
+  {
+    id: 'p50',
+    label: 'p50',
+    points: [
+      { x: 0, y: 10 },
+      { x: 100, y: 20 },
+    ],
+  },
+  {
+    id: 'p95',
+    label: 'p95',
+    points: [
+      { x: 0, y: 30 },
+      { x: 100, y: 90 },
+    ],
+  },
+];
+
+const renderChart = () =>
+  render(
+    <LineChart
+      markers={[{ label: 'Deploy', x: 50 }]}
+      series={SERIES}
+      title='Latency'
+    />,
+  );
+
+const figure = () => screen.getByRole('figure', { name: 'Latency' });
+
+const plotStyle = () =>
+  figure().querySelector('svg')?.parentElement?.getAttribute('style');
+
+const yTicks = () =>
+  figure().querySelector('[aria-hidden="true"]')?.children.length ?? 0;
+
+const dotTitles = () =>
+  [...figure().querySelectorAll(':scope svg > path > title')]
+    .map(({ textContent }) => textContent)
+    .filter((title) => title?.includes(', '));
+
+beforeEach(() => mockDialogElement().restore);
+
+afterEach(cleanup);
+
+describe('LineChart settings', () => {
+  it('offers density, points, ticks, the legend, the data table and marker labels', () => {
+    renderChart();
+
+    const drawer = openChartSettings('Latency');
+
+    expect(
+      drawer
+        .getAllByRole('group')
+        .map((group) => group.firstChild?.textContent),
+    ).toEqual(['Density', 'Points', 'Axis ticks', 'Show']);
+    expect(
+      ['Legend', 'Data table', 'Marker labels'].map((name) =>
+        drawer.getByRole('switch', { name }).getAttribute('aria-checked'),
+      ),
+    ).toEqual(['true', 'false', 'true']);
+  });
+
+  it('scales the plot height to the accepted density', () => {
+    renderChart();
+
+    const before = plotStyle();
+    const drawer = openChartSettings('Latency');
+
+    fireEvent.click(drawer.getByRole('radio', { name: 'Dense' }));
+    acceptChartSettings(drawer);
+
+    expect(before).toContain('240px');
+    expect(plotStyle()).toContain('150px');
+  });
+
+  it('draws more y ticks for the Many tick count', () => {
+    renderChart();
+
+    const before = yTicks();
+    const drawer = openChartSettings('Latency');
+
+    fireEvent.click(drawer.getByRole('radio', { name: 'Many' }));
+    acceptChartSettings(drawer);
+
+    expect(yTicks()).toBeGreaterThan(before);
+  });
+
+  it('hides the legend and the marker labels and shows the data table once accepted', () => {
+    renderChart();
+
+    const drawer = openChartSettings('Latency');
+
+    fireEvent.click(drawer.getByRole('switch', { name: 'Legend' }));
+    fireEvent.click(drawer.getByRole('switch', { name: 'Marker labels' }));
+    fireEvent.click(drawer.getByRole('switch', { name: 'Data table' }));
+    acceptChartSettings(drawer);
+
+    const drawn = within(figure());
+
+    expect(
+      drawn
+        .queryAllByText('Deploy')
+        .map(({ tagName }) => tagName.toLowerCase()),
+    ).toEqual(['title']);
+    expect(
+      drawn.queryAllByText('p95').filter((label) => label.closest('li')),
+    ).toEqual([]);
+    expect(drawn.getByRole('table', { name: 'Latency' })).toBeDefined();
+  });
+
+  it('styles the data table apart once it is shown, and leaves its cells bare while hidden', () => {
+    render(<LineChart hasDataTable series={SERIES} title='Latency' />);
+
+    const { hidden, hiddenCell, shown, shownCell } =
+      showChartDataTable('Latency');
+
+    expect([hiddenCell, shown === hidden, shownCell === '']).toEqual([
+      '',
+      false,
+      false,
+    ]);
+  });
+
+  it('labels markers that arrive after the first render, as the prop asks', () => {
+    const { rerender } = render(<LineChart series={SERIES} title='Latency' />);
+
+    rerender(
+      <LineChart
+        markers={[{ label: 'Deploy', x: 50 }]}
+        series={SERIES}
+        title='Latency'
+      />,
+    );
+
+    expect(
+      within(figure())
+        .queryAllByText('Deploy')
+        .map(({ tagName }) => tagName.toLowerCase()),
+    ).toEqual(['li', 'title']);
+  });
+
+  it('drops the unlinked dots once Linked points only is accepted', () => {
+    renderChart();
+
+    const before = dotTitles();
+    const drawer = openChartSettings('Latency');
+
+    fireEvent.click(drawer.getByRole('radio', { name: 'Linked points only' }));
+    acceptChartSettings(drawer);
+
+    expect([before.length, dotTitles()]).toEqual([4, []]);
+  });
+});

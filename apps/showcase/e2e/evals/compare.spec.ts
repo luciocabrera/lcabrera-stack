@@ -1,3 +1,5 @@
+import type { Page } from '@playwright/test';
+
 import { expect, test as it } from '@playwright/test';
 
 import {
@@ -15,6 +17,26 @@ import { SEED_FEATURE_BRANCH, SEED_RUNS, SEED_TASKS } from './seedStory';
 const run = (runId: string) => `/evals/runs/${runId}`;
 
 const pair = (a: string, b: string) => `/evals/compare?a=${a}&b=${b}`;
+
+const RUN_TRIGGERS = { 'Run A': /^Run A/u, 'Run B': /^Run B/u } as const;
+
+type PickRunArgs = {
+  readonly choice: string;
+  readonly page: Page;
+  readonly side: 'Run A' | 'Run B';
+};
+
+const pickRun = async ({ choice, page, side }: PickRunArgs) => {
+  await mainOf(page).getByRole('button', { name: RUN_TRIGGERS[side] }).click();
+  await page.getByPlaceholder('Search options...').fill(choice);
+  await page
+    .getByRole('listbox', { name: side })
+    .getByRole('button', { exact: true, name: choice })
+    .click();
+};
+
+const submittedRun = (page: Page, side: 'a' | 'b') =>
+  page.locator(`input[type=hidden][name=${side}]`);
 
 const CHOICES = [
   'rules-consistency, 2026-10-18 05:00 on main: no scored trials',
@@ -42,20 +64,16 @@ it('offers Run A and Run B pickers reading suite, date, branch and pass rate', a
   );
   await expectLink({ href: '/evals', name: 'Evals', scope: mainOf(page) });
 
-  for (const side of ['Run A', 'Run B']) {
+  for (const choice of CHOICES) {
+    await pickRun({ choice, page, side: 'Run A' });
     await expect(
-      page
-        .getByRole('combobox', { exact: true, name: side })
-        .getByRole('option'),
-    ).toHaveText(CHOICES);
+      mainOf(page).getByRole('button', { name: RUN_TRIGGERS['Run A'] }),
+    ).toContainText(choice);
   }
 
-  await expect(page.getByRole('combobox', { name: 'Run A' })).toHaveValue(
-    SEED_RUNS.qualityLatest,
-  );
-  await expect(page.getByRole('combobox', { name: 'Run B' })).toHaveValue(
-    SEED_RUNS.rules,
-  );
+  await page.goto('/evals/compare');
+  await expect(submittedRun(page, 'a')).toHaveValue(SEED_RUNS.qualityLatest);
+  await expect(submittedRun(page, 'b')).toHaveValue(SEED_RUNS.rules);
   await expect(
     page.getByRole('textbox', { exact: true, name: 'Branch' }),
   ).toHaveAttribute('placeholder', 'feat/…');
@@ -64,12 +82,16 @@ it('offers Run A and Run B pickers reading suite, date, branch and pass rate', a
 it('submits the picked pair as ?a=&b=', async ({ page }) => {
   await openEvals(page, '/evals/compare');
 
-  await page
-    .getByRole('combobox', { name: 'Run A' })
-    .selectOption(SEED_RUNS.skillsPrevious);
-  await page
-    .getByRole('combobox', { name: 'Run B' })
-    .selectOption(SEED_RUNS.skillsLatest);
+  await pickRun({
+    choice: 'skills, 2026-10-12 02:00 on main: 100% (15/15)',
+    page,
+    side: 'Run A',
+  });
+  await pickRun({
+    choice: 'skills, 2026-10-13 02:00 on main: 85% (11/13)',
+    page,
+    side: 'Run B',
+  });
   await page.getByRole('button', { exact: true, name: 'Compare runs' }).click();
 
   await expect(page).toHaveURL(

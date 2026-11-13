@@ -4,6 +4,7 @@ import {
   NavLink,
   PageHeader,
   Table,
+  Tabs,
   Text,
   Title,
   TrendSparkline,
@@ -14,7 +15,10 @@ import { useLoaderData } from 'react-router';
 import type { loader } from './evals-quality.loader';
 import type { QualityDimensionRow } from './EvalsQuality.types';
 
-import { EVALS_SCORED } from '../constants/evalsDashboard.constants';
+import {
+  EVALS_SCORED,
+  EVALS_TABLE_FEATURES,
+} from '../constants/evalsDashboard.constants';
 import { layoutStyles } from '../evalsLayout.stylex';
 import { subjectHref } from '../utils/subjectHref.util';
 import { QUALITY_SPARKLINE, QUALITY_TOP_SCORE } from './EvalsQuality.constants';
@@ -42,6 +46,7 @@ const COLUMNS: readonly TableColumn<QualityDimensionRow>[] = [
     label: 'Over the recent runs',
     render: ({ dimension, points, skill }) => (
       <TrendSparkline
+        features={{ settings: false }}
         height={QUALITY_SPARKLINE.height}
         isConnected
         label={`${skill} ${dimension} over its last ${String(points.length)} scored runs`}
@@ -67,31 +72,39 @@ export const EvalsQuality = () => {
         skill&apos;s latest quality baseline; a red point fell below it, a green
         one did not, and a grey one has no band to judge against.
       </Text>
-      {skills.length === 0 && <Text>No skill-quality run is stored yet.</Text>}
-      {skills.map(({ baseline, dimensions, kind, name }) => (
-        <section
-          key={`${kind}/${name}`}
-          {...stylex.props(layoutStyles.section)}
-        >
-          <Title level={2} variant='plain'>
-            <NavLink to={subjectHref({ kind, name })} variant='inline'>
-              {name}
-            </NavLink>
-          </Title>
-          <Text size='sm' tone='secondary'>
-            {baseline === undefined
-              ? 'No quality baseline is recorded for this skill.'
-              : `Baseline of ${String(baseline.runs)} runs on ${baseline.modelId}.`}
-          </Text>
-          <Table
-            caption={`${name}: rubric dimensions`}
-            columns={COLUMNS}
-            density='spacious'
-            layout='static'
-            response={dimensions.map((row) => ({ ...row, skill: name }))}
-          />
-        </section>
-      ))}
+      {skills.length === 0 ? (
+        <Text>No skill-quality run is stored yet.</Text>
+      ) : (
+        <Tabs
+          label='Skills'
+          tabs={skills.map(({ baseline, dimensions, kind, name }) => ({
+            children: (
+              <section {...stylex.props(layoutStyles.section)}>
+                <Title level={2} variant='plain'>
+                  <NavLink to={subjectHref({ kind, name })} variant='inline'>
+                    {name}
+                  </NavLink>
+                </Title>
+                <Text size='sm' tone='secondary'>
+                  {baseline === undefined
+                    ? 'No quality baseline is recorded for this skill.'
+                    : `Baseline of ${String(baseline.runs)} runs on ${baseline.modelId}.`}
+                </Text>
+                <Table
+                  caption={`${name}: rubric dimensions`}
+                  columns={COLUMNS}
+                  density='spacious'
+                  features={EVALS_TABLE_FEATURES}
+                  layout='static'
+                  response={dimensions.map((row) => ({ ...row, skill: name }))}
+                />
+              </section>
+            ),
+            header: name,
+            key: `${kind}/${name}`,
+          }))}
+        />
+      )}
     </div>
   );
 };

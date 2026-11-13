@@ -32,6 +32,9 @@ export const openEvals = async (page: Page, path: string) => {
   await expect(mainOf(page).getByRole('heading', { level: 1 })).toBeVisible();
 };
 
+export const openTab = (page: Page, name: string) =>
+  mainOf(page).getByRole('tab', { exact: true, name }).click();
+
 export const expectFacts = async (page: Page, facts: readonly Fact[]) => {
   const terms = await mainOf(page).getByRole('term').allInnerTexts();
   const values = await mainOf(page).getByRole('definition').allInnerTexts();

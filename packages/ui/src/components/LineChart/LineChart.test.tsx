@@ -55,7 +55,12 @@ const THROUGHPUT: LineSeries = {
 const renderChart = (props: Partial<LineChartProps> = {}) =>
   render(
     <MemoryRouter>
-      <LineChart series={[LATENCY]} title='Request latency' {...props} />
+      <LineChart
+        features={{ settings: false }}
+        series={[LATENCY]}
+        title='Request latency'
+        {...props}
+      />
     </MemoryRouter>,
   );
 

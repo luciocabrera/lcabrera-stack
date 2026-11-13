@@ -9,15 +9,21 @@ import { getTimeTicks } from './getTimeTicks.util';
 type GetXTicksArgs = {
   readonly domain: readonly [number, number];
   readonly isTime: boolean;
+  readonly tickCount?: number;
   readonly ticks?: readonly ChartX[];
 };
 
-export const getXTicks = ({ domain, isTime, ticks }: GetXTicksArgs) => {
+export const getXTicks = ({
+  domain,
+  isTime,
+  tickCount = LINE_CHART.tickCount,
+  ticks,
+}: GetXTicksArgs) => {
   if (ticks !== undefined) return ticks;
 
   const [start, end] = domain;
 
   return isTime
     ? getTimeTicks({ end, start })
-    : niceTicks({ count: LINE_CHART.tickCount, max: end, min: start });
+    : niceTicks({ count: tickCount, max: end, min: start });
 };

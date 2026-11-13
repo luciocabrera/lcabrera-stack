@@ -138,6 +138,7 @@ describe('EvalsRun', () => {
     expect(
       screen.getByText('The chart shows the first 2 of 600 trials.'),
     ).toBeDefined();
+    expect(screen.queryByRole('button', { name: /^Settings for / })).toBeNull();
   });
 
   it('shows no trial panel until a trial is chosen', async () => {

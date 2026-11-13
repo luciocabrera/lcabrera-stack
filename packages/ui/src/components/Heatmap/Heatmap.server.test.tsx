@@ -51,9 +51,25 @@ describe('Heatmap on the server', () => {
     expect(html).toContain('role="img"');
   });
 
+  it('renders the settings button closed, with no drawer', () => {
+    const html = renderToString(
+      <Heatmap cells={[]} columns={COLUMNS} rows={ROWS} title='Set grid' />,
+    );
+
+    expect(html).toContain('aria-label="Settings for Set grid"');
+    expect(html).toContain('aria-expanded="false"');
+    expect(html).not.toContain('<dialog');
+  });
+
   it('names the figure root by the title id the plot draws', () => {
     const html = renderToString(
-      <Heatmap cells={[]} columns={COLUMNS} rows={ROWS} title='Named grid' />,
+      <Heatmap
+        cells={[]}
+        columns={COLUMNS}
+        features={{ settings: false }}
+        rows={ROWS}
+        title='Named grid'
+      />,
     );
     const labelledBy = /^<figure aria-labelledby="([^"]+)"/u.exec(html)?.[1];
 

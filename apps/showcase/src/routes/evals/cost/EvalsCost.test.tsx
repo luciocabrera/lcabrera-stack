@@ -1,11 +1,18 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen, within } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { EVALS_COST_LABELS } from '../constants/evalsDashboard.constants';
 import { breadcrumbTrail, evalsTrail } from '../utils/pageHeader.fixtures';
+import { tableHeaders } from '../utils/staticTable.fixtures';
 import { EvalsCost } from './EvalsCost.component';
 import { EVALS_COST_HANDLE } from './EvalsCost.constants';
 
@@ -68,6 +75,12 @@ const renderCost = async () => {
   await screen.findByRole('heading', { level: 1, name: 'Cost and latency' });
 };
 
+const tableInTab = (name: string) => {
+  fireEvent.click(screen.getByRole('tab', { name }));
+
+  return screen.getByRole('table', { name });
+};
+
 const cellTexts = (table: HTMLElement) =>
   [...table.querySelectorAll(':scope tbody td')].map(
     ({ textContent }) => textContent,
@@ -110,6 +123,7 @@ describe('EvalsCost', () => {
         .getByRole('link', { name: POINT.label })
         .getAttribute('href'),
     ).toBe(POINT.to);
+    expect(screen.queryByRole('button', { name: /^Settings for / })).toBeNull();
   });
 
   it('keeps a chart with no runs named, and draws no point in it', async () => {
@@ -126,15 +140,32 @@ describe('EvalsCost', () => {
   it('tabulates per suite, per subject and per run in the same nine columns', async () => {
     await renderCost();
 
-    for (const name of ['Per suite', 'Per subject', 'Per run']) {
-      const table = screen.getByRole('table', { name });
+    expect(
+      screen.getAllByRole('tab').map(({ textContent }) => textContent),
+    ).toEqual(['Per suite', 'Per subject', 'Per run']);
 
+    for (const name of ['Per suite', 'Per subject', 'Per run']) {
+      expect(tableHeaders(tableInTab(name))).toEqual(COLUMNS);
       expect(
-        within(table)
-          .getAllByRole('columnheader')
-          .map((cell) => cell.textContent),
-      ).toEqual(COLUMNS);
+        screen
+          .getAllByRole('table')
+          .map(
+            (table) =>
+              table.getAttribute('aria-label') ??
+              table.querySelector('caption')?.textContent,
+          ),
+      ).toEqual([name]);
     }
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Per suite' }));
+
+    expect(
+      [
+        screen.queryByRole('button', { name: 'Table settings' }),
+        screen.queryByRole('button', { name: 'Name column actions' }),
+        screen.queryByRole('separator', { name: 'Resize Name column' }),
+      ].map((control) => control !== null),
+    ).toEqual([true, true, true]);
 
     expect(cellTexts(screen.getByRole('table', { name: 'Per suite' }))).toEqual(
       [
@@ -155,19 +186,15 @@ describe('EvalsCost', () => {
     await renderCost();
 
     expect(
-      within(screen.getByRole('table', { name: 'Per subject' }))
+      within(tableInTab('Per subject'))
         .getByRole('link', { name: 'skill react-19' })
         .getAttribute('href'),
     ).toBe('/evals/subjects/skill/react-19');
     expect(
-      within(screen.getByRole('table', { name: 'Per run' }))
+      within(tableInTab('Per run'))
         .getByRole('link', { name: 'skills run' })
         .getAttribute('href'),
     ).toBe('/evals/runs/r1');
-    expect(
-      within(screen.getByRole('table', { name: 'Per suite' })).queryByRole(
-        'link',
-      ),
-    ).toBeNull();
+    expect(within(tableInTab('Per suite')).queryByRole('link')).toBeNull();
   });
 });

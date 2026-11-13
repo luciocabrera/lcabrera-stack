@@ -8,6 +8,7 @@ import {
   expectTrialHref,
   mainOf,
   openEvals,
+  openTab,
   rowOf,
 } from './evalsPage';
 import { SEED_RUNS } from './seedStory';
@@ -104,10 +105,13 @@ it('tabulates per suite, per subject and per run in the same nine columns', asyn
 }) => {
   await openEvals(page, '/evals/cost');
 
-  for (const name of COLUMNS) {
+  for (const name of ['Per subject', 'Per run', 'Per suite']) {
+    await openTab(page, name);
     await expect(
-      page.getByRole('columnheader', { exact: true, name }),
-    ).toHaveCount(3);
+      mainOf(page)
+        .getByRole('table', { name })
+        .getByTestId('table-header-label'),
+    ).toHaveText(COLUMNS);
   }
 
   await expect(
@@ -134,12 +138,14 @@ it('tabulates per suite, per subject and per run in the same nine columns', asyn
       'verifier-fixtures 510 510,000 102,000 51,000 read, 10,200 written $61.20 $4.1412 19s 29s',
     ),
   ).toBeVisible();
+  await openTab(page, 'Per subject');
   await expect(
     rowOf(
       page,
       'skill react-19 59 59,000 11,800 5,900 read, 1,180 written $7.08 $0.3329 (41 of 59 trials priced) 18s 29s',
     ),
   ).toBeVisible();
+  await openTab(page, 'Per run');
   await expect(
     rowOf(
       page,
@@ -151,12 +157,21 @@ it('tabulates per suite, per subject and per run in the same nine columns', asyn
 it('links each subject and each run by name', async ({ page }) => {
   await openEvals(page, '/evals/cost');
 
+  await openTab(page, 'Per subject');
+
   for (const [name, href] of [
     ['agent refactor-verifier', '/evals/subjects/agent/refactor-verifier'],
     ['rule typescript', '/evals/subjects/rule/typescript'],
     ['skill react-19', '/evals/subjects/skill/react-19'],
     ['skill store-pattern', '/evals/subjects/skill/store-pattern'],
     ['skill unslop', '/evals/subjects/skill/unslop'],
+  ] as const) {
+    await expectLink({ href, name, scope: mainOf(page) });
+  }
+
+  await openTab(page, 'Per run');
+
+  for (const [name, href] of [
     [
       'rules-consistency, 2026-10-18 05:00, claude-opus-5-5',
       `/evals/runs/${SEED_RUNS.rules}`,

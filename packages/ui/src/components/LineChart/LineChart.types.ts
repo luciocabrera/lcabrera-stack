@@ -1,6 +1,12 @@
 import type { ChartScale } from '@lcabrera/utils/chart/chart.types';
 import type { To } from 'react-router';
 
+import type {
+  ChartDensity,
+  ChartFeatures,
+  ChartSettingsValues,
+} from '#ui/components/ChartSettings/ChartSettings.types';
+
 export type ChartAxis<T extends ChartX> = {
   /** A domain narrower than the data clips the line and band and drops the dots outside it. */
   readonly domain?: readonly [T, T];
@@ -52,6 +58,13 @@ export type LineChartDotGeometry = {
 
 export type LineChartDrawnPoint = ChartPoint & { readonly y: number };
 
+export type LineChartFigureProps = Omit<
+  LineChartProps,
+  'density' | 'features' | 'points'
+> & {
+  readonly settings: ChartSettingsValues;
+};
+
 export type LineChartFormatters = {
   readonly x: (value: ChartX) => string;
   readonly y: (value: number) => string;
@@ -77,10 +90,15 @@ export type LineChartMarkerGeometry = {
 export type LineChartPointsMode = 'always' | 'auto' | 'never';
 
 export type LineChartProps = {
+  /** The density the chart opens at; the reader can change it in the settings. */
+  readonly density?: ChartDensity;
   readonly description?: string;
+  /** Each one unset is on. */
+  readonly features?: ChartFeatures;
   readonly hasDataTable?: boolean;
   /** Draws each marker's label in a list above the plot; `false` leaves the marker named only by its line's `<title>`. Defaults to `true`. */
   readonly hasMarkerLabels?: boolean;
+  /** The plot height at the `compact` density; the other levels scale it. */
   readonly height?: number;
   readonly markers?: readonly ChartMarker[];
   /** `auto` draws linked, toned and short-series points; a linked point is drawn in every mode, so its link stays reachable. */
