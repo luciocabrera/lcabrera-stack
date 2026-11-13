@@ -24,6 +24,7 @@ export const CostCharts = ({ charts }: CostChartsProps) => (
             </Text>
             <TrendSparkline
               emptyRole='group'
+              features={{ settings: false }}
               height={COST_SPARKLINE.height}
               label={`${chart.suite}: ${caption.toLowerCase()}`}
               points={chart[metric]}

@@ -31,6 +31,7 @@ export const HealthSuite = ({
       ]}
     />
     <TrendSparkline
+      features={{ settings: false }}
       height={HEALTH_SPARKLINE.height}
       label={`${suite} errors and timeouts per run over its last ${String(runs)} runs`}
       points={points}

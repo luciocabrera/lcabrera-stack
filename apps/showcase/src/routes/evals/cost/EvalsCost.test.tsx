@@ -123,6 +123,7 @@ describe('EvalsCost', () => {
         .getByRole('link', { name: POINT.label })
         .getAttribute('href'),
     ).toBe(POINT.to);
+    expect(screen.queryByRole('button', { name: /^Settings for / })).toBeNull();
   });
 
   it('keeps a chart with no runs named, and draws no point in it', async () => {

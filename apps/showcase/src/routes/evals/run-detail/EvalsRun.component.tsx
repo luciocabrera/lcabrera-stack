@@ -31,6 +31,7 @@ export const EvalsRun = () => {
         <PageHeader title={`${run.suite} on ${run.branch}`} />
         <DescriptionList items={runFacts(run)} layout='inline' />
         <TrendSparkline
+          features={{ settings: false }}
           height={RUN_SPARKLINE.height}
           isConnected={false}
           label={`Duration of each of the ${String(chart.length)} trials`}

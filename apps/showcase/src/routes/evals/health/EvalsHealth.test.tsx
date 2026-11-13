@@ -108,6 +108,7 @@ describe('EvalsHealth', () => {
         .getByRole('link', { name: 'r1: 2 errors, 1 timeouts' })
         .getAttribute('href'),
     ).toBe(RUN.href);
+    expect(screen.queryByRole('button', { name: /^Settings for / })).toBeNull();
   });
 
   it('counts each error class and badges only the rate limit', async () => {
