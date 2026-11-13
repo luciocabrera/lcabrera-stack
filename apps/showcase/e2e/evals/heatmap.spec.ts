@@ -7,6 +7,7 @@ import {
   expectTrialHref,
   mainOf,
   openEvals,
+  openTab,
   paintOf,
 } from './evalsPage';
 import { SEED_RUNS } from './seedStory';
@@ -14,6 +15,32 @@ import { SEED_RUNS } from './seedStory';
 const run = (runId: string) => `/evals/runs/${runId}`;
 
 const cell = (name: string) => `${name}; open trial`;
+
+it('resizes every cell to the density accepted in its settings', async ({
+  page,
+}) => {
+  await openEvals(page, '/evals/heatmap');
+
+  const plot = page
+    .getByRole('figure', {
+      exact: true,
+      name: 'rules-consistency: 1 subjects over 1 runs',
+    })
+    .locator('svg[viewBox]')
+    .first();
+  const compact = await plot.getAttribute('height');
+
+  await mainOf(page)
+    .getByRole('button', {
+      exact: true,
+      name: 'Settings for rules-consistency: 1 subjects over 1 runs',
+    })
+    .click();
+  await page.getByRole('radio', { exact: true, name: 'Spacious' }).check();
+  await page.getByRole('button', { exact: true, name: 'Accept' }).click();
+
+  await expect(plot).not.toHaveAttribute('height', compact ?? '');
+});
 
 it('draws a grid per suite with subjects as rows and runs as columns', async ({
   page,
@@ -32,9 +59,7 @@ it('draws a grid per suite with subjects as rows and runs as columns', async ({
     ['skills', '2 subjects over 6 runs'],
     ['verifier-fixtures', '1 subjects over 1 runs'],
   ] as const) {
-    await expect(
-      mainOf(page).getByRole('heading', { exact: true, name: suite }),
-    ).toBeVisible();
+    await openTab(page, suite);
     await expect(
       page.getByRole('figure', { exact: true, name: `${suite}: ${shape}` }),
     ).toBeVisible();
@@ -43,6 +68,7 @@ it('draws a grid per suite with subjects as rows and runs as columns', async ({
 
 it('links each run column, each row label and each cell', async ({ page }) => {
   await openEvals(page, '/evals/heatmap');
+  await openTab(page, 'skills');
 
   const skills = page.getByRole('figure', {
     exact: true,
@@ -85,6 +111,7 @@ it('colours each cell by its pass rate and hatches the flaky ones', async ({
   page,
 }) => {
   await openEvals(page, '/evals/heatmap');
+  await openTab(page, 'skills');
 
   const skills = page.getByRole('figure', {
     exact: true,
@@ -108,19 +135,9 @@ it('colours each cell by its pass rate and hatches the flaky ones', async ({
   const flaky = skills.getByRole('link', {
     name: cell('react-19, 2026-10-13: 78% (7/9), flaky'),
   });
-  const failing = await paintOf(
-    page
-      .getByRole('figure', {
-        exact: true,
-        name: 'skill-quality: 2 subjects over 5 runs',
-      })
-      .getByRole('link', { name: cell('react-19, 2026-10-16: 0% (0/1)') }),
-  );
-
   const amber = await paintOf(flaky);
 
   expect(new Set([amber, high, low, none]).size).toBe(4);
-  expect(failing).toBe(low);
   await expect(
     skills.getByRole('link', {
       name: /^react-19, .*, flaky; open trial \d+$/u,
@@ -135,6 +152,19 @@ it('colours each cell by its pass rate and hatches the flaky ones', async ({
 
   expect(await distinctColours(flaky)).toBeGreaterThan(1);
   expect(await distinctColours(flat)).toBe(1);
+
+  await openTab(page, 'skill-quality');
+
+  const failing = await paintOf(
+    page
+      .getByRole('figure', {
+        exact: true,
+        name: 'skill-quality: 2 subjects over 5 runs',
+      })
+      .getByRole('link', { name: cell('react-19, 2026-10-16: 0% (0/1)') }),
+  );
+
+  expect(failing).toBe(low);
 });
 
 it('renders the heatmap in light and dark', async ({ page }, testInfo) => {

@@ -16,6 +16,10 @@ export { CardDescription } from './components/Card/CardDescription/CardDescripti
 export { CardFooter } from './components/Card/CardFooter/CardFooter.component';
 export { CardHeader } from './components/Card/CardHeader/CardHeader.component';
 export { CardTitle } from './components/Card/CardTitle/CardTitle.component';
+export type {
+  ChartDensity,
+  ChartFeatures,
+} from './components/ChartSettings/ChartSettings.types';
 export { DescriptionList } from './components/DescriptionList/DescriptionList.component';
 export type {
   DescriptionListItem,

@@ -8,6 +8,11 @@ export const styles = stylex.create({
     display: 'flex',
     flexWrap: 'wrap',
   },
+  run: {
+    flexBasis: '24rem',
+    flexGrow: 1,
+    minWidth: 0,
+  },
   runs: {
     gap: spacing.xxs,
     display: 'flex',

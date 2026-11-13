@@ -1,4 +1,4 @@
-import { Button, Card, Select, TextInput } from '@lcabrera/ui';
+import { Button, Card, TextInput } from '@lcabrera/ui';
 import * as stylex from '@stylexjs/stylex';
 import { Form, useNavigation } from 'react-router';
 
@@ -8,6 +8,7 @@ import { PREFILLED_CHOICE } from './EvalsCompare.constants';
 import { styles } from './EvalsCompare.stylex';
 import { isSubmittingField } from './isSubmittingField.util';
 import { runChoiceLabel } from './runChoiceLabel.util';
+import { RunSelect } from './RunSelect.component';
 
 export const ComparePicker = ({ choices }: ComparePickerProps) => {
   const { location } = useNavigation();
@@ -21,14 +22,14 @@ export const ComparePicker = ({ choices }: ComparePickerProps) => {
       <Card padding='md'>
         <Form method='get' {...stylex.props(styles.form)}>
           {(['a', 'b'] as const).map((side) => (
-            <Select
-              defaultValue={choices[PREFILLED_CHOICE[side]]?.runId}
-              key={side}
-              label={`Run ${side.toUpperCase()}`}
-              name={side}
-              options={options}
-              required
-            />
+            <div key={side} {...stylex.props(styles.run)}>
+              <RunSelect
+                defaultValue={choices[PREFILLED_CHOICE[side]]?.runId}
+                label={`Run ${side.toUpperCase()}`}
+                name={side}
+                options={options}
+              />
+            </div>
           ))}
           <Button
             customStylex={styles.submit}

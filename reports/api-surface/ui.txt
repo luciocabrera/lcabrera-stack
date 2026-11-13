@@ -20,6 +20,8 @@ CardHeader [const] ({ children, ...props }: CardHeaderProps) => JSX.Element
 CardProps [type] ComponentPropsWithoutRef<'div'> & { readonly color?: CardColor; readonly customStylex?: StyleXStyles; readonly elevation?: CardElevation; readonly interactive?: CardInteractive; readonly padding?: CardPadding; }
 CardTitle [const] ({ children, icon, ...props }: CardTitleProps) => JSX.Element
 ChartAxis [type] { /** A domain narrower than the data clips the line and band and drops the dots outside it. */ readonly domain?: readonly [T, T]; readonly format?: (value: T) => string; readonly label?: string; readonly ticks?: readonly T[]; }
+ChartDensity [type] TableDensity
+ChartFeatures [type] { /** The settings button and the drawer it opens; defaults to on. */ readonly settings?: boolean; }
 ChartMarker [type] { readonly label: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; }
 ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: ChartTone; readonly x: ChartX; readonly y: null | number; }
 ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'
@@ -30,12 +32,12 @@ DescriptionListLayout [type] 'grid' | 'inline'
 DescriptionListProps [type] Omit< ComponentPropsWithoutRef<'dl'>, 'children' | 'className' | 'style' > & { readonly customStylex?: StyleXStyles; readonly items: readonly DescriptionListItem[]; readonly layout?: DescriptionListLayout; }
 FieldNode [type] | GroupFieldNode<TValues> | LeafFieldDef<TValues> | RowFieldNode<TValues> | TabFieldNode<TValues>
 Form [const] <TValues extends Record<string, unknown>>({ action, children, method, ...providerProps }: FormProps<TValues>) => JSX.Element
-Heatmap [const] ({ cells, cellSize, columns, description, hasDataTable, legend, rows, scale, title, }: HeatmapProps) => JSX.Element
+Heatmap [const] ({ density, features, ...props }: HeatmapProps) => JSX.Element
 HeatmapAxisItem [type] { readonly key: string; readonly label: string; readonly to?: To; }
 HeatmapCell [type] { readonly column: string; readonly label: string; readonly pattern?: HeatmapPattern; readonly row: string; readonly to?: To; /** Under a sequential scale this applies only when `value` is not finite. */ readonly tone?: ChartTone; readonly value?: number; }
 HeatmapLegendItem [type] { readonly label: string; readonly pattern?: HeatmapPattern; readonly tone?: ChartTone; }
 HeatmapPattern [type] 'dots' | 'hatch'
-HeatmapProps [type] { readonly cells: readonly HeatmapCell[]; readonly cellSize?: number; readonly columns: readonly HeatmapAxisItem[]; readonly description?: string; readonly hasDataTable?: boolean; readonly legend?: readonly HeatmapLegendItem[]; readonly rows: readonly HeatmapAxisItem[]; readonly scale?: HeatmapScale; readonly title: string; }
+HeatmapProps [type] { readonly cells: readonly HeatmapCell[]; /** The cell size at the `compact` density; the other levels scale it. */ readonly cellSize?: number; readonly columns: readonly HeatmapAxisItem[]; /** The density the chart opens at; the reader can change it in the settings. */ readonly density?: ChartDensity; readonly description?: string; /** Each one unset is on. */ readonly features?: ChartFeatures; readonly hasDataTable?: boolean; readonly legend?: readonly HeatmapLegendItem[]; readonly rows: readonly HeatmapAxisItem[]; readonly scale?: HeatmapScale; readonly title: string; }
 HeatmapScale [type] | { readonly domain: readonly [number, number]; readonly kind: 'sequential' } | { readonly kind: 'tone' }
 hydrateApp [const] () => void
 InfoBox [const] ({ tone, ...rest }: InfoBoxProps) => JSX.Element
@@ -44,9 +46,9 @@ InfoBoxTone [type] 'error' | 'info' | 'neutral' | 'success' | 'warning'
 JsonExplorer [const] ({ sections }: JsonExplorerProps) => JSX.Element
 LayoutProps [type] { readonly children: ReactNode; }
 LineBandPoint [type] { readonly lower: number; readonly upper: number; readonly x: ChartX; }
-LineChart [const] ({ description, hasDataTable, hasMarkerLabels, height, markers, points, series, title, xAxis, yAxis, }: LineChartProps) => JSX.Element
+LineChart [const] ({ density, features, hasMarkerLabels, points, ...props }: LineChartProps) => JSX.Element
 LineChartPointsMode [type] 'always' | 'auto' | 'never'
-LineChartProps [type] { readonly description?: string; readonly hasDataTable?: boolean; /** Draws each marker's label in a list above the plot; `false` leaves the marker named only by its line's `<title>`. Defaults to `true`. */ readonly hasMarkerLabels?: boolean; readonly height?: number; readonly markers?: readonly ChartMarker[]; /** `auto` draws linked, toned and short-series points; a linked point is drawn in every mode, so its link stays reachable. */ readonly points?: LineChartPointsMode; readonly series: readonly LineSeries[]; readonly title: string; readonly xAxis?: ChartAxis<ChartX>; readonly yAxis?: ChartAxis<number>; }
+LineChartProps [type] { /** The density the chart opens at; the reader can change it in the settings. */ readonly density?: ChartDensity; readonly description?: string; /** Each one unset is on. */ readonly features?: ChartFeatures; readonly hasDataTable?: boolean; /** Draws each marker's label in a list above the plot; `false` leaves the marker named only by its line's `<title>`. Defaults to `true`. */ readonly hasMarkerLabels?: boolean; /** The plot height at the `compact` density; the other levels scale it. */ readonly height?: number; readonly markers?: readonly ChartMarker[]; /** `auto` draws linked, toned and short-series points; a linked point is drawn in every mode, so its link stays reachable. */ readonly points?: LineChartPointsMode; readonly series: readonly LineSeries[]; readonly title: string; readonly xAxis?: ChartAxis<ChartX>; readonly yAxis?: ChartAxis<number>; }
 LineSeries [type] { readonly band?: readonly LineBandPoint[]; readonly id: string; readonly isDashed?: boolean; readonly label: string; readonly points: readonly ChartPoint[]; readonly tone?: ChartTone; }
 NavLink [const] ({ caseSensitive, children, customStylex, end, icon, isActive: activeOverride, isBusy, isIconOnly, orientation, prefetch, size, tooltipContent, tooltipPlacement, variant, ...props }: NavLinkProps) => JSX.Element
 NavLinkProps [type] Omit<RouterNavLinkProps, 'children' | 'color'> & ( | { /** An inline link's text is its accessible name, so it cannot be icon-only. */ readonly isIconOnly?: false; readonly variant: 'inline'; } | { readonly isIconOnly?: boolean; readonly variant?: DesignSystemColor; } ) & { readonly children: ReactNode; readonly customStylex?: StyleXStyles; readonly icon?: ReactNode; /** Replaces the router's pathname match for `aria-current` and the active style, and turns off the pending style; unset, the router decides. */ readonly isActive?: boolean; readonly isBusy?: boolean; /** Ignored by the `inline` variant, which flows with the surrounding text. */ readonly orientation?: DesignSystemOrientation; /** Ignored by the `inline` variant, which takes the surrounding font size. */ readonly size?: DesignSystemSize; readonly tooltipContent?: ReactNode; readonly tooltipPlacement?: 'bottom' | 'left' | 'right' | 'top'; }
@@ -88,7 +90,7 @@ Tooltip [const] ({ children, content, placement, }: TooltipProps) => JSX.Element
 TooltipPlacement [type] 'bottom' | 'left' | 'right' | 'top'
 TooltipProps [type] { readonly children: ReactNode; readonly content: ReactNode; readonly placement?: TooltipPlacement; }
 TrendPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: TrendSparklineTone; readonly value: number; }
-TrendSparkline [const] ({ emptyRole, height, isConnected, label, max, tone, width, ...series }: TrendSparklineProps) => JSX.Element
+TrendSparkline [const] ({ density, features, ...props }: TrendSparklineProps) => JSX.Element
 TrendSparklineProps [type] TrendSparklineChartProps & (TrendSparklinePointsProps | TrendSparklineValuesProps)
 TrendSparklineTone [type] | 'error' | 'info' | 'neutral' | 'success' | 'warning'
 useNotifyOnError [const] (error: unknown) => void
@@ -172,12 +174,12 @@ TabFieldNode [type] { readonly tabs: readonly { readonly fields: readonly FieldN
 TextFieldDef [type] BaseFieldDef<TValues> & { readonly type: 'email' | 'password' | 'text' | 'textarea'; }
 
 ## ./components/Heatmap
-Heatmap [const] ({ cells, cellSize, columns, description, hasDataTable, legend, rows, scale, title, }: HeatmapProps) => JSX.Element
+Heatmap [const] ({ density, features, ...props }: HeatmapProps) => JSX.Element
 HeatmapAxisItem [type] { readonly key: string; readonly label: string; readonly to?: To; }
 HeatmapCell [type] { readonly column: string; readonly label: string; readonly pattern?: HeatmapPattern; readonly row: string; readonly to?: To; /** Under a sequential scale this applies only when `value` is not finite. */ readonly tone?: ChartTone; readonly value?: number; }
 HeatmapLegendItem [type] { readonly label: string; readonly pattern?: HeatmapPattern; readonly tone?: ChartTone; }
 HeatmapPattern [type] 'dots' | 'hatch'
-HeatmapProps [type] { readonly cells: readonly HeatmapCell[]; readonly cellSize?: number; readonly columns: readonly HeatmapAxisItem[]; readonly description?: string; readonly hasDataTable?: boolean; readonly legend?: readonly HeatmapLegendItem[]; readonly rows: readonly HeatmapAxisItem[]; readonly scale?: HeatmapScale; readonly title: string; }
+HeatmapProps [type] { readonly cells: readonly HeatmapCell[]; /** The cell size at the `compact` density; the other levels scale it. */ readonly cellSize?: number; readonly columns: readonly HeatmapAxisItem[]; /** The density the chart opens at; the reader can change it in the settings. */ readonly density?: ChartDensity; readonly description?: string; /** Each one unset is on. */ readonly features?: ChartFeatures; readonly hasDataTable?: boolean; readonly legend?: readonly HeatmapLegendItem[]; readonly rows: readonly HeatmapAxisItem[]; readonly scale?: HeatmapScale; readonly title: string; }
 HeatmapScale [type] | { readonly domain: readonly [number, number]; readonly kind: 'sequential' } | { readonly kind: 'tone' }
 
 ## ./components/Icons
@@ -240,9 +242,9 @@ ChartPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: C
 ChartTone [type] | 'error' | 'info' | 'neutral' | 'secondary' | 'success' | 'warning'
 ChartX [type] Date | number
 LineBandPoint [type] { readonly lower: number; readonly upper: number; readonly x: ChartX; }
-LineChart [const] ({ description, hasDataTable, hasMarkerLabels, height, markers, points, series, title, xAxis, yAxis, }: LineChartProps) => JSX.Element
+LineChart [const] ({ density, features, hasMarkerLabels, points, ...props }: LineChartProps) => JSX.Element
 LineChartPointsMode [type] 'always' | 'auto' | 'never'
-LineChartProps [type] { readonly description?: string; readonly hasDataTable?: boolean; /** Draws each marker's label in a list above the plot; `false` leaves the marker named only by its line's `<title>`. Defaults to `true`. */ readonly hasMarkerLabels?: boolean; readonly height?: number; readonly markers?: readonly ChartMarker[]; /** `auto` draws linked, toned and short-series points; a linked point is drawn in every mode, so its link stays reachable. */ readonly points?: LineChartPointsMode; readonly series: readonly LineSeries[]; readonly title: string; readonly xAxis?: ChartAxis<ChartX>; readonly yAxis?: ChartAxis<number>; }
+LineChartProps [type] { /** The density the chart opens at; the reader can change it in the settings. */ readonly density?: ChartDensity; readonly description?: string; /** Each one unset is on. */ readonly features?: ChartFeatures; readonly hasDataTable?: boolean; /** Draws each marker's label in a list above the plot; `false` leaves the marker named only by its line's `<title>`. Defaults to `true`. */ readonly hasMarkerLabels?: boolean; /** The plot height at the `compact` density; the other levels scale it. */ readonly height?: number; readonly markers?: readonly ChartMarker[]; /** `auto` draws linked, toned and short-series points; a linked point is drawn in every mode, so its link stays reachable. */ readonly points?: LineChartPointsMode; readonly series: readonly LineSeries[]; readonly title: string; readonly xAxis?: ChartAxis<ChartX>; readonly yAxis?: ChartAxis<number>; }
 LineSeries [type] { readonly band?: readonly LineBandPoint[]; readonly id: string; readonly isDashed?: boolean; readonly label: string; readonly points: readonly ChartPoint[]; readonly tone?: ChartTone; }
 
 ## ./components/MarkdownRenderer
@@ -523,7 +525,7 @@ TooltipProps [type] { readonly children: ReactNode; readonly content: ReactNode;
 
 ## ./components/TrendSparkline
 TrendPoint [type] { readonly label?: string; readonly to?: To; readonly tone?: TrendSparklineTone; readonly value: number; }
-TrendSparkline [const] ({ emptyRole, height, isConnected, label, max, tone, width, ...series }: TrendSparklineProps) => JSX.Element
+TrendSparkline [const] ({ density, features, ...props }: TrendSparklineProps) => JSX.Element
 TrendSparklineProps [type] TrendSparklineChartProps & (TrendSparklinePointsProps | TrendSparklineValuesProps)
 TrendSparklineTone [type] | 'error' | 'info' | 'neutral' | 'success' | 'warning'
 

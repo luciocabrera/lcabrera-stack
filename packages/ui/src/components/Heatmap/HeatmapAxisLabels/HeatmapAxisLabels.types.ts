@@ -4,4 +4,5 @@ export type HeatmapAxisLabelsProps = {
   readonly axis: 'column' | 'row';
   readonly cellSize: number;
   readonly items: readonly HeatmapAxisItem[];
+  readonly step?: number;
 };

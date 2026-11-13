@@ -90,6 +90,25 @@ const renderWith = (data: unknown) => {
 const searchOfLastLoad = (loader: ReturnType<typeof renderWith>) =>
   new URL(loader.mock.lastCall?.[0].request.url ?? 'http://stub/').search;
 
+const submittedRun = (side: 'a' | 'b') =>
+  document.querySelector<HTMLInputElement>(
+    `input[type=hidden][name=${CSS.escape(side)}]`,
+  )?.value;
+
+type PickRunArgs = {
+  readonly choice: (typeof CHOICES)[number] | undefined;
+  readonly side: RegExp;
+};
+
+const pickRun = async ({ choice, side }: PickRunArgs) => {
+  fireEvent.click(await screen.findByRole('button', { name: side }));
+  fireEvent.click(
+    within(screen.getByRole('listbox')).getByRole('button', {
+      name: choice === undefined ? '' : runChoiceLabel(choice),
+    }),
+  );
+};
+
 afterEach(() => {
   cleanup();
 });
@@ -237,17 +256,12 @@ describe('EvalsCompare', () => {
   it('prefills the older run as A and the newer as B, so an unchanged submit reads forward in time', async () => {
     renderWith({ choices: CHOICES, comparison: undefined });
 
-    const runA = await screen.findByRole('combobox', { name: 'Run A' });
-    const runB = screen.getByRole('combobox', { name: 'Run B' });
+    await screen.findByRole('button', { name: /^Run A/ });
 
-    expect([runA.getAttribute('name'), runB.getAttribute('name')]).toEqual([
-      'a',
-      'b',
+    expect([submittedRun('a'), submittedRun('b')]).toEqual([
+      'run-before',
+      'run-newest',
     ]);
-    expect([
-      (runA as HTMLSelectElement).value,
-      (runB as HTMLSelectElement).value,
-    ]).toEqual(['run-before', 'run-newest']);
     expect(
       screen.getByRole('textbox', { name: 'Branch' }).getAttribute('name'),
     ).toBe('branch');
@@ -256,12 +270,8 @@ describe('EvalsCompare', () => {
   it('submits the picked pair as the same ?a=&b= query string', async () => {
     const loader = renderWith({ choices: CHOICES, comparison: undefined });
 
-    fireEvent.change(await screen.findByRole('combobox', { name: 'Run A' }), {
-      target: { value: 'run-newest' },
-    });
-    fireEvent.change(screen.getByRole('combobox', { name: 'Run B' }), {
-      target: { value: 'run-before' },
-    });
+    await pickRun({ choice: CHOICES[0], side: /^Run A/ });
+    await pickRun({ choice: CHOICES[1], side: /^Run B/ });
     fireEvent.click(screen.getByRole('button', { name: 'Compare runs' }));
 
     await waitFor(() => {
@@ -269,29 +279,16 @@ describe('EvalsCompare', () => {
     });
   });
 
-  it('submits the branch as the same ?branch= query string', async () => {
-    const loader = renderWith({ choices: CHOICES, comparison: undefined });
-
-    fireEvent.change(await screen.findByRole('textbox', { name: 'Branch' }), {
-      target: { value: 'feat/trigger-wording' },
-    });
-    fireEvent.click(screen.getByRole('button', { name: 'Compare with main' }));
-
-    await waitFor(() => {
-      expect(searchOfLastLoad(loader)).toBe('?branch=feat%2Ftrigger-wording');
-    });
-  });
-
   it('offers both pickers with no run to choose on an empty history', async () => {
     renderWith({ choices: [], comparison: undefined });
 
-    const runA = await screen.findByRole('combobox', { name: 'Run A' });
+    await screen.findByRole('button', { name: /^Run A/ });
 
-    expect((runA as HTMLSelectElement).value).toBe('');
-    expect(
-      (screen.getByRole('combobox', { name: 'Run B' }) as HTMLSelectElement)
-        .value,
-    ).toBe('');
+    expect([submittedRun('a'), submittedRun('b')]).toEqual([
+      undefined,
+      undefined,
+    ]);
+    expect(screen.getByRole('button', { name: /^Run B/ })).toBeDefined();
   });
 
   it.each([

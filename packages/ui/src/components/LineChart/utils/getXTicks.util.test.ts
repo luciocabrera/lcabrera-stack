@@ -21,6 +21,12 @@ describe('getXTicks', () => {
     ]);
   });
 
+  it('picks more ticks across a number domain for a larger count', () => {
+    expect(
+      getXTicks({ domain: [0, 100], isTime: false, tickCount: 8 }).length,
+    ).toBeGreaterThan(getXTicks({ domain: [0, 100], isTime: false }).length);
+  });
+
   it('keeps the ticks it is given', () => {
     const ticks = [new Date(1)];
 

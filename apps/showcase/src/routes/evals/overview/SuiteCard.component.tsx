@@ -33,6 +33,7 @@ export const SuiteCard = ({ summary }: SuiteCardProps) => (
     />
     <TrendSparkline
       emptyRole='group'
+      features={{ settings: false }}
       height={OVERVIEW_SPARKLINE.height}
       label={`${summary.suite} pass rate over its last ${String(summary.points.length)} runs`}
       max={1}

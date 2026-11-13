@@ -1,7 +1,7 @@
+import { Tabs } from '@lcabrera/ui';
 import { Heatmap } from '@lcabrera/ui/components/Heatmap';
 import { PageHeader } from '@lcabrera/ui/components/PageHeader';
 import { Text } from '@lcabrera/ui/components/Text';
-import { Title } from '@lcabrera/ui/components/Title';
 import * as stylex from '@stylexjs/stylex';
 import { useLoaderData } from 'react-router';
 
@@ -24,21 +24,26 @@ export const EvalsHeatmap = () => {
         {EVALS_FLAKY.disagreeFraction * 100}% had trials that disagreed (
         {flaky.length} tasks now). Each cell opens its run at one of its trials.
       </Text>
-      {grids.length === 0 && <Text>No eval runs are stored yet.</Text>}
-      {grids.map(({ cells, columns, rows, suite, title }) => (
-        <section key={suite} {...stylex.props(layoutStyles.section)}>
-          <Title level={2} variant='plain'>
-            {suite}
-          </Title>
-          <Heatmap
-            cells={cells}
-            columns={columns}
-            legend={HEATMAP_LEGEND}
-            rows={rows}
-            title={title}
-          />
-        </section>
-      ))}
+      {grids.length === 0 ? (
+        <Text>No eval runs are stored yet.</Text>
+      ) : (
+        <Tabs
+          label='Suites'
+          tabs={grids.map(({ cells, columns, rows, suite, title }) => ({
+            children: (
+              <Heatmap
+                cells={cells}
+                columns={columns}
+                legend={HEATMAP_LEGEND}
+                rows={rows}
+                title={title}
+              />
+            ),
+            header: suite,
+            key: suite,
+          }))}
+        />
+      )}
     </div>
   );
 };

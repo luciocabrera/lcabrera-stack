@@ -69,6 +69,7 @@ const renderHeatmap = (props: Partial<HeatmapProps> = {}) =>
       <Heatmap
         cells={[]}
         columns={COLUMNS}
+        features={{ settings: false }}
         rows={ROWS}
         title='Grid'
         {...props}

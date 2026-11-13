@@ -54,3 +54,10 @@ export const EVALS_COST_LABELS = {
   computed: 'Computed from model prices',
   reported: 'Reported by the SDK',
 } as const;
+
+export const EVALS_TABLE_FEATURES = {
+  columnMenu: true,
+  resize: true,
+  settings: true,
+  toolbar: true,
+} as const;

@@ -24,4 +24,14 @@ export type RunInputs = Pick<
   'catalogHash' | 'harnessVersion' | 'modelId' | 'sdkVersion'
 >;
 
+export type RunSelectProps = {
+  readonly defaultValue?: string;
+  readonly label: string;
+  readonly name: string;
+  readonly options: readonly {
+    readonly label: string;
+    readonly value: string;
+  }[];
+};
+
 type Comparison = NonNullable<Awaited<ReturnType<typeof loader>>['comparison']>;

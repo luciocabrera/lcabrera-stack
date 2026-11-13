@@ -23,6 +23,7 @@ type GetLineChartGeometryArgs = Pick<
 > & {
   readonly formatters: LineChartFormatters;
   readonly mode: NonNullable<LineChartProps['points']>;
+  readonly tickCount?: number;
 };
 
 export const getLineChartGeometry = ({
@@ -30,6 +31,7 @@ export const getLineChartGeometry = ({
   markers = [],
   mode,
   series,
+  tickCount,
   xAxis,
   yAxis,
 }: GetLineChartGeometryArgs) => {
@@ -59,6 +61,7 @@ export const getLineChartGeometry = ({
           ticks: getXTicks({
             domain: domains.x,
             isTime: domains.isTime,
+            tickCount,
             ticks: xAxis?.ticks,
           }),
         });
@@ -68,7 +71,11 @@ export const getLineChartGeometry = ({
       : positionTicks({
           format: formatters.y,
           scale: scales.y,
-          ticks: getYTicks({ domain: domains.y, ticks: yAxis?.ticks }),
+          ticks: getYTicks({
+            domain: domains.y,
+            tickCount,
+            ticks: yAxis?.ticks,
+          }),
         });
 
   return {

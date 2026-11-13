@@ -35,7 +35,11 @@ describe('LineChart on the server', () => {
 
   it('names the figure root by the title id the plot draws', () => {
     const html = renderToString(
-      <LineChart series={[]} title='Request latency' />,
+      <LineChart
+        features={{ settings: false }}
+        series={[]}
+        title='Request latency'
+      />,
     );
     const labelledBy = /^<figure aria-labelledby="([^"]+)"/u.exec(html)?.[1];
 
@@ -43,6 +47,15 @@ describe('LineChart on the server', () => {
     expect(html).toContain(
       `<title id="${String(labelledBy)}">Request latency</title>`,
     );
+  });
+
+  it('renders the settings button closed, with no drawer', () => {
+    const html = renderToString(
+      <LineChart series={[]} title='Request latency' />,
+    );
+
+    expect(html).toContain('aria-label="Settings for Request latency"');
+    expect(html).not.toContain('<dialog');
   });
 
   it('writes no marker label list when hasMarkerLabels is false', () => {

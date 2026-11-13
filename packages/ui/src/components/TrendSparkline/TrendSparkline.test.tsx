@@ -21,7 +21,11 @@ describe('TrendSparkline', () => {
   describe('values mode', () => {
     it('renders no line when there are no values', () => {
       const { container } = render(
-        <TrendSparkline label='Trend' values={[]} />,
+        <TrendSparkline
+          features={{ settings: false }}
+          label='Trend'
+          values={[]}
+        />,
       );
 
       expect(container.querySelector('path')).toBeNull();
@@ -34,6 +38,7 @@ describe('TrendSparkline', () => {
     it('renders a line spanning the given width and height', () => {
       const { container } = render(
         <TrendSparkline
+          features={{ settings: false }}
           height={20}
           label='Trend'
           values={[1, 5, 2]}
@@ -51,17 +56,32 @@ describe('TrendSparkline', () => {
     });
 
     it('exposes the label as the accessible name of a populated chart', () => {
-      render(<TrendSparkline label='Errors per scan' values={[1, 5, 2]} />);
+      render(
+        <TrendSparkline
+          features={{ settings: false }}
+          label='Errors per scan'
+          values={[1, 5, 2]}
+        />,
+      );
 
       expect(screen.getByRole('img', { name: 'Errors per scan' })).toBeTruthy();
     });
 
     it('colours the line from its tone', () => {
       const { container } = render(
-        <TrendSparkline label='Trend' values={[1, 2]} />,
+        <TrendSparkline
+          features={{ settings: false }}
+          label='Trend'
+          values={[1, 2]}
+        />,
       );
       const { container: toned } = render(
-        <TrendSparkline label='Trend' tone='error' values={[1, 2]} />,
+        <TrendSparkline
+          features={{ settings: false }}
+          label='Trend'
+          tone='error'
+          values={[1, 2]}
+        />,
       );
 
       expect(toned.querySelector('path')?.getAttribute('class')).not.toBe(
@@ -75,6 +95,7 @@ describe('TrendSparkline', () => {
       const { container } = render(
         <MemoryRouter>
           <TrendSparkline
+            features={{ settings: false }}
             height={48}
             label='Weekly results'
             max={1}
@@ -102,6 +123,7 @@ describe('TrendSparkline', () => {
       const { container } = render(
         <MemoryRouter>
           <TrendSparkline
+            features={{ settings: false }}
             label='Weekly results'
             points={[
               { tone: 'success', value: 1 },
@@ -126,6 +148,7 @@ describe('TrendSparkline', () => {
     it('draws no line when the points are not connected', () => {
       const { container } = render(
         <TrendSparkline
+          features={{ settings: false }}
           isConnected={false}
           label='Weekly results'
           points={[{ value: 1 }, { value: 2 }]}
@@ -139,6 +162,7 @@ describe('TrendSparkline', () => {
     it('is an image when no dot is linked', () => {
       render(
         <TrendSparkline
+          features={{ settings: false }}
           label='Weekly results'
           points={[{ value: 1 }, { value: 2 }]}
         />,
@@ -151,7 +175,11 @@ describe('TrendSparkline', () => {
     it('renders a linked dot as a link named by its label', () => {
       render(
         <MemoryRouter>
-          <TrendSparkline label='Weekly results' points={POINTS} />
+          <TrendSparkline
+            features={{ settings: false }}
+            label='Weekly results'
+            points={POINTS}
+          />
         </MemoryRouter>,
       );
 
@@ -168,6 +196,7 @@ describe('TrendSparkline', () => {
       render(
         <MemoryRouter>
           <TrendSparkline
+            features={{ settings: false }}
             label='Weekly results'
             points={[{ to: '/x', value: 0.75 }]}
           />
@@ -180,6 +209,7 @@ describe('TrendSparkline', () => {
     it('titles each dot with its label', () => {
       const { container } = render(
         <TrendSparkline
+          features={{ settings: false }}
           label='Weekly results'
           points={[{ label: 'Week 2: failed', value: 1 }, { value: 2 }]}
         />,
@@ -196,7 +226,11 @@ describe('TrendSparkline', () => {
   describe('non-finite values', () => {
     it('leaves NaN out of a values chart', () => {
       const { container } = render(
-        <TrendSparkline label='Trend' values={[1, Number('NaN'), 3, 2]} />,
+        <TrendSparkline
+          features={{ settings: false }}
+          label='Trend'
+          values={[1, Number('NaN'), 3, 2]}
+        />,
       );
 
       expect(container.querySelector('path')?.getAttribute('d')).not.toContain(
@@ -207,6 +241,7 @@ describe('TrendSparkline', () => {
     it('draws no dot and no NaN coordinate for a non-finite point', () => {
       const { container } = render(
         <TrendSparkline
+          features={{ settings: false }}
           label='Weekly results'
           points={[{ value: 1 }, { value: Number('NaN') }, { value: 3 }]}
         />,
@@ -229,10 +264,17 @@ describe('TrendSparkline', () => {
   describe('a maximum below the lowest value', () => {
     it('pins the lowest value to the bottom edge and the higher one to the top in both modes', () => {
       const { container: valuesChart } = render(
-        <TrendSparkline height={48} label='Trend' max={-1} values={[0, 3]} />,
+        <TrendSparkline
+          features={{ settings: false }}
+          height={48}
+          label='Trend'
+          max={-1}
+          values={[0, 3]}
+        />,
       );
       const { container: pointsChart } = render(
         <TrendSparkline
+          features={{ settings: false }}
           height={48}
           label='Trend'
           max={-1}
@@ -257,11 +299,25 @@ describe('TrendSparkline', () => {
   describe('an empty chart with an empty role', () => {
     it.each([
       {
-        chart: <TrendSparkline emptyRole='group' label='Runs' points={[]} />,
+        chart: (
+          <TrendSparkline
+            emptyRole='group'
+            features={{ settings: false }}
+            label='Runs'
+            points={[]}
+          />
+        ),
         role: 'group',
       },
       {
-        chart: <TrendSparkline emptyRole='img' label='Runs' values={[]} />,
+        chart: (
+          <TrendSparkline
+            emptyRole='img'
+            features={{ settings: false }}
+            label='Runs'
+            values={[]}
+          />
+        ),
         role: 'img',
       },
     ])('keeps its label as the name of the $role role', ({ chart, role }) => {
@@ -278,8 +334,18 @@ describe('TrendSparkline', () => {
     it('takes its populated role once it has something to draw', () => {
       render(
         <MemoryRouter>
-          <TrendSparkline emptyRole='img' label='Weekly' points={POINTS} />
-          <TrendSparkline emptyRole='group' label='Trend' values={[1, 2]} />
+          <TrendSparkline
+            emptyRole='img'
+            features={{ settings: false }}
+            label='Weekly'
+            points={POINTS}
+          />
+          <TrendSparkline
+            emptyRole='group'
+            features={{ settings: false }}
+            label='Trend'
+            values={[1, 2]}
+          />
         </MemoryRouter>,
       );
 
@@ -291,18 +357,45 @@ describe('TrendSparkline', () => {
   describe('server render', () => {
     it.each([
       {
-        chart: <TrendSparkline label='Trend' values={[1, 5, 2]} />,
+        chart: (
+          <TrendSparkline
+            features={{ settings: false }}
+            label='Trend'
+            values={[1, 5, 2]}
+          />
+        ),
         mode: 'values',
       },
       {
         chart: (
-          <TrendSparkline label='Weekly results' max={1} points={POINTS} />
+          <TrendSparkline
+            features={{ settings: false }}
+            label='Weekly results'
+            max={1}
+            points={POINTS}
+          />
         ),
         mode: 'points',
       },
-      { chart: <TrendSparkline label='Trend' values={[]} />, mode: 'empty' },
       {
-        chart: <TrendSparkline emptyRole='group' label='Trend' points={[]} />,
+        chart: (
+          <TrendSparkline
+            features={{ settings: false }}
+            label='Trend'
+            values={[]}
+          />
+        ),
+        mode: 'empty',
+      },
+      {
+        chart: (
+          <TrendSparkline
+            emptyRole='group'
+            features={{ settings: false }}
+            label='Trend'
+            points={[]}
+          />
+        ),
         mode: 'empty named',
       },
     ])(
