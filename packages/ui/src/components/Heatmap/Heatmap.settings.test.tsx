@@ -144,6 +144,38 @@ describe('Heatmap settings', () => {
     expect(labels).toEqual([undefined, 'SPAN', undefined]);
   });
 
+  it('names a skipped column label without leaving it a link to tab to', () => {
+    render(
+      <MemoryRouter>
+        <Heatmap
+          cells={[]}
+          columns={COLUMNS.map((column) => ({
+            ...column,
+            to: `/runs/${column.key}`,
+          }))}
+          rows={ROWS}
+          title='Grid'
+        />
+      </MemoryRouter>,
+    );
+
+    const drawer = openChartSettings('Grid');
+
+    fireEvent.click(drawer.getByRole('radio', { name: 'Every 2nd label' }));
+    acceptChartSettings(drawer);
+
+    expect(
+      COLUMNS.map(({ label }) => [
+        screen.getByTitle(label).textContent,
+        screen.queryByRole('link', { name: label })?.getAttribute('href'),
+      ]),
+    ).toEqual([
+      ['Column 1', '/runs/c1'],
+      ['Column 2', undefined],
+      ['Column 3', '/runs/c3'],
+    ]);
+  });
+
   it('keeps a pinned panel open on Accept, and closes it once unpinned', () => {
     renderHeatmap();
 

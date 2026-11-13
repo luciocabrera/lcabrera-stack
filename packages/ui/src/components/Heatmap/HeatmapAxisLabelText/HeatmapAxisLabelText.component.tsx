@@ -11,18 +11,15 @@ export const HeatmapAxisLabelText = ({
   label,
   to,
 }: HeatmapAxisLabelTextProps) => {
-  const text =
-    to === undefined ? (
-      label
-    ) : (
-      <Link to={to} {...stylex.props(heatmapAxisLabelStyles.link)}>
-        {label}
-      </Link>
-    );
+  if (isHidden) {
+    return <span {...stylex.props(accessibility.visuallyHidden)}>{label}</span>;
+  }
 
-  return isHidden ? (
-    <span {...stylex.props(accessibility.visuallyHidden)}>{text}</span>
+  return to === undefined ? (
+    label
   ) : (
-    text
+    <Link to={to} {...stylex.props(heatmapAxisLabelStyles.link)}>
+      {label}
+    </Link>
   );
 };
