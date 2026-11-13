@@ -60,5 +60,6 @@ change a table, without asking anyone to change the page.
 ## Notes
 
 The `command` pointer was checked against one plant: making Accept close the
-panel without applying the draft fails 8 of the 15 tests in the three
-`*.settings.test.tsx` files.
+panel without applying the draft fails the density case in each of the three
+`*.settings.test.tsx` files, and the legend and data-table cases of the heatmap
+and the line chart.
