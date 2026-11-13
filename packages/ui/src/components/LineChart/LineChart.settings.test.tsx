@@ -58,9 +58,6 @@ const dotTitles = () =>
     .map(({ textContent }) => textContent)
     .filter((title) => title?.includes(', '));
 
-const table = () =>
-  screen.getByText('Latency', { selector: 'caption' }).closest('table');
-
 beforeAll(() => {
   Object.assign(HTMLDialogElement.prototype, {
     showModal(this: HTMLDialogElement) {
@@ -140,10 +137,8 @@ describe('LineChart settings', () => {
   it('styles the data table apart once it is shown, and leaves its cells bare while hidden', () => {
     render(<LineChart hasDataTable series={SERIES} title='Latency' />);
 
-    const { hidden, hiddenCell, shown, shownCell } = showChartDataTable({
-      label: 'Latency',
-      table,
-    });
+    const { hidden, hiddenCell, shown, shownCell } =
+      showChartDataTable('Latency');
 
     expect([hiddenCell, shown === hidden, shownCell === '']).toEqual([
       '',

@@ -48,9 +48,6 @@ const plotHeight = () =>
     .querySelector('svg[viewBox]')
     ?.getAttribute('height');
 
-const table = () =>
-  screen.getByText('Grid', { selector: 'caption' }).closest('table');
-
 beforeAll(() => {
   Object.assign(HTMLDialogElement.prototype, {
     showModal(this: HTMLDialogElement) {
@@ -196,10 +193,7 @@ describe('Heatmap settings', () => {
       </MemoryRouter>,
     );
 
-    const { hidden, hiddenCell, shown, shownCell } = showChartDataTable({
-      label: 'Grid',
-      table,
-    });
+    const { hidden, hiddenCell, shown, shownCell } = showChartDataTable('Grid');
 
     expect([hiddenCell, shown === hidden, shownCell === '']).toEqual([
       '',

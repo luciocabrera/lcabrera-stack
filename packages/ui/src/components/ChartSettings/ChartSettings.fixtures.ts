@@ -1,10 +1,5 @@
 import { fireEvent, screen, within } from '@testing-library/react';
 
-type ChartTableArgs = {
-  readonly label: string;
-  readonly table: () => HTMLTableElement | null;
-};
-
 export const openChartSettings = (label: string) => {
   fireEvent.click(
     screen.getByRole('button', { name: `Settings for ${label}` }),
@@ -19,9 +14,12 @@ export const acceptChartSettings = (
   fireEvent.click(drawer.getByRole('button', { name: 'Accept' }));
 };
 
-export const showChartDataTable = ({ label, table }: ChartTableArgs) => {
-  const hidden = table()?.className;
-  const hiddenCell = table()?.querySelector('th')?.className;
+const captionTable = (label: string) =>
+  screen.getByText(label, { selector: 'caption' }).closest('table');
+
+export const showChartDataTable = (label: string) => {
+  const hidden = captionTable(label)?.className;
+  const hiddenCell = captionTable(label)?.querySelector('th')?.className;
   const drawer = openChartSettings(label);
 
   fireEvent.click(drawer.getByRole('switch', { name: 'Data table' }));
@@ -30,7 +28,7 @@ export const showChartDataTable = ({ label, table }: ChartTableArgs) => {
   return {
     hidden,
     hiddenCell,
-    shown: table()?.className,
-    shownCell: table()?.querySelector('th')?.className,
+    shown: captionTable(label)?.className,
+    shownCell: captionTable(label)?.querySelector('th')?.className,
   };
 };
