@@ -1,14 +1,15 @@
 // @vitest-environment jsdom
 
-import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it } from 'vite-plus/test';
+
+import {
+  acceptChartSettings,
+  openChartSettings,
+  showChartDataTable,
+  withOpenableDialogs,
+} from '#ui/components/ChartSettings/ChartSettings.fixtures';
 
 import { Heatmap } from './Heatmap.component';
 
@@ -45,30 +46,13 @@ const plotHeight = () =>
 const table = () =>
   screen.getByText('Grid', { selector: 'caption' }).closest('table');
 
-const openSettings = () => {
-  fireEvent.click(screen.getByRole('button', { name: 'Settings for Grid' }));
-
-  return within(screen.getByTestId('side-panel'));
-};
-
-beforeEach(() => {
-  HTMLDialogElement.prototype.showModal = function showModal(
-    this: HTMLDialogElement,
-  ) {
-    this.setAttribute('open', '');
-  };
-});
-
-afterEach(() => {
-  cleanup();
-  Reflect.deleteProperty(HTMLDialogElement.prototype, 'showModal');
-});
+withOpenableDialogs();
 
 describe('Heatmap settings', () => {
   it('offers density, column labels, the legend and the data table', () => {
     renderHeatmap();
 
-    const drawer = openSettings();
+    const drawer = openChartSettings('Grid');
 
     expect(
       drawer
@@ -100,13 +84,13 @@ describe('Heatmap settings', () => {
     renderHeatmap();
 
     const before = plotHeight();
-    const drawer = openSettings();
+    const drawer = openChartSettings('Grid');
 
     fireEvent.click(drawer.getByRole('radio', { name: 'Spacious' }));
 
     expect(plotHeight()).toBe(before);
 
-    fireEvent.click(drawer.getByRole('button', { name: 'Accept' }));
+    acceptChartSettings(drawer);
 
     expect([before, plotHeight()]).toEqual(['32', '56']);
     expect(screen.queryByTestId('side-panel')).toBeNull();
@@ -116,25 +100,25 @@ describe('Heatmap settings', () => {
     renderHeatmap();
 
     const before = plotHeight();
-    const drawer = openSettings();
+    const drawer = openChartSettings('Grid');
 
     fireEvent.click(drawer.getByRole('radio', { name: 'Dense' }));
     fireEvent.click(drawer.getByRole('button', { name: 'Cancel' }));
 
     expect(plotHeight()).toBe(before);
     expect(
-      openSettings().getByRole('radio', { name: 'Compact' }),
+      openChartSettings('Grid').getByRole('radio', { name: 'Compact' }),
     ).toHaveProperty('checked', true);
   });
 
   it('shows the data table and hides the legend once accepted', () => {
     renderHeatmap();
 
-    const drawer = openSettings();
+    const drawer = openChartSettings('Grid');
 
     fireEvent.click(drawer.getByRole('switch', { name: 'Legend' }));
     fireEvent.click(drawer.getByRole('switch', { name: 'Data table' }));
-    fireEvent.click(drawer.getByRole('button', { name: 'Accept' }));
+    acceptChartSettings(drawer);
 
     expect(screen.queryByText('Passing')).toBeNull();
     expect(screen.getByRole('table', { name: 'Grid' })).toBeDefined();
@@ -143,10 +127,10 @@ describe('Heatmap settings', () => {
   it('keeps every column label readable while it visually draws every 2nd', () => {
     renderHeatmap();
 
-    const drawer = openSettings();
+    const drawer = openChartSettings('Grid');
 
     fireEvent.click(drawer.getByRole('radio', { name: 'Every 2nd label' }));
-    fireEvent.click(drawer.getByRole('button', { name: 'Accept' }));
+    acceptChartSettings(drawer);
 
     const labels = COLUMNS.map(
       ({ label }) => screen.getByTitle(label).firstElementChild?.tagName,
@@ -158,7 +142,7 @@ describe('Heatmap settings', () => {
   it('keeps a pinned panel open on Accept, and closes it once unpinned', () => {
     renderHeatmap();
 
-    const drawer = openSettings();
+    const drawer = openChartSettings('Grid');
 
     fireEvent.click(drawer.getByRole('button', { name: 'Pin drawer' }));
     fireEvent.click(
@@ -199,16 +183,16 @@ describe('Heatmap settings', () => {
       </MemoryRouter>,
     );
 
-    const hidden = table()?.className;
-    const hiddenCell = table()?.querySelector('th')?.className;
-    const drawer = openSettings();
+    const { hidden, hiddenCell, shown, shownCell } = showChartDataTable({
+      label: 'Grid',
+      table,
+    });
 
-    fireEvent.click(drawer.getByRole('switch', { name: 'Data table' }));
-    fireEvent.click(drawer.getByRole('button', { name: 'Accept' }));
-
-    expect(hiddenCell).toBe('');
-    expect(table()?.className).not.toBe(hidden);
-    expect(table()?.querySelector('th')?.className).not.toBe('');
+    expect([hiddenCell, shown === hidden, shownCell === '']).toEqual([
+      '',
+      false,
+      false,
+    ]);
   });
 
   it('draws no settings button when the feature is off', () => {

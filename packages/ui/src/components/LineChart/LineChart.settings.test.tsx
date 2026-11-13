@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
 
+import { fireEvent, render, screen, within } from '@testing-library/react';
+import { describe, expect, it } from 'vite-plus/test';
+
 import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
+  acceptChartSettings,
+  openChartSettings,
+  showChartDataTable,
+  withOpenableDialogs,
+} from '#ui/components/ChartSettings/ChartSettings.fixtures';
 
 import { LineChart } from './LineChart.component';
 
@@ -55,34 +56,13 @@ const dotTitles = () =>
 const table = () =>
   screen.getByText('Latency', { selector: 'caption' }).closest('table');
 
-const openSettings = () => {
-  fireEvent.click(screen.getByRole('button', { name: 'Settings for Latency' }));
-
-  return within(screen.getByTestId('side-panel'));
-};
-
-const accept = (drawer: ReturnType<typeof openSettings>) => {
-  fireEvent.click(drawer.getByRole('button', { name: 'Accept' }));
-};
-
-beforeEach(() => {
-  HTMLDialogElement.prototype.showModal = function showModal(
-    this: HTMLDialogElement,
-  ) {
-    this.setAttribute('open', '');
-  };
-});
-
-afterEach(() => {
-  cleanup();
-  Reflect.deleteProperty(HTMLDialogElement.prototype, 'showModal');
-});
+withOpenableDialogs();
 
 describe('LineChart settings', () => {
   it('offers density, points, ticks, the legend, the data table and marker labels', () => {
     renderChart();
 
-    const drawer = openSettings();
+    const drawer = openChartSettings('Latency');
 
     expect(
       drawer
@@ -100,10 +80,10 @@ describe('LineChart settings', () => {
     renderChart();
 
     const before = plotStyle();
-    const drawer = openSettings();
+    const drawer = openChartSettings('Latency');
 
     fireEvent.click(drawer.getByRole('radio', { name: 'Dense' }));
-    accept(drawer);
+    acceptChartSettings(drawer);
 
     expect(before).toContain('240px');
     expect(plotStyle()).toContain('150px');
@@ -113,10 +93,10 @@ describe('LineChart settings', () => {
     renderChart();
 
     const before = yTicks();
-    const drawer = openSettings();
+    const drawer = openChartSettings('Latency');
 
     fireEvent.click(drawer.getByRole('radio', { name: 'Many' }));
-    accept(drawer);
+    acceptChartSettings(drawer);
 
     expect(yTicks()).toBeGreaterThan(before);
   });
@@ -124,12 +104,12 @@ describe('LineChart settings', () => {
   it('hides the legend and the marker labels and shows the data table once accepted', () => {
     renderChart();
 
-    const drawer = openSettings();
+    const drawer = openChartSettings('Latency');
 
     fireEvent.click(drawer.getByRole('switch', { name: 'Legend' }));
     fireEvent.click(drawer.getByRole('switch', { name: 'Marker labels' }));
     fireEvent.click(drawer.getByRole('switch', { name: 'Data table' }));
-    accept(drawer);
+    acceptChartSettings(drawer);
 
     const drawn = within(figure());
 
@@ -147,26 +127,26 @@ describe('LineChart settings', () => {
   it('styles the data table apart once it is shown, and leaves its cells bare while hidden', () => {
     render(<LineChart hasDataTable series={SERIES} title='Latency' />);
 
-    const hidden = table()?.className;
-    const hiddenCell = table()?.querySelector('th')?.className;
-    const drawer = openSettings();
+    const { hidden, hiddenCell, shown, shownCell } = showChartDataTable({
+      label: 'Latency',
+      table,
+    });
 
-    fireEvent.click(drawer.getByRole('switch', { name: 'Data table' }));
-    accept(drawer);
-
-    expect(hiddenCell).toBe('');
-    expect(table()?.className).not.toBe(hidden);
-    expect(table()?.querySelector('th')?.className).not.toBe('');
+    expect([hiddenCell, shown === hidden, shownCell === '']).toEqual([
+      '',
+      false,
+      false,
+    ]);
   });
 
   it('drops the unlinked dots once Linked points only is accepted', () => {
     renderChart();
 
     const before = dotTitles();
-    const drawer = openSettings();
+    const drawer = openChartSettings('Latency');
 
     fireEvent.click(drawer.getByRole('radio', { name: 'Linked points only' }));
-    accept(drawer);
+    acceptChartSettings(drawer);
 
     expect([before.length, dotTitles()]).toEqual([4, []]);
   });

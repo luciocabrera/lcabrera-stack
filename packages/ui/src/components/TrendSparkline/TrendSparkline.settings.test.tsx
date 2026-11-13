@@ -1,13 +1,13 @@
 // @vitest-environment jsdom
 
+import { fireEvent, render, screen } from '@testing-library/react';
+import { describe, expect, it } from 'vite-plus/test';
+
 import {
-  cleanup,
-  fireEvent,
-  render,
-  screen,
-  within,
-} from '@testing-library/react';
-import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
+  acceptChartSettings,
+  openChartSettings,
+  withOpenableDialogs,
+} from '#ui/components/ChartSettings/ChartSettings.fixtures';
 
 import { TrendSparkline } from './TrendSparkline.component';
 
@@ -15,30 +15,13 @@ const POINTS = [{ value: 1 }, { value: 3 }, { value: 2 }];
 
 const sparkline = () => screen.getByRole('img', { name: 'Trend' });
 
-const openSettings = () => {
-  fireEvent.click(screen.getByRole('button', { name: 'Settings for Trend' }));
-
-  return within(screen.getByTestId('side-panel'));
-};
-
-beforeEach(() => {
-  HTMLDialogElement.prototype.showModal = function showModal(
-    this: HTMLDialogElement,
-  ) {
-    this.setAttribute('open', '');
-  };
-});
-
-afterEach(() => {
-  cleanup();
-  Reflect.deleteProperty(HTMLDialogElement.prototype, 'showModal');
-});
+withOpenableDialogs();
 
 describe('TrendSparkline settings', () => {
   it('offers density and the connecting line for a points chart', () => {
     render(<TrendSparkline label='Trend' points={POINTS} />);
 
-    const drawer = openSettings();
+    const drawer = openChartSettings('Trend');
 
     expect(
       drawer
@@ -68,7 +51,7 @@ describe('TrendSparkline settings', () => {
     render(<TrendSparkline label='Trend' values={[1, 2]} />);
 
     expect(
-      openSettings()
+      openChartSettings('Trend')
         .getAllByRole('group')
         .map((group) => group.firstChild?.textContent),
     ).toEqual(['Density']);
@@ -78,13 +61,13 @@ describe('TrendSparkline settings', () => {
     render(<TrendSparkline label='Trend' points={POINTS} />);
 
     const before = sparkline().getAttribute('height');
-    const drawer = openSettings();
+    const drawer = openChartSettings('Trend');
 
     fireEvent.click(drawer.getByRole('radio', { name: 'Spacious' }));
     fireEvent.click(
       drawer.getByRole('switch', { name: 'Line between points' }),
     );
-    fireEvent.click(drawer.getByRole('button', { name: 'Accept' }));
+    acceptChartSettings(drawer);
 
     expect([before, sparkline().getAttribute('height')]).toEqual(['24', '42']);
     expect(sparkline().querySelector('path')).toBeNull();
