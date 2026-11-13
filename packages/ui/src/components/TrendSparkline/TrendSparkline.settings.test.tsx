@@ -1,12 +1,13 @@
 // @vitest-environment jsdom
 
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   acceptChartSettings,
   openChartSettings,
 } from '#ui/components/ChartSettings/ChartSettings.fixtures';
+import { mockDialogElement } from '#ui/utils/tests/mockDialogElement.util';
 
 import { TrendSparkline } from './TrendSparkline.component';
 
@@ -14,13 +15,7 @@ const POINTS = [{ value: 1 }, { value: 3 }, { value: 2 }];
 
 const sparkline = () => screen.getByRole('img', { name: 'Trend' });
 
-beforeAll(() => {
-  Object.assign(HTMLDialogElement.prototype, {
-    showModal(this: HTMLDialogElement) {
-      this.setAttribute('open', '');
-    },
-  });
-});
+beforeEach(() => mockDialogElement().restore);
 
 afterEach(cleanup);
 

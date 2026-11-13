@@ -8,13 +8,14 @@ import {
   within,
 } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   acceptChartSettings,
   openChartSettings,
   showChartDataTable,
 } from '#ui/components/ChartSettings/ChartSettings.fixtures';
+import { mockDialogElement } from '#ui/utils/tests/mockDialogElement.util';
 
 import { Heatmap } from './Heatmap.component';
 
@@ -48,13 +49,7 @@ const plotHeight = () =>
     .querySelector('svg[viewBox]')
     ?.getAttribute('height');
 
-beforeAll(() => {
-  Object.assign(HTMLDialogElement.prototype, {
-    showModal(this: HTMLDialogElement) {
-      this.setAttribute('open', '');
-    },
-  });
-});
+beforeEach(() => mockDialogElement().restore);
 
 afterEach(cleanup);
 

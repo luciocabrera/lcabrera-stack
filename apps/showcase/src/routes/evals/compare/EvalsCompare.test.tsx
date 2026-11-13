@@ -279,6 +279,28 @@ describe('EvalsCompare', () => {
     });
   });
 
+  it('keeps the run a side already shows when it is clicked again, so the pair stays whole', async () => {
+    const loader = renderWith({ choices: CHOICES, comparison: undefined });
+
+    await pickRun({ choice: CHOICES[0], side: /^Run B/ });
+    fireEvent.click(screen.getByRole('button', { name: 'Compare runs' }));
+
+    await waitFor(() => {
+      expect(searchOfLastLoad(loader)).toBe('?a=run-before&b=run-newest');
+    });
+  });
+
+  it('opens both pickers on the only run of a one-run history', async () => {
+    renderWith({ choices: [CHOICES[0]], comparison: undefined });
+
+    await screen.findByRole('button', { name: /^Run A/ });
+
+    expect([submittedRun('a'), submittedRun('b')]).toEqual([
+      'run-newest',
+      'run-newest',
+    ]);
+  });
+
   it('offers both pickers with no run to choose on an empty history', async () => {
     renderWith({ choices: [], comparison: undefined });
 

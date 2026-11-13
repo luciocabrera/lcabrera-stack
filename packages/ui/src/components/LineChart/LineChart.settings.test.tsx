@@ -7,13 +7,14 @@ import {
   screen,
   within,
 } from '@testing-library/react';
-import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
+import { afterEach, beforeEach, describe, expect, it } from 'vite-plus/test';
 
 import {
   acceptChartSettings,
   openChartSettings,
   showChartDataTable,
 } from '#ui/components/ChartSettings/ChartSettings.fixtures';
+import { mockDialogElement } from '#ui/utils/tests/mockDialogElement.util';
 
 import { LineChart } from './LineChart.component';
 
@@ -58,13 +59,7 @@ const dotTitles = () =>
     .map(({ textContent }) => textContent)
     .filter((title) => title?.includes(', '));
 
-beforeAll(() => {
-  Object.assign(HTMLDialogElement.prototype, {
-    showModal(this: HTMLDialogElement) {
-      this.setAttribute('open', '');
-    },
-  });
-});
+beforeEach(() => mockDialogElement().restore);
 
 afterEach(cleanup);
 
@@ -145,6 +140,24 @@ describe('LineChart settings', () => {
       false,
       false,
     ]);
+  });
+
+  it('labels markers that arrive after the first render, as the prop asks', () => {
+    const { rerender } = render(<LineChart series={SERIES} title='Latency' />);
+
+    rerender(
+      <LineChart
+        markers={[{ label: 'Deploy', x: 50 }]}
+        series={SERIES}
+        title='Latency'
+      />,
+    );
+
+    expect(
+      within(figure())
+        .queryAllByText('Deploy')
+        .map(({ tagName }) => tagName.toLowerCase()),
+    ).toEqual(['li', 'title']);
   });
 
   it('drops the unlinked dots once Linked points only is accepted', () => {

@@ -60,7 +60,7 @@ export type LineChartDrawnPoint = ChartPoint & { readonly y: number };
 
 export type LineChartFigureProps = Omit<
   LineChartProps,
-  'density' | 'features' | 'hasMarkerLabels' | 'points'
+  'density' | 'features' | 'points'
 > & {
   readonly settings: ChartSettingsValues;
 };

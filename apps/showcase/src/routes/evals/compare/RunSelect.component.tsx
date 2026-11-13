@@ -9,16 +9,23 @@ export const RunSelect = ({
   name,
   options,
 }: RunSelectProps) => {
+  const initial = defaultValue ?? options[0]?.value;
   const [selected, setSelected] = useState<readonly string[]>(
-    defaultValue === undefined ? [] : [defaultValue],
+    initial === undefined ? [] : [initial],
   );
+
+  const handleChange = (next: readonly string[]) => {
+    if (next.length > 0) {
+      setSelected(next);
+    }
+  };
 
   return (
     <VirtualSelect
       label={label}
       mode='single'
       name={name}
-      onChange={setSelected}
+      onChange={handleChange}
       options={options}
       placeholder='Select a run...'
       selected={selected}

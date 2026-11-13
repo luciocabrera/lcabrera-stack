@@ -9,7 +9,7 @@ import { getLineChartInitialSettings } from './utils/getLineChartInitialSettings
 export const LineChart = ({
   density = CHART_DEFAULT_DENSITY,
   features,
-  hasMarkerLabels,
+  hasMarkerLabels = true,
   points,
   ...props
 }: LineChartProps) => {
@@ -23,7 +23,13 @@ export const LineChart = ({
   });
 
   if (features?.settings === false) {
-    return <LineChartFigure {...props} settings={initialSettings} />;
+    return (
+      <LineChartFigure
+        {...props}
+        hasMarkerLabels={hasMarkerLabels}
+        settings={initialSettings}
+      />
+    );
   }
 
   return (
@@ -31,7 +37,11 @@ export const LineChart = ({
       initialSettings={initialSettings}
       label={`Settings for ${props.title}`}
       renderChart={(settings) => (
-        <LineChartFigure {...props} settings={settings} />
+        <LineChartFigure
+          {...props}
+          hasMarkerLabels={hasMarkerLabels}
+          settings={settings}
+        />
       )}
     />
   );

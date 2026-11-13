@@ -12,7 +12,7 @@ type GetLineChartInitialSettingsArgs = Pick<
 
 export const getLineChartInitialSettings = ({
   density,
-  hasMarkerLabels = true,
+  hasMarkerLabels,
   markers = [],
   points = 'auto',
   series,

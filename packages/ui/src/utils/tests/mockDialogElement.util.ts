@@ -12,6 +12,7 @@ const setDialogOpen = ({
     value: isOpen,
     writable: true,
   });
+  dialog.toggleAttribute('open', isOpen);
 };
 
 const setAllDialogsOpen = ({ isOpen }: { readonly isOpen: boolean }) => {

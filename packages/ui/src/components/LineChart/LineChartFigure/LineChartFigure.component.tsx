@@ -19,6 +19,7 @@ import { getLineChartGeometry } from '../utils/getLineChartGeometry.util';
 export const LineChartFigure = ({
   description,
   hasDataTable,
+  hasMarkerLabels,
   height = LINE_CHART.defaultHeight,
   markers,
   series,
@@ -42,7 +43,7 @@ export const LineChartFigure = ({
   return (
     <figure aria-labelledby={titleId} {...stylex.props(lineChartLayout.root)}>
       <LineChartAxisLabel axis='y' label={yAxis.label} />
-      {settings.hasMarkerLabels === true && (
+      {(settings.hasMarkerLabels ?? hasMarkerLabels) === true && (
         <LineChartMarkerLabels markers={geometry.markers} />
       )}
       <LineChartTicks axis='y' ticks={geometry.yTicks} />
