@@ -1,12 +1,11 @@
 // @vitest-environment jsdom
 
-import { fireEvent, render, screen } from '@testing-library/react';
-import { describe, expect, it } from 'vite-plus/test';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import {
   acceptChartSettings,
   openChartSettings,
-  withOpenableDialogs,
 } from '#ui/components/ChartSettings/ChartSettings.fixtures';
 
 import { TrendSparkline } from './TrendSparkline.component';
@@ -15,7 +14,15 @@ const POINTS = [{ value: 1 }, { value: 3 }, { value: 2 }];
 
 const sparkline = () => screen.getByRole('img', { name: 'Trend' });
 
-withOpenableDialogs();
+beforeAll(() => {
+  Object.assign(HTMLDialogElement.prototype, {
+    showModal(this: HTMLDialogElement) {
+      this.setAttribute('open', '');
+    },
+  });
+});
+
+afterEach(cleanup);
 
 describe('TrendSparkline settings', () => {
   it('offers density and the connecting line for a points chart', () => {

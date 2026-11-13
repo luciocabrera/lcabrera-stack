@@ -125,12 +125,14 @@ it('shades the Wilson band around the pass-rate line', async ({ page }) => {
     name: 'skill react-19 pass rate in skills over time',
   });
   const dot = skills.getByRole('link', { name: /^skills run 54000000, / });
-  const plotBox = await skills
-    .getByRole('img', {
-      exact: true,
-      name: 'skill react-19 pass rate in skills over time',
-    })
-    .boundingBox();
+  const plot = skills.getByRole('img', {
+    exact: true,
+    name: 'skill react-19 pass rate in skills over time',
+  });
+
+  await plot.scrollIntoViewIfNeeded();
+
+  const plotBox = await plot.boundingBox();
   const dotBox = await dot.boundingBox();
 
   if (plotBox === null || dotBox === null) {

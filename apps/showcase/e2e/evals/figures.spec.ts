@@ -7,6 +7,7 @@ import {
   expectRightAligned,
   mainOf,
   openEvals,
+  openTab,
   rowOf,
 } from './evalsPage';
 
@@ -36,6 +37,7 @@ it('sets every cost figure in tabular figures, right-aligned, and the name in pr
   page,
 }) => {
   await openEvals(page, '/evals/cost');
+  await openTab(page, 'Per subject');
 
   await expectFigureCells({
     figures: [1, 2, 3, 4, 5, 6, 7, 8],

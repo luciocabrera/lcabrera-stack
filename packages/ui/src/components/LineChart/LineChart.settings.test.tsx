@@ -1,13 +1,18 @@
 // @vitest-environment jsdom
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
-import { describe, expect, it } from 'vite-plus/test';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
+import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import {
   acceptChartSettings,
   openChartSettings,
   showChartDataTable,
-  withOpenableDialogs,
 } from '#ui/components/ChartSettings/ChartSettings.fixtures';
 
 import { LineChart } from './LineChart.component';
@@ -56,7 +61,15 @@ const dotTitles = () =>
 const table = () =>
   screen.getByText('Latency', { selector: 'caption' }).closest('table');
 
-withOpenableDialogs();
+beforeAll(() => {
+  Object.assign(HTMLDialogElement.prototype, {
+    showModal(this: HTMLDialogElement) {
+      this.setAttribute('open', '');
+    },
+  });
+});
+
+afterEach(cleanup);
 
 describe('LineChart settings', () => {
   it('offers density, points, ticks, the legend, the data table and marker labels', () => {

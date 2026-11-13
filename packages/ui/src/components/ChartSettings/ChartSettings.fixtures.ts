@@ -1,24 +1,8 @@
-import { cleanup, fireEvent, screen, within } from '@testing-library/react';
-import { afterEach, beforeEach } from 'vite-plus/test';
+import { fireEvent, screen, within } from '@testing-library/react';
 
 type ChartTableArgs = {
   readonly label: string;
   readonly table: () => HTMLTableElement | null;
-};
-
-const showModal = function showModal(this: HTMLDialogElement) {
-  this.setAttribute('open', '');
-};
-
-export const withOpenableDialogs = () => {
-  beforeEach(() => {
-    HTMLDialogElement.prototype.showModal = showModal;
-  });
-
-  afterEach(() => {
-    cleanup();
-    Reflect.deleteProperty(HTMLDialogElement.prototype, 'showModal');
-  });
 };
 
 export const openChartSettings = (label: string) => {

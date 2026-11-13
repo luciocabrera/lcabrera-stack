@@ -1,14 +1,19 @@
 // @vitest-environment jsdom
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import {
+  cleanup,
+  fireEvent,
+  render,
+  screen,
+  within,
+} from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { describe, expect, it } from 'vite-plus/test';
+import { afterEach, beforeAll, describe, expect, it } from 'vite-plus/test';
 
 import {
   acceptChartSettings,
   openChartSettings,
   showChartDataTable,
-  withOpenableDialogs,
 } from '#ui/components/ChartSettings/ChartSettings.fixtures';
 
 import { Heatmap } from './Heatmap.component';
@@ -46,7 +51,15 @@ const plotHeight = () =>
 const table = () =>
   screen.getByText('Grid', { selector: 'caption' }).closest('table');
 
-withOpenableDialogs();
+beforeAll(() => {
+  Object.assign(HTMLDialogElement.prototype, {
+    showModal(this: HTMLDialogElement) {
+      this.setAttribute('open', '');
+    },
+  });
+});
+
+afterEach(cleanup);
 
 describe('Heatmap settings', () => {
   it('offers density, column labels, the legend and the data table', () => {
