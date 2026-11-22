@@ -503,7 +503,7 @@ describe('Table static layout review fixes', () => {
 
     const sizedWidths = {
       maxWidth: undefined,
-      minWidth: undefined,
+      minWidth: DEFAULT_MIN_COLUMN_WIDTH,
       width: 68,
     };
 

@@ -1,5 +1,6 @@
 import type { TableColumn } from '../Table.types';
 
+import { resolveColumnMinWidth } from './resolveColumnMinWidth.util';
 import { resolveColumnStartWidth } from './resolveColumnStartWidth.util';
 
 type ResolveStaticColumnWidthsArgs<TData> = Pick<
@@ -19,14 +20,14 @@ export const resolveStaticColumnWidths = <TData>({
 }: ResolveStaticColumnWidthsArgs<TData>) => {
   if (isPinned) {
     const pinnedWidth =
-      sizedWidth ?? resolveColumnStartWidth({ minWidth, width });
+      sizedWidth ?? resolveColumnStartWidth({ maxWidth, minWidth, width });
 
     return { maxWidth: pinnedWidth, minWidth: pinnedWidth, width: pinnedWidth };
   }
 
   return {
     maxWidth,
-    minWidth,
+    minWidth: resolveColumnMinWidth({ maxWidth, minWidth }),
     width: sizedWidth ?? (width === 'fill' ? '100%' : width),
   };
 };

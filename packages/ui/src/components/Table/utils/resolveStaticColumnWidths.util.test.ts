@@ -4,12 +4,18 @@ import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.constants';
 import { resolveStaticColumnWidths } from './resolveStaticColumnWidths.util';
 
 describe('resolveStaticColumnWidths', () => {
-  it('leaves an undeclared column to size to its content', () => {
+  it('leaves an undeclared column to size to its content, from the default minimum', () => {
     expect(resolveStaticColumnWidths({})).toStrictEqual({
       maxWidth: undefined,
-      minWidth: undefined,
+      minWidth: DEFAULT_MIN_COLUMN_WIDTH,
       width: undefined,
     });
+  });
+
+  it('fixes a pinned column below the default minimum at its declared maximum', () => {
+    expect(
+      resolveStaticColumnWidths({ isPinned: true, maxWidth: 40 }),
+    ).toStrictEqual({ maxWidth: 40, minWidth: 40, width: 40 });
   });
 
   it('keeps the declared bounds and numeric width', () => {
