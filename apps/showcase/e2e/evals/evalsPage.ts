@@ -210,10 +210,13 @@ export const expectRightAligned = async (cell: Locator) => {
 
     return {
       alignments: [...alignments],
+      count: boxes.length,
       left: Math.min(...boxes.map(({ left }) => left)) - contentLeft,
       right: contentRight - Math.max(...boxes.map(({ right }) => right)),
     };
   });
+
+  expect(layout.count).toBeGreaterThan(0);
 
   if (layout.left < 1 && layout.right < 1) {
     expect(layout.alignments).toStrictEqual(

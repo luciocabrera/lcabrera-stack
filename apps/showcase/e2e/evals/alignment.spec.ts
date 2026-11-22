@@ -13,6 +13,7 @@ const CELLS = `<table>
   <tr>
     <td style="overflow: hidden; white-space: nowrap; text-align: right">123,456,789,012</td>
     <td style="overflow: hidden; white-space: nowrap">123,456,789,012</td>
+    <td style="text-align: right"> </td>
   </tr>
 </table>`;
 
@@ -41,4 +42,12 @@ it('reads right alignment from the layout when the text fills its cell', async (
   await expect(expectRightAligned(cells.nth(4))).rejects.toThrow(
     'toStrictEqual',
   );
+});
+
+it('refuses a cell with no text', async ({ page }) => {
+  await page.setContent(CELLS);
+
+  await expect(
+    expectRightAligned(page.getByRole('cell').nth(5)),
+  ).rejects.toThrow('toBeGreaterThan');
 });
