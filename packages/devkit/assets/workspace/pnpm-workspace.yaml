@@ -92,9 +92,7 @@ catalogs:
 catalogMode: prefer
 
 # Redirect every `vite`/`vitest` edge to the toolchain catalog so the workspace
-# resolves a single Vite+ instance. The core alias does not satisfy plugins'
-# `vite` peer ranges, so allow any peer for these two: the single resolved
-# version is the source of truth, not the range. The keys are `vite@*` and
+# resolves a single Vite+ instance. The keys are `vite@*` and
 # `vitest@*`, because a bare key also matches a `catalog:` reference and an
 # upgrade rewrites that reference to a concrete version.
 overrides:
@@ -107,11 +105,3 @@ overrides:
   minimatch@10: ^11.0.1
   vite@*: catalog:build
   vitest@*: catalog:test
-
-peerDependencyRules:
-  allowAny:
-    - vite
-    - vitest
-  allowedVersions:
-    vite: '*'
-    vitest: '*'

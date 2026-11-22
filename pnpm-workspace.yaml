@@ -164,14 +164,13 @@ minimumReleaseAgeExclude:
   - '@fallow-cli/*'
   - '@react-router/*'
 
+  - '@tsrs/*'
   - '@voidzero-dev/*'
   - vite-plus
 
 # Redirect every `vite`/`vitest` edge to the toolchain catalog so the workspace
-# resolves a single Vite+ instance (see the `build` catalog note above). The core
-# alias does not satisfy plugins' `vite@^8` peer ranges, so allow any peer for
-# these two — the single resolved version is the source of truth, not the range.
-# The keys are `vite@*` and `vitest@*`: a bare key also matches a `catalog:`
+# resolves a single Vite+ instance (see the `build` catalog note above). The
+# keys are `vite@*` and `vitest@*`: a bare key also matches a `catalog:`
 # reference, and `vp up` then rewrites that reference to a concrete version.
 overrides:
   # GHSA-2v37-7h3g-55p8 — nanoid's custom generators loop forever at size zero,
@@ -207,12 +206,5 @@ overrides:
   glob@13: ^14.0.2
   vite@*: catalog:build
   vitest@*: catalog:test
-peerDependencyRules:
-  allowAny:
-    - vite
-    - vitest
-  allowedVersions:
-    vite: '*'
-    vitest: '*'
 
 # trustPolicy: no-downgrade
