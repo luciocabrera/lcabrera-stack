@@ -99,6 +99,7 @@ export const EvalsQuality = () => {
                   layout='static'
                   response={dimensions.map((row) => ({ ...row, skill: name }))}
                   title={`${name}: rubric dimensions`}
+                  titleLevel={3}
                 />
               </section>
             ),
