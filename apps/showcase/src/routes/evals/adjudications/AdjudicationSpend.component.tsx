@@ -29,6 +29,7 @@ export const AdjudicationSpend = ({
         layout='static'
         response={rules}
         title='Cases by analyzer and rule, with the share the true answer called a false positive'
+        titleLevel={3}
       />
     </section>
     <section {...stylex.props(layoutStyles.section)}>
@@ -42,6 +43,7 @@ export const AdjudicationSpend = ({
         layout='static'
         response={costs}
         title='Reported cost, time and tokens of each model on the panel'
+        titleLevel={3}
       />
     </section>
     <section {...stylex.props(layoutStyles.section)}>
@@ -55,6 +57,7 @@ export const AdjudicationSpend = ({
         layout='static'
         response={builders}
         title='Cases by the model that built the change, with the panel accuracy on them'
+        titleLevel={3}
       />
     </section>
   </>

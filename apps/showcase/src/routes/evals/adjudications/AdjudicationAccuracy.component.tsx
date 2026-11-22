@@ -40,6 +40,7 @@ export const AdjudicationAccuracy = ({
             layout='static'
             response={accuracy}
             title='Verdicts scored against the latest true answer, by model and role'
+            titleLevel={3}
           />
           <LineChart
             hasDataTable
@@ -80,6 +81,7 @@ export const AdjudicationAccuracy = ({
         layout='static'
         response={prompts}
         title='Verdicts by role and prompt hash, oldest prompt first'
+        titleLevel={3}
       />
     </section>
   </>

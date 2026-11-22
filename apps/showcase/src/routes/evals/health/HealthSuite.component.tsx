@@ -51,6 +51,7 @@ export const HealthSuite = ({
           layout='static'
           response={classes}
           title={`${suite}: errors and timeouts by error class`}
+          titleLevel={3}
         />
         <Table
           columns={HEALTH_RUN_COLUMNS}
@@ -59,6 +60,7 @@ export const HealthSuite = ({
           layout='static'
           response={troubled}
           title={`${suite}: the runs with an error or a timeout, newest first`}
+          titleLevel={3}
         />
       </>
     )}

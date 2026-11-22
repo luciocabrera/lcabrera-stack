@@ -39,6 +39,7 @@ export const splitTableProps = <
   response,
   title,
   titleDensity,
+  titleLevel,
   ...tableProps
 }: SplitTablePropsArgs<TData, TResponse>) => ({
   own: {
@@ -62,6 +63,7 @@ export const splitTableProps = <
     response,
     title,
     titleDensity,
+    titleLevel,
   } satisfies Record<OwnTablePropKey, unknown>,
   tableProps,
 });

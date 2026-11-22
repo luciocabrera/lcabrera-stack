@@ -32,6 +32,7 @@ export const AdjudicationCases = ({
         layout='static'
         response={rows}
         title='False-positive panel cases, newest first'
+        titleLevel={3}
       />
     </section>
     <section {...stylex.props(layoutStyles.section)}>

@@ -148,6 +148,28 @@ it('lists each flaky task with its split runs and one dated column per run', asy
   }
 });
 
+it('sizes a dated column by its tallies, not its wider date label, which it truncates', async ({
+  page,
+}) => {
+  await page.setViewportSize({ height: 900, width: 480 });
+  await openEvals(page, '/evals/flaky');
+
+  const header = page
+    .getByRole('columnheader', { exact: true, name: '2026-10-17' })
+    .first();
+  const sizes = await header
+    .getByTestId('table-header-label')
+    .evaluate((label) => ({
+      clipped: label.clientWidth,
+      column: label.closest('th')?.getBoundingClientRect().width ?? 0,
+      natural: label.scrollWidth,
+    }));
+
+  expect(sizes.natural).toBeGreaterThan(sizes.clipped);
+  expect(sizes.column).toBeGreaterThanOrEqual(60);
+  expect(sizes.column).toBeLessThan(sizes.natural);
+});
+
 it('marks the cells whose trials split apart from the rest', async ({
   page,
 }) => {

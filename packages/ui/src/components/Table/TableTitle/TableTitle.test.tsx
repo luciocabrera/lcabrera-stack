@@ -3,6 +3,8 @@
 import { cleanup, render, screen } from '@testing-library/react';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
+import { TablePresentationContext } from '../contexts/TableConfig/TablePresentationContext.context';
+import { resolveTablePresentation } from '../utils/resolveTablePresentation.util';
 import { TableTitle } from './TableTitle.component';
 
 const { useGetTableTitleDensityMock, useGetTableTitlePluralMock } = vi.hoisted(
@@ -46,6 +48,22 @@ describe('TableTitle', () => {
 
     const heading = screen.getByRole('heading', { name: 'Enterprise Orders' });
     expect(heading.tagName).toBe('H2');
+  });
+
+  it('renders the title at the level its presentation names', () => {
+    cleanup();
+    useGetTableTitlePluralMock.mockReturnValue('Enterprise Orders');
+
+    render(
+      <TablePresentationContext
+        value={resolveTablePresentation({ titleLevel: 3 })}
+      >
+        <TableTitle />
+      </TablePresentationContext>,
+    );
+
+    const heading = screen.getByRole('heading', { name: 'Enterprise Orders' });
+    expect(heading.tagName).toBe('H3');
   });
 
   it('renders icon and actions slots when provided', () => {

@@ -202,6 +202,37 @@ describe('Table static layout', () => {
     ).toBeDefined();
   });
 
+  it('renders its title bar heading at the level it is given, and at 2 by default', () => {
+    const { unmount } = render(
+      <Table
+        columns={COLUMNS}
+        features={{ toolbar: true }}
+        layout='static'
+        response={ROWS}
+        title='Scores by entry'
+        titleLevel={3}
+      />,
+    );
+
+    expect(
+      screen.getByRole('heading', { name: 'Scores by entry' }).tagName,
+    ).toBe('H3');
+
+    unmount();
+    render(
+      <Table
+        columns={COLUMNS}
+        features={{ toolbar: true }}
+        response={ROWS}
+        title='Scores by entry'
+      />,
+    );
+
+    expect(
+      screen.getByRole('heading', { name: 'Scores by entry' }).tagName,
+    ).toBe('H2');
+  });
+
   it('virtualizes the same rows in the virtual layout, so the row count discriminates', () => {
     renderScores({ layout: 'virtual' });
 

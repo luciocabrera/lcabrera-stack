@@ -73,6 +73,7 @@ export const EvalsFlaky = () => {
                 layout='static'
                 response={rows}
                 title={`${suite}: ${String(tasks.length)} flaky tasks left out, each over the suite's last ${String(runs.length)} runs, oldest first`}
+                titleLevel={3}
               />
             )}
           </section>

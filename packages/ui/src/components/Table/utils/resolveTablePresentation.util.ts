@@ -1,13 +1,17 @@
+import type { TitleLevel } from '#ui/components/Title/Title.types';
+
 import type { TableFeatures, TableLayoutMode } from '../Table.types';
 
 type ResolveTablePresentationArgs = {
   readonly features?: TableFeatures;
   readonly layout?: TableLayoutMode;
+  readonly titleLevel?: TitleLevel;
 };
 
 export const resolveTablePresentation = ({
   features = {},
   layout = 'virtual',
+  titleLevel = 2,
 }: ResolveTablePresentationArgs) => {
   const isOnByDefault = layout === 'virtual';
 
@@ -19,5 +23,6 @@ export const resolveTablePresentation = ({
       toolbar: features.toolbar ?? isOnByDefault,
     },
     layout,
+    titleLevel,
   };
 };

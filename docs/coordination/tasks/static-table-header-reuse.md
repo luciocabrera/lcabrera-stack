@@ -22,6 +22,8 @@ area:
   - apps/showcase/src/routes/evals/constants/evalsDashboard.constants.ts
   - apps/showcase/e2e/evals/adjudications.spec.ts
   - apps/showcase/e2e/evals/evalsPage.ts
+  - apps/showcase/e2e/evals/alignment.spec.ts
+  - apps/showcase/e2e/evals/flaky.spec.ts
   - packages/ui/src/components/VirtualSelect/VirtualSelectTrigger/VirtualSelectTrigger.stylex.ts
 started: 2026-11-20
 updated: 2026-11-22

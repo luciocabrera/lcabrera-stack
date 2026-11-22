@@ -44,6 +44,7 @@ export const CompareReport = ({
           layout='static'
           response={flips}
           title={`${String(flips.length)} of ${String(tasks)} tasks changed verdict`}
+          titleLevel={3}
         />
       )}
     </section>
@@ -58,6 +59,7 @@ export const CompareReport = ({
         layout='static'
         response={totals}
         title='Run A against run B'
+        titleLevel={3}
       />
     </section>
     <section {...stylex.props(layoutStyles.section)}>

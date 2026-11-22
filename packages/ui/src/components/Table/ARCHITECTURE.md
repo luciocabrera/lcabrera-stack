@@ -102,7 +102,8 @@ with every switch off, the own stack mounts no `FiltersDataProvider`,
 drawers and resize write paths read them.
 
 A `Table` has one title, `title`: the title bar shows it when the toolbar is
-on, and `TableBase` names the `<table>` with it in both layouts. `footer` renders
+on, as a heading at `titleLevel` (2 unless set, resolved into
+`TablePresentationContext`), and `TableBase` names the `<table>` with it in both layouts. `footer` renders
 inside `TableBase` in both layouts, as `TableFooter`'s single `<tfoot>` row
 spanning every rendered column. The footer row takes the `aria-rowindex` after the last body row, and the
 virtual grid's `aria-rowcount` counts it. The `<table>` props and `customStylex` a `Table` is given are split off by

@@ -15,7 +15,11 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { RunFigures } from '../types/runFigures.types';
 
-import { breadcrumbTrail, evalsTrail } from '../utils/pageHeader.fixtures';
+import {
+  breadcrumbTrail,
+  evalsTrail,
+  headingOutline,
+} from '../utils/pageHeader.fixtures';
 import { tableCells, tableHeaders } from '../utils/staticTable.fixtures';
 import { EvalsCompare } from './EvalsCompare.component';
 import { EVALS_COMPARE_HANDLE } from './EvalsCompare.constants';
@@ -197,16 +201,12 @@ describe('EvalsCompare', () => {
     expect(
       screen.getByText('One cause: skill react-19 content.'),
     ).toBeDefined();
-    expect(
-      screen
-        .getAllByRole('heading', { level: 2 })
-        .map((heading) => heading.textContent),
-    ).toEqual([
-      'Flipped tasks',
-      '2 of 7 tasks changed verdict',
-      'Totals',
-      'Run A against run B',
-      'Changed inputs',
+    expect(headingOutline()).toEqual([
+      'H2 Flipped tasks',
+      'H3 2 of 7 tasks changed verdict',
+      'H2 Totals',
+      'H3 Run A against run B',
+      'H2 Changed inputs',
     ]);
     expect(
       [COMPARISON.a, COMPARISON.b].map(
