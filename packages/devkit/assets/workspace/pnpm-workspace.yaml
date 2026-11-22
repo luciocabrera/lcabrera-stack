@@ -28,6 +28,7 @@ minimumReleaseAgeExclude:
   - '@oxfmt/binding-*'
   - '@oxlint-tsgolint/*'
   - '@oxlint/binding-*'
+  - '@tsrs/*'
   - '@voidzero-dev/vite-plus-darwin-*'
   - '@voidzero-dev/vite-plus-linux-*'
   - '@voidzero-dev/vite-plus-win32-*'
@@ -51,11 +52,11 @@ catalogs:
     typescript: ^6.0.3
     # `vite` is aliased to Vite+ core so the whole workspace resolves ONE Vite
     # instance; the `overrides` below redirect every `vite` edge here. Without
-    # it the graph splits across separate Vite+, Vite and Vitest copies. Keep in
-    # lockstep with `vite-plus` (same Vite+ release).
-    vite: npm:@voidzero-dev/vite-plus-core@1.6.0
+    # it the graph splits across separate Vite+, Vite and Vitest copies. Keep it
+    # on the core version the pinned `vite-plus` depends on.
+    vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
     vite-plugin-babel: ^1.7.3
-    vite-plus: 1.6.0
+    vite-plus: 1.7.0
 
   lint:
     '@biomejs/biome': ^2.5.11

@@ -162,6 +162,7 @@
     "@vitest/coverage-v8": "catalog:test",
     "eslint": "catalog:lint",
     "fallow": "catalog:tooling",
+    "fallow-type-aware": "catalog:tooling",
     "jsdom": "catalog:test",
     "publint": "catalog:tooling",
     "react-doctor": "catalog:lint",

@@ -40,11 +40,12 @@ catalogs:
     # instance — the `overrides` at the bottom redirect every `vite` edge here.
     # Without this, pnpm auto-installs upstream Vite to satisfy Vitest's `vite`
     # peer and the graph splits across separate Vite+, Vite, and Vitest copies.
-    # Keep this in lockstep with the `vite-plus` version (same Vite+ release).
+    # Keep this on the core version the pinned `vite-plus` depends on:
+    # `npm view vite-plus@<version> dependencies.vite`.
     # See node_modules/vite-plus/docs/guide/migrate-rules.md "Vite and Overrides".
-    vite: npm:@voidzero-dev/vite-plus-core@1.6.0
+    vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
     vite-plugin-babel: ^1.7.3
-    vite-plus: 1.6.0
+    vite-plus: 1.7.0
   lint:
     # Held on 2.5 until #1541: Biome 2.6 fails the Biome pass on this tree.
     '@biomejs/biome': ~2.5.15
@@ -117,6 +118,7 @@ catalogs:
     '@changesets/cli': ^3.0.3
     '@changesets/get-release-plan': ^5.0.2
     fallow: ^3.45.0
+    fallow-type-aware: ^3.45.0
     knip: ^6.47.0
     lighthouse: ^13.6.0
     publint: ^0.3.25
