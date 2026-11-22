@@ -5,6 +5,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { AdjudicationCasesProps } from './EvalsAdjudications.types';
 
+import { EVALS_TITLE_BAR_FEATURES } from '../constants/evalsDashboard.constants';
 import { layoutStyles } from '../evalsLayout.stylex';
 import { CASE_COLUMNS } from './EvalsAdjudications.constants';
 
@@ -25,11 +26,12 @@ export const AdjudicationCases = ({
         since the three sit at once.
       </Text>
       <Table
-        caption='False-positive panel cases, newest first'
         columns={CASE_COLUMNS}
         density='compact'
+        features={EVALS_TITLE_BAR_FEATURES}
         layout='static'
         response={rows}
+        title='False-positive panel cases, newest first'
       />
     </section>
     <section {...stylex.props(layoutStyles.section)}>

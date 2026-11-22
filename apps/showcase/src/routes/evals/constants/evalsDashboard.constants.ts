@@ -61,3 +61,5 @@ export const EVALS_TABLE_FEATURES = {
   settings: true,
   toolbar: true,
 } as const;
+
+export const EVALS_TITLE_BAR_FEATURES = { toolbar: true } as const;

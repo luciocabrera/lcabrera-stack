@@ -7,6 +7,7 @@ import { TrendSparkline } from '@lcabrera/ui/components/TrendSparkline';
 
 import type { HealthSuiteProps } from './EvalsHealth.types';
 
+import { EVALS_TITLE_BAR_FEATURES } from '../constants/evalsDashboard.constants';
 import { layoutStyles } from '../evalsLayout.stylex';
 import {
   HEALTH_CLASS_COLUMNS,
@@ -44,18 +45,20 @@ export const HealthSuite = ({
     ) : (
       <>
         <Table
-          caption={`${suite}: errors and timeouts by error class`}
           columns={HEALTH_CLASS_COLUMNS}
           density='compact'
+          features={EVALS_TITLE_BAR_FEATURES}
           layout='static'
           response={classes}
+          title={`${suite}: errors and timeouts by error class`}
         />
         <Table
-          caption={`${suite}: the runs with an error or a timeout, newest first`}
           columns={HEALTH_RUN_COLUMNS}
           density='compact'
+          features={EVALS_TITLE_BAR_FEATURES}
           layout='static'
           response={troubled}
+          title={`${suite}: the runs with an error or a timeout, newest first`}
         />
       </>
     )}

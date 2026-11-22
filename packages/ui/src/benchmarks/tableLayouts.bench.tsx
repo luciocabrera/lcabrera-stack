@@ -51,7 +51,6 @@ const renderPage = (layout: TableLayoutMode) => (
   <main>
     {TABLES.map(({ name, rows }) => (
       <Table
-        caption={name}
         columns={COLUMNS}
         key={name}
         layout={layout}

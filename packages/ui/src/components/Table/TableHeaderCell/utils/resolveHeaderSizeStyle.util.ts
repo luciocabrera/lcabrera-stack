@@ -4,6 +4,7 @@ import type {
   TableLayoutMode,
 } from '#ui/components/Table/Table.types';
 
+import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { resolveStaticColumnWidths } from '#ui/components/Table/utils/resolveStaticColumnWidths.util';
 
 import { tableHeaderCellStyles } from '../TableHeaderCell.stylex';
@@ -29,6 +30,7 @@ export const resolveHeaderSizeStyle = <TData>({
       resolveStaticColumnWidths({
         ...column,
         isPinned: pinInfo !== undefined,
+        minWidth: column.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH,
         sizedWidth,
       }),
     );

@@ -81,9 +81,11 @@ it there, so neither prop is drilled and neither is written to a store.
   is fixed at its stored size or its start width, the numbers
   `getPinnedColumnOffsets` computes the sticky offsets from, so the offsets
   match the widths the browser renders.
-- A header label wraps in the static layout instead of truncating with an
-  ellipsis, so a column can be narrower than its label and the header row grows
-  to fit, as a body row does.
+- A header cell renders the same row in both layouts: the label, truncated
+  with an ellipsis, then its controls. A static `<th>` stays a table cell, so
+  the row is an inner flex box, and the static label is kept out of the
+  column's width: its cells size the column, down to the virtual layout's
+  minimum width.
 - A header cell stays `position: sticky` in the static layout, so a pinned
   column's header pins with its body cells. A header band spans its columns
   with `colSpan` and is sized by the table, not by summed widths.
@@ -99,9 +101,10 @@ with every switch off, the own stack mounts no `FiltersDataProvider`,
 `GlobalSettingsProvider` or `NotificationProvider`, because only the menus,
 drawers and resize write paths read them.
 
-`caption` and `footer` render inside `TableBase` in both layouts: a `<caption>`
-first, and `TableFooter`'s single `<tfoot>` row spanning every rendered column
-last. The footer row takes the `aria-rowindex` after the last body row, and the
+A `Table` has one title, `title`: the title bar shows it when the toolbar is
+on, and `TableBase` names the `<table>` with it in both layouts. `footer` renders
+inside `TableBase` in both layouts, as `TableFooter`'s single `<tfoot>` row
+spanning every rendered column. The footer row takes the `aria-rowindex` after the last body row, and the
 virtual grid's `aria-rowcount` counts it. The `<table>` props and `customStylex` a `Table` is given are split off by
 `splitTableProps`, whose list of the `Table`'s own keys is checked against
 `TableProps` by type, and reach `TableBase` in both layouts. In the virtual layout,

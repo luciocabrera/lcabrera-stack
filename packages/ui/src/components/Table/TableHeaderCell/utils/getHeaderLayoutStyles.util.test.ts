@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+
 import { tableHeaderCellStyles } from '../TableHeaderCell.stylex';
 import { getHeaderLayoutStyles } from './getHeaderLayoutStyles.util';
 
@@ -77,7 +79,7 @@ describe('getHeaderLayoutStyles', () => {
     ).toStrictEqual(
       tableHeaderCellStyles.staticLayout({
         maxWidth: undefined,
-        minWidth: undefined,
+        minWidth: DEFAULT_MIN_COLUMN_WIDTH,
         width: '100%',
       }),
     );
@@ -93,13 +95,13 @@ describe('getHeaderLayoutStyles', () => {
     ).toStrictEqual(
       tableHeaderCellStyles.staticLayout({
         maxWidth: undefined,
-        minWidth: undefined,
+        minWidth: DEFAULT_MIN_COLUMN_WIDTH,
         width: 180,
       }),
     );
   });
 
-  it('lets a static header label wrap, after its alignment', () => {
+  it('keeps a static header label out of the column width, after its alignment', () => {
     expect(
       getHeaderLayoutStyles({ column: {}, layout: 'static' }).label,
     ).toStrictEqual([tableHeaderCellStyles.staticLabel]);

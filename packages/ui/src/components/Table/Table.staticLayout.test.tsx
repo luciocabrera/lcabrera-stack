@@ -138,22 +138,33 @@ const renderScores = ({ layout = 'static' }: RenderScoresArgs = {}) =>
   render(
     <section>
       <Table
-        caption='Scores this week'
         columns={COLUMNS}
         layout={layout}
         response={ROWS}
+        title='Scores this week'
       />
     </section>,
   );
 
-const headerLabelsWrap = (layout: TableLayoutMode) => {
+const headerLabelStyles = (layout: TableLayoutMode) => {
   renderScores({ layout });
 
-  const result = screen
-    .getAllByTestId('table-header-label')
-    .map((element) =>
-      hasStylexStyle({ element, style: tableHeaderCellStyles.staticLabel }),
-    );
+  const result = screen.getAllByTestId('table-header-label').map((element) => ({
+    isContained: hasStylexStyle({
+      element,
+      style: tableHeaderCellStyles.staticLabel,
+    }),
+    isInRow:
+      element.parentElement !== null &&
+      hasStylexStyle({
+        element: element.parentElement,
+        style: tableHeaderCellStyles.row,
+      }),
+    isTruncated: hasStylexStyle({
+      element,
+      style: tableHeaderCellStyles.content,
+    }),
+  }));
 
   cleanup();
 
@@ -161,17 +172,34 @@ const headerLabelsWrap = (layout: TableLayoutMode) => {
 };
 
 describe('Table static layout', () => {
-  it('renders every row, as a table, under its caption, inside a parent with no height', () => {
+  it('renders every row, as a table named by its title, inside a parent with no height', () => {
     renderScores();
 
     const table = screen.getByTestId('table');
 
     expect(bodyRows()).toHaveLength(ROWS.length);
     expect(table.getAttribute('role')).toBe('table');
-    expect(table.querySelector('caption')?.textContent).toBe(
-      'Scores this week',
-    );
+    expect(table.getAttribute('aria-label')).toBe('Scores this week');
     expect(table.hasAttribute('aria-rowcount')).toBe(false);
+  });
+
+  it('shows its title in the title bar and is named by it, with no <caption>', () => {
+    render(
+      <Table
+        columns={COLUMNS}
+        features={{ toolbar: true }}
+        layout='static'
+        response={ROWS}
+        title='Scores by entry'
+      />,
+    );
+
+    const table = screen.getByRole('table', { name: 'Scores by entry' });
+
+    expect(table.querySelector('caption')).toBeNull();
+    expect(
+      screen.getByRole('heading', { name: 'Scores by entry' }),
+    ).toBeDefined();
   });
 
   it('virtualizes the same rows in the virtual layout, so the row count discriminates', () => {
@@ -218,9 +246,16 @@ describe('Table static layout', () => {
     ).toBe(true);
   });
 
-  it('wraps a header label in the static layout and truncates it in the virtual one', () => {
-    expect(headerLabelsWrap('static')).toStrictEqual([true, true, true]);
-    expect(headerLabelsWrap('virtual')).toStrictEqual([false, false, false]);
+  it('truncates a header label in one row with its controls in both layouts, and keeps a static one out of the column width', () => {
+    const virtual = { isContained: false, isInRow: true, isTruncated: true };
+    const sized = { ...virtual, isContained: true };
+
+    expect(headerLabelStyles('static')).toStrictEqual([sized, sized, sized]);
+    expect(headerLabelStyles('virtual')).toStrictEqual([
+      virtual,
+      virtual,
+      virtual,
+    ]);
   });
 
   it('renders no settings button, column menu or resize handle by default', () => {
@@ -380,7 +415,7 @@ describe('Table element props', () => {
   });
 });
 
-describe('Table caption and footer', () => {
+describe('Table footer', () => {
   it.each(['static', 'virtual'] as const)(
     'renders the footer as one <tfoot> row spanning every column in the %s layout',
     (layout) => {
@@ -401,14 +436,13 @@ describe('Table caption and footer', () => {
     },
   );
 
-  it('renders neither a caption nor a footer when none is given', () => {
+  it('renders no footer when none is given', () => {
     renderScores({ layout: 'virtual' });
     cleanup();
     render(<Table columns={COLUMNS} layout='static' response={ROWS} />);
 
     const table = screen.getByTestId('table');
 
-    expect(table.querySelector('caption')).toBeNull();
     expect(table.querySelector('tfoot')).toBeNull();
   });
 });
@@ -627,13 +661,13 @@ describe('Table static layout over grouped rows', () => {
 });
 
 describe('Table static layout on the server', () => {
-  it('renders the same rows, role and caption on the server as on the client', () => {
+  it('renders the same rows, role and name on the server as on the client', () => {
     const element = (
       <Table
-        caption='Scores this week'
         columns={COLUMNS}
         layout='static'
         response={ROWS.slice(0, 5)}
+        title='Scores this week'
       />
     );
     const serverTree = document.createElement('div');

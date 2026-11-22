@@ -29,6 +29,7 @@ const COLUMNS: readonly TableColumn<QualityDimensionRow>[] = [
     align: 'end',
     key: 'latest',
     label: 'Latest',
+    minWidth: 100,
     render: ({ latest }) =>
       latest === undefined ? 'not scored' : latest.value.toFixed(2),
   },
@@ -36,6 +37,7 @@ const COLUMNS: readonly TableColumn<QualityDimensionRow>[] = [
     align: 'end',
     key: 'band',
     label: 'Baseline band',
+    minWidth: 170,
     render: ({ band }) =>
       band === undefined
         ? 'none'
@@ -91,12 +93,12 @@ export const EvalsQuality = () => {
                     : `Baseline of ${String(baseline.runs)} runs on ${baseline.modelId}.`}
                 </Text>
                 <Table
-                  caption={`${name}: rubric dimensions`}
                   columns={COLUMNS}
                   density='spacious'
                   features={EVALS_TABLE_FEATURES}
                   layout='static'
                   response={dimensions.map((row) => ({ ...row, skill: name }))}
+                  title={`${name}: rubric dimensions`}
                 />
               </section>
             ),

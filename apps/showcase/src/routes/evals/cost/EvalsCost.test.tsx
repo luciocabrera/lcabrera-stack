@@ -149,11 +149,7 @@ describe('EvalsCost', () => {
       expect(
         screen
           .getAllByRole('table')
-          .map(
-            (table) =>
-              table.getAttribute('aria-label') ??
-              table.querySelector('caption')?.textContent,
-          ),
+          .map((table) => table.getAttribute('aria-label')),
       ).toEqual([name]);
     }
 

@@ -635,7 +635,7 @@ Pick by what the reader does with the table, not by how many rows it has today.
 
 ```tsx
 // ✅ a short summary: every row, as tall as its rows, links on the normal tab order
-<Table caption='This week' columns={columns} layout='static' response={rows} />
+<Table columns={columns} layout='static' response={rows} title='This week' />
 
 // ❌ a virtual table squeezed into a card: it needs a height from its parent and
 // brings a settings button and column menus nobody uses here

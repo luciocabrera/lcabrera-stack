@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vite-plus/test';
 
+import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+
 import { tableHeaderCellStyles } from '../TableHeaderCell.stylex';
 import { resolveHeaderSizeStyle } from './resolveHeaderSizeStyle.util';
 
@@ -53,8 +55,20 @@ describe('resolveHeaderSizeStyle', () => {
     ).toStrictEqual(
       tableHeaderCellStyles.staticLayout({
         maxWidth: undefined,
-        minWidth: undefined,
+        minWidth: DEFAULT_MIN_COLUMN_WIDTH,
         width: 180,
+      }),
+    );
+  });
+
+  it('keeps a static header at the virtual minimum width when its column declares none', () => {
+    expect(
+      resolveHeaderSizeStyle({ column: {}, layout: 'static' }),
+    ).toStrictEqual(
+      tableHeaderCellStyles.staticLayout({
+        maxWidth: undefined,
+        minWidth: DEFAULT_MIN_COLUMN_WIDTH,
+        width: undefined,
       }),
     );
   });

@@ -19,9 +19,9 @@ export type CostRow = ReturnType<typeof costFigureCells> & {
 };
 
 export type CostTableProps = {
-  readonly caption: string;
   readonly density: 'compact' | 'dense';
   readonly rows: readonly CostRow[];
+  readonly title: string;
 };
 
 export type RunCost = RunCosts['runs'][number];

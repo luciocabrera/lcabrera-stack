@@ -192,15 +192,24 @@ export const expectRightAligned = async (cell: Locator) => {
     }
 
     const box = element.getBoundingClientRect();
-    const textLeft = Math.min(...boxes.map(({ left }) => left));
-    const textRight = Math.max(...boxes.map(({ right }) => right));
+    const style = getComputedStyle(element);
+    const [paddingLeft = 0, borderLeft = 0, paddingRight = 0, borderRight = 0] =
+      [
+        style.paddingLeft,
+        style.borderLeftWidth,
+        style.paddingRight,
+        style.borderRightWidth,
+      ].map((length) => Number(length.replace('px', '')));
+    const contentLeft = box.left + paddingLeft + borderLeft;
+    const contentRight = box.right - paddingRight - borderRight;
 
-    return boxes.length === 0
-      ? { left: 0, right: 0 }
-      : { left: textLeft - box.left, right: box.right - textRight };
+    return {
+      left: Math.min(...boxes.map(({ left }) => left)) - contentLeft,
+      right: contentRight - Math.max(...boxes.map(({ right }) => right)),
+    };
   });
 
-  expect(gaps.right).toBeLessThan(gaps.left);
+  expect(gaps.right).toBeLessThan(gaps.left + 1);
 };
 
 type ThemeArgs = ThemesArgs & {

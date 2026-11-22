@@ -16,6 +16,7 @@ import {
   useGetTableHeaderDensity,
   useGetTableIsBordered,
   useGetTableIsStriped,
+  useGetTableTitlePlural,
 } from '../contexts/TableConfig/meta/selectors';
 import { TablePresentationContext } from '../contexts/TableConfig/TablePresentationContext.context';
 import {
@@ -27,7 +28,6 @@ import { TableFooter } from '../TableFooter/TableFooter.component';
 import { tableStyles } from './TableBase.stylex';
 
 export const TableBase = <TData extends Record<string, unknown>, TResponse>({
-  caption,
   children,
   customStylex,
   footer,
@@ -37,6 +37,7 @@ export const TableBase = <TData extends Record<string, unknown>, TResponse>({
   const header = TABLE_DENSITY_SCALE[useGetTableHeaderDensity()];
   const isBordered = useGetTableIsBordered();
   const isStriped = useGetTableIsStriped();
+  const title = useGetTableTitlePlural();
   const totalRows = useGetTableTotalRows();
   const isLoading = useGetTableIsLoading();
   const gridFocusProps = useTableGridFocus<TData>();
@@ -47,6 +48,7 @@ export const TableBase = <TData extends Record<string, unknown>, TResponse>({
 
   return (
     <table
+      aria-label={title}
       data-striped={isStriped}
       data-testid='table'
       {...rest}
@@ -68,9 +70,6 @@ export const TableBase = <TData extends Record<string, unknown>, TResponse>({
         customStylex,
       )}
     >
-      {caption !== undefined && (
-        <caption {...stylex.props(tableStyles.caption)}>{caption}</caption>
-      )}
       {children}
       {footer !== undefined && <TableFooter>{footer}</TableFooter>}
     </table>

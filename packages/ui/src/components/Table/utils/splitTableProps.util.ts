@@ -20,7 +20,6 @@ export const splitTableProps = <
   TResponse,
 >({
   actions,
-  caption,
   cellPalette,
   cellRenderers,
   columns,
@@ -44,7 +43,6 @@ export const splitTableProps = <
 }: SplitTablePropsArgs<TData, TResponse>) => ({
   own: {
     actions,
-    caption,
     cellPalette,
     cellRenderers,
     columns,

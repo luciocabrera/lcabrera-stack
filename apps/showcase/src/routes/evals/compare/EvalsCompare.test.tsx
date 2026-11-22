@@ -201,7 +201,13 @@ describe('EvalsCompare', () => {
       screen
         .getAllByRole('heading', { level: 2 })
         .map((heading) => heading.textContent),
-    ).toEqual(['Flipped tasks', 'Totals', 'Changed inputs']);
+    ).toEqual([
+      'Flipped tasks',
+      '2 of 7 tasks changed verdict',
+      'Totals',
+      'Run A against run B',
+      'Changed inputs',
+    ]);
     expect(
       [COMPARISON.a, COMPARISON.b].map(
         (side) =>

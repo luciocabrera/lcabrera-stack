@@ -8,7 +8,6 @@ export type TableContentProps<
 > = Pick<
   TableProps<TData, TResponse>,
   | 'actions'
-  | 'caption'
   | 'customStylex'
   | 'dataSelector'
   | 'dataTotalSelector'

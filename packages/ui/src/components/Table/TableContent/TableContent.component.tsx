@@ -14,7 +14,6 @@ import { useTableContentRuntime } from './useTableContentRuntime.hook';
 
 export const TableContent = <TData extends Record<string, unknown>, TResponse>({
   actions,
-  caption,
   customStylex,
   dataSelector,
   dataTotalSelector,
@@ -53,7 +52,6 @@ export const TableContent = <TData extends Record<string, unknown>, TResponse>({
           >
             <TableBase
               {...tableProps}
-              caption={caption}
               customStylex={customStylex}
               footer={footer}
             >

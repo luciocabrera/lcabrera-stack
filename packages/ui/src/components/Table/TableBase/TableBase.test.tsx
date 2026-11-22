@@ -44,6 +44,7 @@ vi.mock('../contexts/TableConfig/meta/selectors', () => ({
   useGetTableHeaderDensity: useGetTableHeaderDensityMock,
   useGetTableIsBordered: useGetTableIsBorderedMock,
   useGetTableIsStriped: useGetTableIsStripedMock,
+  useGetTableTitlePlural: () => undefined,
 }));
 
 vi.mock('../contexts/TableData/data/selectors', () => ({

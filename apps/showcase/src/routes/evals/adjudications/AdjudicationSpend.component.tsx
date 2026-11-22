@@ -4,6 +4,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { AdjudicationSpendProps } from './EvalsAdjudications.types';
 
+import { EVALS_TITLE_BAR_FEATURES } from '../constants/evalsDashboard.constants';
 import { layoutStyles } from '../evalsLayout.stylex';
 import {
   BUILDER_COLUMNS,
@@ -22,11 +23,12 @@ export const AdjudicationSpend = ({
         False positives by rule
       </Title>
       <Table
-        caption='Cases by analyzer and rule, with the share the true answer called a false positive'
         columns={RULE_COLUMNS}
         density='compact'
+        features={EVALS_TITLE_BAR_FEATURES}
         layout='static'
         response={rules}
+        title='Cases by analyzer and rule, with the share the true answer called a false positive'
       />
     </section>
     <section {...stylex.props(layoutStyles.section)}>
@@ -34,11 +36,12 @@ export const AdjudicationSpend = ({
         Cost and time by model
       </Title>
       <Table
-        caption='Reported cost, time and tokens of each model on the panel'
         columns={COST_COLUMNS}
         density='compact'
+        features={EVALS_TITLE_BAR_FEATURES}
         layout='static'
         response={costs}
+        title='Reported cost, time and tokens of each model on the panel'
       />
     </section>
     <section {...stylex.props(layoutStyles.section)}>
@@ -46,11 +49,12 @@ export const AdjudicationSpend = ({
         Cases by builder model
       </Title>
       <Table
-        caption='Cases by the model that built the change, with the panel accuracy on them'
         columns={BUILDER_COLUMNS}
         density='compact'
+        features={EVALS_TITLE_BAR_FEATURES}
         layout='static'
         response={builders}
+        title='Cases by the model that built the change, with the panel accuracy on them'
       />
     </section>
   </>

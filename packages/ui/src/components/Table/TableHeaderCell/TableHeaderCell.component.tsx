@@ -76,7 +76,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         </div>
       )}
       {!isHeaderHidden && (
-        <>
+        <div {...stylex.props(tableHeaderCellStyles.row)}>
           <span
             data-testid='table-header-label'
             {...stylex.props(tableHeaderCellStyles.content, layoutStylex.label)}
@@ -93,7 +93,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
             pinSide={pinInfo?.side}
             sortDirection={sortDirection}
           />
-        </>
+        </div>
       )}
     </th>
   );

@@ -5,7 +5,10 @@ import { useLoaderData } from 'react-router';
 import type { loader } from './evals-flaky.loader';
 import type { FlakyTaskRow } from './EvalsFlaky.types';
 
-import { EVALS_FLAKY } from '../constants/evalsDashboard.constants';
+import {
+  EVALS_FLAKY,
+  EVALS_TITLE_BAR_FEATURES,
+} from '../constants/evalsDashboard.constants';
 import { layoutStyles } from '../evalsLayout.stylex';
 import { FLAKY_TASK_COLUMNS } from './EvalsFlaky.constants';
 import { flakyRunColumn } from './flakyRunColumn.util';
@@ -61,14 +64,15 @@ export const EvalsFlaky = () => {
               </Text>
             ) : (
               <Table
-                caption={`${suite}: ${String(tasks.length)} flaky tasks left out, each over the suite's last ${String(runs.length)} runs, oldest first`}
                 columns={[
                   ...FLAKY_TASK_COLUMNS,
                   ...runs.map((run) => flakyRunColumn(run)),
                 ]}
                 density='comfortable'
+                features={EVALS_TITLE_BAR_FEATURES}
                 layout='static'
                 response={rows}
+                title={`${suite}: ${String(tasks.length)} flaky tasks left out, each over the suite's last ${String(runs.length)} runs, oldest first`}
               />
             )}
           </section>

@@ -514,7 +514,6 @@ export type TableProps<
     | TableRowsSource<TData>
     | TableSelectedSource<TData, TResponse, Promise<TResponse> | TResponse>
   ) & {
-    readonly caption?: ReactNode;
     /** Seeds the providers the Table mounts when none are above it. */
     readonly columns: readonly TableColumn<TData>[];
     /** The level when the meta state holds none; outranks the global default. */

@@ -64,7 +64,7 @@ describe('EvalsAdjudications', () => {
     expect(breadcrumbTrail()).toEqual(evalsTrail('adjudications'));
   });
 
-  it('lists the history in facts, then a level-2 heading per section', async () => {
+  it('lists the history in facts, then a level-2 heading per section and per table', async () => {
     await renderWith(DATA);
 
     expect(
@@ -79,13 +79,19 @@ describe('EvalsAdjudications', () => {
         .map(({ textContent }) => textContent),
     ).toEqual([
       'Cases',
+      'False-positive panel cases, newest first',
       'Reopened dismissals',
       'Accuracy by model and role',
+      'Verdicts scored against the latest true answer, by model and role',
       'Accuracy by model and rule',
       'Accuracy by prompt',
+      'Verdicts by role and prompt hash, oldest prompt first',
       'False positives by rule',
+      'Cases by analyzer and rule, with the share the true answer called a false positive',
       'Cost and time by model',
+      'Reported cost, time and tokens of each model on the panel',
       'Cases by builder model',
+      'Cases by the model that built the change, with the panel accuracy on them',
     ]);
   });
 

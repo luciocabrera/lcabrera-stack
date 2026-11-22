@@ -23,7 +23,6 @@ export const TableGridContent = <
   const { own, tableProps } = splitTableProps(props);
   const {
     actions,
-    caption,
     cellPalette,
     cellRenderers,
     customStylex,
@@ -44,7 +43,6 @@ export const TableGridContent = <
   const { isFlexWrapperEnabled = !isStatic } = own;
   const contentProps = {
     actions,
-    caption,
     customStylex,
     footer,
     icon,
