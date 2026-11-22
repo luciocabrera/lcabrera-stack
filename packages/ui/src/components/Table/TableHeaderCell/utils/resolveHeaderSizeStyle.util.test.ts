@@ -72,4 +72,16 @@ describe('resolveHeaderSizeStyle', () => {
       }),
     );
   });
+
+  it('keeps a static header within a declared maximum below the virtual minimum width', () => {
+    expect(
+      resolveHeaderSizeStyle({ column: { maxWidth: 40 }, layout: 'static' }),
+    ).toStrictEqual(
+      tableHeaderCellStyles.staticLayout({
+        maxWidth: 40,
+        minWidth: 40,
+        width: undefined,
+      }),
+    );
+  });
 });

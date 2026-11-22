@@ -30,7 +30,12 @@ export const resolveHeaderSizeStyle = <TData>({
       resolveStaticColumnWidths({
         ...column,
         isPinned: pinInfo !== undefined,
-        minWidth: column.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH,
+        minWidth:
+          column.minWidth ??
+          Math.min(
+            DEFAULT_MIN_COLUMN_WIDTH,
+            column.maxWidth ?? DEFAULT_MIN_COLUMN_WIDTH,
+          ),
         sizedWidth,
       }),
     );

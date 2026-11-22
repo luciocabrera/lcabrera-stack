@@ -172,9 +172,10 @@ export const distinctColours = async (target: Locator) => {
 export const paintOf = (target: Locator) => paintAt({ target });
 
 export const expectRightAligned = async (cell: Locator) => {
-  const gaps = await cell.evaluate((element) => {
+  const layout = await cell.evaluate((element) => {
     const walker = document.createTreeWalker(element, NodeFilter.SHOW_TEXT);
     const boxes: DOMRect[] = [];
+    const alignments = new Set<string>();
 
     for (
       let node = walker.nextNode();
@@ -189,6 +190,10 @@ export const expectRightAligned = async (cell: Locator) => {
 
       range.selectNodeContents(node);
       boxes.push(range.getBoundingClientRect());
+
+      if (node.parentElement !== null) {
+        alignments.add(getComputedStyle(node.parentElement).textAlign);
+      }
     }
 
     const box = element.getBoundingClientRect();
@@ -204,12 +209,21 @@ export const expectRightAligned = async (cell: Locator) => {
     const contentRight = box.right - paddingRight - borderRight;
 
     return {
+      alignments: [...alignments],
       left: Math.min(...boxes.map(({ left }) => left)) - contentLeft,
       right: contentRight - Math.max(...boxes.map(({ right }) => right)),
     };
   });
 
-  expect(gaps.right).toBeLessThan(gaps.left + 1);
+  if (layout.left < 1 && layout.right < 1) {
+    expect(layout.alignments).toStrictEqual(
+      layout.alignments.map(() => expect.stringMatching(/^(right|end)$/)),
+    );
+
+    return;
+  }
+
+  expect(layout.right).toBeLessThan(layout.left);
 };
 
 type ThemeArgs = ThemesArgs & {
