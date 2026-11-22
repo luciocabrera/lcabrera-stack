@@ -94,7 +94,7 @@ jobs:
       # It is NOT to be "fixed" with pull_request_target; that trades a visible failure for
       # secret exposure on untrusted code.
       - name: Run the Claude review
-        uses: anthropics/claude-code-action@4fa93a88de49bbef68b10eb15aabedf28ca0e1ed # v1.0.271
+        uses: anthropics/claude-code-action@acfe7992852970efb4fee683d63d628e3e52df67 # v1.0.286
         with:
           # A subscription token, not an API key, and exactly one credential is passed on
           # purpose: a static key takes precedence where both are given, so leaving the key
@@ -180,7 +180,7 @@ jobs:
       # is what makes the dispatch step below unreachable there.
       - name: Mint a token for the reviewer's own identity
         id: reviewer-token
-        uses: actions/create-github-app-token@64ab729a6294000f5aa4a4bc0b73d1f32bc45510 # v3.3.0
+        uses: actions/create-github-app-token@f418cff399f7aef4c2f0ad47e25ca7a6abbdd6fc # v3.4.0
         with:
           app-id: ${{ secrets.REVIEWER_APP_ID }}
           private-key: ${{ secrets.REVIEWER_APP_PRIVATE_KEY }}

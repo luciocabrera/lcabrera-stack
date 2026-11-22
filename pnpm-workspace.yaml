@@ -40,54 +40,55 @@ catalogs:
     # instance — the `overrides` at the bottom redirect every `vite` edge here.
     # Without this, pnpm auto-installs upstream Vite to satisfy Vitest's `vite`
     # peer and the graph splits across separate Vite+, Vite, and Vitest copies.
-    # Keep this in lockstep with the `vite-plus` version (same Vite+ release).
+    # Keep this on the core version the pinned `vite-plus` depends on:
+    # `npm view vite-plus@<version> dependencies.vite`.
     # See node_modules/vite-plus/docs/guide/migrate-rules.md "Vite and Overrides".
-    vite: npm:@voidzero-dev/vite-plus-core@1.6.0
+    vite: npm:@voidzero-dev/vite-plus-core@8.3.8000
     vite-plugin-babel: ^1.7.3
-    vite-plus: 1.6.0
+    vite-plus: 1.7.0
   lint:
     # Held on 2.5 until #1541: Biome 2.6 fails the Biome pass on this tree.
     '@biomejs/biome': ~2.5.15
     '@eslint/js': ^10.0.1
-    '@typescript-eslint/rule-tester': ^8.72.2
-    '@typescript-eslint/utils': ^8.72.2
-    eslint: ^10.14.0
+    '@typescript-eslint/rule-tester': ^8.73.0
+    '@typescript-eslint/utils': ^8.73.0
+    eslint: ^10.15.0
     eslint-config-prettier: ^10.1.8
-    eslint-plugin-perfectionist: ^5.13.0
-    eslint-plugin-react-dom: ^5.30.1
+    eslint-plugin-perfectionist: ^5.14.0
+    eslint-plugin-react-dom: ^5.30.5
     eslint-plugin-react-hooks: ^7.1.1
-    eslint-plugin-react-refresh: ^0.5.7
-    eslint-plugin-react-x: ^5.30.1
+    eslint-plugin-react-refresh: ^0.5.8
+    eslint-plugin-react-x: ^5.30.5
     eslint-plugin-security: ^4.2.1
     eslint-plugin-unicorn: ^79.0.0
     globals: ^17.14.0
-    react-doctor: ^0.9.22
-    typescript-eslint: ^8.72.2
+    react-doctor: ^0.9.23
+    typescript-eslint: ^8.73.0
 
   react:
-    '@react-router/dev': ^8.5.1
-    '@react-router/node': ^8.5.1
-    '@react-router/serve': ^8.5.1
-    '@stylexjs/eslint-plugin': ^0.19.1
-    '@stylexjs/stylex': ^0.19.1
-    '@stylexjs/unplugin': ^0.19.1
+    '@react-router/dev': ^8.5.2
+    '@react-router/node': ^8.5.2
+    '@react-router/serve': ^8.5.2
+    '@stylexjs/eslint-plugin': ^0.19.2
+    '@stylexjs/stylex': ^0.19.2
+    '@stylexjs/unplugin': ^0.19.2
     babel-plugin-react-compiler: ^1.0.0
     isbot: 5.2.1
     react: ^19.3.1
     react-dom: ^19.3.1
     react-markdown: ^10.1.0
-    react-router: ^8.5.1
+    react-router: ^8.5.2
 
   runtime:
     zod: ^4.6.7
 
   test:
-    '@anthropic-ai/claude-agent-sdk': ^0.3.322
+    '@anthropic-ai/claude-agent-sdk': ^0.3.330
     '@stryker-mutator/core': ^10.1.1
     '@testing-library/react': ^16.3.3
-    jsdom: ^31.0.0
-    '@playwright/test': ^1.65.0
-    playwright: ^1.65.0
+    jsdom: ^31.0.1
+    '@playwright/test': ^1.65.1
+    playwright: ^1.65.1
     # Both must be DECLARED to resolve, for different reasons, and neither is
     # safe to drop because "nothing imports it".
     #
@@ -116,8 +117,9 @@ catalogs:
     '@arethetypeswrong/core': ^0.18.5
     '@changesets/cli': ^3.0.3
     '@changesets/get-release-plan': ^5.0.2
-    fallow: ^3.42.0
-    knip: ^6.45.1
+    fallow: ^3.45.0
+    fallow-type-aware: ^3.45.0
+    knip: ^6.47.0
     lighthouse: ^13.6.0
     publint: ^0.3.25
     semver: ^7.8.6
@@ -162,14 +164,13 @@ minimumReleaseAgeExclude:
   - '@fallow-cli/*'
   - '@react-router/*'
 
+  - '@tsrs/*'
   - '@voidzero-dev/*'
   - vite-plus
 
 # Redirect every `vite`/`vitest` edge to the toolchain catalog so the workspace
-# resolves a single Vite+ instance (see the `build` catalog note above). The core
-# alias does not satisfy plugins' `vite@^8` peer ranges, so allow any peer for
-# these two — the single resolved version is the source of truth, not the range.
-# The keys are `vite@*` and `vitest@*`: a bare key also matches a `catalog:`
+# resolves a single Vite+ instance (see the `build` catalog note above). The
+# keys are `vite@*` and `vitest@*`: a bare key also matches a `catalog:`
 # reference, and `vp up` then rewrites that reference to a concrete version.
 overrides:
   # GHSA-2v37-7h3g-55p8 — nanoid's custom generators loop forever at size zero,
@@ -205,12 +206,5 @@ overrides:
   glob@13: ^14.0.2
   vite@*: catalog:build
   vitest@*: catalog:test
-peerDependencyRules:
-  allowAny:
-    - vite
-    - vitest
-  allowedVersions:
-    vite: '*'
-    vitest: '*'
 
 # trustPolicy: no-downgrade

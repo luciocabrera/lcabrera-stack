@@ -162,6 +162,7 @@
     "@vitest/coverage-v8": "catalog:test",
     "eslint": "catalog:lint",
     "fallow": "catalog:tooling",
+    "fallow-type-aware": "catalog:tooling",
     "jsdom": "catalog:test",
     "publint": "catalog:tooling",
     "react-doctor": "catalog:lint",
@@ -176,5 +177,5 @@
   "engines": {
     "node": ">=26 <27"
   },
-  "packageManager": "pnpm@12.18.0+sha256.29d1d7d99bf6ec6d0a3dbb0ec5656f0d16e997e8be676ca45c581d11cb71f753"
+  "packageManager": "pnpm@12.21.0+sha256.0791469382b579869c51827759876616bc3eae5296d8fa880bbc3c9c1e8cf6f7"
 }
