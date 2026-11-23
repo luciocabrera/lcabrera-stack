@@ -5,7 +5,7 @@ import {
   useGetNormalizedColumn,
 } from '#ui/components/Table/contexts/TableConfig/columns/selectors';
 import { useColumnResize } from '#ui/components/Table/hooks';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+import { resolveColumnMinWidth } from '#ui/components/Table/utils/resolveColumnMinWidth.util';
 import { resolveColumnStartWidth } from '#ui/components/Table/utils/resolveColumnStartWidth.util';
 
 import type { ResizeHandleProps } from './ResizeHandle.types';
@@ -18,8 +18,8 @@ export const ResizeHandle = <TData,>({
 }: ResizeHandleProps<TData>) => {
   const column = useGetNormalizedColumn<TData>(columnKey);
   const storedWidth = useGetColumnWidth<TData>(columnKey);
-  const { maxWidth, minWidth } = column;
-  const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+  const { maxWidth } = column;
+  const effectiveMinWidth = resolveColumnMinWidth(column);
   const currentWidth = storedWidth ?? resolveColumnStartWidth(column);
 
   const { bounds, isResizing, onDoubleClick, onKeyDown, onMouseDown, width } =

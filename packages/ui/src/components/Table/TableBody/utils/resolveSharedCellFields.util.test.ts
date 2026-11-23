@@ -29,6 +29,17 @@ describe('resolveSharedCellFields', () => {
     expect(fields.kind).toBe('custom');
   });
 
+  it('renders an unsized column with a small maximum at that maximum, the width its pinned offset assumes', () => {
+    const fields = resolveSharedCellFields({
+      ...BASE,
+      col: { key: 'flag', label: 'Flag', maxWidth: 40 },
+      columnSizing: {},
+    });
+
+    expect(fields.minWidth).toBe(40);
+    expect(fields.width).toBe(40);
+  });
+
   it('lets a stored size win over the declared width', () => {
     expect(
       resolveSharedCellFields({

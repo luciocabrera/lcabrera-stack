@@ -11,6 +11,10 @@ describe('resolvePresetColumnWidth', () => {
     ).toBe(80);
   });
 
+  it('caps the min preset at a declared maximum below the default minimum', () => {
+    expect(resolvePresetColumnWidth({ maxWidth: 40, preset: 'min' })).toBe(40);
+  });
+
   it('returns the configured max width for the max preset', () => {
     expect(
       resolvePresetColumnWidth({ maxWidth: 240, minWidth: 80, preset: 'max' }),

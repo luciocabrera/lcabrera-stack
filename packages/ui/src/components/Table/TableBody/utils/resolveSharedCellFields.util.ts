@@ -6,7 +6,7 @@ import type {
   TableLayoutMode,
 } from '#ui/components/Table/Table.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+import { resolveColumnMinWidth } from '#ui/components/Table/utils/resolveColumnMinWidth.util';
 import { resolveColumnStartWidth } from '#ui/components/Table/utils/resolveColumnStartWidth.util';
 
 import { resolveCellLayout } from './resolveCellLayout.util';
@@ -41,7 +41,7 @@ export const resolveSharedCellFields = <TData extends Record<string, unknown>>({
     key,
     kind: 'custom',
     label: '',
-    minWidth: col.minWidth ?? DEFAULT_MIN_COLUMN_WIDTH,
+    minWidth: resolveColumnMinWidth(col),
     pinInfo,
     rowIndex,
     rowKey,
