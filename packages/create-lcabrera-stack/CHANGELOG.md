@@ -1,5 +1,12 @@
 # create-lcabrera-stack
 
+## 0.4.5
+
+### Patch Changes
+
+- Updated dependencies [8565832]
+  - @lcabrera/devkit@0.11.1
+
 ## 0.4.4
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @lcabrera/eslint-plugin
 
+## 0.4.1
+
+### Patch Changes
+
+- 8565832: The `@typescript-eslint/utils` dependency moves from `^8.72.2` to `^8.73.0`.
+
 ## 0.4.0
 
 ### Minor Changes

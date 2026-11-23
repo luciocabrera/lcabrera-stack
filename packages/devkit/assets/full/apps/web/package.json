@@ -13,7 +13,7 @@
   "dependencies": {
     "@lcabrera/api": ">=0.6.1 <1.0.0",
     "@lcabrera/server": ">=0.9.1 <1.0.0",
-    "@lcabrera/ui": ">=0.13.0 <1.0.0",
+    "@lcabrera/ui": ">=0.14.0 <1.0.0",
     "@lcabrera/utils": ">=0.4.0 <1.0.0",
     "@react-router/serve": "catalog:react",
     "@stylexjs/stylex": "catalog:react",
