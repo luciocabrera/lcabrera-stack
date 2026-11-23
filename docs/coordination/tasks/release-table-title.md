@@ -2,7 +2,7 @@
 id: release-table-title
 title: chore(release): version the queued changesets
 owner: agent:claude
-status: active
+status: review
 branch: chore/1659-release-table-title
 area:
   - packages/*/package.json
@@ -13,7 +13,7 @@ area:
 started: 2026-11-23
 updated: 2026-11-23
 plan: (none)
-pr: (none)
+pr: '#1660'
 issue: #1659
 ---
 
