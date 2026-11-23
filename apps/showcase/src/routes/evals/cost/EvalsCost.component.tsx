@@ -29,34 +29,32 @@ export const EvalsCost = () => {
         label='Cost tables'
         tabs={[
           {
-            caption: 'Per suite',
             density: 'compact' as const,
             rows: suites.map(({ cells, label }) => ({ ...cells, name: label })),
+            title: 'Per suite',
           },
           {
-            caption: 'Per subject',
             density: 'compact' as const,
             rows: subjects.map(({ cells, href, label }) => ({
               ...cells,
               href,
               name: label,
             })),
+            title: 'Per subject',
           },
           {
-            caption: 'Per run',
             density: 'dense' as const,
             rows: runs.map(({ cells, href, label }) => ({
               ...cells,
               href,
               name: label,
             })),
+            title: 'Per run',
           },
-        ].map(({ caption, density, rows }) => ({
-          children: (
-            <CostTable caption={caption} density={density} rows={rows} />
-          ),
-          header: caption,
-          key: caption,
+        ].map(({ density, rows, title }) => ({
+          children: <CostTable density={density} rows={rows} title={title} />,
+          header: title,
+          key: title,
         }))}
       />
     </div>

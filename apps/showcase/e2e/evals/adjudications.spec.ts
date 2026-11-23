@@ -59,6 +59,14 @@ it('names the page, links back to the overview and counts the history', async ({
     'Cost and time by model',
     'Cases by builder model',
   ]);
+  await expect(mainOf(page).getByRole('heading', { level: 3 })).toHaveText([
+    'False-positive panel cases, newest first',
+    'Verdicts scored against the latest true answer, by model and role',
+    'Verdicts by role and prompt hash, oldest prompt first',
+    'Cases by analyzer and rule, with the share the true answer called a false positive',
+    'Reported cost, time and tokens of each model on the panel',
+    'Cases by the model that built the change, with the panel accuracy on them',
+  ]);
 });
 
 it('lists every case newest first with its panel, true answer, cost and time', async ({

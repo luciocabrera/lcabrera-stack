@@ -3,6 +3,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { CompareReportProps } from './EvalsCompare.types';
 
+import { EVALS_TITLE_BAR_FEATURES } from '../constants/evalsDashboard.constants';
 import { layoutStyles } from '../evalsLayout.stylex';
 import { evalsHref } from '../utils/evalsHref.util';
 import { FLIP_COLUMNS } from './CompareReport.constants';
@@ -37,11 +38,13 @@ export const CompareReport = ({
         </Text>
       ) : (
         <Table
-          caption={`${String(flips.length)} of ${String(tasks)} tasks changed verdict`}
           columns={FLIP_COLUMNS}
           density='comfortable'
+          features={EVALS_TITLE_BAR_FEATURES}
           layout='static'
           response={flips}
+          title={`${String(flips.length)} of ${String(tasks)} tasks changed verdict`}
+          titleLevel={3}
         />
       )}
     </section>
@@ -50,11 +53,13 @@ export const CompareReport = ({
         Totals
       </Title>
       <Table
-        caption='Run A against run B'
         columns={TOTAL_COLUMNS}
         density='comfortable'
+        features={EVALS_TITLE_BAR_FEATURES}
         layout='static'
         response={totals}
+        title='Run A against run B'
+        titleLevel={3}
       />
     </section>
     <section {...stylex.props(layoutStyles.section)}>

@@ -7,6 +7,7 @@ import * as stylex from '@stylexjs/stylex';
 
 import type { AdjudicationAccuracyProps } from './EvalsAdjudications.types';
 
+import { EVALS_TITLE_BAR_FEATURES } from '../constants/evalsDashboard.constants';
 import { layoutStyles } from '../evalsLayout.stylex';
 import { accuracyChartSeries } from './accuracyChartSeries.util';
 import {
@@ -33,11 +34,13 @@ export const AdjudicationAccuracy = ({
       ) : (
         <>
           <Table
-            caption='Verdicts scored against the latest true answer, by model and role'
             columns={ACCURACY_COLUMNS}
             density='compact'
+            features={EVALS_TITLE_BAR_FEATURES}
             layout='static'
             response={accuracy}
+            title='Verdicts scored against the latest true answer, by model and role'
+            titleLevel={3}
           />
           <LineChart
             hasDataTable
@@ -72,11 +75,13 @@ export const AdjudicationAccuracy = ({
         the rows of one role show its accuracy before and after each change.
       </Text>
       <Table
-        caption='Verdicts by role and prompt hash, oldest prompt first'
         columns={PROMPT_COLUMNS}
         density='compact'
+        features={EVALS_TITLE_BAR_FEATURES}
         layout='static'
         response={prompts}
+        title='Verdicts by role and prompt hash, oldest prompt first'
+        titleLevel={3}
       />
     </section>
   </>

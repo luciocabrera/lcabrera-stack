@@ -1,7 +1,6 @@
-import {
-  DEFAULT_MAX_COLUMN_WIDTH,
-  DEFAULT_MIN_COLUMN_WIDTH,
-} from '#ui/components/Table/Table.constants';
+import { DEFAULT_MAX_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
+
+import { resolveColumnMinWidth } from './resolveColumnMinWidth.util';
 
 type ResolveColumnWidthBoundsArgs = {
   readonly maxWidth?: number;
@@ -13,5 +12,5 @@ export const resolveColumnWidthBounds = ({
   minWidth,
 }: ResolveColumnWidthBoundsArgs) => ({
   maxWidth: maxWidth ?? DEFAULT_MAX_COLUMN_WIDTH,
-  minWidth: minWidth ?? DEFAULT_MIN_COLUMN_WIDTH,
+  minWidth: resolveColumnMinWidth({ maxWidth, minWidth }),
 });

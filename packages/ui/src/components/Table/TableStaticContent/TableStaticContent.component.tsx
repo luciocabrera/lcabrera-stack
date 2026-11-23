@@ -19,7 +19,6 @@ export const TableStaticContent = <
   TResponse,
 >({
   actions,
-  caption,
   customStylex,
   footer,
   icon,
@@ -49,7 +48,6 @@ export const TableStaticContent = <
         >
           <TableBase
             {...tableProps}
-            caption={caption}
             customStylex={customStylex}
             footer={footer}
           >

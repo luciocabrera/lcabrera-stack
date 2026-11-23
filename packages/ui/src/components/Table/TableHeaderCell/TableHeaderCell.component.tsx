@@ -2,8 +2,8 @@ import * as stylex from '@stylexjs/stylex';
 import { use } from 'react';
 
 import { TablePresentationContext } from '#ui/components/Table/contexts/TableConfig/TablePresentationContext.context';
-import { DEFAULT_MIN_COLUMN_WIDTH } from '#ui/components/Table/Table.constants';
 import { resolveColumnCapabilities } from '#ui/components/Table/utils/resolveColumnCapabilities.util';
+import { resolveColumnMinWidth } from '#ui/components/Table/utils/resolveColumnMinWidth.util';
 import { resolveColumnStartWidth } from '#ui/components/Table/utils/resolveColumnStartWidth.util';
 import { skeleton } from '#ui/design-system/tokens/commons.stylex';
 
@@ -35,8 +35,8 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
   const pinInfo = useGetPinnedColumnInfo<TData>(columnKey);
   const { layout } = use(TablePresentationContext);
 
-  const { isHeaderHidden, label, minWidth } = column;
-  const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+  const { isHeaderHidden, label } = column;
+  const effectiveMinWidth = resolveColumnMinWidth(column);
   const currentWidth = width ?? resolveColumnStartWidth(column);
   const sortDirection = column.sortDirection;
   const { isResizable, isSortable, isStatic } =
@@ -76,7 +76,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
         </div>
       )}
       {!isHeaderHidden && (
-        <>
+        <div {...stylex.props(tableHeaderCellStyles.row)}>
           <span
             data-testid='table-header-label'
             {...stylex.props(tableHeaderCellStyles.content, layoutStylex.label)}
@@ -93,7 +93,7 @@ export const TableHeaderCell = <TData extends Record<string, unknown>>({
             pinSide={pinInfo?.side}
             sortDirection={sortDirection}
           />
-        </>
+        </div>
       )}
     </th>
   );

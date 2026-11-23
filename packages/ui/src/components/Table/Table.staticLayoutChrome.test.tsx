@@ -503,7 +503,7 @@ describe('Table static layout review fixes', () => {
 
     const sizedWidths = {
       maxWidth: undefined,
-      minWidth: undefined,
+      minWidth: DEFAULT_MIN_COLUMN_WIDTH,
       width: 68,
     };
 
@@ -612,11 +612,11 @@ describe('Table static layout review fixes', () => {
   it('keeps a static empty state at its content height across renders', () => {
     const element = (
       <Table
-        caption='Nothing yet'
         columns={COLUMNS}
         footer='No rows to total'
         layout='static'
         response={[]}
+        title='Nothing yet'
       />
     );
     const view = render(element);

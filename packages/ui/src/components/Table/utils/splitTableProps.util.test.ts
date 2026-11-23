@@ -15,7 +15,6 @@ type SplitArgs = Parameters<typeof splitTableProps>[0];
 
 const OWN_KEYS = [
   'actions',
-  'caption',
   'cellPalette',
   'cellRenderers',
   'columns',
@@ -35,6 +34,7 @@ const OWN_KEYS = [
   'response',
   'title',
   'titleDensity',
+  'titleLevel',
 ] as const;
 
 const toArgs = (props: Readonly<Record<string, unknown>>) =>

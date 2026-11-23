@@ -81,7 +81,7 @@ export const styles = stylex.create({
     height: '2.25rem',
   },
   triggerLabel: {
-    flex: '1 1 auto',
+    flex: '1 1 0%',
     overflow: 'hidden',
     color: colors.textPrimary,
     fontSize: typography.fontSizeSm,
@@ -93,7 +93,7 @@ export const styles = stylex.create({
     borderColor: colors.borderPrimary,
   },
   triggerPlaceholder: {
-    flex: '1 1 auto',
+    flex: '1 1 0%',
     color: colors.textSecondary,
     fontSize: typography.fontSizeSm,
     minWidth: 0,

@@ -12,6 +12,7 @@ describe('resolveTablePresentation', () => {
         toolbar: true,
       },
       layout: 'virtual',
+      titleLevel: 2,
     });
   });
 
@@ -24,6 +25,7 @@ describe('resolveTablePresentation', () => {
         toolbar: false,
       },
       layout: 'static',
+      titleLevel: 2,
     });
   });
 

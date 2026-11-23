@@ -77,6 +77,20 @@ describe('ResizeHandle', () => {
     expect(splitter.getAttribute('aria-valuetext')).toBe('120 pixels');
   });
 
+  it('resizes a column with a small maximum down to that maximum, not the default minimum', () => {
+    mockUseGetNormalizedColumn.mockReturnValue({ maxWidth: 40 });
+    mockUseGetColumnWidth.mockReturnValue(undefined);
+
+    renderHandle();
+
+    expect(mockUseColumnResize).toHaveBeenCalledWith({
+      columnKey: 'name',
+      currentWidth: 40,
+      maxWidth: 40,
+      minWidth: 40,
+    });
+  });
+
   it('is not a tab stop, because the grid owns the only one', () => {
     renderHandle();
 

@@ -18,7 +18,7 @@ export const TableTitle = ({
 }: TableTitleProps) => {
   const title = useGetTableTitlePlural();
   const titleDensity = useGetTableTitleDensity();
-  const { features } = use(TablePresentationContext);
+  const { features, titleLevel } = use(TablePresentationContext);
 
   if (!features.toolbar) return;
 
@@ -27,6 +27,7 @@ export const TableTitle = ({
       actions={actions}
       customStylex={customStylex}
       icon={icon}
+      level={titleLevel}
       size={TABLE_TITLE_DENSITY_SIZE[titleDensity]}
     >
       {title}

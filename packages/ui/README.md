@@ -234,19 +234,20 @@ const columns: readonly TableColumn<Order>[] = [
 ];
 
 <Table
-  caption='Latest orders'
   columns={columns}
+  features={{ toolbar: true }}
   footer='Totals include tax'
   layout='static'
   response={orders}
+  title='Latest orders'
 />;
 ```
 
 A column's `align` (`'start'`, `'center'` or `'end'`) wins over the alignment its
 `dataType` gives, and applies to a `render` cell too. `width` is a starting width
-in pixels, or `'fill'` for the width the other columns leave. `caption` renders as
-the table's `<caption>` and `footer` as one `<tfoot>` row across every column, in
-either layout. A static row is at least the density's row height and grows to fit
+in pixels, or `'fill'` for the width the other columns leave. `title` names the
+table and shows in its title bar when the toolbar is on, and `footer` renders as
+one `<tfoot>` row across every column, in either layout. A static row is at least the density's row height and grows to fit
 its content.
 
 `Table` passes other `<table>` props and a `ref` to the element. In the virtual

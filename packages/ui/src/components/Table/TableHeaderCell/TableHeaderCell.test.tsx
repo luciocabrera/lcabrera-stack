@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 
+import * as stylex from '@stylexjs/stylex';
 import { cleanup, render, screen } from '@testing-library/react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
@@ -32,6 +33,7 @@ vi.mock('./TableHeaderActionsMenu', () => ({
 }));
 
 import { TableHeaderCell } from './TableHeaderCell.component';
+import { tableHeaderCellStyles } from './TableHeaderCell.stylex';
 
 const createColumn = (overrides: Record<string, unknown> = {}) => ({
   isHeaderHidden: false,
@@ -72,6 +74,24 @@ describe('TableHeaderCell', () => {
     renderCell();
 
     expect(screen.getByText('Name')).not.toBeNull();
+  });
+
+  it('renders a column with a small maximum at that maximum, the width its pinned offset assumes', () => {
+    useGetColumnWidthMock.mockReturnValue(undefined);
+    useGetPinnedColumnInfoMock.mockReturnValue(undefined);
+    useGetNormalizedColumnMock.mockReturnValue(createColumn({ maxWidth: 40 }));
+
+    renderCell();
+
+    const header = screen.getByRole('columnheader');
+    const expected = Object.entries(
+      stylex.props(tableHeaderCellStyles.base(40, 40)).style ?? {},
+    );
+
+    expect(expected.length).toBeGreaterThan(0);
+    expect(
+      expected.map(([property]) => header.style.getPropertyValue(property)),
+    ).toStrictEqual(expected.map(([, value]) => String(value)));
   });
 
   it('renders ResizeHandle when the column is resizable', () => {

@@ -1,12 +1,13 @@
 import type { TableColumn } from '../Table.types';
 
-import { DEFAULT_MIN_COLUMN_WIDTH } from '../Table.constants';
+import { resolveColumnMinWidth } from './resolveColumnMinWidth.util';
 
 export const resolveColumnStartWidth = <TData>({
+  maxWidth,
   minWidth,
   width,
-}: Pick<TableColumn<TData>, 'minWidth' | 'width'>) => {
-  const effectiveMinWidth = minWidth ?? DEFAULT_MIN_COLUMN_WIDTH;
+}: Pick<TableColumn<TData>, 'maxWidth' | 'minWidth' | 'width'>) => {
+  const effectiveMinWidth = resolveColumnMinWidth({ maxWidth, minWidth });
 
   return typeof width === 'number'
     ? Math.max(width, effectiveMinWidth)

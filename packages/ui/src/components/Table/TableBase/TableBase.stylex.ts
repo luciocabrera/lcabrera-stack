@@ -20,18 +20,6 @@ const baseStyles = stylex.create({
   },
 });
 
-const captionStyles = stylex.create({
-  caption: {
-    paddingBlock: spacing.xs,
-    paddingInline: tableDensityVars.headerPaddingInline,
-    captionSide: 'top',
-    color: colors.textPrimary,
-    fontSize: tableDensityVars.headerFontSize,
-    fontWeight: typography.fontWeightSemibold,
-    textAlign: 'left',
-  },
-});
-
 const tableVariants = stylex.create({
   borderless: {
     borderWidth: 0,
@@ -75,7 +63,6 @@ const resolveDensityVariables = ({
 
 export const tableStyles = {
   base: baseStyles.table,
-  caption: captionStyles.caption,
   density: resolveDensityVariables,
   variants: tableVariants,
 };

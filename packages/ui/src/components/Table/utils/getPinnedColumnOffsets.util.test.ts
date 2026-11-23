@@ -37,6 +37,18 @@ describe('getPinnedColumnOffsets', () => {
     expect(result.name?.side).toBe('left');
   });
 
+  it('offsets the next pinned column by a narrow column at its declared maximum', () => {
+    const result = getPinnedColumnOffsets({
+      columnPinning: { left: ['id', 'name'], right: [] },
+      columnSizing: emptySizing,
+      effectiveColumns: [
+        { dataType: 'string', key: 'id', label: 'ID', maxWidth: 40 },
+        { dataType: 'string', key: 'name', label: 'Name', minWidth: 120 },
+      ],
+    });
+    expect(result.name?.offset).toBe(40);
+  });
+
   it('marks last left pinned column as isLastPinnedLeft', () => {
     const result = getPinnedColumnOffsets({
       columnPinning: { left: ['id', 'name'], right: [] },

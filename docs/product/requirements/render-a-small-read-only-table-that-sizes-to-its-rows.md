@@ -10,6 +10,7 @@ requires:
   - render-a-table-from-rows-alone
 issues:
   - 1560
+  - 1653
 evidence:
   - type: test
     ref: packages/ui/src/components/Table/Table.staticLayout.test.tsx
@@ -29,7 +30,7 @@ evidence:
 
 Some of my tables are a handful of rows inside a card or a section of a page: a
 summary, a comparison, a short list with links in it. I want each one to show
-every row and be as tall as its rows, wherever I put it, with a caption that
+every row and be as tall as its rows, wherever I put it, with a title that
 says what it is and numbers lined up where I want them. I do not want a scroll
 viewport, a toolbar, a settings panel or column menus on a table nobody needs to
 configure, and I do not want to learn a second table component to get there.
@@ -41,7 +42,7 @@ configure, and I do not want to learn a second table component to get there.
   in `reports/api-surface/ui.txt`.
 - A test renders it from rows and columns inside a parent with no set height,
   and finds as many body rows in the DOM as there are rows given, a non-zero
-  table height, `role="table"` and the caption as the table's `<caption>`.
+  table height, `role="table"` and the table named by its title.
 - With its defaults it renders no settings button, no column menu and no resize
   handle, and a test asserts each is absent.
 - A column sets its alignment to start, center or end, and a column that sets

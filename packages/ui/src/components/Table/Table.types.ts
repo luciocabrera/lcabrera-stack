@@ -8,6 +8,7 @@ import type { StyleXStyles } from '@stylexjs/stylex';
 import type { ComponentPropsWithRef, ReactNode } from 'react';
 
 import type { ColumnAxisEmittedAggregate } from '#ui/components/Table/utils/columnAxisEmitted.types';
+import type { TitleLevel } from '#ui/components/Title/Title.types';
 import type { ColumnFilter } from '#ui/types/filterOperators.types';
 import type { Pagination, Sorting } from '#ui/types/ui.types';
 
@@ -514,7 +515,6 @@ export type TableProps<
     | TableRowsSource<TData>
     | TableSelectedSource<TData, TResponse, Promise<TResponse> | TResponse>
   ) & {
-    readonly caption?: ReactNode;
     /** Seeds the providers the Table mounts when none are above it. */
     readonly columns: readonly TableColumn<TData>[];
     /** The level when the meta state holds none; outranks the global default. */
@@ -534,6 +534,8 @@ export type TableProps<
     readonly title?: string;
     /** The title bar's level when the meta state holds none; outranks the global default, then defaults to the density. */
     readonly titleDensity?: TableDensity;
+    /** The title bar heading's level; defaults to 2. */
+    readonly titleLevel?: TitleLevel;
   };
 
 export type TableQueryRefusalReason =

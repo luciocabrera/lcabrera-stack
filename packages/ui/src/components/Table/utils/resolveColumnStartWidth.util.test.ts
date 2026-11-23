@@ -17,6 +17,10 @@ describe('resolveColumnStartWidth', () => {
     expect(resolveColumnStartWidth({})).toBe(DEFAULT_MIN_COLUMN_WIDTH);
   });
 
+  it('starts at a declared maximum below the default minimum', () => {
+    expect(resolveColumnStartWidth({ maxWidth: 40 })).toBe(40);
+  });
+
   it('never starts below the minimum, which is what the cell renders at', () => {
     expect(resolveColumnStartWidth({ minWidth: 200, width: 100 })).toBe(200);
     expect(resolveColumnStartWidth({ width: 20 })).toBe(

@@ -43,6 +43,7 @@ export const COST_TABLE_COLUMNS: readonly TableColumn<CostRow>[] = [
   {
     key: 'name',
     label: 'Name',
+    minWidth: 160,
     render: ({ href, name }: CostRow) =>
       href === undefined ? (
         name
@@ -58,6 +59,7 @@ export const COST_TABLE_COLUMNS: readonly TableColumn<CostRow>[] = [
       dataType,
       key,
       label,
+      minWidth: 120,
       render: (row) => row[key],
     }),
   ),

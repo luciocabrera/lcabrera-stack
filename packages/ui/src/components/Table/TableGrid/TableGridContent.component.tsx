@@ -23,7 +23,6 @@ export const TableGridContent = <
   const { own, tableProps } = splitTableProps(props);
   const {
     actions,
-    caption,
     cellPalette,
     cellRenderers,
     customStylex,
@@ -37,14 +36,18 @@ export const TableGridContent = <
     layout,
     onLoadMore,
     titleDensity,
+    titleLevel,
   } = own;
   const globalDensity = useGlobalTableDensityDefaults();
-  const presentation = resolveTablePresentation({ features, layout });
+  const presentation = resolveTablePresentation({
+    features,
+    layout,
+    titleLevel,
+  });
   const isStatic = presentation.layout === 'static';
   const { isFlexWrapperEnabled = !isStatic } = own;
   const contentProps = {
     actions,
-    caption,
     customStylex,
     footer,
     icon,

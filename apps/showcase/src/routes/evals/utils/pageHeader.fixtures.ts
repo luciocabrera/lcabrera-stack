@@ -16,6 +16,12 @@ export const breadcrumbTrail = () =>
       };
     });
 
+export const headingOutline = () =>
+  screen
+    .getAllByRole('heading')
+    .filter(({ tagName }) => tagName !== 'H1')
+    .map(({ tagName, textContent }) => `${tagName} ${textContent}`);
+
 export const evalsTrail = (page: string) => [
   { href: '/evals', isCurrent: false, label: 'Evals' },
   { href: undefined, isCurrent: true, label: page },

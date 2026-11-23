@@ -10,7 +10,11 @@ import {
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
-import { breadcrumbTrail, evalsTrail } from '../utils/pageHeader.fixtures';
+import {
+  breadcrumbTrail,
+  evalsTrail,
+  headingOutline,
+} from '../utils/pageHeader.fixtures';
 import { tableCells, tableHeaders } from '../utils/staticTable.fixtures';
 import { EvalsQuality } from './EvalsQuality.component';
 import { EVALS_QUALITY_HANDLE } from './EvalsQuality.constants';
@@ -124,6 +128,11 @@ describe('EvalsQuality', () => {
       screen.getAllByRole('tab').map(({ textContent }) => textContent),
     ).toEqual(['react-19', 'unslop']);
     expect(screen.getByText('Baseline of 5 runs on model-a.')).toBeDefined();
+
+    expect(headingOutline()).toEqual([
+      'H2 react-19',
+      'H3 react-19: rubric dimensions',
+    ]);
 
     const heading = screen.getByRole('heading', { level: 2, name: 'react-19' });
 

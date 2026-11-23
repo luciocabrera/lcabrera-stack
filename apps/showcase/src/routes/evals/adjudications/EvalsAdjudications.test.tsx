@@ -4,7 +4,11 @@ import { cleanup, render, screen, within } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
-import { breadcrumbTrail, evalsTrail } from '../utils/pageHeader.fixtures';
+import {
+  breadcrumbTrail,
+  evalsTrail,
+  headingOutline,
+} from '../utils/pageHeader.fixtures';
 import { expectHydratesWithoutMismatch } from '../utils/serverMarkup.fixtures';
 import { tableCells, tableHeaders } from '../utils/staticTable.fixtures';
 import { ACCURACY, CASES, VERDICTS } from './adjudications.fixtures';
@@ -64,7 +68,7 @@ describe('EvalsAdjudications', () => {
     expect(breadcrumbTrail()).toEqual(evalsTrail('adjudications'));
   });
 
-  it('lists the history in facts, then a level-2 heading per section', async () => {
+  it('lists the history in facts, then a level-2 heading per section with its tables below it', async () => {
     await renderWith(DATA);
 
     expect(
@@ -73,19 +77,21 @@ describe('EvalsAdjudications', () => {
     expect(
       screen.getAllByRole('definition').map(({ textContent }) => textContent),
     ).toEqual(['4', '3', '2', '1', '1', '1']);
-    expect(
-      screen
-        .getAllByRole('heading', { level: 2 })
-        .map(({ textContent }) => textContent),
-    ).toEqual([
-      'Cases',
-      'Reopened dismissals',
-      'Accuracy by model and role',
-      'Accuracy by model and rule',
-      'Accuracy by prompt',
-      'False positives by rule',
-      'Cost and time by model',
-      'Cases by builder model',
+    expect(headingOutline()).toEqual([
+      'H2 Cases',
+      'H3 False-positive panel cases, newest first',
+      'H2 Reopened dismissals',
+      'H2 Accuracy by model and role',
+      'H3 Verdicts scored against the latest true answer, by model and role',
+      'H2 Accuracy by model and rule',
+      'H2 Accuracy by prompt',
+      'H3 Verdicts by role and prompt hash, oldest prompt first',
+      'H2 False positives by rule',
+      'H3 Cases by analyzer and rule, with the share the true answer called a false positive',
+      'H2 Cost and time by model',
+      'H3 Reported cost, time and tokens of each model on the panel',
+      'H2 Cases by builder model',
+      'H3 Cases by the model that built the change, with the panel accuracy on them',
     ]);
   });
 
