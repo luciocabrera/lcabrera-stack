@@ -1,5 +1,35 @@
 # @lcabrera/ui
 
+## 0.14.0
+
+### Minor Changes
+
+- d8c3790: `Heatmap`, `LineChart` and `TrendSparkline` take reader settings, the way `Table` does: a settings button opens a side panel, and Accept applies what the reader staged. The settings last for the life of the chart; nothing is persisted.
+
+  Each chart offers only the settings it can draw:
+
+  - `Heatmap`: density (cell size), column labels (every label, every 2nd or every 5th), the legend, and the data table shown as a visible table.
+  - `LineChart`: density (plot height), points (`auto`, every point, or linked points only), axis ticks on a numeric axis, the legend past one series, marker labels when there are markers, and the visible data table.
+  - `TrendSparkline`: density (height), and the line between points on a points chart.
+
+  New props on all three: `density` sets the level the chart opens at, using the four `Table` levels (`dense`, `compact`, `comfortable`, `spacious`), and `features={{ settings: false }}` draws the chart without the button. `cellSize` and `height` now give the size at `compact`, which is the default level, so a chart that sets neither prop renders at the size it did before. The new types `ChartDensity` and `ChartFeatures` are exported from the package root.
+
+  **This is the breaking part:** settings are on by default, so every chart now draws a settings button: above a `Heatmap` or `LineChart`, beside a `TrendSparkline`. Pass `features={{ settings: false }}` where a chart sits inside another component, such as a table cell, to keep the previous output.
+
+  With settings on, the props behind a setting are read once, on the first render, to seed what the panel opens with: `density` on all three; `points` and `hasMarkerLabels` on `LineChart`; `isConnected` on `TrendSparkline`. A later change to one of them does not reach the chart, because the reader's choice stands for the life of the chart. A chart you drive from your own state should pass `features={{ settings: false }}`, which applies its props on every render. The panel also decides which settings to offer from the first render: a `LineChart` first drawn with no markers offers no marker-labels switch, and markers added later are labelled as `hasMarkerLabels` asks.
+
+- f7fa33a: **Breaking:** `Table` no longer takes `caption`. A table has one title, `title`: it names the `<table>` in both layouts and shows in the title bar when the toolbar is on. Replace `caption='…'` with `title='…'`, and add `features={{ toolbar: true }}` to a static table whose title should be visible. The new `titleLevel` prop sets the title bar heading's level (2 unless set), so a table under a section heading can sit one level below it. `caption` took a `ReactNode` and `title` takes a `string`, so a caption holding elements (a badge, a link) becomes its text in `title`, and the elements move outside the `Table`.
+
+  `Table` renders the same header row in both layouts: the label on one line, cut with an ellipsis, with its column menu beside it. In the static layout the label no longer wraps or sets the column's width: the column takes its width from its cells and its `width`, `minWidth` and `maxWidth`, and a column that declares no `minWidth` is never narrower than the minimum width the virtual layout uses. In both layouts that default minimum now yields to a smaller declared `maxWidth`: a column with `maxWidth: 40` starts, resizes and pins at 40 instead of being held at the default.
+
+  A single-mode `VirtualSelect` keeps a long selected label on one line, cut with an ellipsis, with its chevron beside it. Before, the label took its full text width, pushed the chevron onto a second line and made the trigger taller than the controls next to it.
+
+### Patch Changes
+
+- 6f21a96: The `toolbar` variant of `Title` uses less block padding at each `size`, so a sized title bar stays close to the table's row heights. Each step now adds 4px, 8px, 12px or 16px above and below its content (it was 12px, 24px, 32px and 48px). A `Title` without a `size` keeps the 24px block padding it had before. A table's title bar sets its size from the title bar density, so it gets shorter at every level.
+- @lcabrera/api@0.6.1
+  - @lcabrera/utils@0.4.0
+
 ## 0.13.0
 
 ### Minor Changes
