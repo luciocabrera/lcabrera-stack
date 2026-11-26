@@ -12,7 +12,7 @@ area:
 started: 2026-11-26
 updated: 2026-11-26
 plan: (none)
-pr: (none)
+pr: #1662
 issue: #1661
 ---
 
