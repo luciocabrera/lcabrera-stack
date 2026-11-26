@@ -225,31 +225,22 @@ describe('the timing of a wait', () => {
     expect(await result).toBe(true);
   });
 
-  it('stops at the deadline itself, without probing again', async () => {
-    const times = [0, 30];
-    const { calls, result } = wait({
-      headSha: HEAD,
-      now: () => times.shift() ?? 30,
-      pullRequests: [],
-      tasks: [],
+  for (const [label, later] of [
+    ['reaches', 30],
+    ['has passed', 31],
+  ]) {
+    it(`stops without probing again once the clock ${label} the deadline`, async () => {
+      const times = [0];
+      const { calls, result } = wait({
+        headSha: HEAD,
+        now: () => times.shift() ?? later,
+        pullRequests: [],
+        tasks: [],
+      });
+      expect(await result).toBe(false);
+      expect(
+        calls.filter((url) => url.includes('/api/project_pull_requests/list')),
+      ).toHaveLength(1);
     });
-    expect(await result).toBe(false);
-    expect(
-      calls.filter((url) => url.includes('/api/project_pull_requests/list')),
-    ).toHaveLength(1);
-  });
-
-  it('stops once the clock has passed the deadline', async () => {
-    const times = [0];
-    const { calls, result } = wait({
-      headSha: HEAD,
-      now: () => times.shift() ?? 31,
-      pullRequests: [],
-      tasks: [],
-    });
-    expect(await result).toBe(false);
-    expect(
-      calls.filter((url) => url.includes('/api/project_pull_requests/list')),
-    ).toHaveLength(1);
-  });
+  }
 });

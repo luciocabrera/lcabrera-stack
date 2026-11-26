@@ -42,19 +42,21 @@ const runnableSkills = () =>
 const readHead = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
-const knownRef = (ref) =>
-  [
+const unresolvable = (ref = '--base') =>
+  new Error(`cannot resolve a merge base with ${ref}`);
+
+const knownRef = (ref) => {
+  const known = [
     'HEAD',
     ...(git(['for-each-ref', '--format=%(refname:short)']) ?? '').split('\n'),
   ].find((name) => name === ref);
+  if (known === undefined) throw unresolvable(ref);
+  return known;
+};
 
 const mergeBase = (ref) => {
-  const known = ref === undefined ? undefined : knownRef(ref);
-  const base =
-    known === undefined ? undefined : git(['merge-base', known, 'HEAD']);
-  if (base === undefined) {
-    throw new Error(`cannot resolve a merge base with ${ref ?? '--base'}`);
-  }
+  const base = git(['merge-base', knownRef(ref), 'HEAD']);
+  if (base === undefined) throw unresolvable(ref);
   return base;
 };
 
