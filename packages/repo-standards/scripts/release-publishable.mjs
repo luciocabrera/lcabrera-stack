@@ -25,7 +25,11 @@
 
 const STATE_ORDER = ['publish', 'first-publish', 'up-to-date'];
 
-export const classifyRelease = ({ packageExists, tagged, versionExists }) => {
+export const classifyRelease = ({
+  packageExists,
+  tagged = false,
+  versionExists,
+}) => {
   if (tagged) {
     return 'up-to-date';
   }
