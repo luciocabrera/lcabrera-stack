@@ -86,7 +86,10 @@ jobs:
       #
       # Permissive by design: anything it cannot resolve counts as publishable,
       # so the job proceeds and `changeset publish` decides. Over-reporting
-      # costs a build; under-reporting would silently skip a release.
+      # costs a build; under-reporting would silently skip a release. The one
+      # exception is a version already tagged `<name>@<version>`: it counts as
+      # released, so a tag pushed by hand for a version npm never received
+      # skips that version until the tag is deleted.
       - name: Plan the release
         id: plan
         run: node packages/repo-standards/scripts/release-publish-plan.mjs --github

@@ -16,7 +16,10 @@
  * authority on what ships, and anything this script cannot resolve is reported
  * as publishable so the workflow proceeds and lets the real tool decide. It may
  * over-report and waste a build; it must never under-report and silently skip a
- * release.
+ * release. One exception: a version whose `<name>@<version>` tag exists counts
+ * as released without asking the registry, because the Release workflow tags
+ * only what npm accepted. A tag made by hand for a version npm never received
+ * fails the wrong way: that version is skipped until the tag is deleted.
  *
  * Usage (from the repository root):
  *   repo-plan-release              # print the plan
