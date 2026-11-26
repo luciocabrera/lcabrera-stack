@@ -554,7 +554,8 @@ jobs:
         if: always()
         run: |
           status() {
-            if [[ "$1" == success ]]; then echo '✅ Passed'; else echo '❌ Failed'; fi
+            local outcome="$1"
+            if [[ "$outcome" == success ]]; then echo '✅ Passed'; else echo '❌ Failed'; fi
           }
 
           CHECK_STATUS="$(status '${{ steps.quality_gate.outcome }}')"
