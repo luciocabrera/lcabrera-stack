@@ -34,6 +34,7 @@ import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 import { errorMessage } from './error-message.mjs';
+import { runGit } from './git-exec.mjs';
 import { resolveHostRoot } from './host-root.mjs';
 import { readPublishableManifests } from './publishable-workspaces.mjs';
 import { fetchPackument } from './registry-packument.mjs';
@@ -56,7 +57,12 @@ const readReleaseTargets = () =>
     version,
   }));
 
-const classifyPackage = async ({ name, version }) => {
+const readTags = () =>
+  new Set(
+    (runGit({ args: ['tag', '--list'], cwd: REPO_ROOT }) ?? '').split('\n'),
+  );
+
+const classifyPackage = async ({ name, tags, version }) => {
   const packument = await fetchPackument(name);
 
   return {
@@ -65,6 +71,7 @@ const classifyPackage = async ({ name, version }) => {
     publishedVersion: packument?.['dist-tags']?.latest,
     state: classifyRelease({
       packageExists: packument !== undefined,
+      tagged: tags.has(`${name}@${version}`),
       versionExists: packument?.versions?.[version] !== undefined,
     }),
   };
@@ -93,8 +100,9 @@ const writeGithub = (classified, publishable, firstPublish) => {
 };
 
 const main = async () => {
+  const tags = readTags();
   const classified = await Promise.all(
-    readReleaseTargets().map((value) => classifyPackage(value)),
+    readReleaseTargets().map((value) => classifyPackage({ ...value, tags })),
   );
   const publishable = selectPublishable(classified);
   const firstPublish = selectFirstPublish(classified);

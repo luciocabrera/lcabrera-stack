@@ -42,6 +42,16 @@ describe('classifyRelease', () => {
     );
   });
 
+  it('skips a tagged version the registry has not caught up with yet', () => {
+    expect(
+      classifyRelease({
+        packageExists: true,
+        tagged: true,
+        versionExists: false,
+      }),
+    ).toBe('up-to-date');
+  });
+
   it('holds a package that has never been published for a human', () => {
     expect(
       classifyRelease({ packageExists: false, versionExists: false }),
