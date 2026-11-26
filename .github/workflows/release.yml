@@ -239,9 +239,9 @@ jobs:
       - name: Wait until npm serves what shipped
         if: always() && steps.publish.outputs.published == 'true'
         run: |
-          deadline=$((SECONDS + 900))
           while read -r tag; do
             [ -n "$tag" ] || continue
+            deadline=$((SECONDS + 900))
             name="${tag%@*}"
             version="${tag##*@}"
             url="https://registry.npmjs.org/${name}/-/${name##*/}-${version}.tgz"
