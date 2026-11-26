@@ -11,4 +11,4 @@ export type ColumnWidthPresetButtonsProps = {
   readonly selectedPreset?: WidthPreset;
 };
 
-export type WidthPreset = 'default' | 'max' | 'min' | undefined;
+export type WidthPreset = 'default' | 'max' | 'min';

@@ -383,6 +383,12 @@ th {
   text-transform: uppercase;
   color: var(--muted);
 }
+th[scope='row'] {
+  font: inherit;
+  letter-spacing: normal;
+  text-transform: none;
+  color: inherit;
+}
 .cell {
   display: inline-flex;
   align-items: center;

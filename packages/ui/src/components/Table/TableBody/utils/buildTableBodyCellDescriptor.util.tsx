@@ -56,19 +56,19 @@ type TableBodyCellDefaultFields<TData extends Record<string, unknown>> = {
 };
 
 type TableBodyCellDescriptorBase<TData extends Record<string, unknown>> = {
-  readonly align?: TableBodyCellLayout['align'];
+  readonly align?: NonNullable<TableBodyCellLayout['align']>;
   readonly columnKey: TableBodyCellProps<TData>['columnKey'];
-  readonly isFill?: TableBodyCellLayout['isFill'];
+  readonly isFill?: NonNullable<TableBodyCellLayout['isFill']>;
   readonly isLoadingState: NonNullable<
     TableBodyCellProps<TData>['isLoadingState']
   >;
-  readonly isNumeric?: TableBodyCellLayout['isNumeric'];
+  readonly isNumeric?: NonNullable<TableBodyCellLayout['isNumeric']>;
   readonly key: DataKey<TData>;
   readonly minWidth: NonNullable<TableBodyCellProps<TData>['minWidth']>;
   readonly pinInfo: TableBodyCellProps<TData>['pinInfo'];
   readonly rowIndex: TableBodyCellProps<TData>['rowIndex'];
   readonly rowKey: TableBodyCellProps<TData>['rowKey'];
-  readonly staticWidths?: TableBodyCellLayout['staticWidths'];
+  readonly staticWidths?: NonNullable<TableBodyCellLayout['staticWidths']>;
   readonly width: NonNullable<TableBodyCellProps<TData>['width']>;
 };
 

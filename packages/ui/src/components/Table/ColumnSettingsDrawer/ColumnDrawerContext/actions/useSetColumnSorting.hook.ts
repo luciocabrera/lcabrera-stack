@@ -5,7 +5,7 @@ import { useColumnDrawerContextValue } from '#ui/components/Table/ColumnSettings
 export const useSetColumnSorting = () => {
   const { columnStore } = useColumnDrawerContextValue();
 
-  return (sorting: SortDirection) => {
+  return (sorting: SortDirection | undefined) => {
     columnStore.set({ sorting });
   };
 };

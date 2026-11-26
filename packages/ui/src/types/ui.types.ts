@@ -38,7 +38,7 @@ export type PrefetchCache<TResponse> = {
   readonly skip: number;
 };
 
-export type SortDirection = 'asc' | 'desc' | undefined;
+export type SortDirection = 'asc' | 'desc';
 
 export type Sorting<TData = Record<string, unknown>> = {
   readonly columnKey: DataKey<TData>;

@@ -19,7 +19,7 @@ export type NavbarLinkConfig = Omit<NavLinkProps, 'children' | 'className'> & {
   readonly icon?: ReactNode;
   readonly label: string;
   readonly type: 'link';
-  readonly variant?: Pick<ButtonProps, 'variant'>['variant'];
+  readonly variant?: NonNullable<ButtonProps['variant']>;
 };
 
 export type NavbarProps = ComponentPropsWithoutRef<'nav'> & {

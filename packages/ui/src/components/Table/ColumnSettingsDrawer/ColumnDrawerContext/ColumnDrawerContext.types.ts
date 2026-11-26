@@ -15,5 +15,5 @@ export type ColumnDrawerState<TData> = {
   readonly columnKey: DataKey<TData>;
   readonly columnPinning?: 'left' | 'right';
   readonly columnSizing?: number;
-  readonly sorting: SortDirection;
+  readonly sorting: SortDirection | undefined;
 };

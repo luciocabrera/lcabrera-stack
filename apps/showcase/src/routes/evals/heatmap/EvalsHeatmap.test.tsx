@@ -120,7 +120,7 @@ describe('EvalsHeatmap', () => {
   });
 
   it('hydrates the server markup without a mismatch', async () => {
-    await expectHydratesWithoutMismatch({
+    const container = await expectHydratesWithoutMismatch({
       path: '/evals/heatmap',
       routes: [
         {
@@ -131,5 +131,9 @@ describe('EvalsHeatmap', () => {
         },
       ],
     });
+
+    expect(
+      within(container).getByRole('tab', { name: 'skills' }),
+    ).toBeDefined();
   });
 });

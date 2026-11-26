@@ -52,8 +52,7 @@ export const createIssue = (issue, bodyPath, { dryRun, log }) => {
     'create',
     '--title',
     assertIsData(`issue ${issue.id} title`, issue.title),
-    '--body-file',
-    assertIsData(`issue ${issue.id} body path`, bodyPath),
+    `--body-file=${assertIsData(`issue ${issue.id} body path`, bodyPath)}`,
     ...issue.labels.flatMap((label) => [
       '--label',
       assertIsData(`issue ${issue.id} label`, label),

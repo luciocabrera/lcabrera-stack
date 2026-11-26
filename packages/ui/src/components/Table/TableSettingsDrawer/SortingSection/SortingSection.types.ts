@@ -8,6 +8,6 @@ export type SortingSectionProps = ComponentPropsWithoutRef<'div'> & {
 
 export type SortItem = {
   readonly columnKey: string;
-  readonly direction: SortDirection;
+  readonly direction: SortDirection | undefined;
   readonly label: string;
 };

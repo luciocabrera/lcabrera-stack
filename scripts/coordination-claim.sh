@@ -23,7 +23,7 @@
 #   <title>      one-line human-readable description
 #   --issue <n>  link an EXISTING GitHub backlog issue (ADR-036) this work picks up
 #   --new-issue  create a fresh tracking issue titled <title> and link it
-#   --area       a glob this work OWNS (repeatable; defaults to a TODO placeholder)
+#   --area       a glob this work OWNS (repeatable; defaults to a placeholder glob to replace)
 #   --type       Conventional-Commit type for the branch (default: chore)
 #   --branch     branch name (default: <type>/<issue>-<id>, the enforced shape)
 #   --in-place   branch in THIS checkout instead of an isolated worktree. Only

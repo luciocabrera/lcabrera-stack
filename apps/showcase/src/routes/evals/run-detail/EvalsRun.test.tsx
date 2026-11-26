@@ -159,9 +159,13 @@ describe('EvalsRun', () => {
   });
 
   it('hydrates the server markup of a chosen trial without a mismatch', async () => {
-    await expectHydratesWithoutMismatch({
+    const container = await expectHydratesWithoutMismatch({
       path: `${RUN_PATH}?trial=8`,
       routes: [ROUTE],
     });
+
+    expect(
+      within(container).getByRole('region', { name: 'Trial 8' }),
+    ).toBeDefined();
   });
 });

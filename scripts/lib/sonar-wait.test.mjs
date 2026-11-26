@@ -173,3 +173,33 @@ describe('the Compute Engine probe, unchanged', () => {
     expect(analysisState(tasks, PR, PUSHED_AT)).toBe('pending');
   });
 });
+
+describe('a wait that outlasts one poll', () => {
+  it('polls again until the head is analysed', async () => {
+    const answers = [[], [{ commit: { sha: HEAD }, key: '1038' }]];
+    const calls = [];
+    const fetchJson = (url) => {
+      calls.push(url);
+      return Promise.resolve(
+        url.includes('/api/project_pull_requests/list')
+          ? { pullRequests: answers.shift() ?? [] }
+          : { tasks: [] },
+      );
+    };
+    const result = waitForAnalysis({
+      base: 'https://sonarcloud.io',
+      fetchJson,
+      headSha: HEAD,
+      intervalMs: 0,
+      project: 'luciocabrera_vite-react-compiler',
+      since: PUSHED_AT,
+      target: PR,
+      timeoutMs: 1000,
+      token: 'stub',
+    });
+    await expect(result).resolves.toBe(true);
+    expect(
+      calls.filter((url) => url.includes('/api/project_pull_requests/list')),
+    ).toHaveLength(2);
+  });
+});
