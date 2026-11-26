@@ -18,6 +18,7 @@ import lighthouse from 'lighthouse';
 import { spawn } from 'node:child_process';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { setTimeout } from 'node:timers/promises';
 import { chromium } from 'playwright';
 
 const PORT = 3000;
@@ -213,16 +214,17 @@ async function startProductionServer() {
 }
 
 async function waitForServer(url, maxAttempts = 30) {
-  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
-    if (await isServerResponding(url)) {
-      log('✓ Server is ready', colors.green);
-      return;
-    }
-
-    await new Promise((resolvePromise) => setTimeout(resolvePromise, 1000));
+  const ready = await Array.from({ length: maxAttempts })
+    .keys()
+    .reduce(async (earlier, attempt) => {
+      if (await earlier) return true;
+      if (attempt > 0) await setTimeout(1000);
+      return isServerResponding(url);
+    }, Promise.resolve(false));
+  if (!ready) {
+    throw new Error('Server failed to start');
   }
-
-  throw new Error('Server failed to start');
+  log('✓ Server is ready', colors.green);
 }
 
 try {

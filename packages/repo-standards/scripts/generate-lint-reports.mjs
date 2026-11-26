@@ -103,23 +103,29 @@ const findEslintWorkspaces = () => {
 
 const generateEslintReport = async () => {
   const workspaces = findEslintWorkspaces();
-  const queue = [...workspaces];
-  const results = [];
-
-  const worker = async () => {
-    for (let dir = queue.shift(); dir; dir = queue.shift()) {
+  const lintLane = (lane) =>
+    lane.reduce(async (earlier, dir) => {
+      const done = await earlier;
       const stdout = await runLinter(
         join(dir, 'node_modules/.bin/eslint'),
         ['.', '--config', 'eslint.config.mjs', '--format', 'json'],
         dir,
       );
-      for (const entry of JSON.parse(stdout)) {
-        results.push({ ...entry, filePath: toRepoRelative(entry.filePath) });
-      }
-    }
-  };
-
-  await Promise.all(Array.from({ length: ESLINT_CONCURRENCY }, () => worker()));
+      return [
+        ...done,
+        ...JSON.parse(stdout).map((entry) => ({
+          ...entry,
+          filePath: toRepoRelative(entry.filePath),
+        })),
+      ];
+    }, Promise.resolve([]));
+  const laneSize = Math.ceil(workspaces.length / ESLINT_CONCURRENCY);
+  const lanes = Array.from({ length: ESLINT_CONCURRENCY })
+    .keys()
+    .map((lane) => workspaces.slice(lane * laneSize, (lane + 1) * laneSize))
+    .toArray();
+  const laneResults = await Promise.all(lanes.map((lane) => lintLane(lane)));
+  const results = laneResults.flat();
   const sorted = results.toSorted((left, right) =>
     left.filePath.localeCompare(right.filePath),
   );

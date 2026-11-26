@@ -132,9 +132,10 @@ const main = async () => {
   }
 
   if (shouldRun) {
-    for (const workspace of workspaces) {
+    await workspaces.reduce(async (earlier, workspace) => {
+      await earlier;
       await runCoverage(workspace);
-    }
+    }, Promise.resolve());
   }
 
   const reports = await Promise.all(
