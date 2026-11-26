@@ -30,25 +30,28 @@ export const retryDelayMs = (attemptIndex) =>
 export const fetchWithRetry = async (attempt, options = {}) => {
   const { attempts = DEFAULT_ATTEMPTS, onRetry, sleep = pause } = options;
 
-  for (let index = 0; index < attempts - 1; index += 1) {
-    const outcome = await attempt().then(
-      (response) => ({ response }),
-      (error) => ({ error }),
-    );
+  const settled = await Array.from({ length: attempts - 1 })
+    .keys()
+    .reduce(async (earlier, index) => {
+      const response = await earlier;
+      if (response !== undefined) return response;
+      const outcome = await attempt().then(
+        (answer) => ({ response: answer }),
+        (error) => ({ error }),
+      );
+      if (
+        outcome.error === undefined &&
+        !isRetryableStatus(outcome.response.status)
+      ) {
+        return outcome.response;
+      }
+      onRetry?.({
+        attempt: index + 1,
+        reason: outcome.error?.message ?? `HTTP ${outcome.response.status}`,
+      });
+      await sleep(retryDelayMs(index));
+      return undefined;
+    }, Promise.resolve(undefined));
 
-    if (
-      outcome.error === undefined &&
-      !isRetryableStatus(outcome.response.status)
-    ) {
-      return outcome.response;
-    }
-
-    onRetry?.({
-      attempt: index + 1,
-      reason: outcome.error?.message ?? `HTTP ${outcome.response.status}`,
-    });
-    await sleep(retryDelayMs(index));
-  }
-
-  return attempt();
+  return settled ?? attempt();
 };

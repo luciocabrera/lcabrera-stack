@@ -138,7 +138,11 @@ const create = (manifest, directory, dryRun) => {
   const numbers = new Map(
     manifest.issues.map((issue) => [
       issue.id,
-      createIssue(issue, join(directory, issue.bodyFile), { dryRun, log }),
+      createIssue(
+        issue,
+        readFileSync(join(directory, issue.bodyFile), 'utf8'),
+        { dryRun, log },
+      ),
     ]),
   );
   console.log(`Issues: ${numbers.size} created.`);

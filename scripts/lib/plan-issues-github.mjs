@@ -46,14 +46,14 @@ export const createMilestones = (wanted, { dryRun, log }) => {
 
 const issueNumberFromUrl = (url) => Number(url.trim().split('/').at(-1));
 
-export const createIssue = (issue, bodyPath, { dryRun, log }) => {
-  const bodyFile = assertIsData(`issue ${issue.id} body path`, bodyPath);
+export const createIssue = (issue, body, { dryRun, log }) => {
   const args = [
     'issue',
     'create',
     '--title',
     assertIsData(`issue ${issue.id} title`, issue.title),
-    `--body-file=${bodyFile}`,
+    '--body-file',
+    '-',
     ...issue.labels.flatMap((label) => [
       '--label',
       assertIsData(`issue ${issue.id} label`, label),
@@ -69,7 +69,7 @@ export const createIssue = (issue, bodyPath, { dryRun, log }) => {
   if (dryRun) {
     return 0;
   }
-  return issueNumberFromUrl(runGh(args));
+  return issueNumberFromUrl(runGh(args, { input: body }));
 };
 
 const issueDatabaseId = (number) =>

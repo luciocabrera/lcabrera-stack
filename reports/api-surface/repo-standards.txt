@@ -138,7 +138,7 @@ errorMessage [const] (value: any) => string
 assertGhArguments [const] (args: any) => any[]
 ghBinary [const] () => string | undefined
 parsePullRequests [const] (raw: string, { warning }: { warning: string; }) => unknown[]
-runGh [const] (args: any) => string
+runGh [const] (args: unknown, { input }?: { input?: string; }) => string
 
 ## ./git-dir
 resolveGitDir [const] (repoRoot: any) => any

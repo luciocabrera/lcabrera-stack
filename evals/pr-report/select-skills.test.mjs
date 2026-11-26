@@ -2,6 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vite-plus/test';
 
+import { runGit } from '../../packages/repo-standards/scripts/git-exec.mjs';
+
 const SCRIPT = fileURLToPath(new URL('select-skills.mjs', import.meta.url));
 const REPO_ROOT = fileURLToPath(new URL('../..', import.meta.url));
 
@@ -31,6 +33,20 @@ describe('select-skills', () => {
 
   it('treats a pull request without labels as not opted in', () => {
     expect(selectSkills(['--base', 'HEAD']).stdout).toContain('labelled=false');
+  });
+
+  it('resolves a ref name git lists', () => {
+    const ref = runGit({
+      args: ['for-each-ref', '--count=1', '--format=%(refname:short)'],
+      cwd: REPO_ROOT,
+    });
+    expect(selectSkills(['--base', ref]).status).toBe(0);
+  });
+
+  it('refuses a revision that is not a ref name', () => {
+    const { status, stderr } = selectSkills(['--base', 'HEAD~0']);
+    expect(status).toBe(1);
+    expect(stderr).toContain('HEAD~0');
   });
 
   it('fails on a base it cannot resolve', () => {

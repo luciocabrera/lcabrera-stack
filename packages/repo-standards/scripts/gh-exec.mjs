@@ -43,7 +43,11 @@ export const assertGhArguments = (args) => {
   return args;
 };
 
-export const runGh = (args) => {
+/**
+ * @param {unknown} args
+ * @param {{ input?: string }} [options]
+ */
+export const runGh = (args, { input } = {}) => {
   assertGhArguments(args);
   const binary = ghBinary();
   if (binary === undefined) {
@@ -53,8 +57,9 @@ export const runGh = (args) => {
     return execFileSync(binary, args, {
       encoding: 'utf8',
       env: { ...process.env, PATH: TRUSTED_DIRECTORIES.join(':') },
+      input,
       maxBuffer: 8 * 1024 * 1024,
-      stdio: ['ignore', 'pipe', 'pipe'],
+      stdio: [input === undefined ? 'ignore' : 'pipe', 'pipe', 'pipe'],
     }).trim();
   } catch (error) {
     const detail = (error.stderr ?? '').toString().trim();

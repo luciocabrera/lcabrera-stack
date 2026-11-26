@@ -19,6 +19,7 @@
  * Why the split, and which parameters SonarCloud ignores unread, is in
  * `docs/decisions/ADR-098-recompute-the-merge-bar-in-a-queue-not-on-every-open-pull-request.md`.
  */
+import { setInterval } from 'node:timers/promises';
 
 const WAIT_TIMEOUT_MS = 5 * 60 * 1000;
 const WAIT_INTERVAL_MS = 15 * 1000;
@@ -61,11 +62,6 @@ export const analysedHead = (pullRequests, target, headSha) => {
   );
 };
 
-const sleep = (ms) =>
-  new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-
 const headAnalysed = async ({
   base,
   fetchJson,
@@ -100,11 +96,23 @@ const activityState = async ({
   return analysisState(body.tasks ?? [], target, since);
 };
 
+const analysisSettled = async (context) => {
+  if (await headAnalysed(context)) return true;
+  const state = await activityState(context);
+  if (state === 'failed') {
+    throw new Error(
+      `SonarCloud analysis failed for ${context.target.type} ${context.target.value}`,
+    );
+  }
+  return state === 'ready';
+};
+
 export const waitForAnalysis = async ({
   base,
   fetchJson,
   headSha,
   intervalMs = WAIT_INTERVAL_MS,
+  now = Date.now,
   project,
   since,
   target,
@@ -112,17 +120,11 @@ export const waitForAnalysis = async ({
   token,
 }) => {
   const context = { base, fetchJson, headSha, project, since, target, token };
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
-    if (await headAnalysed(context)) return true;
-    const state = await activityState(context);
-    if (state === 'ready') return true;
-    if (state === 'failed') {
-      throw new Error(
-        `SonarCloud analysis failed for ${target.type} ${target.value}`,
-      );
-    }
-    await sleep(intervalMs);
+  const deadline = now() + timeoutMs;
+  if (await analysisSettled(context)) return true;
+  for await (const current of setInterval(intervalMs, context)) {
+    if (now() >= deadline) return false;
+    if (await analysisSettled(current)) return true;
   }
   return false;
 };

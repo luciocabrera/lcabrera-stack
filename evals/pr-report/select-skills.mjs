@@ -5,6 +5,7 @@
  * `skills` names the some, and `run` is true only when the pull request
  * carries the opt-in label.
  * Usage (from the repo root): node evals/pr-report/select-skills.mjs --base <ref>
+ *   (HEAD or a ref name `git for-each-ref` lists; anything else is refused)
  *   [--labels <JSON array of the pull request's label names>]
  * Exit codes: 0 = printed, 1 = the base cannot be resolved.
  */
@@ -41,11 +42,16 @@ const runnableSkills = () =>
 const readHead = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
+const knownRef = (ref) =>
+  [
+    'HEAD',
+    ...(git(['for-each-ref', '--format=%(refname:short)']) ?? '').split('\n'),
+  ].find((name) => name === ref);
+
 const mergeBase = (ref) => {
+  const known = ref === undefined ? undefined : knownRef(ref);
   const base =
-    ref === undefined
-      ? undefined
-      : git(['merge-base', '--end-of-options', ref, 'HEAD']);
+    known === undefined ? undefined : git(['merge-base', known, 'HEAD']);
   if (base === undefined) {
     throw new Error(`cannot resolve a merge base with ${ref ?? '--base'}`);
   }

@@ -38,7 +38,7 @@ const stubApi = ({ pullRequests = [], tasks = [] }) => {
   return { calls, fetchJson };
 };
 
-const wait = ({ headSha, pullRequests, tasks }) => {
+const wait = ({ headSha, pullRequests, tasks, ...overrides }) => {
   const { calls, fetchJson } = stubApi({ pullRequests, tasks });
   return {
     calls,
@@ -52,6 +52,7 @@ const wait = ({ headSha, pullRequests, tasks }) => {
       target: PR,
       timeoutMs: 30,
       token: 'stub',
+      ...overrides,
     }),
   };
 };
@@ -201,5 +202,54 @@ describe('a wait that outlasts one poll', () => {
     expect(
       calls.filter((url) => url.includes('/api/project_pull_requests/list')),
     ).toHaveLength(2);
+  });
+});
+
+describe('the timing of a wait', () => {
+  it('is ready on a fresh Compute Engine success alone', async () => {
+    const { result } = wait({
+      headSha: undefined,
+      pullRequests: [],
+      tasks: [task({ pullRequest: '1038' })],
+    });
+    expect(await result).toBe(true);
+  });
+
+  it('probes once before the first interval elapses', async () => {
+    const { result } = wait({
+      headSha: HEAD,
+      intervalMs: 60_000,
+      pullRequests: [{ commit: { sha: HEAD }, key: '1038' }],
+      tasks: [],
+    });
+    expect(await result).toBe(true);
+  });
+
+  it('stops at the deadline itself, without probing again', async () => {
+    const times = [0, 30];
+    const { calls, result } = wait({
+      headSha: HEAD,
+      now: () => times.shift() ?? 30,
+      pullRequests: [],
+      tasks: [],
+    });
+    expect(await result).toBe(false);
+    expect(
+      calls.filter((url) => url.includes('/api/project_pull_requests/list')),
+    ).toHaveLength(1);
+  });
+
+  it('stops once the clock has passed the deadline', async () => {
+    const times = [0];
+    const { calls, result } = wait({
+      headSha: HEAD,
+      now: () => times.shift() ?? 31,
+      pullRequests: [],
+      tasks: [],
+    });
+    expect(await result).toBe(false);
+    expect(
+      calls.filter((url) => url.includes('/api/project_pull_requests/list')),
+    ).toHaveLength(1);
   });
 });
