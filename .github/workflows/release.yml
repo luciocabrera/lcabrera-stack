@@ -234,7 +234,7 @@ jobs:
       # the version just shipped and got a 404 for its tarball. Waiting here,
       # per tag, keeps that lag from reading as a broken release.
       - name: Wait until npm serves what shipped
-        if: steps.publish.outputs.published == 'true'
+        if: always() && steps.publish.outputs.published == 'true'
         run: |
           deadline=$((SECONDS + 900))
           while read -r tag; do
