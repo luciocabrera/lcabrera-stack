@@ -553,47 +553,18 @@ jobs:
       - name: Write quality summary
         if: always()
         run: |
-          if [[ "${{ steps.quality_gate.outcome }}" == "success" ]]; then
-            CHECK_STATUS="✅ Passed"
-          else
-            CHECK_STATUS="❌ Failed"
-          fi
+          status() {
+            local outcome="$1"
+            if [[ "$outcome" == success ]]; then echo '✅ Passed'; else echo '❌ Failed'; fi
+          }
 
-          if [[ "${{ steps.eslint_gate.outcome }}" == "success" ]]; then
-            ESLINT_STATUS="✅ Passed"
-          else
-            ESLINT_STATUS="❌ Failed"
-          fi
-
-          if [[ "${{ steps.biome_gate.outcome }}" == "success" ]]; then
-            BIOME_STATUS="✅ Passed"
-          else
-            BIOME_STATUS="❌ Failed"
-          fi
-
-          if [[ "${{ steps.typecheck_gate.outcome }}" == "success" ]]; then
-            TYPECHECK_STATUS="✅ Passed"
-          else
-            TYPECHECK_STATUS="❌ Failed"
-          fi
-
-          if [[ "${{ steps.commands_gate.outcome }}" == "success" ]]; then
-            COMMANDS_STATUS="✅ Passed"
-          else
-            COMMANDS_STATUS="❌ Failed"
-          fi
-
-          if [[ "${{ steps.react_doctor_gate.outcome }}" == "success" ]]; then
-            REACT_DOCTOR_STATUS="✅ Passed"
-          else
-            REACT_DOCTOR_STATUS="❌ Failed"
-          fi
-
-          if [[ "${{ steps.preflight.outcome }}" == "success" ]]; then
-            PREFLIGHT_STATUS="✅ Passed"
-          else
-            PREFLIGHT_STATUS="❌ Failed"
-          fi
+          CHECK_STATUS="$(status '${{ steps.quality_gate.outcome }}')"
+          ESLINT_STATUS="$(status '${{ steps.eslint_gate.outcome }}')"
+          BIOME_STATUS="$(status '${{ steps.biome_gate.outcome }}')"
+          TYPECHECK_STATUS="$(status '${{ steps.typecheck_gate.outcome }}')"
+          COMMANDS_STATUS="$(status '${{ steps.commands_gate.outcome }}')"
+          REACT_DOCTOR_STATUS="$(status '${{ steps.react_doctor_gate.outcome }}')"
+          PREFLIGHT_STATUS="$(status '${{ steps.preflight.outcome }}')"
 
           echo "## 🔍 Quality Gate" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"

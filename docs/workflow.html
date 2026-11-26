@@ -126,7 +126,18 @@
             id="levers"
             aria-label="Choose a role"
           ></fieldset>
-          <div class="matrix"><table id="matrix"></table></div>
+          <div class="matrix">
+            <table id="matrix">
+              <thead>
+                <tr>
+                  <th scope="col">Information</th>
+                  <th scope="col">Orchestrator</th>
+                  <th scope="col">Builder</th>
+                  <th scope="col">Verifier</th>
+                </tr>
+              </thead>
+            </table>
+          </div>
           <p class="note" id="roleNote"></p>
         </div>
       </section>
@@ -713,20 +724,24 @@ $ vp run test
             b.setAttribute('aria-pressed', i === role ? 'true' : 'false');
           });
           var h =
-            '<thead><tr><th>Information</th>' +
+            '<thead><tr><th scope="col">Information</th>' +
             roles
               .map(function (r, i) {
                 return (
-                  '<th class="' + (i === role ? '' : 'dim') + '">' + r + '</th>'
+                  '<th scope="col" class="' +
+                  (i === role ? '' : 'dim') +
+                  '">' +
+                  r +
+                  '</th>'
                 );
               })
               .join('') +
             '</tr></thead><tbody>';
           rows.forEach(function (row) {
             h +=
-              '<tr><td>' +
+              '<tr><th scope="row">' +
               row[0] +
-              '</td>' +
+              '</th>' +
               row[1]
                 .map(function (v, i) {
                   return (

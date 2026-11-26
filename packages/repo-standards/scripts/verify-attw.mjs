@@ -64,16 +64,18 @@ const main = async () => {
     return;
   }
 
-  const failures = packages
+  const unbuilt = packages
     .filter((packageConfig) => !isBuilt(packageConfig))
     .map(
       (packageConfig) =>
         `${packageConfig.name}: no dist/, so its published types were not checked — build the packages first.`,
     );
-  for (const packageConfig of packages) {
-    if (!isBuilt(packageConfig)) continue;
-    failures.push(...(await checkResolution(packageConfig)));
-  }
+  const unresolved = await Promise.all(
+    packages
+      .filter((packageConfig) => isBuilt(packageConfig))
+      .map((packageConfig) => checkResolution(packageConfig)),
+  );
+  const failures = [...unbuilt, ...unresolved.flat()];
 
   if (failures.length > 0) {
     console.error('attw gate failed:\n');

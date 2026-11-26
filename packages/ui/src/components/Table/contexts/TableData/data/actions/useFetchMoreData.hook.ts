@@ -19,7 +19,7 @@ export const useFetchMoreData = <TData, TResponse>() => {
     skip: -1,
   });
 
-  return async (args: FetchMoreDataArgs<TData, TResponse>) =>
+  return (args: FetchMoreDataArgs<TData, TResponse>) =>
     executeFetchMore({
       args,
       dataStore,

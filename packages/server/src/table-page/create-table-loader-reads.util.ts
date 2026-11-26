@@ -28,7 +28,7 @@ export type TableLoaderPageArgs<
   readonly filters: Readonly<Record<string, ColumnFilter>>;
   /** A grouping with no keys reads rows. */
   readonly grouping?: TGrouping;
-  readonly totalsPlacement?: TablePageRead['totalsPlacement'];
+  readonly totalsPlacement?: NonNullable<TablePageRead['totalsPlacement']>;
 };
 
 export type TableLoaderRead<

@@ -47,13 +47,13 @@ export const createMilestones = (wanted, { dryRun, log }) => {
 const issueNumberFromUrl = (url) => Number(url.trim().split('/').at(-1));
 
 export const createIssue = (issue, bodyPath, { dryRun, log }) => {
+  const bodyFile = assertIsData(`issue ${issue.id} body path`, bodyPath);
   const args = [
     'issue',
     'create',
     '--title',
     assertIsData(`issue ${issue.id} title`, issue.title),
-    '--body-file',
-    assertIsData(`issue ${issue.id} body path`, bodyPath),
+    `--body-file=${bodyFile}`,
     ...issue.labels.flatMap((label) => [
       '--label',
       assertIsData(`issue ${issue.id} label`, label),

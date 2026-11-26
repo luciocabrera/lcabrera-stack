@@ -42,7 +42,10 @@ const readHead = (path) =>
   existsSync(path) ? readFileSync(path, 'utf8') : undefined;
 
 const mergeBase = (ref) => {
-  const base = ref === undefined ? undefined : git(['merge-base', ref, 'HEAD']);
+  const base =
+    ref === undefined
+      ? undefined
+      : git(['merge-base', '--end-of-options', ref, 'HEAD']);
   if (base === undefined) {
     throw new Error(`cannot resolve a merge base with ${ref ?? '--base'}`);
   }

@@ -213,9 +213,11 @@ const main = async () => {
   }
 
   const contentIds = await contentIdsFor({ eventName, payload, token });
-  for (const contentId of contentIds) {
-    await applyStatus({ contentId, meta, optionId, token });
-  }
+  await Promise.all(
+    contentIds.map((contentId) =>
+      applyStatus({ contentId, meta, optionId, token }),
+    ),
+  );
   console.log(`Set ${contentIds.length} item(s) to "${status}".`);
 };
 

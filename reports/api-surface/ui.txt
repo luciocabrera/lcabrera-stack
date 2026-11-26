@@ -256,7 +256,7 @@ Modal [const] ({ bodyStylex, children, customStylex, footer, isOpen, onClose, ti
 ## ./components/Navbar/Navbar.types
 NavbarButtonConfig [type] Omit<ButtonProps, 'children' | 'width'> & { readonly icon?: ReactNode; readonly label: string; readonly type: 'button'; }
 NavbarItemConfig [type] NavbarButtonConfig | NavbarLinkConfig
-NavbarLinkConfig [type] Omit<NavLinkProps, 'children' | 'className'> & { readonly icon?: ReactNode; readonly label: string; readonly type: 'link'; readonly variant?: Pick<ButtonProps, 'variant'>['variant']; }
+NavbarLinkConfig [type] Omit<NavLinkProps, 'children' | 'className'> & { readonly icon?: ReactNode; readonly label: string; readonly type: 'link'; readonly variant?: NonNullable<ButtonProps['variant']>; }
 NavbarProps [type] ComponentPropsWithoutRef<'nav'> & { readonly isCompact?: boolean; readonly items: readonly NavbarItemConfig[]; readonly orientation?: DesignSystemOrientation; readonly size?: DesignSystemSize; }
 
 ## ./components/NavLink

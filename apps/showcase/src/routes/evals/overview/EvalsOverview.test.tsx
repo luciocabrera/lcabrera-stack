@@ -238,7 +238,7 @@ describe('EvalsOverview', () => {
   });
 
   it('hydrates the server markup of a populated overview without a mismatch', async () => {
-    await expectHydratesWithoutMismatch({
+    const container = await expectHydratesWithoutMismatch({
       path: '/evals',
       routes: [
         {
@@ -258,5 +258,9 @@ describe('EvalsOverview', () => {
         },
       ],
     });
+
+    expect(
+      within(container).getByRole('heading', { level: 1, name: 'Evals' }),
+    ).toBeDefined();
   });
 });

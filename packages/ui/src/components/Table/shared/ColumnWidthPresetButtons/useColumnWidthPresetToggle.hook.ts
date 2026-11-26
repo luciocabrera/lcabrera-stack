@@ -3,7 +3,7 @@ import { useState } from 'react';
 import type { WidthPreset } from './ColumnWidthPresetButtons.types';
 
 type UseColumnWidthPresetToggleArgs = {
-  readonly onSelectPreset: (preset: NonNullable<WidthPreset>) => void;
+  readonly onSelectPreset: (preset: WidthPreset) => void;
 };
 
 export const useColumnWidthPresetToggle = ({
@@ -11,7 +11,7 @@ export const useColumnWidthPresetToggle = ({
 }: UseColumnWidthPresetToggleArgs) => {
   const [selectedPreset, setSelectedPreset] = useState<WidthPreset>();
 
-  const handleToggle = (preset: NonNullable<WidthPreset>) => {
+  const handleToggle = (preset: WidthPreset) => {
     const newPreset = selectedPreset === preset ? undefined : preset;
     setSelectedPreset(newPreset);
 

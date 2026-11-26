@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 
-import { cleanup, render, screen } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import { createRoutesStub } from 'react-router';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
@@ -105,9 +105,16 @@ describe('EvalsSubjectTrend', () => {
   });
 
   it('hydrates the server markup without a mismatch', async () => {
-    await expectHydratesWithoutMismatch({
+    const container = await expectHydratesWithoutMismatch({
       path: '/evals/subjects/skill/react-19',
       routes: [ROUTE],
     });
+
+    expect(
+      within(container).getByRole('heading', {
+        level: 1,
+        name: 'skill react-19',
+      }),
+    ).toBeDefined();
   });
 });
