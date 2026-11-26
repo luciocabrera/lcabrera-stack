@@ -1,6 +1,11 @@
-import { describe, expect, it } from 'vite-plus/test';
+import { describe, expect, it, vi } from 'vite-plus/test';
 
+import { runGh } from '../../packages/repo-standards/scripts/gh-exec.mjs';
 import { createIssue, startsWithDash } from './plan-issues-github.mjs';
+
+vi.mock('../../packages/repo-standards/scripts/gh-exec.mjs', () => ({
+  runGh: vi.fn(() => 'https://github.com/owner/repo/issues/42\n'),
+}));
 
 const issue = (overrides) => ({
   id: 'E-1',
@@ -71,5 +76,28 @@ describe('createIssue refuses a dash-leading value', () => {
         { dryRun: true, log: () => undefined },
       ),
     ).toBe(0);
+  });
+});
+
+describe('createIssue', () => {
+  it('passes the body path inside its flag, so gh cannot read it as an option', () => {
+    const number = createIssue(
+      issue({ labels: ['type: chore'], milestone: 'M1' }),
+      'plans/E-1.md',
+      options(),
+    );
+
+    expect(number).toBe(42);
+    expect(runGh).toHaveBeenLastCalledWith([
+      'issue',
+      'create',
+      '--title',
+      'fix(scripts): something',
+      '--body-file=plans/E-1.md',
+      '--label',
+      'type: chore',
+      '--milestone',
+      'M1',
+    ]);
   });
 });
