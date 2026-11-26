@@ -17,8 +17,8 @@
  * as publishable so the workflow proceeds and lets the real tool decide. It may
  * over-report and waste a build; it must never under-report and silently skip a
  * release. One exception: a version whose `<name>@<version>` tag exists counts
- * as released without asking the registry, because the Release workflow tags
- * only what npm accepted. A tag made by hand for a version npm never received
+ * as released whatever the registry says about that version, as long as npm
+ * knows the package, because the Release workflow tags only what npm accepted. A tag made by hand for a version npm never received
  * fails the wrong way: that version is skipped until the tag is deleted.
  *
  * Usage (from the repository root):

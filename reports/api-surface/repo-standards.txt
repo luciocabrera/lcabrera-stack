@@ -182,7 +182,7 @@ registryOrigin [const] () => string
 registryUrl [const] (name: any) => string
 
 ## ./release-publishable
-classifyRelease [const] ({ packageExists, tagged, versionExists, }: { packageExists: any; tagged?: boolean | undefined; versionExists: any; }) => "up-to-date" | "first-publish" | "publish"
+classifyRelease [const] ({ packageExists, tagged, versionExists, }: { packageExists: any; tagged?: boolean | undefined; versionExists: any; }) => "first-publish" | "up-to-date" | "publish"
 extractChangelogSection [const] ({ changelog, version }: { changelog: any; version: any; }) => any
 findBlockingFirstPublish [const] ({ firstPublish, publishable }: { firstPublish: any; publishable: any; }) => any
 renderSummary [const] (classified: any) => string

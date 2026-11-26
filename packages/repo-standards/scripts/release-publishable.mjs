@@ -30,15 +30,11 @@ export const classifyRelease = ({
   tagged = false,
   versionExists,
 }) => {
-  if (tagged) {
-    return 'up-to-date';
-  }
-
   if (!packageExists) {
     return 'first-publish';
   }
 
-  return versionExists ? 'up-to-date' : 'publish';
+  return tagged || versionExists ? 'up-to-date' : 'publish';
 };
 
 export const selectPublishable = (classified) =>
