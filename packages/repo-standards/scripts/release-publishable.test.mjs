@@ -24,11 +24,6 @@ const CHANGELOG = `# @lcabrera/utils
 - def5678: An older entry that must not leak into 0.2.0's notes.
 `;
 
-// The bug this file defends against is #620: a repo-wide gate that suppressed
-// publishing for every package whenever any one of them had a pending
-// changeset, while the workflow still reported success. Every assertion below
-// is about one package's fate being decided by the registry alone.
-
 describe('classifyRelease', () => {
   it('publishes a package whose version is missing from the registry', () => {
     expect(classifyRelease({ packageExists: true, versionExists: false })).toBe(
@@ -40,6 +35,26 @@ describe('classifyRelease', () => {
     expect(classifyRelease({ packageExists: true, versionExists: true })).toBe(
       'up-to-date',
     );
+  });
+
+  it('skips a tagged version the registry has not caught up with yet', () => {
+    expect(
+      classifyRelease({
+        packageExists: true,
+        tagged: true,
+        versionExists: false,
+      }),
+    ).toBe('up-to-date');
+  });
+
+  it('still holds a tagged package the registry has never served', () => {
+    expect(
+      classifyRelease({
+        packageExists: false,
+        tagged: true,
+        versionExists: false,
+      }),
+    ).toBe('first-publish');
   });
 
   it('holds a package that has never been published for a human', () => {

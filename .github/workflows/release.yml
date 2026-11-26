@@ -86,7 +86,10 @@ jobs:
       #
       # Permissive by design: anything it cannot resolve counts as publishable,
       # so the job proceeds and `changeset publish` decides. Over-reporting
-      # costs a build; under-reporting would silently skip a release.
+      # costs a build; under-reporting would silently skip a release. The one
+      # exception is a version already tagged `<name>@<version>`: it counts as
+      # released, so a tag pushed by hand for a version npm never received
+      # skips that version until the tag is deleted.
       - name: Plan the release
         id: plan
         run: node packages/repo-standards/scripts/release-publish-plan.mjs --github
@@ -227,6 +230,29 @@ jobs:
             [ -n "$tag" ] || continue
             node scripts/release-notes.mjs "$tag" > /tmp/notes.md
             gh release create "$tag" --title "$tag" --notes-file /tmp/notes.md
+          done < /tmp/tags-new
+
+      # npm accepts a publish minutes before its CDN serves the tarball: the
+      # registry check below once resolved `create-lcabrera-stack@latest` to
+      # the version just shipped and got a 404 for its tarball. Waiting here,
+      # per tag, keeps that lag from reading as a broken release.
+      - name: Wait until npm serves what shipped
+        if: always() && steps.publish.outputs.published == 'true'
+        run: |
+          while read -r tag; do
+            [ -n "$tag" ] || continue
+            deadline=$((SECONDS + 900))
+            name="${tag%@*}"
+            version="${tag##*@}"
+            url="https://registry.npmjs.org/${name}/-/${name##*/}-${version}.tgz"
+            until curl --fail --silent --head --output /dev/null "$url"; do
+              if [ "$SECONDS" -ge "$deadline" ]; then
+                echo "::error::npm still does not serve $url after 15 minutes."
+                exit 1
+              fi
+              sleep 15
+            done
+            echo "$tag is served"
           done < /tmp/tags-new
 
   # workspace:verify in Check Safe installs the packages packed from the

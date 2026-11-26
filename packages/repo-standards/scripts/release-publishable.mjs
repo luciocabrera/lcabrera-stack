@@ -15,17 +15,26 @@
  * been versioned, so its manifest version is the one already on npm and it
  * classifies `up-to-date`.
  *
+ * A version whose `<name>@<version>` tag exists is up to date whatever the
+ * registry answers: the Release workflow creates that tag only after npm has
+ * accepted the publish, and npm's CDN can serve a packument from before it for
+ * minutes, long enough for the next push's run to try the same version again.
+ *
  * Pure — the npm queries and all output live in `release-publish-plan.mjs`.
  */
 
 const STATE_ORDER = ['publish', 'first-publish', 'up-to-date'];
 
-export const classifyRelease = ({ packageExists, versionExists }) => {
+export const classifyRelease = ({
+  packageExists,
+  tagged = false,
+  versionExists,
+}) => {
   if (!packageExists) {
     return 'first-publish';
   }
 
-  return versionExists ? 'up-to-date' : 'publish';
+  return tagged || versionExists ? 'up-to-date' : 'publish';
 };
 
 export const selectPublishable = (classified) =>
